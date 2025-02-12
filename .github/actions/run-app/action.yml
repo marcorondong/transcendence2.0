@@ -1,0 +1,12 @@
+name: Build and Run App
+description: Start containers and make application available for incoming connections
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and Run Containers
+      run: make up
+      shell: bash
