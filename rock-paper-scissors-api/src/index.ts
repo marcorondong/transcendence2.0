@@ -13,11 +13,29 @@ fastify.register(websocket);
 fastify.register(async function (fastify)
 {
   fastify.get("/", { websocket: true }, handleWebSocketConnection);
+  fastify.get("/ws/", {websocket:true}, anotherHandel);
 });
+
+
+function anotherHandel(socket: WebSocket, req: FastifyRequest)
+{
+  socket.on("message", stupid(socket))
+}
 
 function handleWebSocketConnection(socket: WebSocket, req: FastifyRequest)
 {
   socket.on("message", handleClientMessage(socket));
+}
+
+function stupid(socket:WebSocket)
+{
+  return (message: MessageEvent) =>
+    {
+      const clientMesssage = message.toString();
+      console.log("Recevided from client on ws:", clientMesssage);
+  
+      socket.send(`Hi from Server you move tr ${clientMesssage} received`);
+    }
 }
 
 function handleClientMessage(socket: WebSocket)
