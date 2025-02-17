@@ -1,11 +1,10 @@
 import Fastify, { FastifyRequest } from 'fastify';
 import { WebSocket } from 'ws';
 import websocket from "@fastify/websocket"
-//import { SocketStream } from '@fastify/websocket';
+
+
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
-
-
 const fastify = Fastify( {logger:true});
 
 
@@ -14,16 +13,24 @@ fastify.register(websocket);
 
 fastify.register(async function (fastify)
 {
-  fastify.get("/", {websocket: true}, (socket: WebSocket, req:FastifyRequest) =>
+  fastify.get("/", { websocket: true }, handleWebSocketConnection);
+});
+
+function handleWebSocketConnection(socket: WebSocket, req: FastifyRequest)
+{
+  socket.on("message", handleClientMessage(socket));
+}
+
+function handleClientMessage(socket: WebSocket)
+{
+  return (message: MessageEvent) =>
   {
-    socket.on("message", message =>
-    {
-      //message.toString() === 'hi from client'
-      socket.send("Hi from server")
-    }
-    )
-  })
-})
+    const clientMesssage = message.toString();
+    console.log("Recevided from client:", clientMesssage);
+
+    socket.send("Hi from Server");
+  }
+}
 
 // Start the server
 fastify.listen({ port: PORT, host: HOST }, (err, address) => {
