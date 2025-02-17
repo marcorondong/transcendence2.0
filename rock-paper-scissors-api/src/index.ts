@@ -10,7 +10,6 @@ const fastify = Fastify( {logger:true});
 
 // Register WebSocket plugin
 fastify.register(websocket);
-
 fastify.register(async function (fastify)
 {
   fastify.get("/", { websocket: true }, handleWebSocketConnection);
@@ -28,7 +27,7 @@ function handleClientMessage(socket: WebSocket)
     const clientMesssage = message.toString();
     console.log("Recevided from client:", clientMesssage);
 
-    socket.send("Hi from Server");
+    socket.send(`Hi from Server you move ${clientMesssage} received`);
   }
 }
 
