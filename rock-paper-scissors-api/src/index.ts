@@ -25,7 +25,13 @@ function anotherHandel(socket: WebSocket, req: FastifyRequest)
 function handleWebSocketConnection(socket: WebSocket, req: FastifyRequest)
 {
   socket.on("message", handleClientMessage(socket));
+  socket.on("close", handleclose);
 }
+
+function handleclose(code:number, reason:string)
+{
+  console.log(`client disconnected. Code: ${code}, Reason: ${reason}`)
+};
 
 function stupid(socket:WebSocket)
 {
