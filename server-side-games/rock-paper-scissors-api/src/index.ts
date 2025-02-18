@@ -42,7 +42,7 @@ fastify.register(async function (fastify)
   // fastify.get("/", { websocket: true }, handleWebSocketConnection);
   // fastify.get("/ws/", {websocket:true}, anotherHandel);
   fastify.get("/ws", {websocket:true}, (connection, req) =>
-    {
+  {
     const clienId = generateId++;
     const player1:Player = new Player(clienId.toString(), connection);
     console.log(`Loggin player info ${player1.id}`)
