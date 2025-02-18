@@ -56,11 +56,3 @@ const startServer = async() =>
 }
 
 startServer()
-// Start the server
-// fastify.listen({ port: PORT, host: HOST }, (err, address) => {
-//   if (err) {
-//     console.error(err);
-//     process.exit(1);
-//   }
-//   console.log(`WebSocket server running on ${address}/ws`);
-// });
