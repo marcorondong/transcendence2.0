@@ -1,3 +1,5 @@
+import { WebSocket } from "ws";
+
 export class Player
 {
 	readonly id: string; 

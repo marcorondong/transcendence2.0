@@ -2,6 +2,7 @@ import Fastify, { FastifyRequest } from 'fastify';
 import { WebSocket } from 'ws';
 import websocket from "@fastify/websocket"
 import { Socket } from 'dgram';
+import {Player} from "../../utils/Player"
 
 
 const PORT:number = 3000
@@ -43,6 +44,8 @@ fastify.register(async function (fastify)
   fastify.get("/ws", {websocket:true}, (connection, req) =>
     {
     const clienId = generateId++;
+    const player1:Player = new Player(clienId.toString(), connection);
+    console.log(`Loggin player info ${player1.id}`)
     console.log(`Client connectd ${clienId}`);
     connection.send(`Hello client ${clienId}`);
     //clients.add(connection);
