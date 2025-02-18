@@ -9,4 +9,9 @@ export class SessionRoom
 	{
 		this.id = roomId;
 	}
+
+	addPlayer(player: Player)
+	{
+		this.players.add(player);
+	}
 }
