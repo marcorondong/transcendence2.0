@@ -1,21 +1,25 @@
 import Fastify, { FastifyRequest } from 'fastify';
 import { WebSocket } from 'ws';
 import websocket from "@fastify/websocket"
+import { Socket } from 'dgram';
 
 
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
+let generateId = 0;
 const CLOSE_CODE:number = 1000
 const fastify = Fastify( {logger:true});
 const clients: Set<WebSocket> = new Set(); //set is just array but uniue values
 
-function broadcastToAll(allClients: Set<WebSocket>, sender:WebSocket, message:string)
+const players: Map<number, WebSocket> = new Map();
+
+function broadcastToAll(allClients: Map<number, WebSocket>, sender:number, message:string)
 {
-  for(const oneClient of clients)
+  for(const [id, oneClient] of allClients)
   {
-    if(oneClient !== sender && oneClient.readyState === WebSocket.OPEN)
+    if(id !== sender && oneClient.readyState === WebSocket.OPEN)
     {
-      oneClient.send(`Client says ${message}`)
+      oneClient.send(`Client ${id} says ${message}`)
     }
   }
 }
@@ -28,14 +32,16 @@ fastify.register(async function (fastify)
   // fastify.get("/", { websocket: true }, handleWebSocketConnection);
   // fastify.get("/ws/", {websocket:true}, anotherHandel);
   fastify.get("/ws", {websocket:true}, (connection, req) =>
-  {
-    console.log("Client connectd");
-    clients.add(connection);
+    {
+    const clienId = generateId++;
+    console.log(`Client connectd ${clienId}`);
+    //clients.add(connection);
+    players.set(clienId, connection);
     //connection.close(CLOSE_CODE, "Necu te")
     connection.on("message", (message)=>
     {
       const messageStr = message.toString();
-      broadcastToAll(clients, connection, messageStr);
+      broadcastToAll(players, clienId, messageStr);
       console.log("Received:", message.toString());
       //connection.send(`Echo: ${message}`)
     })
