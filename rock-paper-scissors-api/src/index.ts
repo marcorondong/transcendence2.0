@@ -12,54 +12,55 @@ const fastify = Fastify( {logger:true});
 fastify.register(websocket);
 fastify.register(async function (fastify)
 {
-  fastify.get("/", { websocket: true }, handleWebSocketConnection);
-  fastify.get("/ws/", {websocket:true}, anotherHandel);
+  // fastify.get("/", { websocket: true }, handleWebSocketConnection);
+  // fastify.get("/ws/", {websocket:true}, anotherHandel);
+  fastify.get("/wss", {websocket:true}, (connection, req) =>
+  {
+    console.log("Client connectd");
+    connection.on("message", (message)=>
+    {
+      console.log("Received:", message.toString());
+      connection.send(`Echo: ${message}`)
+    })
+
+    connection.on("close", (code:number, reason:Buffer) =>
+    {
+      console.log("Client disconnected");
+      console.log(`Reason ${code} buffer: ${reason}`)
+    })
+  })
+
+  fastify.get("/normal", (request, reply) =>
+  {
+    reply.send(
+      {
+        hello: "good"
+      }
+    )
+  })
+
 });
 
-
-function anotherHandel(socket: WebSocket, req: FastifyRequest)
+const startServer = async() =>
 {
-  socket.on("message", stupid(socket))
-}
-
-function handleWebSocketConnection(socket: WebSocket, req: FastifyRequest)
-{
-  socket.on("message", handleClientMessage(socket));
-  socket.on("close", handleclose);
-}
-
-function handleclose(code:number, reason:string)
-{
-  console.log(`client disconnected. Code: ${code}, Reason: ${reason}`)
-};
-
-function stupid(socket:WebSocket)
-{
-  return (message: MessageEvent) =>
-    {
-      const clientMesssage = message.toString();
-      console.log("Recevided from client on ws:", clientMesssage);
-  
-      socket.send(`Hi from Server you move tr ${clientMesssage} received`);
-    }
-}
-
-function handleClientMessage(socket: WebSocket)
-{
-  return (message: MessageEvent) =>
+  try 
   {
-    const clientMesssage = message.toString();
-    console.log("Recevided from client:", clientMesssage);
-
-    socket.send(`Hi from Server you move ${clientMesssage} received`);
+    await fastify.listen({ port: PORT, host: HOST });
+    console.log(`Server is running on http://${HOST}:${PORT}`);
   }
-}
-
-// Start the server
-fastify.listen({ port: PORT, host: HOST }, (err, address) => {
-  if (err) {
+  catch(err)
+  {
     console.error(err);
     process.exit(1);
   }
-  console.log(`WebSocket server running on ${address}/ws`);
-});
+}
+
+startServer()
+// Start the server
+// fastify.listen({ port: PORT, host: HOST }, (err, address) => {
+//   if (err) {
+//     console.error(err);
+//     process.exit(1);
+//   }
+//   console.log(`WebSocket server running on ${address}/ws`);
+// });
