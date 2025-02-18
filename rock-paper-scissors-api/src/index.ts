@@ -5,6 +5,7 @@ import websocket from "@fastify/websocket"
 
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
+const CLOSE_CODE:number = 1000
 const fastify = Fastify( {logger:true});
 const clients: Set<WebSocket> = new Set(); //set is just array but uniue values
 
@@ -30,6 +31,7 @@ fastify.register(async function (fastify)
   {
     console.log("Client connectd");
     clients.add(connection);
+    //connection.close(CLOSE_CODE, "Necu te")
     connection.on("message", (message)=>
     {
       const messageStr = message.toString();
