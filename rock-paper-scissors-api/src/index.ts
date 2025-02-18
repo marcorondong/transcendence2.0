@@ -24,6 +24,15 @@ function broadcastToAll(allClients: Map<number, WebSocket>, sender:number, messa
   }
 }
 
+function sendPrivateMessage(senderId: number, receiverId: number, message:string)
+{
+  const reciverSocket = players.get(receiverId);
+  if(reciverSocket && reciverSocket.readyState === WebSocket.OPEN && receiverId!==senderId)
+  {
+    reciverSocket.send(`Private from ${senderId}: ${message}`);
+  }
+}
+
 
 // Register WebSocket plugin
 fastify.register(websocket);
@@ -41,8 +50,24 @@ fastify.register(async function (fastify)
     connection.on("message", (message)=>
     {
       const messageStr = message.toString();
-      broadcastToAll(players, clienId, messageStr);
       console.log("Received:", message.toString());
+      
+      try 
+      {
+        const data = JSON.parse(messageStr);
+        if(data.type === 'private' && data.to)
+        {
+          sendPrivateMessage(clienId, data.to, data.message);
+        }
+        else
+        {
+          broadcastToAll(players, clienId, messageStr);
+        }
+      }
+      catch(error)
+      {
+        connection.send('Invalid message format. Send JSON with type, message, and optional to.');
+      }
       //connection.send(`Echo: ${message}`)
     })
 
