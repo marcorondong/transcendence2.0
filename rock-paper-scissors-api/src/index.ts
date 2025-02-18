@@ -44,6 +44,7 @@ fastify.register(async function (fastify)
     {
     const clienId = generateId++;
     console.log(`Client connectd ${clienId}`);
+    connection.send(`Hello client ${clienId}`);
     //clients.add(connection);
     players.set(clienId, connection);
     //connection.close(CLOSE_CODE, "Necu te")
@@ -73,8 +74,9 @@ fastify.register(async function (fastify)
 
     connection.on("close", (code:number, reason:Buffer) =>
     {
-      console.log("Client disconnected");
+      console.log(`Client ${clienId} disconnected`);
       console.log(`Reason ${code} buffer: ${reason}`)
+      players.delete(clienId);
     })
   })
 
