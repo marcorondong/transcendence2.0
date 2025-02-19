@@ -48,7 +48,7 @@ fastify.register(async function (fastify)
   })
 
   
-  fastify.get("/html/", async (request, reply) => {
+  fastify.get("/rps/", async (request, reply) => {
     const filePath = path.join(process.cwd(), "src/public/rps.html");
     console.log(`Serving file from: ${filePath}`);
     if (fs.existsSync(filePath)) {
