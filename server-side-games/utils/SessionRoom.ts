@@ -3,19 +3,31 @@ import {Player} from "./Player"
 export class SessionRoom
 {
 	readonly id: string; 
-	private players: Set<Player>;
+	protected players: Map<string,Player>;
 	private requiredPlayers: number;
 	
 	constructor(roomId: string, requiredPlayers:number = 2)
 	{
 		this.id = roomId;
 		this.requiredPlayers = requiredPlayers;
-		this.players = new Set<Player>();
+		this.players = new Map<string,Player>();
 	}
 
-	addPlayer(player: Player)
+	//TODO: research should this be boolean or Promise async function
+	/**
+	 * 
+	 * @param player player to add
+	 * @returns 
+	 */
+	addPlayer(player: Player):boolean
 	{
-		this.players.add(player);
+		if(this.getPlayerCount() < this.requiredPlayers)
+		{
+			this.players.set(player.id, player);
+			return true;
+		}
+		console.warn(`Player ${player.id} cannot join full room ${this.id}`);
+		return false;
 	}
 
 	getPlayerCount(): number 
@@ -33,5 +45,22 @@ export class SessionRoom
 			update = `Waiting for ${this.requiredPlayers - this.getPlayerCount()} more player to join`;
 			player.connection.send(update);
 		}
+	}
+
+	/**
+	 * send same message to all player in room
+	 * @param message message to send
+	 */
+	roomBroadcast(message: string): void 
+	{
+		for (const player of this.players.values())
+		{
+			player.connection.send(message);
+		}
+	}
+	
+	isFull():boolean
+	{
+		return this.getPlayerCount() === this.requiredPlayers;
 	}
 }
