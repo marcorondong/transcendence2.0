@@ -18,6 +18,11 @@ export class RpsRoom extends SessionRoom
 		this.moves.set(player, choice);
 	}
 
+	resetMoves()
+	{
+		this.moves.clear();
+	}
+
 
 	//TODO check if promise is good use case for this
 	/**
@@ -31,6 +36,7 @@ export class RpsRoom extends SessionRoom
 		const [[key1, value1], [key2, value2]] = this.moves.entries();
 		const annoucement = RPSGame.getWinnerAnnouncement(value1, value2);
 		this.roomBroadcast(annoucement);
+		this.resetMoves();
 	}
 
 }
