@@ -1,10 +1,12 @@
 services:
-  fastify:
+  rps-api:
+    image: rps-api-img
+    container_name: rps-api
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: rock-paper-scissors-api/Dockerfile
     volumes:
-      - ./src/:/fastify/src
+      - ./src/:/rps/rock-paper-scissors-api/src/
     ports:
       - 3000:3000
     command: npm run dev
