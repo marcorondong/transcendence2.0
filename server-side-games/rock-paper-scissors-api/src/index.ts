@@ -4,6 +4,12 @@ import {Player} from "../../utils/Player"
 import {RpsRoom} from "./RpsRoom"
 import { RawData } from 'ws';
 
+import fs from "fs"
+import path from 'path';
+import fastifyStatic from '@fastify/static';
+
+
+
 
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
@@ -12,6 +18,10 @@ const fastify = Fastify( {logger:true});
 
 const oneRoom:RpsRoom = new RpsRoom("1");
 
+fastify.register(fastifyStatic, {
+  root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
+  prefix: "/", // Optional: Sets the URL prefix
+});
 // Register WebSocket plugin
 fastify.register(websocket);
 fastify.register(async function (fastify)
@@ -36,6 +46,17 @@ fastify.register(async function (fastify)
       oneRoom.removePlayer(player1);
     })
   })
+
+  
+  fastify.get("/html/", async (request, reply) => {
+    const filePath = path.join(process.cwd(), "src/public/rps.html");
+    console.log(`Serving file from: ${filePath}`);
+    if (fs.existsSync(filePath)) {
+      return reply.sendFile("rps.html"); // Serve public/index.html
+    } else {
+      reply.status(404).send({ error: "File not found" });
+    }
+  });
 
   // fastify.get("/normal", (request, reply) =>
   // {
