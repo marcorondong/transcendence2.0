@@ -26,7 +26,7 @@ fastify.register(fastifyStatic, {
 fastify.register(websocket);
 fastify.register(async function (fastify)
 {
-  fastify.get("/ws", {websocket:true}, (connection, req) =>
+  fastify.get("/ws/rps/", {websocket:true}, (connection, req) =>
   {
     const clienId = generateId++;
     const player1:Player = new Player(clienId.toString(), connection);
