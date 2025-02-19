@@ -42,7 +42,7 @@ export class SessionRoom
 
 	greetPlayer(player: Player): void 
 	{
-		const greeting: string = `Hello player ${player.id} welcom to room ${this.id}`;
+		const greeting: string = `Hello player ${player.id} welcome to room ${this.id}`;
 		var update: string; 
 		player.connection.send(greeting);
 		if(this.getPlayerCount() <= this.requiredPlayers)
