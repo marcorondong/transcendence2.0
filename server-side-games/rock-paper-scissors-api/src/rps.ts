@@ -82,13 +82,13 @@ export class RPSGame
 		switch (winner)
 		{
 			case 1:
-				annoucement = `Winner is player 1. ${player1.getChoice} wins over ${player2.getChoice}`
+				annoucement = `Winner is player 1. ${player1.getChoice()} wins over ${player2.getChoice()}`
 				break;
 			case 2:
-				annoucement = `Winner is player 2. ${player2.getChoice} wins over ${player1.getChoice}`
+				annoucement = `Winner is player 2. ${player2.getChoice()} wins over ${player1.getChoice()}`
 				break;
 			case 0:
-				annoucement = `It is draw. ${player1.getChoice} vs ${player2.getChoice}`
+				annoucement = `It is draw. ${player1.getChoice()} vs ${player2.getChoice()}`
 				break;
 		}
 		return annoucement;
