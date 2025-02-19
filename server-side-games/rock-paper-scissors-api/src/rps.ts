@@ -1,5 +1,6 @@
 //rps stands for Rock paper scisors 
 
+import {Player} from "../../utils/Player"
 export type RpsShape = "rock" | "paper" | "scissors" | "invalid";
 
 function rockWin(player2: Choice): 1 | 2
@@ -75,20 +76,23 @@ export class RPSGame
 		throw Error("Edge case that is not covered in getWinner function. Should not be printed");
 	}
 
-	static getWinnerAnnouncement(player1: Choice, player2: Choice):string
+	static getWinnerAnnouncement(
+		obj1: {choice: Choice, player:Player }, 
+		obj2: {choice: Choice, player:Player}
+	):string
 	{
-		const winner = this.getWinner(player1, player2);
+		const winner = this.getWinner(obj1.choice, obj2.choice);
 		let annoucement; 
 		switch (winner)
 		{
 			case 1:
-				annoucement = `Winner is player 1. ${player1.getChoice()} wins over ${player2.getChoice()}`
+				annoucement = `Winner is player: ${obj1.player.id}. ${obj1.choice.getChoice()} wins over ${obj2.choice.getChoice()}`
 				break;
 			case 2:
-				annoucement = `Winner is player 2. ${player2.getChoice()} wins over ${player1.getChoice()}`
+				annoucement = `Winner is player: ${obj2.player.id}. ${obj2.choice.getChoice()} wins over ${obj1.choice.getChoice()}`
 				break;
 			case 0:
-				annoucement = `It is draw. ${player1.getChoice()} vs ${player2.getChoice()}`
+				annoucement = `It is draw. ${obj1.choice.getChoice()} vs ${obj2.choice.getChoice()}`
 				break;
 		}
 		return annoucement;
