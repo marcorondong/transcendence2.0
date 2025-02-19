@@ -58,14 +58,14 @@ fastify.register(async function (fastify)
     }
   });
 
-  // fastify.get("/normal", (request, reply) =>
-  // {
-  //   reply.send(
-  //     {
-  //       hello: "good"
-  //     }
-  //   )
-  // })
+  fastify.get("/", (request, reply) =>
+  {
+    reply.send(
+      {
+        hello: "good"
+      }
+    )
+  })
 });
 
 function addPlayerToRoom(rpsRoom:RpsRoom, player:Player): void
