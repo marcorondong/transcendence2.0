@@ -30,6 +30,11 @@ export class SessionRoom
 		return false;
 	}
 
+	removePlayer(player: Player)
+	{
+		this.players.delete(player.id)
+	}
+
 	getPlayerCount(): number 
 	{
 		return this.players.size;
