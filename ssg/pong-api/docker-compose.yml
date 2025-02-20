@@ -1,0 +1,10 @@
+services:
+  pong-api:
+    image: pong-api-img 
+    container_name: pong-api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./src/:/pong/src/
+    command: npm run dev
