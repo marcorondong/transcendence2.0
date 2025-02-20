@@ -1,23 +1,36 @@
-import { Point } from "./Point";
-import { Paddle } from "./Paddle";
-const a = new Point(0,0);
-const b = new Point(0,0);
-if(a.equals(b))
-{
-	console.log("Equal points");
-}
-else 
-{
-	console.log("not same points");
-}
-console.log("Hello world")
-console.log(a);
+import Fastify from "fastify"
 
-const left:Paddle = new Paddle(a);
-console.log(left);
-left.moveUp();
-console.log(left);
-left.moveUp();
-console.log(left);
-left.moveDown();
-console.log(left);
+const PORT:number = 3010;
+const HOST:string = "0.0.0.0"
+
+
+const fastify = Fastify({logger: true});
+
+fastify.register(async function(fastify)
+{
+	fastify.get("/", (request, reply) =>
+	{
+		reply.send(
+			{
+				hello: "Ping Pong server"
+			}
+		)
+	})
+})
+
+
+const startServer = async() =>
+{
+	try 
+	{
+		await fastify.listen({port: PORT, host: HOST});
+		console.log(`Pong server is runnig on http://${HOST}:${PORT}`);
+	}
+	catch(err)
+	{
+		console.log(err);
+		process.exit(1);
+	}
+}
+
+startServer();
