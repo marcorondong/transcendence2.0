@@ -7,6 +7,10 @@ import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
 
+import fs from "fs"
+import path from 'path';
+import fastifyStatic from '@fastify/static';
+
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
 
@@ -16,6 +20,11 @@ const fastify = Fastify({logger: true});
 const leftPaddle: Paddle = new Paddle(new Point(-2.5, 0));
 const rightPaddle: Paddle = new Paddle(new Point(2.5, 0));
 const ball: Ball = new Ball(new Point(0, 0));
+
+fastify.register(fastifyStatic, {
+	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
+	prefix: "/", // Optional: Sets the URL prefix
+  });
 
 fastify.register(websocket);
 fastify.register(async function(fastify)
@@ -61,6 +70,16 @@ fastify.register(async function(fastify)
 		// oneRoom.removePlayer(player1);
 		// })
 	})
+
+	fastify.get("/pingpong/", async (request, reply) => {
+		const filePath = path.join(process.cwd(), "src/public/pong.html");
+		console.log(`Serving file from: ${filePath}`);
+		if (fs.existsSync(filePath)) {
+		  return reply.sendFile("pong.html"); // Serve public/index.html
+		} else {
+		  reply.status(404).send({ error: "File not found" });
+		}
+	  });
 })
 
 
@@ -71,7 +90,8 @@ function sendFrames(socket: WebSocket)
 		const frame:PongFrameI = PongFrame.getPongFrame(leftPaddle, rightPaddle, ball);
 		const frameJson = JSON.stringify(frame)
 		socket.send(frameJson)
-	}, 1000)
+		ball.moveBall();
+	}, 1000/60)
 }
 
 function moveHandler(socket: WebSocket, paddle: Paddle)
