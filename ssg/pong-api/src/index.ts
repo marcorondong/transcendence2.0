@@ -5,6 +5,7 @@ import { Ball } from "./Ball";
 import { PongFrame, PongFrameI } from "./PongFrame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
+import {Parser} from "../../utils/Parser"
 
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
@@ -31,6 +32,12 @@ fastify.register(async function(fastify)
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
 		sendFrames(connection);
+		moveHandler(connection);
+
+		connection.on("message", (data: RawData, isBinnary: boolean) =>
+		{
+			leftPaddle.moveUp();
+		})
 		// var counter = 1;
 		// const interval = setInterval(() => 
 		// {
@@ -65,6 +72,21 @@ function sendFrames(socket: WebSocket)
 		const frameJson = JSON.stringify(frame)
 		socket.send(frameJson)
 	}, 1000)
+}
+
+function moveHandler(socket: WebSocket)
+{
+	socket.on("message", (data: RawData, isBinnary:boolean) =>
+	{
+		const json = Parser.rawDataToJson(data);
+		if(!json)
+		{
+			socket.send("Invalid json");
+			return 
+		}
+		console.log(json);
+
+	})
 }
 
 const startServer = async() =>
