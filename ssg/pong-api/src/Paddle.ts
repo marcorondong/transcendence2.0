@@ -26,6 +26,16 @@ export class Paddle
 		this.position.setY(newY);
 	}
 
+	move(direction: "up" | "down"):void 
+	{
+		if(direction === "up")
+			this.moveUp();
+		else if (direction === "down")
+			this.moveDown();
+		else 
+			console.warn("Invalid movement direction");
+	}
+
 	getPosition(): Point
 	{
 		return this.position;
