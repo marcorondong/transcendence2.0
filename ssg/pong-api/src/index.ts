@@ -32,12 +32,12 @@ fastify.register(async function(fastify)
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
 		sendFrames(connection);
-		moveHandler(connection);
+		moveHandler(connection, leftPaddle);
 
-		connection.on("message", (data: RawData, isBinnary: boolean) =>
-		{
-			leftPaddle.moveUp();
-		})
+		// connection.on("message", (data: RawData, isBinnary: boolean) =>
+		// {
+		// 	leftPaddle.moveUp();
+		// })
 		// var counter = 1;
 		// const interval = setInterval(() => 
 		// {
@@ -74,7 +74,7 @@ function sendFrames(socket: WebSocket)
 	}, 1000)
 }
 
-function moveHandler(socket: WebSocket)
+function moveHandler(socket: WebSocket, paddle: Paddle)
 {
 	socket.on("message", (data: RawData, isBinnary:boolean) =>
 	{
@@ -84,8 +84,9 @@ function moveHandler(socket: WebSocket)
 			socket.send("Invalid json");
 			return 
 		}
-		console.log(json);
-
+		const direction = json.move;
+		console.log(direction);
+		paddle.move(direction);
 	})
 }
 
