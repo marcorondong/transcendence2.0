@@ -1,3 +1,19 @@
+
+export enum VectorDirection{
+	NO = 0,
+	UP = 1,
+	DOWN = 2,
+
+	RIGHT = 4,
+	RIGHT_UP = 5,
+	RIGHT_DOWN = 6,
+
+	LEFT = 8,
+	LEFT_UP = 9,
+	LEFT_DOWN = 10
+}
+
+
 export class Point
 {
 	protected xPos: number;
@@ -43,5 +59,23 @@ export class Point
 	setY(newY: number)
 	{
 		this.yPos = newY;
+	}
+
+	private getFactor(num:number): 0 | 1 | 2
+	{
+		if(num === 0)
+			return 0;
+		else if(num > 0)
+			return 1;
+		return 2;
+	}
+
+	getMovementDirection(): VectorDirection
+	{
+		const x = this.getX();
+		const y = this.getY();
+		const factorX = this.getFactor(x);
+		const factorY = this.getFactor(y);
+		return ((4 * factorX ) + factorY)
 	}
 }
