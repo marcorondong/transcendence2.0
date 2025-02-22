@@ -1,7 +1,7 @@
 import { Ball } from "../src/Ball";
 import { Point } from "../src/Point";
 
-test("Ball hitbox", () =>
+test("Ball hitbox on raidus 0.25", () =>
 {
 	const ballCenter:Point = new Point(0,0);
 	const ball:Ball = new Ball(ballCenter);
