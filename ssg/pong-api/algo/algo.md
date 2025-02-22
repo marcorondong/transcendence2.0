@@ -13,3 +13,11 @@
 ## Client POV 
 1. Once conected via websocket client is sending json whith either {"move":"up"} or {"move" "down"}
 2. Server in next frame should send updated paddle position (maybe client on his frontend can in exactly same frame update his paddle. Opponet will see this only in next frame?)
+
+
+## Game collision logic 
+Both paddle and ball have their hitboxes. aka area around position.
+For paddle it is +- 1 on y axis 
+for ball it is area 0.25 around postion 
+If ball hit UP or Down on field x direction stay same but y should be reversed
+If ball hit left or right it is considered goal.
