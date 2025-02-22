@@ -21,3 +21,7 @@ For paddle it is +- 1 on y axis
 for ball it is area 0.25 around postion 
 If ball hit UP or Down on field x direction stay same but y should be reversed
 If ball hit left or right it is considered goal.
+
+## Critical area 
+critical area are points of field where make sense to check if ball hit something (edge of field or paddle). 
+Critical should be in my opinion (ball radius + (MovementVector * SOME_X_THAT_MAKE_SENSE=5) in this example +- 0.75 diff 
