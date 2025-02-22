@@ -37,16 +37,18 @@ export class Ball
 		this.position = point;
 	}
 
-	isHit(otherObjectX: number, OtherObjectY:number):boolean
+
+
+	isHit(otherPoint:Point):boolean
 	{
 		const centerX = this.getPosition().getX();
 		const centerY = this.getPosition().getY();
-		const x = otherObjectX;
-		const y = OtherObjectY;
+		const x = otherPoint.getX();
+		const y = otherPoint.getY();
 
 		const result:number = Math.pow((x - centerX), 2) + Math.pow((y - centerY), 2);
 		const radiusSquared = Math.pow(this.radius, 2);
-		if(result < radiusSquared)
+		if(result <= radiusSquared)
 			return true;
 		return false;
 	}
