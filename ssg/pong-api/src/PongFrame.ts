@@ -7,7 +7,7 @@ interface Position
 	y:number;
 }
 
-interface PongFrameI
+export interface PongFrameI
 {
 	leftPaddle: Position;
 	rightPaddle: Position;

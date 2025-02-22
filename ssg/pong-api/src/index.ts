@@ -2,7 +2,7 @@ import Fastify from "fastify"
 import { Paddle } from "./Paddle";
 import { Point } from "./Point";
 import { Ball } from "./Ball";
-import { PongFrame } from "./PongFrame";
+import { PongFrame, PongFrameI } from "./PongFrame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 
@@ -30,11 +30,12 @@ fastify.register(async function(fastify)
 
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
-		var counter = 1;
-		const interval = setInterval(() => 
-		{
-			sendFrames(connection);
-		}, 1000);
+		sendFrames(connection);
+		// var counter = 1;
+		// const interval = setInterval(() => 
+		// {
+		// 	sendFrames(connection);
+		// }, 1000);
 		// const clienId = generateId++;
 		// const player1:Player = new Player(clienId.toString(), connection);
 		// console.log(`Loggin player info ${player1.id}`)
@@ -58,9 +59,12 @@ fastify.register(async function(fastify)
 
 function sendFrames(socket: WebSocket)
 {
-	const frame = PongFrame.getPongFrame(leftPaddle, rightPaddle, ball);
-	const frameJson = JSON.stringify(frame)
-	socket.send(frameJson)
+	const interval = setInterval(() => 
+	{
+		const frame:PongFrameI = PongFrame.getPongFrame(leftPaddle, rightPaddle, ball);
+		const frameJson = JSON.stringify(frame)
+		socket.send(frameJson)
+	}, 1000)
 }
 
 const startServer = async() =>
