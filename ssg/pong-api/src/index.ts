@@ -2,7 +2,7 @@ import Fastify from "fastify"
 import { Paddle } from "./Paddle";
 import { Point } from "./Point";
 import { Ball } from "./Ball";
-import { PongFrame, PongFrameI } from "./PongFrame";
+import { PingPongGame, PongFrameI } from "./PongFrame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
@@ -31,7 +31,7 @@ fastify.register(async function(fastify)
 {
 	fastify.get("/", (request, reply) =>
 	{
-		reply.send(PongFrame.getPongFrame(leftPaddle, rightPaddle, ball));
+		reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
 		ball.moveBall();
 		leftPaddle.moveUp();
 		rightPaddle.moveDown();
@@ -87,7 +87,7 @@ function sendFrames(socket: WebSocket)
 {
 	const interval = setInterval(() => 
 	{
-		const frame:PongFrameI = PongFrame.getPongFrame(leftPaddle, rightPaddle, ball);
+		const frame:PongFrameI = PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball);
 		const frameJson = JSON.stringify(frame)
 		socket.send(frameJson)
 		ball.moveBall();
