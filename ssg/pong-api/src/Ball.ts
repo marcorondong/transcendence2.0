@@ -52,4 +52,24 @@ export class Ball
 			return true;
 		return false;
 	}
+
+	/**
+	 * 
+	 * @returns 8 points of circle, aka every 45 degree
+	 */
+	getBallHitBoxPoints(): Point[]
+	{
+		const allPoints: Point[] = [];
+		const centerX=this.getPosition().getX();
+		const centerY=this.getPosition().getY();
+		for(let angle = 0; angle < 360; angle += 45)
+		{
+			const radians = angle *(Math.PI / 180);
+			const x = centerX + this.radius * Math.cos(radians);
+			const y = centerY + this.radius * Math.sin(radians);
+			const hitPoint:Point = new Point(x, y);
+			allPoints.push(hitPoint);
+		}
+		return allPoints;
+	}
 }
