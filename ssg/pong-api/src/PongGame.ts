@@ -65,39 +65,52 @@ export class PingPongGame
 		return false;
 	}
 
-	private isLeftGoal():boolean
+
+	private scoredGoal(goalSide: "left" | "right"): void
+	{
+		console.log(`${goalSide} GOAL scored`);
+		this.ball.setPosition(new Point(0,0));
+		console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+	}
+
+	private isLeftGoal(BallPoint:Point):boolean
+	{
+		if(BallPoint.getX() <= (-1 * this.TABLE_LENGHT_X / 2))
+		{
+			this.scoredGoal("left");
+			return true;
+		}
+		return false
+	}
+	
+	private isRightGoal(BallPoint:Point):boolean
+	{
+		if(BallPoint.getX() >= this.TABLE_LENGHT_X/2)
+		{
+			this.scoredGoal("right");
+			return true;
+		}
+		return false
+	}
+
+	private isGoal():boolean
 	{
 		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		const vectorDir:VectorDirection = this.ball.getBallDirection();
 		for(const point of ballHitPoints)
 		{
-			if(point.getX() <= -1 * this.TABLE_LENGHT_X/2)
+			if(vectorDir === VectorDirection.RIGHT || vectorDir === VectorDirection.RIGHT_DOWN || vectorDir ===VectorDirection.RIGHT_UP)
 			{
-				//this.ball.simpleBounceX();
-				console.log("Left GOAL");
-				this.ball.setPosition(new Point(0,0));
-				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
-				return true
+				return this.isRightGoal(point);
+			}
+			else if(vectorDir === VectorDirection.LEFT || vectorDir === VectorDirection.LEFT_DOWN || vectorDir ===VectorDirection.LEFT_UP)
+			{
+				return this.isLeftGoal(point);
 			}
 		}
 		return false
 	}
 
-	private isRightGoal():boolean
-	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
-		for(const point of ballHitPoints)
-		{
-			if(point.getX() >= this.TABLE_LENGHT_X/2)
-			{
-				this.ball.simpleBounceX();
-				console.log("Right GOAL");
-				this.ball.setPosition(new Point(0,0));
-				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
-				return true
-			}
-		}
-		return false
-	}
 
 	private isLeftEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
@@ -174,8 +187,7 @@ export class PingPongGame
 			console.log("Critical left right area");
 			console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 			//this.paddleBounce();
-			this.isLeftGoal();
-			this.isRightGoal();
+			this.isGoal();
 			return true
 		}
 		return false
