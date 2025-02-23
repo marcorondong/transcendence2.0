@@ -114,32 +114,42 @@ export class PingPongGame
 
 
 
-	private isTopHit():boolean
+	private isTopHit(ballPoint:Point):boolean
 	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
-		for(const point of ballHitPoints)
+		if(ballPoint.getY() >= this.TABLE_WIDTH_Y/2)
 		{
-			if(point.getY() >= this.TABLE_WIDTH_Y/2)
-			{
-				this.ball.simpleBounceY();
-				return true
-			}
+			// this.ball.simpleBounceY();
+			return true
 		}
 		return false
 	}
 
-	private isBottomHit():boolean
+	private isBottomHit(ballPoint:Point):boolean
 	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
-		for(const point of ballHitPoints)
+		if(ballPoint.getY() <= -1 * this.TABLE_WIDTH_Y/2)
 		{
-			if(point.getY() <= -1 * this.TABLE_WIDTH_Y/2)
-			{
-				this.ball.simpleBounceY();
-				return true
-			}
+			//this.ball.simpleBounceY();
+			return true
 		}
 		return false
+	}
+
+	private isBounceEdge(side: "top" | "bottom"):boolean 
+	{
+		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		let result = false;
+		for(const point of ballHitPoints)
+		{
+			if(side === "top")
+			{
+				result = this.isTopHit(point)
+			}
+			else 
+			{
+				result = this.isBottomHit(point);
+			}
+		}
+		return result;
 	}
 
 
@@ -161,8 +171,11 @@ export class PingPongGame
 		const RightEdgePoint:Point = new Point(rightEdgeX, ballY);
 		if(this.isObstacleNear(topEdgePoint)  ||  this.isObstacleNear(bottomEdgePoint))
 		{
-			this.isTopHit();
-			this.isBottomHit();
+			console.log("near TOP or bottom");
+			if(this.isBounceEdge("top") === true || this.isBounceEdge("bottom"))
+			{
+				this.ball.simpleBounceY();
+			}
 		}
 		if(this.isObstacleNear(RightEdgePoint)  ||  this.isObstacleNear(LeftEdgePoint))
 		{
