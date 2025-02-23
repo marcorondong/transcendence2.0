@@ -1,6 +1,8 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
+import { time } from "console";
+import raf from 'raf' //raf is request animation frame
 
 interface Position 
 {
@@ -22,6 +24,7 @@ export class PingPongGame
 	protected rightPaddle: Paddle;
 	protected ball: Ball;
 	readonly CRITICAL_DISTANCE;
+	private lastFrameTime: number = 0;
 	
 	readonly TABLE_WIDTH_Y: number = 5;
 	readonly TABLE_LENGHT_X: number = 9;
@@ -37,6 +40,7 @@ export class PingPongGame
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
 		this.CRITICAL_DISTANCE= ball.getCriticalDistance();
+		this.start();
 	}
 
 	static getPongFrame(leftPad: Paddle, rightPad: Paddle, ball: Ball): PongFrameI
@@ -64,10 +68,23 @@ export class PingPongGame
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
 	}
 
-	renderNextFrame()
+	private renderNextFrame()
 	{
 		this.isBallInCriticalArea();
 		this.ball.moveBall();
+	}
+
+	private start(): void 
+	{
+		raf((timestamp:number)=> this.gameLoop(timestamp))
+	}
+
+	private gameLoop(timestamp: number):void 
+	{
+		const deltaTime = timestamp - this.lastFrameTime;
+		this.lastFrameTime = timestamp;
+		this.renderNextFrame();
+		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
 	private isObstacleNear(obstaclePoint:Point,criticalDistance: number = this.CRITICAL_DISTANCE):boolean
