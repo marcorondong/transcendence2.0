@@ -55,6 +55,57 @@ export class PingPongGame
 		};
 	}
 
+
+	private isRightEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
+	{
+		const ballX = this.ball.getPosition().getX();
+		const currentDistance = Math.abs(this.TABLE_LENGHT_X/2 - ballX);
+		if(currentDistance <= criticalDistance)
+			return true;
+		return false;
+	}
+
+	private isLeftHit():boolean
+	{
+		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		for(const point of ballHitPoints)
+		{
+			if(point.getX() <= -1 * this.TABLE_LENGHT_X/2)
+			{
+				this.ball.simpleBounceX();
+				console.log("Left hit");
+				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+				return true
+			}
+		}
+		return false
+	}
+
+	private isRightHit():boolean
+	{
+		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		for(const point of ballHitPoints)
+		{
+			if(point.getX() >= this.TABLE_LENGHT_X/2)
+			{
+				this.ball.simpleBounceX();
+				console.log("Right hit");
+				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+				return true
+			}
+		}
+		return false
+	}
+
+	private isLeftEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
+	{
+		const ballX = this.ball.getPosition().getX();
+		const currentDistance = Math.abs( (-1 * this.TABLE_LENGHT_X/2) - ballX);
+		if(currentDistance <= criticalDistance)
+			return true;
+		return false;
+	}
+
 	private isTopEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
 		const ballY = this.ball.getPosition().getY();
@@ -71,10 +122,24 @@ export class PingPongGame
 		{
 			if(point.getY() >= this.TABLE_WIDTH_Y/2)
 			{
-				let dir = this.ball.getDirection();
-				dir.setY(dir.getY() * - 1);
-				this.ball.setDirection(dir);
-				console.log("hit");
+				this.ball.simpleBounceY();
+				console.log("Top hit");
+				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+				return true
+			}
+		}
+		return false
+	}
+
+	private isBottomHit():boolean
+	{
+		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		for(const point of ballHitPoints)
+		{
+			if(point.getY() <= -1 * this.TABLE_WIDTH_Y/2)
+			{
+				this.ball.simpleBounceY();
+				console.log("Bottom hit");
 				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 				return true
 			}
@@ -95,10 +160,19 @@ export class PingPongGame
 	{
 		if(this.isBottomEdgeCritical() || this.isTopEdgeCritical())
 		{
-			console.log("critical area");
-			console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+			//console.log("critical area");
+			//console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 			this.isTopHit();
+			this.isBottomHit();
 			return true 
+		}
+
+		if(this.isLeftEdgeCritical() || this.isRightEdgeCritical())
+		{
+			console.log("Critical left right area");
+			console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+			this.isLeftHit();
+			this.isRightHit();
 		}
 		return false
 	}
