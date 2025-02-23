@@ -1,7 +1,6 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
-import { time } from "console";
 import raf from 'raf' //raf is request animation frame
 
 interface Position 
@@ -97,7 +96,6 @@ export class PingPongGame
 
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
-		console.log(`${goalSide} GOAL scored`);
 		this.ball.setPosition(new Point(0,0));
 	}
 	
@@ -187,7 +185,6 @@ export class PingPongGame
 		const RightEdgePoint:Point = new Point(this.RIGHT_EDGE_X, ballY);
 		if(this.isObstacleNear(topEdgePoint)  ||  this.isObstacleNear(bottomEdgePoint))
 		{
-			console.log("near TOP or bottom");
 			if(this.isBounceEdge("top") === true || this.isBounceEdge("bottom"))
 			{
 				this.ball.simpleBounceY();

@@ -7,7 +7,6 @@ import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
 import raf from "raf";
-
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
@@ -15,12 +14,12 @@ import fastifyStatic from '@fastify/static';
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
 
-
 const fastify = Fastify({logger: true});
 
 const leftPaddle: Paddle = new Paddle(new Point(-2.5, 0));
 const rightPaddle: Paddle = new Paddle(new Point(2.5, 0));
 const ball: Ball = new Ball(new Point(0, 0));
+let player:number = 1;
 
 const game: PingPongGame = new PingPongGame("1",leftPaddle, rightPaddle, ball);
 
@@ -44,34 +43,11 @@ fastify.register(async function(fastify)
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
 		sendFrames(connection);
-		moveHandler(connection, leftPaddle);
-
-		// connection.on("message", (data: RawData, isBinnary: boolean) =>
-		// {
-		// 	leftPaddle.moveUp();
-		// })
-		// var counter = 1;
-		// const interval = setInterval(() => 
-		// {
-		// 	sendFrames(connection);
-		// }, 1000);
-		// const clienId = generateId++;
-		// const player1:Player = new Player(clienId.toString(), connection);
-		// console.log(`Loggin player info ${player1.id}`)
-	
-		// addPlayerToRoom(oneRoom, player1)
-	
-		// connection.on("message", (message:RawData)=>
-		// {
-		// onMessageHandler(message, oneRoom, player1);
-		// })
-	
-		// connection.on("close", (code:number, reason:Buffer) =>
-		// {
-		// console.log(`Client ${clienId} disconnected`);
-		// console.log(`Reason ${code} buffer: ${reason}`)
-		// oneRoom.removePlayer(player1);
-		// })
+		if(player === 1)
+			moveHandler(connection, leftPaddle);
+		else if(player === 2)
+			moveHandler(connection, rightPaddle);
+		player++;
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
@@ -92,8 +68,6 @@ function sendFrames(socket: WebSocket)
 		const frame: PongFrameI = PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball);
 		const frameJson = JSON.stringify(frame);
 		socket.send(frameJson);
-		// game.renderNextFrame();
-		// ball.moveBall();
 		raf(renderFrame);
 };
 	raf(renderFrame);
@@ -110,7 +84,6 @@ function moveHandler(socket: WebSocket, paddle: Paddle)
 			return 
 		}
 		const direction = json.move;
-		console.log(direction);
 		paddle.move(direction);
 	})
 }

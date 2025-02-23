@@ -14,7 +14,7 @@
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        const ws = new WebSocket("ws://localhost:3010/pong/");
+        const ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/pong/`);
         
         let gameState = {
             leftPaddle: { x: -2.5, y: 0 },
