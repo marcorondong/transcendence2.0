@@ -1,5 +1,7 @@
 import { Point } from "./Point"
 
+const MOVE_COEFFICIENT = 5;
+
 export class Ball
 {
 	protected position:Point;
@@ -35,6 +37,21 @@ export class Ball
 	setPosition(point:Point) :void 
 	{
 		this.position = point;
+	}
+
+	getRadius():number
+	{
+		return this.radius;
+	}
+
+	/**
+	 * 
+	 * @returns distance in which is possible that ball with hit something in next MOVE_COEFFICIENT frames (aka next 5 frames)
+	 */
+	getCriticalDistance():number 
+	{
+		const critDistance = this.radius + (Math.abs(this.getDirection().getBiggerAxis())) * MOVE_COEFFICIENT;
+		return critDistance; 
 	}
 
 
