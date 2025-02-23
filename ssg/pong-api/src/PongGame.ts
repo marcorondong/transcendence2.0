@@ -58,7 +58,7 @@ export class PingPongGame
 	private isTopEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
 		const ballY = this.ball.getPosition().getY();
-		const currentDistance = Math.abs(this.TABLE_WIDTH_Y - ballY);
+		const currentDistance = Math.abs(this.TABLE_WIDTH_Y/2 - ballY);
 		if(currentDistance <= criticalDistance)
 			return true;
 		return false;
@@ -67,7 +67,7 @@ export class PingPongGame
 	private isBottomEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
 		const ballY = this.ball.getPosition().getY();
-		const currentDistance = Math.abs( (-1 * this.TABLE_WIDTH_Y) - ballY);
+		const currentDistance = Math.abs( (-1 * this.TABLE_WIDTH_Y/2) - ballY);
 		if(currentDistance <= criticalDistance)
 			return true;
 		return false;
