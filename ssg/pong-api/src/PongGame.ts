@@ -25,6 +25,10 @@ export class PingPongGame
 	
 	readonly TABLE_WIDTH_Y: number = 5;
 	readonly TABLE_LENGHT_X: number = 9;
+	readonly TOP_EDGE_Y:number = this.TABLE_WIDTH_Y/2;
+	readonly BOTTOM_EDGE_Y:number = (this.TABLE_WIDTH_Y/2) * (-1);
+	readonly RIGHT_EDGE_X = this.TABLE_LENGHT_X/2;
+	readonly LEFT_EDGE_X = (this.TABLE_LENGHT_X/2) * (-1);
 
 	constructor(gameId:string, leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball)
 	{
@@ -76,7 +80,7 @@ export class PingPongGame
 	
 	private isLeftGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() <= (-1 * this.TABLE_LENGHT_X / 2))
+		if(BallPoint.getX() <= this.LEFT_EDGE_X)
 		{
 			this.scoredGoal("left");
 			return true;
@@ -86,7 +90,7 @@ export class PingPongGame
 	
 	private isRightGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() >= this.TABLE_LENGHT_X/2)
+		if(BallPoint.getX() >= this.RIGHT_EDGE_X)
 		{
 			this.scoredGoal("right");
 			return true;
@@ -116,7 +120,7 @@ export class PingPongGame
 
 	private isTopHit(ballPoint:Point):boolean
 	{
-		if(ballPoint.getY() >= this.TABLE_WIDTH_Y/2)
+		if(ballPoint.getY() >= this.TOP_EDGE_Y)
 		{
 			return true
 		}
@@ -125,7 +129,7 @@ export class PingPongGame
 
 	private isBottomHit(ballPoint:Point):boolean
 	{
-		if(ballPoint.getY() <= -1 * this.TABLE_WIDTH_Y/2)
+		if(ballPoint.getY() <= this.BOTTOM_EDGE_Y)
 		{
 			return true
 		}
@@ -156,17 +160,11 @@ export class PingPongGame
 		const ballX = this.ball.getPosition().getX();
 		const ballY = this.ball.getPosition().getY();
 
-		const topEdgeY = this.TABLE_WIDTH_Y/2;
-		const bottomEdgeY = (this.TABLE_WIDTH_Y/2) * (-1);
+		const topEdgePoint:Point = new Point(ballX, this.TOP_EDGE_Y);
+		const bottomEdgePoint:Point = new Point(ballX, this.BOTTOM_EDGE_Y);
 
-		const rightEdgeX = this.TABLE_LENGHT_X/2;
-		const leftEdgeX = (this.TABLE_LENGHT_X/2) * (-1);
-
-		const topEdgePoint:Point = new Point(ballX, topEdgeY);
-		const bottomEdgePoint:Point = new Point(ballX, bottomEdgeY);
-
-		const LeftEdgePoint:Point = new Point(leftEdgeX, ballY);
-		const RightEdgePoint:Point = new Point(rightEdgeX, ballY);
+		const LeftEdgePoint:Point = new Point(this.LEFT_EDGE_X, ballY);
+		const RightEdgePoint:Point = new Point(this.RIGHT_EDGE_X, ballY);
 		if(this.isObstacleNear(topEdgePoint)  ||  this.isObstacleNear(bottomEdgePoint))
 		{
 			console.log("near TOP or bottom");
