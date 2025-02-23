@@ -55,6 +55,11 @@ export class PingPongGame
 		};
 	}
 
+	getFrame()
+	{
+		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
+	}
+
 	private isObstacleNear(obstaclePoint:Point,criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
 		const currentDistance = Point.calculateDistance(obstaclePoint, this.ball.getPosition());
@@ -67,7 +72,6 @@ export class PingPongGame
 	{
 		console.log(`${goalSide} GOAL scored`);
 		this.ball.setPosition(new Point(0,0));
-		console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
@@ -118,9 +122,6 @@ export class PingPongGame
 			if(point.getY() >= this.TABLE_WIDTH_Y/2)
 			{
 				this.ball.simpleBounceY();
-				//TODO remove this
-				// console.log("Top hit");
-				// console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 				return true
 			}
 		}
@@ -135,9 +136,6 @@ export class PingPongGame
 			if(point.getY() <= -1 * this.TABLE_WIDTH_Y/2)
 			{
 				this.ball.simpleBounceY();
-				//TODO remove this
-				// console.log("Bottom hit");
-				// console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 				return true
 			}
 		}
@@ -165,24 +163,17 @@ export class PingPongGame
 		{
 			this.isTopHit();
 			this.isBottomHit();
-			//return true 
 		}
 		if(this.isObstacleNear(RightEdgePoint)  ||  this.isObstacleNear(LeftEdgePoint))
 		{
-			console.log("Critical left right area");
-			//TODO remove this
-			//console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 			this.isGoal();
-			//return true
 		}
 		if(this.isObstacleNear(this.leftPaddle.getPosition(), this.leftPaddle.height + this.ball.getRadius()))
 		{
-			console.log("near left");
 			this.paddleBounce();
 		}
 		if(this.isObstacleNear(this.rightPaddle.getPosition(), this.rightPaddle.height + this.ball.getRadius()))
 			this.paddleBounce();
-		//return false
 	}
 
 
@@ -195,9 +186,6 @@ export class PingPongGame
 		{
 			if(this.ball.isHit(point) == true)
 			{
-				console.log(this.leftPaddle.getPosition());
-				console.log("paddle hit left");
-				//console.log(point);
 				this.ball.simpleBounceX();
 			}
 		}
@@ -206,8 +194,6 @@ export class PingPongGame
 		{
 			if(this.ball.isHit(point) == true)
 			{
-				//console.log("paddle hit right");
-				//console.log(point);
 				this.ball.simpleBounceX();
 			}
 		}
@@ -216,7 +202,6 @@ export class PingPongGame
 	renderNextFrame()
 	{
 		this.isBallInCriticalArea();
-		//this.paddleBounce();
 		this.ball.moveBall();
 	}
 }
