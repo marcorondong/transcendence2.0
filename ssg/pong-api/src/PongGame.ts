@@ -118,8 +118,9 @@ export class PingPongGame
 			if(point.getY() >= this.TABLE_WIDTH_Y/2)
 			{
 				this.ball.simpleBounceY();
-				console.log("Top hit");
-				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+				//TODO remove this
+				// console.log("Top hit");
+				// console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 				return true
 			}
 		}
@@ -134,8 +135,9 @@ export class PingPongGame
 			if(point.getY() <= -1 * this.TABLE_WIDTH_Y/2)
 			{
 				this.ball.simpleBounceY();
-				console.log("Bottom hit");
-				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+				//TODO remove this
+				// console.log("Bottom hit");
+				// console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 				return true
 			}
 		}
@@ -143,7 +145,7 @@ export class PingPongGame
 	}
 
 
-	private isBallInCriticalArea():boolean
+	private isBallInCriticalArea():void
 	{
 		const ballX = this.ball.getPosition().getX();
 		const ballY = this.ball.getPosition().getY();
@@ -163,16 +165,24 @@ export class PingPongGame
 		{
 			this.isTopHit();
 			this.isBottomHit();
-			return true 
+			//return true 
 		}
 		if(this.isObstacleNear(RightEdgePoint)  ||  this.isObstacleNear(LeftEdgePoint))
 		{
 			console.log("Critical left right area");
-			console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+			//TODO remove this
+			//console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
 			this.isGoal();
-			return true
+			//return true
 		}
-		return false
+		if(this.isObstacleNear(this.leftPaddle.getPosition(), this.leftPaddle.height + this.ball.getRadius()))
+		{
+			console.log("near left");
+			this.paddleBounce();
+		}
+		if(this.isObstacleNear(this.rightPaddle.getPosition(), this.rightPaddle.height + this.ball.getRadius()))
+			this.paddleBounce();
+		//return false
 	}
 
 
@@ -206,7 +216,7 @@ export class PingPongGame
 	renderNextFrame()
 	{
 		this.isBallInCriticalArea();
-		this.paddleBounce();
+		//this.paddleBounce();
 		this.ball.moveBall();
 	}
 }
