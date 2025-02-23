@@ -1,5 +1,6 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
+import { VectorDirection } from "./Point";
 
 interface Position 
 {
@@ -20,9 +21,10 @@ export class PingPongGame
 	protected leftPaddle: Paddle;
 	protected rightPaddle: Paddle;
 	protected ball: Ball;
+	readonly CRITICAL_DISTANCE;
 	
-	readonly tableWidth: number = 5;
-	readonly tableLenght: number = 9;
+	readonly TABLE_WIDTH_Y: number = 5;
+	readonly TABLE_LENGHT_X: number = 9;
 
 	constructor(gameId:string, leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball)
 	{
@@ -30,6 +32,7 @@ export class PingPongGame
 		this.leftPaddle = leftPaddle;
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
+		this.CRITICAL_DISTANCE= ball.getCriticalDistance();
 	}
 
 	static getPongFrame(leftPad: Paddle, rightPad: Paddle, ball: Ball): PongFrameI
@@ -50,5 +53,40 @@ export class PingPongGame
 				y: ball.getPosition().getY(),
 			},
 		};
+	}
+
+	private isTopEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
+	{
+		const ballY = this.ball.getPosition().getY();
+		const currentDistance = Math.abs(this.TABLE_WIDTH_Y - ballY);
+		if(currentDistance <= criticalDistance)
+			return true;
+		return false;
+	}
+
+	private isBottomEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
+	{
+		const ballY = this.ball.getPosition().getY();
+		const currentDistance = Math.abs( (-1 * this.TABLE_WIDTH_Y) - ballY);
+		if(currentDistance <= criticalDistance)
+			return true;
+		return false;
+	}
+
+	private isBallInCriticalArea():boolean
+	{
+		if(this.isBottomEdgeCritical() || this.isTopEdgeCritical())
+		{
+			console.log("critical area");
+			console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+			return true 
+		}
+		return false
+	}
+
+	renderNextFrame()
+	{
+		this.isBallInCriticalArea();
+		this.ball.moveBall();
 	}
 }
