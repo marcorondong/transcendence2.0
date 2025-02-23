@@ -64,6 +64,12 @@ export class PingPongGame
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
 	}
 
+	renderNextFrame()
+	{
+		this.isBallInCriticalArea();
+		this.ball.moveBall();
+	}
+
 	private isObstacleNear(obstaclePoint:Point,criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
 		const currentDistance = Point.calculateDistance(obstaclePoint, this.ball.getPosition());
@@ -116,8 +122,6 @@ export class PingPongGame
 		return false
 	}
 
-
-
 	private isTopHit(ballPoint:Point):boolean
 	{
 		if(ballPoint.getY() >= this.TOP_EDGE_Y)
@@ -154,7 +158,6 @@ export class PingPongGame
 		return result;
 	}
 
-
 	private isBallInCriticalArea():void
 	{
 		const ballX = this.ball.getPosition().getX();
@@ -185,7 +188,6 @@ export class PingPongGame
 			this.paddleBounce(this.rightPaddle);
 	}
 
-
 	private paddleBounce(paddle:Paddle)
 	{
 		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
@@ -196,11 +198,5 @@ export class PingPongGame
 				this.ball.simpleBounceX();
 			}
 		}
-	}
-
-	renderNextFrame()
-	{
-		this.isBallInCriticalArea();
-		this.ball.moveBall();
 	}
 }
