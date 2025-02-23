@@ -191,7 +191,9 @@ export class PingPongGame
 		{
 			if(this.ball.isHit(point) == true)
 			{
+				console.log(this.leftPaddle.getPosition());
 				console.log("paddle hit left");
+				//console.log(point);
 				this.ball.simpleBounceX();
 			}
 		}
@@ -200,7 +202,8 @@ export class PingPongGame
 		{
 			if(this.ball.isHit(point) == true)
 			{
-				console.log("paddle hti right");
+				//console.log("paddle hit right");
+				//console.log(point);
 				this.ball.simpleBounceX();
 			}
 		}
