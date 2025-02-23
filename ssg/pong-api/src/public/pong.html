@@ -39,16 +39,28 @@
         }
         
         function drawPaddle(x, y) {
-            ctx.fillStyle = "white";
-            ctx.fillRect(x + canvas.width / 2 - 5, y + canvas.height / 2 - 30, 10, 60);
-        }
-        
-        function drawBall(x, y) {
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(x + canvas.width / 2, y + canvas.height / 2, 5, 0, Math.PI * 2);
-            ctx.fill();
-        }
+    ctx.fillStyle = "white";
+    ctx.fillRect(
+        x + canvas.width / 2 - 5,
+        -y + canvas.height / 2 - 30,  // Flip Y-axis
+        10,
+        60
+    );
+}
+
+function drawBall(x, y) {
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(
+        x + canvas.width / 2,
+        -y + canvas.height / 2,  // Flip Y-axis
+        5,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+}
+
         
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") {
