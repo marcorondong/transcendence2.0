@@ -25,6 +25,17 @@ export class Point
 		this.yPos = y;
 	}
 
+	static calculateDistance(pointA:Point, pointB: Point)
+	{
+		const a = pointA.getX();
+		const b = pointA.getY();
+		const p = pointB.getX();
+		const q = pointB.getY();
+
+		const distance_squared = Math.pow((a - p), 2) + Math.pow((b - q), 2)
+		return Math.sqrt(distance_squared);
+	}
+
 	equals(otherPoint: Point):boolean
 	{
 		return (otherPoint.xPos === this.xPos && otherPoint.yPos === this.yPos)
@@ -47,16 +58,16 @@ export class Point
 		return this.xPos;
 	}
 
-	getY():number 
-	{
-		return this.yPos;
-	}
-
 	setX(newX: number)
 	{
 		this.xPos = newX; 
 	}
-
+	
+	getY():number 
+	{
+		return this.yPos;
+	}
+	
 	setY(newY: number)
 	{
 		this.yPos = newY;
@@ -69,6 +80,15 @@ export class Point
 		return this.getY();
 	}
 
+	getMovementDirection(): VectorDirection
+	{
+		const x = this.getX();
+		const y = this.getY();
+		const factorX = this.getFactor(x);
+		const factorY = this.getFactor(y);
+		return ((4 * factorX ) + factorY)
+	}
+
 	private getFactor(num:number): 0 | 1 | 2
 	{
 		if(num === 0)
@@ -78,12 +98,4 @@ export class Point
 		return 2;
 	}
 
-	getMovementDirection(): VectorDirection
-	{
-		const x = this.getX();
-		const y = this.getY();
-		const factorX = this.getFactor(x);
-		const factorY = this.getFactor(y);
-		return ((4 * factorX ) + factorY)
-	}
 }
