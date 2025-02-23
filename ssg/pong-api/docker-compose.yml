@@ -3,8 +3,10 @@ services:
     image: pong-api-img 
     container_name: pong-api
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: pong-api/Dockerfile
     volumes:
-      - ./src/:/pong/src/
+      - ./src/:/pong/pong-api/src/
+    ports:
+      - 3010:3010
     command: npm run dev
