@@ -1,4 +1,4 @@
-import { Point } from "./Point"
+import { Point, VectorDirection } from "./Point"
 
 const MOVE_COEFFICIENT = 5;
 
@@ -8,7 +8,7 @@ export class Ball
 	protected vector:Point;
 	readonly radius = 0.25;
 
-	constructor(position:Point, vector:Point = new Point(0.1, 0.0)) 
+	constructor(position:Point, vector:Point = new Point(-0.12, 0.3)) 
 	{
 		this.position = position;
 		this.vector = vector;	
@@ -54,6 +54,11 @@ export class Ball
 	getRadius():number
 	{
 		return this.radius;
+	}
+
+	getBallDirection(): VectorDirection
+	{
+		return this.getDirection().getMovementDirection();
 	}
 
 	/**
