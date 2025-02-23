@@ -1,6 +1,6 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
-import { VectorDirection } from "./Point";
+import { VectorDirection, Point } from "./Point";
 
 interface Position 
 {
@@ -64,6 +64,24 @@ export class PingPongGame
 		return false;
 	}
 
+	private isTopHit():boolean
+	{
+		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		for(const point of ballHitPoints)
+		{
+			if(point.getY() >= this.TABLE_WIDTH_Y/2)
+			{
+				let dir = this.ball.getDirection();
+				dir.setY(dir.getY() * - 1);
+				this.ball.setDirection(dir);
+				console.log("hit");
+				console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+				return true
+			}
+		}
+		return false
+	}
+
 	private isBottomEdgeCritical(criticalDistance: number = this.CRITICAL_DISTANCE):boolean
 	{
 		const ballY = this.ball.getPosition().getY();
@@ -79,6 +97,7 @@ export class PingPongGame
 		{
 			console.log("critical area");
 			console.log(PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball));
+			this.isTopHit();
 			return true 
 		}
 		return false
