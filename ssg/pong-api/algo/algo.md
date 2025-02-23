@@ -25,3 +25,11 @@ If ball hit left or right it is considered goal.
 ## Critical area 
 critical area are points of field where make sense to check if ball hit something (edge of field or paddle). 
 Critical should be in my opinion (ball radius + (MovementVector * SOME_X_THAT_MAKE_SENSE=5) in this example +- 0.75 diff 
+
+
+## bouncing logic 
+1. IF BALL in critical area 
+	1. IF BALL HIT SOMETHING 
+		bounce 
+	return 
+2. return 
