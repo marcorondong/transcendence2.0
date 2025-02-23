@@ -2,7 +2,7 @@ import Fastify from "fastify"
 import { Paddle } from "./Paddle";
 import { Point } from "./Point";
 import { Ball } from "./Ball";
-import { PingPongGame, PongFrameI } from "./PongFrame";
+import { PingPongGame, PongFrameI } from "./PongGame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
