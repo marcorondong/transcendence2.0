@@ -1,3 +1,4 @@
+import { get } from "http";
 
 export enum VectorDirection{
 	NO = 0,
@@ -59,6 +60,13 @@ export class Point
 	setY(newY: number)
 	{
 		this.yPos = newY;
+	}
+
+	getBiggerAxis():number 
+	{
+		if(Math.abs(this.xPos) > Math.abs(this.yPos))
+			return this.getX();
+		return this.getY();
 	}
 
 	private getFactor(num:number): 0 | 1 | 2
