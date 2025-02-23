@@ -21,6 +21,8 @@ const leftPaddle: Paddle = new Paddle(new Point(-2.5, 0));
 const rightPaddle: Paddle = new Paddle(new Point(2.5, 0));
 const ball: Ball = new Ball(new Point(0, 0));
 
+const game: PingPongGame = new PingPongGame("1",leftPaddle, rightPaddle, ball);
+
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
 	prefix: "/", // Optional: Sets the URL prefix
@@ -90,7 +92,8 @@ function sendFrames(socket: WebSocket)
 		const frame:PongFrameI = PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball);
 		const frameJson = JSON.stringify(frame)
 		socket.send(frameJson)
-		ball.moveBall();
+		game.renderNextFrame();
+		//ball.moveBall();
 	}, 1000/60)
 }
 
