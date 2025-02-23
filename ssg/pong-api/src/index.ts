@@ -6,6 +6,7 @@ import { PingPongGame, PongFrameI } from "./PongGame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
+import raf from "raf";
 
 import fs from "fs"
 import path from 'path';
@@ -87,14 +88,15 @@ fastify.register(async function(fastify)
 
 function sendFrames(socket: WebSocket)
 {
-	const interval = setInterval(() => 
-	{
-		const frame:PongFrameI = PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball);
-		const frameJson = JSON.stringify(frame)
-		socket.send(frameJson)
-		game.renderNextFrame();
-		//ball.moveBall();
-	}, 1000/60)
+	const renderFrame = () => {
+		const frame: PongFrameI = PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball);
+		const frameJson = JSON.stringify(frame);
+		socket.send(frameJson);
+		// game.renderNextFrame();
+		// ball.moveBall();
+		raf(renderFrame);
+};
+	raf(renderFrame);
 }
 
 function moveHandler(socket: WebSocket, paddle: Paddle)
