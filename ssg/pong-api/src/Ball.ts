@@ -8,7 +8,7 @@ export class Ball
 	protected vector:Point;
 	readonly radius = 0.25;
 
-	constructor(position:Point, vector:Point = new Point(0.1, 0.1)) 
+	constructor(position:Point, vector:Point = new Point(0.1, 0.0)) 
 	{
 		this.position = position;
 		this.vector = vector;	
