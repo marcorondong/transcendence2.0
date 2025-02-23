@@ -8,7 +8,7 @@ export class Ball
 	protected vector:Point;
 	readonly radius = 0.25;
 
-	constructor(position:Point, vector:Point = new Point(0.1, 0)) 
+	constructor(position:Point, vector:Point = new Point(0.1, 0.1)) 
 	{
 		this.position = position;
 		this.vector = vector;	
@@ -27,6 +27,18 @@ export class Ball
 	getDirection(): Point
 	{
 		return this.vector;
+	}
+
+	simpleBounceX(): void 
+	{
+		const newX = -1 * this.getDirection().getX();
+		this.getDirection().setX(newX);
+	}
+
+	simpleBounceY():void 
+	{
+		const newY = -1 * this.getDirection().getY();
+		this.getDirection().setY(newY);
 	}
 
 	getPosition():Point
