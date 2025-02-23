@@ -118,7 +118,6 @@ export class PingPongGame
 	{
 		if(ballPoint.getY() >= this.TABLE_WIDTH_Y/2)
 		{
-			// this.ball.simpleBounceY();
 			return true
 		}
 		return false
@@ -128,7 +127,6 @@ export class PingPongGame
 	{
 		if(ballPoint.getY() <= -1 * this.TABLE_WIDTH_Y/2)
 		{
-			//this.ball.simpleBounceY();
 			return true
 		}
 		return false
@@ -183,27 +181,17 @@ export class PingPongGame
 		}
 		if(this.isObstacleNear(this.leftPaddle.getPosition(), this.leftPaddle.height + this.ball.getRadius()))
 		{
-			this.paddleBounce();
+			this.paddleBounce(this.leftPaddle);
 		}
 		if(this.isObstacleNear(this.rightPaddle.getPosition(), this.rightPaddle.height + this.ball.getRadius()))
-			this.paddleBounce();
+			this.paddleBounce(this.rightPaddle);
 	}
 
 
-	private paddleBounce()
+	private paddleBounce(paddle:Paddle)
 	{
-		const leftPaddleHitPoints = this.leftPaddle.getPaddleHitBoxPoints();
-		const rightPaddleHitPoints = this.rightPaddle.getPaddleHitBoxPoints();
-
-		for(const point of leftPaddleHitPoints)
-		{
-			if(this.ball.isHit(point) == true)
-			{
-				this.ball.simpleBounceX();
-			}
-		}
-
-		for(const point of rightPaddleHitPoints)
+		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
+		for(const point of paddleHitPoints)
 		{
 			if(this.ball.isHit(point) == true)
 			{
