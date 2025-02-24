@@ -61,6 +61,34 @@ export class Ball
 		return this.getDirection().getMovementDirection();
 	}
 
+	isMovingLeft(): boolean
+	{
+		if(this.getDirection().getX() < 0)
+			return true;
+		return false;
+	}
+
+	isMovingRight(): boolean
+	{
+		if(this.getDirection().getX() > 0)
+			return true;
+		return false;
+	}
+
+	isMovingUp(): boolean
+	{
+		if(this.getDirection().getY() > 0)
+			return true;
+		return false;
+	}
+
+	isMovingDown(): boolean
+	{
+		if(this.getDirection().getY() < 0)
+			return true;
+		return false;
+	}
+
 	/**
 	 * 
 	 * @returns distance in which is possible that ball with hit something in next MOVE_COEFFICIENT frames (aka next 5 frames)
