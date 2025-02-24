@@ -10,16 +10,16 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="900" height="500"></canvas> <!-- Adjusted canvas size -->
+    <canvas id="gameCanvas" width="900" height="500"></canvas> 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/pong/`);
         
         let gameState = {
-            leftPaddle: { x: -4, y: 0 },
-            rightPaddle: { x: 4, y: 0 },
-            ball: { x: 0, y: 0 }
+            leftPaddle: { x: -4, y: 0, height: 1 },
+            rightPaddle: { x: 4, y: 0, height: 1 },
+            ball: { x: 0, y: 0, radius: 0.25 }
         };
         
         ws.onmessage = (event) => {
@@ -30,41 +30,49 @@
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            let scaleX = canvas.width / 9;  // Field width is 9
-            let scaleY = canvas.height / 5; // Field height is 5
+            let scaleX = canvas.width / 9;
+            let scaleY = canvas.height / 5;
 
             drawFieldBorders(scaleX, scaleY);
-            drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, scaleX, scaleY);
-            drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, scaleX, scaleY);
-            drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, scaleY);
+            drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, gameState.leftPaddle.height * scaleY);
+            drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, gameState.rightPaddle.height * scaleY);
+            drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, gameState.ball.radius * scaleX);
         }
 
         function drawFieldBorders(scaleX, scaleY) {
             ctx.strokeStyle = "red";
             ctx.lineWidth = 2;
-            ctx.beginPath();
             
-            ctx.rect(canvas.width / 2 - 4.5 * scaleX, canvas.height / 2 - 2.5 * scaleY, 9 * scaleX, 5 * scaleY);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+            ctx.moveTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.stroke();
         }
 
-        function drawPaddle(x, y, scaleX, scaleY) {
+        function drawPaddle(x, y, height) {
             ctx.fillStyle = "white";
             ctx.fillRect(
-                x + canvas.width / 2 - (0.1 * scaleX), 
-                -y + canvas.height / 2 - (0.5 * scaleY), 
-                0.2 * scaleX,  // Paddle width
-                scaleY          // Paddle height (1 unit)
+                x + canvas.width / 2 - 5,
+                -y + canvas.height / 2 - (height / 2),  
+                10,
+                height
             );
         }
 
-        function drawBall(x, y, scaleY) {
+        function drawBall(x, y, radius) {
             ctx.fillStyle = "white";
             ctx.beginPath();
             ctx.arc(
                 x + canvas.width / 2,
-                -y + canvas.height / 2, 
-                0.25 * scaleY,  
+                -y + canvas.height / 2,  
+                radius,
                 0,
                 Math.PI * 2
             );
