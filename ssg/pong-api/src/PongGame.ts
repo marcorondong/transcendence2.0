@@ -121,7 +121,7 @@ export class PingPongGame
 
 	private isGoal():boolean
 	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		const ballHitPoints: Point[] = Array.from(this.ball.getBallHitBoxPoints().values());
 		const vectorDir:VectorDirection = this.ball.getBallDirection();
 		for(const point of ballHitPoints)
 		{
@@ -137,6 +137,11 @@ export class PingPongGame
 		return false
 	}
 
+	/**
+	 * 
+	 * @param ballPoint (usually up point of ball)
+	 * @returns true if ball point touches the top of field
+	 */
 	private isTopHit(ballPoint:Point):boolean
 	{
 		if(ballPoint.getY() >= this.TOP_EDGE_Y)
@@ -146,6 +151,11 @@ export class PingPongGame
 		return false
 	}
 
+		/**
+	 * 
+	 * @param ballPoint (usually down point of ball)
+	 * @returns true if ball point touches the top of field
+	 */
 	private isBottomHit(ballPoint:Point):boolean
 	{
 		if(ballPoint.getY() <= this.BOTTOM_EDGE_Y)
@@ -157,19 +167,25 @@ export class PingPongGame
 
 	private isBounceEdge(side: "top" | "bottom"):boolean 
 	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		const ballHitPoints: Map<VectorDirection, Point> = this.ball.getBallHitBoxPoints();
 		let result = false;
-		for(const point of ballHitPoints)
+		if(side === "top")
 		{
-			if(side === "top")
-			{
-				result = this.isTopHit(point)
-			}
+			const topPoint = ballHitPoints.get(VectorDirection.UP);
+			if(topPoint !== undefined)
+				result = this.isTopHit(topPoint)
 			else 
-			{
-				result = this.isBottomHit(point);
-			}
+				result = false;
 		}
+		else 
+		{
+			const bottomPoint = ballHitPoints.get(VectorDirection.DOWN);
+			if(bottomPoint !== undefined)
+				result = this.isBottomHit(bottomPoint)
+			else 
+				result = false;
+		}
+		
 		return result;
 	}
 
