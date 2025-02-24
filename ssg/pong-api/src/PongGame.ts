@@ -101,7 +101,7 @@ export class PingPongGame
 	
 	private isLeftGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() <= this.LEFT_EDGE_X)
+		if(BallPoint.getX() < this.LEFT_EDGE_X)
 		{
 			this.scoredGoal("left");
 			return true;
@@ -111,7 +111,7 @@ export class PingPongGame
 	
 	private isRightGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() >= this.RIGHT_EDGE_X)
+		if(BallPoint.getX() > this.RIGHT_EDGE_X)
 		{
 			this.scoredGoal("right");
 			return true;
