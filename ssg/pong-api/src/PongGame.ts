@@ -11,9 +11,9 @@ interface Position
 
 export interface PongFrameI
 {
-	leftPaddle: Position;
-	rightPaddle: Position;
-	ball: Position;
+	leftPaddle: Position & {height:number};
+	rightPaddle: Position & {height:number};
+	ball: Position & { radius: number };
 }
 
 export class PingPongGame
@@ -48,16 +48,19 @@ export class PingPongGame
 			leftPaddle: {
 				x: leftPad.getPosition().getX(),
 				y: leftPad.getPosition().getY(),
+				height: leftPad.height
 			}, 
 			rightPaddle: 
 			{
 				x: rightPad.getPosition().getX(),
 				y: rightPad.getPosition().getY(),
+				height: rightPad.height
 			},
 			ball: 
 			{
 				x: ball.getPosition().getX(),
 				y: ball.getPosition().getY(),
+				radius: ball.getRadius()
 			},
 		};
 	}
