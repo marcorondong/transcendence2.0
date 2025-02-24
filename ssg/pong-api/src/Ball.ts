@@ -6,12 +6,13 @@ export class Ball
 {
 	protected position:Point;
 	protected vector:Point;
-	readonly radius = 0.25;
+	readonly radius;
 
-	constructor(position:Point, vector:Point = new Point(-0.1, 0.2)) 
+	constructor(position:Point, vector:Point = new Point(-0.1, 0.12), radius=0.125) 
 	{
 		this.position = position;
 		this.vector = vector;	
+		this.radius = radius
 	}
 
 	moveBall()
