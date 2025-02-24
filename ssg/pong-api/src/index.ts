@@ -14,7 +14,18 @@ import fastifyStatic from '@fastify/static';
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
 
-const fastify = Fastify({logger: true});
+const fastify = Fastify({
+	logger: {
+		transport: {
+			target: "pino-pretty",
+			options:{
+				colorize: true, //enables colors
+				translateTime: "HH:MM:ss Z", //formating timestamt
+				ignore: "pid,hostname" //Hide fields
+			}
+		}
+
+}});
 
 const leftPaddle: Paddle = new Paddle(new Point(-2.5, 0));
 const rightPaddle: Paddle = new Paddle(new Point(2.5, 0));
