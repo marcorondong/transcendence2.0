@@ -31,8 +31,8 @@ const fastify = Fastify(
 	}
 });
 
-const leftPaddle: Paddle = new Paddle(new Point(-2.5, 0));
-const rightPaddle: Paddle = new Paddle(new Point(2.5, 0));
+const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
+const rightPaddle: Paddle = new Paddle(new Point(4, 0));
 const ball: Ball = new Ball(new Point(0, 0));
 let player:number = 1;
 
