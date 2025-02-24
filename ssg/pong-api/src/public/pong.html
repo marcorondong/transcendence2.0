@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <canvas id="gameCanvas" width="1000" height="500"></canvas> <!-- Increased canvas size -->
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
@@ -30,37 +30,61 @@
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            let scaleX = canvas.width / 10;
-            let scaleY = canvas.height / 4;
-            
+            let scaleX = canvas.width / 12;  // Adjusted scale
+            let scaleY = canvas.height / 6;  // Adjusted scale
+
+            drawFieldBorders(scaleX, scaleY);
             drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY);
             drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY);
             drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY);
         }
-        
+
+        function drawFieldBorders(scaleX, scaleY) {
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            // Left boundary (-4.5, from -2.5 to 2.5)
+            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+
+            // Right boundary (4.5, from -2.5 to 2.5)
+            ctx.moveTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+
+            // Top boundary (from -4.5 to 4.5, at 2.5)
+            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
+
+            // Bottom boundary (from -4.5 to 4.5, at -2.5)
+            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+
+            ctx.stroke();
+        }
+
         function drawPaddle(x, y) {
-    ctx.fillStyle = "white";
-    ctx.fillRect(
-        x + canvas.width / 2 - 5,
-        -y + canvas.height / 2 - 30,  // Flip Y-axis
-        10,
-        60
-    );
-}
+            ctx.fillStyle = "white";
+            ctx.fillRect(
+                x + canvas.width / 2 - 5,
+                -y + canvas.height / 2 - 30,  // Flip Y-axis
+                10,
+                60
+            );
+        }
 
-function drawBall(x, y) {
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(
-        x + canvas.width / 2,
-        -y + canvas.height / 2,  // Flip Y-axis
-        5,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-}
-
+        function drawBall(x, y) {
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(
+                x + canvas.width / 2,
+                -y + canvas.height / 2,  // Flip Y-axis
+                5,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+        }
         
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") {
