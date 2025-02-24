@@ -85,3 +85,12 @@ test("Distance with floating-point numbers", () => {
     const distance = Point.calculateDistance(a, b);
     expect(distance).toBeCloseTo(5.08, 2); // Rounded to 2 decimal places
 });
+
+test("Vector between two points", () => 
+{
+	const pointA:Point = new Point(2,3);
+	const pointB:Point = new Point(5,7);
+	const vector = Point.calulateVector(pointA, pointB);
+	expect(vector.getX()).toBe(3);
+	expect(vector.getY()).toBe(4);
+})
