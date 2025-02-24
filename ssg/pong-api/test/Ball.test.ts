@@ -4,7 +4,7 @@ import { Point, VectorDirection } from "../src/Point";
 test("Ball hitbox on raidus 0.25", () =>
 {
 	const ballCenter:Point = new Point(0,0);
-	const ball:Ball = new Ball(ballCenter);
+	const ball:Ball = new Ball(ballCenter, new Point(0,0), 0.25);
 
 	const hit:boolean = ball.isHit(new Point(0,0));
 	expect(hit).toBe(true);
@@ -33,7 +33,7 @@ test("Ball hitbox on raidus 0.25", () =>
 
 test("ball hitbox points on radius 0.25 and position 0,0", () => 
 {
-	const ball:Ball = new Ball(new Point(0,0));
+	const ball:Ball = new Ball(new Point(0,0), new Point(0,0), 0.25);
 	const allPoints: Map<VectorDirection, Point> = ball.getBallHitBoxPoints();
 
 	const upPoint = allPoints.get(VectorDirection.UP);
