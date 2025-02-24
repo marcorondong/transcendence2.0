@@ -100,6 +100,7 @@ export class PingPongGame
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
 		this.ball.setPosition(new Point(0,0));
+		this.ball.setDirection(new Point(-0.1, 0))
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
@@ -226,28 +227,35 @@ export class PingPongGame
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			if(this.paddleBounce(this.leftPaddle))
-				return this.ball.simpleBounceX();
+			const impactPointPaddle:Point | false = this.paddleBounce(this.leftPaddle);
+			if(impactPointPaddle !== false)
+				return this.ball.complexBounce(impactPointPaddle);
 			if(this.isObstacleNear(LeftEdgePoint) && (this.isGoal()))
 				return this.scoredGoal("left");
 		}
 		if(this.ball.isMovingRight())
 		{
-			if (this.paddleBounce(this.rightPaddle))
-				return this.ball.simpleBounceX();
+			const impactPointPaddle:Point | false = this.paddleBounce(this.rightPaddle);
+			if(impactPointPaddle !== false)
+				return this.ball.complexBounce(impactPointPaddle);
 			if(this.isObstacleNear(RightEdgePoint) && (this.isGoal()))
 				return this.scoredGoal("right");
 		}
 	}
 
-	private paddleBounce(paddle:Paddle): boolean
+	/**
+	 * 
+	 * @param paddle 
+	 * @returns either false or Point it hits
+	 */
+	private paddleBounce(paddle:Paddle): false | Point
 	{
 		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
 		for(const point of paddleHitPoints)
 		{
 			if(this.ball.isHit(point) == true)
 			{
-				return true;
+				return point;
 			}
 		}
 		return false;

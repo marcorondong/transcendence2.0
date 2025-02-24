@@ -42,6 +42,18 @@ export class Ball
 		this.getDirection().setY(newY);
 	}
 
+	complexBounce(pointA:Point):void 
+	{
+		const vector:Point = Point.calulateVector(pointA, this.getPosition());
+		console.log("point of impact is");
+		console.log(pointA);
+		console.log("ball is")
+		console.log(this.getPosition());
+		console.log("complex vector");
+		console.log(vector);
+		this.setDirection(vector);
+	}
+
 	getPosition():Point
 	{
 		return this.position;
