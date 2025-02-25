@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Pong</title>
+    <style>
+        body { text-align: center; }
+        canvas { background: black; display: block; margin: auto; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/pong/`);
+        
+        let gameState = {
+            leftPaddle: { x: -2.5, y: 0 },
+            rightPaddle: { x: 2.5, y: 0 },
+            ball: { x: 0, y: 0 }
+        };
+        
+        ws.onmessage = (event) => {
+            gameState = JSON.parse(event.data);
+            drawGame();
+        };
+        
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            let scaleX = canvas.width / 10;
+            let scaleY = canvas.height / 4;
+            
+            drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY);
+            drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY);
+            drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY);
+        }
+        
+        function drawPaddle(x, y) {
+    ctx.fillStyle = "white";
+    ctx.fillRect(
+        x + canvas.width / 2 - 5,
+        -y + canvas.height / 2 - 30,  // Flip Y-axis
+        10,
+        60
+    );
+}
+
+function drawBall(x, y) {
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(
+        x + canvas.width / 2,
+        -y + canvas.height / 2,  // Flip Y-axis
+        5,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+}
+
+        
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowUp") {
+                ws.send(JSON.stringify({ move: "up" }));
+            } else if (event.key === "ArrowDown") {
+                ws.send(JSON.stringify({ move: "down" }));
+            }
+        });
+        
+    </script>
+</body>
+</html>
