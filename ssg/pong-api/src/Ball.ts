@@ -7,12 +7,14 @@ export class Ball
 	protected position:Point;
 	protected vector:Point;
 	readonly radius;
+	readonly speed:number;
 
 	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
 		this.position = position;
 		this.vector = vector;	
-		this.radius = radius
+		this.radius = radius;
+		this.speed = Point.calculateVectorSpeed(vector);
 	}
 
 	moveBall()
@@ -44,14 +46,10 @@ export class Ball
 
 	complexBounce(pointA:Point):void 
 	{
-		const vector:Point = Point.calulateVector(pointA, this.getPosition());
-		console.log("point of impact is");
-		console.log(pointA);
-		console.log("ball is")
-		console.log(this.getPosition());
-		console.log("complex vector");
-		console.log(vector);
-		this.setDirection(vector);
+		const vector:Point = Point.calculateVector(pointA, this.getPosition());
+		const newY = vector.getY();
+
+		this.setDirection( new Point (this.getDirection().getX() * -1, vector.getY()));
 	}
 
 	getPosition():Point
@@ -151,4 +149,5 @@ export class Ball
 		}
 		return allPoints;
 	}
+
 }
