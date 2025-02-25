@@ -1,7 +1,7 @@
 FROM node:iron-slim
 
-COPY ./utils /rps/utils/
 WORKDIR /rps/utils/
+COPY ./utils ./
 RUN npm i
 
 WORKDIR /rps/rps-api/
