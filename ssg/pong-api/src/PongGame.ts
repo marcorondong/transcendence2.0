@@ -229,7 +229,10 @@ export class PingPongGame
 		{
 			const impactPointPaddle:Point | false = this.paddleBounce(this.leftPaddle);
 			if(impactPointPaddle !== false)
-				return this.ball.complexBounce(this.leftPaddle.getPosition());
+			{
+				const bounceDir:Point = this.ball.caluclateComplexBounceDirection(this.leftPaddle.getPosition(), this.leftPaddle.height);
+				return this.ball.setDirection(bounceDir);
+			}
 			if(this.isObstacleNear(LeftEdgePoint) && (this.isGoal()))
 				return this.scoredGoal("left");
 		}
@@ -237,7 +240,10 @@ export class PingPongGame
 		{
 			const impactPointPaddle:Point | false = this.paddleBounce(this.rightPaddle);
 			if(impactPointPaddle !== false)
-				return this.ball.complexBounce(this.rightPaddle.getPosition());
+			{
+				const bounceDir:Point = this.ball.caluclateComplexBounceDirection(this.rightPaddle.getPosition(), this.rightPaddle.height);
+				return this.ball.setDirection(bounceDir);
+			}
 			if(this.isObstacleNear(RightEdgePoint) && (this.isGoal()))
 				return this.scoredGoal("right");
 		}
