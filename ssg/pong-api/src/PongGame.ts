@@ -216,36 +216,44 @@ export class PingPongGame
 		return false
 	}
 
-	private ballMovementMechanics():void
+
+	private sideMechanics(side: "left" | "right"):void 
 	{
 		const ballY = this.ball.getPosition().getY();
+		let paddle:Paddle; 
+		let edgeX;
+		if(side === "left")
+		{
+			edgeX = this.LEFT_EDGE_X;
+			paddle = this.leftPaddle;
+		}
+		else
+		{
+			edgeX = this.RIGHT_EDGE_X;
+			paddle = this.rightPaddle;
+		}
+		const EdgePoint:Point = new Point(edgeX, ballY);
+		const impactPointPaddle:Point | false = this.paddleBounce(paddle);
+		if(impactPointPaddle !== false)
+		{
+			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(paddle.getPosition(), paddle.height);
+			return this.ball.setDirection(bounceDir);
+		}
+		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
+			return this.scoredGoal(side);
+	}
 
-		const LeftEdgePoint:Point = new Point(this.LEFT_EDGE_X, ballY);
-		const RightEdgePoint:Point = new Point(this.RIGHT_EDGE_X, ballY);
-
+	private ballMovementMechanics():void
+	{
 		if(this.topEdgeCollision() || this.bottomEdgeCollision())
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			const impactPointPaddle:Point | false = this.paddleBounce(this.leftPaddle);
-			if(impactPointPaddle !== false)
-			{
-				const bounceDir:Point = this.ball.caluclateComplexBounceDirection(this.leftPaddle.getPosition(), this.leftPaddle.height);
-				return this.ball.setDirection(bounceDir);
-			}
-			if(this.isObstacleNear(LeftEdgePoint) && (this.isGoal()))
-				return this.scoredGoal("left");
+			return this.sideMechanics("left");
 		}
 		if(this.ball.isMovingRight())
 		{
-			const impactPointPaddle:Point | false = this.paddleBounce(this.rightPaddle);
-			if(impactPointPaddle !== false)
-			{
-				const bounceDir:Point = this.ball.caluclateComplexBounceDirection(this.rightPaddle.getPosition(), this.rightPaddle.height);
-				return this.ball.setDirection(bounceDir);
-			}
-			if(this.isObstacleNear(RightEdgePoint) && (this.isGoal()))
-				return this.scoredGoal("right");
+			return this.sideMechanics("right");
 		}
 	}
 
