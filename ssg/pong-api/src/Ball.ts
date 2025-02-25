@@ -9,7 +9,7 @@ export class Ball
 	readonly radius;
 	readonly speed:number;
 
-	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
+	constructor(position:Point, vector:Point = new Point(-0.2, 0.0), radius=0.075) 
 	{
 		this.position = position;
 		this.vector = vector;	
@@ -44,12 +44,19 @@ export class Ball
 		this.getDirection().setY(newY);
 	}
 
-	complexBounce(pointA:Point):void 
+	caluclateComplexBounceDirection(pointA:Point, maxDoubleDistanceFromPoint:number):Point
 	{
+		const currentDirectionX = this.getDirection().getX();
 		const vector:Point = Point.calculateVector(pointA, this.getPosition());
-		const newY = vector.getY();
-
-		this.setDirection( new Point (this.getDirection().getX() * -1, vector.getY()));
+		const vecY = vector.getY();
+		const centerMissPercent = Math.abs(vecY)/maxDoubleDistanceFromPoint;
+		let newX = this.speed * (1 - centerMissPercent);
+		let newY = this.speed * (centerMissPercent);
+		if(currentDirectionX > 0)
+			newX *= -1;
+		if(vecY < 0)
+			newY *= -1;
+		return new Point(newX, newY);
 	}
 
 	getPosition():Point
