@@ -9,4 +9,4 @@ services:
       - ./src/:/pong/pong-api/src/
     ports:
       - 3010:3010
-    command: npm run dev
+    command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
