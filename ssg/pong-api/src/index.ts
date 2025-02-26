@@ -10,7 +10,10 @@ import raf from "raf";
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
+import dotenv from 'dotenv'
 
+
+dotenv.config();
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
 
