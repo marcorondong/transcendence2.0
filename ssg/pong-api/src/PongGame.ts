@@ -67,7 +67,6 @@ export class PingPongGame
 
 	getFrame()
 	{
-		console.log(Point.calculateVectorSpeed(this.ball.getDirection()));
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
 	}
 
@@ -257,7 +256,7 @@ export class PingPongGame
 			paddle = this.rightPaddle;
 		}
 		const EdgePoint:Point = new Point(edgeX, ballY);
-		const impactPointPaddle:Point | false = this.paddleBounce(paddle);
+		const impactPointPaddle:Point | false = this.paddleBounce(paddle, this.ball.getDirection().getX());
 		if(impactPointPaddle !== false)
 		{
 			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(paddle.getPosition(), paddle.height);
@@ -286,9 +285,9 @@ export class PingPongGame
 	 * @param paddle 
 	 * @returns either false or Point it hits
 	 */
-	private paddleBounce(paddle:Paddle): false | Point
+	private paddleBounce(paddle:Paddle, ballDirectionX:number): false | Point
 	{
-		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
+		const paddleHitPoints = paddle.getPaddleHitBoxPoints(ballDirectionX);
 		for(const point of paddleHitPoints)
 		{
 			if(this.ball.isHit(point) == true)

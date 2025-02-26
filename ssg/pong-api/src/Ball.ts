@@ -10,7 +10,7 @@ export class Ball
 	readonly speed:number;
 	readonly initialVector:Point
 
-	constructor(position:Point, vector:Point = new Point(-0.2, 0.0), radius=0.075) 
+	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
 		this.position = position;
 		this.vector = vector;
