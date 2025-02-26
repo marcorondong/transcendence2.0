@@ -6,12 +6,13 @@ export class Ball
 {
 	protected position:Point;
 	protected vector:Point;
-	readonly radius = 0.25;
+	readonly radius;
 
-	constructor(position:Point, vector:Point = new Point(-0.1, 0.2)) 
+	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
 		this.position = position;
 		this.vector = vector;	
+		this.radius = radius
 	}
 
 	moveBall()
@@ -61,6 +62,34 @@ export class Ball
 		return this.getDirection().getMovementDirection();
 	}
 
+	isMovingLeft(): boolean
+	{
+		if(this.getDirection().getX() < 0)
+			return true;
+		return false;
+	}
+
+	isMovingRight(): boolean
+	{
+		if(this.getDirection().getX() > 0)
+			return true;
+		return false;
+	}
+
+	isMovingUp(): boolean
+	{
+		if(this.getDirection().getY() > 0)
+			return true;
+		return false;
+	}
+
+	isMovingDown(): boolean
+	{
+		if(this.getDirection().getY() < 0)
+			return true;
+		return false;
+	}
+
 	/**
 	 * 
 	 * @returns distance in which is possible that ball with hit something in next MOVE_COEFFICIENT frames (aka next 5 frames)
@@ -87,22 +116,26 @@ export class Ball
 		return false;
 	}
 
+
 	/**
 	 * 
 	 * @returns 8 points of circle, aka every 45 degree
 	 */
-	getBallHitBoxPoints(): Point[]
+	getBallHitBoxPoints(): Map<VectorDirection, Point>
 	{
-		const allPoints: Point[] = [];
+		const allPoints: Map<VectorDirection, Point> = new Map<VectorDirection, Point>();
+		const directions: VectorDirection[] = [VectorDirection.RIGHT, VectorDirection.RIGHT_UP, VectorDirection.UP, VectorDirection.LEFT_UP,
+			VectorDirection.LEFT, VectorDirection.LEFT_DOWN, VectorDirection.DOWN, VectorDirection.RIGHT_DOWN]
 		const centerX=this.getPosition().getX();
 		const centerY=this.getPosition().getY();
-		for(let angle = 0; angle < 360; angle += 45)
+		let dir = 0;
+		for(let angle = 0; angle < 360; angle += 45, dir++)
 		{
 			const radians = angle *(Math.PI / 180);
 			const x = centerX + this.radius * Math.cos(radians);
 			const y = centerY + this.radius * Math.sin(radians);
 			const hitPoint:Point = new Point(x, y);
-			allPoints.push(hitPoint);
+			allPoints.set(directions[dir], hitPoint);
 		}
 		return allPoints;
 	}

@@ -14,10 +14,26 @@ import fastifyStatic from '@fastify/static';
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
 
-const fastify = Fastify({logger: true});
+const fastify = Fastify(
+{
+	logger: process.env.NODE_ENV === "development"?
+	{
+		transport:
+		{
+			target: "pino-pretty",
+			options:
+			{
+				colorize: true, //enables colors
+				translateTime: "HH:MM:ss Z", //formating timestamt
+				ignore: "pid,hostname" //Hide fields
+			}
+		}
+	}
+	: true
+});
 
-const leftPaddle: Paddle = new Paddle(new Point(-2.5, 0));
-const rightPaddle: Paddle = new Paddle(new Point(2.5, 0));
+const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
+const rightPaddle: Paddle = new Paddle(new Point(4, 0));
 const ball: Ball = new Ball(new Point(0, 0));
 let player:number = 1;
 

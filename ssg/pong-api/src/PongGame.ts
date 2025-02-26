@@ -11,9 +11,9 @@ interface Position
 
 export interface PongFrameI
 {
-	leftPaddle: Position;
-	rightPaddle: Position;
-	ball: Position;
+	leftPaddle: Position & {height:number};
+	rightPaddle: Position & {height:number};
+	ball: Position & { radius: number };
 }
 
 export class PingPongGame
@@ -48,16 +48,19 @@ export class PingPongGame
 			leftPaddle: {
 				x: leftPad.getPosition().getX(),
 				y: leftPad.getPosition().getY(),
+				height: leftPad.height
 			}, 
 			rightPaddle: 
 			{
 				x: rightPad.getPosition().getX(),
 				y: rightPad.getPosition().getY(),
+				height: rightPad.height
 			},
 			ball: 
 			{
 				x: ball.getPosition().getX(),
 				y: ball.getPosition().getY(),
+				radius: ball.getRadius()
 			},
 		};
 	}
@@ -69,7 +72,7 @@ export class PingPongGame
 
 	private renderNextFrame()
 	{
-		this.isBallInCriticalArea();
+		this.ballMovementMechanics();
 		this.ball.moveBall();
 	}
 
@@ -101,9 +104,8 @@ export class PingPongGame
 	
 	private isLeftGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() <= this.LEFT_EDGE_X)
+		if(BallPoint.getX() < this.LEFT_EDGE_X)
 		{
-			this.scoredGoal("left");
 			return true;
 		}
 		return false
@@ -111,9 +113,8 @@ export class PingPongGame
 	
 	private isRightGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() >= this.RIGHT_EDGE_X)
+		if(BallPoint.getX() > this.RIGHT_EDGE_X)
 		{
-			this.scoredGoal("right");
 			return true;
 		}
 		return false
@@ -121,22 +122,24 @@ export class PingPongGame
 
 	private isGoal():boolean
 	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
 		const vectorDir:VectorDirection = this.ball.getBallDirection();
-		for(const point of ballHitPoints)
+
+		if(this.ball.isMovingRight())
 		{
-			if(vectorDir === VectorDirection.RIGHT || vectorDir === VectorDirection.RIGHT_DOWN || vectorDir ===VectorDirection.RIGHT_UP)
-			{
-				return this.isRightGoal(point);
-			}
-			else if(vectorDir === VectorDirection.LEFT || vectorDir === VectorDirection.LEFT_DOWN || vectorDir ===VectorDirection.LEFT_UP)
-			{
-				return this.isLeftGoal(point);
-			}
+			return this.isRightGoal(this.ball.getPosition());
+		}
+		else if(this.ball.isMovingLeft())
+		{
+			return this.isLeftGoal(this.ball.getPosition());
 		}
 		return false
 	}
 
+	/**
+	 * 
+	 * @param ballPoint (usually up point of ball)
+	 * @returns true if ball point touches the top of field
+	 */
 	private isTopHit(ballPoint:Point):boolean
 	{
 		if(ballPoint.getY() >= this.TOP_EDGE_Y)
@@ -146,6 +149,11 @@ export class PingPongGame
 		return false
 	}
 
+	/**
+	 * 
+	 * @param ballPoint (usually down point of ball)
+	 * @returns true if ball point touches the top of field
+	 */
 	private isBottomHit(ballPoint:Point):boolean
 	{
 		if(ballPoint.getY() <= this.BOTTOM_EDGE_Y)
@@ -157,60 +165,91 @@ export class PingPongGame
 
 	private isBounceEdge(side: "top" | "bottom"):boolean 
 	{
-		const ballHitPoints: Point[] = this.ball.getBallHitBoxPoints();
+		const ballHitPoints: Map<VectorDirection, Point> = this.ball.getBallHitBoxPoints();
 		let result = false;
-		for(const point of ballHitPoints)
+		if(side === "top")
 		{
-			if(side === "top")
-			{
-				result = this.isTopHit(point)
-			}
+			const topPoint = ballHitPoints.get(VectorDirection.UP);
+			if(topPoint !== undefined)
+				result = this.isTopHit(topPoint)
 			else 
-			{
-				result = this.isBottomHit(point);
-			}
+				result = false;
+		}
+		else 
+		{
+			const bottomPoint = ballHitPoints.get(VectorDirection.DOWN);
+			if(bottomPoint !== undefined)
+				result = this.isBottomHit(bottomPoint)
+			else 
+				result = false;
 		}
 		return result;
 	}
 
-	private isBallInCriticalArea():void
+
+	private topEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const ballY = this.ball.getPosition().getY();
-
 		const topEdgePoint:Point = new Point(ballX, this.TOP_EDGE_Y);
+		if(this.ball.isMovingUp() && this.isObstacleNear(topEdgePoint))
+		{
+			if(this.isBounceEdge("top"))
+			{
+				return true;
+			}
+		}
+		return false
+	}
+
+	private bottomEdgeCollision():boolean
+	{
+		const ballX = this.ball.getPosition().getX();
 		const bottomEdgePoint:Point = new Point(ballX, this.BOTTOM_EDGE_Y);
+		if(this.ball.isMovingDown() && this.isObstacleNear(bottomEdgePoint))
+		{
+			if(this.isBounceEdge("bottom"))
+			{
+				return true;
+			}
+		}
+		return false
+	}
+
+	private ballMovementMechanics():void
+	{
+		const ballY = this.ball.getPosition().getY();
 
 		const LeftEdgePoint:Point = new Point(this.LEFT_EDGE_X, ballY);
 		const RightEdgePoint:Point = new Point(this.RIGHT_EDGE_X, ballY);
-		if(this.isObstacleNear(topEdgePoint)  ||  this.isObstacleNear(bottomEdgePoint))
+
+		if(this.topEdgeCollision() || this.bottomEdgeCollision())
+			return this.ball.simpleBounceY();
+		if(this.ball.isMovingLeft())
 		{
-			if(this.isBounceEdge("top") === true || this.isBounceEdge("bottom"))
-			{
-				this.ball.simpleBounceY();
-			}
+			if(this.paddleBounce(this.leftPaddle))
+				return this.ball.simpleBounceX();
+			if(this.isObstacleNear(LeftEdgePoint) && (this.isGoal()))
+				return this.scoredGoal("left");
 		}
-		if(this.isObstacleNear(RightEdgePoint)  ||  this.isObstacleNear(LeftEdgePoint))
+		if(this.ball.isMovingRight())
 		{
-			this.isGoal();
+			if (this.paddleBounce(this.rightPaddle))
+				return this.ball.simpleBounceX();
+			if(this.isObstacleNear(RightEdgePoint) && (this.isGoal()))
+				return this.scoredGoal("right");
 		}
-		if(this.isObstacleNear(this.leftPaddle.getPosition(), this.leftPaddle.height + this.ball.getRadius()))
-		{
-			this.paddleBounce(this.leftPaddle);
-		}
-		if(this.isObstacleNear(this.rightPaddle.getPosition(), this.rightPaddle.height + this.ball.getRadius()))
-			this.paddleBounce(this.rightPaddle);
 	}
 
-	private paddleBounce(paddle:Paddle)
+	private paddleBounce(paddle:Paddle): boolean
 	{
 		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
 		for(const point of paddleHitPoints)
 		{
 			if(this.ball.isHit(point) == true)
 			{
-				this.ball.simpleBounceX();
+				return true;
 			}
 		}
+		return false;
 	}
 }

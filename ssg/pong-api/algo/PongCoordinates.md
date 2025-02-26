@@ -3,14 +3,16 @@ offical pong table is 9 (feet) long, 5 (feet) wide.
 
 ## Game coordinates (x), (y)
 x = 0, y = 0 will be center of pong table.
-* Left Up corner => (-2.5), (4.5)
-* Left Down corner => (-2.5), (-4.5)
-* Right Up corner => (2.5), (4.5)
-* Right Down corner => (2.5), (-4.5)
+* Left Up corner => (-4.5), (2.5)
+* Left Down corner => (-4.5), (-2.5)
+* Right Up corner => (4.5), (2.5)
+* Right Down corner => (4.5), (-2.5)
+* Left Paddle => (-4.0), (0)
+* Right Paddle => (4.0), (0)
 
 ## Sizes (x width, y height)
 * Paddle size => (x: 0.2, y: 1.0)
-* Ball size => (0.25) diameter of circle
+* Ball size => (0.075) diameter of circle
 
 ## Vector enum direction explanation 
 |x value| direction|
@@ -40,4 +42,5 @@ x = 0, y = 0 will be center of pong table.
 |10|10|LEFT_DOWN|10|
 
 # Svg
+x and y on edges are switched...Stupid filip
 ![svg file with dimensions](./Pong_dimensions.svg) 

@@ -14,7 +14,22 @@ import fastifyStatic from '@fastify/static';
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
 let generateId = 0;
-const fastify = Fastify( {logger:true});
+const fastify = Fastify(
+  {
+    logger:
+    {
+      transport:
+      {
+        target: "pino-pretty",
+        options:
+        {
+          colorize: true, //enables colors
+          translateTime: "HH:MM:ss Z", //formating timestamt
+          ignore: "pid,hostname" //Hide fields
+        }
+      }
+    }
+  });
 
 const oneRoom:RpsRoom = new RpsRoom("1");
 
