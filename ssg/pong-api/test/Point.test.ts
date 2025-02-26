@@ -95,6 +95,46 @@ test("Vector between two points", () =>
 	expect(vector.getY()).toBe(4);
 })
 
+test("Vector between two points in different quadrants", () => {
+	const pointA: Point = new Point(-3, -2);
+	const pointB: Point = new Point(4, 5);
+	const vector = Point.calculateVector(pointA, pointB);
+	expect(vector.getX()).toBe(7);
+	expect(vector.getY()).toBe(7);
+});
+
+test("Vector between two points with negative coordinates", () => {
+	const pointA: Point = new Point(-5, -3);
+	const pointB: Point = new Point(-2, -6);
+	const vector = Point.calculateVector(pointA, pointB);
+	expect(vector.getX()).toBe(3);
+	expect(vector.getY()).toBe(-3);
+});
+
+test("Vector between the same points (zero vector)", () => {
+	const pointA: Point = new Point(1, 1);
+	const pointB: Point = new Point(1, 1);
+	const vector = Point.calculateVector(pointA, pointB);
+	expect(vector.getX()).toBe(0);
+	expect(vector.getY()).toBe(0);
+});
+
+test("Vector with one point at origin", () => {
+	const pointA: Point = new Point(0, 0);
+	const pointB: Point = new Point(7, -3);
+	const vector = Point.calculateVector(pointA, pointB);
+	expect(vector.getX()).toBe(7);
+	expect(vector.getY()).toBe(-3);
+});
+
+test("Vector when moving in the negative direction", () => {
+	const pointA: Point = new Point(8, 5);
+	const pointB: Point = new Point(2, 1);
+	const vector = Point.calculateVector(pointA, pointB);
+	expect(vector.getX()).toBe(-6);
+	expect(vector.getY()).toBe(-4);
+});
+
 test("Vector speed / length", () =>
 {
 	const vector:Point = new Point(1, 1);
