@@ -67,6 +67,7 @@ export class PingPongGame
 
 	getFrame()
 	{
+		console.log(Point.calculateVectorSpeed(this.ball.getDirection()));
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
 	}
 
@@ -123,7 +124,7 @@ export class PingPongGame
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
 		this.ball.setPosition(new Point(0,0));
-		this.ball.setDirection(new Point(-0.1, 0))
+		this.ball.setDirection(new Point(this.ball.getDirection().getX(), 0))
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
