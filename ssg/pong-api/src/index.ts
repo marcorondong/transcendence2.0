@@ -103,7 +103,8 @@ function moveHandler(socket: WebSocket, paddle: Paddle)
 			return 
 		}
 		const direction = json.move;
-		paddle.move(direction);
+		game.movePaddle(paddle, direction)
+		//paddle.move(direction);
 	})
 }
 

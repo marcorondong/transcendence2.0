@@ -70,6 +70,29 @@ export class PingPongGame
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
 	}
 
+
+	movePaddle(paddle:Paddle, direction: "up" | "down")
+	{
+		if(this.isPaddleMoveAllowed(paddle,direction))
+			paddle.move(direction);
+	}
+
+
+	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
+	{
+		const maxY = this.TOP_EDGE_Y + (0.45) * paddle.height;
+		const minY = this.BOTTOM_EDGE_Y - (0.45) * paddle.height;
+		let move_modifier = paddle.getMoveModifier();
+		if(direction === "down")
+			move_modifier *= -1;
+		const newPaddleY = paddle.getPosition().getY() + move_modifier;
+		if(newPaddleY >= maxY)
+			return false
+		if(newPaddleY <= minY)
+			return false;
+		return true;
+	}
+
 	private renderNextFrame()
 	{
 		this.ballMovementMechanics();

@@ -54,4 +54,9 @@ export class Paddle
 		return allPoints;
 
 	}
+
+	getMoveModifier(): number 
+	{
+		return MOVE_MODIFIER;
+	}
 }
