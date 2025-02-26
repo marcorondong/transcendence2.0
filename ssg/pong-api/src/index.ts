@@ -16,7 +16,7 @@ const HOST:string = "0.0.0.0"
 
 const fastify = Fastify(
 {
-	logger:
+	logger: process.env.NODE_ENV === "development"?
 	{
 		transport:
 		{
@@ -29,6 +29,7 @@ const fastify = Fastify(
 			}
 		}
 	}
+	: true
 });
 
 const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
