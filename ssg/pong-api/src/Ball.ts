@@ -8,11 +8,13 @@ export class Ball
 	protected vector:Point;
 	readonly radius;
 	readonly speed:number;
+	readonly initialVector:Point
 
-	constructor(position:Point, vector:Point = new Point(-0.3, 0.0), radius=0.075) 
+	constructor(position:Point, vector:Point = new Point(-0.2, 0.0), radius=0.075) 
 	{
 		this.position = position;
-		this.vector = vector;	
+		this.vector = vector;
+		this.initialVector = vector;
 		this.radius = radius;
 		this.speed = Point.calculateVectorSpeed(vector);
 	}
@@ -25,6 +27,11 @@ export class Ball
 	setDirection(vector:Point):void 
 	{
 		this.vector = vector;
+	}
+
+	resetDirection():void
+	{
+		this.vector = this.initialVector;
 	}
 	
 	getDirection(): Point

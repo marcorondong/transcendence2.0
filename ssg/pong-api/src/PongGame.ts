@@ -124,7 +124,7 @@ export class PingPongGame
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
 		this.ball.setPosition(new Point(0,0));
-		this.ball.setDirection(new Point(this.ball.getDirection().getX(), 0))
+		this.ball.resetDirection();
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
