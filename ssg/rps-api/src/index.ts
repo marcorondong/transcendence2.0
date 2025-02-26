@@ -3,33 +3,34 @@ import websocket from "@fastify/websocket"
 import {Player} from "../../utils/Player"
 import {RpsRoom} from "./RpsRoom"
 import { RawData } from 'ws';
+import dotenv from 'dotenv'
+dotenv.config(); //loads env variables from .env file
 
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 
 
-
-
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
 let generateId = 0;
 const fastify = Fastify(
+{
+  logger: process.env.NODE_ENV === "development"?
   {
-    logger:
+    transport:
     {
-      transport:
+      target: "pino-pretty",
+      options:
       {
-        target: "pino-pretty",
-        options:
-        {
-          colorize: true, //enables colors
-          translateTime: "HH:MM:ss Z", //formating timestamt
-          ignore: "pid,hostname" //Hide fields
-        }
+        colorize: true, //enables colors
+        translateTime: "HH:MM:ss Z", //formating timestamt
+        ignore: "pid,hostname" //Hide fields
       }
     }
-  });
+  }
+  : true
+});
 
 const oneRoom:RpsRoom = new RpsRoom("1");
 

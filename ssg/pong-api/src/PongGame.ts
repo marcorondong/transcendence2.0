@@ -100,6 +100,7 @@ export class PingPongGame
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
 		this.ball.setPosition(new Point(0,0));
+		this.ball.setDirection(new Point(-0.1, 0))
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
@@ -215,39 +216,60 @@ export class PingPongGame
 		return false
 	}
 
-	private ballMovementMechanics():void
+
+	private sideMechanics(side: "left" | "right"):void 
 	{
 		const ballY = this.ball.getPosition().getY();
+		let paddle:Paddle; 
+		let edgeX;
+		if(side === "left")
+		{
+			edgeX = this.LEFT_EDGE_X;
+			paddle = this.leftPaddle;
+		}
+		else
+		{
+			edgeX = this.RIGHT_EDGE_X;
+			paddle = this.rightPaddle;
+		}
+		const EdgePoint:Point = new Point(edgeX, ballY);
+		const impactPointPaddle:Point | false = this.paddleBounce(paddle);
+		if(impactPointPaddle !== false)
+		{
+			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(paddle.getPosition(), paddle.height);
+			return this.ball.setDirection(bounceDir);
+		}
+		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
+			return this.scoredGoal(side);
+	}
 
-		const LeftEdgePoint:Point = new Point(this.LEFT_EDGE_X, ballY);
-		const RightEdgePoint:Point = new Point(this.RIGHT_EDGE_X, ballY);
-
+	private ballMovementMechanics():void
+	{
 		if(this.topEdgeCollision() || this.bottomEdgeCollision())
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			if(this.paddleBounce(this.leftPaddle))
-				return this.ball.simpleBounceX();
-			if(this.isObstacleNear(LeftEdgePoint) && (this.isGoal()))
-				return this.scoredGoal("left");
+			return this.sideMechanics("left");
 		}
 		if(this.ball.isMovingRight())
 		{
-			if (this.paddleBounce(this.rightPaddle))
-				return this.ball.simpleBounceX();
-			if(this.isObstacleNear(RightEdgePoint) && (this.isGoal()))
-				return this.scoredGoal("right");
+			return this.sideMechanics("right");
 		}
 	}
 
-	private paddleBounce(paddle:Paddle): boolean
+	/**
+	 * 
+	 * @param paddle 
+	 * @returns either false or Point it hits
+	 */
+	private paddleBounce(paddle:Paddle): false | Point
 	{
 		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
 		for(const point of paddleHitPoints)
 		{
 			if(this.ball.isHit(point) == true)
 			{
-				return true;
+				return point;
 			}
 		}
 		return false;

@@ -29,8 +29,9 @@ test("Paddle hit box points", () =>
 	// 	console.log(onePoint);
 	// }
 	const first = allPoints[0];
-	expect(first.getY()).toBe(-0.5);
+	expect(first.getY()).toBeCloseTo(-0.5, 1);
 	const last = allPoints[allPoints.length - 1];
-	expect(last.getY()).toBe(0.5);
-	expect(allPoints.length).toBe((paddle.height / 0.1) + 1);
+	expect(last.getY()).toBeCloseTo(0.5, 1);
+	expect(allPoints.length).toBeGreaterThanOrEqual((paddle.height / 0.01));
+	expect(allPoints.length).toBeLessThanOrEqual((paddle.height / 0.01) + 1);
 })

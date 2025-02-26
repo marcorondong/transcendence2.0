@@ -36,10 +36,38 @@ export class Point
 		return Math.sqrt(distance_squared);
 	}
 
+/**
+ * 
+ * @param pointA from 
+ * @param pointB to
+ * return point that represent vector from A to B
+ */
+	static calculateVector(pointA:Point, pointB:Point): Point
+	{
+		const x1 = pointA.getX();
+		const y1 = pointA.getY();
+		const x2 = pointB.getX();
+		const y2 = pointB.getY();
+
+		const vectorX = x2 - x1;
+		const vectorY = y2 - y1;
+		const vector:Point = new Point(vectorX, vectorY);
+		return vector;
+	}
+
+	static calculateVectorSpeed(vector:Point):number
+	{
+		const firstStep = Math.pow(vector.getX(), 2) + Math.pow(vector.getY(),2);
+		const speed = Math.sqrt(firstStep);
+		return speed;
+	}
+
 	equals(otherPoint: Point):boolean
 	{
 		return (otherPoint.xPos === this.xPos && otherPoint.yPos === this.yPos)
 	}
+
+
 
 	/**
 	 * modify this object with new x and y postion that adds other point(vector) x and y position 
