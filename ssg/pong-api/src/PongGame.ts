@@ -70,6 +70,11 @@ export class PingPongGame
 		};
 	}
 
+	getGameStatus(): "running" | "paused" | "finished"
+	{
+		return this.gameStatus;
+	}
+
 	pauseGame(): void
 	{
 		this.gameStatus = "paused";
