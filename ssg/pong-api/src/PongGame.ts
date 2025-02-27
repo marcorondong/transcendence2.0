@@ -26,6 +26,7 @@ export class PingPongGame
 	protected ball: Ball;
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
+	private gameStatus : "running" | "paused" | "finished" = "running"
 	
 	readonly score:ScoreBoard = new ScoreBoard();
 	readonly TABLE_WIDTH_Y: number = 5;
@@ -69,6 +70,23 @@ export class PingPongGame
 		};
 	}
 
+	pauseGame(): void
+	{
+		this.gameStatus = "paused";
+		this.score.pause();
+	}
+
+	startGame(): void 
+	{
+		this.gameStatus = "running"
+		this.score.start();
+	}
+
+	finishGame():void 
+	{
+		this.gameStatus = "finished"
+	}
+
 	getFrame()
 	{
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball, this.score);
@@ -77,7 +95,7 @@ export class PingPongGame
 
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
-		if(this.isPaddleMoveAllowed(paddle,direction))
+		if(this.isPaddleMoveAllowed(paddle,direction) && this.gameStatus === "running")
 			paddle.move(direction);
 	}
 
@@ -101,6 +119,8 @@ export class PingPongGame
 	{
 		this.ballMovementMechanics();
 		this.ball.moveBall();
+		if(this.score.isWinnerDecided() === true)
+			this.finishGame();
 	}
 
 	private start(): void 
@@ -111,9 +131,12 @@ export class PingPongGame
 
 	private gameLoop(timestamp: number):void 
 	{
-		const deltaTime = timestamp - this.lastFrameTime;
-		this.lastFrameTime = timestamp;
-		this.renderNextFrame();
+		if(this.gameStatus === "running")
+		{
+			const deltaTime = timestamp - this.lastFrameTime;
+			this.lastFrameTime = timestamp;
+			this.renderNextFrame();
+		}
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
