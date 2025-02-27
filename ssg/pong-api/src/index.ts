@@ -33,6 +33,7 @@ catch
 	process.exit(1);
 
 }
+
 const fastify = Fastify(
 {
 	https:

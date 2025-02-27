@@ -14,8 +14,32 @@ import fastifyStatic from '@fastify/static';
 const PORT:number = 3000
 const HOST:string = "0.0.0.0"
 let generateId = 0;
+
+const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
+const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
+let privateKey: string; 
+let certificate: string;
+
+try 
+{
+	privateKey = fs.readFileSync(privateKeyPath, "utf-8");
+	certificate = fs.readFileSync(certificatePath, "utf-8");
+}
+catch
+{
+	console.error("ssl private key and certificate are not generated. Run https-key.sh script inside scripts folder first")
+	process.exit(1);
+
+}
+
 const fastify = Fastify(
 {
+  https:
+  {
+    key: privateKey,
+    cert: certificate
+  },
+  
   logger: process.env.NODE_ENV === "development"?
   {
     transport:
