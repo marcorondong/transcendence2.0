@@ -1,6 +1,6 @@
 
 
-interface ScoreI
+export interface ScoreI
 {
 	leftGoals: number;
 	rightGoals: number;
@@ -9,9 +9,9 @@ interface ScoreI
 
 export class ScoreBoard
 {
-	protected leftGoals:number = 0;
-	protected rightGoals:number = 0;
-	protected timeLeft: number | false = -1;
+	protected leftPlayerGoals:number = 0;
+	protected rightPlayerGoals:number = 0;
+	protected secondsLeft: number | false = 60;
 
 	constructor()
 	{
@@ -21,17 +21,17 @@ export class ScoreBoard
 	score(side: "left" | "right")
 	{
 		if(side === "left")
-			this.leftGoals++;
+			this.leftPlayerGoals++;
 		else 
-			this.rightGoals++;
+			this.rightPlayerGoals++;
 	}
 
 	getScoreJson():ScoreI
 	{
 		return {
-			leftGoals: this.leftGoals,
-			rightGoals: this.rightGoals,
-			time: this.timeLeft
+			leftGoals: this.leftPlayerGoals,
+			rightGoals: this.rightPlayerGoals,
+			time: this.secondsLeft
 		}
 	}
 }
