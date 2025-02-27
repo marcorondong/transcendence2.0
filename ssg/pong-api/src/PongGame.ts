@@ -16,6 +16,7 @@ export interface PongFrameI
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
 	score: ScoreI;
+	matchStatus: "running" | "paused" | "finished"
 }
 
 export class PingPongGame
@@ -27,6 +28,7 @@ export class PingPongGame
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
 	private gameStatus : "running" | "paused" | "finished" = "running"
+	private lastFrame:boolean = false;
 	
 	readonly score:ScoreBoard = new ScoreBoard();
 	readonly TABLE_WIDTH_Y: number = 5;
@@ -44,30 +46,6 @@ export class PingPongGame
 		this.ball = ball;
 		this.CRITICAL_DISTANCE= ball.getCriticalDistance();
 		this.start();
-	}
-
-	static getPongFrame(leftPad: Paddle, rightPad: Paddle, ball: Ball, score:ScoreBoard): PongFrameI
-	{
-		return {
-			leftPaddle: {
-				x: leftPad.getPosition().getX(),
-				y: leftPad.getPosition().getY(),
-				height: leftPad.height
-			}, 
-			rightPaddle: 
-			{
-				x: rightPad.getPosition().getX(),
-				y: rightPad.getPosition().getY(),
-				height: rightPad.height
-			},
-			ball: 
-			{
-				x: ball.getPosition().getX(),
-				y: ball.getPosition().getY(),
-				radius: ball.getRadius()
-			},
-			score: score.getScoreJson()
-		};
 	}
 
 	getGameStatus(): "running" | "paused" | "finished"
@@ -90,11 +68,42 @@ export class PingPongGame
 	finishGame():void 
 	{
 		this.gameStatus = "finished"
+		this.lastFrame = true;
+	}
+
+	shouldSendFrame(): boolean
+	{
+		if(this.gameStatus === "running" || this.lastFrame)
+		{
+			this.lastFrame = false;
+			return true 
+		}
+		return false
 	}
 
 	getFrame()
 	{
-		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball, this.score);
+		return {
+			leftPaddle: {
+				x: this.leftPaddle.getPosition().getX(),
+				y: this.leftPaddle.getPosition().getY(),
+				height: this.leftPaddle.height
+			}, 
+			rightPaddle: 
+			{
+				x: this.rightPaddle.getPosition().getX(),
+				y: this.rightPaddle.getPosition().getY(),
+				height: this.rightPaddle.height
+			},
+			ball: 
+			{
+				x: this.ball.getPosition().getX(),
+				y: this.ball.getPosition().getY(),
+				radius: this.ball.getRadius()
+			},
+			score: this.score.getScoreJson(), 
+			matchStatus: this.gameStatus
+		};
 	}
 
 

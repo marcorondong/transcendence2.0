@@ -86,7 +86,7 @@ function sendFrames(socket: WebSocket)
 	const renderFrame = () => {
 		const frame: PongFrameI = game.getFrame();
 		const frameJson = JSON.stringify(frame);
-		if(game.getGameStatus() === "running")
+		if(game.shouldSendFrame())
 			socket.send(frameJson);
 		raf(renderFrame);
 	};
