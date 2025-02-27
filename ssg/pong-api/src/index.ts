@@ -86,8 +86,11 @@ function sendFrames(socket: WebSocket)
 	const renderFrame = () => {
 		const frame: PongFrameI = game.getFrame();
 		const frameJson = JSON.stringify(frame);
-		if(game.shouldSendFrame())
-			socket.send(frameJson);
+		socket.send(frameJson);
+		if(game.isLastFrame())
+		{
+			return;
+		}
 		raf(renderFrame);
 	};
 	raf(renderFrame);

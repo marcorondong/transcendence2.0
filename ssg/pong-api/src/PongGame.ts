@@ -71,14 +71,9 @@ export class PingPongGame
 		this.lastFrame = true;
 	}
 
-	shouldSendFrame(): boolean
+	isLastFrame(): boolean
 	{
-		if(this.gameStatus === "running" || this.lastFrame)
-		{
-			this.lastFrame = false;
-			return true 
-		}
-		return false
+		return this.lastFrame;
 	}
 
 	getFrame()
