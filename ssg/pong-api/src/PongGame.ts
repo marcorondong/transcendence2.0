@@ -158,6 +158,8 @@ export class PingPongGame
 		this.score.score(strikerSide);
 		this.ball.setPosition(new Point(0,0));
 		this.ball.resetDirection();
+		this.leftPaddle.resetPosition();
+		this.rightPaddle.resetPosition();
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean

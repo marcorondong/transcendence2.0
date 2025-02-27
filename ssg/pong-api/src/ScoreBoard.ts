@@ -11,7 +11,7 @@ export class ScoreBoard
 {
 	protected leftPlayerGoals:number = 0;
 	protected rightPlayerGoals:number = 0;
-	protected secondsLeft: number = 60;
+	protected secondsLeft: number = 30;
 	protected paused: boolean = false;
 
 	constructor()
