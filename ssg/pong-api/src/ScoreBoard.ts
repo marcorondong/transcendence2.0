@@ -11,7 +11,8 @@ export class ScoreBoard
 {
 	protected leftPlayerGoals:number = 0;
 	protected rightPlayerGoals:number = 0;
-	protected secondsLeft: number = 15;
+	protected secondsLeft: number = 60;
+	protected paused: boolean = false;
 
 	constructor()
 	{
@@ -39,11 +40,32 @@ export class ScoreBoard
 	{
 		const interval = setInterval( ()=>
 		{
-			this.secondsLeft--;
+			if(this.paused === false)
+				this.secondsLeft--;
 			if(this.secondsLeft <= 0)
 			{
 				clearInterval(interval)
 			}
 		}, 1000);
+	}
+
+	pause():void 
+	{
+		this.paused = true;
+	}
+
+	start():void 
+	{
+		this.paused = false;
+	}
+
+	isWinnerDecided():boolean
+	{
+		if(this.secondsLeft <= 0)
+		{
+			if(this.leftPlayerGoals !== this.rightPlayerGoals)
+				return true;
+		}
+		return false
 	}
 }
