@@ -171,7 +171,7 @@ export class PingPongGame
 			strikerSide = "left"
 		this.score.score(strikerSide);
 		this.ball.setPosition(new Point(0,0));
-		this.ball.resetDirection();
+		this.ball.resetDirection(goalSide);
 		this.leftPaddle.resetPosition();
 		this.rightPaddle.resetPosition();
 	}

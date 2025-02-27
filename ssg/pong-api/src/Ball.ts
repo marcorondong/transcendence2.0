@@ -29,9 +29,19 @@ export class Ball
 		this.vector = vector;
 	}
 
-	resetDirection():void
+	resetDirection(direction: "left" | "right"):void
 	{
+		let newX = this.initialVector.getX();
+		if(direction === "left" && newX > 0)
+		{
+			newX *= -1;
+		}
+		if(direction === "right" && newX < 0)
+		{
+			newX *= -1;
+		}
 		this.vector = this.initialVector;
+		this.vector.setX(newX);
 	}
 	
 	getDirection(): Point
