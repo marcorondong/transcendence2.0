@@ -15,7 +15,6 @@ export class Paddle
 		this.initialPosition = new Point(position.getX(), position.getY());
 	}
 
-	//TODO: add protection to not go over field
 	moveUp():void 
 	{
 		const newY = this.position.getY() + MOVE_MODIFIER;
