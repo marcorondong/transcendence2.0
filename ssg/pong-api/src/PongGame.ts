@@ -1,6 +1,7 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
+import { ScoreBoard, ScoreI} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 
 interface Position 
@@ -14,6 +15,7 @@ export interface PongFrameI
 	leftPaddle: Position & {height:number};
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
+	score: ScoreI;
 }
 
 export class PingPongGame
@@ -25,6 +27,7 @@ export class PingPongGame
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
 	
+	readonly score:ScoreBoard = new ScoreBoard();
 	readonly TABLE_WIDTH_Y: number = 5;
 	readonly TABLE_LENGHT_X: number = 9;
 	readonly TOP_EDGE_Y:number = this.TABLE_WIDTH_Y/2;
@@ -42,7 +45,7 @@ export class PingPongGame
 		this.start();
 	}
 
-	static getPongFrame(leftPad: Paddle, rightPad: Paddle, ball: Ball): PongFrameI
+	static getPongFrame(leftPad: Paddle, rightPad: Paddle, ball: Ball, score:ScoreBoard): PongFrameI
 	{
 		return {
 			leftPaddle: {
@@ -62,12 +65,13 @@ export class PingPongGame
 				y: ball.getPosition().getY(),
 				radius: ball.getRadius()
 			},
+			score: score.getScoreJson()
 		};
 	}
 
 	getFrame()
 	{
-		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
+		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball, this.score);
 	}
 
 
@@ -122,6 +126,12 @@ export class PingPongGame
 
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
+		let strikerSide: "left" | "right";
+		if(goalSide === "left")
+			strikerSide = "right";
+		else 
+			strikerSide = "left"
+		this.score.score(strikerSide);
 		this.ball.setPosition(new Point(0,0));
 		this.ball.resetDirection();
 	}
