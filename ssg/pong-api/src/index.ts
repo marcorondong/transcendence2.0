@@ -50,14 +50,14 @@ fastify.register(fastifyStatic, {
 fastify.register(websocket);
 fastify.register(async function(fastify)
 {
-	fastify.get("/", (request, reply) =>
-	{
-		reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
-		ball.moveBall();
-		leftPaddle.moveUp();
-		rightPaddle.moveDown();
-		rightPaddle.moveDown();
-	});
+	// fastify.get("/", (request, reply) =>
+	// {
+	// 	//reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
+	// 	ball.moveBall();
+	// 	leftPaddle.moveUp();
+	// 	rightPaddle.moveDown();
+	// 	rightPaddle.moveDown();
+	// });
 
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
