@@ -17,8 +17,16 @@ dotenv.config();
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
 
+const privateKey:string = path.join(__dirname, "../server-keys/key.pem")
+const certificate:string = path.join(__dirname, "../server-keys/cert.pem")
 const fastify = Fastify(
 {
+	https:
+	{
+		key: fs.readFileSync(privateKey),
+		cert: fs.readFileSync(certificate)
+	},
+
 	logger: process.env.NODE_ENV === "development"?
 	{
 		transport:
@@ -50,14 +58,19 @@ fastify.register(fastifyStatic, {
 fastify.register(websocket);
 fastify.register(async function(fastify)
 {
-	// fastify.get("/", (request, reply) =>
-	// {
-	// 	//reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
-	// 	ball.moveBall();
-	// 	leftPaddle.moveUp();
-	// 	rightPaddle.moveDown();
-	// 	rightPaddle.moveDown();
-	// });
+	fastify.get("/", (request, reply) =>
+	{
+		reply.send(
+		{
+			hello: "ssl"
+		}
+		)
+		//reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
+		// ball.moveBall();
+		// leftPaddle.moveUp();
+		// rightPaddle.moveDown();
+		// rightPaddle.moveDown();
+	});
 
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
