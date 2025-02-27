@@ -105,6 +105,7 @@ export class PingPongGame
 
 	private start(): void 
 	{
+		this.score.startCountdown();
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 

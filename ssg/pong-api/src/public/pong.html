@@ -19,7 +19,8 @@
         let gameState = {
             leftPaddle: { x: -4, y: 0, height: 1 },
             rightPaddle: { x: 4, y: 0, height: 1 },
-            ball: { x: 0, y: 0, radius: 0.25 }
+            ball: { x: 0, y: 0, radius: 0.25 },
+            score: { leftGoals: 0, rightGoals: 0, time: false }
         };
         
         ws.onmessage = (event) => {
@@ -37,6 +38,7 @@
             drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, gameState.leftPaddle.height * scaleY);
             drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, gameState.rightPaddle.height * scaleY);
             drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, gameState.ball.radius * scaleX);
+            drawScore();
         }
 
         function drawFieldBorders(scaleX, scaleY) {
@@ -44,12 +46,9 @@
             ctx.lineWidth = 2;
             
             ctx.beginPath();
-            ctx.moveTo(0, 0);
             ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.moveTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
-            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
-            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
@@ -77,6 +76,17 @@
                 Math.PI * 2
             );
             ctx.fill();
+        }
+        
+        function drawScore() {
+            ctx.fillStyle = "white";
+            ctx.font = "24px Arial";
+            ctx.fillText(`Left: ${gameState.score.leftGoals}`, canvas.width / 4, 30);
+            ctx.fillText(`Right: ${gameState.score.rightGoals}`, (canvas.width * 3) / 4, 30);
+            
+            if (gameState.score.time !== false) {
+                ctx.fillText(`Time: ${gameState.score.time}s`, canvas.width / 2 - 40, 30);
+            }
         }
         
         document.addEventListener("keydown", (event) => {
