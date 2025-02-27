@@ -70,6 +70,29 @@ export class PingPongGame
 		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
 	}
 
+
+	movePaddle(paddle:Paddle, direction: "up" | "down")
+	{
+		if(this.isPaddleMoveAllowed(paddle,direction))
+			paddle.move(direction);
+	}
+
+
+	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
+	{
+		const maxY = this.TOP_EDGE_Y + (0.45) * paddle.height;
+		const minY = this.BOTTOM_EDGE_Y - (0.45) * paddle.height;
+		let move_modifier = paddle.getMoveModifier();
+		if(direction === "down")
+			move_modifier *= -1;
+		const newPaddleY = paddle.getPosition().getY() + move_modifier;
+		if(newPaddleY >= maxY)
+			return false
+		if(newPaddleY <= minY)
+			return false;
+		return true;
+	}
+
 	private renderNextFrame()
 	{
 		this.ballMovementMechanics();
@@ -100,7 +123,7 @@ export class PingPongGame
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
 		this.ball.setPosition(new Point(0,0));
-		this.ball.setDirection(new Point(-0.1, 0))
+		this.ball.resetDirection();
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
@@ -233,7 +256,7 @@ export class PingPongGame
 			paddle = this.rightPaddle;
 		}
 		const EdgePoint:Point = new Point(edgeX, ballY);
-		const impactPointPaddle:Point | false = this.paddleBounce(paddle);
+		const impactPointPaddle:Point | false = this.paddleBounce(paddle, this.ball.getDirection().getX());
 		if(impactPointPaddle !== false)
 		{
 			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(paddle.getPosition(), paddle.height);
@@ -262,9 +285,9 @@ export class PingPongGame
 	 * @param paddle 
 	 * @returns either false or Point it hits
 	 */
-	private paddleBounce(paddle:Paddle): false | Point
+	private paddleBounce(paddle:Paddle, ballDirectionX:number): false | Point
 	{
-		const paddleHitPoints = paddle.getPaddleHitBoxPoints();
+		const paddleHitPoints = paddle.getPaddleHitBoxPoints(ballDirectionX);
 		for(const point of paddleHitPoints)
 		{
 			if(this.ball.isHit(point) == true)

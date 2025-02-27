@@ -84,7 +84,7 @@ fastify.register(async function(fastify)
 function sendFrames(socket: WebSocket)
 {
 	const renderFrame = () => {
-		const frame: PongFrameI = PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball);
+		const frame: PongFrameI = game.getFrame();
 		const frameJson = JSON.stringify(frame);
 		socket.send(frameJson);
 		raf(renderFrame);
@@ -103,7 +103,8 @@ function moveHandler(socket: WebSocket, paddle: Paddle)
 			return 
 		}
 		const direction = json.move;
-		paddle.move(direction);
+		game.movePaddle(paddle, direction)
+		//paddle.move(direction);
 	})
 }
 

@@ -33,3 +33,7 @@ Critical should be in my opinion (ball radius + (MovementVector * SOME_X_THAT_MA
 		bounce 
 	return 
 2. return 
+
+## Padle movement blocking
+let user modify paddle x position only if there is at least 10% of paddle inside the field
+That means that position y of paddle can be maximum = top edgeY + 45% of paddle height

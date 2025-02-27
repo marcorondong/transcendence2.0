@@ -8,11 +8,13 @@ export class Ball
 	protected vector:Point;
 	readonly radius;
 	readonly speed:number;
+	readonly initialVector:Point
 
 	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
 		this.position = position;
-		this.vector = vector;	
+		this.vector = vector;
+		this.initialVector = vector;
 		this.radius = radius;
 		this.speed = Point.calculateVectorSpeed(vector);
 	}
@@ -25,6 +27,11 @@ export class Ball
 	setDirection(vector:Point):void 
 	{
 		this.vector = vector;
+	}
+
+	resetDirection():void
+	{
+		this.vector = this.initialVector;
 	}
 	
 	getDirection(): Point
@@ -50,13 +57,15 @@ export class Ball
 		const vector:Point = Point.calculateVector(pointA, this.getPosition());
 		const vecY = vector.getY();
 		const centerMissPercent = Math.abs(vecY)/maxDoubleDistanceFromPoint;
-		let newX = this.speed * (1 - centerMissPercent);
-		let newY = this.speed * (centerMissPercent);
+		const xSquared = Math.pow(this.speed, 2) / (1 + Math.pow(centerMissPercent, 2));
+		let newX = Math.sqrt(xSquared);
+		let newY = newX * centerMissPercent;
 		if(currentDirectionX > 0)
 			newX *= -1;
 		if(vecY < 0)
 			newY *= -1;
 		return new Point(newX, newY);
+
 	}
 
 	getPosition():Point

@@ -41,17 +41,35 @@ export class Paddle
 		return this.position;
 	}
 
-	getPaddleHitBoxPoints(): Point[]
+	getPaddleHitBoxPoints(ballDirection:number): Point[]
 	{
 		const allPoints:Point[] = new Array<Point>();
 		const x = this.getPosition().getX();
 		const center_y = this.getPosition().getY();
 		for(let y = center_y - (this.height / 2); y <= center_y + (this.height / 2); y += 0.01)
 		{
-			const hitPoint = new Point(x, y);
-			allPoints.push(hitPoint);
+			if(ballDirection > 0)
+			{
+				for(let x = this.getPosition().getX() + ballDirection * 2; x >= this.getPosition().getX(); x -= 0.01)
+				{
+					const hitPoint = new Point(x, y);
+					allPoints.push(hitPoint);
+				}
+			}
+			else 
+			{
+				for(let x = this.getPosition().getX() + ballDirection * 2; x <= this.getPosition().getX(); x += 0.01)
+				{
+					const hitPoint = new Point(x, y);
+					allPoints.push(hitPoint);
+				}
+			}
 		}
 		return allPoints;
+	}
 
+	getMoveModifier(): number 
+	{
+		return MOVE_MODIFIER;
 	}
 }
