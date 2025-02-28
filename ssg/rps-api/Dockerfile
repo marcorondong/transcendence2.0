@@ -1,5 +1,9 @@
 FROM node:iron-slim
 
+RUN apt-get update && apt-get install -y openssl
+COPY ./rps-api/scripts/https-keys.sh /rps/rps-api/scripts/https-keys.sh
+RUN bash /rps/rps-api/scripts/https-keys.sh
+
 WORKDIR /rps/utils/
 COPY ./utils ./
 RUN npm i

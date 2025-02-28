@@ -1,6 +1,7 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
+import { ScoreBoard, ScoreI} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 
 interface Position 
@@ -14,6 +15,8 @@ export interface PongFrameI
 	leftPaddle: Position & {height:number};
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
+	score: ScoreI;
+	matchStatus: "running" | "paused" | "finished"
 }
 
 export class PingPongGame
@@ -24,7 +27,10 @@ export class PingPongGame
 	protected ball: Ball;
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
+	private gameStatus : "running" | "paused" | "finished" = "running"
+	private lastFrame:boolean = false;
 	
+	readonly score:ScoreBoard = new ScoreBoard();
 	readonly TABLE_WIDTH_Y: number = 5;
 	readonly TABLE_LENGHT_X: number = 9;
 	readonly TOP_EDGE_Y:number = this.TABLE_WIDTH_Y/2;
@@ -42,38 +48,63 @@ export class PingPongGame
 		this.start();
 	}
 
-	static getPongFrame(leftPad: Paddle, rightPad: Paddle, ball: Ball): PongFrameI
+	getGameStatus(): "running" | "paused" | "finished"
 	{
-		return {
-			leftPaddle: {
-				x: leftPad.getPosition().getX(),
-				y: leftPad.getPosition().getY(),
-				height: leftPad.height
-			}, 
-			rightPaddle: 
-			{
-				x: rightPad.getPosition().getX(),
-				y: rightPad.getPosition().getY(),
-				height: rightPad.height
-			},
-			ball: 
-			{
-				x: ball.getPosition().getX(),
-				y: ball.getPosition().getY(),
-				radius: ball.getRadius()
-			},
-		};
+		return this.gameStatus;
+	}
+
+	pauseGame(): void
+	{
+		this.gameStatus = "paused";
+		this.score.pause();
+	}
+
+	startGame(): void 
+	{
+		this.gameStatus = "running"
+		this.score.start();
+	}
+
+	finishGame():void 
+	{
+		this.gameStatus = "finished"
+		this.lastFrame = true;
+	}
+
+	isLastFrame(): boolean
+	{
+		return this.lastFrame;
 	}
 
 	getFrame()
 	{
-		return PingPongGame.getPongFrame(this.leftPaddle, this.rightPaddle, this.ball);
+		return {
+			leftPaddle: {
+				x: this.leftPaddle.getPosition().getX(),
+				y: this.leftPaddle.getPosition().getY(),
+				height: this.leftPaddle.height
+			}, 
+			rightPaddle: 
+			{
+				x: this.rightPaddle.getPosition().getX(),
+				y: this.rightPaddle.getPosition().getY(),
+				height: this.rightPaddle.height
+			},
+			ball: 
+			{
+				x: this.ball.getPosition().getX(),
+				y: this.ball.getPosition().getY(),
+				radius: this.ball.getRadius()
+			},
+			score: this.score.getScoreJson(), 
+			matchStatus: this.gameStatus
+		};
 	}
 
 
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
-		if(this.isPaddleMoveAllowed(paddle,direction))
+		if(this.isPaddleMoveAllowed(paddle,direction) && this.gameStatus === "running")
 			paddle.move(direction);
 	}
 
@@ -97,18 +128,24 @@ export class PingPongGame
 	{
 		this.ballMovementMechanics();
 		this.ball.moveBall();
+		if(this.score.isWinnerDecided() === true)
+			this.finishGame();
 	}
 
 	private start(): void 
 	{
+		this.score.startCountdown();
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
 	private gameLoop(timestamp: number):void 
 	{
-		const deltaTime = timestamp - this.lastFrameTime;
-		this.lastFrameTime = timestamp;
-		this.renderNextFrame();
+		if(this.gameStatus === "running")
+		{
+			const deltaTime = timestamp - this.lastFrameTime;
+			this.lastFrameTime = timestamp;
+			this.renderNextFrame();
+		}
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
@@ -122,8 +159,16 @@ export class PingPongGame
 
 	private scoredGoal(goalSide: "left" | "right"): void
 	{
+		let strikerSide: "left" | "right";
+		if(goalSide === "left")
+			strikerSide = "right";
+		else 
+			strikerSide = "left"
+		this.score.score(strikerSide);
 		this.ball.setPosition(new Point(0,0));
-		this.ball.resetDirection();
+		this.ball.resetDirection(goalSide);
+		this.leftPaddle.resetPosition();
+		this.rightPaddle.resetPosition();
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean

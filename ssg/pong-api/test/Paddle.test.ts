@@ -23,7 +23,7 @@ test("Paddle hit box points", () =>
 {
 	const paddle:Paddle = new Paddle(new Point(0,0));
 
-	const allPoints:Point[] = paddle.getPaddleHitBoxPoints();
+	const allPoints:Point[] = paddle.getPaddleHitBoxPoints(0);
 	// for(const onePoint of allPoints)
 	// {
 	// 	console.log(onePoint);

@@ -6,18 +6,25 @@ export class Paddle
 {
 	protected position:Point;
 	readonly height:number;
+	readonly initialPosition:Point; 
 
 	constructor(position: Point, height:number = 1)
 	{
 		this.position = position;
 		this.height = height;
+		this.initialPosition = new Point(position.getX(), position.getY());
 	}
 
-	//TODO: add protection to not go over field
 	moveUp():void 
 	{
 		const newY = this.position.getY() + MOVE_MODIFIER;
 		this.position.setY(newY);
+	}
+
+	resetPosition():void
+	{
+		this.position.setX(this.initialPosition.getX());
+		this.position.setY(this.initialPosition.getY());
 	}
 
 	moveDown():void 
