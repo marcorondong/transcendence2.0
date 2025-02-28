@@ -8,4 +8,4 @@
 ## App
 0. RUN pong-api server
 1. run CLI client with `python3 main.py`
-2. Use `w` to go up `s` to go down and wach in browser movements until i implement something better
+2. Use `w` to go up `s` to go down and watch in browser movements until i implement something better
