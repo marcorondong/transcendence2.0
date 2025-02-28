@@ -7,8 +7,9 @@ import readchar
 HOST = "localhost"
 PORT = "3010"
 ROUTE = "/pong/"
-
 WS_ROUTE = f"wss://{HOST}:{PORT}{ROUTE}"
+
+CONTROLS_TUTORIAL="Use 'w' to go up with paddle, 's' to go down with paddle, 'q' to stop. Look at browser; rendering is not implemented in cli yet."
 
 async def send_move(websocket, move):
 	data = {"move": move}
@@ -26,12 +27,13 @@ async def get_move():
 		elif move == "q":
 			return "stop"
 		else:
-			print("Invalid move, press 'w' for up, 's' for down or 'q' for stop")
+			print(f"Invalid move. {CONTROLS_TUTORIAL}")
 
 
 async def client():
 	ssl_context = ssl._create_unverified_context()
 	async with websockets.connect(WS_ROUTE, ssl=ssl_context) as websocket:
+		print(f"Connected to server.{CONTROLS_TUTORIAL}")
 		while True:
 			move = await get_move()
 			if move == "stop":
