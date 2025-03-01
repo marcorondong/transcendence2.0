@@ -3,6 +3,7 @@ import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
 import { ScoreBoard, ScoreI} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
+import { error } from "console";
 
 interface Position 
 {
@@ -44,13 +45,22 @@ export class PingPongGame
 		this.leftPaddle = leftPaddle;
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
-		this.CRITICAL_DISTANCE= ball.getCriticalDistance();
+		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.start();
 	}
 
 	getGameStatus(): "running" | "paused" | "finished"
 	{
 		return this.gameStatus;
+	}
+
+	getPaddle(side: "left" | "right"): Paddle
+	{
+		if(side === "left")
+			return this.leftPaddle;
+		else if(side === "right")
+			return this.rightPaddle
+		throw error("paddle not found")
 	}
 
 	pauseGame(): void
