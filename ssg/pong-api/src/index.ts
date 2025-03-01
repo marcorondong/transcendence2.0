@@ -92,6 +92,7 @@ fastify.register(async function(fastify)
 		{
 			gameRoom.addPlayer(new Player("second right", connection))
 			moveHandler(connection, gameRoom.getGame(), "right");
+			gameRoom.getGame().start();
 		}
 		player++;
 	})

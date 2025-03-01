@@ -28,7 +28,7 @@ export class PingPongGame
 	protected ball: Ball;
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
-	private gameStatus : "running" | "paused" | "finished" = "running"
+	private gameStatus : "running" | "paused" | "finished" = "paused"
 	private lastFrame:boolean = false;
 	
 	readonly score:ScoreBoard = new ScoreBoard();
@@ -46,7 +46,8 @@ export class PingPongGame
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
-		this.start();
+		this.pauseGame();
+		//this.start();
 	}
 
 	getGameStatus(): "running" | "paused" | "finished"
@@ -142,8 +143,9 @@ export class PingPongGame
 			this.finishGame();
 	}
 
-	private start(): void 
+	start(): void 
 	{
+		this.gameStatus = 'running'
 		this.score.startCountdown();
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}

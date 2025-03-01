@@ -38,6 +38,7 @@ export class ScoreBoard
 
 	startCountdown():void 
 	{
+		this.start();
 		const interval = setInterval( ()=>
 		{
 			if(this.paused === false)
