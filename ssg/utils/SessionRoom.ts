@@ -2,7 +2,7 @@ import {Player} from "./Player"
 
 export class SessionRoom
 {
-	readonly id: string; 
+	protected readonly id: string; 
 	protected players: Map<string,Player>;
 	private requiredPlayers: number;
 	
