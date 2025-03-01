@@ -1,9 +1,10 @@
 import {Player} from "./Player"
-
+import { WebSocket } from "ws";
 export class SessionRoom
 {
 	protected readonly id: string; 
 	protected players: Map<string,Player>;
+	private spectators: WebSocket[] = new Array<WebSocket>();
 	private requiredPlayers: number;
 	
 	constructor(roomId: string, requiredPlayers:number = 2)
@@ -28,6 +29,11 @@ export class SessionRoom
 		}
 		console.warn(`Player ${player.id} cannot join full room ${this.id}`);
 		return false;
+	}
+
+	addSpectator(spectator: WebSocket)
+	{
+		this.spectators.push(spectator);
 	}
 
 	removePlayer(player: Player)
@@ -61,6 +67,15 @@ export class SessionRoom
 		for (const player of this.players.values())
 		{
 			player.connection.send(message);
+		}
+		this.spectatorBroadcast(message);
+	}
+
+	private spectatorBroadcast(message: string):void 
+	{
+		for(const fan of this.spectators)
+		{
+			fan.send(message);
 		}
 	}
 	

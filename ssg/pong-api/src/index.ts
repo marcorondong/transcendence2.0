@@ -94,6 +94,7 @@ fastify.register(async function(fastify)
 			moveHandler(connection, gameRoom.getGame(), "right");
 			gameRoom.getGame().start();
 		}
+		gameRoom.addSpectator(connection);
 		player++;
 	})
 
