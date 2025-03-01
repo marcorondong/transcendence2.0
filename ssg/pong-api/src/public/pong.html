@@ -22,7 +22,20 @@
             ball: { x: 0, y: 0, radius: 0.25 },
             score: { leftGoals: 0, rightGoals: 0, time: false }
         };
-        
+
+        let leftPaddleDirection = 0; // -1 for up, 1 for down, 0 for no movement
+        let rightPaddleDirection = 0;
+
+        // Game loop to update paddle positions
+        setInterval(() => {
+            if (leftPaddleDirection !== 0) {
+                ws.send(JSON.stringify({ move: leftPaddleDirection > 0 ? "down" : "up", paddle: "left" }));
+            }
+            if (rightPaddleDirection !== 0) {
+                ws.send(JSON.stringify({ move: rightPaddleDirection > 0 ? "down" : "up", paddle: "right" }));
+            }
+        }, 1000 / 60); // 60 times per second (60fps)
+
         ws.onmessage = (event) => {
             gameState = JSON.parse(event.data);
             drawGame();
@@ -91,12 +104,26 @@
         
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") {
-                ws.send(JSON.stringify({ move: "up" }));
+                leftPaddleDirection = -1;  // Move up
             } else if (event.key === "ArrowDown") {
-                ws.send(JSON.stringify({ move: "down" }));
+                leftPaddleDirection = 1;   // Move down
+            }
+            if (event.key === "w") {
+                rightPaddleDirection = -1; // Move up
+            } else if (event.key === "s") {
+                rightPaddleDirection = 1;  // Move down
             }
         });
         
+        document.addEventListener("keyup", (event) => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                leftPaddleDirection = 0; // Stop movement
+            }
+            if (event.key === "w" || event.key === "s") {
+                rightPaddleDirection = 0; // Stop movement
+            }
+        });
+
     </script>
 </body>
 </html>
