@@ -68,6 +68,12 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
   });
 
+interface GameQueryI
+{
+	gameId: string;
+	playerId: string;
+} 
+
 fastify.register(websocket);
 fastify.register(async function(fastify)
 {
@@ -80,17 +86,18 @@ fastify.register(async function(fastify)
 		)
 	});
 
-	fastify.get("/pong/", {websocket:true}, (connection, req) =>
+	fastify.get<{Querystring: GameQueryI}>("/pong/", {websocket:true}, (connection, req) =>
 	{
+		const {gameId, playerId} = req.query;
 		sendFrames(gameRoom);
 		if(player === 1)
 		{
-			gameRoom.addPlayer(new Player("first left", connection))
+			gameRoom.addPlayer(new Player(playerId, connection))
 			moveHandler(connection, gameRoom.getGame(), "left");
 		}
 		else if(player === 2)
 		{
-			gameRoom.addPlayer(new Player("second right", connection))
+			gameRoom.addPlayer(new Player(playerId, connection))
 			moveHandler(connection, gameRoom.getGame(), "right");
 			gameRoom.getGame().start();
 		}
