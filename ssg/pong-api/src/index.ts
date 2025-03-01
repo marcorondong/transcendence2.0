@@ -1,8 +1,6 @@
 import Fastify from "fastify"
 import { Paddle } from "./Paddle";
-import { Point } from "./Point";
-import { Ball } from "./Ball";
-import { PingPongGame, PongFrameI } from "./PongGame";
+import {PingPongGame, PongFrameI } from "./PongGame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
@@ -11,6 +9,8 @@ import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
+import { PongRoom } from "./PongRoom";
+import { Player } from "../../utils/Player";
 
 
 dotenv.config();
@@ -58,12 +58,10 @@ const fastify = Fastify(
 	: true
 });
 
-const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
-const rightPaddle: Paddle = new Paddle(new Point(4, 0));
-const ball: Ball = new Ball(new Point(0, 0));
+
+const gameRoom:PongRoom = new PongRoom("1");
 let player:number = 1;
 
-const game: PingPongGame = new PingPongGame("1",leftPaddle, rightPaddle, ball);
 
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
@@ -80,20 +78,21 @@ fastify.register(async function(fastify)
 			hello: "ssl"
 		}
 		)
-		//reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
-		// ball.moveBall();
-		// leftPaddle.moveUp();
-		// rightPaddle.moveDown();
-		// rightPaddle.moveDown();
 	});
 
 	fastify.get("/pong/", {websocket:true}, (connection, req) =>
 	{
-		sendFrames(connection);
+		sendFrames(gameRoom);
 		if(player === 1)
-			moveHandler(connection, leftPaddle);
+		{
+			gameRoom.addPlayer(new Player("first left", connection))
+			moveHandler(connection, gameRoom.getGame(), "left");
+		}
 		else if(player === 2)
-			moveHandler(connection, rightPaddle);
+		{
+			gameRoom.addPlayer(new Player("second right", connection))
+			moveHandler(connection, gameRoom.getGame(), "right");
+		}
 		player++;
 	})
 
@@ -109,13 +108,13 @@ fastify.register(async function(fastify)
 })
 
 
-function sendFrames(socket: WebSocket)
+function sendFrames(gameRoom:PongRoom)
 {
 	const renderFrame = () => {
-		const frame: PongFrameI = game.getFrame();
+		const frame: PongFrameI = gameRoom.getGame().getFrame();
 		const frameJson = JSON.stringify(frame);
-		socket.send(frameJson);
-		if(game.isLastFrame())
+		gameRoom.roomBroadcast(frameJson)
+		if(gameRoom.getGame().isLastFrame())
 		{
 			return;
 		}
@@ -124,7 +123,7 @@ function sendFrames(socket: WebSocket)
 	raf(renderFrame);
 }
 
-function moveHandler(socket: WebSocket, paddle: Paddle)
+function moveHandler(socket: WebSocket, game:PingPongGame, paddleSide: "left" | "right")
 {
 	socket.on("message", (data: RawData, isBinnary:boolean) =>
 	{
@@ -135,7 +134,8 @@ function moveHandler(socket: WebSocket, paddle: Paddle)
 			return 
 		}
 		const direction = json.move;
-		game.movePaddle(paddle, direction)
+		const paddle:Paddle = gameRoom.getGame().getPaddle(paddleSide);
+		game.movePaddle(paddle, direction);
 	})
 }
 
