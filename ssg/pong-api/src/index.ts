@@ -4,7 +4,6 @@ import {PingPongGame, PongFrameI } from "./PongGame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser"
-import raf from "raf";
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
@@ -21,6 +20,7 @@ const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
 const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
 let privateKey: string; 
 let certificate: string;
+var totalGameCount = 0;
 
 try 
 {
@@ -59,8 +59,30 @@ const fastify = Fastify(
 });
 
 
-const gameRoom:PongRoom = new PongRoom("1");
-let player:number = 1;
+//const gameRoom:PongRoom = new PongRoom("1");
+const rooms:Map<string, PongRoom> = new Map<string, PongRoom>();
+
+function getOrCreateGameRoom(gameRoomId:string): PongRoom
+{
+	var room:PongRoom | undefined
+	if (rooms.has(gameRoomId))
+	{
+		console.log(`returning game with id ${gameRoomId}`);
+		room = rooms.get(gameRoomId);
+	}
+	if(room == undefined)
+	{
+		totalGameCount++;
+		if(gameRoomId === undefined)
+		{
+			gameRoomId = totalGameCount.toString()
+		}
+		room = new PongRoom(gameRoomId)
+		console.log(`creating game with id ${gameRoomId}`);
+		rooms.set(gameRoomId, room);
+	}
+	return room
+}
 
 
 fastify.register(fastifyStatic, {
@@ -89,20 +111,34 @@ fastify.register(async function(fastify)
 	fastify.get<{Querystring: GameQueryI}>("/pong/", {websocket:true}, (connection, req) =>
 	{
 		const {gameId, playerId} = req.query;
-		sendFrames(gameRoom);
-		if(player === 1)
+		const gameRoom = getOrCreateGameRoom(gameId);
+		gameRoom.getAndSendFramesOnce();
+		if(gameRoom.getPlayerCount() === 0)
 		{
-			gameRoom.addPlayer(new Player(playerId, connection))
+			gameRoom.addPlayer(new Player("PlayerId1", connection))
 			moveHandler(connection, gameRoom.getGame(), "left");
+			console.log("player 1")
 		}
-		else if(player === 2)
+		else if(gameRoom.getPlayerCount() === 1)
 		{
-			gameRoom.addPlayer(new Player(playerId, connection))
+			console.log("player 2")
+			gameRoom.addPlayer(new Player("PlayerId2", connection))
 			moveHandler(connection, gameRoom.getGame(), "right");
 			gameRoom.getGame().start();
 		}
-		gameRoom.addSpectator(connection);
-		player++;
+		else
+		{
+			gameRoom.addSpectator(connection)
+		}
+
+		connection.on("close", () => {
+			gameRoom.removeSpectator(connection);
+			console.log("spectator removed");
+			// if (gameRoom.getPlayerCount() === 0) {
+			//   rooms.delete(gameId);
+			// }
+		  });
+
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
@@ -117,20 +153,6 @@ fastify.register(async function(fastify)
 })
 
 
-function sendFrames(gameRoom:PongRoom)
-{
-	const renderFrame = () => {
-		const frame: PongFrameI = gameRoom.getGame().getFrame();
-		const frameJson = JSON.stringify(frame);
-		gameRoom.roomBroadcast(frameJson)
-		if(gameRoom.getGame().isLastFrame())
-		{
-			return;
-		}
-		raf(renderFrame);
-	};
-	raf(renderFrame);
-}
 
 function moveHandler(socket: WebSocket, game:PingPongGame, paddleSide: "left" | "right")
 {
@@ -143,7 +165,7 @@ function moveHandler(socket: WebSocket, game:PingPongGame, paddleSide: "left" | 
 			return 
 		}
 		const direction = json.move;
-		const paddle:Paddle = gameRoom.getGame().getPaddle(paddleSide);
+		const paddle:Paddle = game.getPaddle(paddleSide);
 		game.movePaddle(paddle, direction);
 	})
 }
