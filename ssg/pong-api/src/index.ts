@@ -13,14 +13,14 @@ import { Player } from "../../utils/Player";
 
 
 dotenv.config();
+
+//Server set up variables
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
-
 const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
 const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
 let privateKey: string; 
 let certificate: string;
-var totalGameCount = 0;
 
 try 
 {
@@ -31,7 +31,7 @@ catch
 {
 	console.error("ssl private key and certificate are not generated. Run https-key.sh script inside scripts folder first")
 	process.exit(1);
-
+	
 }
 
 const fastify = Fastify(
@@ -41,7 +41,7 @@ const fastify = Fastify(
 		key: privateKey,
 		cert: certificate
 	},
-
+	
 	logger: process.env.NODE_ENV === "development"?
 	{
 		transport:
@@ -57,10 +57,11 @@ const fastify = Fastify(
 	}
 	: true
 });
-
-
+	
+	
 //const gameRoom:PongRoom = new PongRoom("1");
 const rooms:Map<string, PongRoom> = new Map<string, PongRoom>();
+var totalGameCount = 0;
 
 function getOrCreateGameRoom(gameRoomId:string): PongRoom
 {
@@ -115,15 +116,15 @@ fastify.register(async function(fastify)
 		gameRoom.getAndSendFramesOnce();
 		if(gameRoom.getPlayerCount() === 0)
 		{
-			gameRoom.addPlayer(new Player("PlayerId1", connection))
-			moveHandler(connection, gameRoom.getGame(), "left");
+			gameRoom.addPlayer(new Player("PlayerId1", connection));
+			gameRoom.assingControlsToPlayer(connection, "left");
 			console.log("player 1")
 		}
 		else if(gameRoom.getPlayerCount() === 1)
 		{
 			console.log("player 2")
-			gameRoom.addPlayer(new Player("PlayerId2", connection))
-			moveHandler(connection, gameRoom.getGame(), "right");
+			gameRoom.addPlayer(new Player("PlayerId2", connection));
+			gameRoom.assingControlsToPlayer(connection, "right");
 			gameRoom.getGame().start();
 		}
 		else
@@ -151,24 +152,6 @@ fastify.register(async function(fastify)
 		}
 	  });
 })
-
-
-
-function moveHandler(socket: WebSocket, game:PingPongGame, paddleSide: "left" | "right")
-{
-	socket.on("message", (data: RawData, isBinnary:boolean) =>
-	{
-		const json = Parser.rawDataToJson(data);
-		if(!json)
-		{
-			socket.send("Invalid json");
-			return 
-		}
-		const direction = json.move;
-		const paddle:Paddle = game.getPaddle(paddleSide);
-		game.movePaddle(paddle, direction);
-	})
-}
 
 const startServer = async() =>
 {

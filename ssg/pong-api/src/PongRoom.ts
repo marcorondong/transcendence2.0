@@ -5,6 +5,8 @@ import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { PongFrameI } from "./PongGame";
 import raf from "raf";
+import { WebSocket, RawData } from "ws";
+import {Parser} from "../../utils/Parser"
 
 
 function createGame(gameId:string) :PingPongGame
@@ -41,6 +43,22 @@ export class PongRoom extends SessionRoom
 			this.isFrameGenerating = true;
 			this.sendFrames();
 		}
+	}
+
+	assingControlsToPlayer(socket: WebSocket, paddleSide: "left" | "right"):void 
+	{
+		socket.on("message", (data: RawData, isBinnary:boolean) =>
+		{
+			const json = Parser.rawDataToJson(data);
+			if(!json)
+			{
+				socket.send("Invalid json");
+				return 
+			}
+			const direction = json.move;
+			const paddle:Paddle = this.getGame().getPaddle(paddleSide);
+			this.getGame().movePaddle(paddle, direction);
+		})
 	}
 
 	private sendFrames()
