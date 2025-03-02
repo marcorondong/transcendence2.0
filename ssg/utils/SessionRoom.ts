@@ -4,7 +4,7 @@ export class SessionRoom
 {
 	protected readonly id: string; 
 	protected players: Map<string,Player>;
-	private spectators: WebSocket[] = new Array<WebSocket>();
+	private spectators: Set<WebSocket> = new Set<WebSocket>();
 	private requiredPlayers: number;
 	
 	constructor(roomId: string, requiredPlayers:number = 2)
@@ -33,7 +33,12 @@ export class SessionRoom
 
 	addSpectator(spectator: WebSocket)
 	{
-		this.spectators.push(spectator);
+		this.spectators.add(spectator);
+	}
+
+	removeSpectator(spectator: WebSocket)
+	{
+		this.spectators.delete(spectator);
 	}
 
 	removePlayer(player: Player)
