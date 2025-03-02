@@ -1,0 +1,5 @@
+
+
+microservice: chat
+registration: true
+nickname: nickname_input.value
