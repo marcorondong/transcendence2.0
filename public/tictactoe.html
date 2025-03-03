@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tictactoe</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex justify-center items-center h-screen m-0 bg-gray-200">
+	<h1 id = 'me' class="absolute top-10 text-2xl font-bold text-center mb-4">Tictactoe</h1>
+
+	<div id="nickname_page" class="page flex flex-col space-y-4">
+		<div class="flex justify-center">
+			<h1 class="text-4xl">Enter your nickname</h1>
+		</div>
+		<div class="flex justify-center">
+			<input id="nickname_input" type="text" class="border border-gray-300 rounded-lg p-2" placeholder="Nickname here">
+		</div>
+		<div class="flex justify-center">
+			<button id="nickname_button" class="btn bg-blue-500 text-white py-2 px-4 rounded">Submit</button>
+		</div>
+	</div>
+
+	<div id="gamePage" class="text-center p-5 bg-white rounded-lg shadow-md">
+
+		<div class="info mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
+			<div class="play-with mb-2">You play with: <span id="playWith" class="font-semibold">X</span></div>
+			<div class="info mb-2"><span id="info" class="font-semibold">Your turn</span></div>
+		</div>
+
+		<div id="board" class="p-4 grid grid-cols-3 grid-rows-3 gap-2 mb-5">
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="0"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="1"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="2"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="3"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="4"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="5"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="6"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="7"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="8"></div>
+		</div>
+
+		<div class="score-table-container flex justify-center mt-4">
+			<table class="score-table border-collapse border border-gray-300">
+				<thead>
+					<tr>
+						<th class="border border-gray-300 px-4 py-2">Player</th>
+						<th id='player1_name' class="border border-gray-300 px-4 py-2">Player 1</th>
+						<th id='player2_name' class="border border-gray-300 px-4 py-2">Player 2</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td id="totalScore" class="border border-gray-300 px-4 py-2">Score</td>
+						<td id="player1_score" class="border border-gray-300 px-4 py-2">0</td>
+						<td id="player2_score" class="border border-gray-300 px-4 py-2">0</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div id="loadingPage" class="page flex flex-col space-y-4">
+		<div class="flex justify-center">
+			<h1 id="waiting" class="text-4xl">Waiting for opponent to join...</h1>
+		</div>
+		<div class="flex justify-center">
+			<img src="loading.gif" alt="Loading...">
+		</div>
+		<div class="flex justify-center">
+			<button id="cancelButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Cancel</button>
+		</div>
+	</div>
+
+	<div id="customisePage" class="page flex flex-col space-y-4">
+		<div class="flex justify-center">
+			<button id="playOnlineButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Play Online</button>
+		</div>
+		<div class="flex justify-center">
+			<button id="playAiButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Play AI</button>
+		</div>
+		<div class="flex justify-center">
+			<button id="playTournamentButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Play Tournament</button>
+		</div>
+		<div class="flex justify-center">
+			<button id="createNewTournamentButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Create Tournament</button>
+		</div>
+	</div>
+
+	<script src="tictactoe.js"></script>
+
+</body>
+</html>
