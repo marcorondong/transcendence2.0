@@ -50,66 +50,14 @@ function addMessage(sender: string, receiver: string, message: Message) {
     chatHistories[sender][receiver].push(message);
 }
 
-function sendToAllClients(data: any, socket: WebSocket): void 
-{
-	for (const otherClients of allClients.values())
-	{
-		if(data.peopleOnline === false && otherClients.socket !== socket)
-		{
-			otherClients.socket.send(JSON.stringify({ peopleOnline: false, nickname: data.nickname }));
-		}
-		else if(otherClients.socket !== socket && otherClients.nickname !== '')
-		{
-			otherClients.socket.send(JSON.stringify({ peopleOnline: true, nickname: data.nickname }));
-		}
-	}
-}
-
-function receiveFromAllClients(data: any, socket: WebSocket): void
-{
-	for (const otherClients of allClients.values())
-	{
-		if(otherClients.socket !== socket && otherClients.nickname !== '')
-		{
-			socket.send(JSON.stringify({ peopleOnline: true, nickname: otherClients.nickname }));
-		}
-	}
-}
-
 const findClientByNickname = (nickname: string): Client | undefined => {
     for (const client of allClients.values()) {
-		// console.log('client.nickname: ' + client.nickname);
         if (client.nickname === nickname) {
             return client;
         }
     }
     return undefined;
 };
-
-const findKeyByValue = (map: Map<string, Client>, value: Client): string | undefined => {
-    for (const [key, val] of map.entries()) {
-        if (val === value) {
-            return key;
-        }
-    }
-    return undefined;
-};
-
-// const nicknameExists = (nickname: string): boolean => {
-// 	let users = readData();
-// 	return users.find((u: { nickname: string }) => u.nickname === nickname);
-// };
-
-function sendAllClients() {
-    const clientsOnline = Array.from(allClients.values()).map(client => ({
-        nickname: client.nickname
-    }));
-
-	const message = JSON.stringify({ microservice: 'chat', updatePeopleOnline: true, clientsOnline: clientsOnline });
-    allClients.forEach(client => {
-        client.socket.send(message);
-    });
-}
 
 fastify.register(fastifyStatic, {
 	root: path.join(__dirname, '../public'),
@@ -137,86 +85,73 @@ fastify.register(async function (fastify)
 			const data = JSON.parse(message.toString());
 			if(data.microservice === 'chat')
 			{
-				if(data.registration)
+				if(data.message)
+				{
+					const receiver = findClientByNickname(data.receiver);
+					if(receiver && !receiver.blockedList.includes(currentClient.nickname))
+					{
+						const message = new Message(data.message, false);
+						addMessage(data.receiver, currentClient.nickname, message);
+						receiver.socket.send(JSON.stringify(data));
+					}
+					const message = new Message(data.message, true);
+					addMessage(currentClient.nickname, data.receiver, message);
+					return;
+				}
+				else if(data.chatHistoryRequest)
+				{
+					if(!chatHistories[currentClient.nickname] || !chatHistories[currentClient.nickname][data.chattingWith])
+					{
+						socket.send(JSON.stringify({ ...data, chatHistory: [], block: false }));
+						return;
+					}
+					const isBlocked = currentClient.blockedList.includes(data.chattingWith);
+					const chatHistory = chatHistories[currentClient.nickname][data.chattingWith];
+					socket.send(JSON.stringify({ ...data, chatHistory: chatHistory, block: isBlocked }));
+					return;
+				}
+				else if(data.block)
+				{
+					currentClient.blockedList.push(data.blockedPerson);
+					return;
+				}
+				else if(data.unblock)
+				{
+					currentClient.blockedList = currentClient.blockedList.filter(n => n !== data.unblockedPerson);
+					return;
+				}
+				else if(data.registration)
 				{
 					if(allClients.some(client => client.nickname === data.nickname))
 					{
-						data.registration = false;
-						socket.send(JSON.stringify(data));
+						socket.send(JSON.stringify({microservice: 'chat', registration: false}));
 						return;
 					}
 					const clientsOnline = Array.from(allClients.values()).map(client => ({
 						nickname: client.nickname
 					}));
 					socket.send(JSON.stringify({ ...data, clientsOnline: clientsOnline }));
-					allClients.forEach(client => {
+
+					for(const client of allClients)
+					{
 						client.socket.send(JSON.stringify({ microservice: 'chat', newClientOnline: true, nickname: data.nickname }));
-					});
+					}
 					currentClient.nickname = data.nickname;
 					allClients.push(currentClient);
 					return;
 				}
-				if(data.chatHistoryRequest)
-				{
-					if(!chatHistories[data.nickname] || !chatHistories[data.nickname][data.chattingWith])
-					{
-						socket.send(JSON.stringify({ ...data, chatHistory: []}));
-						return;
-					}
-					const chatHistory = chatHistories[data.nickname][data.chattingWith];
-					socket.send(JSON.stringify({ ...data, chatHistory: chatHistory}));
-					return;
-				}
-				if(data.message)
-				{
-					const receiver = findClientByNickname(data.receiver);
-					if(receiver && !receiver.blockedList.includes(data.sender))
-					{
-						const message = new Message(data.message, false);
-						addMessage(data.receiver, data.sender, message);
-						receiver.socket.send(JSON.stringify(data));
-					}
-					const message = new Message(data.message, true);
-					addMessage(data.sender, data.receiver, message);
-					return;
-				}
-				if(data.block)
-				{
-					currentClient.blockedList.push(data.blockedPerson);
-					return;
-				}
-				if(data.unblock)
-				{
-					currentClient.blockedList = currentClient.blockedList.filter(n => n !== data.unblockedPerson);
-					return;
-				}
-				// if(data.peopleOnline)
-				// {
-				// 	sendToAllClients(data, socket);
-				// 	return;
-				// }
-				// if(data.peopleOnline === false)
-				// {
-				// 	sendToAllClients(data, socket);
-				// 	return;
-				// }
-				// if(data.receiveFromAllClients)
-				// {
-				// 	receiveFromAllClients(data, socket);
-				// 	return;
-				// }
 			};
 		});
 
 		connection.on('close', (code: number, reason: Buffer) => 
 		{
-			// client.friendSocket && allClients.get(client.friendSocket)?.socket.send(JSON.stringify({ connection: 'lost' }));
 			console.log(chalk.red(`Client disconnected with code: ${code}, reason: ${reason.toString()}`));
 			allClients = allClients.filter(client => client !== currentClient);
-			allClients.forEach(client => {
+
+			for(const client of allClients)
+			{
 				client.socket.send(JSON.stringify({ microservice: 'chat', clientDisconnected: true, nickname: currentClient.nickname }));
 			}
-			);
 		});
 	});
 });

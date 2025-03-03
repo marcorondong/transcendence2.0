@@ -8,12 +8,9 @@ const chatBox = document.getElementById("chat-box") as HTMLDivElement;
 const sendButton = document.getElementById("send-button") as HTMLButtonElement;
 const chatPerson = document.getElementById("chatPerson")!;
 const peopleOnlineList = document.getElementById("peopleOnlineList") as HTMLDivElement;
-const friendRequestButton = document.getElementById('friendRequestButton') as HTMLButtonElement;
-const friendRequestInput = document.getElementById('friendRequestInput') as HTMLInputElement;
 const nickname_page = document.getElementById('nickname_page') as HTMLDivElement;
 const nickname_input = document.getElementById('nickname_input') as HTMLInputElement;
 const nickname_button = document.getElementById('nickname_button') as HTMLButtonElement;
-const game = document.getElementById('game') as HTMLDivElement;
 const me = document.getElementById('me')!;
 const peopleOnlineDiv = document.getElementById('peopleOnlineDiv') as HTMLDivElement;
 
@@ -74,7 +71,7 @@ function appendPerson(text: string): void {
 
     personContainer.addEventListener("click", () => {
         chatPerson.textContent = text;
-        socket.send(JSON.stringify({ microservice: 'chat', chatHistoryRequest: true, nickname: me.textContent, chattingWith: text }));
+        socket.send(JSON.stringify({ microservice: 'chat', chatHistoryRequest: true, chattingWith: text }));
         newMessageIndicator.classList.add("hidden"); // Hide the indicator when the person is clicked
     });
 
@@ -103,7 +100,6 @@ function sendMessage(): void
 const hideAllPages = () => // DONE
 {
 	nickname_page.style.display = 'none';
-	// game.style.display = 'none';
 	chat.style.display = 'none';
 	peopleOnlineDiv.style.display = 'none';
 };
@@ -162,20 +158,6 @@ blockButton.addEventListener('click', () =>
 	socket.send(JSON.stringify({ microservice: 'chat', block: true, nickname: me.textContent, blockedPerson: chatPerson.textContent }));
 });
 
-// messageInput.addEventListener("keypress", (event: KeyboardEvent) => {
-// 	if (event.key === "Enter") sendMessage();
-// });
-
-// friendRequestButton.addEventListener('click', () => 
-// {
-// 	if(friendRequestInput.value.trim() !== "")
-// 	{
-// 		socket.send(JSON.stringify({ type: 'friendRequest', friendNickname: friendRequestInput.value }));
-// 		alert('Friend request sent');
-// 		friendRequestInput.value = "";
-// 	}
-// });
-
 nickname_button.addEventListener('click', () =>  //DONE
 {
 	if(nickname_input.value.trim() !== "")
@@ -223,6 +205,14 @@ socket.onmessage = (event) =>
 			data.chatHistory.forEach((message: { text: string; isOwn: boolean; }) => {
 				appendMessage(message.text, message.isOwn);
 			});
+			if(data.block)
+			{
+				blockButton.style.backgroundColor = 'green';
+			}
+			else if(data.block === false)
+			{
+				blockButton.style.backgroundColor = 'white';
+			}
 			showPage(chat);
 			return;
 		}
@@ -236,44 +226,7 @@ socket.onmessage = (event) =>
 			updateNewMessageIndicator(data.sender, true);
 			return;
 		}
-		// if(data.chatHistoryRequest)
-		// {
-		// 	currentConversation = data.chattingWith;
-		// 	// displayMessages(data.chattingWith);
-		// 	return;
-		// }
-		// if(blockedList.includes(data.nickname))
-		// {
-		// 	// alert('You have blocked this person');
-		// 	return;
-		// }
-		// let incomingMessage: Message = {
-		// 	text: data.message,
-		// 	isOwn: false
-		// };
-		
-		// if (!messageHistories[data.nickname]) {
-		// 	messageHistories[data.nickname] = [];
-		// }
-		// messageHistories[data.nickname].push(incomingMessage);
-		// displayMessages(currentConversation);
-		// if(chatPerson.textContent === data.nickname)
-		// {
-		// 	appendMessage(data.message, false);
-		// 	return;
-		// }
-		// changePersonBackgroundColor(data.nickname, 'green');
 		return;		
 	}
-	// if(data.peopleOnline)
-	// {
-	// 	appendPerson(data.nickname);
-	// 	return;
-	// }
-	// if(data.peopleOnline === false)
-	// {
-	// 	deletePerson(data.nickname);
-	// 	return;
-	// }
 }
 };
