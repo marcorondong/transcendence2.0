@@ -4,14 +4,16 @@ export class SessionRoom
 {
 	protected readonly id: string; 
 	protected players: Map<string,Player>;
+	protected privateRoom: boolean;
 	private spectators: Set<WebSocket> = new Set<WebSocket>();
 	private requiredPlayers: number;
 	
-	constructor(roomId: string, requiredPlayers:number = 2)
+	constructor(roomId: string, requiredPlayers:number = 2, privateRoom:boolean = false)
 	{
 		this.id = roomId;
 		this.requiredPlayers = requiredPlayers;
 		this.players = new Map<string,Player>();
+		this.privateRoom = privateRoom;
 	}
 
 	//TODO: research should this be boolean or Promise async function
@@ -76,16 +78,22 @@ export class SessionRoom
 		this.spectatorBroadcast(message);
 	}
 
+	
+	isFull():boolean
+	{
+		return this.getPlayerCount() === this.requiredPlayers;
+	}
+	
+	isPrivate():boolean
+	{
+		return this.privateRoom;
+	}
+	
 	private spectatorBroadcast(message: string):void 
 	{
 		for(const fan of this.spectators)
 		{
 			fan.send(message);
 		}
-	}
-	
-	isFull():boolean
-	{
-		return this.getPlayerCount() === this.requiredPlayers;
 	}
 }
