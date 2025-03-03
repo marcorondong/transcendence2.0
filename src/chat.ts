@@ -190,6 +190,12 @@ socket.onmessage = (event) =>
 		}
 		if(data.clientDisconnected)
 		{
+			if(data.nickname === chatPerson.textContent)
+			{
+				chatPerson.textContent = '';
+				chatBox.innerHTML = '';
+				showPage(peopleOnlineDiv);
+			}
 			deletePerson(data.nickname);
 			return;
 		}
