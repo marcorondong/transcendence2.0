@@ -1,7 +1,6 @@
 const socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws`);
 
-// const blockedList: string[] = [];
-let currentMagenta = document.createElement('button');
+window.onload = () => {
 
 const chat = document.getElementById("chat") as HTMLDivElement;
 const messageInput = document.getElementById("message-input") as HTMLInputElement;
@@ -15,112 +14,22 @@ const nickname_page = document.getElementById('nickname_page') as HTMLDivElement
 const nickname_input = document.getElementById('nickname_input') as HTMLInputElement;
 const nickname_button = document.getElementById('nickname_button') as HTMLButtonElement;
 const game = document.getElementById('game') as HTMLDivElement;
-const tic = document.getElementById('tic')!;
+const me = document.getElementById('me')!;
+const peopleOnlineDiv = document.getElementById('peopleOnlineDiv') as HTMLDivElement;
 
-// function displayMessages(person: string): void 
-// {
-// 	chatBox.innerHTML = '';
-// 	const messages = messageHistories[person] || [];
-// 	messages.forEach(message => {
-// 		const messageElement = document.createElement("div");
-// 		messageElement.classList.add("mb-2", "flex", message.isOwnMessage ? "justify-end" : "justify-start", "items-start");
-// 		messageElement.innerHTML = `<span class="${message.isOwnMessage ? "bg-blue-500 text-white" : "bg-gray-200"} p-2 rounded-lg">${message.text}</span>`;
-// 		chatBox.appendChild(messageElement);
-// 	});
-// 	chatBox.scrollTop = chatBox.scrollHeight;
-// }
+const backButton = document.getElementById('backButton') as HTMLButtonElement;
+const infoButton = document.getElementById('infoButton') as HTMLButtonElement;
+const inviteButton = document.getElementById('inviteButton') as HTMLButtonElement;
+const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
 
-function appendMessage(message: string, isOwnMessage: boolean): void // DONE
+function appendMessage(message: string, isOwn: boolean): void // DONE
 {
 	const newMessage = document.createElement("div");
-	newMessage.classList.add("mb-2", "flex", isOwnMessage ? "justify-end" : "justify-start", "items-start");
-	newMessage.innerHTML = `<span class="${isOwnMessage ? "bg-blue-500 text-white" : "bg-gray-200"} p-2 rounded-lg">${message}</span>`;
+	newMessage.classList.add("mb-2", "flex", isOwn ? "justify-end" : "justify-start", "items-start");
+	newMessage.innerHTML = `<span class="${isOwn ? "bg-blue-500 text-white" : "bg-gray-200"} p-2 rounded-lg">${message}</span>`;
 	chatBox.appendChild(newMessage);
 	chatBox.scrollTop = chatBox.scrollHeight;
 }
-
-// function changePersonBackgroundColor(): void 
-// {
-//     const buttons = peopleOnlineList.querySelectorAll('button');
-//     buttons.forEach(button => {
-//         const buttonElement = button as HTMLElement;
-//         if (buttonElement.style.backgroundColor === 'magenta') {
-//             buttonElement.style.backgroundColor = 'blue';
-//         }
-//     });
-// }
-
-function appendPerson(text: string): void 
-{
-	const personContainer = document.createElement("div");
-	personContainer.classList.add("mb-2", "flex", "justify-between", "items-center");
-	personContainer.setAttribute("data-person", text);
-
-	const person = document.createElement("button");
-	person.classList.add("bg-blue-500", "text-white", "p-2", "rounded-lg");
-	person.textContent = text;
-	person.addEventListener("click", () => {
-		chatPerson.textContent = text;
-		currentMagenta.style.backgroundColor = 'blue';
-		currentMagenta = person;
-		person.style.backgroundColor = 'magenta';
-		socket.send(JSON.stringify({ microservice: 'chat', chatHistoryRequest: true, nickname: tic.textContent, chatingWith: text }));
-	});
-
-	const buttonContainer = document.createElement("div");
-	buttonContainer.classList.add("flex", "space-x-2");
-
-	const button1 = document.createElement("button");
-	button1.classList.add("bg-green-500", "text-white", "px-2", "py-1", "rounded");
-	button1.textContent = "Info";
-	button1.addEventListener("click", () => {
-		alert('Info button clicked');
-		// chatPerson.textContent = text;
-	});
-
-	const button2 = document.createElement("button");
-	button2.classList.add("bg-yellow-500", "text-white", "px-2", "py-1", "rounded");
-	button2.textContent = "Invite";
-	button2.addEventListener("click", () => {
-		// showPage(loading);
-		// socket.send(JSON.stringify({ matchRequest: true, requestedPerson: text, nickname: player1_name.textContent }));
-		alert('Button 2 clicked');
-	});
-
-	const button3 = document.createElement("button");
-	button3.classList.add("bg-red-500", "text-white", "px-2", "py-1", "rounded");
-	button3.textContent = "Block";
-	button3.addEventListener("click", () => {
-		// blockedList.push(text);
-		alert('Blocked');
-		button3.textContent = "Blocked";
-		// deletePerson(text);
-	});
-
-
-	buttonContainer.appendChild(button1);
-	buttonContainer.appendChild(button2);
-	buttonContainer.appendChild(button3);
-
-	personContainer.appendChild(person);
-	personContainer.appendChild(buttonContainer);
-
-	peopleOnlineList.appendChild(personContainer);
-	peopleOnlineList.scrollTop = peopleOnlineList.scrollHeight;
-}
-
-// function appendPerson(text: string): void {
-//     const message = document.createElement("div");
-//     message.classList.add("mb-2", "flex", "justify-end", "items-start");
-//     message.setAttribute("data-person", text);
-// 	message.innerHTML = `<span class="bg-blue-500 text-white p-2 rounded-lg">${text}</span>`;
-// 	message.addEventListener("click", () => {
-// 		alert('Friend request sent');
-// 		// You can add more actions here
-// 	});      
-// 	peopleOnlineList.appendChild(message);
-//     peopleOnlineList.scrollTop = peopleOnlineList.scrollHeight;
-// }
 
 function deletePerson(text: string): void 
 {
@@ -128,8 +37,49 @@ function deletePerson(text: string): void
 	if (personElement) {
 		peopleOnlineList.removeChild(personElement);
 	} else {
-		console.log(`Person with text "${text}" not found.`);
+		alert('Warning: Person not found');
 	}
+}
+
+function updateNewMessageIndicator(person: string, hasNewMessage: boolean): void {
+    const personElement = peopleOnlineList.querySelector(`[data-person="${person}"]`);
+    if (personElement) {
+        const newMessageIndicator = personElement.querySelector('.new-message-indicator');
+        if (newMessageIndicator) {
+            if (hasNewMessage) {
+                newMessageIndicator.classList.remove('hidden');
+                newMessageIndicator.classList.add('bg-green-500');
+            } else {
+                newMessageIndicator.classList.add('hidden');
+                newMessageIndicator.classList.remove('bg-green-500');
+            }
+        }
+    }
+}
+
+function appendPerson(text: string): void {
+    const personContainer = document.createElement("div");
+    personContainer.classList.add("flex", "items-center", "p-4", "hover:bg-gray-100", "cursor-pointer");
+    personContainer.setAttribute("data-person", text);
+
+    const personName = document.createElement("div");
+    personName.classList.add("text-lg", "font-semibold", "text-gray-900", "flex-grow");
+    personName.textContent = text;
+
+    const newMessageIndicator = document.createElement("div");
+    newMessageIndicator.classList.add("new-message-indicator", "w-3", "h-3", "rounded-full", "ml-4");
+
+    personContainer.appendChild(personName);
+    personContainer.appendChild(newMessageIndicator);
+
+    personContainer.addEventListener("click", () => {
+        chatPerson.textContent = text;
+        socket.send(JSON.stringify({ microservice: 'chat', chatHistoryRequest: true, nickname: me.textContent, chattingWith: text }));
+        newMessageIndicator.classList.add("hidden"); // Hide the indicator when the person is clicked
+    });
+
+    peopleOnlineList.appendChild(personContainer);
+    peopleOnlineList.scrollTop = peopleOnlineList.scrollHeight;
 }
 
 function sendMessage(): void 
@@ -138,7 +88,12 @@ function sendMessage(): void
 	{
 		if(messageInput.value.trim() !== "")
 		{
-			socket.send(JSON.stringify({ type: 'chat', message: messageInput.value, nickname: nickname_input.value, friendNickname: chatPerson.textContent }));
+			if(blockButton.style.backgroundColor === 'green')
+			{
+				alert('You have blocked this person. Unblock to send message');
+				return;
+			}
+			socket.send(JSON.stringify({ microservice: 'chat', message: messageInput.value, sender: me.textContent, receiver: chatPerson.textContent }));
 			appendMessage(messageInput.value, true);
 			messageInput.value = '';
 		}
@@ -148,7 +103,9 @@ function sendMessage(): void
 const hideAllPages = () => // DONE
 {
 	nickname_page.style.display = 'none';
-	game.style.display = 'none';
+	// game.style.display = 'none';
+	chat.style.display = 'none';
+	peopleOnlineDiv.style.display = 'none';
 };
 
 const showPage = (page: HTMLElement) => // DONE
@@ -160,6 +117,50 @@ const showPage = (page: HTMLElement) => // DONE
 // ******** event listeners start here **************
 
 sendButton.addEventListener("click", sendMessage);
+
+backButton.addEventListener('click', () => 
+{
+	chatPerson.textContent = '';
+	// chatBox.innerHTML = '';
+	showPage(peopleOnlineDiv);
+});
+
+infoButton.addEventListener('click', () => 
+{
+	if(blockButton.style.backgroundColor === 'green')
+	{
+		alert('You have blocked this person. Unblock to view info');
+		return;
+	}
+	alert('This is ' + chatPerson.textContent + '. He is hopefully a good guy');
+});
+
+inviteButton.addEventListener('click', () => 
+{
+	if(blockButton.style.backgroundColor === 'green')
+	{
+		alert('You have blocked this person. Unblock to invite');
+		return;
+	}
+	alert('You invited ' + chatPerson.textContent + ' to play PingPong');
+	appendMessage('You invited ' + chatPerson.textContent, true);
+	const inviteMessage = ' You are invited by ' + me.textContent;
+	socket.send(JSON.stringify({ microservice: 'chat', message: inviteMessage, sender: me.textContent, receiver: chatPerson.textContent }));
+});
+
+blockButton.addEventListener('click', () => 
+{
+	if(blockButton.style.backgroundColor === 'green')
+	{
+		alert('You have unblocked ' + chatPerson.textContent);
+		blockButton.style.backgroundColor = 'white';
+		socket.send(JSON.stringify({ microservice: 'chat', unblock: true, nickname: me.textContent, unblockedPerson: chatPerson.textContent }));
+		return;
+	}
+	alert('You have blocked ' + chatPerson.textContent);
+	blockButton.style.backgroundColor = 'green';
+	socket.send(JSON.stringify({ microservice: 'chat', block: true, nickname: me.textContent, blockedPerson: chatPerson.textContent }));
+});
 
 // messageInput.addEventListener("keypress", (event: KeyboardEvent) => {
 // 	if (event.key === "Enter") sendMessage();
@@ -198,33 +199,47 @@ socket.onmessage = (event) =>
 				alert('Nickname already exists');
 				return;
 			}
-			tic.textContent = data.nickname;
-			showPage(game);
+			me.textContent = data.nickname;
+			data.clientsOnline.forEach((client: { nickname: string }) => {
+				appendPerson(client.nickname);
+			});
+			showPage(peopleOnlineDiv);
 			return;
 		}
-		if(data.updatePeopleOnline === true)
+		if(data.clientDisconnected)
 		{
-			console.log('All clients:', data.clientsOnline);
-			peopleOnlineList.innerHTML = '';
-			data.clientsOnline.forEach((client: { nickname: string }) => {
-				if(client.nickname !== tic.textContent)
-				{
-					appendPerson(client.nickname);
-				}
-			});
+			deletePerson(data.nickname);
+			return;
+		}
+		if(data.newClientOnline === true)
+		{
+			appendPerson(data.nickname);
+			return;
 		}
 		if(data.chatHistoryRequest)
 		{
 			chatBox.innerHTML = '';
-			data.chatHistory.forEach((message: { text: string; isOwnMessage: boolean; }) => {
-				appendMessage(message.text, message.isOwnMessage);
+			console.log('Chat history:', data.chatHistory);
+			data.chatHistory.forEach((message: { text: string; isOwn: boolean; }) => {
+				appendMessage(message.text, message.isOwn);
 			});
+			showPage(chat);
+			return;
+		}
+		if(data.message)
+		{
+			if(data.sender === chatPerson.textContent)
+			{
+				appendMessage(data.message, false);
+				return;
+			}
+			updateNewMessageIndicator(data.sender, true);
 			return;
 		}
 		// if(data.chatHistoryRequest)
 		// {
-		// 	currentConversation = data.chatingWith;
-		// 	// displayMessages(data.chatingWith);
+		// 	currentConversation = data.chattingWith;
+		// 	// displayMessages(data.chattingWith);
 		// 	return;
 		// }
 		// if(blockedList.includes(data.nickname))
@@ -234,7 +249,7 @@ socket.onmessage = (event) =>
 		// }
 		// let incomingMessage: Message = {
 		// 	text: data.message,
-		// 	isOwnMessage: false
+		// 	isOwn: false
 		// };
 		
 		// if (!messageHistories[data.nickname]) {
@@ -261,3 +276,4 @@ socket.onmessage = (event) =>
 	// 	return;
 	// }
 }
+};

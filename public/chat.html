@@ -8,6 +8,8 @@
 </head>
 <body class="flex justify-center items-center h-screen m-0 bg-gray-200">
 
+	<h1 id = 'me' class="absolute top-10 text-2xl font-bold text-center mb-4">🐱 Cat Chat</h1>
+	
 	<div id="nickname_page" class="page flex flex-col space-y-4">
 		<div class="flex justify-center">
 			<h1 class="text-4xl">Enter your nickname</h1>
@@ -20,59 +22,38 @@
 		</div>
 	</div>
 
-    <div id="game" class="text-center p-5 bg-white rounded-lg shadow-md">
-        <h1 id = 'tic' class="text-2xl font-bold text-center mb-4">🐱 Cat Chat</h1>
-
-		<div id="boardAndChat" class="flex justify-center items-center space-x-4">
-
-			<div id = "chat" class="w-1/2 p-4 max-w-md p-4 bg-white rounded-lg shadow-lg">
-				<h2 id="chatPerson" class="text-xl font-bold text-center mb-4">🐱 Cat Chat</h2>
 		
-				<div class="h-40 overflow-y-auto p-3 border rounded-md bg-gray-50" id="chat-box"></div>
+	<div id = "chat" class="p-4 max-w-md p-4 bg-white rounded-lg shadow-lg">
 		
-				<div class="mt-4 flex">
-					<input type="text" id="message-input" class="flex-1 p-2 border rounded-l-md focus:outline-none" placeholder="Type a message...">
-					<button class="bg-blue-500 text-white py-2 w-20 h-12 px-4 rounded-r-md" id="send-button">Send</button>
-				</div>
-			</div>
-
-			<div id="friendList" class="w-1/2 p-4 max-w-md p-4 bg-white rounded-lg shadow-lg">
-				<h2 class="text-xl font-bold text-center mb-4">👫 Friend List</h2>
-		
-				<div class="h-40 overflow-y-auto p-3 border rounded-md bg-gray-50" id="friend-list"></div>
-
-				<div class="mt-4 flex">
-					<input type="text" id="friendRequestInput" class="flex-1 p-2 border rounded-l-md focus:outline-none" placeholder="Enter friend's nickname...">
-					<button class="bg-blue-500 text-white px-4 py-2 w-20 h-12 rounded-r-md" id="friendRequestButton">Friend</button>
-				</div>
+		<div class="flex justify-between items-center mb-4">
+			<button id="backButton" class="text-white text-2xl">⬅️</button>
+			<h2 id="chatPerson" class="text-xl font-bold text-center flex-grow">🐱 Cat Chat</h2>
+			<div class="flex space-x-2">
+				<button id="infoButton" class="text-2xl">ℹ️</button>
+				<button id="inviteButton" class="text-2xl">🎮</button>
+				<button id="blockButton" value="friend" class="text-2xl">🚫</button>
 			</div>
 		</div>
 
-		<div id="secondLine" class="flex justify-center items-center space-x-4">
-			<div id="notificationDiv" class="w-1/2 p-4 max-w-md p-4 bg-white rounded-lg shadow-lg">
-				<h2 class="text-xl font-bold text-center mb-4">👫 Your Notifications</h2>
-		
-				<div class="h-40 overflow-y-auto p-3 border rounded-md bg-gray-50" id="notification-list"></div>
+		<div class="h-40 overflow-y-auto p-3 border rounded-md bg-gray-50" id="chat-box"></div>
 
-				<div class="mt-4 flex">
-					<input type="text" id="acceptFriendRequestInput" class="flex-1 p-2 border rounded-l-md focus:outline-none" placeholder="Enter friend's nickname...">
-					<button class="bg-blue-500 text-white px-4 py-2 w-20 h-12 rounded-r-md" id="acceptFriendRequestButton">Accept</button>
-				</div>
-			</div>
-
-			<div id="peopleOnlineDiv" class="w-1/2 p-4 max-w-md p-4 bg-white rounded-lg shadow-lg">
-				<h2 class="text-xl font-bold text-center mb-4">👫 People Online</h2>
-		
-				<div class="h-40 overflow-y-auto p-3 border rounded-md bg-gray-50" id="peopleOnlineList"></div>
-
-				<div class="mt-4 flex">
-					<input type="text" id="peopleOnlineDivButton" class="flex-1 p-2 border rounded-l-md focus:outline-none" placeholder="Enter friend's nickname...">
-					<button class="bg-blue-500 text-white px-4 py-2 w-20 h-12 rounded-r-md" id="acceptFriendRequestButton2">Invite</button>
-				</div>
-			</div>
+		<div class="mt-4 flex">
+			<input type="text" id="message-input" class="flex-1 p-2 border rounded-l-md focus:outline-none" placeholder="Type a message...">
+			<button class="bg-blue-500 text-white py-2 w-20 h-12 px-4 rounded-r-md" id="send-button">Send</button>
 		</div>
+	</div>
 
-    </div>
+	<div id="peopleOnlineDiv" class="p-4 max-w-md p-4 bg-white rounded-lg shadow-lg">
+		<h2 class="text-xl font-bold text-center mb-4">👫 People Online</h2>
+
+		<div class="h-40 overflow-y-auto p-3 border rounded-md bg-gray-50" id="peopleOnlineList"></div>
+
+		<div class="mt-4 flex">
+			<input type="text" id="peopleOnlineDivButton" class="flex-1 p-2 border rounded-l-md focus:outline-none" placeholder="Enter friend's nickname...">
+			<button class="bg-blue-500 text-white px-4 py-2 w-20 h-12 rounded-r-md" id="acceptFriendRequestButton2">Invite</button>
+		</div>
+	</div>
+
     <script src="chat.js"></script>
 </body>
 </html>

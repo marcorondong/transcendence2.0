@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+    <!-- Main container -->
+    <div class="max-w-lg mx-auto mt-8 bg-white shadow-lg rounded-lg overflow-hidden">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 bg-green-600 text-white">
+            <div class="flex items-center space-x-3">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full w-10 h-10">
+                <span class="font-semibold text-lg">WhatsApp</span>
+            </div>
+            <div class="space-x-3">
+                <button class="text-white text-2xl">⚙️</button>
+                <button class="text-white text-2xl">📞</button>
+            </div>
+        </div>
+
+        <!-- Contacts List -->
+        <div class="p-4 space-y-3 overflow-y-scroll h-96">
+ 
+            <!-- Contact Item -->
+            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <div class="flex items-center space-x-3">
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full w-10 h-10">
+                    <div>
+                        <span class="font-semibold">Emily</span>
+                        <p class="text-sm text-gray-500">Are we still meeting later?</p>
+                    </div>
+                </div>
+                <span class="text-xs text-gray-400">Yesterday</span>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

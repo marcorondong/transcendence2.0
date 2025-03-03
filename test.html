@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Chat Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+    <!-- Chat Container -->
+    <div class="max-w-lg mx-auto mt-8 bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 bg-green-600 text-white">
+            <div class="flex items-center space-x-3">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full w-10 h-10">
+                <span class="font-semibold text-lg">John Doe</span>
+            </div>
+            <div class="space-x-3">
+                <button class="text-white text-2xl">⚙️</button>
+                <button class="text-white text-2xl">📞</button>
+				<button class="text-white text-2xl">ℹ️</button>
+				<button class="text-white text-2xl">🚫</button>
+				<button class="text-white text-2xl">✅</button>
+				<button class="text-white text-2xl">➕</button>
+
+            </div>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="p-4 h-80 overflow-y-scroll space-y-4">
+            <!-- Messages -->
+            <div class="flex space-x-3">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full w-10 h-10">
+                <div class="bg-gray-200 p-2 rounded-lg max-w-xs">
+                    <p class="text-sm">Hey! How's it going?</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <div class="bg-green-600 text-white p-2 rounded-lg max-w-xs">
+                    <p class="text-sm">I'm good, thanks! How about you?</p>
+                </div>
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full w-10 h-10">
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="p-4 bg-gray-200 flex items-center space-x-3">
+            <input type="text" class="w-full p-2 rounded-lg bg-white border border-gray-300 focus:outline-none" placeholder="Type a message...">
+            <button class="text-green-600 text-2xl">📎</button>
+            <button class="text-green-600 text-2xl">😊</button>
+            <button class="bg-green-600 text-white p-2 rounded-full">
+                <span class="text-xl">▶️</span>
+            </button>
+        </div>
+    </div>
+
+</body>
+
+</html>
