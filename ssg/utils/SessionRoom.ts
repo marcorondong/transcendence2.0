@@ -7,6 +7,7 @@ export class SessionRoom
 	protected privateRoom: boolean;
 	private spectators: Set<WebSocket> = new Set<WebSocket>();
 	private requiredPlayers: number;
+	protected readonly creationDate:Date; 
 	
 	constructor(roomId: string, requiredPlayers:number = 2, privateRoom:boolean = false)
 	{
@@ -14,6 +15,7 @@ export class SessionRoom
 		this.requiredPlayers = requiredPlayers;
 		this.players = new Map<string,Player>();
 		this.privateRoom = privateRoom;
+		this.creationDate = new Date();
 	}
 
 	//TODO: research should this be boolean or Promise async function
@@ -88,7 +90,17 @@ export class SessionRoom
 	{
 		return this.privateRoom;
 	}
-	
+
+	setRoomPrivate():void 
+	{
+		this.privateRoom = true;
+	}
+
+	setRoomPublic(): void 
+	{
+		this.privateRoom = false;
+	}
+
 	private spectatorBroadcast(message: string):void 
 	{
 		for(const fan of this.spectators)
