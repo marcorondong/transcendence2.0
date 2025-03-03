@@ -25,6 +25,8 @@ const player1_score = document.getElementById('player1_score') as HTMLDivElement
 const player2_score = document.getElementById('player2_score') as HTMLDivElement;
 const playWith = document.getElementById('playWith') as HTMLDivElement;
 const info = document.getElementById('info') as HTMLDivElement;
+const rematchButton = document.getElementById('rematchButton') as HTMLButtonElement;
+const leaveButton = document.getElementById('leaveButton') as HTMLButtonElement;
 
 // Loading page
 const loadingPage = document.getElementById('loadingPage') as HTMLDivElement;
@@ -120,6 +122,38 @@ function ft_lookingForGame()
 	showPage(loadingPage);
 }
 
+function ft_leaveRoom()
+{
+	socket.send(JSON.stringify({ microservice: 'tictactoe', leftRoom: true }));
+	board.fill("");
+	cells.forEach(cell => cell.textContent = "");
+	player1Score = 0;
+	player2Score = 0;
+	player1_score.textContent = '0';
+	player2_score.textContent = '0';
+	gameActive = true;
+	showPage(customisePage);
+}
+
+
+cells.forEach(cell => {
+	cell.addEventListener('mouseenter', (event) => {
+		const target = event.target as HTMLElement;
+        const index = Number(target.dataset.index);
+		
+        if (board[index]) {
+			target.classList.add('hover:bg-red-100');
+        }
+    });
+	
+	cell.addEventListener('mouseleave', (event) => {
+		const target = event.target as HTMLElement;
+        target.classList.remove('hover:bg-red-100');
+    });
+	
+	cell.addEventListener('click', handleCellClick);
+});
+
 nickname_button.addEventListener('click', () =>  //DONE
 {
 	if(nickname_input.value.trim() !== "")
@@ -128,30 +162,10 @@ nickname_button.addEventListener('click', () =>  //DONE
 	}
 });
 
-cancelButton.addEventListener('click', () => ft_cancelLookingForGame());
-
-cells.forEach(cell => {
-    cell.addEventListener('mouseenter', (event) => {
-        const target = event.target as HTMLElement;
-        const index = Number(target.dataset.index);
-
-        if (board[index]) {
-            target.classList.add('hover:bg-red-100');
-        }
-    });
-
-	cell.addEventListener('mouseleave', (event) => {
-        const target = event.target as HTMLElement;
-        target.classList.remove('hover:bg-red-100');
-    });
-
-	cell.addEventListener('click', handleCellClick);
-});
-
-
 
 playOnlineButton.addEventListener('click', () => ft_lookingForGame());
 cancelButton.addEventListener('click', () => ft_cancelLookingForGame());
+leaveButton.addEventListener('click', () => ft_leaveRoom());
 
 
 
@@ -203,6 +217,19 @@ socket.onmessage = (event) =>
 			}
 			gameActive = true;
 			info.textContent = 'Your turn';
+			return;
+		}
+		if(data.leftRoom)
+		{
+			board.fill("");
+			cells.forEach(cell => cell.textContent = "");
+			player1Score = 0;
+			player2Score = 0;
+			player1_score.textContent = '0';
+			player2_score.textContent = '0';
+			gameActive = true;
+			alert('Opponent left the room');
+			showPage(customisePage);
 			return;
 		}
 	}
