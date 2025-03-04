@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
 import { Player } from "../../utils/Player";
 import { PongRoomManager } from "./PongRoomManager";
+import { Parser } from "../../utils/Parser";
 
 
 dotenv.config();
@@ -56,10 +57,8 @@ const fastify = Fastify(
 	: true
 });
 	
-	
-const roomManager:PongRoomManager = new PongRoomManager();
 
-function roomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
+function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 {
 	if(roomId === 0)
 	{
@@ -86,6 +85,22 @@ function roomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 		}
 	}
 }
+
+function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
+{
+	if(roomId === 0)
+		return false;
+	const roomWithId = roomManager.getRoom(roomId);
+	if(roomWithId !== undefined)
+	{
+		roomWithId.addSpectator(connection);
+		return true
+	}
+	return false;
+}
+
+
+const roomManager:PongRoomManager = new PongRoomManager();
 
 
 fastify.register(fastifyStatic, {
@@ -125,12 +140,24 @@ fastify.register(async function(fastify)
 
 		let room:PongRoom | undefined;
 
+		console.log(clientType);
 		if(clientType === "player")
 		{
-			room =roomJoiner(roomId, connection);
+			room = playerRoomJoiner(roomId, connection);
+			console.log(`Player joined to room:${room.getId()}`);
+			connection.send(`Hello player welcom to room ${room.getId()}`)
 		}
-		if(room !== undefined)
+		if(room !== undefined && room.isFull())
 			room.getAndSendFramesOnce();
+		if(clientType ==="spectator")
+		{
+			console.log("Client joining")
+			if(spectatorJoin(roomId, connection))
+			{
+				console.log(`Spectator joined to room:${roomId}`)
+				connection.send(`Hello spectator welcome to room ${roomId}`)
+			}
+		}
 		// const gameRoom = getOrCreateGameRoom(gameId);
 		// gameRoom.getAndSendFramesOnce();
 		// if(gameRoom.getPlayerCount() === 0)
