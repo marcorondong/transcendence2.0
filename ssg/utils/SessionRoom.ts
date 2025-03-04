@@ -2,22 +2,33 @@ import {Player} from "./Player"
 import { WebSocket } from "ws";
 export class SessionRoom
 {
-	protected readonly id: string; 
+	protected readonly id: string;
 	protected players: Map<string,Player>;
 	protected privateRoom: boolean;
 	private spectators: Set<WebSocket> = new Set<WebSocket>();
 	private requiredPlayers: number;
 	protected readonly creationDate:Date; 
 	
-	constructor(roomId: string, requiredPlayers:number = 2, privateRoom:boolean = false)
+	constructor(requiredPlayers:number = 2, privateRoom:boolean = false)
 	{
-		this.id = roomId;
+		this.id = crypto.randomUUID();
 		this.requiredPlayers = requiredPlayers;
 		this.players = new Map<string,Player>();
 		this.privateRoom = privateRoom;
 		this.creationDate = new Date();
 	}
 
+
+	getId():string
+	{
+		return this.id;
+	}
+
+	getCreationDate():Date 
+	{
+		return this.creationDate;
+	}
+	
 	//TODO: research should this be boolean or Promise async function
 	/**
 	 * 
