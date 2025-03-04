@@ -5,29 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Pong</title>
     <style>
-        body { text-align: center; }
-        canvas { background: black; display: block; margin: auto; }
+        body { 
+            text-align: center; 
+            font-family: Arial, sans-serif; 
+            color: white; 
+            background: black; 
+        }
+        #game-container {
+            background: grey; 
+            display: inline-block; 
+            padding: 20px; 
+            border-radius: 10px;
+        }
+        canvas { 
+            background: black; 
+            display: block; 
+            margin: auto; 
+        }
+        #room-container { margin-top: 20px; }
+        #roomId { 
+            font-size: 18px; 
+            padding: 10px; 
+            border: 1px solid white; 
+            display: inline-block; 
+            background: grey; 
+            color: white; 
+            border-radius: 5px;
+        }
+        button { 
+            margin-top: 10px; 
+            padding: 10px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border: none; 
+            background: white; 
+            color: black; 
+            border-radius: 5px; 
+        }
+        button:hover { background: lightgrey; }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="900" height="500"></canvas> 
+    <div id="game-container">
+        <canvas id="gameCanvas" width="900" height="500"></canvas> 
+    </div>
+    
+    <div id="room-container">
+        <p>Room ID: <span id="roomId">N/A</span></p>
+        <button onclick="copyRoomId()">Copy Room ID</button>
+    </div>
+
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        const querryParams = window.location.search;
-        const ws = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/pong/${querryParams}`);
-        
+        const queryParams = window.location.search;
+        const ws = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`);
+
         let gameState = {
             leftPaddle: { x: -4, y: 0, height: 1 },
             rightPaddle: { x: 4, y: 0, height: 1 },
             ball: { x: 0, y: 0, radius: 0.25 },
-            score: { leftGoals: 0, rightGoals: 0, time: false }
+            score: { leftGoals: 0, rightGoals: 0, time: false },
+            roomId: "N/A"
         };
 
-        let leftPaddleDirection = 0; // -1 for up, 1 for down, 0 for no movement
+        let leftPaddleDirection = 0; 
         let rightPaddleDirection = 0;
 
-        // Game loop to update paddle positions
         setInterval(() => {
             if (leftPaddleDirection !== 0) {
                 ws.send(JSON.stringify({ move: leftPaddleDirection > 0 ? "down" : "up", paddle: "left" }));
@@ -35,16 +79,17 @@
             if (rightPaddleDirection !== 0) {
                 ws.send(JSON.stringify({ move: rightPaddleDirection > 0 ? "down" : "up", paddle: "right" }));
             }
-        }, 1000 / 60); // 60 times per second (60fps)
+        }, 1000 / 60); 
 
         ws.onmessage = (event) => {
             gameState = JSON.parse(event.data);
+            document.getElementById("roomId").innerText = gameState.roomId || "N/A";
             drawGame();
         };
-        
+
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             let scaleX = canvas.width / 9;
             let scaleY = canvas.height / 5;
 
@@ -56,9 +101,9 @@
         }
 
         function drawFieldBorders(scaleX, scaleY) {
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 2;
-            
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3; // Increased thickness for visibility
+
             ctx.beginPath();
             ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
@@ -66,65 +111,52 @@
             ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
+            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.stroke();
         }
 
         function drawPaddle(x, y, height) {
             ctx.fillStyle = "white";
-            ctx.fillRect(
-                x + canvas.width / 2 - 5,
-                -y + canvas.height / 2 - (height / 2),  
-                10,
-                height
-            );
+            ctx.fillRect(x + canvas.width / 2 - 5, -y + canvas.height / 2 - (height / 2), 10, height);
         }
 
         function drawBall(x, y, radius) {
             ctx.fillStyle = "white";
             ctx.beginPath();
-            ctx.arc(
-                x + canvas.width / 2,
-                -y + canvas.height / 2,  
-                radius,
-                0,
-                Math.PI * 2
-            );
+            ctx.arc(x + canvas.width / 2, -y + canvas.height / 2, radius, 0, Math.PI * 2);
             ctx.fill();
         }
-        
+
         function drawScore() {
             ctx.fillStyle = "white";
             ctx.font = "24px Arial";
             ctx.fillText(`Left: ${gameState.score.leftGoals}`, canvas.width / 4, 30);
             ctx.fillText(`Right: ${gameState.score.rightGoals}`, (canvas.width * 3) / 4, 30);
-            
             if (gameState.score.time !== false) {
                 ctx.fillText(`Time: ${gameState.score.time}s`, canvas.width / 2 - 40, 30);
             }
         }
-        
+
         document.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowUp") {
-                leftPaddleDirection = -1;  // Move up
-            } else if (event.key === "ArrowDown") {
-                leftPaddleDirection = 1;   // Move down
-            }
-            if (event.key === "w") {
-                rightPaddleDirection = -1; // Move up
-            } else if (event.key === "s") {
-                rightPaddleDirection = 1;  // Move down
-            }
-        });
-        
-        document.addEventListener("keyup", (event) => {
-            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-                leftPaddleDirection = 0; // Stop movement
-            }
-            if (event.key === "w" || event.key === "s") {
-                rightPaddleDirection = 0; // Stop movement
-            }
+            if (event.key === "ArrowUp") leftPaddleDirection = -1;
+            if (event.key === "ArrowDown") leftPaddleDirection = 1;
+            if (event.key === "w") rightPaddleDirection = -1;
+            if (event.key === "s") rightPaddleDirection = 1;
         });
 
+        document.addEventListener("keyup", (event) => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") leftPaddleDirection = 0;
+            if (event.key === "w" || event.key === "s") rightPaddleDirection = 0;
+        });
+
+        function copyRoomId() {
+            const roomId = document.getElementById("roomId").innerText;
+            navigator.clipboard.writeText(roomId).then(() => {
+                alert("Room ID copied to clipboard!");
+            }).catch((err) => {
+                console.error("Failed to copy Room ID", err);
+            });
+        }
     </script>
 </body>
 </html>
