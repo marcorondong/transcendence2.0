@@ -27,6 +27,12 @@ export class ScoreBoard
 			this.rightPlayerGoals++;
 	}
 
+	setScore(leftGoals:number, rightGoals:number)
+	{
+		this.leftPlayerGoals = leftGoals;
+		this.rightPlayerGoals = rightGoals;
+	}
+
 	getScoreJson():ScoreI
 	{
 		return {
