@@ -72,7 +72,8 @@ export class PongRoom extends SessionRoom
 	{
 		const renderFrame = () => {
 			const frame: PongFrameI = this.getGame().getFrame();
-			const frameJson = JSON.stringify(frame);
+			const frameWithRoomId = {...frame, roomId:this.getId()};
+			const frameJson = JSON.stringify(frameWithRoomId);
 			this.roomBroadcast(frameJson)
 			if(this.getGame().isLastFrame())
 			{
