@@ -145,7 +145,8 @@ fastify.register(async function(fastify)
 		{
 			room = playerRoomJoiner(roomId, connection);
 			console.log(`Player joined to room:${room.getId()}`);
-			connection.send(`Hello player welcom to room ${room.getId()}`)
+			const roomIdJson = {roomId: room.getId()};
+			connection.send(JSON.stringify(roomIdJson));
 		}
 		if(room !== undefined && room.isFull())
 			room.getAndSendFramesOnce();
