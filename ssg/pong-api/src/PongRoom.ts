@@ -6,7 +6,8 @@ import { Ball } from "./Ball";
 import { PongFrameI } from "./PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
-import {Parser} from "../../utils/Parser"
+import {Parser} from "../../utils/Parser";
+import { Player } from "../../utils/Player";
 
 
 function createGame(gameId:string) :PingPongGame
@@ -23,9 +24,9 @@ export class PongRoom extends SessionRoom
 	private isFrameGenerating: boolean = false;
 
 	game:PingPongGame = createGame(this.id);
-	constructor(roomID: string)
+	constructor(privateRoom:boolean = false)
 	{
-		super(roomID, 2);
+		super(2, privateRoom);
 	}
 
 	getGame():PingPongGame
@@ -45,7 +46,7 @@ export class PongRoom extends SessionRoom
 		}
 	}
 
-	assingControlsToPlayer(socket: WebSocket, paddleSide: "left" | "right"):void 
+	private assingControlsToPlayer(socket: WebSocket, paddleSide: "left" | "right"):void 
 	{
 		socket.on("message", (data: RawData, isBinnary:boolean) =>
 		{
@@ -59,6 +60,12 @@ export class PongRoom extends SessionRoom
 			const paddle:Paddle = this.getGame().getPaddle(paddleSide);
 			this.getGame().movePaddle(paddle, direction);
 		})
+	}
+
+	addAndAssingControlsToPlayer(player:Player, playerSide: "left" | "right")
+	{
+		this.addPlayer(player);
+		this.assingControlsToPlayer(player.connection, playerSide);
 	}
 
 	private sendFrames()
