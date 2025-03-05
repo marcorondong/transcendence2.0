@@ -6,9 +6,9 @@ import { RPSGame } from "./rps";
 export class RpsRoom extends SessionRoom
 {
 	moves:Map<Player, Choice> = new Map();
-	constructor(roomId: string)
+	constructor()
 	{
-		super(roomId, 2);
+		super();
 	}
 
 	storeMove(player:Player, playedMove:string)
