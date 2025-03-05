@@ -1,15 +1,14 @@
-import { WebSocket } from "ws";
-import { Paddle } from "./Paddle";
+import { WebSocket, RawData } from "ws";
 
 export class PongPlayer
 {
 	readonly connection: WebSocket;
-	readonly playerPaddle: Paddle;
+	readonly side: "left" | "right";
 
-	constructor(socket: WebSocket, playerControledPaddle: Paddle)
+	constructor(socket: WebSocket, playerSide: "left" | "right")
 	{
 		this.connection = socket;
-		this.playerPaddle = playerControledPaddle;
+		this.side = playerSide;
 	}
 
 	equals(otherPlayer: PongPlayer):boolean
