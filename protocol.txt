@@ -3,3 +3,77 @@
 microservice: chat
 registration: true
 nickname: nickname_input.value
+
+
+
+
+
+
+if (!data.microservice)
+
+The falsy values in JavaScript are:
+
+false 		— The boolean false.
+0 			— The number zero.
+-0 			— The negative zero.
+"" 			(empty string) — An empty string.
+null 		— Represents the intentional absence of any object value.
+undefined 	— Represents an uninitialized variable or missing property.
+NaN 		— Stands for "Not a Number," often the result of mathematical operations that fail.
+
+if (false) console.log("false is falsy");
+if (0) console.log("0 is falsy");
+if (-0) console.log("-0 is falsy");
+if ("") console.log('"" is falsy');
+if (null) console.log("null is falsy");
+if (undefined) console.log("undefined is falsy");
+if (NaN) console.log("NaN is falsy");
+
+-------------------------------------------------------------
+
+Some common truthy values include:
+
+true — The boolean true.
+Any non-zero number (e.g., 1, -1, 3.14, etc.).
+Non-empty strings (e.g., "hello", " ", etc.).
+Objects — Even an empty object ({}) or an empty array ([]).
+Functions — Any function, even if it's empty.
+Any other value that is not falsy — Any object, non-empty string, non-zero number, etc.
+
+if (true) console.log("true is truthy");
+if (1) console.log("1 is truthy");
+if ("hello") console.log('"hello" is truthy');
+if ({}) console.log("{} is truthy");
+if ([]) console.log("[] is truthy");
+if (function() {}) console.log("function() {} is truthy");
+
+
+-------------------
+
+let values = [false, 0, "", null, undefined, NaN, "hello", 1, [], {}, true, -1];
+
+values.forEach(value => {
+  if (value) {
+    console.log(`${value} is truthy`);
+  } else {
+    console.log(`${value} is falsy`);
+  }
+});
+
+false is falsy
+0 is falsy
+"" is falsy
+null is falsy
+undefined is falsy
+NaN is falsy
+hello is truthy
+1 is truthy
+ is truthy
+[object Object] is truthy
+true is truthy
+-1 is truthy
+
+------------------------
+
+
+

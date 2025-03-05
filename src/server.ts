@@ -77,70 +77,119 @@ fastify.register(async function (fastify)
 		const socket = connection as unknown as WebSocket;
 		const id = uuidv4();
 		const currentClient = new Client(id, "", socket);
-		// allClients.push(client);
+		// allClients.push(currentClient); // This is done after registration is successful
 		console.log(chalk.magentaBright('Client connected'));
 
 		connection.on('message', (message: string) =>
 		{
 			const data = JSON.parse(message.toString());
-			if(data.microservice === 'chat')
+			if(data.microservice)
 			{
-				if(data.message)
+				if(data.microservice === 'chat')
 				{
-					const receiver = findClientByNickname(data.receiver);
-					if(receiver && !receiver.blockedList.includes(currentClient.nickname))
+					if(data.message)
 					{
-						const message = new Message(data.message, false);
-						addMessage(data.receiver, currentClient.nickname, message);
-						receiver.socket.send(JSON.stringify(data));
-					}
-					const message = new Message(data.message, true);
-					addMessage(currentClient.nickname, data.receiver, message);
-					return;
-				}
-				else if(data.chatHistoryRequest)
-				{
-					if(!chatHistories[currentClient.nickname] || !chatHistories[currentClient.nickname][data.chattingWith])
-					{
-						socket.send(JSON.stringify({ ...data, chatHistory: [], block: false }));
+						const receiver = findClientByNickname(data.receiver);
+						if(receiver && !receiver.blockedList.includes(currentClient.nickname))
+						{
+							const message = new Message(data.message, false);
+							addMessage(data.receiver, currentClient.nickname, message);
+							receiver.socket.send(JSON.stringify({ microservice: 'chat', message: data.message, sender: currentClient.nickname }));
+						}
+						const message = new Message(data.message, true);
+						addMessage(currentClient.nickname, data.receiver, message);
 						return;
 					}
-					const isBlocked = currentClient.blockedList.includes(data.chattingWith);
-					const chatHistory = chatHistories[currentClient.nickname][data.chattingWith];
-					socket.send(JSON.stringify({ ...data, chatHistory: chatHistory, block: isBlocked }));
-					return;
-				}
-				else if(data.block)
-				{
-					currentClient.blockedList.push(data.blockedPerson);
-					return;
-				}
-				else if(data.unblock)
-				{
-					currentClient.blockedList = currentClient.blockedList.filter(n => n !== data.unblockedPerson);
-					return;
-				}
-				else if(data.registration)
-				{
-					if(allClients.some(client => client.nickname === data.nickname))
+					else if(data.chatHistoryRequest)
 					{
-						socket.send(JSON.stringify({microservice: 'chat', registration: false}));
+						if(!chatHistories[currentClient.nickname] || !chatHistories[currentClient.nickname][data.chattingWith])
+						{
+							socket.send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: [], block: false }));
+							return;
+						}
+						const isBlocked = currentClient.blockedList.includes(data.chattingWith);
+						const chatHistory = chatHistories[currentClient.nickname][data.chattingWith];
+						socket.send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: chatHistory, block: isBlocked }));
 						return;
 					}
-					const clientsOnline = Array.from(allClients.values()).map(client => ({
-						nickname: client.nickname
-					}));
-					socket.send(JSON.stringify({ ...data, clientsOnline: clientsOnline }));
-
-					for(const client of allClients)
+					else if(data.blockThisPerson)
 					{
-						client.socket.send(JSON.stringify({ microservice: 'chat', newClientOnline: true, nickname: data.nickname }));
+						currentClient.blockedList.push(data.blockedPerson);
+						socket.send(JSON.stringify({ microservice: 'chat', thisPersonBlocked: data.blockThisPerson }));
+						return;
 					}
-					currentClient.nickname = data.nickname;
-					allClients.push(currentClient);
-					return;
+					else if(data.unblockThisPerson)
+					{
+						currentClient.blockedList = currentClient.blockedList.filter(n => n !== data.unblockThisPerson);
+						socket.send(JSON.stringify({ microservice: 'chat', thisPersonUnblocked: data.unblockThisPerson }));
+						return;
+					}
+					else if(data.registerThisPerson)
+					{
+						if(allClients.some(client => client.nickname === data.registerThisPerson))
+						{
+							socket.send(JSON.stringify({ microservice: 'chat', registrationDeclined: data.registerThisPerson + ' is already taken'}));
+							return;
+						}
+						const clientsOnline = Array.from(allClients.values()).map(client => ({nickname: client.nickname}));
+						socket.send(JSON.stringify({ microservice: 'chat', registrationApproved: data.registerThisPerson, clientsOnline: clientsOnline }));
+						for(const client of allClients)
+						{
+							client.socket.send(JSON.stringify({ microservice: 'chat', newClientOnline: data.registerThisPerson }));
+						}
+						currentClient.nickname = data.registerThisPerson;
+						allClients.push(currentClient);
+						return;
+					}
+					else if(data.inviteThisPerson)
+					{
+						const invitee = findClientByNickname(data.inviteThisPerson);
+						if(invitee && !invitee.blockedList.includes(currentClient.nickname))
+						{
+							const message = new Message(data.message, false);
+							addMessage(data.receiver, currentClient.nickname, message);
+							invitee.socket.send(JSON.stringify({ microservice: 'chat', thisPersonInvitedYou: currentClient.nickname }));
+						}
+						return;
+					}
+					else if(data.error)
+					{
+						console.log(chalk.red('Error: Client sent an error message to "chat" microservice. Something went wrong in client side. The error message is:'));
+						console.log(chalk.yellow(data.error));
+						return;
+					}
+					else // if chat microservice has an unknown request
+					{
+						console.log(chalk.red('Error: Unknown request from client in "chat" microservice. Received data:'));
+						console.log(JSON.stringify(data, null, 2));
+					}
 				}
-			};
+				else if (data.microservice === 'error')
+				{
+					if(data.errorMessage && data.sentData)
+					{
+						console.log(chalk.red('Error: Client received incorrect data from server. The error message is:'));
+						console.log(chalk.yellow(data.errorMessage));
+						console.log(chalk.red('Data which client received from server:'));
+						console.log(JSON.stringify(data.sentData, null, 2));
+					}
+					else // if errorMessage or sentData property is not found or has a falsy value
+					{
+						console.log(chalk.red('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:'));
+						console.log(JSON.stringify(data, null, 2));
+					}
+				}
+				else // if microservice property has an unknown value
+				{
+					console.log(chalk.red('Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests. Received data:'));
+					console.log(JSON.stringify(data, null, 2));
+				}
+			}
+			else // if microservice property is not found or has a falsy value
+			{
+				console.log(chalk.red('Error: "microservice" property not found or has a falsy value in data sent by client to server. Received data:'));
+				console.log(JSON.stringify(data, null, 2))
+			}
 		});
 
 		connection.on('close', (code: number, reason: Buffer) => 
