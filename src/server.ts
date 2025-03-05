@@ -100,6 +100,15 @@ fastify.register(async function (fastify)
 						addMessage(currentClient.nickname, data.receiver, message);
 						return;
 					}
+					else if(data.notification)
+					{
+						const receiver = findClientByNickname(data.receiver);
+						if(receiver && !receiver.blockedList.includes(currentClient.nickname))
+						{
+							receiver.socket.send(JSON.stringify({ microservice: 'chat', notification: data.notification, sender: currentClient.nickname }));
+						}
+						return;
+					}
 					else if(data.chatHistoryRequest)
 					{
 						if(!chatHistories[currentClient.nickname] || !chatHistories[currentClient.nickname][data.chattingWith])
@@ -149,6 +158,25 @@ fastify.register(async function (fastify)
 							const message = new Message(data.message, false);
 							addMessage(data.receiver, currentClient.nickname, message);
 							invitee.socket.send(JSON.stringify({ microservice: 'chat', thisPersonInvitedYou: currentClient.nickname }));
+						}
+						return;
+					}
+					else if(data.invitationCanceled)
+					{
+						const invitee = findClientByNickname(data.invitationCanceled);
+						if(invitee && !invitee.blockedList.includes(currentClient.nickname))
+						{
+							invitee.socket.send(JSON.stringify({ microservice: 'chat', invitationCanceled: currentClient.nickname }));
+						}
+						return;
+					}
+					else if (data.startGame)
+					{
+						const invitee = findClientByNickname(data.startGame);
+						if(invitee && !invitee.blockedList.includes(currentClient.nickname))
+						{
+							invitee.socket.send(JSON.stringify({ microservice: 'chat', startGame: "http://10.14.5.2:3001/" }));
+							socket.send(JSON.stringify({ microservice: 'chat', startGame: "http://10.14.5.2:3001/" }));
 						}
 						return;
 					}

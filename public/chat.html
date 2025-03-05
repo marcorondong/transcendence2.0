@@ -23,7 +23,7 @@
 	</div>
 
 		
-	<div id = "chat" class="p-4 max-w-xl bg-white rounded-lg shadow-lg">
+	<div id = "chat" class="p-4 max-w-xl bg-green-500 rounded-lg shadow-lg">
 		
 		<div class="flex justify-between items-center mb-4">
 			<button id="chatBackButton" class="text-white text-2xl">⬅️</button>
@@ -59,13 +59,41 @@
 		</div>
 	</div>
 
-	<div id="notificationDiv" class="p-4 max-w-xl p-4 bg-white rounded-lg shadow-lg">
+	<div id="notificationDiv" class="p-4 max-w-xl p-4 bg-blue-500 rounded-lg shadow-lg">
 		<div class="flex justify-between items-center mb-4">
 			<button id="notifBackButton" class="text-white text-2xl">⬅️</button>
 			<h2 class="text-xl font-bold text-center flex-grow">👫 Your Notifications</h2>
 		</div>
 
 		<div class="h-80 overflow-y-auto p-3 border rounded-md bg-gray-50" id="notificationList"></div>
+
+	</div>
+
+	<div id="loadingPage" class="page flex flex-col space-y-4">
+		<div class="flex justify-center">
+			<h1 id="waiting" class="text-4xl">Waiting for opponent to join...</h1>
+		</div>
+		<div class="flex justify-center">
+			<img src="loading.gif" alt="Loading...">
+		</div>
+		<div class="flex justify-center">
+			<button id="cancelLoadingButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Cancel</button>
+		</div>
+	</div>
+
+	<div id="gamePage" class="text-center p-5 bg-white rounded-lg shadow-md">
+
+		<div id="board" class="p-4 grid grid-cols-3 grid-rows-3 gap-2 mb-5">
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="0"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="1"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="2"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="3"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="4"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="5"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="6"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="7"></div>
+			<div class="cell w-20 h-20 bg-white border border-gray-300 flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-100" data-index="8"></div>
+		</div>
 
 	</div>
 

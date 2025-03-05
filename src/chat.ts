@@ -2,6 +2,7 @@ const socket = new WebSocket(`ws://${window.location.hostname}:${window.location
 
 window.onload = () => 
 {
+	const notificationMap = new Map<string, HTMLDivElement>();
 
 	const chat = document.getElementById("chat") as HTMLDivElement;
 	const messageInput = document.getElementById("message-input") as HTMLInputElement;
@@ -23,7 +24,9 @@ window.onload = () =>
 	const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
 	const notifBackButton = document.getElementById('notifBackButton') as HTMLButtonElement;
 	const notifButton = document.getElementById('notifButton') as HTMLButtonElement;
-
+	const loadingPage = document.getElementById('loadingPage') as HTMLDivElement;
+	const cancelLoadingButton = document.getElementById('cancelLoadingButton') as HTMLButtonElement;
+	const gamePage = document.getElementById('gamePage') as HTMLDivElement;
 
 	function appendMessage(message: string, isOwn: boolean): void // DONE
 	{
@@ -34,18 +37,54 @@ window.onload = () =>
 		chatBox.scrollTop = chatBox.scrollHeight;
 	}
 
-	// function appendNotification(notification: string): void // not fully implemented. Attention.
-	// {
-	// 	// const newNotificationContainer = document.createElement("div");
-	// 	// newNotificationContainer.classList.add("flex", "items-center", "p-4", "hover:bg-gray-100", "cursor-pointer");
+	function appendNotification(person: string, text: string, invitation: boolean): void // not fully implemented. Attention.
+	{
+		const NotificationContainer = document.createElement("div");
+		NotificationContainer.classList.add("items-center", "p-4", "hover:bg-gray-100", "cursor-pointer");
+
+		const newNotification = document.createElement("div");
+		newNotification.classList.add("text-lg", "font-semibold", "text-gray-900", "flex-grow", "break-words");
+		newNotification.textContent = person + text;
+
+		NotificationContainer.appendChild(newNotification);
+		if(invitation)
+		{
+			const buttonContainer = document.createElement("div");
+			buttonContainer.classList.add("flex", "items-center");
+
+			const acceptButton = document.createElement("button");
+			acceptButton.classList.add("px-4", "py-2", "bg-green-500", "text-white", "rounded-lg", "hover:bg-green-600", "focus:outline-none");
+			acceptButton.textContent = "Accept";
+			acceptButton.addEventListener("click", () => {
+				// not fully implemented. Attention.
+				// should be integrated with pingpong
+				socket.send(JSON.stringify({ microservice: 'chat', startGame: person }));
+				appendNotification(person, ' \'s invitation accepted', false);
+				buttonContainer.remove();
+			});
 
 
-	// 	const newNotification = document.createElement("div");
-	// 	newNotification.classList.add("mb-2", "flex", "justify-start", "items-start");
-	// 	newNotification.innerHTML = `<span class="bg-yellow-500 text-white p-2 rounded-lg max-w-xs break-words">${notification}</span>`;
-	// 	notificationList.appendChild(newNotification);
-	// 	notificationList.scrollTop = chatBox.scrollHeight
-	// }
+			const rejectButton = document.createElement("button");
+			rejectButton.classList.add("px-4", "py-2", "bg-red-500", "text-white", "rounded-lg", "hover:bg-red-600", "focus:outline-none", "ml-2");
+			rejectButton.textContent = "Reject";
+			rejectButton.addEventListener("click", () => {
+				// not fully implemented. Attention.
+				// should be integrated with pingpong
+				socket.send(JSON.stringify({ microservice: 'chat', notification: ' rejected your invitation', receiver: person }));
+				appendNotification(person, ' \'s invitation rejected', false);
+				buttonContainer.remove();
+			});
+
+			buttonContainer.appendChild(acceptButton);
+			buttonContainer.appendChild(rejectButton);
+			NotificationContainer.appendChild(buttonContainer);
+			notificationMap.set(person, buttonContainer);
+		}
+
+
+		notificationList.appendChild(NotificationContainer);
+		notificationList.scrollTop = notificationList.scrollHeight;
+	}
 
 	function appendPerson(text: string): void {
 		const personContainer = document.createElement("div");
@@ -79,6 +118,20 @@ window.onload = () =>
 			peopleOnlineList.removeChild(personElement);
 		} else {
 			alert('Warning: Person not found');
+		}
+	}
+
+	function deleteButtonContainer(text: string): void // not fully implemented. Attention.
+	{
+		const buttonContainer = notificationMap.get(text);
+		if(buttonContainer)
+		{
+			buttonContainer.remove();
+			notificationMap.delete(text);
+		}
+		else
+		{
+			alert('Warning: Button container not found');
 		}
 	}
 
@@ -122,6 +175,8 @@ window.onload = () =>
 		chat.style.display = 'none';
 		peopleOnlineDiv.style.display = 'none';
 		notificationDiv.style.display = 'none';
+		loadingPage.style.display = 'none';
+		gamePage.style.display = 'none';
 	};
 
 	const showPage = (page: HTMLElement) => // reviewed
@@ -133,6 +188,13 @@ window.onload = () =>
 	// ******** event listeners start here **************
 
 	sendButton.addEventListener("click", sendMessage);
+
+	cancelLoadingButton.addEventListener('click', () => // reviewed
+	{
+		socket.send(JSON.stringify({ microservice: 'chat', invitationCanceled: chatPerson.textContent }));
+		appendNotification('', 'you have canceled the invitation', false);
+		showPage(peopleOnlineDiv);
+	});
 
 	notifButton.addEventListener('click', () => // reviewed
 	{
@@ -172,8 +234,9 @@ window.onload = () =>
 		//
 		//
 		// should be integrated with pingpong
-		// appendNotification('You have invited ' + chatPerson.textContent + ' to play PingPong');
+		appendNotification(chatPerson.textContent ?? '', ' has been invited to play PingPong', false);
 		socket.send(JSON.stringify({ microservice: 'chat', inviteThisPerson: chatPerson.textContent}));
+		showPage(loadingPage);
 	});
 
 	blockButton.addEventListener('click', () =>  // reviewed
@@ -286,15 +349,27 @@ window.onload = () =>
 				}
 				else if(data.thisPersonInvitedYou) // not fully implemented. Attention.
 				{
-					// appendNotification(data.thisPersonInvitedYou + ' has invited you to play PingPong');
+					appendNotification(data.thisPersonInvitedYou, ' has invited you to play PingPong', true);
 					return;
 				}
-				// else if(data.invitationAccepted) // not fully implemented. Attention.
-				// {
-				// 	alert(data.invitationAccepted + ' has accepted your invitation to play PingPong');
-				// 	appendMessage(data.invitationAccepted + ' has accepted your invitation to play PingPong', true);
-				// 	return;
-				// }
+				else if(data.invitationCanceled) // not fully implemented. Attention.
+				{
+					alert(data.invitationCanceled + ' has canceled the invitation');
+					appendNotification(data.invitationCanceled, ' has canceled the invitation', false);
+					deleteButtonContainer(data.invitationCanceled);
+					showPage(peopleOnlineDiv);
+					return;
+				}
+				else if(data.notification)
+				{
+					appendNotification(data.sender, data.notification, false);
+					return;
+				}
+				else if(data.startGame)
+				{
+					showPage(peopleOnlineDiv);
+					window.open(data.startGame, '_blank');
+				}
 				else
 				{
 					socket.send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "chat" microservice has no such request handler in client side sent by server to client under received "microservice": "chat" request in client side', sentData: data}));
