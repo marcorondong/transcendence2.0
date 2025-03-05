@@ -18,4 +18,9 @@ export class PongPlayer
 		return false
 	}
 
+	getPlayerSide(): "left" | "right"
+	{
+		return this.side;
+	}
+
 }
