@@ -49,7 +49,7 @@ export class PingPongGame
 		//this.start();
 	}
 
-	static createStandardGame(gameId:string) :PingPongGame
+	static createStandardGame() :PingPongGame
 	{
 		const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
 		const rightPaddle: Paddle = new Paddle(new Point(4, 0));
