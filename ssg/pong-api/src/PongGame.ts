@@ -23,13 +23,12 @@ export interface PongFrameI
 
 export class PingPongGame
 {
-	readonly id: string;
 
 	protected leftPaddle: Paddle;
 	protected rightPaddle: Paddle;
 	protected ball: Ball;
-	readonly score:ScoreBoard = new ScoreBoard();
-	readonly field:PongField = new PongField();
+	readonly score:ScoreBoard;
+	readonly field:PongField;
 
 
 	readonly CRITICAL_DISTANCE;
@@ -37,17 +36,29 @@ export class PingPongGame
 	private gameStatus : "running" | "paused" | "finished" = "paused"
 	private lastFrame:boolean = false;
 	
-	constructor(gameId:string, leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball)
+	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
-		this.id = gameId;
 		this.leftPaddle = leftPaddle;
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
+		this.score = score;
+		this.field = tableField;
+
 		this.pauseGame();
 		//this.start();
 	}
 
+	static createStandardGame(gameId:string) :PingPongGame
+	{
+		const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
+		const rightPaddle: Paddle = new Paddle(new Point(4, 0));
+		const ball: Ball = new Ball(new Point(0, 0));
+		const table: PongField = new PongField();
+		const score: ScoreBoard = new ScoreBoard();
+		const game: PingPongGame = new PingPongGame(leftPaddle, rightPaddle, ball, score, table);
+		return game;
+	}
 	getGameStatus(): "running" | "paused" | "finished"
 	{
 		return this.gameStatus;
