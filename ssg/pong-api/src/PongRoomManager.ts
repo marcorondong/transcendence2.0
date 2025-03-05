@@ -22,6 +22,11 @@ export class PongRoomManager
 		this.rooms.set(room.getId(), room);
 	}
 
+	removeRoom(room: PongRoom):boolean 
+	{
+		return this.rooms.delete(room.getId());
+	}
+
 	getRoom(roomId:string)
 	{
 		return this.rooms.get(roomId);

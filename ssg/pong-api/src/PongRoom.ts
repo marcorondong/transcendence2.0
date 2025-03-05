@@ -100,9 +100,19 @@ export class PongRoom extends SessionRoom
 	{
 		const socket = rageQuitPlayer.connection;
 		socket.on("close", () => {
-			console.log("PlayerLeft");
-			this.game.forfeitGame(rageQuitPlayer.getPlayerSide());
+			console.log("Player left");
+			this.currentPlayers--;
+			this.removeConnectionFromRoom(socket);
+			if(this.currentPlayers === 1)
+				this.game.forfeitGame(rageQuitPlayer.getPlayerSide());
 		})
+	}
+
+	isConnectionPlayer(connection:WebSocket):boolean
+	{
+		if(connection === this.leftPlayer?.connection || connection === this.rightPlayer?.connection)
+			return true;
+		return false;
 	}
 
 	// addAndAssingControlsToPlayer(PongPlayer:PongPlayer, playerSide: "left" | "right")

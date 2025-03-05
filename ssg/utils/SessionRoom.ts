@@ -38,6 +38,7 @@ export class SessionRoom
 
 	removeConnectionFromRoom(connectionToRemove: WebSocket):void
 	{
+		connectionToRemove.close();
 		this.connections.delete(connectionToRemove);
 	}
 
@@ -45,7 +46,6 @@ export class SessionRoom
 	{
 		for(const oneConnection of this.connections)
 		{
-			oneConnection.close();
 			this.removeConnectionFromRoom(oneConnection);
 			console.log("Closing and removing connection");
 		}

@@ -8,7 +8,6 @@ import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
 import { PongPlayer } from "./PongPlayer";
 import { PongRoomManager } from "./PongRoomManager";
-import { Parser } from "../../utils/Parser";
 
 
 dotenv.config();
@@ -118,6 +117,33 @@ interface GameRoomQueryI
 	clientType: "player" | "spectator";
 } 
 
+
+function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
+{	
+	connection.on("close", () => {
+	if(room?.isFull() === false)
+	{
+		console.log(`Deleting room: ${room.getId()}`);
+		roomManager.removeRoom(room);
+	}
+	});
+}
+
+function spectatorLogic(roomId:string | 0, connection:WebSocket)
+{
+	if(spectatorJoin(roomId, connection))
+	{
+		console.log(`Spectator joined to room: ${roomId}`)
+		connection.send(JSON.stringify(roomId));
+	}
+	else 
+	{
+		connection.send(`Room: ${roomId} you tried to join does not exist`);
+		connection.close();
+	}
+}
+
+
 fastify.register(websocket);
 fastify.register(async function(fastify)
 {
@@ -141,12 +167,9 @@ fastify.register(async function(fastify)
 		} = req.query as GameRoomQueryI;
 
 		let room:PongRoom | undefined;
-
-		console.log(clientType);
 		if(clientType === "player")
 		{
 			room = playerRoomJoiner(roomId, connection);
-			//room.disconnectBehaviour();
 			console.log(`Player joined to room:${room.getId()}`);
 			const roomIdJson = {roomId: room.getId()};
 			connection.send(JSON.stringify(roomIdJson));
@@ -154,23 +177,8 @@ fastify.register(async function(fastify)
 		if(room !== undefined && room.isFull())
 			room.getAndSendFramesOnce();
 		if(clientType ==="spectator")
-		{
-			console.log("Client joining")
-			if(spectatorJoin(roomId, connection))
-			{
-				console.log(`Spectator joined to room:${roomId}`)
-				connection.send(JSON.stringify(roomId));
-			}
-		}
-
-		// connection.on("close", () => {
-		// 	gameRoom.removeSpectator(connection);
-		// 	console.log("spectator removed");
-		// 	// if (gameRoom.getPlayerCount() === 0) {
-		// 	//   rooms.delete(gameId);
-		// 	// }
-		//   });
-
+			spectatorLogic(roomId, connection);
+		closeConnectionLogic(connection, room);
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
@@ -189,7 +197,7 @@ const startServer = async() =>
 	try 
 	{
 		await fastify.listen({port: PORT, host: HOST});
-		console.log(`Pong server is runnig on http://${HOST}:${PORT}`);
+		console.log(`Pong server is runnig on https://${HOST}:${PORT}`);
 	}
 	catch(err)
 	{
