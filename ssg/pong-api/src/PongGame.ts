@@ -4,6 +4,7 @@ import { VectorDirection, Point } from "./Point";
 import { ScoreBoard, ScoreI} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 import { error } from "console";
+import { PongField } from "./PongField";
 
 interface Position 
 {
@@ -23,22 +24,19 @@ export interface PongFrameI
 export class PingPongGame
 {
 	readonly id: string;
+
 	protected leftPaddle: Paddle;
 	protected rightPaddle: Paddle;
 	protected ball: Ball;
+	readonly score:ScoreBoard = new ScoreBoard();
+	readonly field:PongField = new PongField();
+
+
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
 	private gameStatus : "running" | "paused" | "finished" = "paused"
 	private lastFrame:boolean = false;
 	
-	readonly score:ScoreBoard = new ScoreBoard();
-	readonly TABLE_WIDTH_Y: number = 5;
-	readonly TABLE_LENGHT_X: number = 9;
-	readonly TOP_EDGE_Y:number = this.TABLE_WIDTH_Y/2;
-	readonly BOTTOM_EDGE_Y:number = (this.TABLE_WIDTH_Y/2) * (-1);
-	readonly RIGHT_EDGE_X = this.TABLE_LENGHT_X/2;
-	readonly LEFT_EDGE_X = (this.TABLE_LENGHT_X/2) * (-1);
-
 	constructor(gameId:string, leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball)
 	{
 		this.id = gameId;
@@ -119,11 +117,24 @@ export class PingPongGame
 			paddle.move(direction);
 	}
 
+	forfeitGame(sideThatLeft: "left" | "right")
+	{
+		if(sideThatLeft === "left")
+		{
+			this.score.setScore(0, 3);
+		}
+		else if(sideThatLeft === "right")
+		{
+			this.score.setScore(3, 0);
+		}
+		this.finishGame();
+	}
+
 
 	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
 	{
-		const maxY = this.TOP_EDGE_Y + (0.45) * paddle.height;
-		const minY = this.BOTTOM_EDGE_Y - (0.45) * paddle.height;
+		const maxY = this.field.TOP_EDGE_Y + (0.45) * paddle.height;
+		const minY = this.field.BOTTOM_EDGE_Y - (0.45) * paddle.height;
 		let move_modifier = paddle.getMoveModifier();
 		if(direction === "down")
 			move_modifier *= -1;
@@ -185,7 +196,7 @@ export class PingPongGame
 	
 	private isLeftGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() < this.LEFT_EDGE_X)
+		if(BallPoint.getX() < this.field.LEFT_EDGE_X)
 		{
 			return true;
 		}
@@ -194,7 +205,7 @@ export class PingPongGame
 	
 	private isRightGoal(BallPoint:Point):boolean
 	{
-		if(BallPoint.getX() > this.RIGHT_EDGE_X)
+		if(BallPoint.getX() > this.field.RIGHT_EDGE_X)
 		{
 			return true;
 		}
@@ -223,7 +234,7 @@ export class PingPongGame
 	 */
 	private isTopHit(ballPoint:Point):boolean
 	{
-		if(ballPoint.getY() >= this.TOP_EDGE_Y)
+		if(ballPoint.getY() >= this.field.TOP_EDGE_Y)
 		{
 			return true
 		}
@@ -237,7 +248,7 @@ export class PingPongGame
 	 */
 	private isBottomHit(ballPoint:Point):boolean
 	{
-		if(ballPoint.getY() <= this.BOTTOM_EDGE_Y)
+		if(ballPoint.getY() <= this.field.BOTTOM_EDGE_Y)
 		{
 			return true
 		}
@@ -271,7 +282,7 @@ export class PingPongGame
 	private topEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const topEdgePoint:Point = new Point(ballX, this.TOP_EDGE_Y);
+		const topEdgePoint:Point = new Point(ballX, this.field.TOP_EDGE_Y);
 		if(this.ball.isMovingUp() && this.isObstacleNear(topEdgePoint))
 		{
 			if(this.isBounceEdge("top"))
@@ -285,7 +296,7 @@ export class PingPongGame
 	private bottomEdgeCollision():boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const bottomEdgePoint:Point = new Point(ballX, this.BOTTOM_EDGE_Y);
+		const bottomEdgePoint:Point = new Point(ballX, this.field.BOTTOM_EDGE_Y);
 		if(this.ball.isMovingDown() && this.isObstacleNear(bottomEdgePoint))
 		{
 			if(this.isBounceEdge("bottom"))
@@ -304,12 +315,12 @@ export class PingPongGame
 		let edgeX;
 		if(side === "left")
 		{
-			edgeX = this.LEFT_EDGE_X;
+			edgeX = this.field.LEFT_EDGE_X;
 			paddle = this.leftPaddle;
 		}
 		else
 		{
-			edgeX = this.RIGHT_EDGE_X;
+			edgeX = this.field.RIGHT_EDGE_X;
 			paddle = this.rightPaddle;
 		}
 		const EdgePoint:Point = new Point(edgeX, ballY);
