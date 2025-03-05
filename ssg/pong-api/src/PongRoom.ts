@@ -35,6 +35,7 @@ export class PongRoom extends SessionRoom
 			this.leftPlayer = leftPlayer;
 			this.addConnectionToRoom(leftPlayer.connection);
 			this.assingControlsToPlayer(this.leftPlayer);
+			this.disconnectBehaviour(this.leftPlayer);
 			this.currentPlayers++;
 			return true
 		}
@@ -49,6 +50,7 @@ export class PongRoom extends SessionRoom
 			this.rightPlayer = rightPlayer;
 			this.addConnectionToRoom(rightPlayer.connection);
 			this.assingControlsToPlayer(this.rightPlayer);
+			this.disconnectBehaviour(this.rightPlayer);
 			this.currentPlayers++;
 			return true;
 		}
