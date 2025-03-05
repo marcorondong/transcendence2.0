@@ -41,6 +41,15 @@ export class SessionRoom
 		this.connections.delete(connectionToRemove);
 	}
 
+	closeAndRemoveAllConnections():void
+	{
+		for(const oneConnection of this.connections)
+		{
+			oneConnection.close();
+			this.removeConnectionFromRoom(oneConnection);
+			console.log("Closing and removing connection");
+		}
+	}
 
 	getConnectionsCount(): number 
 	{
