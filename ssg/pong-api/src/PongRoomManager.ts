@@ -1,7 +1,7 @@
 
 import { PongRoom } from "./PongRoom"
-import { Player } from "../../utils/Player";
 import { WebSocket, RawData } from "ws";
+import { PongPlayer } from "./PongPlayer";
 
 export class PongRoomManager
 {
@@ -50,7 +50,8 @@ export class PongRoomManager
 	{
 		const room:PongRoom = new PongRoom(false);
 		this.addRoom(room);
-		room.addAndAssingControlsToPlayer(new Player("leftPlayer1", connection), "left");
+		const leftPlayer: PongPlayer = new PongPlayer(connection, "left");
+		room.addLeftPlayer(leftPlayer);
 		return room;
 	}
 }

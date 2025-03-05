@@ -6,7 +6,7 @@ import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
-import { Player } from "../../utils/Player";
+import { PongPlayer } from "./PongPlayer";
 import { PongRoomManager } from "./PongRoomManager";
 import { Parser } from "../../utils/Parser";
 
@@ -65,7 +65,8 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 		const roomToJoin = roomManager.isAnyPublicRoomAvailable();
 		if(roomToJoin !== false)
 		{
-			roomToJoin.addAndAssingControlsToPlayer(new Player("rightPlayer2", connection), "right");
+			const player:PongPlayer = new PongPlayer(connection, "right");
+			roomToJoin.addRightPlayer(player)
 			roomToJoin.getGame().start();
 			return roomToJoin;
 		}
@@ -79,7 +80,8 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 			return roomManager.createRoomAndAddFirstPlayer(connection);
 		else
 		{
-			roomWithId.addAndAssingControlsToPlayer(new Player("rightPlayer2", connection), "right");
+			const player:PongPlayer = new PongPlayer(connection, "right");
+			roomWithId.addRightPlayer(player)
 			roomWithId.getGame().start();
 			return roomWithId;
 		}
@@ -144,6 +146,7 @@ fastify.register(async function(fastify)
 		if(clientType === "player")
 		{
 			room = playerRoomJoiner(roomId, connection);
+			//room.disconnectBehaviour();
 			console.log(`Player joined to room:${room.getId()}`);
 			const roomIdJson = {roomId: room.getId()};
 			connection.send(JSON.stringify(roomIdJson));
@@ -156,30 +159,9 @@ fastify.register(async function(fastify)
 			if(spectatorJoin(roomId, connection))
 			{
 				console.log(`Spectator joined to room:${roomId}`)
-				connection.send(`Hello spectator welcome to room ${roomId}`)
+				connection.send(JSON.stringify(roomId));
 			}
 		}
-		// const gameRoom = getOrCreateGameRoom(gameId);
-		// gameRoom.getAndSendFramesOnce();
-		// if(gameRoom.getPlayerCount() === 0)
-		// {
-		// 	gameRoom.addPlayer(new Player("PlayerId1", connection));
-		// 	gameRoom.assingControlsToPlayer(connection, "left");
-		// 	console.log("player 1")
-		// }
-		// else if(gameRoom.getPlayerCount() === 1)
-		// {
-		// 	console.log("player 2")
-		// 	gameRoom.addPlayer(new Player("PlayerId2", connection));
-		// 	gameRoom.assingControlsToPlayer(connection, "right");
-		// 	gameRoom.getGame().start();
-		// }
-
-
-		// else
-		// {
-		// 	gameRoom.addSpectator(connection)
-		// }
 
 		// connection.on("close", () => {
 		// 	gameRoom.removeSpectator(connection);

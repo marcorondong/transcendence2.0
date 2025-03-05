@@ -56,6 +56,16 @@ export class PongRoom extends SessionRoom
 		return false;
 	}
 
+	addSpectator(connection:WebSocket)
+	{
+		this.addConnectionToRoom(connection);
+	}
+
+	isFull():boolean
+	{
+		return (this.currentPlayers === this.requiredPlayers);
+	}
+
 
 	/**
 	 * function that make sure frame are generated only once. This fixed performance bug
