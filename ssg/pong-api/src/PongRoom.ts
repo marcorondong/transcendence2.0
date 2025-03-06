@@ -173,7 +173,7 @@ export class PongRoom extends SessionRoom
 	{
 		const socket = rageQuitPlayer.connection;
 		socket.on("close", () => {
-			console.log("Player left");
+			console.log("Player quited");
 			this.currentPlayers--;
 			this.removeConnectionFromRoom(socket);
 			if(this.currentPlayers === 1)

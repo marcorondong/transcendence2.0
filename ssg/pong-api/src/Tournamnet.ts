@@ -24,7 +24,7 @@ export class Tournament extends EventEmitter
 
 	async createAndStartRound()
 	{
-		console.log("Players left ", this.playerPool.size)
+		console.log("Players left in tournamet:", this.playerPool.size)
 		if(this.playerPool.size == 1)
 			return;
 		let rivals: PongPlayer[] = []
@@ -41,7 +41,7 @@ export class Tournament extends EventEmitter
 			}
 		}
 		await this.waitForWinners();
-		console.log("Now Second round can begin");
+		console.log("Now next round can begin");
 		this.createAndStartRound();
 	}
 
