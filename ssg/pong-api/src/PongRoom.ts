@@ -23,6 +23,16 @@ export class PongRoom extends SessionRoom
 		super(privateRoom);
 	}
 
+	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
+	{
+		const room:PongRoom = new PongRoom();
+		playerOne.setPlayerSide("left");
+		playerTwo.setPlayerSide("right")
+		room.addLeftPlayer(playerOne);
+		room.addRightPlayer(playerTwo);
+		return room;
+	}
+
 	getGame():PingPongGame
 	{
 		return this.game;

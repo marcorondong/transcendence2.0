@@ -173,6 +173,7 @@ function tournamentJoiner(connection:WebSocket)
 simpleTournamnet.on("full tournament", () =>
 {
 	console.log("Seoska liga pocinje pripremite prase i janje");
+	simpleTournamnet.createAndStartRound();
 })
 
 
