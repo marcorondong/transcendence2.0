@@ -47,6 +47,10 @@ function addMessage(sender: string, receiver: string, message: Message) {
     if (!chatHistories[sender][receiver]) {
         chatHistories[sender][receiver] = [];
     }
+	if(message.text === '')
+	{
+		return;
+	}
     chatHistories[sender][receiver].push(message);
 }
 
@@ -113,6 +117,8 @@ fastify.register(async function (fastify)
 					{
 						if(!chatHistories[currentClient.nickname] || !chatHistories[currentClient.nickname][data.chattingWith])
 						{
+							const message = new Message('', false);
+							addMessage(currentClient.nickname, data.chattingWith, message);
 							socket.send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: [], block: false }));
 							return;
 						}
@@ -123,7 +129,7 @@ fastify.register(async function (fastify)
 					}
 					else if(data.blockThisPerson)
 					{
-						currentClient.blockedList.push(data.blockedPerson);
+						currentClient.blockedList.push(data.blockThisPerson);
 						socket.send(JSON.stringify({ microservice: 'chat', thisPersonBlocked: data.blockThisPerson }));
 						return;
 					}

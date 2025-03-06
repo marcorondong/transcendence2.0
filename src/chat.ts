@@ -289,6 +289,7 @@ window.onload = () =>
 					data.chatHistoryProvided.forEach((message: { text: string; isOwn: boolean; }) => {
 						appendMessage(message.text, message.isOwn);
 					});
+					console.log('aaaaaaaaaaaa' + data.block);
 					if(data.block === true) // if person is blocked, blockButton color is updated accordingly
 					{
 						blockButton.style.backgroundColor = 'green';
