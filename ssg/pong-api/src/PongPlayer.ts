@@ -1,12 +1,15 @@
 import { error } from "console";
 import { WebSocket, RawData } from "ws";
 
+
+export type TPlayerSide = "left" | "right" | "TBD"; //TBD means to be decided
+
 export class PongPlayer
 {
 	readonly connection: WebSocket;
-	private side: "left" | "right" | "TBD"; //TBD to be decided
+	private side: TPlayerSide; //TBD to be decided
 
-	constructor(socket: WebSocket, playerSide: "left" | "right" | "TBD")
+	constructor(socket: WebSocket, playerSide: TPlayerSide)
 	{
 		this.connection = socket;
 		this.side = playerSide;
@@ -19,7 +22,7 @@ export class PongPlayer
 		return false
 	}
 
-	getPlayerSide(): "left" | "right" | "TBD"
+	getPlayerSide(): TPlayerSide
 	{
 		return this.side;
 	}
