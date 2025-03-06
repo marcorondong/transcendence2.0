@@ -6,7 +6,7 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import chalk from 'chalk';
 
-const PORT = 3000;
+const PORT = 3002;
 const HOST = '0.0.0.0';
 
 const fastify: FastifyInstance = Fastify({ logger: false });
