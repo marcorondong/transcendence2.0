@@ -270,6 +270,10 @@ nickname_button.addEventListener('click', () =>  //DONE
 	{
 		socket.send(JSON.stringify({ microservice: 'tictactoe', registration: true, nickname: nickname_input.value }));
 	}
+	else
+	{
+		alert('Enter your nickname');
+	}
 });
 
 
