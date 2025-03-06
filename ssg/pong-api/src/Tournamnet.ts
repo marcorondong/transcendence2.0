@@ -22,8 +22,11 @@ export class Tournament extends EventEmitter
 			this.emit("full tournament")
 	}
 
-	createAndStartRound()
+	async createAndStartRound()
 	{
+		console.log("Players left ", this.playerPool.size)
+		if(this.playerPool.size == 1)
+			return;
 		let rivals: PongPlayer[] = []
 		for(const player of this.playerPool)
 		{
@@ -37,5 +40,24 @@ export class Tournament extends EventEmitter
 				rivals = [];
 			}
 		}
+		await this.waitForWinners();
+		console.log("Now Second round can begin");
+		this.createAndStartRound();
+	}
+
+	async waitForWinners()
+	{
+		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
+		{
+			const winner = await room.getRoomWinner();
+			const loser = await room.getRoomLoser();
+			console.log("Winner is ", winner.getPlayerSide());
+			console.log("Loser is ", loser.getPlayerSide());
+			this.playerPool.delete(loser);
+			return winner;
+
+		});
+
+		await Promise.all(winnerPromises);
 	}
 }

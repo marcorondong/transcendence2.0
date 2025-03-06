@@ -36,10 +36,10 @@ export class SessionRoom
 		this.connections.add(connectionToAdd);
 	}
 
-	removeConnectionFromRoom(connectionToRemove: WebSocket):void
+	removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
 	{
 		connectionToRemove.close();
-		this.connections.delete(connectionToRemove);
+		return this.connections.delete(connectionToRemove);
 	}
 
 	closeAndRemoveAllConnections():void
