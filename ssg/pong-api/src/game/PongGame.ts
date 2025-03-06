@@ -140,14 +140,14 @@ export class PingPongGame extends EventEmitter
 				radius: this.ball.getRadius()
 			},
 			score: this.score.getScoreJson(), 
-			matchStatus: this.gameStatus
+			matchStatus: this.getGameStatus()
 		};
 	}
 
 
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
-		if(this.isPaddleMoveAllowed(paddle,direction) && this.gameStatus === "running")
+		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === "running")
 			paddle.move(direction);
 	}
 
@@ -197,7 +197,7 @@ export class PingPongGame extends EventEmitter
 
 	private gameLoop(timestamp: number):void 
 	{
-		if(this.gameStatus === "running")
+		if(this.getGameStatus() === "running")
 		{
 			const deltaTime = timestamp - this.lastFrameTime;
 			this.lastFrameTime = timestamp;
