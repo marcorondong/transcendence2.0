@@ -5,6 +5,7 @@ import { ScoreBoard, ScoreI} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 import { error } from "console";
 import { PongField } from "./PongField";
+import { EventEmitter } from "stream";
 
 interface Position 
 {
@@ -21,7 +22,7 @@ export interface PongFrameI
 	matchStatus: "running" | "paused" | "finished"
 }
 
-export class PingPongGame
+export class PingPongGame extends EventEmitter
 {
 
 	protected leftPaddle: Paddle;
@@ -38,6 +39,7 @@ export class PingPongGame
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
+		super();
 		this.leftPaddle = leftPaddle;
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
@@ -62,6 +64,19 @@ export class PingPongGame
 	getGameStatus(): "running" | "paused" | "finished"
 	{
 		return this.gameStatus;
+	}
+
+	getPongWinnerSide(): "left" | "right"
+	{
+		return this.score.getWinnerSide();
+	}
+
+	waitForFinalWhistle(): void
+	{
+		this.on("finished game", () =>
+		{
+			console.log("Game is done");
+		})
 	}
 
 	getPaddle(side: "left" | "right"): Paddle
@@ -89,6 +104,7 @@ export class PingPongGame
 	{
 		this.gameStatus = "finished"
 		this.lastFrame = true;
+		this.emit("finished game");
 	}
 
 	isLastFrame(): boolean

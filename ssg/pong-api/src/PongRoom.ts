@@ -6,6 +6,8 @@ import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
 import { PongPlayer } from "./PongPlayer";
+import { error } from "console";
+import { resolve } from "path";
 
 
 
@@ -31,6 +33,67 @@ export class PongRoom extends SessionRoom
 		room.addLeftPlayer(playerOne);
 		room.addRightPlayer(playerTwo);
 		return room;
+	}
+
+
+	private getWinner():PongPlayer
+	{
+		if(this.game.getPongWinnerSide() === "left")
+		{
+			if (this.leftPlayer === undefined)
+				throw error("Left player dont exist")
+			return this.leftPlayer;
+		}
+		else 
+		{
+			if(this.rightPlayer === undefined)
+				throw error("Right player dont exist")
+			return this.rightPlayer;
+		}
+	}
+
+	private getLoser():PongPlayer
+	{
+		if(this.game.getPongWinnerSide() === "left")
+		{
+			if (this.rightPlayer === undefined)
+				throw error("Right player dont exist")
+			return this.rightPlayer;
+		}
+		else 
+		{
+			if(this.leftPlayer === undefined)
+				throw error("left player dont exist")
+			return this.leftPlayer;
+		}
+	}
+
+	async getRoomWinner():Promise<PongPlayer>
+	{
+		if(this.game.getGameStatus() === "finished")
+		{
+			return this.getWinner();
+		}
+		return new Promise((resolve) => {
+			this.game.once("finished game", () =>
+			{
+				resolve(this.getWinner())
+			})
+		})
+	}
+
+	async getRoomLoser():Promise<PongPlayer>
+	{
+		if(this.game.getGameStatus() === "finished")
+		{
+			return this.getLoser();
+		}
+		return new Promise((resolve) => {
+			this.game.once("finished game", () =>
+			{
+				resolve(this.getLoser())
+			})
+		})
 	}
 
 	getGame():PingPongGame
