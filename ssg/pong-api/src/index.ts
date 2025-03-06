@@ -115,6 +115,7 @@ interface GameRoomQueryI
 	playerId: string;
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
+	matchType: "single" | "tournament";
 } 
 
 
@@ -143,6 +144,28 @@ function spectatorLogic(roomId:string | 0, connection:WebSocket)
 	}
 }
 
+function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | string, connection:WebSocket)
+{
+	let room:PongRoom | undefined;
+	if(clientType === "player")
+	{
+		room = playerRoomJoiner(roomId, connection);
+		console.log(`Player joined to room:${room.getId()}`);
+		const roomIdJson = {roomId: room.getId()};
+		connection.send(JSON.stringify(roomIdJson));
+	}
+	if(room !== undefined && room.isFull())
+		room.getAndSendFramesOnce();
+	if(clientType ==="spectator")
+		spectatorLogic(roomId, connection);
+	closeConnectionLogic(connection, room);
+}
+
+function tournamentJoiner()
+{
+	console.log("Tournament");
+}
+
 
 fastify.register(websocket);
 fastify.register(async function(fastify)
@@ -163,22 +186,17 @@ fastify.register(async function(fastify)
 			roomId = 0,
 			playerId= "Player whatever",
 			privateRoom = false,
-			clientType = "player"	
+			clientType = "player",
+			matchType = "single"
 		} = req.query as GameRoomQueryI;
-
-		let room:PongRoom | undefined;
-		if(clientType === "player")
+		if(matchType === "single")
 		{
-			room = playerRoomJoiner(roomId, connection);
-			console.log(`Player joined to room:${room.getId()}`);
-			const roomIdJson = {roomId: room.getId()};
-			connection.send(JSON.stringify(roomIdJson));
+			singleMatchMaking(clientType, roomId, connection);
+			console.log("Single match activated");
 		}
-		if(room !== undefined && room.isFull())
-			room.getAndSendFramesOnce();
-		if(clientType ==="spectator")
-			spectatorLogic(roomId, connection);
-		closeConnectionLogic(connection, room);
+		else if(matchType === "tournament")
+			tournamentJoiner();
+
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
