@@ -14,7 +14,7 @@ export class Tournament extends EventEmitter
 
 	addPlayer(player:PongPlayer)
 	{
-		if(this.requiredPlayers < this.playerPool.size)
+		if(this.requiredPlayers > this.playerPool.size)
 			this.playerPool.add(player);
 		if(this.playerPool.size === this.requiredPlayers)
 			this.emit("full tournament")

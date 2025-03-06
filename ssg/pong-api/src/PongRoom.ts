@@ -91,7 +91,7 @@ export class PongRoom extends SessionRoom
 				return 
 			}
 			const direction = json.move;
-			const paddle:Paddle = this.getGame().getPaddle(player.getPlayerSide());
+			const paddle:Paddle = this.getGame().getPaddle(player.getPlayerSideLR());
 			this.getGame().movePaddle(paddle, direction);
 		})
 	}
@@ -104,7 +104,7 @@ export class PongRoom extends SessionRoom
 			this.currentPlayers--;
 			this.removeConnectionFromRoom(socket);
 			if(this.currentPlayers === 1)
-				this.game.forfeitGame(rageQuitPlayer.getPlayerSide());
+				this.game.forfeitGame(rageQuitPlayer.getPlayerSideLR());
 		})
 	}
 

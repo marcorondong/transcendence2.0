@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
 import { PongPlayer } from "./PongPlayer";
 import { PongRoomManager } from "./PongRoomManager";
+import { Tournament } from "./Tournamnet";
 
 
 dotenv.config();
@@ -161,10 +162,18 @@ function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | strin
 	closeConnectionLogic(connection, room);
 }
 
-function tournamentJoiner()
+const simpleTournamnet:Tournament = new Tournament(4);
+
+function tournamentJoiner(connection:WebSocket)
 {
-	console.log("Tournament");
+	const proPlayer:PongPlayer = new PongPlayer(connection, "TBD");
+	simpleTournamnet.addPlayer(proPlayer);
 }
+
+simpleTournamnet.on("full tournament", () =>
+{
+	console.log("Seoska liga pocinje pripremite prase i janje");
+})
 
 
 fastify.register(websocket);
@@ -195,7 +204,7 @@ fastify.register(async function(fastify)
 			console.log("Single match activated");
 		}
 		else if(matchType === "tournament")
-			tournamentJoiner();
+			tournamentJoiner(connection);
 
 	})
 
