@@ -1,7 +1,7 @@
 import {SessionRoom} from "../../utils/SessionRoom"
-import { PingPongGame } from "./PongGame";
-import { Paddle } from "./Paddle";
-import { PongFrameI } from "./PongGame";
+import { PingPongGame } from "./game/PongGame";
+import { Paddle } from "./game/Paddle";
+import { PongFrameI } from "./game/PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
