@@ -15,7 +15,7 @@ export class PongRoom extends SessionRoom
 {
 	private isFrameGenerating: boolean = false;
 	private readonly requiredPlayers = 2;
-	private currentPlayers = 0;
+	private currentOnlinePlayers = 0;
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
 
@@ -109,7 +109,7 @@ export class PongRoom extends SessionRoom
 			this.addConnectionToRoom(leftPlayer.connection);
 			this.assingControlsToPlayer(this.leftPlayer);
 			this.disconnectBehaviour(this.leftPlayer);
-			this.currentPlayers++;
+			this.currentOnlinePlayers++;
 			return true
 		}
 		console.warn("Left player already exist. Cannot overwrite it")
@@ -124,7 +124,7 @@ export class PongRoom extends SessionRoom
 			this.addConnectionToRoom(rightPlayer.connection);
 			this.assingControlsToPlayer(this.rightPlayer);
 			this.disconnectBehaviour(this.rightPlayer);
-			this.currentPlayers++;
+			this.currentOnlinePlayers++;
 			return true;
 		}
 		console.warn("Right player already exist cannot overwrite it");
@@ -138,7 +138,7 @@ export class PongRoom extends SessionRoom
 
 	isFull():boolean
 	{
-		return (this.currentPlayers === this.requiredPlayers);
+		return (this.currentOnlinePlayers === this.requiredPlayers);
 	}
 
 
@@ -171,13 +171,13 @@ export class PongRoom extends SessionRoom
 
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
-		const socket = rageQuitPlayer.connection;
-		socket.on("close", () => {
-			console.log("Player quited");
-			this.currentPlayers--;
-			this.removeConnectionFromRoom(socket);
-			if(this.currentPlayers === 1)
-				this.game.forfeitGame(rageQuitPlayer.getPlayerSideLR());
+		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
+		{
+			console.log("We have rage quitter here");
+			this.currentOnlinePlayers--; 
+			if(this.currentOnlinePlayers > 0)
+				this.game.forfeitGame(player.getPlayerSideLR());
+			
 		})
 	}
 
