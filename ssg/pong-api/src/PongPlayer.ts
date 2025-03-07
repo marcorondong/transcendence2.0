@@ -1,11 +1,12 @@
 import { error } from "console";
+import { EventEmitter } from "stream";
 import { WebSocket, RawData } from "ws";
 
 
 export type TPlayerSide = "left" | "right" | "TBD"; //TBD means to be decided
 type TOnlineStatus = "online" | "offline";
 
-export class PongPlayer
+export class PongPlayer extends EventEmitter
 {
 	readonly connection: WebSocket;
 	private side: TPlayerSide; //TBD to be decided
@@ -13,6 +14,7 @@ export class PongPlayer
 
 	constructor(socket: WebSocket, playerSide: TPlayerSide)
 	{
+		super();
 		this.connection = socket;
 		this.side = playerSide;
 		this.status = "online";
@@ -23,8 +25,10 @@ export class PongPlayer
 	{
 		this.connection.on("close", ()=> 
 		{
-			console.log("Connnection lost");
+			this.connection.close();
+			console.log("connnection lost");
 			this.setPlayerStatus("offline");
+			this.emit("connection lost", this);
 		})
 	}
 
