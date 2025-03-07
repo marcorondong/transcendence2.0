@@ -37,7 +37,6 @@ export class PingPongGame extends EventEmitter
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
 	private gameStatus:gameStatus = "not started"
-	private lastFrame:boolean = false;
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
@@ -114,13 +113,7 @@ export class PingPongGame extends EventEmitter
 	finishGame():void 
 	{
 		this.setGameStatus("finished");
-		this.lastFrame = true;
 		this.emit("finished game");
-	}
-
-	isLastFrame(): boolean
-	{
-		return this.lastFrame;
 	}
 
 	getFrame()
