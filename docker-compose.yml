@@ -1,4 +1,18 @@
 services:
+
+  frontend_api:
+    image: frontend_api_img 
+    container_name: frontend_api
+    build: ./frontend_api/
+    volumes:
+      - ./frontend_api/src/:/frontend_api/src/
+      - ./frontend_api/public/:/frontend_api/public/
+    ports:
+      - 3000:3000
+    depends_on:
+      - tictactoe_api
+      - chat_api
+
   tictactoe_api:
     image: tictactoe_api_img 
     container_name: tictactoe_api
@@ -17,15 +31,3 @@ services:
     ports:
       - 3002:3002
 
-  frontend_api:
-    image: frontend_api_img 
-    container_name: frontend_api
-    build: ./frontend_api/
-    volumes:
-      - ./frontend_api/src/:/frontend_api/src/
-      - ./frontend_api/public/:/frontend_api/public/
-    ports:
-      - 3000:3000
-    depends_on:
-      - tictactoe_api
-      - chat_api
