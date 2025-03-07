@@ -49,7 +49,9 @@ export class PingPongGame extends EventEmitter
 		this.score = score;
 		this.field = tableField;
 
+		//TODO maybe even remove this
 		this.pauseGame();
+		this.gameStatus = "not started";
 		//this.start();
 	}
 
@@ -63,6 +65,8 @@ export class PingPongGame extends EventEmitter
 		const game: PingPongGame = new PingPongGame(leftPaddle, rightPaddle, ball, score, table);
 		return game;
 	}
+
+
 	getGameStatus(): gameStatus
 	{
 		return this.gameStatus;
