@@ -7,21 +7,33 @@ export class Tournament extends EventEmitter
 	private requiredPlayers:number;
 	private playerPool:Set<PongPlayer> = new Set<PongPlayer>();
 	private gamesPool:Set<PongRoom> = new Set<PongRoom>();
+	private torunamnetStatus: "started" | "lobby";
+	private roundNumber:number;
 
 	constructor(tournamnetPlayers:number)
 	{
 		super();
 		this.requiredPlayers = tournamnetPlayers;
+		this.torunamnetStatus = "lobby";
+		this.roundNumber = this.requiredPlayers;
 	}
-
+	
+	getRequiredPlayers():number
+	{
+		return this.requiredPlayers;
+	}
+	
 	addPlayer(player:PongPlayer)
 	{
 		if(this.requiredPlayers > this.playerPool.size)
+		{
 			this.playerPool.add(player);
+			this.connectionMonitor(player);
+		}
 		if(this.playerPool.size === this.requiredPlayers)
 			this.emit("full tournament")
 	}
-
+	
 	caluclateNumberOfFreeSpots():number
 	{
 		return this.requiredPlayers - this.playerPool.size;
@@ -36,20 +48,8 @@ export class Tournament extends EventEmitter
 		}
 	}
 
-	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
-	{
-		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
-		this.gamesPool.add(room);
-		room.setRoomAsTournament(this.getRoundName(this.playerPool.size));
-		room.getGame().start();
-		room.checkIfPlayerIsStillOnline(proPlayer1);
-		room.checkIfPlayerIsStillOnline(proPlayer2);
-		room.getAndSendFramesOnce();
-	}
-
 	async createAndStartRound()
 	{
-		console.log("Players left in tournamet:", this.playerPool.size)
 		if(this.playerPool.size == 1)
 			return;
 		let rivals: PongPlayer[] = []
@@ -62,33 +62,27 @@ export class Tournament extends EventEmitter
 				rivals = [];
 			}
 		}
+		this.roundNumber /= 2;
 		await this.waitForWinners();
+
 		console.log("Now next round can begin");
+		this.removeAllGamefromPool();
 		this.createAndStartRound();
 	}
-
-
-	private createTournametStatusUpdate(nottification: string)
-	{
-		return {
-			tournamentStatus: nottification
-		}
-	}
-
+	
 	async waitForWinners()
 	{
 		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
 		{
-			const roundName = this.getRoundName(this.playerPool.size);
 			const winner = await room.getRoomWinner();
 			const loser = await room.getRoomLoser();
 			console.log("Winner is ", winner.getPlayerSide());
 			let notification = this.createTournametStatusUpdate("You won, you will progress to next round once all matches of round are done");
-			if(this.playerPool.size === 2)
+			if(room.getRoundName() === "finals")
 				notification = this.createTournametStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
 			winner.sendNottification(JSON.stringify(notification));
 			console.log("Loser is ", loser.getPlayerSide());
-			notification = this.createTournametStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${roundName}`);
+			notification = this.createTournametStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
 			loser.sendNottification(JSON.stringify(notification));
 			this.playerPool.delete(loser);
 			return winner;
@@ -98,14 +92,51 @@ export class Tournament extends EventEmitter
 		await Promise.all(winnerPromises);
 	}
 
-	private getRoundName(numberOfPlayers: number): string
+	private removeAllGamefromPool()
 	{
-		if(numberOfPlayers === 2)
+		for(const oneGame of this.gamesPool)
+			this.gamesPool.delete(oneGame);
+	}
+
+	private connectionMonitor(player:PongPlayer)
+	{
+		player.on("connection lost", (unpatient:PongPlayer)=>
+		{
+			if(this.torunamnetStatus === "lobby")
+			{
+				this.playerPool.delete(unpatient)
+				this.sendAnnouncementToEveryone(`Someone left loby, waiting for ${this.caluclateNumberOfFreeSpots()} players`)
+			}
+		})
+	}
+
+
+	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
+	{
+		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
+		this.gamesPool.add(room);
+		room.setRoomAsTournament(this.getRoundName());
+		room.getGame().start();
+		room.checkIfPlayerIsStillOnline(proPlayer1);
+		room.checkIfPlayerIsStillOnline(proPlayer2);
+		room.getAndSendFramesOnce();
+	}
+
+	private createTournametStatusUpdate(nottification: string)
+	{
+		return {
+			tournamentStatus: nottification
+		}
+	}
+
+	private getRoundName(): string
+	{
+		if(this.roundNumber === 2)
 			return "finals";
-		else if (numberOfPlayers === 4)
+		else if (this.roundNumber === 4)
 			return "semi-finals";
-		else if(numberOfPlayers === 8)
+		else if(this.roundNumber === 8)
 			return "quarter finals";
-		return `Round of ${numberOfPlayers}`;
+		return `Round of ${this.roundNumber}`;
 	}
 }
