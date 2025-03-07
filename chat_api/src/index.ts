@@ -1,9 +1,9 @@
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify'
 import fastifyWebsocket from '@fastify/websocket';
-import fastifyStatic from '@fastify/static';
-import path from 'path';
-import fs from 'fs';
-import { v4 as uuidv4 } from 'uuid';
+// import fastifyStatic from '@fastify/static';
+// import path from 'path';
+// import fs from 'fs';
+// import { v4 as uuidv4 } from 'uuid';
 // import chalk from 'chalk';
 
 const PORT = 3002;
@@ -79,7 +79,7 @@ fastify.register(async function (fastify)
 	fastify.get('/ws', { websocket: true }, (connection, req) => 
 	{
 		const socket = connection as unknown as WebSocket;
-		const id = uuidv4();
+		const id = crypto.randomUUID();
 		const currentClient = new Client(id, "", socket);
 		// allClients.push(currentClient); // This is done after registration is successful
 		// console.log(chalk.magentaBright('Client connected'));
@@ -111,7 +111,6 @@ fastify.register(async function (fastify)
 						{
 							receiver.socket.send(JSON.stringify({ microservice: 'chat', notification: data.notification, sender: currentClient.nickname }));
 						}
-						return;
 					}
 					else if(data.chatHistoryRequest)
 					{
@@ -125,19 +124,16 @@ fastify.register(async function (fastify)
 						const isBlocked = currentClient.blockedList.includes(data.chattingWith);
 						const chatHistory = chatHistories[currentClient.nickname][data.chattingWith];
 						socket.send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: chatHistory, block: isBlocked }));
-						return;
 					}
 					else if(data.blockThisPerson)
 					{
 						currentClient.blockedList.push(data.blockThisPerson);
 						socket.send(JSON.stringify({ microservice: 'chat', thisPersonBlocked: data.blockThisPerson }));
-						return;
 					}
 					else if(data.unblockThisPerson)
 					{
 						currentClient.blockedList = currentClient.blockedList.filter(n => n !== data.unblockThisPerson);
 						socket.send(JSON.stringify({ microservice: 'chat', thisPersonUnblocked: data.unblockThisPerson }));
-						return;
 					}
 					else if(data.registerThisPerson)
 					{
@@ -154,7 +150,6 @@ fastify.register(async function (fastify)
 						}
 						currentClient.nickname = data.registerThisPerson;
 						allClients.push(currentClient);
-						return;
 					}
 					else if(data.inviteThisPerson)
 					{
@@ -165,7 +160,6 @@ fastify.register(async function (fastify)
 							addMessage(data.receiver, currentClient.nickname, message);
 							invitee.socket.send(JSON.stringify({ microservice: 'chat', thisPersonInvitedYou: currentClient.nickname }));
 						}
-						return;
 					}
 					else if(data.invitationCanceled)
 					{
@@ -174,7 +168,6 @@ fastify.register(async function (fastify)
 						{
 							invitee.socket.send(JSON.stringify({ microservice: 'chat', invitationCanceled: currentClient.nickname }));
 						}
-						return;
 					}
 					else if (data.startGame)
 					{
@@ -184,13 +177,11 @@ fastify.register(async function (fastify)
 							invitee.socket.send(JSON.stringify({ microservice: 'chat', startGame: "http://10.14.5.2:3001/" }));
 							socket.send(JSON.stringify({ microservice: 'chat', startGame: "http://10.14.5.2:3001/" }));
 						}
-						return;
 					}
 					else if(data.error)
 					{
 						// console.log(chalk.red('Error: Client sent an error message to "chat" microservice. Something went wrong in client side. The error message is:'));
 						// console.log(chalk.yellow(data.error));
-						return;
 					}
 					else // if chat microservice has an unknown request
 					{
