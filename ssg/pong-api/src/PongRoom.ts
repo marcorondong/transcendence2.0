@@ -18,6 +18,9 @@ export class PongRoom extends SessionRoom
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
 
+	private tournamentRoom:boolean = false;
+	private roundName?:string;
+
 	game:PingPongGame = PingPongGame.createStandardGame();
 	constructor(privateRoom:boolean = false)
 	{
@@ -32,6 +35,12 @@ export class PongRoom extends SessionRoom
 		room.addLeftPlayer(playerOne);
 		room.addRightPlayer(playerTwo);
 		return room;
+	}
+
+	setRoomAsTournament(roundName:string)
+	{
+		this.tournamentRoom = true;
+		this.roundName = roundName;
 	}
 
 
@@ -201,7 +210,7 @@ export class PongRoom extends SessionRoom
 	{
 		const renderFrame = () => {
 			const frame: PongFrameI = this.getGame().getFrame();
-			const frameWithRoomId = {...frame, roomId:this.getId()};
+			const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
 			const frameJson = JSON.stringify(frameWithRoomId);
 			this.roomBroadcast(frameJson)
 			if(this.getGame().getGameStatus() === "finished")

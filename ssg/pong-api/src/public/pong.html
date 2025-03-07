@@ -52,6 +52,7 @@
     
     <div id="room-container">
         <p>Room ID: <span id="roomId">N/A</span></p>
+        <p>Knockout Stage: <span id="knockoutName">N/A</span></p>
         <button onclick="copyRoomId()">Copy Room ID</button>
     </div>
 
@@ -82,10 +83,13 @@
         }, 1000 / 60); 
 
         wss.onmessage = (event) => {
-            gameState = JSON.parse(event.data);
-            document.getElementById("roomId").innerText = gameState.roomId || "N/A";
-            drawGame();
-        };
+        gameState = JSON.parse(event.data);
+        
+        document.getElementById("roomId").innerText = gameState.roomId || "N/A";
+        document.getElementById("knockoutName").innerText = gameState.knockoutName || "N/A";
+        
+        drawGame();
+};
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);

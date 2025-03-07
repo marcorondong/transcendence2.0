@@ -30,6 +30,7 @@ export class Tournament extends EventEmitter
 		room.checkIfPlayerIsStillOnline(proPlayer1);
 		room.checkIfPlayerIsStillOnline(proPlayer2);
 		room.getAndSendFramesOnce();
+		room.setRoomAsTournament(this.getRoundName());
 	}
 
 	async createAndStartRound()
@@ -44,7 +45,6 @@ export class Tournament extends EventEmitter
 			if(rivals.length === 2)
 			{
 				this.createOneRoundMatch(rivals[0], rivals[1]);
-				const room:PongRoom = PongRoom.createRoomForTwoPlayers(rivals[0], rivals[1]);
 				rivals = [];
 			}
 		}
@@ -67,5 +67,16 @@ export class Tournament extends EventEmitter
 		});
 
 		await Promise.all(winnerPromises);
+	}
+
+	private getRoundName(): string
+	{
+		if(this.playerPool.size === 2)
+			return "finals";
+		else if (this.playerPool.size === 4)
+			return "semi-finals";
+		else if(this.playerPool.size === 8)
+			return "quarter finals";
+		return `Round of ${this.playerPool.size}`;
 	}
 }
