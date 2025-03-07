@@ -3,16 +3,29 @@ import { WebSocket, RawData } from "ws";
 
 
 export type TPlayerSide = "left" | "right" | "TBD"; //TBD means to be decided
+type TOnlineStatus = "online" | "offline";
 
 export class PongPlayer
 {
 	readonly connection: WebSocket;
 	private side: TPlayerSide; //TBD to be decided
+	private status: TOnlineStatus;
 
 	constructor(socket: WebSocket, playerSide: TPlayerSide)
 	{
 		this.connection = socket;
 		this.side = playerSide;
+		this.status = "online";
+		this.connectionMonitor();
+	}
+
+	private connectionMonitor()
+	{
+		this.connection.on("close", ()=> 
+		{
+			console.log("Connnection lost");
+			this.setPlayerStatus("offline");
+		})
 	}
 
 	equals(otherPlayer: PongPlayer):boolean
@@ -35,9 +48,19 @@ export class PongPlayer
 		return LRside;
 	}
 
-	setPlayerSide(side: "left" | "right")
+	setPlayerSide(side: TPlayerSide)
 	{
 		this.side = side;
+	}
+
+	getPlayerOnlineStatus():TOnlineStatus
+	{
+		return this.status;
+	}
+	
+	setPlayerStatus(status: TOnlineStatus)
+	{
+		this.status = status;
 	}
 
 }
