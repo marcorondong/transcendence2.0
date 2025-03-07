@@ -15,7 +15,6 @@ export class PongRoom extends SessionRoom
 {
 	private isFrameGenerating: boolean = false;
 	private readonly requiredPlayers = 2;
-	private currentOnlinePlayers = 0;
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
 
@@ -109,7 +108,6 @@ export class PongRoom extends SessionRoom
 			this.addConnectionToRoom(leftPlayer.connection);
 			this.assingControlsToPlayer(this.leftPlayer);
 			this.disconnectBehaviour(this.leftPlayer);
-			this.currentOnlinePlayers++;
 			return true
 		}
 		console.warn("Left player already exist. Cannot overwrite it")
@@ -124,7 +122,6 @@ export class PongRoom extends SessionRoom
 			this.addConnectionToRoom(rightPlayer.connection);
 			this.assingControlsToPlayer(this.rightPlayer);
 			this.disconnectBehaviour(this.rightPlayer);
-			this.currentOnlinePlayers++;
 			return true;
 		}
 		console.warn("Right player already exist cannot overwrite it");
@@ -136,9 +133,13 @@ export class PongRoom extends SessionRoom
 		this.addConnectionToRoom(connection);
 	}
 
+	//TODO make it room emmit
 	isFull():boolean
 	{
-		return (this.currentOnlinePlayers === this.requiredPlayers);
+		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
+			return true
+		return false;
+		//return (this.currentOnlinePlayers === this.requiredPlayers);
 	}
 
 
@@ -174,9 +175,11 @@ export class PongRoom extends SessionRoom
 		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
 		{
 			console.log("We have rage quitter here");
-			this.currentOnlinePlayers--; 
-			if(this.currentOnlinePlayers > 0)
+			if(this.game.getGameStatus() !== "not started")
+			{
+				console.log("Since game is rage quiter lost");
 				this.game.forfeitGame(player.getPlayerSideLR());
+			}
 			
 		})
 	}
@@ -187,12 +190,6 @@ export class PongRoom extends SessionRoom
 			return true;
 		return false;
 	}
-
-	// addAndAssingControlsToPlayer(PongPlayer:PongPlayer, playerSide: "left" | "right")
-	// {
-	// 	this.addPlayer(player);
-	// 	this.assingControlsToPlayer(player.connection, playerSide);
-	// }
 
 	private sendFrames()
 	{
