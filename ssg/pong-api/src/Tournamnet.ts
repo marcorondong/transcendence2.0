@@ -22,6 +22,20 @@ export class Tournament extends EventEmitter
 			this.emit("full tournament")
 	}
 
+	caluclateNumberOfFreeSpots():number
+	{
+		return this.requiredPlayers - this.playerPool.size;
+	}
+
+	sendAnnouncementToEveryone(announcement: string)
+	{
+		const update = this.createTournametStatusUpdate(announcement);
+		for(const player of this.playerPool)
+		{
+			player.sendNottification(JSON.stringify(update));
+		}
+	}
+
 	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
 	{
 		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);

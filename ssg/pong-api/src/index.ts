@@ -168,6 +168,8 @@ function tournamentJoiner(connection:WebSocket)
 {
 	const proPlayer:PongPlayer = new PongPlayer(connection, "TBD");
 	simpleTournamnet.addPlayer(proPlayer);
+	const freeSpots = simpleTournamnet.caluclateNumberOfFreeSpots();
+	simpleTournamnet.sendAnnouncementToEveryone(`We are waiting for ${freeSpots} player to join. Be patient`);
 }
 
 simpleTournamnet.on("full tournament", () =>
