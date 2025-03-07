@@ -1,0 +1,10 @@
+services:
+  chat-api:
+    image: frontend_api_img 
+    container_name: frontend_api
+    build: ./
+    volumes:
+      - ./src/:/frontend_api/src/
+      - ./public/:/frontend_api/public/
+    ports:
+      - 3000:3000
