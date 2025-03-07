@@ -170,6 +170,12 @@ export class PongRoom extends SessionRoom
 		})
 	}
 
+	checkIfPlayerIsStillOnline(player:PongPlayer)
+	{
+		if(player.getPlayerOnlineStatus() != "online")
+			this.game.forfeitGame(player.getPlayerSideLR());
+	}
+
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
 		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>

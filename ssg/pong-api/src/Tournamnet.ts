@@ -22,6 +22,16 @@ export class Tournament extends EventEmitter
 			this.emit("full tournament")
 	}
 
+	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
+	{
+		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
+		this.gamesPool.add(room);
+		room.getGame().start();
+		room.checkIfPlayerIsStillOnline(proPlayer1);
+		room.checkIfPlayerIsStillOnline(proPlayer2);
+		room.getAndSendFramesOnce();
+	}
+
 	async createAndStartRound()
 	{
 		console.log("Players left in tournamet:", this.playerPool.size)
@@ -33,10 +43,8 @@ export class Tournament extends EventEmitter
 			rivals.push(player);
 			if(rivals.length === 2)
 			{
+				this.createOneRoundMatch(rivals[0], rivals[1]);
 				const room:PongRoom = PongRoom.createRoomForTwoPlayers(rivals[0], rivals[1]);
-				this.gamesPool.add(room);
-				room.getGame().start();
-				room.getAndSendFramesOnce();
 				rivals = [];
 			}
 		}
