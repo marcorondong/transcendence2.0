@@ -41,7 +41,7 @@ export class Tournament extends EventEmitter
 
 	sendAnnouncementToEveryone(announcement: string)
 	{
-		const update = this.createTournametStatusUpdate(announcement);
+		const update = PongRoom.createMatchStatusUpdate(announcement);
 		for(const player of this.playerPool)
 		{
 			player.sendNottification(JSON.stringify(update));
@@ -69,7 +69,7 @@ export class Tournament extends EventEmitter
 		this.removeAllGamefromPool();
 		this.createAndStartRound();
 	}
-	
+
 	async waitForWinners()
 	{
 		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
@@ -77,12 +77,12 @@ export class Tournament extends EventEmitter
 			const winner = await room.getRoomWinner();
 			const loser = await room.getRoomLoser();
 			console.log("Winner is ", winner.getPlayerSide());
-			let notification = this.createTournametStatusUpdate("You won, you will progress to next round once all matches of round are done");
+			let notification = PongRoom.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
 			if(room.getRoundName() === "finals")
-				notification = this.createTournametStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
+				notification = PongRoom.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
 			winner.sendNottification(JSON.stringify(notification));
 			console.log("Loser is ", loser.getPlayerSide());
-			notification = this.createTournametStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
+			notification = PongRoom.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
 			loser.sendNottification(JSON.stringify(notification));
 			this.playerPool.delete(loser);
 			return winner;
@@ -122,12 +122,12 @@ export class Tournament extends EventEmitter
 		room.getAndSendFramesOnce();
 	}
 
-	private createTournametStatusUpdate(nottification: string)
-	{
-		return {
-			tournamentStatus: nottification
-		}
-	}
+	// private createTournametStatusUpdate(nottification: string)
+	// {
+	// 	return {
+	// 		tournamentStatus: nottification
+	// 	}
+	// }
 
 	private getRoundName(): string
 	{

@@ -53,7 +53,7 @@
     <div id="room-container">
         <p>Room ID: <span id="roomId">N/A</span></p>
         <p>Knockout Stage: <span id="knockoutName">N/A</span></p>
-        <p>Tournament Status: <span id="tournamentStatus">N/A</span></p>
+        <p>Match Status: <span id="matchStatus">N/A</span></p>
         <button onclick="copyRoomId()">Copy Room ID</button>
     </div>
 
@@ -88,7 +88,7 @@
         
         document.getElementById("roomId").innerText = gameState.roomId || "N/A";
         document.getElementById("knockoutName").innerText = gameState.knockoutName || "N/A";
-        document.getElementById("tournamentStatus").innerText = gameState.tournamentStatus || "N/A";
+        document.getElementById("matchStatus").innerText = gameState.matchStatus || "N/A";
         drawGame();
 };
 

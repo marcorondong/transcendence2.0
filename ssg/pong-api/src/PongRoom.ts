@@ -159,6 +159,13 @@ export class PongRoom extends SessionRoom
 			return true;
 		return false;
 	}
+
+	static createMatchStatusUpdate(nottification: string)
+	{
+		return {
+			matchStatus: nottification
+		}
+	}
 			
 	private sendFrames()
 	{
