@@ -7,8 +7,6 @@ import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
 import { PongPlayer } from "./PongPlayer";
 import { error } from "console";
-import { resolve } from "path";
-
 
 
 export class PongRoom extends SessionRoom
@@ -19,12 +17,17 @@ export class PongRoom extends SessionRoom
 	private rightPlayer?:PongPlayer;
 
 	private tournamentRoom:boolean = false;
-	private roundName?:string;
+	private roundName:string ="single Match";
 
 	game:PingPongGame = PingPongGame.createStandardGame();
 	constructor(privateRoom:boolean = false)
 	{
 		super(privateRoom);
+	}
+
+	getRoundName()
+	{
+		return this.roundName;
 	}
 
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
@@ -43,6 +46,135 @@ export class PongRoom extends SessionRoom
 		this.roundName = roundName;
 	}
 
+	
+	async getRoomWinner():Promise<PongPlayer>
+	{
+		if(this.game.getGameStatus() === "finished")
+		{
+			return this.getWinner();
+		}
+		return new Promise((resolve) => {
+			this.game.once("finished game", () =>
+			{
+				resolve(this.getWinner())
+			})
+		})
+	}
+		
+	async getRoomLoser():Promise<PongPlayer>
+	{
+		if(this.game.getGameStatus() === "finished")
+		{
+			return this.getLoser();
+		}
+		return new Promise((resolve) => {
+			this.game.once("finished game", () =>
+			{
+				resolve(this.getLoser())
+			})
+		})
+	}
+	
+	getGame():PingPongGame
+	{
+		return this.game;
+	}
+	
+	addLeftPlayer(leftPlayer: PongPlayer):boolean
+	{
+		if(this.leftPlayer === undefined)
+		{
+			this.leftPlayer = leftPlayer;
+			this.addConnectionToRoom(leftPlayer.connection);
+			this.assingControlsToPlayer(this.leftPlayer);
+			this.disconnectBehaviour(this.leftPlayer);
+			return true
+		}
+		console.warn("Left player already exist. Cannot overwrite it")
+		return false;
+	}
+		
+	addRightPlayer(rightPlayer:PongPlayer):boolean
+	{
+		if(this.rightPlayer === undefined)
+		{
+			this.rightPlayer = rightPlayer;
+			this.addConnectionToRoom(rightPlayer.connection);
+			this.assingControlsToPlayer(this.rightPlayer);
+			this.disconnectBehaviour(this.rightPlayer);
+			return true;
+		}
+		console.warn("Right player already exist cannot overwrite it");
+		return false;
+	}
+			
+	addSpectator(connection:WebSocket)
+	{
+		this.addConnectionToRoom(connection);
+	}
+	
+	isFull():boolean
+	{
+		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
+			return true
+		return false;
+	}
+			
+			
+	/**
+	 * function that make sure frame are generated only once. This fixed performance bug
+	*/
+	getAndSendFramesOnce()
+	{
+		if(this.isFrameGenerating === false)
+		{
+			this.isFrameGenerating = true;
+			this.sendFrames();
+		}
+	}
+			
+	checkIfPlayerIsStillOnline(player:PongPlayer)
+	{
+		if(player.getPlayerOnlineStatus() != "online")
+			this.game.forfeitGame(player.getPlayerSideLR());
+	}
+	
+	disconnectBehaviour(rageQuitPlayer:PongPlayer)
+	{
+		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
+		{
+			console.log("We have rage quitter here");
+			if(this.game.getGameStatus() !== "not started" && this.game.getGameStatus() !== "finished")
+			{
+				console.log("Since game is rage quiter lost");
+				this.game.forfeitGame(player.getPlayerSideLR());
+			}
+				
+		})
+	}
+			
+	isConnectionPlayer(connection:WebSocket):boolean
+	{
+		if(connection === this.leftPlayer?.connection || connection === this.rightPlayer?.connection)
+			return true;
+		return false;
+	}
+			
+	private sendFrames()
+	{
+		const renderFrame = () => {
+			const frame: PongFrameI = this.getGame().getFrame();
+			const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
+			const frameJson = JSON.stringify(frameWithRoomId);
+			this.roomBroadcast(frameJson)
+			if(this.getGame().getGameStatus() === "finished")
+			{
+				return;
+			}
+			raf(renderFrame);
+		};
+		raf(renderFrame);
+	}
 
 	private getWinner():PongPlayer
 	{
@@ -76,93 +208,6 @@ export class PongRoom extends SessionRoom
 		}
 	}
 
-	async getRoomWinner():Promise<PongPlayer>
-	{
-		if(this.game.getGameStatus() === "finished")
-		{
-			return this.getWinner();
-		}
-		return new Promise((resolve) => {
-			this.game.once("finished game", () =>
-			{
-				resolve(this.getWinner())
-			})
-		})
-	}
-
-	async getRoomLoser():Promise<PongPlayer>
-	{
-		if(this.game.getGameStatus() === "finished")
-		{
-			return this.getLoser();
-		}
-		return new Promise((resolve) => {
-			this.game.once("finished game", () =>
-			{
-				resolve(this.getLoser())
-			})
-		})
-	}
-
-	getGame():PingPongGame
-	{
-		return this.game;
-	}
-
-	addLeftPlayer(leftPlayer: PongPlayer):boolean
-	{
-		if(this.leftPlayer === undefined)
-		{
-			this.leftPlayer = leftPlayer;
-			this.addConnectionToRoom(leftPlayer.connection);
-			this.assingControlsToPlayer(this.leftPlayer);
-			this.disconnectBehaviour(this.leftPlayer);
-			return true
-		}
-		console.warn("Left player already exist. Cannot overwrite it")
-		return false;
-	}
-
-	addRightPlayer(rightPlayer:PongPlayer):boolean
-	{
-		if(this.rightPlayer === undefined)
-		{
-			this.rightPlayer = rightPlayer;
-			this.addConnectionToRoom(rightPlayer.connection);
-			this.assingControlsToPlayer(this.rightPlayer);
-			this.disconnectBehaviour(this.rightPlayer);
-			return true;
-		}
-		console.warn("Right player already exist cannot overwrite it");
-		return false;
-	}
-
-	addSpectator(connection:WebSocket)
-	{
-		this.addConnectionToRoom(connection);
-	}
-
-	//TODO make it room emmit
-	isFull():boolean
-	{
-		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
-			return true
-		return false;
-		//return (this.currentOnlinePlayers === this.requiredPlayers);
-	}
-
-
-	/**
-	 * function that make sure frame are generated only once. This fixed performance bug
-	 */
-	getAndSendFramesOnce() {
-		if(this.isFrameGenerating === false)
-		{
-			this.isFrameGenerating = true;
-			this.sendFrames();
-		}
-	}
-
 	private assingControlsToPlayer(player:PongPlayer):void 
 	{
 		player.connection.on("message", (data: RawData, isBinnary:boolean) =>
@@ -177,48 +222,5 @@ export class PongRoom extends SessionRoom
 			const paddle:Paddle = this.getGame().getPaddle(player.getPlayerSideLR());
 			this.getGame().movePaddle(paddle, direction);
 		})
-	}
-
-	checkIfPlayerIsStillOnline(player:PongPlayer)
-	{
-		if(player.getPlayerOnlineStatus() != "online")
-			this.game.forfeitGame(player.getPlayerSideLR());
-	}
-
-	disconnectBehaviour(rageQuitPlayer:PongPlayer)
-	{
-		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
-		{
-			console.log("We have rage quitter here");
-			if(this.game.getGameStatus() !== "not started" && this.game.getGameStatus() !== "finished")
-			{
-				console.log("Since game is rage quiter lost");
-				this.game.forfeitGame(player.getPlayerSideLR());
-			}
-			
-		})
-	}
-
-	isConnectionPlayer(connection:WebSocket):boolean
-	{
-		if(connection === this.leftPlayer?.connection || connection === this.rightPlayer?.connection)
-			return true;
-		return false;
-	}
-
-	private sendFrames()
-	{
-		const renderFrame = () => {
-			const frame: PongFrameI = this.getGame().getFrame();
-			const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
-			const frameJson = JSON.stringify(frameWithRoomId);
-			this.roomBroadcast(frameJson)
-			if(this.getGame().getGameStatus() === "finished")
-			{
-				return;
-			}
-			raf(renderFrame);
-		};
-		raf(renderFrame);
 	}
 }
