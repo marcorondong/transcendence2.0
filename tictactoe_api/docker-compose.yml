@@ -1,5 +1,5 @@
 services:
-  chat-api:
+  tictactoe_api:
     image: tictactoe_api_img 
     container_name: tictactoe_api
     build: ./
