@@ -1,55 +1,59 @@
-import {Player} from "./Player"
+import { WebSocket } from "ws";
 
 export class SessionRoom
 {
-	readonly id: string; 
-	protected players: Map<string,Player>;
-	private requiredPlayers: number;
+	protected readonly id: string;
+	protected connections: Set<WebSocket> = new Set<WebSocket>();
+	protected privateRoom: boolean;
+	protected readonly creationDate:Date; 
 	
-	constructor(roomId: string, requiredPlayers:number = 2)
+	constructor(privateRoom:boolean = false)
 	{
-		this.id = roomId;
-		this.requiredPlayers = requiredPlayers;
-		this.players = new Map<string,Player>();
+		this.id = crypto.randomUUID();
+		this.privateRoom = privateRoom;
+		this.creationDate = new Date();
 	}
 
+
+	getId():string
+	{
+		return this.id;
+	}
+
+	getCreationDate():Date 
+	{
+		return this.creationDate;
+	}
+	
 	//TODO: research should this be boolean or Promise async function
 	/**
 	 * 
 	 * @param player player to add
 	 * @returns 
 	 */
-	addPlayer(player: Player):boolean
+	addConnectionToRoom(connectionToAdd: WebSocket):void
 	{
-		if(this.getPlayerCount() < this.requiredPlayers)
+		this.connections.add(connectionToAdd);
+	}
+
+	removeConnectionFromRoom(connectionToRemove: WebSocket):void
+	{
+		connectionToRemove.close();
+		this.connections.delete(connectionToRemove);
+	}
+
+	closeAndRemoveAllConnections():void
+	{
+		for(const oneConnection of this.connections)
 		{
-			this.players.set(player.id, player);
-			return true;
+			this.removeConnectionFromRoom(oneConnection);
+			console.log("Closing and removing connection");
 		}
-		console.warn(`Player ${player.id} cannot join full room ${this.id}`);
-		return false;
 	}
 
-	removePlayer(player: Player)
+	getConnectionsCount(): number 
 	{
-		this.players.delete(player.id)
-	}
-
-	getPlayerCount(): number 
-	{
-		return this.players.size;
-	}
-
-	greetPlayer(player: Player): void 
-	{
-		const greeting: string = `Hello player ${player.id} welcome to room ${this.id}`;
-		var update: string; 
-		player.connection.send(greeting);
-		if(this.getPlayerCount() <= this.requiredPlayers)
-		{
-			update = `Waiting for ${this.requiredPlayers - this.getPlayerCount()} more player to join`;
-			player.connection.send(update);
-		}
+		return this.connections.size;
 	}
 
 	/**
@@ -58,14 +62,24 @@ export class SessionRoom
 	 */
 	roomBroadcast(message: string): void 
 	{
-		for (const player of this.players.values())
+		for (const oneConnection of this.connections)
 		{
-			player.connection.send(message);
+			oneConnection.send(message);
 		}
 	}
-	
-	isFull():boolean
+
+	isPrivate():boolean
 	{
-		return this.getPlayerCount() === this.requiredPlayers;
+		return this.privateRoom;
+	}
+
+	setRoomPrivate():void 
+	{
+		this.privateRoom = true;
+	}
+
+	setRoomPublic(): void 
+	{
+		this.privateRoom = false;
 	}
 }

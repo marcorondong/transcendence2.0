@@ -1,22 +1,20 @@
 import Fastify from "fastify"
-import { Paddle } from "./Paddle";
-import { Point } from "./Point";
-import { Ball } from "./Ball";
-import { PingPongGame, PongFrameI } from "./PongGame";
 import websocket from "@fastify/websocket"
 import { WebSocket, RawData } from "ws";
-import {Parser} from "../../utils/Parser"
-import raf from "raf";
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
+import { PongRoom } from "./PongRoom";
+import { PongPlayer } from "./PongPlayer";
+import { PongRoomManager } from "./PongRoomManager";
 
 
 dotenv.config();
+
+//Server set up variables
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
-
 const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
 const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
 let privateKey: string; 
@@ -31,7 +29,7 @@ catch
 {
 	console.error("ssl private key and certificate are not generated. Run https-key.sh script inside scripts folder first")
 	process.exit(1);
-
+	
 }
 
 const fastify = Fastify(
@@ -41,7 +39,7 @@ const fastify = Fastify(
 		key: privateKey,
 		cert: certificate
 	},
-
+	
 	logger: process.env.NODE_ENV === "development"?
 	{
 		transport:
@@ -57,18 +55,94 @@ const fastify = Fastify(
 	}
 	: true
 });
+	
 
-const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
-const rightPaddle: Paddle = new Paddle(new Point(4, 0));
-const ball: Ball = new Ball(new Point(0, 0));
-let player:number = 1;
+function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
+{
+	if(roomId === 0)
+	{
+		const roomToJoin = roomManager.isAnyPublicRoomAvailable();
+		if(roomToJoin !== false)
+		{
+			const player:PongPlayer = new PongPlayer(connection, "right");
+			roomToJoin.addRightPlayer(player)
+			roomToJoin.getGame().start();
+			return roomToJoin;
+		}
+		else 
+			return roomManager.createRoomAndAddFirstPlayer(connection);
+	}
+	else 
+	{
+		const roomWithId = roomManager.getRoom(roomId);
+		if(roomWithId === undefined)
+			return roomManager.createRoomAndAddFirstPlayer(connection);
+		else
+		{
+			const player:PongPlayer = new PongPlayer(connection, "right");
+			roomWithId.addRightPlayer(player)
+			roomWithId.getGame().start();
+			return roomWithId;
+		}
+	}
+}
 
-const game: PingPongGame = new PingPongGame("1",leftPaddle, rightPaddle, ball);
+function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
+{
+	if(roomId === 0)
+		return false;
+	const roomWithId = roomManager.getRoom(roomId);
+	if(roomWithId !== undefined)
+	{
+		roomWithId.addSpectator(connection);
+		return true
+	}
+	return false;
+}
+
+
+const roomManager:PongRoomManager = new PongRoomManager();
+
 
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
 	prefix: "/", // Optional: Sets the URL prefix
   });
+
+interface GameRoomQueryI
+{
+	roomId: string | 0;
+	playerId: string;
+	privateRoom: boolean;
+	clientType: "player" | "spectator";
+} 
+
+
+function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
+{	
+	connection.on("close", () => {
+	if(room?.isFull() === false)
+	{
+		console.log(`Deleting room: ${room.getId()}`);
+		roomManager.removeRoom(room);
+	}
+	});
+}
+
+function spectatorLogic(roomId:string | 0, connection:WebSocket)
+{
+	if(spectatorJoin(roomId, connection))
+	{
+		console.log(`Spectator joined to room: ${roomId}`)
+		connection.send(JSON.stringify(roomId));
+	}
+	else 
+	{
+		connection.send(`Room: ${roomId} you tried to join does not exist`);
+		connection.close();
+	}
+}
+
 
 fastify.register(websocket);
 fastify.register(async function(fastify)
@@ -80,21 +154,31 @@ fastify.register(async function(fastify)
 			hello: "ssl"
 		}
 		)
-		//reply.send(PingPongGame.getPongFrame(leftPaddle, rightPaddle, ball));
-		// ball.moveBall();
-		// leftPaddle.moveUp();
-		// rightPaddle.moveDown();
-		// rightPaddle.moveDown();
 	});
 
-	fastify.get("/pong/", {websocket:true}, (connection, req) =>
+	//Partial makes all field optional. 
+	fastify.get<{Querystring: Partial<GameRoomQueryI>}>("/pong/", {websocket:true}, (connection, req) =>
 	{
-		sendFrames(connection);
-		if(player === 1)
-			moveHandler(connection, leftPaddle);
-		else if(player === 2)
-			moveHandler(connection, rightPaddle);
-		player++;
+		const {
+			roomId = 0,
+			playerId= "Player whatever",
+			privateRoom = false,
+			clientType = "player"	
+		} = req.query as GameRoomQueryI;
+
+		let room:PongRoom | undefined;
+		if(clientType === "player")
+		{
+			room = playerRoomJoiner(roomId, connection);
+			console.log(`Player joined to room:${room.getId()}`);
+			const roomIdJson = {roomId: room.getId()};
+			connection.send(JSON.stringify(roomIdJson));
+		}
+		if(room !== undefined && room.isFull())
+			room.getAndSendFramesOnce();
+		if(clientType ==="spectator")
+			spectatorLogic(roomId, connection);
+		closeConnectionLogic(connection, room);
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
@@ -108,43 +192,12 @@ fastify.register(async function(fastify)
 	  });
 })
 
-
-function sendFrames(socket: WebSocket)
-{
-	const renderFrame = () => {
-		const frame: PongFrameI = game.getFrame();
-		const frameJson = JSON.stringify(frame);
-		socket.send(frameJson);
-		if(game.isLastFrame())
-		{
-			return;
-		}
-		raf(renderFrame);
-	};
-	raf(renderFrame);
-}
-
-function moveHandler(socket: WebSocket, paddle: Paddle)
-{
-	socket.on("message", (data: RawData, isBinnary:boolean) =>
-	{
-		const json = Parser.rawDataToJson(data);
-		if(!json)
-		{
-			socket.send("Invalid json");
-			return 
-		}
-		const direction = json.move;
-		game.movePaddle(paddle, direction)
-	})
-}
-
 const startServer = async() =>
 {
 	try 
 	{
 		await fastify.listen({port: PORT, host: HOST});
-		console.log(`Pong server is runnig on http://${HOST}:${PORT}`);
+		console.log(`Pong server is runnig on https://${HOST}:${PORT}`);
 	}
 	catch(err)
 	{

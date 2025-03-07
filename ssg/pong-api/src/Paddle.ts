@@ -1,6 +1,6 @@
 import { Point } from "./Point";
 
-const MOVE_MODIFIER = 0.1;
+const MOVE_MODIFIER = 0.05;
 
 export class Paddle
 {
