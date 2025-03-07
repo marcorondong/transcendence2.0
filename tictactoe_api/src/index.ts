@@ -4,7 +4,7 @@ import fastifyStatic from '@fastify/static';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import chalk from 'chalk';
+// import chalk from 'chalk';
 
 const PORT = 3001;
 const HOST = '0.0.0.0';
@@ -28,16 +28,16 @@ class Client
     }
 }
 
-fastify.register(fastifyStatic, {
-	root: path.join(__dirname, '../public'),
-	prefix: '/', // optional: default '/'
-});
+// fastify.register(fastifyStatic, {
+// 	root: path.join(__dirname, '../public'),
+// 	prefix: '/', // optional: default '/'
+// });
 
 fastify.register(fastifyWebsocket);
 
-fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-	return reply.sendFile('tictactoe.html');
-});
+// fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
+// 	return reply.sendFile('tictactoe.html');
+// });
 
 fastify.register(async function (fastify)
 {
@@ -46,7 +46,7 @@ fastify.register(async function (fastify)
 		const socket = connection as unknown as WebSocket;
 		const id = uuidv4();
 		const currentClient = new Client(id, "", socket);
-		console.log(chalk.magentaBright('Client connected'));
+		// console.log(chalk.magentaBright('Client connected'));
 
 		connection.on('message', (message: string) =>
 		{
@@ -110,7 +110,7 @@ fastify.register(async function (fastify)
 				lookingForGame_nickname = '';
 			}
 			allClients = allClients.filter(client => client !== currentClient);
-			console.log(chalk.red(`Client disconnected with code: ${code}, reason: ${reason.toString()}`));
+			// console.log(chalk.red(`Client disconnected with code: ${code}, reason: ${reason.toString()}`));
 		});
 	});
 });
