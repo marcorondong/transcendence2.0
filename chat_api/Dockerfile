@@ -1,20 +1,10 @@
-
 FROM node:iron-slim
 
 RUN apt-get update
 
-# Create app directory
-RUN mkdir -p chat_api
-RUN mkdir -p chat_api/src
-RUN mkdir -p chat_api/dist
-RUN mkdir -p chat_api/public
-WORKDIR chat_api
+COPY ./package.json /chat_api/
+COPY ./tsconfig.json /chat_api/
+# COPY ./src /chat_api/src
+RUN npm --prefix /chat_api install
 
-# Install app dependencies
-COPY package.json .
-COPY tsconfig.json .
-# COPY src ./src
-RUN npm install
-RUN npm run build
-
-# CMD ["npm", "run", "dev"]
+CMD ["npm", "--prefix", "/chat_api", "run", "dev"]

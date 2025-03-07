@@ -1,12 +1,9 @@
-
 services:
   chat-api:
-    image: chat-api
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3002"
+    image: chat_api_img 
+    container_name: chat_api
+    build: ./
     volumes:
-      - .:/chat_api
-    command: ./run.sh
+      - ./src/:/chat_api/src/
+    ports:
+      - 3002:3002

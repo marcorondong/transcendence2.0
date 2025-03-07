@@ -1,12 +1,11 @@
 {
   "name": "only_chat",
   "version": "1.0.0",
-  "main": "public/index.js",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "watch": "npx tsc -w",
-    "dev": "nodemon --watch src public/server.js", 
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "tsc -w",
+	"dev": "nodemon --exec ts-node --watch 'src/**/*.ts' src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -25,6 +24,7 @@
     "@types/node": "^22.13.9",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "dependencies": {
@@ -33,7 +33,6 @@
     "@types/ws": "^8.18.0",
     "chalk": "^5.4.1",
     "fastify": "^5.2.1",
-    "uuid": "^11.1.0",
-    "ws": "^8.18.1"
+    "uuid": "^11.1.0"
   }
 }

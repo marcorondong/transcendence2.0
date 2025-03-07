@@ -63,16 +63,16 @@ const findClientByNickname = (nickname: string): Client | undefined => {
     return undefined;
 };
 
-fastify.register(fastifyStatic, {
-	root: path.join(__dirname, '../public'),
-	prefix: '/', // optional: default '/'
-});
+// fastify.register(fastifyStatic, {
+// 	root: path.join(__dirname, '../public'),
+// 	prefix: '/', // optional: default '/'
+// });
 
 fastify.register(fastifyWebsocket);
 
-fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-	return reply.sendFile('index.html');
-});
+// fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
+// 	return reply.sendFile('index.html');
+// });
 
 fastify.register(async function (fastify)
 {
