@@ -200,8 +200,6 @@ export class PongRoom extends SessionRoom
 			this.roomBroadcast(frameJson)
 			if(this.getGame().isLastFrame())
 			{
-				//TODO check this hotfix one more; it makes tournament possible
-				//this.closeAndRemoveAllConnections();
 				return;
 			}
 			raf(renderFrame);
