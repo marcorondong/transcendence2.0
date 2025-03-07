@@ -1,0 +1,31 @@
+services:
+  tictactoe_api:
+    image: tictactoe_api_img 
+    container_name: tictactoe_api
+    build: ./tictactoe_api/
+    volumes:
+      - ./tictactoe_api/src/:/tictactoe_api/src/
+    ports:
+      - 3001:3001
+
+  chat_api:
+    image: chat_api_img 
+    container_name: chat_api
+    build: ./chat_api/
+    volumes:
+      - ./chat_api/src/:/chat_api/src/
+    ports:
+      - 3002:3002
+
+  frontend_api:
+    image: frontend_api_img 
+    container_name: frontend_api
+    build: ./frontend_api/
+    volumes:
+      - ./frontend_api/src/:/frontend_api/src/
+      - ./frontend_api/public/:/frontend_api/public/
+    ports:
+      - 3000:3000
+    depends_on:
+      - tictactoe_api
+      - chat_api
