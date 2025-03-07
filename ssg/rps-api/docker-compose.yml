@@ -1,0 +1,12 @@
+services:
+  rps-api:
+    image: rps-api-img
+    container_name: rps-api
+    build:
+      context: ..
+      dockerfile: rps-api/Dockerfile
+    volumes:
+      - ./src/:/rps/rps-api/src/
+    ports:
+      - 3000:3000
+    command: npm run dev
