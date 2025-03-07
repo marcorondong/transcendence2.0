@@ -59,7 +59,7 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const queryParams = window.location.search;
-        const ws = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`);
+        const wss = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`);
 
         let gameState = {
             leftPaddle: { x: -4, y: 0, height: 1 },
@@ -74,14 +74,14 @@
 
         setInterval(() => {
             if (leftPaddleDirection !== 0) {
-                ws.send(JSON.stringify({ move: leftPaddleDirection > 0 ? "down" : "up", paddle: "left" }));
+                wss.send(JSON.stringify({ move: leftPaddleDirection > 0 ? "down" : "up", paddle: "left" }));
             }
             if (rightPaddleDirection !== 0) {
-                ws.send(JSON.stringify({ move: rightPaddleDirection > 0 ? "down" : "up", paddle: "right" }));
+                wss.send(JSON.stringify({ move: rightPaddleDirection > 0 ? "down" : "up", paddle: "right" }));
             }
         }, 1000 / 60); 
 
-        ws.onmessage = (event) => {
+        wss.onmessage = (event) => {
             gameState = JSON.parse(event.data);
             document.getElementById("roomId").innerText = gameState.roomId || "N/A";
             drawGame();
