@@ -47,11 +47,7 @@ export class PingPongGame extends EventEmitter
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.score = score;
 		this.field = tableField;
-
-		//TODO maybe even remove this
-		this.pauseGame();
 		this.gameStatus = "not started";
-		//this.start();
 	}
 
 	static createStandardGame() :PingPongGame
