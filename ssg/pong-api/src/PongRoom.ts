@@ -175,7 +175,7 @@ export class PongRoom extends SessionRoom
 		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
 		{
 			console.log("We have rage quitter here");
-			if(this.game.getGameStatus() !== "not started")
+			if(this.game.getGameStatus() !== "not started" && this.game.getGameStatus() !== "finished")
 			{
 				console.log("Since game is rage quiter lost");
 				this.game.forfeitGame(player.getPlayerSideLR());
