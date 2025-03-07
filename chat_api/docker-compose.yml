@@ -1,5 +1,5 @@
 services:
-  chat-api:
+  chat_api:
     image: chat_api_img 
     container_name: chat_api
     build: ./
