@@ -26,11 +26,11 @@ export class Tournament extends EventEmitter
 	{
 		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
 		this.gamesPool.add(room);
+		room.setRoomAsTournament(this.getRoundName(this.playerPool.size));
 		room.getGame().start();
 		room.checkIfPlayerIsStillOnline(proPlayer1);
 		room.checkIfPlayerIsStillOnline(proPlayer2);
 		room.getAndSendFramesOnce();
-		room.setRoomAsTournament(this.getRoundName());
 	}
 
 	async createAndStartRound()
@@ -53,14 +53,29 @@ export class Tournament extends EventEmitter
 		this.createAndStartRound();
 	}
 
+
+	private createTournametStatusUpdate(nottification: string)
+	{
+		return {
+			tournamentStatus: nottification
+		}
+	}
+
 	async waitForWinners()
 	{
 		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
 		{
+			const roundName = this.getRoundName(this.playerPool.size);
 			const winner = await room.getRoomWinner();
 			const loser = await room.getRoomLoser();
 			console.log("Winner is ", winner.getPlayerSide());
+			let notification = this.createTournametStatusUpdate("You won, you will progress to next round once all matches of round are done");
+			if(this.playerPool.size === 2)
+				notification = this.createTournametStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
+			winner.sendNottification(JSON.stringify(notification));
 			console.log("Loser is ", loser.getPlayerSide());
+			notification = this.createTournametStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${roundName}`);
+			loser.sendNottification(JSON.stringify(notification));
 			this.playerPool.delete(loser);
 			return winner;
 
@@ -69,14 +84,14 @@ export class Tournament extends EventEmitter
 		await Promise.all(winnerPromises);
 	}
 
-	private getRoundName(): string
+	private getRoundName(numberOfPlayers: number): string
 	{
-		if(this.playerPool.size === 2)
+		if(numberOfPlayers === 2)
 			return "finals";
-		else if (this.playerPool.size === 4)
+		else if (numberOfPlayers === 4)
 			return "semi-finals";
-		else if(this.playerPool.size === 8)
+		else if(numberOfPlayers === 8)
 			return "quarter finals";
-		return `Round of ${this.playerPool.size}`;
+		return `Round of ${numberOfPlayers}`;
 	}
 }

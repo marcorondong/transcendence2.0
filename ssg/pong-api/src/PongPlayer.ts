@@ -67,4 +67,9 @@ export class PongPlayer extends EventEmitter
 		this.status = status;
 	}
 
+	sendNottification(notification: string)
+	{
+		this.connection.send(notification)
+	}
+
 }
