@@ -1,11 +1,11 @@
 {
   "name": "only_chat",
   "version": "1.0.0",
-  "main": "public/server.js",
+  "main": "public/index.js",
   "scripts": {
-    "build": "npx tsc",
+    "build": "tsc -p tsconfig.json",
     "watch": "npx tsc -w",
-    "dev": "npx nodemon --watch public/server.js",
+    "dev": "nodemon --watch src public/server.js", 
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

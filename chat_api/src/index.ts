@@ -4,7 +4,7 @@ import fastifyStatic from '@fastify/static';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import chalk from 'chalk';
+// import chalk from 'chalk';
 
 const PORT = 3002;
 const HOST = '0.0.0.0';
@@ -71,7 +71,7 @@ fastify.register(fastifyStatic, {
 fastify.register(fastifyWebsocket);
 
 fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-	return reply.sendFile('chat.html');
+	return reply.sendFile('index.html');
 });
 
 fastify.register(async function (fastify)
@@ -82,7 +82,7 @@ fastify.register(async function (fastify)
 		const id = uuidv4();
 		const currentClient = new Client(id, "", socket);
 		// allClients.push(currentClient); // This is done after registration is successful
-		console.log(chalk.magentaBright('Client connected'));
+		// console.log(chalk.magentaBright('Client connected'));
 
 		connection.on('message', (message: string) =>
 		{
@@ -188,47 +188,47 @@ fastify.register(async function (fastify)
 					}
 					else if(data.error)
 					{
-						console.log(chalk.red('Error: Client sent an error message to "chat" microservice. Something went wrong in client side. The error message is:'));
-						console.log(chalk.yellow(data.error));
+						// console.log(chalk.red('Error: Client sent an error message to "chat" microservice. Something went wrong in client side. The error message is:'));
+						// console.log(chalk.yellow(data.error));
 						return;
 					}
 					else // if chat microservice has an unknown request
 					{
-						console.log(chalk.red('Error: Unknown request from client in "chat" microservice. Received data:'));
-						console.log(JSON.stringify(data, null, 2));
+						// console.log(chalk.red('Error: Unknown request from client in "chat" microservice. Received data:'));
+						// console.log(JSON.stringify(data, null, 2));
 					}
 				}
 				else if (data.microservice === 'error')
 				{
 					if(data.errorMessage && data.sentData)
 					{
-						console.log(chalk.red('Error: Client received incorrect data from server. The error message is:'));
-						console.log(chalk.yellow(data.errorMessage));
-						console.log(chalk.red('Data which client received from server:'));
+						// console.log(chalk.red('Error: Client received incorrect data from server. The error message is:'));
+						// console.log(chalk.yellow(data.errorMessage));
+						// console.log(chalk.red('Data which client received from server:'));
 						console.log(JSON.stringify(data.sentData, null, 2));
 					}
 					else // if errorMessage or sentData property is not found or has a falsy value
 					{
-						console.log(chalk.red('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:'));
+						// console.log(chalk.red('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:'));
 						console.log(JSON.stringify(data, null, 2));
 					}
 				}
 				else // if microservice property has an unknown value
 				{
-					console.log(chalk.red('Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests. Received data:'));
+					// console.log(chalk.red('Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests. Received data:'));
 					console.log(JSON.stringify(data, null, 2));
 				}
 			}
 			else // if microservice property is not found or has a falsy value
 			{
-				console.log(chalk.red('Error: "microservice" property not found or has a falsy value in data sent by client to server. Received data:'));
+				// console.log(chalk.red('Error: "microservice" property not found or has a falsy value in data sent by client to server. Received data:'));
 				console.log(JSON.stringify(data, null, 2))
 			}
 		});
 
 		connection.on('close', (code: number, reason: Buffer) => 
 		{
-			console.log(chalk.red(`Client disconnected with code: ${code}, reason: ${reason.toString()}`));
+			// console.log(chalk.red(`Client disconnected with code: ${code}, reason: ${reason.toString()}`));
 			allClients = allClients.filter(client => client !== currentClient);
 
 			for(const client of allClients)
