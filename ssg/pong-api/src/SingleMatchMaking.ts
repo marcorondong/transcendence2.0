@@ -3,9 +3,10 @@ import { PongRoom } from "./PongRoom"
 import { WebSocket, RawData } from "ws";
 import { PongPlayer } from "./PongPlayer";
 
-export class PongRoomManager
+
+export class SingleMatchMaking
 {
-	private rooms: Map<string, PongRoom> = new Map<string, PongRoom>();
+	private singleMatches: Map<string, PongRoom> = new Map<string, PongRoom>();
 
 	constructor()
 	{
@@ -14,28 +15,29 @@ export class PongRoomManager
 
 	addRoom(room: PongRoom):void 
 	{
-		if(this.rooms.has(room.getId()))
+		if(this.singleMatches.has(room.getId()))
 		{
 			console.warn("Tryed to add room with id that already exist in map.");
 			return;
 		}
-		this.rooms.set(room.getId(), room);
+		this.singleMatches.set(room.getId(), room);
+		this.monitorRoom(room);
 	}
 
 	removeRoom(room: PongRoom):boolean 
 	{
-		return this.rooms.delete(room.getId());
+		return this.singleMatches.delete(room.getId());
 	}
 
 	getRoom(roomId:string)
 	{
-		return this.rooms.get(roomId);
+		return this.singleMatches.get(roomId);
 	}
 
 	isAnyPublicRoomAvailable():false | PongRoom
 	{
 		let toReturn:PongRoom | false = false;
-		for(const [key, oneRoom] of this.rooms.entries())
+		for(const [key, oneRoom] of this.singleMatches.entries())
 		{
 			if(oneRoom.isPrivate() === false && oneRoom.isFull() === false)
 			{
@@ -58,5 +60,13 @@ export class PongRoomManager
 		const leftPlayer: PongPlayer = new PongPlayer(connection, "left");
 		room.addLeftPlayer(leftPlayer);
 		return room;
+	}
+
+	private async monitorRoom(room:PongRoom)
+	{
+		await room.game.waitForFinalWhistle();
+		console.log("Game finished");
+		room.closeAllConecctionsFromRoom();
+		this.removeRoom(room);
 	}
 }

@@ -7,7 +7,7 @@ import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
 import { PongPlayer } from "./PongPlayer";
-import { PongRoomManager } from "./PongRoomManager";
+import { SingleMatchMaking } from "./SingleMatchMaking";
 import { Tournament } from "./Tournamnet";
 
 
@@ -62,7 +62,7 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 {
 	if(roomId === 0)
 	{
-		const roomToJoin = roomManager.isAnyPublicRoomAvailable();
+		const roomToJoin = singlesManager.isAnyPublicRoomAvailable();
 		if(roomToJoin !== false)
 		{
 			const player:PongPlayer = new PongPlayer(connection, "right");
@@ -71,13 +71,13 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 			return roomToJoin;
 		}
 		else 
-			return roomManager.createRoomAndAddFirstPlayer(connection);
+			return singlesManager.createRoomAndAddFirstPlayer(connection);
 	}
 	else 
 	{
-		const roomWithId = roomManager.getRoom(roomId);
+		const roomWithId = singlesManager.getRoom(roomId);
 		if(roomWithId === undefined)
-			return roomManager.createRoomAndAddFirstPlayer(connection);
+			return singlesManager.createRoomAndAddFirstPlayer(connection);
 		else
 		{
 			const player:PongPlayer = new PongPlayer(connection, "right");
@@ -92,7 +92,7 @@ function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
 {
 	if(roomId === 0)
 		return false;
-	const roomWithId = roomManager.getRoom(roomId);
+	const roomWithId = singlesManager.getRoom(roomId);
 	if(roomWithId !== undefined)
 	{
 		roomWithId.addSpectator(connection);
@@ -102,7 +102,7 @@ function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
 }
 
 
-const roomManager:PongRoomManager = new PongRoomManager();
+const singlesManager:SingleMatchMaking = new SingleMatchMaking();
 
 
 fastify.register(fastifyStatic, {
@@ -126,7 +126,7 @@ function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
 	if(room?.isFull() === false)
 	{
 		console.log(`Deleting room: ${room.getId()}`);
-		roomManager.removeRoom(room);
+		singlesManager.removeRoom(room);
 	}
 	});
 }
