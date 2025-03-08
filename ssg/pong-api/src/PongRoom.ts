@@ -49,30 +49,14 @@ export class PongRoom extends SessionRoom
 	
 	async getRoomWinner():Promise<PongPlayer>
 	{
-		if(this.game.getGameStatus() === "finished")
-		{
-			return this.getWinner();
-		}
-		return new Promise((resolve) => {
-			this.game.once("finished game", () =>
-			{
-				resolve(this.getWinner())
-			})
-		})
+		await this.game.waitForFinalWhistle();
+		return this.getWinner();
 	}
 		
 	async getRoomLoser():Promise<PongPlayer>
 	{
-		if(this.game.getGameStatus() === "finished")
-		{
-			return this.getLoser();
-		}
-		return new Promise((resolve) => {
-			this.game.once("finished game", () =>
-			{
-				resolve(this.getLoser())
-			})
-		})
+		await this.game.waitForFinalWhistle();
+		return this.getLoser();
 	}
 	
 	getGame():PingPongGame

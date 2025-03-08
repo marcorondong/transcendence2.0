@@ -77,11 +77,16 @@ export class PingPongGame extends EventEmitter
 		return this.score.getWinnerSide();
 	}
 
-	waitForFinalWhistle(): void
+	async waitForFinalWhistle(): Promise<PingPongGame>
 	{
-		this.on("finished game", () =>
+		if(this.gameStatus === "finished")
+			return this;
+		return new Promise((resolve, reject)=>
 		{
-			console.log("Game is done");
+			this.on("finished game", ()=>
+			{
+				resolve(this);
+			})
 		})
 	}
 
@@ -104,6 +109,7 @@ export class PingPongGame extends EventEmitter
 	{
 		this.setGameStatus("running");
 		this.score.start();
+		this.start();
 	}
 
 	finishGame():void 
@@ -181,7 +187,7 @@ export class PingPongGame extends EventEmitter
 			this.finishGame();
 	}
 
-	start(): void 
+	private start(): void 
 	{
 		this.setGameStatus("running");
 		this.score.startCountdown();

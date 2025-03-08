@@ -7,14 +7,14 @@ export class Tournament extends EventEmitter
 	private requiredPlayers:number;
 	private playerPool:Set<PongPlayer> = new Set<PongPlayer>();
 	private gamesPool:Set<PongRoom> = new Set<PongRoom>();
-	private torunamnetStatus: "started" | "lobby";
+	private tournamentStatus: "started" | "lobby" | "finished";
 	private roundNumber:number;
 
 	constructor(tournamnetPlayers:number)
 	{
 		super();
 		this.requiredPlayers = tournamnetPlayers;
-		this.torunamnetStatus = "lobby";
+		this.tournamentStatus = "lobby";
 		this.roundNumber = this.requiredPlayers;
 	}
 	
@@ -25,13 +25,13 @@ export class Tournament extends EventEmitter
 	
 	startTournament()
 	{
-		this.torunamnetStatus = "started";
+		this.tournamentStatus = "started";
 		this.createAndStartRound();
 	}
 
 	addPlayer(player:PongPlayer)
 	{
-		if(this.torunamnetStatus=="lobby" && (this.requiredPlayers > this.playerPool.size))
+		if(this.tournamentStatus=="lobby" && (this.requiredPlayers > this.playerPool.size))
 		{
 			this.playerPool.add(player);
 			this.connectionMonitor(player);
@@ -59,28 +59,6 @@ export class Tournament extends EventEmitter
 		}
 	}
 
-	private async createAndStartRound()
-	{
-		if(this.playerPool.size == 1)
-			return;
-		let rivals: PongPlayer[] = []
-		for(const player of this.playerPool)
-		{
-			rivals.push(player);
-			if(rivals.length === 2)
-			{
-				this.createOneRoundMatch(rivals[0], rivals[1]);
-				rivals = [];
-			}
-		}
-		this.roundNumber /= 2;
-		await this.waitForWinners();
-
-		console.log("Now next round can begin");
-		this.removeAllGamefromPool();
-		this.createAndStartRound();
-	}
-
 	async waitForWinners()
 	{
 		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
@@ -95,7 +73,7 @@ export class Tournament extends EventEmitter
 			console.log("Loser is ", loser.getPlayerSide());
 			notification = PongRoom.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
 			loser.sendNottification(JSON.stringify(notification));
-			this.playerPool.delete(loser);
+			this.kickPlayer(loser);
 			return winner;
 
 		});
@@ -103,7 +81,32 @@ export class Tournament extends EventEmitter
 		await Promise.all(winnerPromises);
 	}
 
-	private removeAllGamefromPool()
+	private async createAndStartRound()
+	{
+		if(this.playerPool.size == 1)
+		{
+			this.emit("done tournament");
+			this.tournamentStatus="finished";
+			return;
+		}
+		let rivals: PongPlayer[] = []
+		for(const player of this.playerPool)
+		{
+			rivals.push(player);
+			if(rivals.length === 2)
+			{
+				this.createOneRoundMatch(rivals[0], rivals[1]);
+				rivals = [];
+			}
+		}
+		this.roundNumber /= 2;
+		await this.waitForWinners();
+		console.log("Now next round can begin");
+		this.removeAllGamesfromPool();
+		this.createAndStartRound();
+	}
+
+	private removeAllGamesfromPool()
 	{
 		for(const oneGame of this.gamesPool)
 			this.gamesPool.delete(oneGame);
@@ -113,12 +116,19 @@ export class Tournament extends EventEmitter
 	{
 		player.on("connection lost", (unpatient:PongPlayer)=>
 		{
-			if(this.torunamnetStatus === "lobby")
+			if(this.tournamentStatus === "lobby")
 			{
 				this.playerPool.delete(unpatient)
 				this.sendAnnouncementToEveryone(`Someone left loby, waiting for ${this.caluclateNumberOfFreeSpots()} players`)
 			}
 		})
+	}
+
+	private kickPlayer(proPlayer:PongPlayer)
+	{
+		console.log("Kicking player out of tournament");
+		proPlayer.connection.close();
+		this.playerPool.delete(proPlayer);
 	}
 
 
@@ -127,18 +137,11 @@ export class Tournament extends EventEmitter
 		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
 		this.gamesPool.add(room);
 		room.setRoomAsTournament(this.getRoundName());
-		room.getGame().start();
+		room.getGame().startGame();
 		room.checkIfPlayerIsStillOnline(proPlayer1);
 		room.checkIfPlayerIsStillOnline(proPlayer2);
 		room.getAndSendFramesOnce();
 	}
-
-	// private createTournametStatusUpdate(nottification: string)
-	// {
-	// 	return {
-	// 		tournamentStatus: nottification
-	// 	}
-	// }
 
 	private getRoundName(): string
 	{

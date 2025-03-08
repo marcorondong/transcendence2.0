@@ -67,7 +67,7 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 		{
 			const player:PongPlayer = new PongPlayer(connection, "right");
 			roomToJoin.addRightPlayer(player)
-			roomToJoin.getGame().start();
+			roomToJoin.getGame().startGame();
 			return roomToJoin;
 		}
 		else 
@@ -82,7 +82,7 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 		{
 			const player:PongPlayer = new PongPlayer(connection, "right");
 			roomWithId.addRightPlayer(player)
-			roomWithId.getGame().start();
+			roomWithId.getGame().startGame();
 			return roomWithId;
 		}
 	}
@@ -119,7 +119,7 @@ interface GameRoomQueryI
 	matchType: "single" | "tournament";
 } 
 
-
+//TODO try to move this in some class
 function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
 {	
 	connection.on("close", () => {
