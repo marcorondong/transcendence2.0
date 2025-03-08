@@ -150,6 +150,14 @@ export class PongRoom extends SessionRoom
 		return false;
 	}
 
+	public sendCurrentFrame():void
+	{
+		const frame: PongFrameI = this.getGame().getFrame();
+		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
+		const frameJson = JSON.stringify(frameWithRoomId);
+		this.roomBroadcast(frameJson)
+	}
+
 	static createMatchStatusUpdate(nottification: string)
 	{
 		return {
@@ -160,10 +168,7 @@ export class PongRoom extends SessionRoom
 	private sendFrames()
 	{
 		const renderFrame = () => {
-			const frame: PongFrameI = this.getGame().getFrame();
-			const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
-			const frameJson = JSON.stringify(frameWithRoomId);
-			this.roomBroadcast(frameJson)
+			this.sendCurrentFrame();
 			if(this.getGame().getGameStatus() === "finished")
 			{
 				return;

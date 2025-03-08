@@ -141,7 +141,7 @@ function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | strin
 	{
 		room = playerRoomJoiner(roomId, connection);
 		console.log(`Player joined to room:${room.getId()}`);
-		const status = PongRoom.createMatchStatusUpdate("Waiting for opponnenetns saf")
+		const status = PongRoom.createMatchStatusUpdate("Waiting for opponent")
 		const roomIdJson = {roomId: room.getId(),
 			...status //spreading properties
 		};

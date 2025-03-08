@@ -67,6 +67,7 @@ export class SingleMatchMaking
 	{
 		if(roomToClean.isCleaned)
 			return;
+		roomToClean.sendCurrentFrame(); //send last frame that notify client of finished game.
 		console.log("Clean function");
 		roomToClean.isCleaned = true; 
 		roomToClean.closeAllConecctionsFromRoom();
