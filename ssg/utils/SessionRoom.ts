@@ -49,6 +49,14 @@ export class SessionRoom
 			console.log("Removing connection from room");
 		}
 	}
+	
+	closeAllConecctionsFromRoom():void 
+	{
+		for(const oneConnection of this.connections)
+		{
+			oneConnection.close();
+		}
+	}
 
 	/**
 	 * send same message to all player in room
