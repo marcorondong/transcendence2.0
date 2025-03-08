@@ -137,7 +137,7 @@ export class Tournament extends EventEmitter
 		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
 		this.gamesPool.add(room);
 		room.setRoomAsTournament(this.getRoundName());
-		room.getGame().start();
+		room.getGame().startGame();
 		room.checkIfPlayerIsStillOnline(proPlayer1);
 		room.checkIfPlayerIsStillOnline(proPlayer2);
 		room.getAndSendFramesOnce();
