@@ -36,24 +36,18 @@ export class SessionRoom
 		this.connections.add(connectionToAdd);
 	}
 
-	removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
+	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
 	{
-		connectionToRemove.close();
 		return this.connections.delete(connectionToRemove);
 	}
 
-	closeAndRemoveAllConnections():void
+	removeAllConnectionsFromRoom():void
 	{
 		for(const oneConnection of this.connections)
 		{
 			this.removeConnectionFromRoom(oneConnection);
 			console.log("Closing and removing connection");
 		}
-	}
-
-	getConnectionsCount(): number 
-	{
-		return this.connections.size;
 	}
 
 	/**
@@ -71,15 +65,5 @@ export class SessionRoom
 	isPrivate():boolean
 	{
 		return this.privateRoom;
-	}
-
-	setRoomPrivate():void 
-	{
-		this.privateRoom = true;
-	}
-
-	setRoomPublic(): void 
-	{
-		this.privateRoom = false;
 	}
 }
