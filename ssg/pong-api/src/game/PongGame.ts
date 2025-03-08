@@ -186,7 +186,7 @@ export class PingPongGame extends EventEmitter
 			this.finishGame();
 	}
 
-	start(): void 
+	private start(): void 
 	{
 		this.setGameStatus("running");
 		this.score.startCountdown();
