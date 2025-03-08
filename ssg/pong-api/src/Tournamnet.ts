@@ -23,15 +23,26 @@ export class Tournament extends EventEmitter
 		return this.requiredPlayers;
 	}
 	
+	startTournament()
+	{
+		this.torunamnetStatus = "started";
+		this.createAndStartRound();
+	}
+
 	addPlayer(player:PongPlayer)
 	{
-		if(this.requiredPlayers > this.playerPool.size)
+		if(this.torunamnetStatus=="lobby" && (this.requiredPlayers > this.playerPool.size))
 		{
 			this.playerPool.add(player);
 			this.connectionMonitor(player);
+			if(this.playerPool.size === this.requiredPlayers)
+				this.emit("full tournament")
 		}
-		if(this.playerPool.size === this.requiredPlayers)
-			this.emit("full tournament")
+		else
+		{
+			const jsonNot = PongRoom.createMatchStatusUpdate("Torunament is full, you cant join")
+			player.sendNottification(JSON.stringify(jsonNot));
+		}
 	}
 	
 	caluclateNumberOfFreeSpots():number
@@ -48,7 +59,7 @@ export class Tournament extends EventEmitter
 		}
 	}
 
-	async createAndStartRound()
+	private async createAndStartRound()
 	{
 		if(this.playerPool.size == 1)
 			return;

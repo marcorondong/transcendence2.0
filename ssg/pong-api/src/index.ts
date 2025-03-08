@@ -175,10 +175,10 @@ function tournamentJoiner(connection:WebSocket)
 	simpleTournamnet.sendAnnouncementToEveryone(`We are waiting for ${freeSpots} player to join. Be patient`);
 }
 
-simpleTournamnet.on("full tournament", () =>
+simpleTournamnet.once("full tournament", () =>
 {
 	console.log("Seoska liga pocinje pripremite prase i janje");
-	simpleTournamnet.createAndStartRound();
+	simpleTournamnet.startTournament();
 })
 
 
