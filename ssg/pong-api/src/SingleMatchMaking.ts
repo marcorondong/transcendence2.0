@@ -21,7 +21,7 @@ export class SingleMatchMaking
 			return;
 		}
 		this.singleMatches.set(room.getId(), room);
-		this.monitorRoom(room);
+		this.lobbyMatchMonitor(room);
 	}
 
 	removeRoom(room: PongRoom):boolean 
@@ -62,11 +62,38 @@ export class SingleMatchMaking
 		return room;
 	}
 
-	private async monitorRoom(room:PongRoom)
+
+	private cleanRoom(roomToClean:PongRoom)
+	{
+		if(roomToClean.isCleaned)
+			return;
+		console.log("Clean function");
+		roomToClean.isCleaned = true; 
+		roomToClean.closeAllConecctionsFromRoom();
+		this.removeRoom(roomToClean);
+	}
+
+
+	private async lobbyMatchMonitor(room:PongRoom)
+	{
+		room.isCleaned = false;
+		this.lobbyMonitor(room);
+		this.matchMonitor(room);
+	}
+
+	private async lobbyMonitor(room:PongRoom)
+	{
+		room.on("empty room", ()=>
+		{
+			console.log("Lobby monitor Removing empty room: ");
+			this.cleanRoom(room);
+		})
+	}
+
+	private async matchMonitor(room:PongRoom)
 	{
 		await room.game.waitForFinalWhistle();
-		console.log("Game finished");
-		room.closeAllConecctionsFromRoom();
-		this.removeRoom(room);
+		console.log("match monitor Game finished", room.getId());
+		this.cleanRoom(room);
 	}
 }

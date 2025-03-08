@@ -119,17 +119,6 @@ interface GameRoomQueryI
 	matchType: "single" | "tournament";
 } 
 
-//TODO try to move this in some class
-function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
-{	
-	connection.on("close", () => {
-	if(room?.isFull() === false)
-	{
-		console.log(`Deleting room: ${room.getId()}`);
-		singlesManager.removeRoom(room);
-	}
-	});
-}
 
 function spectatorLogic(roomId:string | 0, connection:WebSocket)
 {
@@ -162,7 +151,7 @@ function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | strin
 		room.getAndSendFramesOnce();
 	if(clientType ==="spectator")
 		spectatorLogic(roomId, connection);
-	closeConnectionLogic(connection, room);
+	//closeConnectionLogic(connection, room);
 }
 
 const simpleTournamnet:Tournament = new Tournament(4);

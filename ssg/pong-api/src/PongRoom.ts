@@ -19,6 +19,8 @@ export class PongRoom extends SessionRoom
 	private tournamentRoom:boolean = false;
 	private roundName:string ="single Match";
 
+	isCleaned:boolean = false;
+
 	game:PingPongGame = PingPongGame.createStandardGame();
 	constructor(privateRoom:boolean = false)
 	{
@@ -132,6 +134,10 @@ export class PongRoom extends SessionRoom
 			{
 				console.log("Since game is rage quiter lost");
 				this.game.forfeitGame(player.getPlayerSideLR());
+			}
+			else 
+			{
+				this.emit("empty room", this);
 			}
 				
 		})

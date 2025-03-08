@@ -1,6 +1,7 @@
+import { EventEmitter } from "stream";
 import { WebSocket } from "ws";
 
-export class SessionRoom
+export class SessionRoom extends EventEmitter
 {
 	protected readonly id: string;
 	protected connections: Set<WebSocket> = new Set<WebSocket>();
@@ -9,6 +10,7 @@ export class SessionRoom
 	
 	constructor(privateRoom:boolean = false)
 	{
+		super();
 		this.id = crypto.randomUUID();
 		this.privateRoom = privateRoom;
 		this.creationDate = new Date();
