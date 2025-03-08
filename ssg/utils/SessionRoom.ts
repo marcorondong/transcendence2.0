@@ -46,7 +46,7 @@ export class SessionRoom
 		for(const oneConnection of this.connections)
 		{
 			this.removeConnectionFromRoom(oneConnection);
-			console.log("Closing and removing connection");
+			console.log("Removing connection from room");
 		}
 	}
 

@@ -119,7 +119,7 @@ interface GameRoomQueryI
 	matchType: "single" | "tournament";
 } 
 
-
+//TODO try to move this in some class
 function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
 {	
 	connection.on("close", () => {
