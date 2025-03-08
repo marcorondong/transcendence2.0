@@ -59,6 +59,28 @@ export class Tournament extends EventEmitter
 		}
 	}
 
+	async waitForWinners()
+	{
+		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
+		{
+			const winner = await room.getRoomWinner();
+			const loser = await room.getRoomLoser();
+			console.log("Winner is ", winner.getPlayerSide());
+			let notification = PongRoom.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
+			if(room.getRoundName() === "finals")
+				notification = PongRoom.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
+			winner.sendNottification(JSON.stringify(notification));
+			console.log("Loser is ", loser.getPlayerSide());
+			notification = PongRoom.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
+			loser.sendNottification(JSON.stringify(notification));
+			this.kickPlayer(loser);
+			return winner;
+
+		});
+
+		await Promise.all(winnerPromises);
+	}
+
 	private async createAndStartRound()
 	{
 		if(this.playerPool.size == 1)
@@ -82,28 +104,6 @@ export class Tournament extends EventEmitter
 		console.log("Now next round can begin");
 		this.removeAllGamesfromPool();
 		this.createAndStartRound();
-	}
-
-	async waitForWinners()
-	{
-		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
-		{
-			const winner = await room.getRoomWinner();
-			const loser = await room.getRoomLoser();
-			console.log("Winner is ", winner.getPlayerSide());
-			let notification = PongRoom.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
-			if(room.getRoundName() === "finals")
-				notification = PongRoom.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
-			winner.sendNottification(JSON.stringify(notification));
-			console.log("Loser is ", loser.getPlayerSide());
-			notification = PongRoom.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
-			loser.sendNottification(JSON.stringify(notification));
-			this.kickPlayer(loser);
-			return winner;
-
-		});
-
-		await Promise.all(winnerPromises);
 	}
 
 	private removeAllGamesfromPool()
@@ -142,13 +142,6 @@ export class Tournament extends EventEmitter
 		room.checkIfPlayerIsStillOnline(proPlayer2);
 		room.getAndSendFramesOnce();
 	}
-
-	// private createTournametStatusUpdate(nottification: string)
-	// {
-	// 	return {
-	// 		tournamentStatus: nottification
-	// 	}
-	// }
 
 	private getRoundName(): string
 	{
