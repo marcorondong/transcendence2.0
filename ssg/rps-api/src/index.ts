@@ -56,7 +56,7 @@ const fastify = Fastify(
   : true
 });
 
-const oneRoom:RpsRoom = new RpsRoom("1");
+const oneRoom:RpsRoom = new RpsRoom();
 
 fastify.register(fastifyStatic, {
   root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
@@ -83,7 +83,7 @@ fastify.register(async function (fastify)
     {
       console.log(`Client ${clienId} disconnected`);
       console.log(`Reason ${code} buffer: ${reason}`)
-      oneRoom.removePlayer(player1);
+      oneRoom.removeConnectionFromRoom(player1.connection);
     })
   })
 
@@ -110,14 +110,8 @@ fastify.register(async function (fastify)
 
 function addPlayerToRoom(rpsRoom:RpsRoom, player:Player): void
 {
-  const successJoin:boolean = rpsRoom.addPlayer(player); 
-  if(successJoin === false)
-  {
-    player.connection.send("Cannot join full room");
-    player.connection.close(1000, "Full room");
-  }
-  rpsRoom.greetPlayer(player);
-  if(rpsRoom.isFull())
+  rpsRoom.addConnectionToRoom(player.connection); 
+  if(rpsRoom.getConnectionsCount() === 2)
     rpsRoom.roomBroadcast("Ready to play");
 }
 

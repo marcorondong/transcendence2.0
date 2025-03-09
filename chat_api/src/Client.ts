@@ -2,15 +2,27 @@
 export class Client 
 {
 	private readonly id: string;
+<<<<<<< HEAD
     private nickname: string = '';
+=======
+    private nickname: string;
+>>>>>>> origin/main
     private readonly socket: WebSocket;
 	private blockedList: string[] = [];
 	private registered: boolean = false;
 
+<<<<<<< HEAD
     constructor(id: string, socket: WebSocket) 
 	{
         this.id = id;
 		this.socket = socket;
+=======
+    constructor(id: string, nickname: string, socket: WebSocket) 
+	{
+        this.id = id;
+		this.socket = socket;
+        this.nickname = '';
+>>>>>>> origin/main
     }
 
 	getId(): string

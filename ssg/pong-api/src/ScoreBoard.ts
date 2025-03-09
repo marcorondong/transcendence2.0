@@ -27,6 +27,12 @@ export class ScoreBoard
 			this.rightPlayerGoals++;
 	}
 
+	setScore(leftGoals:number, rightGoals:number)
+	{
+		this.leftPlayerGoals = leftGoals;
+		this.rightPlayerGoals = rightGoals;
+	}
+
 	getScoreJson():ScoreI
 	{
 		return {
@@ -38,6 +44,7 @@ export class ScoreBoard
 
 	startCountdown():void 
 	{
+		this.start();
 		const interval = setInterval( ()=>
 		{
 			if(this.paused === false)
