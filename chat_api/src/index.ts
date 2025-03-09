@@ -10,11 +10,6 @@ const PORT = 3002;
 const HOST = '0.0.0.0';
 
 const fastify: FastifyInstance = Fastify({ logger: false });
-<<<<<<< HEAD
-=======
-export let allClients: Client[] = [];
-export const chatHistories: Record<string, Record<string, Message[]>> = {};
->>>>>>> origin/main
 
 // fastify.register(fastifyStatic, {
 // 	root: path.join(__dirname, '../public'),
@@ -33,21 +28,13 @@ fastify.register(async function (fastify)
 	{
 		const socket = connection as unknown as WebSocket;
 		const id = crypto.randomUUID();
-<<<<<<< HEAD
 		const currentClient = new Client(id, socket);
-=======
-		const currentClient = new Client(id, "", socket);
->>>>>>> origin/main
 		// allClients.push(currentClient); // This is done after registration is successful
 		console.log('Client connected');
 
 		connection.on('message', (message: string) => onClientMessage(message, currentClient));
 
-<<<<<<< HEAD
 		connection.on('close', (code: number, reason: Buffer) => onClientDisconnect(code, reason, currentClient));
-=======
-		connection.on('close', (code: number, reason: Buffer) => onClientDisconnect(currentClient, code, reason));
->>>>>>> origin/main
 	});
 });
 

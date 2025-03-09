@@ -1,22 +1,14 @@
 import { Client } from './Client';
 import { Message } from './Message';
-<<<<<<< HEAD
 
 let allClients: Client[] = [];
 const chatHistories: Record<string, Record<string, Message[]>> = {};
 
 export function onClientMessage(message: string, currentClient: Client): void
-=======
-import { chatHistories } from './index';
-import { allClients } from './index';
-
-export function onClientMessage(message: string, currentClient: Client)
->>>>>>> origin/main
 {
 	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
 	if (!data)
 		return;
-<<<<<<< HEAD
 	// if(currentClient.getRegistered() === false)
 	// {
 	// 	if(data.microservice === 'chat' && data.registerThisPerson)
@@ -31,28 +23,11 @@ export function onClientMessage(message: string, currentClient: Client)
 	// }
 	// else // if client is registered
 	// {
-=======
-	if(currentClient.getRegistered() === false)
-	{
-		if(data.microservice === 'chat' && data.registerThisPerson)
-			handleRegisterPerson(data, currentClient);
-		else 
-		{
-			console.log('Error: Client is not registered but send message. Client must register before interacting website. Client may try to send message not throw frondend but else way (ex: Postman). Warning: Possibly port is exposed or hacker attack. Received data:');
-			console.log(JSON.stringify(data, null, 2));
-			currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Client is not registered but send message. Client must register before interacting website. Client may try to send message not throw frondend but else way (ex: Postman). Warning: Possibly port is exposed or hacker attack.', sentData: data }));
-			currentClient.getSocket().close();
-		}
-	}
-	else // if client is registered
-	{
->>>>>>> origin/main
 		if(data.microservice)
 		{
 			if(data.microservice === 'chat')
 				handleChatMicroserviceRequests(data, currentClient);
 			else if (data.microservice === 'error')
-<<<<<<< HEAD
 				handleErrorGeneral(data, currentClient);
 			else // if microservice property has an unknown value
 				unknownMicroserviceRequest(data, currentClient);
@@ -63,18 +38,6 @@ export function onClientMessage(message: string, currentClient: Client)
 }
 
 export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client)
-=======
-				handleErrorGeneral(data);
-			else // if microservice property has an unknown value
-				unknownMicroserviceRequest(data);
-		}
-		else // if microservice property is not found or has a falsy value
-			noMicroservicePropertyFound(data, currentClient);
-	}
-}
-
-export function onClientDisconnect(currentClient: Client, code: number, reason: Buffer)
->>>>>>> origin/main
 {
 	if(currentClient.getRegistered() === true)
 	{
@@ -181,19 +144,11 @@ export function handleUnblockPerson(data: any, currentClient: Client)
 
 export function handleRegisterPerson(data: any, currentClient: Client)
 {
-<<<<<<< HEAD
 	// if(allClients.some(client => client.getNickname() === data.registerThisPerson))
 	// {
 	// 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: data.registerThisPerson + ' is already taken'}));
 	// 	return;
 	// }
-=======
-	if(allClients.some(client => client.getNickname() === data.registerThisPerson))
-	{
-		currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: data.registerThisPerson + ' is already taken'}));
-		return;
-	}
->>>>>>> origin/main
 	const clientsOnline = Array.from(allClients.values()).map(client => ({nickname: client.getNickname()}));
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationApproved: data.registerThisPerson, clientsOnline: clientsOnline }));
 	for(const client of allClients)
@@ -201,13 +156,8 @@ export function handleRegisterPerson(data: any, currentClient: Client)
 		client.getSocket().send(JSON.stringify({ microservice: 'chat', newClientOnline: data.registerThisPerson }));
 	}
 	currentClient.setNickname(data.registerThisPerson);
-<<<<<<< HEAD
 	currentClient.setRegistered(true);
 	allClients.push(currentClient);
-=======
-	allClients.push(currentClient);
-	currentClient.setRegistered(true);
->>>>>>> origin/main
 }
 
 export function handleInvitePerson(data: any, currentClient: Client)
@@ -245,7 +195,6 @@ export function handleErrorInChat(data: any)
 		console.log(data.error);
 }
 
-<<<<<<< HEAD
 export function handleErrorGeneral(data: any, currentClient: Client)
 {
 	if(data.errorMessage && data.sentData)
@@ -260,27 +209,10 @@ export function handleErrorGeneral(data: any, currentClient: Client)
 		console.log('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:');
 		console.log(JSON.stringify(data, null, 2));
 	}
-=======
-export function handleErrorGeneral(data: any)
-{
-	if(data.errorMessage && data.sentData)
-		{
-			console.log('Error: Client received incorrect data from server. The error message is:');
-			console.log(data.errorMessage);
-			console.log('Data which client received from server:');
-			console.log(JSON.stringify(data.sentData, null, 2));
-		}
-		else // if errorMessage or sentData property is not found or has a falsy value
-		{
-			console.log('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:');
-			console.log(JSON.stringify(data, null, 2));
-		}
->>>>>>> origin/main
 }
 
 export function handleChatMicroserviceRequests(data: any, currentClient: Client)
 {
-<<<<<<< HEAD
 	// if(data.registerThisPerson && currentClient.getRegistered() === false)
 	// {
 	// 	// currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: 'You are already registered as ' + currentClient.getNickname() }));
@@ -290,15 +222,6 @@ export function handleChatMicroserviceRequests(data: any, currentClient: Client)
 	// }
 	if(data.registerThisPerson)
 		handleRegisterPerson(data, currentClient);
-=======
-	if(data.registerThisPerson && currentClient.getRegistered() === true)
-	{
-		currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: 'You are already registered as ' + currentClient.getNickname() }));
-		console.log('Error: Client is already registered but trying to register again. Received data:');
-		console.log(JSON.stringify(data, null, 2));
-		currentClient.getSocket().close();
-	}
->>>>>>> origin/main
 	else if(data.message && data.receiver && data.receiver !== currentClient.getNickname() && currentClient.getNickname())
 		handleChatMessage(data, currentClient);
 	else if(data.notification)
@@ -324,29 +247,17 @@ export function handleChatMicroserviceRequests(data: any, currentClient: Client)
 	}
 }
 
-<<<<<<< HEAD
 export function unknownMicroserviceRequest(data: any, currentClient: Client)
 {
 	console.log('Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests. Received data:');
 	console.log(JSON.stringify(data, null, 2));
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests.', sentData: data }));
-=======
-export function unknownMicroserviceRequest(data: any)
-{
-	console.log('Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests. Received data:');
-	console.log(JSON.stringify(data, null, 2));
->>>>>>> origin/main
 }
 
 export function noMicroservicePropertyFound(data: any, currentClient: Client)
 {
-<<<<<<< HEAD
 	console.log('Error: "microservice" property not found or has a falsy value in data sent by client to server. Received data:');
 	console.log(JSON.stringify(data, null, 2));
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "microservice" property not found or has a falsy value in data sent by client to server.', sentData: data }));
-=======
-		console.log('Error: "microservice" property not found or has a falsy value in data sent by client to server. Received data:');
-		console.log(JSON.stringify(data, null, 2));
->>>>>>> origin/main
 }
 
