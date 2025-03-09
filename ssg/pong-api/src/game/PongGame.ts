@@ -15,7 +15,7 @@ interface Position
 
 type gameStatus = "running" | "paused" | "finished" | "not started";
 
-export interface PongFrameI
+export interface IPongFrame
 {
 	leftPaddle: Position & {height:number};
 	rightPaddle: Position & {height:number};

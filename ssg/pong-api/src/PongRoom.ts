@@ -1,7 +1,7 @@
 import {SessionRoom} from "../../utils/SessionRoom"
 import { PingPongGame } from "./game/PongGame";
 import { Paddle } from "./game/Paddle";
-import { PongFrameI } from "./game/PongGame";
+import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
@@ -152,7 +152,7 @@ export class PongRoom extends SessionRoom
 
 	public sendCurrentFrame():void
 	{
-		const frame: PongFrameI = this.getGame().getFrame();
+		const frame: IPongFrame = this.getGame().getFrame();
 		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)
