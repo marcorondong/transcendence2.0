@@ -541,8 +541,9 @@ window.onload = () =>
 	{
 		if(nickname_input.value.trim() !== "")
 		{
-			tic_socket.send(JSON.stringify({ microservice: 'tictactoe', registration: true, nickname: nickname_input.value }));
-			chat_socket.send(JSON.stringify({ microservice: 'chat', registerThisPerson: nickname_input.value }));
+			socket.send(JSON.stringify({ microservice: 'frontend', registerThisPerson: nickname_input.value }));
+			// tic_socket.send(JSON.stringify({ microservice: 'tictactoe', registerThisPerson: nickname_input.value }));
+			// chat_socket.send(JSON.stringify({ microservice: 'chat', registerThisPerson: nickname_input.value }));
 		}
 		else
 		{
@@ -567,24 +568,41 @@ window.onload = () =>
 
 	
 	showPage(nickname_page);
+
+	socket.onmessage = (event) =>
+	{
+		const data = JSON.parse(event.data);
+		if(data.microservice === 'frontend')
+		{
+			if(data.registrationApproved)
+			{
+				tic_socket.send(JSON.stringify({ microservice: 'tictactoe', registerThisPerson: data.registrationApproved }));
+				chat_socket.send(JSON.stringify({ microservice: 'chat', registerThisPerson: data.registrationApproved }));
+				me.textContent = data.registrationApproved;
+				showPage(customisePage);
+			}
+			else if(data.registrationDeclined)
+			{
+				alert(data.registrationDeclined);
+			}
+		}
+	}
 	
 	tic_socket.onmessage = (event) =>
 	{
 		const data = JSON.parse(event.data);
 		if(data.microservice === 'tictactoe')
 		{
-			if(data.registration !== undefined)
+			if(data.registrationApproved)
 			{
-				if(data.registration === false)
-				{
-					alert('Nickname already exists');
-					return;
-				}
-				player1_name.textContent = data.nickname;
-				showPage(customisePage);
-				return;
+				player1_name.textContent = data.registrationApproved;
+				// showPage(customisePage);
 			}
-			if(data.startGame)
+			else if(data.registrationDeclined)
+			{
+				alert(data.registrationDeclined);
+			}
+			else if(data.startGame)
 			{
 				player2_name.textContent = data.friendNickname;
 				youAre = data.yourSymbol;
@@ -594,9 +612,8 @@ window.onload = () =>
 				info.textContent = youAre === 'X' ? 'Your turn' : 'Opponent\'s turn';
 				showPage(gamePage);
 				showPageChat(peopleOnlineDiv);
-				return;
 			}
-			if(data.yourTurn)
+			else if(data.yourTurn)
 			{
 				board[data.index] = opponent;
 				cells[data.index].textContent = opponent;
@@ -617,9 +634,8 @@ window.onload = () =>
 				}
 				gameActive = true;
 				info.textContent = 'Your turn';
-				return;
 			}
-			if(data.leftRoom)
+			else if(data.leftRoom)
 			{
 				board.fill("");
 				cells.forEach(cell => cell.textContent = "");
@@ -630,15 +646,13 @@ window.onload = () =>
 				gameActive = true;
 				alert('Opponent left the room');
 				showPage(customisePage);
-				return;
 			}
-			if(data.rematchRequest)
+			else if(data.rematchRequest)
 			{
 				rematchRequestSender.style.display = 'none';
 				rematchRequestReceiver.style.display = 'block';
-				return;
 			}
-			if(data.rematchRequestAccepted)
+			else if(data.rematchRequestAccepted)
 			{
 				board.fill("");
 				cells.forEach(cell => cell.textContent = "");
@@ -652,13 +666,11 @@ window.onload = () =>
 				gameActive = youAre === 'X' ? true : false;
 				showPage(gamePage);
 				showPageChat(peopleOnlineDiv);
-				return;
 			}
-			if(data.rematchRequestCanceled)
+			else if(data.rematchRequestCanceled)
 			{
 				rematchRequestSender.style.display = 'none';
 				rematchRequestReceiver.style.display = 'none';
-				return;
 			}
 		}
 	}
@@ -716,7 +728,7 @@ window.onload = () =>
 					}
 					else if(data.registrationApproved && data.clientsOnline) // reviewed
 					{
-						me.textContent = data.registrationApproved;
+						// me.textContent = data.registrationApproved;
 						data.clientsOnline.forEach((client: { nickname: string }) => {
 							appendPerson(client.nickname);
 						});
