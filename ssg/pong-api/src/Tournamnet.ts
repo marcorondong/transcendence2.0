@@ -41,7 +41,7 @@ export class Tournament extends EventEmitter
 		else
 		{
 			const jsonNot = PongRoom.createMatchStatusUpdate("Torunament is full, you cant join")
-			player.sendNottification(JSON.stringify(jsonNot));
+			player.sendNotification(JSON.stringify(jsonNot));
 		}
 	}
 	
@@ -55,7 +55,7 @@ export class Tournament extends EventEmitter
 		const update = PongRoom.createMatchStatusUpdate(announcement);
 		for(const player of this.playerPool)
 		{
-			player.sendNottification(JSON.stringify(update));
+			player.sendNotification(JSON.stringify(update));
 		}
 	}
 
@@ -69,10 +69,10 @@ export class Tournament extends EventEmitter
 			let notification = PongRoom.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
 			if(room.getRoundName() === "finals")
 				notification = PongRoom.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
-			winner.sendNottification(JSON.stringify(notification));
+			winner.sendNotification(JSON.stringify(notification));
 			console.log("Loser is ", loser.getPlayerSide());
 			notification = PongRoom.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
-			loser.sendNottification(JSON.stringify(notification));
+			loser.sendNotification(JSON.stringify(notification));
 			this.kickPlayer(loser);
 			return winner;
 
