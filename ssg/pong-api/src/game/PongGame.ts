@@ -198,7 +198,7 @@ export class PingPongGame extends EventEmitter
 	{
 		if(this.getGameStatus() === "running")
 		{
-			const deltaTime = timestamp - this.lastFrameTime;
+			//const deltaTime = timestamp - this.lastFrameTime;
 			this.lastFrameTime = timestamp;
 			this.renderNextFrame();
 		}
