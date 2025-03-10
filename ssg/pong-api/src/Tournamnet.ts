@@ -52,10 +52,10 @@ export class Tournament extends EventEmitter
 
 	sendAnnouncementToEveryone(announcement: string)
 	{
-		const update = PongRoom.createMatchStatusUpdate(announcement);
+		const jsonNotification = PongRoom.createMatchStatusUpdate(announcement);
 		for(const player of this.playerPool)
 		{
-			player.sendNotification(JSON.stringify(update));
+			player.sendNotification(JSON.stringify(jsonNotification));
 		}
 	}
 
