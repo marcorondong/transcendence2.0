@@ -40,8 +40,8 @@ export class Tournament extends EventEmitter
 		}
 		else
 		{
-			const jsonNot = PongRoom.createMatchStatusUpdate("Torunament is full, you cant join")
-			player.sendNotification(JSON.stringify(jsonNot));
+			const jsonNotification = PongRoom.createMatchStatusUpdate("Tournament is full, you cant join")
+			player.sendNotification(JSON.stringify(jsonNotification));
 		}
 	}
 	
