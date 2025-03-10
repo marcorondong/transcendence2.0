@@ -50,7 +50,7 @@ export class Tournament extends EventEmitter
 		return this.requiredPlayers - this.playerPool.size;
 	}
 
-	sendAnnouncementToEveryone(announcement: string)
+	broadcastTournamentAnnouncement(announcement: string)
 	{
 		const jsonNotification = PongRoom.createMatchStatusUpdate(announcement);
 		for(const player of this.playerPool)
@@ -119,7 +119,7 @@ export class Tournament extends EventEmitter
 			if(this.tournamentStatus === "lobby")
 			{
 				this.playerPool.delete(unpatient)
-				this.sendAnnouncementToEveryone(`Someone left loby, waiting for ${this.calculateNumberOfFreeSpots()} players`)
+				this.broadcastTournamentAnnouncement(`Someone left loby, waiting for ${this.calculateNumberOfFreeSpots()} players`)
 			}
 		})
 	}

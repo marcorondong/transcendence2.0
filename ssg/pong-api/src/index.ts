@@ -158,10 +158,10 @@ const simpleTournamnet:Tournament = new Tournament(4);
 
 function tournamentJoiner(connection:WebSocket)
 {
-	const proPlayer:PongPlayer = new PongPlayer(connection, "TBD");
-	simpleTournamnet.addPlayer(proPlayer);
+	const player:PongPlayer = new PongPlayer(connection, "TBD");
+	simpleTournamnet.addPlayer(player);
 	const freeSpots = simpleTournamnet.calculateNumberOfFreeSpots();
-	simpleTournamnet.sendAnnouncementToEveryone(`We are waiting for ${freeSpots} player to join. Be patient`);
+	simpleTournamnet.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
 }
 
 simpleTournamnet.once("full tournament", () =>
