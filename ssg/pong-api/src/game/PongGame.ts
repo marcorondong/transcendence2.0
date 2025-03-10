@@ -36,7 +36,7 @@ export class PingPongGame extends EventEmitter
 
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
-	private gameStatus:gameStatus = "not started"
+	private gameStatus:gameStatus;
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
