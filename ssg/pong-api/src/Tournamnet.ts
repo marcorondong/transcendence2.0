@@ -45,7 +45,7 @@ export class Tournament extends EventEmitter
 		}
 	}
 	
-	caluclateNumberOfFreeSpots():number
+	calculateNumberOfFreeSpots():number
 	{
 		return this.requiredPlayers - this.playerPool.size;
 	}
@@ -119,7 +119,7 @@ export class Tournament extends EventEmitter
 			if(this.tournamentStatus === "lobby")
 			{
 				this.playerPool.delete(unpatient)
-				this.sendAnnouncementToEveryone(`Someone left loby, waiting for ${this.caluclateNumberOfFreeSpots()} players`)
+				this.sendAnnouncementToEveryone(`Someone left loby, waiting for ${this.calculateNumberOfFreeSpots()} players`)
 			}
 		})
 	}
