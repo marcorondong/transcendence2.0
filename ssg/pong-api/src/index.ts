@@ -9,6 +9,7 @@ import { PongRoom } from "./PongRoom";
 import { PongPlayer } from "./PongPlayer";
 import { SingleMatchMaking } from "./SingleMatchMaking";
 import { Tournament } from "./Tournamnet";
+import { TournamentEvents } from "./customEvents";
 
 
 dotenv.config();
@@ -164,7 +165,7 @@ function tournamentJoiner(connection:WebSocket)
 	simpleTournamnet.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
 }
 
-simpleTournamnet.once("full tournament", () =>
+simpleTournamnet.once(TournamentEvents.FULL, () =>
 {
 	console.log("Seoska liga pocinje pripremite prase i janje");
 	simpleTournamnet.startTournament();
