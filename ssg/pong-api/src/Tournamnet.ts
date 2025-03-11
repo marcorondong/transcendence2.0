@@ -3,12 +3,14 @@ import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
 import { TournamentEvents, ClientEvents } from "./customEvents";
 
-enum ETournamentState
+export enum ETournamentState
 {
 	LOBBY,
 	RUNNING,
 	FINISHED
 }
+
+export type TValidTournamentSize = 4 | 8 | 16;
 
 export class Tournament extends EventEmitter
 {
@@ -19,7 +21,7 @@ export class Tournament extends EventEmitter
 	private roundNumber:number;
 	private readonly id:string;
 
-	constructor(tournamnetPlayers:number)
+	constructor(tournamnetPlayers:TValidTournamentSize)
 	{
 		super();
 		this.playerPool = new Set<PongPlayer>();
@@ -39,12 +41,16 @@ export class Tournament extends EventEmitter
 	{
 		return this.requiredPlayers;
 	}
+
+	getState():ETournamentState
+	{
+		return this.state;
+	}
 	
 	startTournament()
 	{
 		this.state = ETournamentState.RUNNING;
 		this.emit(TournamentEvents.STARTED);
-		//TODO maybe listen to event FULL and start torunamnet from outside
 		this.createAndStartRound();
 	}
 
@@ -75,6 +81,14 @@ export class Tournament extends EventEmitter
 		for(const player of this.playerPool)
 		{
 			player.sendNotification(JSON.stringify(jsonNotification));
+		}
+	}
+
+	kickEveryone()
+	{
+		for(const player of this.playerPool)
+		{
+			this.kickPlayer(player);
 		}
 	}
 
