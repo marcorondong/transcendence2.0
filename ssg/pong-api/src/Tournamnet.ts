@@ -2,19 +2,26 @@ import { PongPlayer } from "./PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
 
+enum ETournamentState
+{
+	LOBBY,
+	STARTED,
+	FINISHED
+}
+
 export class Tournament extends EventEmitter
 {
 	private requiredPlayers:number;
 	private playerPool:Set<PongPlayer> = new Set<PongPlayer>();
 	private gamesPool:Set<PongRoom> = new Set<PongRoom>();
-	private tournamentStatus: "started" | "lobby" | "finished";
+	private state: ETournamentState;
 	private roundNumber:number;
 
 	constructor(tournamnetPlayers:number)
 	{
 		super();
 		this.requiredPlayers = tournamnetPlayers;
-		this.tournamentStatus = "lobby";
+		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
 	}
 	
@@ -25,13 +32,13 @@ export class Tournament extends EventEmitter
 	
 	startTournament()
 	{
-		this.tournamentStatus = "started";
+		this.state = ETournamentState.STARTED;
 		this.createAndStartRound();
 	}
 
 	addPlayer(player:PongPlayer)
 	{
-		if(this.tournamentStatus=="lobby" && (this.requiredPlayers > this.playerPool.size))
+		if(this.state==ETournamentState.LOBBY && (this.requiredPlayers > this.playerPool.size))
 		{
 			this.playerPool.add(player);
 			this.connectionMonitor(player);
@@ -81,12 +88,17 @@ export class Tournament extends EventEmitter
 		await Promise.all(winnerPromises);
 	}
 
+	private finishTournament()
+	{
+		this.state = ETournamentState.FINISHED;
+		this.emit("done tournament");
+	}
+
 	private async createAndStartRound()
 	{
 		if(this.playerPool.size == 1)
 		{
-			this.emit("done tournament");
-			this.tournamentStatus="finished";
+			this.finishTournament();
 			return;
 		}
 		let rivals: PongPlayer[] = []
@@ -116,7 +128,7 @@ export class Tournament extends EventEmitter
 	{
 		player.on("connection lost", (unpatient:PongPlayer)=>
 		{
-			if(this.tournamentStatus === "lobby")
+			if(this.state === ETournamentState.LOBBY)
 			{
 				this.playerPool.delete(unpatient)
 				this.broadcastTournamentAnnouncement(`Someone left loby, waiting for ${this.calculateNumberOfFreeSpots()} players`)
