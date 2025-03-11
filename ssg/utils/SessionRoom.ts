@@ -26,7 +26,6 @@ export class SessionRoom extends EventEmitter
 		return this.creationDate;
 	}
 	
-
 	addConnectionToRoom(connectionToAdd: WebSocket):void
 	{
 		this.connections.add(connectionToAdd);
