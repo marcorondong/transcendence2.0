@@ -1,0 +1,9 @@
+services:
+  chat_api:
+    image: chat_api_img 
+    container_name: chat_api
+    build: ./
+    volumes:
+      - ./src/:/chat_api/src/
+    ports:
+      - 3002:3002
