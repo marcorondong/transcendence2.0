@@ -27,12 +27,7 @@ export class SessionRoom extends EventEmitter
 		return this.creationDate;
 	}
 	
-	//TODO: research should this be boolean or Promise async function
-	/**
-	 * 
-	 * @param player player to add
-	 * @returns 
-	 */
+
 	addConnectionToRoom(connectionToAdd: WebSocket):void
 	{
 		this.connections.add(connectionToAdd);
