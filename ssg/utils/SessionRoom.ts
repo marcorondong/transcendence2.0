@@ -16,7 +16,6 @@ export class SessionRoom extends EventEmitter
 		this.creationDate = new Date();
 	}
 
-
 	getId():string
 	{
 		return this.id;
@@ -32,7 +31,6 @@ export class SessionRoom extends EventEmitter
 	{
 		this.connections.add(connectionToAdd);
 	}
-
 
 	removeAllConnectionsFromRoom():void
 	{
