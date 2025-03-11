@@ -4,21 +4,27 @@ import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "./customEvents";
 
 
+export enum EPlayerStatus
+{
+	ONLINE,
+	OFFLINE
+}
+
 export type TPlayerSide = "left" | "right" | "TBD"; //TBD means to be decided
-type TOnlineStatus = "online" | "offline";
+//type TOnlineStatus = "online" | "offline";
 
 export class PongPlayer extends EventEmitter
 {
 	readonly connection: WebSocket;
 	private side: TPlayerSide; //TBD to be decided
-	private status: TOnlineStatus;
+	private status: EPlayerStatus;
 
 	constructor(socket: WebSocket, playerSide: TPlayerSide)
 	{
 		super();
 		this.connection = socket;
 		this.side = playerSide;
-		this.status = "online";
+		this.status = EPlayerStatus.ONLINE;
 		this.connectionMonitor();
 	}
 
@@ -28,7 +34,7 @@ export class PongPlayer extends EventEmitter
 		{
 			this.connection.close();
 			console.log("connnection lost");
-			this.setPlayerStatus("offline");
+			this.setPlayerStatus(EPlayerStatus.OFFLINE);
 			this.emit(ClientEvents.GONE_OFFLINE, this);
 		})
 	}
@@ -58,12 +64,12 @@ export class PongPlayer extends EventEmitter
 		this.side = side;
 	}
 
-	getPlayerOnlineStatus():TOnlineStatus
+	getPlayerOnlineStatus():EPlayerStatus
 	{
 		return this.status;
 	}
 	
-	setPlayerStatus(status: TOnlineStatus)
+	setPlayerStatus(status: EPlayerStatus)
 	{
 		this.status = status;
 	}

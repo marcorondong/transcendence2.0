@@ -5,7 +5,7 @@ import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
-import { PongPlayer } from "./PongPlayer";
+import { EPlayerStatus, PongPlayer } from "./PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "./customEvents";
 
@@ -122,7 +122,7 @@ export class PongRoom extends SessionRoom
 			
 	checkIfPlayerIsStillOnline(player:PongPlayer)
 	{
-		if(player.getPlayerOnlineStatus() != "online")
+		if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
 			this.game.forfeitGame(player.getPlayerSideLR());
 	}
 	
