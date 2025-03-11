@@ -33,10 +33,6 @@ export class SessionRoom extends EventEmitter
 		this.connections.add(connectionToAdd);
 	}
 
-	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
-	{
-		return this.connections.delete(connectionToRemove);
-	}
 
 	removeAllConnectionsFromRoom():void
 	{
@@ -70,5 +66,10 @@ export class SessionRoom extends EventEmitter
 	isPrivate():boolean
 	{
 		return this.privateRoom;
+	}
+
+	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
+	{
+		return this.connections.delete(connectionToRemove);
 	}
 }
