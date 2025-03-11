@@ -1,18 +1,18 @@
 all: up
 
 up:
-	docker-compose up --build
+	cd yml && docker-compose up --build
 
 down:
-	docker-compose down --volumes
+	cd yml && docker-compose down --volumes
 
 clear:
 	clear
 
 remove:
-	docker-compose down --volumes
-	docker system prune -a -f --volumes
-	docker builder prune -a -f
+	cd yml && docker-compose down --volumes
+	cd yml && docker system prune -a -f --volumes
+	cd yml && docker builder prune -a -f
 
 super: remove clear up
 

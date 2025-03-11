@@ -1,0 +1,47 @@
+# Version control
+.git
+.gitignore
+.svn
+.hg
+.bzr
+
+# Node modules (for Node.js projects)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+out/
+*.log
+
+# Docker-specific files
+Dockerfile
+.dockerignore
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-project
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Configuration files (optional)
+.env
+config.json
+
+# Test files (optional)
+test/
+tests/
+*.test.js
+
+# Miscellaneous
+*.md
+README.md
