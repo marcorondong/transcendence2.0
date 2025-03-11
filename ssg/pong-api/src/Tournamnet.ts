@@ -1,6 +1,7 @@
 import { PongPlayer } from "./PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
+import { TournamentEvents } from "./customEvents";
 
 enum ETournamentState
 {
@@ -33,6 +34,8 @@ export class Tournament extends EventEmitter
 	startTournament()
 	{
 		this.state = ETournamentState.STARTED;
+		this.emit(TournamentEvents.STARTED);
+		//TODO maybe listen to event FULL and start torunamnet from outside
 		this.createAndStartRound();
 	}
 
@@ -43,7 +46,7 @@ export class Tournament extends EventEmitter
 			this.playerPool.add(player);
 			this.connectionMonitor(player);
 			if(this.playerPool.size === this.requiredPlayers)
-				this.emit("full tournament")
+				this.emit(TournamentEvents.FULL);
 		}
 		else
 		{
@@ -91,7 +94,7 @@ export class Tournament extends EventEmitter
 	private finishTournament()
 	{
 		this.state = ETournamentState.FINISHED;
-		this.emit("done tournament");
+		this.emit(TournamentEvents.FINISHED);
 	}
 
 	private async createAndStartRound()
