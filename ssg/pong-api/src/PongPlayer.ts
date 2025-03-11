@@ -1,6 +1,7 @@
 import { error } from "console";
 import { EventEmitter } from "stream";
 import { WebSocket, RawData } from "ws";
+import { ClientEvents } from "./customEvents";
 
 
 export type TPlayerSide = "left" | "right" | "TBD"; //TBD means to be decided
@@ -28,7 +29,7 @@ export class PongPlayer extends EventEmitter
 			this.connection.close();
 			console.log("connnection lost");
 			this.setPlayerStatus("offline");
-			this.emit("connection lost", this);
+			this.emit(ClientEvents.GONE_OFFLINE, this);
 		})
 	}
 

@@ -1,7 +1,7 @@
 import { PongPlayer } from "./PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
-import { TournamentEvents } from "./customEvents";
+import { TournamentEvents, ClientEvents } from "./customEvents";
 
 enum ETournamentState
 {
@@ -129,7 +129,7 @@ export class Tournament extends EventEmitter
 
 	private connectionMonitor(player:PongPlayer)
 	{
-		player.on("connection lost", (unpatient:PongPlayer)=>
+		player.on(ClientEvents.GONE_OFFLINE, (unpatient:PongPlayer)=>
 		{
 			if(this.state === ETournamentState.LOBBY)
 			{

@@ -2,6 +2,7 @@
 import { PongRoom } from "./PongRoom"
 import { WebSocket, RawData } from "ws";
 import { PongPlayer } from "./PongPlayer";
+import { RoomEvents } from "./customEvents";
 
 
 export class SingleMatchMaking
@@ -84,7 +85,7 @@ export class SingleMatchMaking
 
 	private async lobbyMonitor(room:PongRoom)
 	{
-		room.on("empty room", ()=>
+		room.on(RoomEvents.EMPTY, ()=>
 		{
 			console.log("Lobby monitor Removing empty room: ");
 			this.cleanRoom(room);

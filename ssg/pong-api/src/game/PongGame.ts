@@ -6,6 +6,7 @@ import raf from 'raf' //raf is request animation frame
 import { error } from "console";
 import { PongField } from "./PongField";
 import { EventEmitter } from "stream";
+import { GameEvents } from "../customEvents";
 
 interface Position 
 {
@@ -83,7 +84,7 @@ export class PingPongGame extends EventEmitter
 			return this;
 		return new Promise((resolve, reject)=>
 		{
-			this.on("finished game", ()=>
+			this.on(GameEvents.FINISHED, ()=>
 			{
 				resolve(this);
 			})
@@ -115,7 +116,7 @@ export class PingPongGame extends EventEmitter
 	finishGame():void 
 	{
 		this.setGameStatus("finished");
-		this.emit("finished game");
+		this.emit(GameEvents.FINISHED, this);
 	}
 
 	getFrame()

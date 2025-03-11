@@ -7,6 +7,7 @@ import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
 import { PongPlayer } from "./PongPlayer";
 import { error } from "console";
+import { ClientEvents, RoomEvents } from "./customEvents";
 
 
 export class PongRoom extends SessionRoom
@@ -127,7 +128,7 @@ export class PongRoom extends SessionRoom
 	
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
-		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
+		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
 			console.log("We have rage quitter here");
 			if(this.game.getGameStatus() !== "not started" && this.game.getGameStatus() !== "finished")
@@ -137,7 +138,7 @@ export class PongRoom extends SessionRoom
 			}
 			else 
 			{
-				this.emit("empty room", this);
+				this.emit(RoomEvents.EMPTY, this);
 			}
 				
 		})
