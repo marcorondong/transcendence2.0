@@ -6,7 +6,7 @@ import { TournamentEvents, ClientEvents } from "./customEvents";
 enum ETournamentState
 {
 	LOBBY,
-	STARTED,
+	RUNNING,
 	FINISHED
 }
 
@@ -33,7 +33,7 @@ export class Tournament extends EventEmitter
 	
 	startTournament()
 	{
-		this.state = ETournamentState.STARTED;
+		this.state = ETournamentState.RUNNING;
 		this.emit(TournamentEvents.STARTED);
 		//TODO maybe listen to event FULL and start torunamnet from outside
 		this.createAndStartRound();
