@@ -8,9 +8,8 @@ import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
 import { PongPlayer } from "./PongPlayer";
 import { SingleMatchMaking } from "./SingleMatchMaking";
-import { Tournament } from "./Tournamnet";
-import { TournamentEvents } from "./customEvents";
-
+import { TournamentMatchMaking } from "./TournamentMatchMaking";
+import { TValidTournamentSize } from "./Tournamnet";
 
 dotenv.config();
 
@@ -104,6 +103,7 @@ function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
 
 
 const singlesManager:SingleMatchMaking = new SingleMatchMaking();
+const tournamentManager:TournamentMatchMaking = new TournamentMatchMaking();
 
 
 fastify.register(fastifyStatic, {
@@ -118,6 +118,7 @@ interface GameRoomQueryI
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
 	matchType: "single" | "tournament";
+	tournamentSize: TValidTournamentSize;
 } 
 
 
@@ -152,25 +153,13 @@ function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | strin
 		room.getAndSendFramesOnce();
 	if(clientType ==="spectator")
 		spectatorLogic(roomId, connection);
-	//closeConnectionLogic(connection, room);
 }
 
-const simpleTournamnet:Tournament = new Tournament(4);
-
-function tournamentJoiner(connection:WebSocket)
+function tournamentJoiner(connection:WebSocket, tournamentSizeQuerry:TValidTournamentSize)
 {
 	const player:PongPlayer = new PongPlayer(connection, "TBD");
-	simpleTournamnet.addPlayer(player);
-	const freeSpots = simpleTournamnet.calculateNumberOfFreeSpots();
-	simpleTournamnet.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
+	tournamentManager.putPlayerInTournament(player, tournamentSizeQuerry);
 }
-
-simpleTournamnet.once(TournamentEvents.FULL, () =>
-{
-	console.log("Seoska liga pocinje pripremite prase i janje");
-	simpleTournamnet.startTournament();
-})
-
 
 fastify.register(websocket);
 fastify.register(async function(fastify)
@@ -192,7 +181,8 @@ fastify.register(async function(fastify)
 			playerId= "Player whatever",
 			privateRoom = false,
 			clientType = "player",
-			matchType = "single"
+			matchType = "single",
+			tournamentSize = 4 //TODO: check client queryy. It must be one of valid values. Correct it if it is not' only if matchType is tournament
 		} = req.query as GameRoomQueryI;
 		if(matchType === "single")
 		{
@@ -200,7 +190,7 @@ fastify.register(async function(fastify)
 			console.log("Single match activated");
 		}
 		else if(matchType === "tournament")
-			tournamentJoiner(connection);
+			tournamentJoiner(connection, tournamentSize);
 
 	})
 

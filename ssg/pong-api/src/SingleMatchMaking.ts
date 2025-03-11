@@ -7,11 +7,11 @@ import { RoomEvents } from "./customEvents";
 
 export class SingleMatchMaking
 {
-	private singleMatches: Map<string, PongRoom> = new Map<string, PongRoom>();
+	private singleMatches: Map<string, PongRoom>;
 
 	constructor()
 	{
-
+		this.singleMatches = new Map<string,PongRoom>();
 	}
 
 	addRoom(room: PongRoom):void 
