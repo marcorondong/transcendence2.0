@@ -1,12 +1,12 @@
 services:
 
-  frontend_api:
-    image: frontend_api_img 
-    container_name: frontend_api
-    build: ./frontend_api/
+  dummy_frontend_api:
+    image: dummy_frontend_api_img 
+    container_name: dummy_frontend_api
+    build: ./dummy_frontend_api/
     volumes:
-      - ./frontend_api/src/:/frontend_api/src/
-      - ./frontend_api/public/:/frontend_api/public/
+      - ./dummy_frontend_api/src/:/dummy_frontend_api/src/
+      - ./dummy_frontend_api/public/:/dummy_frontend_api/public/
     ports:
       - 3000:3000
     depends_on:
