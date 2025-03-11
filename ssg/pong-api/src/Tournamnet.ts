@@ -146,7 +146,6 @@ export class Tournament extends EventEmitter
 		this.playerPool.delete(proPlayer);
 	}
 
-
 	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
 	{
 		const room:PongRoom = PongRoom.createRoomForTwoPlayers(proPlayer1, proPlayer2);
