@@ -13,17 +13,26 @@ enum ETournamentState
 export class Tournament extends EventEmitter
 {
 	private requiredPlayers:number;
-	private playerPool:Set<PongPlayer> = new Set<PongPlayer>();
-	private gamesPool:Set<PongRoom> = new Set<PongRoom>();
+	private playerPool:Set<PongPlayer>;
+	private gamesPool:Set<PongRoom>;
 	private state: ETournamentState;
 	private roundNumber:number;
+	private readonly id:string;
 
 	constructor(tournamnetPlayers:number)
 	{
 		super();
+		this.playerPool = new Set<PongPlayer>();
+		this.gamesPool = new Set<PongRoom>();
 		this.requiredPlayers = tournamnetPlayers;
 		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
+		this.id = crypto.randomUUID();
+	}
+
+	getId()
+	{
+		return this.id;
 	}
 	
 	getRequiredPlayers():number
