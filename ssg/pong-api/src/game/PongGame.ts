@@ -7,6 +7,7 @@ import { error } from "console";
 import { PongField } from "./PongField";
 import { EventEmitter } from "stream";
 import { GameEvents } from "../customEvents";
+import { EPlayerSide } from "../PongPlayer";
 
 interface Position 
 {
@@ -91,11 +92,11 @@ export class PingPongGame extends EventEmitter
 		})
 	}
 
-	getPaddle(side: "left" | "right"): Paddle
+	getPaddle(side: EPlayerSide): Paddle
 	{
-		if(side === "left")
+		if(side === EPlayerSide.LEFT)
 			return this.leftPaddle;
-		else if(side === "right")
+		else if(side === EPlayerSide.RIGTH)
 			return this.rightPaddle
 		throw error("paddle not found")
 	}
@@ -151,13 +152,13 @@ export class PingPongGame extends EventEmitter
 			paddle.move(direction);
 	}
 
-	forfeitGame(sideThatLeft: "left" | "right")
+	forfeitGame(sideThatLeft: EPlayerSide.LEFT | EPlayerSide.RIGTH)
 	{
-		if(sideThatLeft === "left")
+		if(sideThatLeft === EPlayerSide.LEFT)
 		{
 			this.score.setScore(0, 3);
 		}
-		else if(sideThatLeft === "right")
+		else if(sideThatLeft === EPlayerSide.RIGTH)
 		{
 			this.score.setScore(3, 0);
 		}

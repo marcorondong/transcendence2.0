@@ -10,16 +10,20 @@ export enum EPlayerStatus
 	OFFLINE
 }
 
-export type TPlayerSide = "left" | "right" | "TBD"; //TBD means to be decided
-//type TOnlineStatus = "online" | "offline";
+export enum EPlayerSide
+{
+	LEFT,
+	RIGTH,
+	TBD
+}
 
 export class PongPlayer extends EventEmitter
 {
 	readonly connection: WebSocket;
-	private side: TPlayerSide; //TBD to be decided
+	private side: EPlayerSide; //TBD to be decided
 	private status: EPlayerStatus;
 
-	constructor(socket: WebSocket, playerSide: TPlayerSide)
+	constructor(socket: WebSocket, playerSide: EPlayerSide)
 	{
 		super();
 		this.connection = socket;
@@ -46,20 +50,20 @@ export class PongPlayer extends EventEmitter
 		return false
 	}
 
-	getPlayerSide(): TPlayerSide
+	getPlayerSide(): EPlayerSide
 	{
 		return this.side;
 	}
 
-	getPlayerSideLR(): "left" | "right"
+	getPlayerSideLR():EPlayerSide.LEFT | EPlayerSide.RIGTH
 	{
 		const LRside = this.side;
-		if(LRside === "TBD")
+		if(LRside === EPlayerSide.TBD)
 			throw error("Calling function without deciding player side");
 		return LRside;
 	}
 
-	setPlayerSide(side: TPlayerSide)
+	setPlayerSide(side: EPlayerSide)
 	{
 		this.side = side;
 	}

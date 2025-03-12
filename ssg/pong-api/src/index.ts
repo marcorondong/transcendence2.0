@@ -6,7 +6,7 @@ import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
 import { PongRoom } from "./PongRoom";
-import { PongPlayer } from "./PongPlayer";
+import { EPlayerSide, PongPlayer } from "./PongPlayer";
 import { SingleMatchMaking } from "./SingleMatchMaking";
 import { TournamentMatchMaking } from "./TournamentMatchMaking";
 import { TValidTournamentSize } from "./Tournamnet";
@@ -65,7 +65,7 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 		const roomToJoin = singlesManager.isAnyPublicRoomAvailable();
 		if(roomToJoin !== false)
 		{
-			const player:PongPlayer = new PongPlayer(connection, "right");
+			const player:PongPlayer = new PongPlayer(connection, EPlayerSide.RIGTH);
 			roomToJoin.addRightPlayer(player)
 			roomToJoin.getGame().startGame();
 			return roomToJoin;
@@ -80,7 +80,7 @@ function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
 			return singlesManager.createRoomAndAddFirstPlayer(connection);
 		else
 		{
-			const player:PongPlayer = new PongPlayer(connection, "right");
+			const player:PongPlayer = new PongPlayer(connection, EPlayerSide.RIGTH);
 			roomWithId.addRightPlayer(player)
 			roomWithId.getGame().startGame();
 			return roomWithId;
@@ -157,7 +157,7 @@ function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | strin
 
 function tournamentJoiner(connection:WebSocket, tournamentSizeQuerry:TValidTournamentSize)
 {
-	const player:PongPlayer = new PongPlayer(connection, "TBD");
+	const player:PongPlayer = new PongPlayer(connection, EPlayerSide.TBD);
 	tournamentManager.putPlayerInTournament(player, tournamentSizeQuerry);
 }
 

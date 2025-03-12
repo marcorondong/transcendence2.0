@@ -1,7 +1,7 @@
 
 import { PongRoom } from "./PongRoom"
 import { WebSocket, RawData } from "ws";
-import { PongPlayer } from "./PongPlayer";
+import { EPlayerSide, PongPlayer } from "./PongPlayer";
 import { RoomEvents } from "./customEvents";
 
 
@@ -58,7 +58,7 @@ export class SingleMatchMaking
 	{
 		const room:PongRoom = new PongRoom(false);
 		this.addRoom(room);
-		const leftPlayer: PongPlayer = new PongPlayer(connection, "left");
+		const leftPlayer: PongPlayer = new PongPlayer(connection, EPlayerSide.LEFT);
 		room.addLeftPlayer(leftPlayer);
 		return room;
 	}

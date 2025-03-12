@@ -5,7 +5,7 @@ import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
-import { EPlayerStatus, PongPlayer } from "./PongPlayer";
+import { EPlayerSide, EPlayerStatus, PongPlayer } from "./PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "./customEvents";
 
@@ -36,8 +36,8 @@ export class PongRoom extends SessionRoom
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
 	{
 		const room:PongRoom = new PongRoom();
-		playerOne.setPlayerSide("left");
-		playerTwo.setPlayerSide("right")
+		playerOne.setPlayerSide(EPlayerSide.LEFT);
+		playerTwo.setPlayerSide(EPlayerSide.RIGTH)
 		room.addLeftPlayer(playerOne);
 		room.addRightPlayer(playerTwo);
 		return room;
