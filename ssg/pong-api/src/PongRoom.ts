@@ -1,5 +1,5 @@
 import {SessionRoom} from "../../utils/SessionRoom"
-import { PingPongGame } from "./game/PongGame";
+import { EGameStatus, PingPongGame } from "./game/PongGame";
 import { Paddle } from "./game/Paddle";
 import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
@@ -131,7 +131,8 @@ export class PongRoom extends SessionRoom
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
 			console.log("We have rage quitter here");
-			if(this.game.getGameStatus() !== "not started" && this.game.getGameStatus() !== "finished")
+			//TODO: maybe just check if game status IS started
+			if(this.game.getGameStatus() !== EGameStatus.NOT_STARTED && this.game.getGameStatus() !== EGameStatus.FINISHED)
 			{
 				console.log("Since game is rage quiter lost");
 				this.game.forfeitGame(player.getPlayerSideLR());
@@ -170,7 +171,7 @@ export class PongRoom extends SessionRoom
 	{
 		const renderFrame = () => {
 			this.sendCurrentFrame();
-			if(this.getGame().getGameStatus() === "finished")
+			if(this.getGame().getGameStatus() === EGameStatus.FINISHED)
 			{
 				return;
 			}

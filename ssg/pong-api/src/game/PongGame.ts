@@ -15,7 +15,13 @@ interface Position
 	y:number;
 }
 
-type gameStatus = "running" | "paused" | "finished" | "not started";
+export enum EGameStatus
+{
+	NOT_STARTED,
+	RUNNING,
+	PAUSED, 
+	FINISHED
+}
 
 export interface IPongFrame
 {
@@ -23,7 +29,7 @@ export interface IPongFrame
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
 	score: ScoreI;
-	matchStatus: gameStatus
+	matchStatus: EGameStatus
 }
 
 export class PingPongGame extends EventEmitter
@@ -38,7 +44,7 @@ export class PingPongGame extends EventEmitter
 
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
-	private gameStatus:gameStatus;
+	private gameStatus:EGameStatus;
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
@@ -49,7 +55,7 @@ export class PingPongGame extends EventEmitter
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.score = score;
 		this.field = tableField;
-		this.gameStatus = "not started";
+		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
 	static createStandardGame() :PingPongGame
@@ -64,12 +70,12 @@ export class PingPongGame extends EventEmitter
 	}
 
 
-	getGameStatus(): gameStatus
+	getGameStatus(): EGameStatus
 	{
 		return this.gameStatus;
 	}
 
-	setGameStatus(newStatus:gameStatus)
+	setGameStatus(newStatus:EGameStatus)
 	{
 		this.gameStatus = newStatus;
 	}
@@ -81,7 +87,7 @@ export class PingPongGame extends EventEmitter
 
 	async waitForFinalWhistle(): Promise<PingPongGame>
 	{
-		if(this.gameStatus === "finished")
+		if(this.gameStatus === EGameStatus.FINISHED)
 			return this;
 		return new Promise((resolve, reject)=>
 		{
@@ -103,20 +109,20 @@ export class PingPongGame extends EventEmitter
 
 	pauseGame(): void
 	{
-		this.setGameStatus("paused");
+		this.setGameStatus(EGameStatus.PAUSED);
 		this.score.pause();
 	}
 
 	startGame(): void 
 	{
-		this.setGameStatus("running");
+		this.setGameStatus(EGameStatus.RUNNING);
 		this.score.start();
 		this.start();
 	}
 
 	finishGame():void 
 	{
-		this.setGameStatus("finished");
+		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
 	}
 
@@ -148,7 +154,7 @@ export class PingPongGame extends EventEmitter
 
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
-		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === "running")
+		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === EGameStatus.RUNNING)
 			paddle.move(direction);
 	}
 
@@ -191,14 +197,14 @@ export class PingPongGame extends EventEmitter
 
 	private start(): void 
 	{
-		this.setGameStatus("running");
+		this.setGameStatus(EGameStatus.RUNNING);
 		this.score.startCountdown();
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
 	private gameLoop(timestamp: number):void 
 	{
-		if(this.getGameStatus() === "running")
+		if(this.getGameStatus() === EGameStatus.RUNNING)
 		{
 			//const deltaTime = timestamp - this.lastFrameTime;
 			this.lastFrameTime = timestamp;
