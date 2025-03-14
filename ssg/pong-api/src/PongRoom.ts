@@ -13,7 +13,6 @@ import { ClientEvents, RoomEvents } from "./customEvents";
 export class PongRoom extends SessionRoom
 {
 	private isFrameGenerating: boolean;
-	private readonly requiredPlayers;
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
 	private tournamentRoom:boolean;
@@ -25,7 +24,6 @@ export class PongRoom extends SessionRoom
 	{
 		super(privateRoom);
 		this.isFrameGenerating = false;
-		this.requiredPlayers = 2;
 		this.roundName = "single Match";
 		this.isCleaned = false;
 		this.tournamentRoom = false;
@@ -158,8 +156,7 @@ export class PongRoom extends SessionRoom
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
 			console.log("We have rage quitter here");
-			//TODO: maybe just check if game status IS started
-			if(this.game.getGameStatus() !== EGameStatus.NOT_STARTED && this.game.getGameStatus() !== EGameStatus.FINISHED)
+			if(this.game.getGameStatus() === EGameStatus.RUNNING)
 			{
 				console.log("Since game is rage quiter lost");
 				this.game.forfeitGame(player.getPlayerSideLR());
