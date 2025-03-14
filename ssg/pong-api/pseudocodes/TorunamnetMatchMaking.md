@@ -13,3 +13,12 @@
 		join that player to that tournament
 	2. else 
 		create tournament with that size and put that player in that tournament 
+
+
+## Singles match joiner 
+1. new player connect
+2. Look for room in map 
+	1. if there is public lobby room 
+		join playet to that room
+	2. else 
+		create room and put playet in that one

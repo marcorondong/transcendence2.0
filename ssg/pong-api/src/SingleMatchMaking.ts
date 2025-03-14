@@ -14,15 +14,20 @@ export class SingleMatchMaking
 		this.singleMatches = new Map<string,PongRoom>();
 	}
 
-	addRoom(room: PongRoom):void 
+	putPlayerinRandomRoom(player: PongPlayer)
 	{
-		if(this.singleMatches.has(room.getId()))
-		{
-			console.warn("Tryed to add room with id that already exist in map.");
-			return;
-		}
-		this.singleMatches.set(room.getId(), room);
-		this.lobbyMatchMonitor(room);
+		const roomForPlayer:PongRoom = this.findRoomToJoin();
+		const playerSide:EPlayerSide = roomForPlayer.getMissingPlayerSide();
+		player.setPlayerSide(playerSide);
+		roomForPlayer.addPlayer(player);
+	}
+
+	createRoom():PongRoom
+	{
+		const freshRoom:PongRoom = new PongRoom(false);
+		this.singleMatches.set(freshRoom.getId(), freshRoom);
+		this.lobbyMatchMonitor(freshRoom);
+		return freshRoom;
 	}
 
 	removeRoom(room: PongRoom):boolean 
@@ -35,42 +40,34 @@ export class SingleMatchMaking
 		return this.singleMatches.get(roomId);
 	}
 
-	isAnyPublicRoomAvailable():false | PongRoom
+	findRoomToJoin(): PongRoom
 	{
 		let toReturn:PongRoom | false = false;
 		for(const [key, oneRoom] of this.singleMatches.entries())
 		{
 			if(oneRoom.isPrivate() === false && oneRoom.isFull() === false)
 			{
-				if(toReturn == false)
+				if(toReturn === false)
 					toReturn = oneRoom
-				else 
+				else
 				{
 					if(oneRoom.getCreationDate() < toReturn.getCreationDate())
 						toReturn = oneRoom
 				}
 			}
 		}
+		if(toReturn === false)
+			toReturn = this.createRoom();
 		return toReturn
 	}
 
-	createRoomAndAddFirstPlayer(connection: WebSocket):PongRoom
-	{
-		const room:PongRoom = new PongRoom(false);
-		this.addRoom(room);
-		const leftPlayer: PongPlayer = new PongPlayer(connection, EPlayerSide.LEFT);
-		room.addLeftPlayer(leftPlayer);
-		return room;
-	}
-
-
 	private cleanRoom(roomToClean:PongRoom)
 	{
-		if(roomToClean.isCleaned)
+		if(roomToClean.isRoomCleaned() === true)
 			return;
 		roomToClean.sendCurrentFrame(); //send last frame that notify client of finished game.
 		console.log("Clean function");
-		roomToClean.isCleaned = true; 
+		roomToClean.setRoomCleanedStatus(true);
 		roomToClean.closeAllConecctionsFromRoom();
 		this.removeRoom(roomToClean);
 	}
@@ -78,7 +75,7 @@ export class SingleMatchMaking
 
 	private async lobbyMatchMonitor(room:PongRoom)
 	{
-		room.isCleaned = false;
+		room.setRoomCleanedStatus(false);
 		this.lobbyMonitor(room);
 		this.matchMonitor(room);
 	}
@@ -90,11 +87,18 @@ export class SingleMatchMaking
 			console.log("Lobby monitor Removing empty room: ");
 			this.cleanRoom(room);
 		})
+
+		room.on(RoomEvents.FULL, ()=>
+		{
+			console.log("Room is full lets get started");
+			room.getGame().startGame();
+			room.getAndSendFramesOnce();
+		})
 	}
 
 	private async matchMonitor(room:PongRoom)
 	{
-		await room.game.waitForFinalWhistle();
+		await room.getGame().waitForFinalWhistle();
 		console.log("match monitor Game finished", room.getId());
 		this.cleanRoom(room);
 	}

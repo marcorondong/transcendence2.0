@@ -12,20 +12,24 @@ import { ClientEvents, RoomEvents } from "./customEvents";
 
 export class PongRoom extends SessionRoom
 {
-	private isFrameGenerating: boolean = false;
-	private readonly requiredPlayers = 2;
+	private isFrameGenerating: boolean;
+	private readonly requiredPlayers;
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
+	private tournamentRoom:boolean;
+	private roundName:string;
+	private isCleaned:boolean;
+	private game:PingPongGame;
 
-	private tournamentRoom:boolean = false;
-	private roundName:string ="single Match";
-
-	isCleaned:boolean = false;
-
-	game:PingPongGame = PingPongGame.createStandardGame();
 	constructor(privateRoom:boolean = false)
 	{
 		super(privateRoom);
+		this.isFrameGenerating = false;
+		this.requiredPlayers = 2;
+		this.roundName = "single Match";
+		this.isCleaned = false;
+		this.tournamentRoom = false;
+		this.game = PingPongGame.createStandardGame();
 	}
 
 	getRoundName()
@@ -33,13 +37,22 @@ export class PongRoom extends SessionRoom
 		return this.roundName;
 	}
 
+	getMissingPlayerSide():EPlayerSide
+	{
+		if(this.leftPlayer === undefined)
+			return EPlayerSide.LEFT;
+		else if(this.rightPlayer === undefined)
+			return EPlayerSide.RIGTH;
+		throw error("Room is full, no player is missing");
+	}
+
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
 	{
 		const room:PongRoom = new PongRoom();
 		playerOne.setPlayerSide(EPlayerSide.LEFT);
-		playerTwo.setPlayerSide(EPlayerSide.RIGTH)
-		room.addLeftPlayer(playerOne);
-		room.addRightPlayer(playerTwo);
+		playerTwo.setPlayerSide(EPlayerSide.RIGTH);
+		room.addPlayer(playerOne);
+		room.addPlayer(playerTwo);
 		return room;
 	}
 
@@ -67,32 +80,37 @@ export class PongRoom extends SessionRoom
 		return this.game;
 	}
 	
-	addLeftPlayer(leftPlayer: PongPlayer):boolean
+	addPlayer(player: PongPlayer):boolean
 	{
-		if(this.leftPlayer === undefined)
+		if(player.getPlayerSideLR()=== EPlayerSide.LEFT)
 		{
-			this.leftPlayer = leftPlayer;
-			this.addConnectionToRoom(leftPlayer.connection);
-			this.assingControlsToPlayer(this.leftPlayer);
-			this.disconnectBehaviour(this.leftPlayer);
-			return true
+			if(this.leftPlayer === undefined)
+				this.leftPlayer = player
+			else 
+			{
+				console.warn(`${player.getPlayerSide()} player already exist. Cannot overwrite it`);
+				return false;
+			}
 		}
-		console.warn("Left player already exist. Cannot overwrite it")
-		return false;
-	}
-		
-	addRightPlayer(rightPlayer:PongPlayer):boolean
-	{
-		if(this.rightPlayer === undefined)
+		else if(player.getPlayerSideLR() === EPlayerSide.RIGTH)
 		{
-			this.rightPlayer = rightPlayer;
-			this.addConnectionToRoom(rightPlayer.connection);
-			this.assingControlsToPlayer(this.rightPlayer);
-			this.disconnectBehaviour(this.rightPlayer);
-			return true;
+			if(this.rightPlayer === undefined)
+				this.rightPlayer = player;
+			else 
+			{
+				console.warn(`${player.getPlayerSide()} player already exist. Cannot overwrite it`);
+				return false;
+			}
 		}
-		console.warn("Right player already exist cannot overwrite it");
-		return false;
+		this.addConnectionToRoom(player.connection);
+		this.assingControlsToPlayer(player);
+		this.disconnectBehaviour(player);
+		if(this.isFull())
+		{
+			this.getGame().startGame();
+			//this.emit(RoomEvents.FULL, this);
+		}
+		return true;
 	}
 			
 	addSpectator(connection:WebSocket)
@@ -105,6 +123,16 @@ export class PongRoom extends SessionRoom
 		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
 			return true
 		return false;
+	}
+
+	isRoomCleaned():boolean
+	{
+		return this.isCleaned;
+	}
+
+	setRoomCleanedStatus(freshStatus:boolean):void
+	{
+		this.isCleaned = freshStatus;
 	}
 			
 			
@@ -139,6 +167,7 @@ export class PongRoom extends SessionRoom
 			}
 			else 
 			{
+				this.removePlayer(rageQuitPlayer);
 				this.emit(RoomEvents.EMPTY, this);
 			}
 				
@@ -165,6 +194,15 @@ export class PongRoom extends SessionRoom
 		return {
 			matchStatus: nottification
 		}
+	}
+
+	private removePlayer(player:PongPlayer)
+	{
+		if(player === this.leftPlayer)
+			return this.leftPlayer = undefined;
+		else if(player === this.rightPlayer)
+			return this.rightPlayer = undefined;
+		throw error("Player was never added in this room");
 	}
 			
 	private sendFrames()

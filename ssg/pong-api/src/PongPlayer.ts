@@ -23,11 +23,11 @@ export class PongPlayer extends EventEmitter
 	private side: EPlayerSide; //TBD to be decided
 	private status: EPlayerStatus;
 
-	constructor(socket: WebSocket, playerSide: EPlayerSide)
+	constructor(socket: WebSocket)
 	{
 		super();
 		this.connection = socket;
-		this.side = playerSide;
+		this.side = EPlayerSide.TBD;
 		this.status = EPlayerStatus.ONLINE;
 		this.connectionMonitor();
 	}

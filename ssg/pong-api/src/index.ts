@@ -58,35 +58,35 @@ const fastify = Fastify(
 });
 	
 
-function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
-{
-	if(roomId === 0)
-	{
-		const roomToJoin = singlesManager.isAnyPublicRoomAvailable();
-		if(roomToJoin !== false)
-		{
-			const player:PongPlayer = new PongPlayer(connection, EPlayerSide.RIGTH);
-			roomToJoin.addRightPlayer(player)
-			roomToJoin.getGame().startGame();
-			return roomToJoin;
-		}
-		else 
-			return singlesManager.createRoomAndAddFirstPlayer(connection);
-	}
-	else 
-	{
-		const roomWithId = singlesManager.getRoom(roomId);
-		if(roomWithId === undefined)
-			return singlesManager.createRoomAndAddFirstPlayer(connection);
-		else
-		{
-			const player:PongPlayer = new PongPlayer(connection, EPlayerSide.RIGTH);
-			roomWithId.addRightPlayer(player)
-			roomWithId.getGame().startGame();
-			return roomWithId;
-		}
-	}
-}
+// function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
+// {
+// 	if(roomId === 0)
+// 	{
+// 		const roomToJoin = singlesManager.isAnyPublicRoomAvailable();
+// 		if(roomToJoin !== false)
+// 		{
+// 			const player:PongPlayer = new PongPlayer(connection, EPlayerSide.RIGTH);
+// 			roomToJoin.addRightPlayer(player)
+// 			roomToJoin.getGame().startGame();
+// 			return roomToJoin;
+// 		}
+// 		else 
+// 			return singlesManager.createRoomAndAddFirstPlayer(connection);
+// 	}
+// 	else 
+// 	{
+// 		const roomWithId = singlesManager.getRoom(roomId);
+// 		if(roomWithId === undefined)
+// 			return singlesManager.createRoomAndAddFirstPlayer(connection);
+// 		else
+// 		{
+// 			const player:PongPlayer = new PongPlayer(connection, EPlayerSide.RIGTH);
+// 			roomWithId.addRightPlayer(player)
+// 			roomWithId.getGame().startGame();
+// 			return roomWithId;
+// 		}
+// 	}
+// }
 
 function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
 {
@@ -136,28 +136,28 @@ function spectatorLogic(roomId:string | 0, connection:WebSocket)
 	}
 }
 
-function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | string, connection:WebSocket)
-{
-	let room:PongRoom | undefined;
-	if(clientType === "player")
-	{
-		room = playerRoomJoiner(roomId, connection);
-		console.log(`Player joined to room:${room.getId()}`);
-		const status = PongRoom.createMatchStatusUpdate("Waiting for opponent")
-		const roomIdJson = {roomId: room.getId(),
-			...status //spreading properties
-		};
-		connection.send(JSON.stringify(roomIdJson));
-	}
-	if(room !== undefined && room.isFull())
-		room.getAndSendFramesOnce();
-	if(clientType ==="spectator")
-		spectatorLogic(roomId, connection);
-}
+// function singleMatchMaking(clientType: "player" | "spectator", roomId: 0 | string, connection:WebSocket)
+// {
+// 	let room:PongRoom | undefined;
+// 	if(clientType === "player")
+// 	{
+// 		room = playerRoomJoiner(roomId, connection);
+// 		console.log(`Player joined to room:${room.getId()}`);
+// 		const status = PongRoom.createMatchStatusUpdate("Waiting for opponent")
+// 		const roomIdJson = {roomId: room.getId(),
+// 			...status //spreading properties
+// 		};
+// 		connection.send(JSON.stringify(roomIdJson));
+// 	}
+// 	if(room !== undefined && room.isFull())
+// 		room.getAndSendFramesOnce();
+// 	if(clientType ==="spectator")
+// 		spectatorLogic(roomId, connection);
+// }
 
 function tournamentJoiner(connection:WebSocket, tournamentSizeQuerry:TValidTournamentSize)
 {
-	const player:PongPlayer = new PongPlayer(connection, EPlayerSide.TBD);
+	const player:PongPlayer = new PongPlayer(connection);
 	tournamentManager.putPlayerInTournament(player, tournamentSizeQuerry);
 }
 
@@ -186,7 +186,9 @@ fastify.register(async function(fastify)
 		} = req.query as GameRoomQueryI;
 		if(matchType === "single")
 		{
-			singleMatchMaking(clientType, roomId, connection);
+			const player:PongPlayer = new PongPlayer(connection);
+			singlesManager.putPlayerinRandomRoom(player);
+			//singleMatchMaking(clientType, roomId, connection);
 			console.log("Single match activated");
 		}
 		else if(matchType === "tournament")

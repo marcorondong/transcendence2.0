@@ -10,7 +10,8 @@ export const TournamentEvents =
 
 export const RoomEvents =
 {
-	EMPTY: Symbol("Room is empty")
+	EMPTY: Symbol("Room is empty"),
+	FULL: Symbol("Room is full, ready to play")
 }
 
 export const ClientEvents =
