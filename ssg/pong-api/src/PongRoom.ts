@@ -107,8 +107,7 @@ export class PongRoom extends SessionRoom
 		this.disconnectBehaviour(player);
 		if(this.isFull())
 		{
-			this.getGame().startGame();
-			//this.emit(RoomEvents.FULL, this);
+			this.emit(RoomEvents.FULL, this);
 		}
 		return true;
 	}

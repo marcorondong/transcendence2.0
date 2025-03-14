@@ -91,8 +91,8 @@ export class SingleMatchMaking
 		room.on(RoomEvents.FULL, ()=>
 		{
 			console.log("Room is full lets get started");
-			room.getGame().startGame();
 			room.getAndSendFramesOnce();
+			room.getGame().startGame();
 		})
 	}
 
