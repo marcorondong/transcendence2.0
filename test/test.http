@@ -25,3 +25,15 @@ Content-Type: application/json
 {
   "name": "item 2 updated"
 }
+
+
+### notes
+
+.
+└── src/
+    ├── server.ts -> start server + register routes
+    ├── routs.ts -> list of routes (endpoints)
+    ├── opts.ts -> option of each route 
+    ├── schemas.ts -> schemas of opts
+    ├── controllers.ts -> handlers of opts
+    └── interfaces.ts -> interfaces to provide type safety
