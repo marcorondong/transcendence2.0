@@ -5,6 +5,7 @@ import { ScoreBoard, ScoreI} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 import { error } from "console";
 import { PongField } from "./PongField";
+import { EventEmitter } from "stream";
 
 interface Position 
 {
@@ -12,16 +13,18 @@ interface Position
 	y:number;
 }
 
-export interface PongFrameI
+type gameStatus = "running" | "paused" | "finished" | "not started";
+
+export interface IPongFrame
 {
 	leftPaddle: Position & {height:number};
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
 	score: ScoreI;
-	matchStatus: "running" | "paused" | "finished"
+	matchStatus: gameStatus
 }
 
-export class PingPongGame
+export class PingPongGame extends EventEmitter
 {
 
 	protected leftPaddle: Paddle;
@@ -33,20 +36,18 @@ export class PingPongGame
 
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
-	private gameStatus : "running" | "paused" | "finished" = "paused"
-	private lastFrame:boolean = false;
+	private gameStatus:gameStatus;
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
+		super();
 		this.leftPaddle = leftPaddle;
 		this.rightPaddle = rightPaddle;
 		this.ball = ball;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.score = score;
 		this.field = tableField;
-
-		this.pauseGame();
-		//this.start();
+		this.gameStatus = "not started";
 	}
 
 	static createStandardGame() :PingPongGame
@@ -59,9 +60,34 @@ export class PingPongGame
 		const game: PingPongGame = new PingPongGame(leftPaddle, rightPaddle, ball, score, table);
 		return game;
 	}
-	getGameStatus(): "running" | "paused" | "finished"
+
+
+	getGameStatus(): gameStatus
 	{
 		return this.gameStatus;
+	}
+
+	setGameStatus(newStatus:gameStatus)
+	{
+		this.gameStatus = newStatus;
+	}
+
+	getPongWinnerSide(): "left" | "right"
+	{
+		return this.score.getWinnerSide();
+	}
+
+	async waitForFinalWhistle(): Promise<PingPongGame>
+	{
+		if(this.gameStatus === "finished")
+			return this;
+		return new Promise((resolve, reject)=>
+		{
+			this.on("finished game", ()=>
+			{
+				resolve(this);
+			})
+		})
 	}
 
 	getPaddle(side: "left" | "right"): Paddle
@@ -75,25 +101,21 @@ export class PingPongGame
 
 	pauseGame(): void
 	{
-		this.gameStatus = "paused";
+		this.setGameStatus("paused");
 		this.score.pause();
 	}
 
 	startGame(): void 
 	{
-		this.gameStatus = "running"
+		this.setGameStatus("running");
 		this.score.start();
+		this.start();
 	}
 
 	finishGame():void 
 	{
-		this.gameStatus = "finished"
-		this.lastFrame = true;
-	}
-
-	isLastFrame(): boolean
-	{
-		return this.lastFrame;
+		this.setGameStatus("finished");
+		this.emit("finished game");
 	}
 
 	getFrame()
@@ -117,14 +139,14 @@ export class PingPongGame
 				radius: this.ball.getRadius()
 			},
 			score: this.score.getScoreJson(), 
-			matchStatus: this.gameStatus
+			matchStatus: this.getGameStatus()
 		};
 	}
 
 
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
-		if(this.isPaddleMoveAllowed(paddle,direction) && this.gameStatus === "running")
+		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === "running")
 			paddle.move(direction);
 	}
 
@@ -165,18 +187,18 @@ export class PingPongGame
 			this.finishGame();
 	}
 
-	start(): void 
+	private start(): void 
 	{
-		this.gameStatus = 'running'
+		this.setGameStatus("running");
 		this.score.startCountdown();
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
 	private gameLoop(timestamp: number):void 
 	{
-		if(this.gameStatus === "running")
+		if(this.getGameStatus() === "running")
 		{
-			const deltaTime = timestamp - this.lastFrameTime;
+			//const deltaTime = timestamp - this.lastFrameTime;
 			this.lastFrameTime = timestamp;
 			this.renderNextFrame();
 		}
