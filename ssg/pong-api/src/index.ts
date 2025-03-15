@@ -9,6 +9,7 @@ import { PongPlayer } from "./PongPlayer";
 import { SingleMatchMaking } from "./SingleMatchMaking";
 import { TournamentMatchMaking } from "./TournamentMatchMaking";
 import { TValidTournamentSize } from "./Tournamnet";
+import { MatchMaking } from "./MatchMaking";
 
 dotenv.config();
 
@@ -72,14 +73,15 @@ function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
 
 const singlesManager:SingleMatchMaking = new SingleMatchMaking();
 const tournamentManager:TournamentMatchMaking = new TournamentMatchMaking();
-
+const manager:MatchMaking = new MatchMaking();
 
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
 	prefix: "/", // Optional: Sets the URL prefix
   });
 
-interface GameRoomQueryI
+  
+export interface GameRoomQueryI
 {
 	roomId: string | 0;
 	playerId: string;
@@ -133,6 +135,19 @@ fastify.register(async function(fastify)
 			matchType = "single",
 			tournamentSize = 4 //TODO: check client queryy. It must be one of valid values. Correct it if it is not' only if matchType is tournament
 		} = req.query as GameRoomQueryI;
+
+		const gameQuerry: GameRoomQueryI =
+		{
+			roomId,
+			playerId,
+			privateRoom,
+			clientType, 
+			matchType,
+			tournamentSize
+		}
+
+		manager.matchJoiner(connection,gameQuerry);
+		console.log("This is req querr1|", req.query);
 		if(matchType === "single")
 		{
 			const player:PongPlayer = new PongPlayer(connection);

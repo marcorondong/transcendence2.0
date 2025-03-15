@@ -14,6 +14,12 @@ export class SingleMatchMaking
 		this.singleMatches = new Map<string,PongRoom>();
 	}
 
+
+	getAllMatches()
+	{
+		return this.singleMatches;
+	}
+	
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoom = this.findRoomToJoin();
