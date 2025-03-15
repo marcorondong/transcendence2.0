@@ -1,6 +1,7 @@
+import { EventEmitter } from "stream";
 import { WebSocket } from "ws";
 
-export class SessionRoom
+export class SessionRoom extends EventEmitter
 {
 	protected readonly id: string;
 	protected connections: Set<WebSocket> = new Set<WebSocket>();
@@ -9,6 +10,7 @@ export class SessionRoom
 	
 	constructor(privateRoom:boolean = false)
 	{
+		super();
 		this.id = crypto.randomUUID();
 		this.privateRoom = privateRoom;
 		this.creationDate = new Date();
@@ -36,24 +38,26 @@ export class SessionRoom
 		this.connections.add(connectionToAdd);
 	}
 
-	removeConnectionFromRoom(connectionToRemove: WebSocket):void
+	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
 	{
-		connectionToRemove.close();
-		this.connections.delete(connectionToRemove);
+		return this.connections.delete(connectionToRemove);
 	}
 
-	closeAndRemoveAllConnections():void
+	removeAllConnectionsFromRoom():void
 	{
 		for(const oneConnection of this.connections)
 		{
 			this.removeConnectionFromRoom(oneConnection);
-			console.log("Closing and removing connection");
+			console.log("Removing connection from room");
 		}
 	}
-
-	getConnectionsCount(): number 
+	
+	closeAllConecctionsFromRoom():void 
 	{
-		return this.connections.size;
+		for(const oneConnection of this.connections)
+		{
+			oneConnection.close();
+		}
 	}
 
 	/**
@@ -71,15 +75,5 @@ export class SessionRoom
 	isPrivate():boolean
 	{
 		return this.privateRoom;
-	}
-
-	setRoomPrivate():void 
-	{
-		this.privateRoom = true;
-	}
-
-	setRoomPublic(): void 
-	{
-		this.privateRoom = false;
 	}
 }
