@@ -5,7 +5,7 @@ import { itemRoutes } from './routes/routes';
 const PORT = 5000;
 
 const fastifyApi: FastifyInstance = myFastify({
-    logger: true
+    logger: false
 });
 
 fastifyApi.register(itemRoutes);
