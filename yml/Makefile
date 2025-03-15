@@ -1,7 +1,12 @@
 all: up
 
 up:
-	docker-compose up --build
+	docker-compose build
+	docker-compose up
+
+dev:
+	docker-compose build --no-cache
+	docker-compose up
 
 down:
 	docker-compose down --volumes
@@ -14,5 +19,5 @@ remove:
 	docker system prune -a -f --volumes
 	docker builder prune -a -f
 
-super: remove clear up
+super: remove clear dev
 

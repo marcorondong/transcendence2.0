@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
       args:
         NO_ARGS: "some_value"
-    no-cache: true
+      # no-cache: true
     env_file:
       - .env
     secrets:
@@ -17,8 +17,8 @@ services:
       - NO_ENV=${MY_VAR}
       - API_KEY_DUMMY_FRONTEND_FILE=/run/secrets/api_key_dummy_frontend
     volumes:
-      - ./dummy_frontend_api/src/:/dummy_frontend_api/src/
-      - ./dummy_frontend_api/public/:/dummy_frontend_api/public/
+      - ../dummy_frontend_api/src/:/dummy_frontend_api/src/
+      - ../dummy_frontend_api/public/:/dummy_frontend_api/public/
     ports:
       - "${DUMMY_FRONTEND_PORT}:${DUMMY_FRONTEND_PORT}"
     networks:
@@ -44,7 +44,7 @@ services:
       dockerfile: Dockerfile
       args:
         NO_ARGS: "some_value"
-    no-cache: true
+      # no-cache: true
     env_file:
       - .env
     secrets:
@@ -53,7 +53,7 @@ services:
       - NO_ENV=${MY_VAR}
       - API_KEY_TICTACTOE_FILE=/run/secrets/api_key_tictactoe
     volumes:
-      - ./tictactoe_api/src/:/tictactoe_api/src/
+      - ../tictactoe_api/src/:/tictactoe_api/src/
     ports:
       - "${TICTACTOE_PORT}:${TICTACTOE_PORT}"
     networks:
@@ -74,7 +74,7 @@ services:
       dockerfile: Dockerfile
       args:
         NO_ARGS: "some_value"
-    no-cache: true
+        # no-cache: true
     env_file:
       - .env
     secrets:
@@ -83,7 +83,7 @@ services:
       - NO_ENV=${MY_VAR}
       - API_KEY_CHAT_FILE=/run/secrets/api_key_chat
     volumes:
-      - ./chat_api/src/:/chat_api/src/
+      - ../chat_api/src/:/chat_api/src/
     ports:
       - "${CHAT_PORT}:${CHAT_PORT}"
     networks:
@@ -106,10 +106,10 @@ secrets:
 
 
 networks:
-  frontend:
-    driver:
   backend:
-    driver:
+    driver: bridge
+  frontend:
+    driver: bridge
 
 # volumes:
 #   sqlite:

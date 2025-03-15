@@ -45,3 +45,7 @@ tests/
 # Miscellaneous
 *.md
 README.md
+
+# Secret folder
+**/secrets/
+

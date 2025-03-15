@@ -161,3 +161,6 @@ atlassian-ide-plugin.xml
 ############################ Operating System Files ###########################
 .DS_Store
 Thumbs.db
+
+############################# Docker Related Files #############################
+# **/secrets/
