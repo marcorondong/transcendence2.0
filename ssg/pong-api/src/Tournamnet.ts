@@ -32,6 +32,15 @@ export class Tournament extends EventEmitter
 		this.id = crypto.randomUUID();
 	}
 
+	getAllTournamentsRoom():Map<string, PongRoom>
+	{
+		const allRooms: Map<string, PongRoom> = new Map<string, PongRoom>(
+			[...this.gamesPool].map(room =>[room.getId(), room] as [string, PongRoom])
+		);
+		return allRooms;
+		
+	}
+
 	getId()
 	{
 		return this.id;

@@ -1,6 +1,7 @@
 import { ETournamentState, Tournament, TValidTournamentSize } from "./Tournamnet"
 import { PongPlayer } from "./PongPlayer";
 import { TournamentEvents } from "./customEvents";
+import { PongRoom } from "./PongRoom";
 
 export class TournamentMatchMaking
 {
@@ -17,6 +18,19 @@ export class TournamentMatchMaking
 		tournamnetForPlayer.addPlayer(player);
 		const freeSpots = tournamnetForPlayer.calculateNumberOfFreeSpots();
 		tournamnetForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
+	}
+
+	getMatchesFromAllTournaments():Map<string, PongRoom>
+	{
+		const allTournamnetsRooms:Map<string, PongRoom> = new Map<string, PongRoom>();
+		for(const [key, oneTournament] of this.allTournamnets)
+		{
+			for(const [key, room] of oneTournament.getAllTournamentsRoom())
+			{
+				allTournamnetsRooms.set(key, room);
+			}
+		}
+		return allTournamnetsRooms;
 	}
 
 	private findTournamentToJoin(tournamentSizeQuerry: TValidTournamentSize): Tournament
