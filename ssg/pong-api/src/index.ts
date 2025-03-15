@@ -57,22 +57,19 @@ const fastify = Fastify(
 	: true
 });
 	
-function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
-{
-	if(roomId === 0)
-		return false;
-	const roomWithId = singlesManager.getRoom(roomId);
-	if(roomWithId !== undefined)
-	{
-		roomWithId.addSpectator(connection);
-		return true
-	}
-	return false;
-}
+// function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
+// {
+// 	if(roomId === 0)
+// 		return false;
+// 	const roomWithId = singlesManager.getRoom(roomId);
+// 	if(roomWithId !== undefined)
+// 	{
+// 		roomWithId.addSpectator(connection);
+// 		return true
+// 	}
+// 	return false;
+// }
 
-
-const singlesManager:SingleMatchMaking = new SingleMatchMaking();
-const tournamentManager:TournamentMatchMaking = new TournamentMatchMaking();
 const manager:MatchMaking = new MatchMaking();
 
 fastify.register(fastifyStatic, {
@@ -80,7 +77,7 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
   });
 
-  
+
 export interface GameRoomQueryI
 {
 	roomId: string | 0;
@@ -92,25 +89,25 @@ export interface GameRoomQueryI
 } 
 
 
-function spectatorLogic(roomId:string | 0, connection:WebSocket)
-{
-	if(spectatorJoin(roomId, connection))
-	{
-		console.log(`Spectator joined to room: ${roomId}`)
-		connection.send(JSON.stringify(roomId));
-	}
-	else 
-	{
-		connection.send(`Room: ${roomId} you tried to join does not exist`);
-		connection.close();
-	}
-}
+// function spectatorLogic(roomId:string | 0, connection:WebSocket)
+// {
+// 	if(spectatorJoin(roomId, connection))
+// 	{
+// 		console.log(`Spectator joined to room: ${roomId}`)
+// 		connection.send(JSON.stringify(roomId));
+// 	}
+// 	else 
+// 	{
+// 		connection.send(`Room: ${roomId} you tried to join does not exist`);
+// 		connection.close();
+// 	}
+// }
 
-function tournamentJoiner(connection:WebSocket, tournamentSizeQuerry:TValidTournamentSize)
-{
-	const player:PongPlayer = new PongPlayer(connection);
-	tournamentManager.putPlayerInTournament(player, tournamentSizeQuerry);
-}
+// function tournamentJoiner(connection:WebSocket, tournamentSizeQuerry:TValidTournamentSize)
+// {
+// 	const player:PongPlayer = new PongPlayer(connection);
+// 	tournamentManager.putPlayerInTournament(player, tournamentSizeQuerry);
+// }
 
 fastify.register(websocket);
 fastify.register(async function(fastify)
@@ -145,17 +142,7 @@ fastify.register(async function(fastify)
 			matchType,
 			tournamentSize
 		}
-
 		manager.matchJoiner(connection,gameQuerry);
-		console.log("This is req querr1|", req.query);
-		if(matchType === "single")
-		{
-			const player:PongPlayer = new PongPlayer(connection);
-			singlesManager.putPlayerinRandomRoom(player);
-			console.log("Single match activated");
-		}
-		else if(matchType === "tournament")
-			tournamentJoiner(connection, tournamentSize);
 
 	})
 
