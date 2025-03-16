@@ -2,6 +2,7 @@ import { PongPlayer } from "./PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
 import { TournamentEvents, ClientEvents } from "./customEvents";
+import { error } from "node:console";
 
 export enum ETournamentState
 {
@@ -10,7 +11,8 @@ export enum ETournamentState
 	FINISHED
 }
 
-export type TValidTournamentSize = 4 | 8 | 16;
+const validSizeTournament: Set<number> = new Set<number>([4, 8, 16]);
+const defaultSize: number = 4 as const;
 
 export class Tournament extends EventEmitter
 {
@@ -21,15 +23,36 @@ export class Tournament extends EventEmitter
 	private roundNumber:number;
 	private readonly id:string;
 
-	constructor(tournamnetPlayers:TValidTournamentSize)
+	constructor(tournamnetPlayers:number)
 	{
 		super();
+		if(Tournament.isSizeValid(tournamnetPlayers) === false)
+			throw error("Tried to create torunament with not valid size");
 		this.playerPool = new Set<PongPlayer>();
 		this.gamesPool = new Set<PongRoom>();
 		this.requiredPlayers = tournamnetPlayers;
 		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
 		this.id = crypto.randomUUID();
+	}
+
+	static isSizeValid(requestedSize:number)
+	{
+		return validSizeTournament.has(requestedSize);
+	}
+
+	static getDefaultTournamnetSize()
+	{
+		return defaultSize;
+	}
+
+	getAllTournamentsRoom():Map<string, PongRoom>
+	{
+		const allRooms: Map<string, PongRoom> = new Map<string, PongRoom>(
+			[...this.gamesPool].map(room =>[room.getId(), room] as [string, PongRoom])
+		);
+		return allRooms;
+		
 	}
 
 	getId()
