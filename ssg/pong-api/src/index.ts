@@ -6,6 +6,7 @@ import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
 import { MatchMaking } from "./MatchMaking";
+import { Tournament } from "./Tournamnet";
 
 dotenv.config();
 
@@ -92,7 +93,7 @@ fastify.register(async function(fastify)
 			privateRoom = false,
 			clientType = "player",
 			matchType = "single",
-			tournamentSize = 4 //TODO: check client queryy. It must be one of valid values. Correct it if it is not' only if matchType is tournament
+			tournamentSize = Tournament.getDefaultTournamnetSize() //TODO: check client queryy. It must be one of valid values. Correct it if it is not' only if matchType is tournament
 		} = req.query as GameRoomQueryI;
 
 		const gameQuerry: GameRoomQueryI =

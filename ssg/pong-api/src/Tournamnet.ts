@@ -12,6 +12,7 @@ export enum ETournamentState
 }
 
 const validSizeTournament: Set<number> = new Set<number>([4, 8, 16]);
+const defaultSize: number = 4 as const;
 
 export class Tournament extends EventEmitter
 {
@@ -25,7 +26,7 @@ export class Tournament extends EventEmitter
 	constructor(tournamnetPlayers:number)
 	{
 		super();
-		if(this.isSizeValid(tournamnetPlayers) === false)
+		if(Tournament.isSizeValid(tournamnetPlayers) === false)
 			throw error("Tried to create torunament with not valid size");
 		this.playerPool = new Set<PongPlayer>();
 		this.gamesPool = new Set<PongRoom>();
@@ -35,9 +36,14 @@ export class Tournament extends EventEmitter
 		this.id = crypto.randomUUID();
 	}
 
-	isSizeValid(requestedSize:number)
+	static isSizeValid(requestedSize:number)
 	{
 		return validSizeTournament.has(requestedSize);
+	}
+
+	static getDefaultTournamnetSize()
+	{
+		return defaultSize;
 	}
 
 	getAllTournamentsRoom():Map<string, PongRoom>

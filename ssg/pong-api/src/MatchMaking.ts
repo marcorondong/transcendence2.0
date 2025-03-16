@@ -4,6 +4,8 @@ import { GameRoomQueryI } from ".";
 import { WebSocket } from "ws";
 import { PongPlayer } from "./PongPlayer";
 import { PongRoom } from "./PongRoom";
+import { Tournament } from "./Tournamnet";
+import fastify from "fastify";
 
 
 export class MatchMaking 
@@ -34,6 +36,11 @@ export class MatchMaking
 		}
 		else if(matchType == "tournament")
 		{
+			if(Tournament.isSizeValid(tournamentSize) === false)
+			{
+				player.sendNotification(`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamnetSize()}`)
+				tournamentSize = Tournament.getDefaultTournamnetSize();
+			}
 			this.tournamentManager.putPlayerInTournament(player, tournamentSize);
 		}
 	}
