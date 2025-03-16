@@ -5,10 +5,6 @@ import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
-import { PongPlayer } from "./PongPlayer";
-import { SingleMatchMaking } from "./SingleMatchMaking";
-import { TournamentMatchMaking } from "./TournamentMatchMaking";
-import { TValidTournamentSize } from "./Tournamnet";
 import { MatchMaking } from "./MatchMaking";
 
 dotenv.config();
@@ -57,19 +53,6 @@ const fastify = Fastify(
 	: true
 });
 	
-// function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
-// {
-// 	if(roomId === 0)
-// 		return false;
-// 	const roomWithId = singlesManager.getRoom(roomId);
-// 	if(roomWithId !== undefined)
-// 	{
-// 		roomWithId.addSpectator(connection);
-// 		return true
-// 	}
-// 	return false;
-// }
-
 const manager:MatchMaking = new MatchMaking();
 
 fastify.register(fastifyStatic, {
@@ -85,29 +68,8 @@ export interface GameRoomQueryI
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
 	matchType: "single" | "tournament";
-	tournamentSize: TValidTournamentSize;
+	tournamentSize: number;
 } 
-
-
-// function spectatorLogic(roomId:string | 0, connection:WebSocket)
-// {
-// 	if(spectatorJoin(roomId, connection))
-// 	{
-// 		console.log(`Spectator joined to room: ${roomId}`)
-// 		connection.send(JSON.stringify(roomId));
-// 	}
-// 	else 
-// 	{
-// 		connection.send(`Room: ${roomId} you tried to join does not exist`);
-// 		connection.close();
-// 	}
-// }
-
-// function tournamentJoiner(connection:WebSocket, tournamentSizeQuerry:TValidTournamentSize)
-// {
-// 	const player:PongPlayer = new PongPlayer(connection);
-// 	tournamentManager.putPlayerInTournament(player, tournamentSizeQuerry);
-// }
 
 fastify.register(websocket);
 fastify.register(async function(fastify)

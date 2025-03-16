@@ -1,4 +1,4 @@
-import { ETournamentState, Tournament, TValidTournamentSize } from "./Tournamnet"
+import { ETournamentState, Tournament} from "./Tournamnet"
 import { PongPlayer } from "./PongPlayer";
 import { TournamentEvents } from "./customEvents";
 import { PongRoom } from "./PongRoom";
@@ -12,7 +12,7 @@ export class TournamentMatchMaking
 		this.allTournamnets = new Map<string, Tournament>();
 	}
 
-	putPlayerInTournament(player: PongPlayer, tournamentSizeQuerry: TValidTournamentSize):void
+	putPlayerInTournament(player: PongPlayer, tournamentSizeQuerry: number):void
 	{
 		const tournamnetForPlayer:Tournament = this.findTournamentToJoin(tournamentSizeQuerry);
 		tournamnetForPlayer.addPlayer(player);
@@ -33,7 +33,7 @@ export class TournamentMatchMaking
 		return allTournamnetsRooms;
 	}
 
-	private findTournamentToJoin(tournamentSizeQuerry: TValidTournamentSize): Tournament
+	private findTournamentToJoin(tournamentSizeQuerry: number): Tournament
 	{
 		for(const [key, oneTournament] of this.allTournamnets)
 		{
@@ -45,7 +45,7 @@ export class TournamentMatchMaking
 		return this.createTournament(tournamentSizeQuerry);
 	}
 
-	private createTournament(tournamentSize:TValidTournamentSize):Tournament
+	private createTournament(tournamentSize:number):Tournament
 	{
 		const freshTournament:Tournament = new Tournament(tournamentSize);
 		this.allTournamnets.set(freshTournament.getId(), freshTournament);
