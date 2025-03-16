@@ -93,7 +93,7 @@ fastify.register(async function(fastify)
 			privateRoom = false,
 			clientType = "player",
 			matchType = "single",
-			tournamentSize = Tournament.getDefaultTournamnetSize() //TODO: check client queryy. It must be one of valid values. Correct it if it is not' only if matchType is tournament
+			tournamentSize = Tournament.getDefaultTournamnetSize()
 		} = req.query as GameRoomQueryI;
 
 		const gameQuerry: GameRoomQueryI =
