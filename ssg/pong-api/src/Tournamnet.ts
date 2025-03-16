@@ -2,6 +2,7 @@ import { PongPlayer } from "./PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
 import { TournamentEvents, ClientEvents } from "./customEvents";
+import { error } from "node:console";
 
 export enum ETournamentState
 {
@@ -24,6 +25,8 @@ export class Tournament extends EventEmitter
 	constructor(tournamnetPlayers:number)
 	{
 		super();
+		if(this.isSizeValid(tournamnetPlayers) === false)
+			throw error("Tried to create torunament with not valid size");
 		this.playerPool = new Set<PongPlayer>();
 		this.gamesPool = new Set<PongRoom>();
 		this.requiredPlayers = tournamnetPlayers;

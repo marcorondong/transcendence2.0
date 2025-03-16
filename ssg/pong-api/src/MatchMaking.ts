@@ -3,7 +3,6 @@ import { TournamentMatchMaking } from "./TournamentMatchMaking";
 import { GameRoomQueryI } from ".";
 import { WebSocket } from "ws";
 import { PongPlayer } from "./PongPlayer";
-import { TValidTournamentSize } from "./Tournamnet";
 import { PongRoom } from "./PongRoom";
 
 
@@ -26,7 +25,7 @@ export class MatchMaking
 			this.spectatorJoiner(connection, querry.roomId);
 	}
 
-	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament", tournamentSize:TValidTournamentSize)
+	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament", tournamentSize:number)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
 		if(matchType == "single")
