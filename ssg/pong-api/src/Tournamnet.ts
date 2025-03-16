@@ -10,7 +10,7 @@ export enum ETournamentState
 	FINISHED
 }
 
-export type TValidTournamentSize = 4 | 8 | 16;
+const validSizeTournament: Set<number> = new Set<number>([4, 8, 16]);
 
 export class Tournament extends EventEmitter
 {
@@ -21,7 +21,7 @@ export class Tournament extends EventEmitter
 	private roundNumber:number;
 	private readonly id:string;
 
-	constructor(tournamnetPlayers:TValidTournamentSize)
+	constructor(tournamnetPlayers:number)
 	{
 		super();
 		this.playerPool = new Set<PongPlayer>();
@@ -30,6 +30,11 @@ export class Tournament extends EventEmitter
 		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
 		this.id = crypto.randomUUID();
+	}
+
+	isSizeValid(requestedSize:number)
+	{
+		return validSizeTournament.has(requestedSize);
 	}
 
 	getAllTournamentsRoom():Map<string, PongRoom>
