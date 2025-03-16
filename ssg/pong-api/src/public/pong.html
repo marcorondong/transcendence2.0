@@ -145,13 +145,10 @@
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") leftPaddleDirection = -1;
             if (event.key === "ArrowDown") leftPaddleDirection = 1;
-            if (event.key === "w") rightPaddleDirection = -1;
-            if (event.key === "s") rightPaddleDirection = 1;
         });
 
         document.addEventListener("keyup", (event) => {
             if (event.key === "ArrowUp" || event.key === "ArrowDown") leftPaddleDirection = 0;
-            if (event.key === "w" || event.key === "s") rightPaddleDirection = 0;
         });
 
         function copyRoomId() {
