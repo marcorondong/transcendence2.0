@@ -5,8 +5,6 @@ import { WebSocket } from "ws";
 import { PongPlayer } from "./PongPlayer";
 import { PongRoom } from "./PongRoom";
 import { Tournament } from "./Tournamnet";
-import fastify from "fastify";
-
 
 export class MatchMaking 
 {
