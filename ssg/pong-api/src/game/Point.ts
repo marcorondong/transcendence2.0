@@ -14,7 +14,6 @@ export enum VectorDirection{
 	LEFT_DOWN = 10
 }
 
-
 export class Point
 {
 	protected xPos: number;
@@ -66,8 +65,6 @@ export class Point
 	{
 		return (otherPoint.xPos === this.xPos && otherPoint.yPos === this.yPos)
 	}
-
-
 
 	/**
 	 * modify this object with new x and y postion that adds other point(vector) x and y position 

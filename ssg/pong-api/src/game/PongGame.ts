@@ -151,7 +151,6 @@ export class PingPongGame extends EventEmitter
 		};
 	}
 
-
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
 		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === EGameStatus.RUNNING)
@@ -170,7 +169,6 @@ export class PingPongGame extends EventEmitter
 		}
 		this.finishGame();
 	}
-
 
 	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
 	{
@@ -318,7 +316,6 @@ export class PingPongGame extends EventEmitter
 		}
 		return result;
 	}
-
 
 	private topEdgeCollision(): boolean
 	{

@@ -131,9 +131,7 @@ export class Tournament extends EventEmitter
 			loser.sendNotification(JSON.stringify(notification));
 			this.kickPlayer(loser);
 			return winner;
-
 		});
-
 		await Promise.all(winnerPromises);
 	}
 

@@ -175,5 +175,4 @@ export class Ball
 		}
 		return allPoints;
 	}
-
 }

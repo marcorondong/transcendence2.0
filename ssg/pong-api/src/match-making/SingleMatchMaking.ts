@@ -1,9 +1,7 @@
-
 import { PongRoom } from "../PongRoom"
 import { WebSocket, RawData } from "ws";
 import { EPlayerSide, PongPlayer } from "../PongPlayer";
 import { RoomEvents } from "../customEvents";
-
 
 export class SingleMatchMaking
 {
@@ -13,7 +11,6 @@ export class SingleMatchMaking
 	{
 		this.singleMatches = new Map<string,PongRoom>();
 	}
-
 
 	getAllMatches()
 	{
@@ -77,7 +74,6 @@ export class SingleMatchMaking
 		roomToClean.closeAllConecctionsFromRoom();
 		this.removeRoom(roomToClean);
 	}
-
 
 	private async lobbyMatchMonitor(room:PongRoom)
 	{

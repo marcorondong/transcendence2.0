@@ -9,7 +9,6 @@ import { EPlayerSide, EPlayerStatus, PongPlayer } from "./PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "./customEvents";
 
-
 export class PongRoom extends SessionRoom
 {
 	private isFrameGenerating: boolean;
@@ -60,7 +59,6 @@ export class PongRoom extends SessionRoom
 		this.roundName = roundName;
 	}
 
-	
 	async getRoomWinner():Promise<PongPlayer>
 	{
 		await this.game.waitForFinalWhistle();
