@@ -1,7 +1,7 @@
-import { ETournamentState, Tournament} from "./Tournamnet"
-import { PongPlayer } from "./PongPlayer";
-import { TournamentEvents } from "./customEvents";
-import { PongRoom } from "./PongRoom";
+import { ETournamentState, Tournament} from "../Tournamnet"
+import { PongPlayer } from "../PongPlayer";
+import { TournamentEvents } from "../customEvents";
+import { PongRoom } from "../PongRoom";
 
 export class TournamentMatchMaking
 {

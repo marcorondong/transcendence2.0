@@ -5,7 +5,7 @@ import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
-import { MatchMaking } from "./MatchMaking";
+import { MatchMaking } from "./match-making/MatchMaking";
 import { Tournament } from "./Tournamnet";
 
 dotenv.config();
@@ -106,7 +106,6 @@ fastify.register(async function(fastify)
 			tournamentSize
 		}
 		manager.matchJoiner(connection,gameQuerry);
-
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
