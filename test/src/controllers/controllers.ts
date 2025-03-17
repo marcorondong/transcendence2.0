@@ -69,3 +69,38 @@ export const updateItem = async (request: FastifyRequest<{ Params: Params, Body:
         reply.code(500).send({ message: "Internal Server Error" });
     }
 };
+
+// export async function login(
+// 	req: FastifyRequest<{
+// 	  Body: LoginUserInput
+// 	}>,
+// 	reply: FastifyReply,
+//   ) {
+// 	const { email, password } = req.body
+
+
+	  /*
+   MAKE SURE TO VALIDATE (according to you needs) user data
+   before performing the db query
+  */
+//    const user = await prisma.user.findUnique({ where: { email: email } })
+//    const isMatch = user && (await bcrypt.compare(password, user.password))
+//    if (!user || !isMatch) {
+// 	 return reply.code(401).send({
+// 	   message: 'Invalid email or password',
+// 	 })
+//    }
+//    const payload = {
+// 	 id: user.id,
+// 	 email: user.email,
+// 	 name: user.name,
+//    }
+//    const token = req.jwt.sign(payload)
+//    console.log('token', token)
+//    reply.setCookie('access_token', token, {
+// 	 path: '/',
+// 	 httpOnly: true,
+// 	 secure: true,
+//    })
+//    return { accessToken: token }
+//  }
