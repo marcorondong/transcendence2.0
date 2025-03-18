@@ -5,11 +5,11 @@ import { PongRoom } from "../PongRoom";
 
 export class TournamentMatchMaking
 {
-	private allTournamnets: Map<string, Tournament>;
+	private allTournaments: Map<string, Tournament>;
 
 	constructor()
 	{
-		this.allTournamnets = new Map<string, Tournament>();
+		this.allTournaments = new Map<string, Tournament>();
 	}
 
 	putPlayerInTournament(player: PongPlayer, tournamentSizeQuerry: number):void
@@ -23,7 +23,7 @@ export class TournamentMatchMaking
 	getMatchesFromAllTournaments():Map<string, PongRoom>
 	{
 		const allTournamnetsRooms:Map<string, PongRoom> = new Map<string, PongRoom>();
-		for(const [key, oneTournament] of this.allTournamnets)
+		for(const [key, oneTournament] of this.allTournaments)
 		{
 			for(const [key, room] of oneTournament.getAllTournamentsRoom())
 			{
@@ -35,7 +35,7 @@ export class TournamentMatchMaking
 
 	private findTournamentToJoin(tournamentSizeQuerry: number): Tournament
 	{
-		for(const [key, oneTournament] of this.allTournamnets)
+		for(const [key, oneTournament] of this.allTournaments)
 		{
 			if(oneTournament.getState() === ETournamentState.LOBBY && oneTournament.getRequiredPlayers() === tournamentSizeQuerry)
 			{
@@ -48,7 +48,7 @@ export class TournamentMatchMaking
 	private createTournament(tournamentSize:number):Tournament
 	{
 		const freshTournament:Tournament = new Tournament(tournamentSize);
-		this.allTournamnets.set(freshTournament.getId(), freshTournament);
+		this.allTournaments.set(freshTournament.getId(), freshTournament);
 		this.tournamentFullListener(freshTournament);
 		this.tournamentFinishedListener(freshTournament);
 		return freshTournament;
@@ -69,7 +69,7 @@ export class TournamentMatchMaking
 		{
 			console.log("Tournamnet is finished. Kicking(closing connection) with everyone");
 			freshTournament.kickEveryone();
-			this.allTournamnets.delete(freshTournament.getId());
+			this.allTournaments.delete(freshTournament.getId());
 		})
 	}
 }
