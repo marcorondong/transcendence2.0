@@ -14,7 +14,7 @@ export async function registerUserHandler(
 		return reply.code(201).send(user);
 	}catch(e) {
 		console.log(e)
-		// TODO: I should check what was the error and then return the correcr code.
+		// TODO: I should check what was the error and then return the correcr code (e.g: 409 Conflict).
 		return reply.code(500).send(e);
 	}
 }
