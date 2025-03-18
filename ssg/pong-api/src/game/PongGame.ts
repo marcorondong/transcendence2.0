@@ -1,11 +1,13 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
-import { ScoreBoard, ScoreI} from "./ScoreBoard";
+import { ScoreBoard, IScore} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 import { error } from "console";
 import { PongField } from "./PongField";
 import { EventEmitter } from "stream";
+import { GameEvents } from "../customEvents";
+import { EPlayerSide } from "../PongPlayer";
 
 interface Position 
 {
@@ -13,15 +15,21 @@ interface Position
 	y:number;
 }
 
-type gameStatus = "running" | "paused" | "finished" | "not started";
+export enum EGameStatus
+{
+	NOT_STARTED,
+	RUNNING,
+	PAUSED, 
+	FINISHED
+}
 
 export interface IPongFrame
 {
 	leftPaddle: Position & {height:number};
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
-	score: ScoreI;
-	matchStatus: gameStatus
+	score: IScore;
+	matchStatus: EGameStatus
 }
 
 export class PingPongGame extends EventEmitter
@@ -36,7 +44,7 @@ export class PingPongGame extends EventEmitter
 
 	readonly CRITICAL_DISTANCE;
 	private lastFrameTime: number = 0;
-	private gameStatus:gameStatus;
+	private gameStatus:EGameStatus;
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
@@ -47,7 +55,7 @@ export class PingPongGame extends EventEmitter
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.score = score;
 		this.field = tableField;
-		this.gameStatus = "not started";
+		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
 	static createStandardGame() :PingPongGame
@@ -62,12 +70,12 @@ export class PingPongGame extends EventEmitter
 	}
 
 
-	getGameStatus(): gameStatus
+	getGameStatus(): EGameStatus
 	{
 		return this.gameStatus;
 	}
 
-	setGameStatus(newStatus:gameStatus)
+	setGameStatus(newStatus:EGameStatus)
 	{
 		this.gameStatus = newStatus;
 	}
@@ -79,43 +87,43 @@ export class PingPongGame extends EventEmitter
 
 	async waitForFinalWhistle(): Promise<PingPongGame>
 	{
-		if(this.gameStatus === "finished")
+		if(this.gameStatus === EGameStatus.FINISHED)
 			return this;
 		return new Promise((resolve, reject)=>
 		{
-			this.on("finished game", ()=>
+			this.on(GameEvents.FINISHED, ()=>
 			{
 				resolve(this);
 			})
 		})
 	}
 
-	getPaddle(side: "left" | "right"): Paddle
+	getPaddle(side: EPlayerSide): Paddle
 	{
-		if(side === "left")
+		if(side === EPlayerSide.LEFT)
 			return this.leftPaddle;
-		else if(side === "right")
+		else if(side === EPlayerSide.RIGTH)
 			return this.rightPaddle
 		throw error("paddle not found")
 	}
 
 	pauseGame(): void
 	{
-		this.setGameStatus("paused");
+		this.setGameStatus(EGameStatus.PAUSED);
 		this.score.pause();
 	}
 
 	startGame(): void 
 	{
-		this.setGameStatus("running");
+		this.setGameStatus(EGameStatus.RUNNING);
 		this.score.start();
 		this.start();
 	}
 
 	finishGame():void 
 	{
-		this.setGameStatus("finished");
-		this.emit("finished game");
+		this.setGameStatus(EGameStatus.FINISHED);
+		this.emit(GameEvents.FINISHED, this);
 	}
 
 	getFrame()
@@ -143,26 +151,24 @@ export class PingPongGame extends EventEmitter
 		};
 	}
 
-
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
-		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === "running")
+		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === EGameStatus.RUNNING)
 			paddle.move(direction);
 	}
 
-	forfeitGame(sideThatLeft: "left" | "right")
+	forfeitGame(sideThatLeft: EPlayerSide.LEFT | EPlayerSide.RIGTH)
 	{
-		if(sideThatLeft === "left")
+		if(sideThatLeft === EPlayerSide.LEFT)
 		{
 			this.score.setScore(0, 3);
 		}
-		else if(sideThatLeft === "right")
+		else if(sideThatLeft === EPlayerSide.RIGTH)
 		{
 			this.score.setScore(3, 0);
 		}
 		this.finishGame();
 	}
-
 
 	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
 	{
@@ -189,14 +195,14 @@ export class PingPongGame extends EventEmitter
 
 	private start(): void 
 	{
-		this.setGameStatus("running");
+		this.setGameStatus(EGameStatus.RUNNING);
 		this.score.startCountdown();
 		raf((timestamp:number)=> this.gameLoop(timestamp))
 	}
 
 	private gameLoop(timestamp: number):void 
 	{
-		if(this.getGameStatus() === "running")
+		if(this.getGameStatus() === EGameStatus.RUNNING)
 		{
 			//const deltaTime = timestamp - this.lastFrameTime;
 			this.lastFrameTime = timestamp;
@@ -310,7 +316,6 @@ export class PingPongGame extends EventEmitter
 		}
 		return result;
 	}
-
 
 	private topEdgeCollision(): boolean
 	{

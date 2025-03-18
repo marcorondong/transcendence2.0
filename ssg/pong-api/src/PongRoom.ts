@@ -1,30 +1,32 @@
 import {SessionRoom} from "../../utils/SessionRoom"
-import { PingPongGame } from "./game/PongGame";
+import { EGameStatus, PingPongGame } from "./game/PongGame";
 import { Paddle } from "./game/Paddle";
 import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
-import { PongPlayer } from "./PongPlayer";
+import { EPlayerSide, EPlayerStatus, PongPlayer } from "./PongPlayer";
 import { error } from "console";
-
+import { ClientEvents, RoomEvents } from "./customEvents";
 
 export class PongRoom extends SessionRoom
 {
-	private isFrameGenerating: boolean = false;
-	private readonly requiredPlayers = 2;
+	private isFrameGenerating: boolean;
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
+	private tournamentRoom:boolean;
+	private roundName:string;
+	private isCleaned:boolean;
+	private game:PingPongGame;
 
-	private tournamentRoom:boolean = false;
-	private roundName:string ="single Match";
-
-	isCleaned:boolean = false;
-
-	game:PingPongGame = PingPongGame.createStandardGame();
 	constructor(privateRoom:boolean = false)
 	{
 		super(privateRoom);
+		this.isFrameGenerating = false;
+		this.roundName = "single Match";
+		this.isCleaned = false;
+		this.tournamentRoom = false;
+		this.game = PingPongGame.createStandardGame();
 	}
 
 	getRoundName()
@@ -32,13 +34,22 @@ export class PongRoom extends SessionRoom
 		return this.roundName;
 	}
 
+	getMissingPlayerSide():EPlayerSide
+	{
+		if(this.leftPlayer === undefined)
+			return EPlayerSide.LEFT;
+		else if(this.rightPlayer === undefined)
+			return EPlayerSide.RIGTH;
+		throw error("Room is full, no player is missing");
+	}
+
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
 	{
 		const room:PongRoom = new PongRoom();
-		playerOne.setPlayerSide("left");
-		playerTwo.setPlayerSide("right")
-		room.addLeftPlayer(playerOne);
-		room.addRightPlayer(playerTwo);
+		playerOne.setPlayerSide(EPlayerSide.LEFT);
+		playerTwo.setPlayerSide(EPlayerSide.RIGTH);
+		room.addPlayer(playerOne);
+		room.addPlayer(playerTwo);
 		return room;
 	}
 
@@ -48,7 +59,6 @@ export class PongRoom extends SessionRoom
 		this.roundName = roundName;
 	}
 
-	
 	async getRoomWinner():Promise<PongPlayer>
 	{
 		await this.game.waitForFinalWhistle();
@@ -66,32 +76,36 @@ export class PongRoom extends SessionRoom
 		return this.game;
 	}
 	
-	addLeftPlayer(leftPlayer: PongPlayer):boolean
+	addPlayer(player: PongPlayer):boolean
 	{
-		if(this.leftPlayer === undefined)
+		if(player.getPlayerSideLR()=== EPlayerSide.LEFT)
 		{
-			this.leftPlayer = leftPlayer;
-			this.addConnectionToRoom(leftPlayer.connection);
-			this.assingControlsToPlayer(this.leftPlayer);
-			this.disconnectBehaviour(this.leftPlayer);
-			return true
+			if(this.leftPlayer === undefined)
+				this.leftPlayer = player
+			else 
+			{
+				console.warn(`${player.getPlayerSide()} player already exist. Cannot overwrite it`);
+				return false;
+			}
 		}
-		console.warn("Left player already exist. Cannot overwrite it")
-		return false;
-	}
-		
-	addRightPlayer(rightPlayer:PongPlayer):boolean
-	{
-		if(this.rightPlayer === undefined)
+		else if(player.getPlayerSideLR() === EPlayerSide.RIGTH)
 		{
-			this.rightPlayer = rightPlayer;
-			this.addConnectionToRoom(rightPlayer.connection);
-			this.assingControlsToPlayer(this.rightPlayer);
-			this.disconnectBehaviour(this.rightPlayer);
-			return true;
+			if(this.rightPlayer === undefined)
+				this.rightPlayer = player;
+			else 
+			{
+				console.warn(`${player.getPlayerSide()} player already exist. Cannot overwrite it`);
+				return false;
+			}
 		}
-		console.warn("Right player already exist cannot overwrite it");
-		return false;
+		this.addConnectionToRoom(player.connection);
+		this.assingControlsToPlayer(player);
+		this.disconnectBehaviour(player);
+		if(this.isFull())
+		{
+			this.emit(RoomEvents.FULL, this);
+		}
+		return true;
 	}
 			
 	addSpectator(connection:WebSocket)
@@ -104,6 +118,16 @@ export class PongRoom extends SessionRoom
 		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
 			return true
 		return false;
+	}
+
+	isRoomCleaned():boolean
+	{
+		return this.isCleaned;
+	}
+
+	setRoomCleanedStatus(freshStatus:boolean):void
+	{
+		this.isCleaned = freshStatus;
 	}
 			
 			
@@ -121,23 +145,24 @@ export class PongRoom extends SessionRoom
 			
 	checkIfPlayerIsStillOnline(player:PongPlayer)
 	{
-		if(player.getPlayerOnlineStatus() != "online")
+		if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
 			this.game.forfeitGame(player.getPlayerSideLR());
 	}
 	
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
-		rageQuitPlayer.on("connection lost", (player:PongPlayer) =>
+		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
 			console.log("We have rage quitter here");
-			if(this.game.getGameStatus() !== "not started" && this.game.getGameStatus() !== "finished")
+			if(this.game.getGameStatus() === EGameStatus.RUNNING)
 			{
 				console.log("Since game is rage quiter lost");
 				this.game.forfeitGame(player.getPlayerSideLR());
 			}
 			else 
 			{
-				this.emit("empty room", this);
+				this.removePlayer(rageQuitPlayer);
+				this.emit(RoomEvents.EMPTY, this);
 			}
 				
 		})
@@ -164,12 +189,21 @@ export class PongRoom extends SessionRoom
 			matchStatus: nottification
 		}
 	}
+
+	private removePlayer(player:PongPlayer)
+	{
+		if(player === this.leftPlayer)
+			return this.leftPlayer = undefined;
+		else if(player === this.rightPlayer)
+			return this.rightPlayer = undefined;
+		throw error("Player was never added in this room");
+	}
 			
 	private sendFrames()
 	{
 		const renderFrame = () => {
 			this.sendCurrentFrame();
-			if(this.getGame().getGameStatus() === "finished")
+			if(this.getGame().getGameStatus() === EGameStatus.FINISHED)
 			{
 				return;
 			}

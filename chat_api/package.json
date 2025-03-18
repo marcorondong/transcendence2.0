@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -w",
-	"dev": "nodemon --exec ts-node --watch 'src/**/*.ts' src/index.ts"
+    "dev": "nodemon --exec ts-node --watch 'src/**/*.ts' src/index.ts"
   },
   "repository": {
     "type": "git",
