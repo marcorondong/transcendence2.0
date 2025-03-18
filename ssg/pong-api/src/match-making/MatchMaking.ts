@@ -4,7 +4,7 @@ import { GameRoomQueryI } from "..";
 import { WebSocket } from "ws";
 import { PongPlayer } from "../PongPlayer";
 import { PongRoom } from "../PongRoom";
-import { Tournament } from "../Tournamnet";
+import { Tournament } from "../Tournament";
 
 export class MatchMaking 
 {

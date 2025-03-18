@@ -1,4 +1,4 @@
-import { ETournamentState, Tournament} from "../Tournamnet"
+import { ETournamentState, Tournament} from "../Tournament"
 import { PongPlayer } from "../PongPlayer";
 import { TournamentEvents } from "../customEvents";
 import { PongRoom } from "../PongRoom";
