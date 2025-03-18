@@ -96,7 +96,7 @@ fastify.register(async function(fastify)
 			tournamentSize = Tournament.getDefaultTournamnetSize()
 		} = req.query as IGameRoomQuery;
 
-		const gameQuerry: IGameRoomQuery =
+		const gameQuery: IGameRoomQuery =
 		{
 			roomId,
 			playerId,
@@ -105,7 +105,7 @@ fastify.register(async function(fastify)
 			matchType,
 			tournamentSize
 		}
-		manager.matchJoiner(connection,gameQuerry);
+		manager.matchJoiner(connection,gameQuery);
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
