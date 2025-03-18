@@ -12,12 +12,12 @@ export class TournamentMatchMaking
 		this.allTournaments = new Map<string, Tournament>();
 	}
 
-	putPlayerInTournament(player: PongPlayer, tournamentSizeQuerry: number):void
+	putPlayerInTournament(player: PongPlayer, tournamentSizeQuery: number):void
 	{
-		const tournamnetForPlayer:Tournament = this.findTournamentToJoin(tournamentSizeQuerry);
-		tournamnetForPlayer.addPlayer(player);
-		const freeSpots = tournamnetForPlayer.calculateNumberOfFreeSpots();
-		tournamnetForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
+		const tournamentForPlayer:Tournament = this.findTournamentToJoin(tournamentSizeQuery);
+		tournamentForPlayer.addPlayer(player);
+		const freeSpots = tournamentForPlayer.calculateNumberOfFreeSpots();
+		tournamentForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
 	}
 
 	getMatchesFromAllTournaments():Map<string, PongRoom>
