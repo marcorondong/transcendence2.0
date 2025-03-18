@@ -1,7 +1,7 @@
 import { Paddle } from "./Paddle";
 import { Ball } from "./Ball";
 import { VectorDirection, Point } from "./Point";
-import { ScoreBoard, ScoreI} from "./ScoreBoard";
+import { ScoreBoard, IScore} from "./ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 import { error } from "console";
 import { PongField } from "./PongField";
@@ -28,7 +28,7 @@ export interface IPongFrame
 	leftPaddle: Position & {height:number};
 	rightPaddle: Position & {height:number};
 	ball: Position & { radius: number };
-	score: ScoreI;
+	score: IScore;
 	matchStatus: EGameStatus
 }
 
