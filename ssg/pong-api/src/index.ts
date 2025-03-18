@@ -62,7 +62,7 @@ fastify.register(fastifyStatic, {
   });
 
 
-export interface GameRoomQueryI
+export interface IGameRoomQuery
 {
 	roomId: string | 0;
 	playerId: string;
@@ -85,7 +85,7 @@ fastify.register(async function(fastify)
 	});
 
 	//Partial makes all field optional. 
-	fastify.get<{Querystring: Partial<GameRoomQueryI>}>("/pong/", {websocket:true}, (connection, req) =>
+	fastify.get<{Querystring: Partial<IGameRoomQuery>}>("/pong/", {websocket:true}, (connection, req) =>
 	{
 		const {
 			roomId = 0,
@@ -94,9 +94,9 @@ fastify.register(async function(fastify)
 			clientType = "player",
 			matchType = "single",
 			tournamentSize = Tournament.getDefaultTournamnetSize()
-		} = req.query as GameRoomQueryI;
+		} = req.query as IGameRoomQuery;
 
-		const gameQuerry: GameRoomQueryI =
+		const gameQuerry: IGameRoomQuery =
 		{
 			roomId,
 			playerId,

@@ -1,6 +1,6 @@
 import { SingleMatchMaking } from "./SingleMatchMaking";
 import { TournamentMatchMaking } from "./TournamentMatchMaking";
-import { GameRoomQueryI } from "..";
+import { IGameRoomQuery } from "..";
 import { WebSocket } from "ws";
 import { PongPlayer } from "../PongPlayer";
 import { PongRoom } from "../PongRoom";
@@ -17,12 +17,12 @@ export class MatchMaking
 		this.tournamentManager = new TournamentMatchMaking();
 	}
 
-	matchJoiner(connection: WebSocket, querry: GameRoomQueryI)
+	matchJoiner(connection: WebSocket, query: IGameRoomQuery)
 	{
-		if(querry.clientType === "player")
-			this.playerJoiner(connection, querry.matchType,querry.tournamentSize);
-		else if(querry.clientType === "spectator")
-			this.spectatorJoiner(connection, querry.roomId);
+		if(query.clientType === "player")
+			this.playerJoiner(connection, query.matchType,query.tournamentSize);
+		else if(query.clientType === "spectator")
+			this.spectatorJoiner(connection, query.roomId);
 	}
 
 	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament", tournamentSize:number)
