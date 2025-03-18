@@ -1,5 +1,5 @@
 import {SessionRoom} from "../../utils/SessionRoom"
-import { EGameStatus, PingPongGame } from "./game/PongGame";
+import { EGameStatus, PongGame } from "./game/PongGame";
 import { Paddle } from "./game/Paddle";
 import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
@@ -17,7 +17,7 @@ export class PongRoom extends SessionRoom
 	private tournamentRoom:boolean;
 	private roundName:string;
 	private isCleaned:boolean;
-	private game:PingPongGame;
+	private game:PongGame;
 
 	constructor(privateRoom:boolean = false)
 	{
@@ -26,7 +26,7 @@ export class PongRoom extends SessionRoom
 		this.roundName = "single Match";
 		this.isCleaned = false;
 		this.tournamentRoom = false;
-		this.game = PingPongGame.createStandardGame();
+		this.game = PongGame.createStandardGame();
 	}
 
 	getRoundName()
@@ -71,7 +71,7 @@ export class PongRoom extends SessionRoom
 		return this.getLoser();
 	}
 	
-	getGame():PingPongGame
+	getGame():PongGame
 	{
 		return this.game;
 	}

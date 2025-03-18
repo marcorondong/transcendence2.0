@@ -32,7 +32,7 @@ export interface IPongFrame
 	matchStatus: EGameStatus
 }
 
-export class PingPongGame extends EventEmitter
+export class PongGame extends EventEmitter
 {
 
 	protected leftPaddle: Paddle;
@@ -58,14 +58,14 @@ export class PingPongGame extends EventEmitter
 		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
-	static createStandardGame() :PingPongGame
+	static createStandardGame() :PongGame
 	{
 		const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
 		const rightPaddle: Paddle = new Paddle(new Point(4, 0));
 		const ball: Ball = new Ball(new Point(0, 0));
 		const table: PongField = new PongField();
 		const score: ScoreBoard = new ScoreBoard();
-		const game: PingPongGame = new PingPongGame(leftPaddle, rightPaddle, ball, score, table);
+		const game: PongGame = new PongGame(leftPaddle, rightPaddle, ball, score, table);
 		return game;
 	}
 
@@ -85,7 +85,7 @@ export class PingPongGame extends EventEmitter
 		return this.score.getWinnerSide();
 	}
 
-	async waitForFinalWhistle(): Promise<PingPongGame>
+	async waitForFinalWhistle(): Promise<PongGame>
 	{
 		if(this.gameStatus === EGameStatus.FINISHED)
 			return this;
