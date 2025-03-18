@@ -47,7 +47,7 @@ export class MatchMaking
 	{
 		if(roomId === 0)
 		{
-			connection.send("roomId is required querry if you are spectator")
+			connection.send("roomId is required query if you are spectator")
 			connection.close();
 			return;
 		}
