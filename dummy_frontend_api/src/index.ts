@@ -51,9 +51,6 @@ window.onload = () =>
 	const playTournamentButton = document.getElementById('playTournamentButton') as HTMLButtonElement;
 	const createNewTournamentButton = document.getElementById('createNewTournamentButton') as HTMLButtonElement;
 
-
-
-
 	const notificationMap = new Map<string, HTMLDivElement>();
 
 	const chat = document.getElementById("chat") as HTMLDivElement;
@@ -78,6 +75,12 @@ window.onload = () =>
 	const notifButton = document.getElementById('notifButton') as HTMLButtonElement;
 	const loadingPage_chat = document.getElementById('loadingPage_chat') as HTMLDivElement;
 	const cancelLoadingButton = document.getElementById('cancelLoadingButton') as HTMLButtonElement;
+
+
+	// PONGG
+	const pongPage = document.getElementById('pongPage') as HTMLDivElement;
+	const playPongButton = document.getElementById('playPongButton') as HTMLButtonElement;
+	const backPongButton = document.getElementById('backPongButton') as HTMLButtonElement;
 
 	function appendMessage(message: string, isOwn: boolean): void // DONE
 	{
@@ -239,6 +242,8 @@ window.onload = () =>
 		customisePage.style.display = 'none';
 		rematchRequestReceiver.style.display = 'none';
 		rematchRequestSender.style.display = 'none';
+		pongPage.style.display = 'none';
+		backPongButton.style.display = 'none';
 	};
 
 	const hideAllPagesChat = () =>
@@ -261,6 +266,15 @@ window.onload = () =>
 	};
 
 	// ******** event listeners start here **************
+
+	// PONGG
+	playPongButton.addEventListener('click', () =>
+	{
+		 showPage(pongPage);
+		 backPongButton.style.display = 'block';
+	});
+
+	backPongButton.addEventListener('click', () => showPage(customisePage));
 
 	sendButton.addEventListener("click", sendMessage);
 
