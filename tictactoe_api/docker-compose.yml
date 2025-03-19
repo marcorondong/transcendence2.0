@@ -1,0 +1,9 @@
+services:
+  tictactoe_api:
+    image: tictactoe_api_img 
+    container_name: tictactoe_api
+    build: ./
+    volumes:
+      - ./src/:/tictactoe_api/src/
+    ports:
+      - 3001:3001
