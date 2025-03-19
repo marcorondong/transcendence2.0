@@ -1,42 +1,90 @@
 import { PongPlayer } from "./PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
+import { TournamentEvents, ClientEvents } from "./customEvents";
+import { error } from "node:console";
+
+export enum ETournamentState
+{
+	LOBBY,
+	RUNNING,
+	FINISHED
+}
+
+const validSizeTournament: Set<number> = new Set<number>([4, 8, 16]);
+const defaultSize: number = 4 as const;
 
 export class Tournament extends EventEmitter
 {
 	private requiredPlayers:number;
-	private playerPool:Set<PongPlayer> = new Set<PongPlayer>();
-	private gamesPool:Set<PongRoom> = new Set<PongRoom>();
-	private tournamentStatus: "started" | "lobby" | "finished";
+	private playerPool:Set<PongPlayer>;
+	private gamesPool:Set<PongRoom>;
+	private state: ETournamentState;
 	private roundNumber:number;
+	private readonly id:string;
 
-	constructor(tournamnetPlayers:number)
+	constructor(tournamentPlayers:number)
 	{
 		super();
-		this.requiredPlayers = tournamnetPlayers;
-		this.tournamentStatus = "lobby";
+		if(Tournament.isSizeValid(tournamentPlayers) === false)
+			throw error("Tried to create tournament with not valid size");
+		this.playerPool = new Set<PongPlayer>();
+		this.gamesPool = new Set<PongRoom>();
+		this.requiredPlayers = tournamentPlayers;
+		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
+		this.id = crypto.randomUUID();
+	}
+
+	static isSizeValid(requestedSize:number)
+	{
+		return validSizeTournament.has(requestedSize);
+	}
+
+	static getDefaultTournamnetSize()
+	{
+		return defaultSize;
+	}
+
+	getAllTournamentsRoom():Map<string, PongRoom>
+	{
+		const allRooms: Map<string, PongRoom> = new Map<string, PongRoom>(
+			[...this.gamesPool].map(room =>[room.getId(), room] as [string, PongRoom])
+		);
+		return allRooms;
+		
+	}
+
+	getId()
+	{
+		return this.id;
 	}
 	
 	getRequiredPlayers():number
 	{
 		return this.requiredPlayers;
 	}
+
+	getState():ETournamentState
+	{
+		return this.state;
+	}
 	
 	startTournament()
 	{
-		this.tournamentStatus = "started";
+		this.state = ETournamentState.RUNNING;
+		this.emit(TournamentEvents.STARTED);
 		this.createAndStartRound();
 	}
 
 	addPlayer(player:PongPlayer)
 	{
-		if(this.tournamentStatus=="lobby" && (this.requiredPlayers > this.playerPool.size))
+		if(this.state==ETournamentState.LOBBY && (this.requiredPlayers > this.playerPool.size))
 		{
 			this.playerPool.add(player);
 			this.connectionMonitor(player);
 			if(this.playerPool.size === this.requiredPlayers)
-				this.emit("full tournament")
+				this.emit(TournamentEvents.FULL);
 		}
 		else
 		{
@@ -59,6 +107,14 @@ export class Tournament extends EventEmitter
 		}
 	}
 
+	kickEveryone()
+	{
+		for(const player of this.playerPool)
+		{
+			this.kickPlayer(player);
+		}
+	}
+
 	async waitForWinners()
 	{
 		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
@@ -75,18 +131,21 @@ export class Tournament extends EventEmitter
 			loser.sendNotification(JSON.stringify(notification));
 			this.kickPlayer(loser);
 			return winner;
-
 		});
-
 		await Promise.all(winnerPromises);
+	}
+
+	private finishTournament()
+	{
+		this.state = ETournamentState.FINISHED;
+		this.emit(TournamentEvents.FINISHED);
 	}
 
 	private async createAndStartRound()
 	{
 		if(this.playerPool.size == 1)
 		{
-			this.emit("done tournament");
-			this.tournamentStatus="finished";
+			this.finishTournament();
 			return;
 		}
 		let rivals: PongPlayer[] = []
@@ -114,9 +173,9 @@ export class Tournament extends EventEmitter
 
 	private connectionMonitor(player:PongPlayer)
 	{
-		player.on("connection lost", (unpatient:PongPlayer)=>
+		player.on(ClientEvents.GONE_OFFLINE, (unpatient:PongPlayer)=>
 		{
-			if(this.tournamentStatus === "lobby")
+			if(this.state === ETournamentState.LOBBY)
 			{
 				this.playerPool.delete(unpatient)
 				this.broadcastTournamentAnnouncement(`Someone left loby, waiting for ${this.calculateNumberOfFreeSpots()} players`)
@@ -130,7 +189,6 @@ export class Tournament extends EventEmitter
 		proPlayer.connection.close();
 		this.playerPool.delete(proPlayer);
 	}
-
 
 	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
 	{
