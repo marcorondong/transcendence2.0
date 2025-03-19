@@ -9,7 +9,7 @@ import { EventEmitter } from "stream";
 import { GameEvents } from "../customEvents";
 import { EPlayerSide } from "../PongPlayer";
 
-interface Position 
+export interface Position 
 {
 	x:number;
 	y:number;
@@ -38,13 +38,13 @@ export class PongGame extends EventEmitter
 	protected leftPaddle: Paddle;
 	protected rightPaddle: Paddle;
 	protected ball: Ball;
-	readonly score:ScoreBoard;
-	readonly field:PongField;
+	protected readonly score:ScoreBoard;
+	protected readonly field:PongField;
 
 
 	readonly CRITICAL_DISTANCE;
-	private lastFrameTime: number = 0;
-	private gameStatus:EGameStatus;
+	//TODO check if needed private lastFrameTime: number = 0;
+	protected gameStatus:EGameStatus;
 	
 	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
@@ -126,7 +126,7 @@ export class PongGame extends EventEmitter
 		this.emit(GameEvents.FINISHED, this);
 	}
 
-	getFrame()
+	getFrame(): IPongFrame
 	{
 		return {
 			leftPaddle: {
@@ -205,7 +205,7 @@ export class PongGame extends EventEmitter
 		if(this.getGameStatus() === EGameStatus.RUNNING)
 		{
 			//const deltaTime = timestamp - this.lastFrameTime;
-			this.lastFrameTime = timestamp;
+			//this.lastFrameTime = timestamp;
 			this.renderNextFrame();
 		}
 		raf((timestamp:number)=> this.gameLoop(timestamp))
