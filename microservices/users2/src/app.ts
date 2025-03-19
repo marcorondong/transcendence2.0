@@ -1,17 +1,36 @@
 // console.log("hello world");
-import Fastify from "fastify";
+import Fastify, { fastify, FastifyReply, FastifyRequest } from "fastify";
+import fastifyJwt from "@fastify/jwt";
 import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from 'fastify-type-provider-zod';
 import userRoutes from "./modules/user/user.route";
+// import { request } from "http";  // It seems that this is not used
 
 // Creating server
 // const server = Fastify();
 
 // Creating server with global Zod type inference
-const server = Fastify().withTypeProvider<ZodTypeProvider>();
+export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
+
+// Set JWT plugin
+// TODO: Maybe this JWT part should be handled by Autentication Service
+server.register(fastifyJwt, {
+	secret: "supersecret",
+});
+
+server.decorate(
+	"auth",
+	async (request: FastifyRequest, reply: FastifyReply) => {
+		try {
+			await request.jwtVerify();
+		} catch (e) {
+			return reply.send(e);
+		}
+	}
+);
 
 // Route for checking health (if server is up and running)
 server.get('/healthcheck', async function() {
