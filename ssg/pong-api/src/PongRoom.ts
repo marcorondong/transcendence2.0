@@ -5,7 +5,7 @@ import { IPongFrame } from "./game/PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../utils/Parser";
-import { EPlayerSide, EPlayerStatus, PongPlayer } from "./PongPlayer";
+import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered } from "./PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "./customEvents";
 
@@ -34,20 +34,20 @@ export class PongRoom extends SessionRoom
 		return this.roundName;
 	}
 
-	getMissingPlayerSide():EPlayerSide
+	getMissingPlayerRole():ETeamSideFiltered
 	{
 		if(this.leftPlayer === undefined)
-			return EPlayerSide.LEFT;
+			return ETeamSide.LEFT;
 		else if(this.rightPlayer === undefined)
-			return EPlayerSide.RIGTH;
+			return ETeamSide.RIGTH;
 		throw error("Room is full, no player is missing");
 	}
 
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
 	{
 		const room:PongRoom = new PongRoom();
-		playerOne.setPlayerSide(EPlayerSide.LEFT);
-		playerTwo.setPlayerSide(EPlayerSide.RIGTH);
+		playerOne.setTeamSide(ETeamSide.LEFT);
+		playerTwo.setTeamSide(ETeamSide.RIGTH);
 		room.addPlayer(playerOne);
 		room.addPlayer(playerTwo);
 		return room;
@@ -78,23 +78,23 @@ export class PongRoom extends SessionRoom
 	
 	addPlayer(player: PongPlayer):boolean
 	{
-		if(player.getPlayerSideLR()=== EPlayerSide.LEFT)
+		if(player.getTeamSideLR()=== ETeamSide.LEFT)
 		{
 			if(this.leftPlayer === undefined)
 				this.leftPlayer = player
 			else 
 			{
-				console.warn(`${player.getPlayerSide()} player already exist. Cannot overwrite it`);
+				console.warn(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
 				return false;
 			}
 		}
-		else if(player.getPlayerSideLR() === EPlayerSide.RIGTH)
+		else if(player.getTeamSideLR() === ETeamSide.RIGTH)
 		{
 			if(this.rightPlayer === undefined)
 				this.rightPlayer = player;
 			else 
 			{
-				console.warn(`${player.getPlayerSide()} player already exist. Cannot overwrite it`);
+				console.warn(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
 				return false;
 			}
 		}
@@ -146,7 +146,7 @@ export class PongRoom extends SessionRoom
 	checkIfPlayerIsStillOnline(player:PongPlayer)
 	{
 		if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
-			this.game.forfeitGame(player.getPlayerSideLR());
+			this.game.forfeitGame(player.getTeamSideLR());
 	}
 	
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
@@ -157,7 +157,7 @@ export class PongRoom extends SessionRoom
 			if(this.game.getGameStatus() === EGameStatus.RUNNING)
 			{
 				console.log("Since game is rage quiter lost");
-				this.game.forfeitGame(player.getPlayerSideLR());
+				this.game.forfeitGame(player.getTeamSideLR());
 			}
 			else 
 			{
@@ -255,7 +255,7 @@ export class PongRoom extends SessionRoom
 				return 
 			}
 			const direction = json.move;
-			const paddle:Paddle = this.getGame().getPaddle(player.getPlayerSideLR());
+			const paddle:Paddle = this.getGame().getPaddle(player.getTeamSideLR());
 			this.getGame().movePaddle(paddle, direction);
 		})
 	}

@@ -9,24 +9,26 @@ export enum EPlayerStatus
 	OFFLINE
 }
 
-export enum EPlayerSide
+export enum ETeamSide
 {
 	LEFT,
 	RIGTH,
 	TBD
 }
 
+export type ETeamSideFiltered = Exclude<ETeamSide, ETeamSide.TBD>;
+
 export class PongPlayer extends EventEmitter
 {
 	readonly connection: WebSocket;
-	private side: EPlayerSide; //TBD to be decided
+	private side: ETeamSide; //TBD to be decided
 	private status: EPlayerStatus;
 
 	constructor(socket: WebSocket)
 	{
 		super();
 		this.connection = socket;
-		this.side = EPlayerSide.TBD;
+		this.side = ETeamSide.TBD;
 		this.status = EPlayerStatus.ONLINE;
 		this.connectionMonitor();
 	}
@@ -42,27 +44,27 @@ export class PongPlayer extends EventEmitter
 		})
 	}
 
-	equals(otherPlayer: PongPlayer):boolean
+	equals(otherPlayer: PongPlayer): boolean
 	{
 		if(this.connection === otherPlayer.connection)
 			return true;
 		return false
 	}
 
-	getPlayerSide(): EPlayerSide
+	getTeamSide(): ETeamSide
 	{
 		return this.side;
 	}
 
-	getPlayerSideLR():EPlayerSide.LEFT | EPlayerSide.RIGTH
+	getTeamSideLR(): ETeamSideFiltered
 	{
 		const LRside = this.side;
-		if(LRside === EPlayerSide.TBD)
+		if(LRside === ETeamSide.TBD)
 			throw error("Calling function without deciding player side");
 		return LRside;
 	}
 
-	setPlayerSide(side: EPlayerSide)
+	setTeamSide(side: ETeamSideFiltered)
 	{
 		this.side = side;
 	}
