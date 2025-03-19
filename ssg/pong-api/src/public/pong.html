@@ -52,6 +52,8 @@
     
     <div id="room-container">
         <p>Room ID: <span id="roomId">N/A</span></p>
+        <p>Knockout Stage: <span id="knockoutName">N/A</span></p>
+        <p>Match Status: <span id="matchStatus">N/A</span></p>
         <button onclick="copyRoomId()">Copy Room ID</button>
     </div>
 
@@ -82,10 +84,13 @@
         }, 1000 / 60); 
 
         wss.onmessage = (event) => {
-            gameState = JSON.parse(event.data);
-            document.getElementById("roomId").innerText = gameState.roomId || "N/A";
-            drawGame();
-        };
+        gameState = JSON.parse(event.data);
+        
+        document.getElementById("roomId").innerText = gameState.roomId || "N/A";
+        document.getElementById("knockoutName").innerText = gameState.knockoutName || "N/A";
+        document.getElementById("matchStatus").innerText = gameState.matchStatus || "N/A";
+        drawGame();
+};
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -140,13 +145,10 @@
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") leftPaddleDirection = -1;
             if (event.key === "ArrowDown") leftPaddleDirection = 1;
-            if (event.key === "w") rightPaddleDirection = -1;
-            if (event.key === "s") rightPaddleDirection = 1;
         });
 
         document.addEventListener("keyup", (event) => {
             if (event.key === "ArrowUp" || event.key === "ArrowDown") leftPaddleDirection = 0;
-            if (event.key === "w" || event.key === "s") rightPaddleDirection = 0;
         });
 
         function copyRoomId() {

@@ -1,6 +1,4 @@
-
-
-export interface ScoreI
+export interface IScore
 {
 	leftGoals: number;
 	rightGoals: number;
@@ -11,8 +9,9 @@ export class ScoreBoard
 {
 	protected leftPlayerGoals:number = 0;
 	protected rightPlayerGoals:number = 0;
-	protected secondsLeft: number = 30;
+	protected secondsLeft: number = 15;
 	protected paused: boolean = false;
+	private lastScoredSide: "left" | "right" = "left";
 
 	constructor()
 	{
@@ -22,9 +21,27 @@ export class ScoreBoard
 	score(side: "left" | "right")
 	{
 		if(side === "left")
+		{
 			this.leftPlayerGoals++;
-		else 
+			this.lastScoredSide = "left";
+		}
+		else
+		{
 			this.rightPlayerGoals++;
+			this.lastScoredSide="right";
+		}
+	}
+
+	getWinnerSide(): "left" | "right"
+	{
+		if(this.leftPlayerGoals > this.rightPlayerGoals)
+			return "left";
+		if(this.leftPlayerGoals === this.rightPlayerGoals)
+		{
+			console.warn("Not really winner, should not happen")
+			return this.lastScoredSide;
+		}
+		return "right"
 	}
 
 	setScore(leftGoals:number, rightGoals:number)
@@ -33,7 +50,7 @@ export class ScoreBoard
 		this.rightPlayerGoals = rightGoals;
 	}
 
-	getScoreJson():ScoreI
+	getScoreJson():IScore
 	{
 		return {
 			leftGoals: this.leftPlayerGoals,

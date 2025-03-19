@@ -11,7 +11,7 @@ export class Parser
 			return jsonData;
 		} catch(error)
 		{
-			console.warn("Error parsing JSON: ", error);
+			console.warn("Transcedence error parsing JSON: ", error);
 			return null;
 		}
 	}

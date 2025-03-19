@@ -5,10 +5,8 @@ import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
-import { PongRoom } from "./PongRoom";
-import { PongPlayer } from "./PongPlayer";
-import { PongRoomManager } from "./PongRoomManager";
-
+import { MatchMaking } from "./match-making/MatchMaking";
+import { Tournament } from "./Tournament";
 
 dotenv.config();
 
@@ -56,93 +54,23 @@ const fastify = Fastify(
 	: true
 });
 	
-
-function playerRoomJoiner(roomId:0 | string, connection:WebSocket):PongRoom
-{
-	if(roomId === 0)
-	{
-		const roomToJoin = roomManager.isAnyPublicRoomAvailable();
-		if(roomToJoin !== false)
-		{
-			const player:PongPlayer = new PongPlayer(connection, "right");
-			roomToJoin.addRightPlayer(player)
-			roomToJoin.getGame().start();
-			return roomToJoin;
-		}
-		else 
-			return roomManager.createRoomAndAddFirstPlayer(connection);
-	}
-	else 
-	{
-		const roomWithId = roomManager.getRoom(roomId);
-		if(roomWithId === undefined)
-			return roomManager.createRoomAndAddFirstPlayer(connection);
-		else
-		{
-			const player:PongPlayer = new PongPlayer(connection, "right");
-			roomWithId.addRightPlayer(player)
-			roomWithId.getGame().start();
-			return roomWithId;
-		}
-	}
-}
-
-function spectatorJoin(roomId:string | 0, connection:WebSocket) :boolean
-{
-	if(roomId === 0)
-		return false;
-	const roomWithId = roomManager.getRoom(roomId);
-	if(roomWithId !== undefined)
-	{
-		roomWithId.addSpectator(connection);
-		return true
-	}
-	return false;
-}
-
-
-const roomManager:PongRoomManager = new PongRoomManager();
-
+const manager:MatchMaking = new MatchMaking();
 
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
 	prefix: "/", // Optional: Sets the URL prefix
   });
 
-interface GameRoomQueryI
+
+export interface IGameRoomQuery
 {
 	roomId: string | 0;
 	playerId: string;
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
+	matchType: "single" | "tournament";
+	tournamentSize: number;
 } 
-
-
-function closeConnectionLogic(connection:WebSocket, room?:PongRoom)
-{	
-	connection.on("close", () => {
-	if(room?.isFull() === false)
-	{
-		console.log(`Deleting room: ${room.getId()}`);
-		roomManager.removeRoom(room);
-	}
-	});
-}
-
-function spectatorLogic(roomId:string | 0, connection:WebSocket)
-{
-	if(spectatorJoin(roomId, connection))
-	{
-		console.log(`Spectator joined to room: ${roomId}`)
-		connection.send(JSON.stringify(roomId));
-	}
-	else 
-	{
-		connection.send(`Room: ${roomId} you tried to join does not exist`);
-		connection.close();
-	}
-}
-
 
 fastify.register(websocket);
 fastify.register(async function(fastify)
@@ -157,28 +85,27 @@ fastify.register(async function(fastify)
 	});
 
 	//Partial makes all field optional. 
-	fastify.get<{Querystring: Partial<GameRoomQueryI>}>("/pong/", {websocket:true}, (connection, req) =>
+	fastify.get<{Querystring: Partial<IGameRoomQuery>}>("/pong/", {websocket:true}, (connection, req) =>
 	{
 		const {
 			roomId = 0,
 			playerId= "Player whatever",
 			privateRoom = false,
-			clientType = "player"	
-		} = req.query as GameRoomQueryI;
+			clientType = "player",
+			matchType = "single",
+			tournamentSize = Tournament.getDefaultTournamnetSize()
+		} = req.query as IGameRoomQuery;
 
-		let room:PongRoom | undefined;
-		if(clientType === "player")
+		const gameQuery: IGameRoomQuery =
 		{
-			room = playerRoomJoiner(roomId, connection);
-			console.log(`Player joined to room:${room.getId()}`);
-			const roomIdJson = {roomId: room.getId()};
-			connection.send(JSON.stringify(roomIdJson));
+			roomId,
+			playerId,
+			privateRoom,
+			clientType, 
+			matchType,
+			tournamentSize
 		}
-		if(room !== undefined && room.isFull())
-			room.getAndSendFramesOnce();
-		if(clientType ==="spectator")
-			spectatorLogic(roomId, connection);
-		closeConnectionLogic(connection, room);
+		manager.matchJoiner(connection,gameQuery);
 	})
 
 	fastify.get("/pingpong/", async (request, reply) => {
