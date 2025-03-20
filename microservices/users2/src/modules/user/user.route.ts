@@ -7,6 +7,7 @@ async function userRoutes(server: FastifyInstance) {
 	// MR_NOTE: I should do this if I haven't enabled Zod globally
 	// const app = server.withTypeProvider<ZodTypeProvider>();
 	// OR: server.withTypeProvider<ZodTypeProvider>().post("/", {...});
+	// The function definition is this: server.get(path, options, handler); (3 arguments)
 	server.post("/",
 		{
 		schema: {

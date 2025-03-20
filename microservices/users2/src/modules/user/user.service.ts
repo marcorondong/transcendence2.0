@@ -19,6 +19,7 @@ export async function findUserByEmail(email: string) {
 	});
 }
 
+// TODO: Define a serializer insterad of doing arrow function.
 export async function findUsers() {
 	const users = await prisma.user.findMany();
 	return users.map(user => ({

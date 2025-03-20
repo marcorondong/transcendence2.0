@@ -1,8 +1,9 @@
 // console.log("hello world");
 import Fastify, { fastify, FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
-import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from 'fastify-type-provider-zod';
+import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from "fastify-type-provider-zod";
 import userRoutes from "./modules/user/user.route";
+import productRoutes from "./modules/product/product.route";
 // import { request } from "http";  // It seems that this is not used
 
 // Creating server
@@ -15,27 +16,41 @@ export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
-// Extending TypeScript Fastify's types to add "authRequired" custom field
 // TODO: This should be done in a "types/fastify.d.ts" file
+// TODO: Reseaarch if "?" is for making it optional.
+// Extend TypeScript Fastify's types to add "authRequired" custom field. (augmenting)(augmenting Fastify's type system)
 declare module 'fastify' {
 	interface FastifyContextConfig {
 	  authRequired?: boolean;
 	}
   }
 
-// Extending TypeScript Fastify's types to add "authenticate" function
+// Extend TypeScript Fastify's types to add "authenticate" function. (extending public types)(augmenting Fastify's type system)
 declare module 'fastify' {
 	export interface FastifyInstance {
 	  authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 	}
   }
 
-// Set JWT plugin
+// TODO: register this differently. e.g., src/types/jwt.d.ts or in app.ts before initializing Fastify
+// Extend FastifyJWT module to recognize "user" (fields in JWT). (module augmentation)(augmenting Fastify's type system)
+declare module "@fastify/jwt" {
+	interface FastifyJWT {
+		user: {
+			id: number;
+			email: string;
+			name: string;
+		};
+	}
+}
+
 // TODO: Maybe this JWT part should be handled by Autentication Service
+// Set JWT plugin
 server.register(fastifyJwt, {
 	secret: "supersecret",
 });
 
+// Add JWT Authentication Middleware
 server.decorate(
 	"authenticate", // This is a custom function on Fastify
 	async (request: FastifyRequest, reply: FastifyReply) => {
@@ -61,7 +76,8 @@ server.get('/healthcheck', async function() {
 
 async function main() {
 	// Register routes
-	server.register(userRoutes, {prefix: 'api/users'})
+	server.register(userRoutes, {prefix: 'api/users'});
+	server.register(productRoutes, {prefix: 'api/products'});
 	try{
 		// Start server
 		await server.listen( {port: 3000, host: "0.0.0.0"});
