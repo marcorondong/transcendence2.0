@@ -14,15 +14,15 @@ export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 
 
 // This is for logging serialization errors
-// server.setErrorHandler((error, request, reply) => {
-// 	console.error("Error Handler:", error);
-// 	// reply.send(error);
-// 	reply.status(error.statusCode || 500).send({
-// 		error: error.name,
-// 		message: error.message,
-// 		details: error.validation,  // May include validation mismatch info
-// 	});
-// });
+server.setErrorHandler((error, request, reply) => {
+	console.error("Error Handler:", error);
+	// reply.send(error);
+	reply.status(error.statusCode || 500).send({
+		error: error.name,
+		message: error.message,
+		details: error.validation,  // May include validation mismatch info
+	});
+});
 
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);

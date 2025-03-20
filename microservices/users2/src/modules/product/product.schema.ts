@@ -25,8 +25,8 @@ export const productResponseSchema = z.object({
 })
 
 // MR_NOTE: This is for previewing the final JSON schema Fastify sees.
-// const jsonSchema = zodToJsonSchema(z.array(productResponseSchema), "ProductsArray");
-// console.log("Expected JSON Schema:", JSON.stringify(jsonSchema, null, 2));
+const jsonSchema = zodToJsonSchema(z.array(productResponseSchema), "ProductsArray");
+console.log("Expected JSON Schema:", JSON.stringify(jsonSchema, null, 2));
 
 
 // TODO: Tutorial has it as "productsResponseSchema"
