@@ -3,6 +3,7 @@ import { createProductHandler, getProductsHandler } from "./product.controller";
 import { createProductSchema, productArrayResponseSchema, productResponseSchema } from "./product.schema";
 
 async function productRoutes(server: FastifyInstance) {
+	// This route IS authenticated
 	server.post("/", {
 		schema: {
 			body: createProductSchema,
@@ -10,6 +11,7 @@ async function productRoutes(server: FastifyInstance) {
 		},
 	}, createProductHandler);
 
+	// This route IS NOT authenticated
 	server.get("/", {
 		schema: {
 			response: { 200: productArrayResponseSchema },
