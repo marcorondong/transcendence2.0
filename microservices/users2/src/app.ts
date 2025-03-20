@@ -15,6 +15,21 @@ export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
+// Extending TypeScript Fastify's types to add "authRequired" custom field
+// TODO: This should be done in a "types/fastify.d.ts" file
+declare module 'fastify' {
+	interface FastifyContextConfig {
+	  authRequired?: boolean;
+	}
+  }
+
+// Extending TypeScript Fastify's types to add "authenticate" function
+declare module 'fastify' {
+	export interface FastifyInstance {
+	  authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+	}
+  }
+
 // Set JWT plugin
 // TODO: Maybe this JWT part should be handled by Autentication Service
 server.register(fastifyJwt, {
@@ -22,7 +37,7 @@ server.register(fastifyJwt, {
 });
 
 server.decorate(
-	"auth",
+	"authenticate", // This is a custom function on Fastify
 	async (request: FastifyRequest, reply: FastifyReply) => {
 		try {
 			await request.jwtVerify();
@@ -31,6 +46,13 @@ server.decorate(
 		}
 	}
 );
+
+// Hook to check route config (authentication required by default)
+server.addHook("onRequest", async (request, reply) => {
+	const requiresAuth = request.routeOptions?.config?.authRequired !== false;
+	if (!requiresAuth) return;  // Skip auth
+	await server.authenticate(request, reply);  // Enforce auth
+  });
 
 // Route for checking health (if server is up and running)
 server.get('/healthcheck', async function() {
