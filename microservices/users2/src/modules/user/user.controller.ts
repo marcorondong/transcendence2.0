@@ -55,6 +55,6 @@ export async function loginHandler(
 }
 
 export async function getUsersHandler() {
-	const users = await findUsers()
-	return users;
+	const users = await findUsers();
+	return users;  // Fastify auto-validates response using Zod schema defined in route
 }

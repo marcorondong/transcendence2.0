@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { registerUserHandler, loginHandler, getUsersHandler } from "./user.controller";
-import { createUserSchema, createUserResponseSchema, loginSchema, loginResponseSchema } from './user.schema';
+import { createUserSchema, createUserResponseSchema, loginSchema, loginResponseSchema, userArrayResponseSchema } from './user.schema';
 // import { ZodTypeProvider } from 'fastify-type-provider-zod';  // It seems that this is not used
 
 async function userRoutes(server: FastifyInstance) {
@@ -29,7 +29,14 @@ async function userRoutes(server: FastifyInstance) {
 		},
 	}, loginHandler);
 
-	server.get("/", getUsersHandler)
+	server.get("/", {
+		schema: {
+			response: {
+				200: userArrayResponseSchema,
+			},
+		},
+	},
+	getUsersHandler);
 }
 
 export default userRoutes

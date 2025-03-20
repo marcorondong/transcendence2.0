@@ -20,11 +20,27 @@ export async function findUserByEmail(email: string) {
 }
 
 export async function findUsers() {
-	return prisma.user.findMany( {
-		select: {
-			email: true,
-			name: true,
-			id: true,
-		},
-	});
+	const users = await prisma.user.findMany();
+	return users.map(user => ({
+		id: user.id,
+		email: user.email,
+		name: user.name,
+	}));
 }
+
+// MR_NOTE: This function returns all users with all fields (no filtering)
+// export async function findUsers() {
+// 	return prisma.user.findMany();
+// }
+
+// MR_NOTE: I could filter the returned field via a schema;
+// But I can also doing directly in prisma like this:
+// export async function findUsers() {
+// 	return prisma.user.findMany( {
+// 		select: {
+// 			email: true,
+// 			name: true,
+// 			id: true,
+// 		},
+// 	});
+// }

@@ -9,7 +9,7 @@ const userCore = {
 	name: z.string(),
 }
 
-// Schema for creating a user
+// Schema for createUser
 export const createUserSchema = z.object({
 	...userCore,
 	password: z.string({
@@ -18,7 +18,7 @@ export const createUserSchema = z.object({
 	}),
 });
 
-// Schema for user response
+// Schema for createUser response
 export const createUserResponseSchema = z.object({
 	id: z.number(),
 	...userCore,
@@ -39,6 +39,17 @@ export const loginResponseSchema = z.object({
 	accessToken: z.string(),
 })
 
-// Types for input validation
+// Schema for a single user 
+export const userResponseSchema = z.object({
+	id: z.number(),
+	...userCore,
+});
+
+// Schema for an array of users (for list responses)
+export const userArrayResponseSchema = z.array(userResponseSchema);
+
+// TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
 export type loginInput = z.infer<typeof loginSchema>;
+export type UserResponse = z.infer<typeof userResponseSchema>;
+export type UserArrayResponse = z.infer<typeof userArrayResponseSchema>;
