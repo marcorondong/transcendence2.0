@@ -39,13 +39,13 @@ export const loginResponseSchema = z.object({
 	accessToken: z.string(),
 })
 
-// Schema for a single user 
+// Schema for single user 
 export const userResponseSchema = z.object({
 	id: z.number(),
 	...userCore,
 });
 
-// Schema for an array of users (for list responses)
+// Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // TypeScript types inferred from schemas

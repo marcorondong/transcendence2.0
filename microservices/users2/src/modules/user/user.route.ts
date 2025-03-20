@@ -7,8 +7,7 @@ async function userRoutes(server: FastifyInstance) {
 	// MR_NOTE: I should do this if I haven't enabled Zod globally
 	// const app = server.withTypeProvider<ZodTypeProvider>();
 	// OR: server.withTypeProvider<ZodTypeProvider>().post("/", {...});
-	server.post(
-		"/",
+	server.post("/",
 		{
 		schema: {
 			body: createUserSchema,
@@ -16,6 +15,7 @@ async function userRoutes(server: FastifyInstance) {
 			201: createUserResponseSchema,
 			},
 		},
+		config: { authRequired: false },
 	},
 	registerUserHandler
 	);
@@ -27,16 +27,28 @@ async function userRoutes(server: FastifyInstance) {
 			200: loginResponseSchema,
 			},
 		},
+		config: { authRequired: false },
 	}, loginHandler);
 
-	server.get("/", {
-		schema: {
-			response: {
-				200: userArrayResponseSchema,
+	// This route is NOT authenticated
+	// server.get("/", {
+	// 	schema: {
+	// 		response: {
+	// 			200: userArrayResponseSchema,
+	// 		},
+	// 	config: { authRequired: false },
+	// 	},
+	// },
+	// getUsersHandler);
+		// This route IS authenticated because it doesnt have "config: { authRequired: false },"
+		server.get("/", {
+			schema: {
+				response: {
+					200: userArrayResponseSchema,
+				},
 			},
 		},
-	},
-	getUsersHandler);
+		getUsersHandler);
 }
 
 export default userRoutes
