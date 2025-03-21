@@ -20,8 +20,8 @@ export enum EPlayerRole
 {
 	LEFT_ONE,
 	LEFT_TWO,
-	RIGTH_ONE,
-	RIGTH_TWO,
+	RIGHT_ONE,
+	RIGHT_TWO,
 	TBD
 }
 
@@ -81,7 +81,7 @@ export class PongPlayer extends EventEmitter
 		this.role = role;
 		if(role === EPlayerRole.LEFT_ONE || role === EPlayerRole.LEFT_TWO)
 			this.setTeamSide(ETeamSide.LEFT);
-		else if(role === EPlayerRole.RIGTH_ONE || role === EPlayerRole.RIGTH_TWO)
+		else if(role === EPlayerRole.RIGHT_ONE || role === EPlayerRole.RIGHT_TWO)
 			this.setTeamSide(ETeamSide.RIGTH);
 		else 
 			throw error("Unexpected player role setted");

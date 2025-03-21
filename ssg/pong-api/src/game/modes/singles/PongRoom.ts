@@ -39,7 +39,7 @@ export class PongRoom extends SessionRoom
 		if(this.leftPlayer === undefined)
 			return EPlayerRole.LEFT_ONE;
 		else if(this.rightPlayer === undefined)
-			return EPlayerRole.RIGTH_TWO;
+			return EPlayerRole.RIGHT_TWO;
 		throw error("Room is full, no player is missing");
 	}
 
@@ -47,7 +47,7 @@ export class PongRoom extends SessionRoom
 	{
 		const room:PongRoom = new PongRoom();
 		playerOne.setPlayerRole(EPlayerRole.LEFT_ONE);
-		playerTwo.setPlayerRole(EPlayerRole.RIGTH_ONE);
+		playerTwo.setPlayerRole(EPlayerRole.RIGHT_ONE);
 		room.addPlayer(playerOne);
 		room.addPlayer(playerTwo);
 		return room;
