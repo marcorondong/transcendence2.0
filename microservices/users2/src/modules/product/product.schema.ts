@@ -11,8 +11,14 @@ const productInput = {
 // TODO: Rename it to "existingProduct" or "product"
 const productGenerated = {
 	id: z.number(),
-	createdAt: z.string(),
-	updatedAt: z.string(),
+	// createdAt: z.string(),
+	// updatedAt: z.string(),
+	// createdAt: z.date().transform((date) => date.toISOString()),  // Automate conversion
+	// updatedAt: z.date().transform((date) => date.toISOString()),  // Prisma returns `Date`, but we want to serialize as string
+	// createdAt: z.string().datetime(),
+	// updatedAt: z.string().datetime(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 }
 
 export const createProductSchema = z.object({
