@@ -1,6 +1,6 @@
 import { PongPlayer } from "../../PongPlayer";
 import { EventEmitter } from "node:stream";
-import { PongRoomSingle } from "./PongRoom";
+import { PongRoomSingle } from "./PongRoomSingle";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";
 import { error } from "node:console";
 

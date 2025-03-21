@@ -1,4 +1,4 @@
-import { PongRoomSingle } from "../game/modes/singles/PongRoom"
+import { PongRoomSingle } from "../game/modes/singles/PongRoomSingle"
 import { WebSocket, RawData } from "ws";
 import { EPlayerRole, ETeamSide, PongPlayer } from "../game/PongPlayer";
 import { RoomEvents } from "../customEvents";

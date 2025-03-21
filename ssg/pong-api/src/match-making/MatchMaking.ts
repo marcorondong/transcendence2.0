@@ -3,7 +3,7 @@ import { TournamentMatchMaking } from "./TournamentMatchMaking";
 import { IGameRoomQuery } from "..";
 import { WebSocket } from "ws";
 import { PongPlayer } from "../game/PongPlayer";
-import { PongRoomSingle } from "../game/modes/singles/PongRoom";
+import { PongRoomSingle } from "../game/modes/singles/PongRoomSingle";
 import { Tournament } from "../game/modes/singles/Tournament";
 
 export class MatchMaking 
