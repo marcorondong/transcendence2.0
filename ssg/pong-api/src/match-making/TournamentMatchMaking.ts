@@ -1,7 +1,7 @@
 import { ETournamentState, Tournament} from "../game/modes/singles/Tournament"
 import { PongPlayer } from "../game/PongPlayer";
 import { TournamentEvents } from "../customEvents";
-import { PongRoom } from "../game/modes/singles/PongRoom";
+import { PongRoomSingle } from "../game/modes/singles/PongRoom";
 
 export class TournamentMatchMaking
 {
@@ -20,9 +20,9 @@ export class TournamentMatchMaking
 		tournamentForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
 	}
 
-	getMatchesFromAllTournaments():Map<string, PongRoom>
+	getMatchesFromAllTournaments():Map<string, PongRoomSingle>
 	{
-		const allTournamnetsRooms:Map<string, PongRoom> = new Map<string, PongRoom>();
+		const allTournamnetsRooms:Map<string, PongRoomSingle> = new Map<string, PongRoomSingle>();
 		for(const [key, oneTournament] of this.allTournaments)
 		{
 			for(const [key, room] of oneTournament.getAllTournamentsRoom())

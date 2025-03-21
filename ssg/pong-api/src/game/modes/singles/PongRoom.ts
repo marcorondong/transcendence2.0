@@ -9,7 +9,7 @@ import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered, EPlayerRole, E
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "../../../customEvents";
 
-export class PongRoom extends SessionRoom
+export class PongRoomSingle extends SessionRoom
 {
 	private isFrameGenerating: boolean;
 	private leftPlayer?:PongPlayer;
@@ -43,9 +43,9 @@ export class PongRoom extends SessionRoom
 		throw error("Room is full, no player is missing");
 	}
 
-	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
+	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingle
 	{
-		const room:PongRoom = new PongRoom();
+		const room:PongRoomSingle = new PongRoomSingle();
 		playerOne.setPlayerRole(EPlayerRole.LEFT_ONE);
 		playerTwo.setPlayerRole(EPlayerRole.RIGHT_ONE);
 		room.addPlayer(playerOne);

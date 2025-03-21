@@ -1,15 +1,15 @@
-import { PongRoom } from "../game/modes/singles/PongRoom"
+import { PongRoomSingle } from "../game/modes/singles/PongRoom"
 import { WebSocket, RawData } from "ws";
 import { EPlayerRole, ETeamSide, PongPlayer } from "../game/PongPlayer";
 import { RoomEvents } from "../customEvents";
 
 export class SingleMatchMaking
 {
-	private singleMatches: Map<string, PongRoom>;
+	private singleMatches: Map<string, PongRoomSingle>;
 
 	constructor()
 	{
-		this.singleMatches = new Map<string,PongRoom>();
+		this.singleMatches = new Map<string,PongRoomSingle>();
 	}
 
 	getAllMatches()
@@ -19,21 +19,21 @@ export class SingleMatchMaking
 	
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
-		const roomForPlayer:PongRoom = this.findRoomToJoin();
+		const roomForPlayer:PongRoomSingle = this.findRoomToJoin();
 		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
 		player.setPlayerRole(playerRole)
 		roomForPlayer.addPlayer(player);
 	}
 
-	createRoom():PongRoom
+	createRoom():PongRoomSingle
 	{
-		const freshRoom:PongRoom = new PongRoom(false);
+		const freshRoom:PongRoomSingle = new PongRoomSingle(false);
 		this.singleMatches.set(freshRoom.getId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
 	}
 
-	removeRoom(room: PongRoom):boolean 
+	removeRoom(room: PongRoomSingle):boolean 
 	{
 		return this.singleMatches.delete(room.getId());
 	}
@@ -43,9 +43,9 @@ export class SingleMatchMaking
 		return this.singleMatches.get(roomId);
 	}
 
-	findRoomToJoin(): PongRoom
+	findRoomToJoin(): PongRoomSingle
 	{
-		let toReturn:PongRoom | false = false;
+		let toReturn:PongRoomSingle | false = false;
 		for(const [key, oneRoom] of this.singleMatches.entries())
 		{
 			if(oneRoom.isPrivate() === false && oneRoom.isFull() === false)
@@ -64,7 +64,7 @@ export class SingleMatchMaking
 		return toReturn
 	}
 
-	private cleanRoom(roomToClean:PongRoom)
+	private cleanRoom(roomToClean:PongRoomSingle)
 	{
 		if(roomToClean.isRoomCleaned() === true)
 			return;
@@ -75,14 +75,14 @@ export class SingleMatchMaking
 		this.removeRoom(roomToClean);
 	}
 
-	private async lobbyMatchMonitor(room:PongRoom)
+	private async lobbyMatchMonitor(room:PongRoomSingle)
 	{
 		room.setRoomCleanedStatus(false);
 		this.lobbyMonitor(room);
 		this.matchMonitor(room);
 	}
 
-	private async lobbyMonitor(room:PongRoom)
+	private async lobbyMonitor(room:PongRoomSingle)
 	{
 		room.on(RoomEvents.EMPTY, ()=>
 		{
@@ -98,7 +98,7 @@ export class SingleMatchMaking
 		})
 	}
 
-	private async matchMonitor(room:PongRoom)
+	private async matchMonitor(room:PongRoomSingle)
 	{
 		await room.getGame().waitForFinalWhistle();
 		console.log("match monitor Game finished", room.getId());
