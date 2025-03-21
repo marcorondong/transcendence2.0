@@ -317,7 +317,7 @@ export class PongGame extends EventEmitter
 		return result;
 	}
 
-	private topEdgeCollision(): boolean
+	protected topEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
 		const topEdgePoint:Point = new Point(ballX, this.field.TOP_EDGE_Y);
@@ -331,7 +331,7 @@ export class PongGame extends EventEmitter
 		return false
 	}
 
-	private bottomEdgeCollision():boolean
+	protected bottomEdgeCollision():boolean
 	{
 		const ballX = this.ball.getPosition().getX();
 		const bottomEdgePoint:Point = new Point(ballX, this.field.BOTTOM_EDGE_Y);
@@ -365,7 +365,7 @@ export class PongGame extends EventEmitter
 			return this.scoredGoal(side);
 	}
 
-	private ballMovementMechanics():void
+	protected ballMovementMechanics():void
 	{
 		if(this.topEdgeCollision() || this.bottomEdgeCollision())
 			return this.ball.simpleBounceY();
@@ -379,6 +379,8 @@ export class PongGame extends EventEmitter
 		}
 	}
 
+
+	//TODO it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
 	/**
 	 * 
 	 * @param paddle 
