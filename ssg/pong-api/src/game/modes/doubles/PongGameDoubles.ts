@@ -1,9 +1,16 @@
-import { PongGame } from "../singles/PongGame"
+import { IPongFrame, PongGame, Position } from "../singles/PongGame"
 import { Paddle } from "../../elements/Paddle"
 import { Ball } from "../../elements/Ball"
 import { PongField } from "../../elements/PongField"
 import { ScoreBoard } from "../../elements/ScoreBoard"
 import { Point } from "../../elements/Point"
+
+
+export interface IPongFrameDoubles extends IPongFrame
+{
+	leftSecondPaddle: Position & {height:number};
+	rightSecondPaddle: Position & {height:number};
+}
 
 export class PongGameDoubles extends PongGame
 {
@@ -28,6 +35,25 @@ export class PongGameDoubles extends PongGame
 		const score: ScoreBoard = new ScoreBoard();
 		const game: PongGameDoubles = new PongGameDoubles(leftPaddle,leftPaddletwo ,rightPaddle, rightPaddletwo, ball, score, table);
 		return game;
+	}
+
+	getFrameDoubles(): IPongFrameDoubles {
+		return {
+			...super.getFrame(),
+			leftSecondPaddle:
+			{
+				x: this.leftPaddletwo.getPosition().getX(),
+				y: this.leftPaddletwo.getPosition().getY(),
+				height: this.leftPaddletwo.height
+			},
+			rightSecondPaddle:
+			{
+				x: this.rightPaddletwo.getPosition().getX(),
+				y: this.rightPaddletwo.getPosition().getY(),
+				height: this.rightPaddletwo.height
+			}
+		}
+		
 	}
 
 	private closerLeftPaddle():Paddle
@@ -61,5 +87,4 @@ export class PongGameDoubles extends PongGame
 			return this.sideMechanics("right", this.closerRightPaddle());
 		}	
 	}
-
 }
