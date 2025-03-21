@@ -20,19 +20,20 @@ export async function findUserByEmail(email: string) {
 }
 
 // TODO: Define a serializer insterad of doing arrow function.
-export async function findUsers() {
-	const users = await prisma.user.findMany();
-	return users.map(user => ({
-		id: user.id,
-		email: user.email,
-		name: user.name,
-	}));
-}
+// MR_Note: Old function which didnt use automatic Zod for validation/serialization.
+// export async function findUsers() {
+// 	const users = await prisma.user.findMany();
+// 	return users.map(user => ({
+// 		id: user.id,
+// 		email: user.email,
+// 		name: user.name,
+// 	}));
+// }
 
 // MR_NOTE: This function returns all users with all fields (no filtering)
-// export async function findUsers() {
-// 	return prisma.user.findMany();
-// }
+export async function findUsers() {
+	return prisma.user.findMany();
+}
 
 // MR_NOTE: I could filter the returned field via a schema;
 // But I can also doing directly in prisma like this:
