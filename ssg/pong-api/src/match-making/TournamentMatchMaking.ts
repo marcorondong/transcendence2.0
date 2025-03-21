@@ -1,5 +1,5 @@
 import { ETournamentState, Tournament} from "../game/modes/singles/Tournament"
-import { PongPlayer } from "../game/modes/singles/PongPlayer";
+import { PongPlayer } from "../game/PongPlayer";
 import { TournamentEvents } from "../customEvents";
 import { PongRoom } from "../game/modes/singles/PongRoom";
 

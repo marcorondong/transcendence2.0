@@ -1,4 +1,4 @@
-import { PongPlayer } from "./PongPlayer";
+import { PongPlayer } from "../../PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoom } from "./PongRoom";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";

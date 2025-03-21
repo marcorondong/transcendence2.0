@@ -5,7 +5,7 @@ import { IPongFrame } from "./PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
 import {Parser} from "../../../../../utils/Parser";
-import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered } from "./PongPlayer";
+import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered, EPlayerRole, EPlayerRoleFiltered } from "../../PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "../../../customEvents";
 
@@ -34,20 +34,20 @@ export class PongRoom extends SessionRoom
 		return this.roundName;
 	}
 
-	getMissingPlayerRole():ETeamSideFiltered
+	getMissingPlayerRole():EPlayerRoleFiltered
 	{
 		if(this.leftPlayer === undefined)
-			return ETeamSide.LEFT;
+			return EPlayerRole.LEFT_ONE;
 		else if(this.rightPlayer === undefined)
-			return ETeamSide.RIGTH;
+			return EPlayerRole.RIGTH_TWO;
 		throw error("Room is full, no player is missing");
 	}
 
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoom
 	{
 		const room:PongRoom = new PongRoom();
-		playerOne.setTeamSide(ETeamSide.LEFT);
-		playerTwo.setTeamSide(ETeamSide.RIGTH);
+		playerOne.setPlayerRole(EPlayerRole.LEFT_ONE);
+		playerTwo.setPlayerRole(EPlayerRole.RIGTH_ONE);
 		room.addPlayer(playerOne);
 		room.addPlayer(playerTwo);
 		return room;

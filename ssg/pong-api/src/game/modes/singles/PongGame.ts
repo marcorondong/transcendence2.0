@@ -7,7 +7,7 @@ import { error } from "console";
 import { PongField } from "../../elements/PongField";
 import { EventEmitter } from "stream";
 import { GameEvents } from "../../../customEvents";
-import { ETeamSide } from "./PongPlayer";
+import { ETeamSide } from "../../PongPlayer";
 
 export interface Position 
 {

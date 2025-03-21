@@ -1,6 +1,6 @@
 import { PongRoom } from "../game/modes/singles/PongRoom"
 import { WebSocket, RawData } from "ws";
-import { ETeamSide, PongPlayer } from "../game/modes/singles/PongPlayer";
+import { EPlayerRole, ETeamSide, PongPlayer } from "../game/PongPlayer";
 import { RoomEvents } from "../customEvents";
 
 export class SingleMatchMaking
@@ -20,8 +20,8 @@ export class SingleMatchMaking
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoom = this.findRoomToJoin();
-		const playerSide:ETeamSide = roomForPlayer.getMissingPlayerRole();
-		player.setTeamSide(playerSide);
+		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
+		player.setPlayerRole(playerRole)
 		roomForPlayer.addPlayer(player);
 	}
 
