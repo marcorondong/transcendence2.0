@@ -185,7 +185,7 @@ export class PongGame extends EventEmitter
 		return true;
 	}
 
-	private renderNextFrame()
+	protected renderNextFrame()
 	{
 		this.ballMovementMechanics();
 		this.ball.moveBall();
@@ -346,26 +346,19 @@ export class PongGame extends EventEmitter
 	}
 
 
-	private sideMechanics(side: "left" | "right"):void 
+	protected sideMechanics(side: "left" | "right", closestPaddle: Paddle):void 
 	{
 		const ballY = this.ball.getPosition().getY();
-		let paddle:Paddle; 
 		let edgeX;
 		if(side === "left")
-		{
 			edgeX = this.field.LEFT_EDGE_X;
-			paddle = this.leftPaddle;
-		}
 		else
-		{
 			edgeX = this.field.RIGHT_EDGE_X;
-			paddle = this.rightPaddle;
-		}
 		const EdgePoint:Point = new Point(edgeX, ballY);
-		const impactPointPaddle:Point | false = this.paddleBounce(paddle, this.ball.getDirection().getX());
+		const impactPointPaddle:Point | false = this.paddleBounce(closestPaddle, this.ball.getDirection().getX());
 		if(impactPointPaddle !== false)
 		{
-			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(paddle.getPosition(), paddle.height);
+			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
 			return this.ball.setDirection(bounceDir);
 		}
 		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
@@ -378,11 +371,11 @@ export class PongGame extends EventEmitter
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			return this.sideMechanics("left");
+			return this.sideMechanics("left", this.leftPaddle);
 		}
 		if(this.ball.isMovingRight())
 		{
-			return this.sideMechanics("right");
+			return this.sideMechanics("right", this.rightPaddle);
 		}
 	}
 
