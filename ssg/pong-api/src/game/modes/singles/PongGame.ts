@@ -3,7 +3,6 @@ import { Ball } from "../../elements/Ball";
 import { VectorDirection, Point } from "../../elements/Point";
 import { ScoreBoard, IScore} from "../../elements/ScoreBoard";
 import raf from 'raf' //raf is request animation frame
-import { error } from "console";
 import { PongField } from "../../elements/PongField";
 import { EventEmitter } from "stream";
 import { GameEvents } from "../../../customEvents";
@@ -104,7 +103,7 @@ export class PongGame extends EventEmitter
 			return this.leftPaddle;
 		else if(role === EPlayerRole.RIGHT_ONE)
 			return this.rightPaddle
-		throw error("paddle not found")
+		throw Error("paddle not found")
 	}
 
 	pauseGame(): void

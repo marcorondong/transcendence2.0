@@ -27,7 +27,7 @@ export class PongRoomSingle extends APongRoom<PongGame>
 			return EPlayerRole.LEFT_ONE;
 		else if(this.rightPlayer === undefined)
 			return EPlayerRole.RIGHT_ONE;
-		throw error("Room is full, no player is missing");
+		throw Error("Room is full, no player is missing");
 	}
 
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingle
@@ -163,13 +163,13 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		if(this.game.getPongWinnerSide() === "left")
 		{
 			if (this.leftPlayer === undefined)
-				throw error("Left player dont exist")
+				throw Error("Left player dont exist")
 			return this.leftPlayer;
 		}
 		else 
 		{
 			if(this.rightPlayer === undefined)
-				throw error("Right player dont exist")
+				throw Error("Right player dont exist")
 			return this.rightPlayer;
 		}
 	}
@@ -179,13 +179,13 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		if(this.game.getPongWinnerSide() === "left")
 		{
 			if (this.rightPlayer === undefined)
-				throw error("Right player dont exist")
+				throw Error("Right player dont exist")
 			return this.rightPlayer;
 		}
 		else 
 		{
 			if(this.leftPlayer === undefined)
-				throw error("left player dont exist")
+				throw Error("left player dont exist")
 			return this.leftPlayer;
 		}
 	}

@@ -1,4 +1,3 @@
-import { error } from "console";
 import { EventEmitter } from "stream";
 import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "../customEvents";
@@ -74,7 +73,7 @@ export class PongPlayer extends EventEmitter
 	{
 		const LRside = this.side;
 		if(LRside === ETeamSide.TBD)
-			throw error("Calling function without deciding player side");
+			throw Error("Calling function without deciding player side");
 		return LRside;
 	}
 
@@ -86,7 +85,7 @@ export class PongPlayer extends EventEmitter
 		else if(role === EPlayerRole.RIGHT_ONE || role === EPlayerRole.RIGHT_TWO)
 			this.setTeamSide(ETeamSide.RIGTH);
 		else 
-			throw error("Unexpected player role setted");
+			throw Error("Unexpected player role setted");
 	}
 
 	private setTeamSide(side: ETeamSideFiltered)
