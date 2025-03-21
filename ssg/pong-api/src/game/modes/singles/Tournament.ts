@@ -123,11 +123,11 @@ export class Tournament extends EventEmitter
 			const loser = await room.getRoomLoser();
 			console.log("Winner is ", winner.getTeamSide());
 			let notification = PongRoomSingle.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
-			if(room.getRoundName() === "finals")
+			if(room.getMatchName() === "finals")
 				notification = PongRoomSingle.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
 			winner.sendNotification(JSON.stringify(notification));
 			console.log("Loser is ", loser.getTeamSide());
-			notification = PongRoomSingle.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getRoundName()}`);
+			notification = PongRoomSingle.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getMatchName()}`);
 			loser.sendNotification(JSON.stringify(notification));
 			this.kickPlayer(loser);
 			return winner;

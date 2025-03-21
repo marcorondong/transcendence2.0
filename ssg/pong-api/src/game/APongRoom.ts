@@ -4,10 +4,8 @@ import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
 import { Parser } from "../../../utils/Parser";
-import { ClientEvents, RoomEvents } from "../customEvents";
-import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
-export abstract class PongRoom<T extends PongGame> extends SessionRoom
+export abstract class APongRoom<T extends PongGame> extends SessionRoom
 {
 	protected isFrameGenerating: boolean;
 	protected isCleaned:boolean;
@@ -30,7 +28,8 @@ export abstract class PongRoom<T extends PongGame> extends SessionRoom
 	abstract getRoomWinner(): Promise<PongPlayer>;
 	abstract getRoomLoser(): Promise<PongPlayer>;
 	abstract disconnectBehaviour(rageQuitPlayer: PongPlayer): void;
-	abstract sendCurrentFrame(): void;
+	abstract getAndSendFramesOnce():void;
+
 
 	static createMatchStatusUpdate(nottification: string)
 	{
@@ -50,22 +49,10 @@ export abstract class PongRoom<T extends PongGame> extends SessionRoom
 		this.matchName = roundName;
 	}
 
-	getRoundName()
+	getMatchName()
 	{
 		return this.matchName;
 	}
-
-	// async getRoomWinner():Promise<PongPlayer>
-	// {
-	// 	await this.game.waitForFinalWhistle();
-	// 	return this.getWinner();
-	// }
-
-	// async getRoomLoser():Promise<PongPlayer>
-	// {
-	// 	await this.game.waitForFinalWhistle();
-	// 	return this.getLoser();
-	// }
 
 	getGame():T
 	{

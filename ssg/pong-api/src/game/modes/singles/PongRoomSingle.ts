@@ -1,16 +1,13 @@
-import {SessionRoom} from "../../../../../utils/SessionRoom"
 import { EGameStatus, PongGame } from "./PongGame";
-import { Paddle } from "../../elements/Paddle";
 import { IPongFrame } from "./PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
-import {Parser} from "../../../../../utils/Parser";
-import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered, EPlayerRole, EPlayerRoleFiltered } from "../../PongPlayer";
+import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered } from "../../PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "../../../customEvents";
-import { PongRoom } from "../../PongRoom";
+import { APongRoom } from "../../APongRoom";
 
-export class PongRoomSingle extends PongRoom<PongGame>
+export class PongRoomSingle extends APongRoom<PongGame>
 {
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
@@ -60,7 +57,6 @@ export class PongRoomSingle extends PongRoom<PongGame>
 		await this.game.waitForFinalWhistle();
 		return this.getLoser();
 	}
-	
 
 	addPlayer(player: PongPlayer):boolean
 	{
@@ -93,12 +89,7 @@ export class PongRoomSingle extends PongRoom<PongGame>
 		}
 		return true;
 	}
-			
-	// addSpectator(connection:WebSocket)
-	// {
-	// 	this.addConnectionToRoom(connection);
-	// }
-	
+
 	isFull():boolean
 	{
 		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
@@ -106,17 +97,6 @@ export class PongRoomSingle extends PongRoom<PongGame>
 		return false;
 	}
 
-	// isRoomCleaned():boolean
-	// {
-	// 	return this.isCleaned;
-	// }
-
-	// setRoomCleanedStatus(freshStatus:boolean):void
-	// {
-	// 	this.isCleaned = freshStatus;
-	// }
-			
-			
 	/**
 	 * function that make sure frame are generated only once. This fixed performance bug
 	*/
@@ -128,13 +108,7 @@ export class PongRoomSingle extends PongRoom<PongGame>
 			this.sendFrames();
 		}
 	}
-			
-	// checkIfPlayerIsStillOnline(player:PongPlayer)
-	// {
-	// 	if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
-	// 		this.game.forfeitGame(player.getTeamSideLR());
-	// }
-	
+
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
@@ -153,28 +127,14 @@ export class PongRoomSingle extends PongRoom<PongGame>
 				
 		})
 	}
-			
-	isConnectionPlayer(connection:WebSocket):boolean
-	{
-		if(connection === this.leftPlayer?.connection || connection === this.rightPlayer?.connection)
-			return true;
-		return false;
-	}
 
-	public sendCurrentFrame():void
+	sendCurrentFrame():void
 	{
 		const frame: IPongFrame = this.getGame().getFrame();
 		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)
 	}
-
-	// static createMatchStatusUpdate(nottification: string)
-	// {
-	// 	return {
-	// 		matchStatus: nottification
-	// 	}
-	// }
 
 	removePlayer(player:PongPlayer)
 	{
@@ -229,20 +189,4 @@ export class PongRoomSingle extends PongRoom<PongGame>
 			return this.leftPlayer;
 		}
 	}
-
-	// private assingControlsToPlayer(player:PongPlayer):void 
-	// {
-	// 	player.connection.on("message", (data: RawData, isBinnary:boolean) =>
-	// 	{
-	// 		const json = Parser.rawDataToJson(data);
-	// 		if(!json)
-	// 		{
-	// 			player.connection.send("Invalid json");
-	// 			return 
-	// 		}
-	// 		const direction = json.move;
-	// 		const paddle:Paddle = player.getPlayerPaddle(this.game);
-	// 		this.getGame().movePaddle(paddle, direction);
-	// 	})
-	// }
 }
