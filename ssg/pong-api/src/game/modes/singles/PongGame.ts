@@ -7,7 +7,7 @@ import { error } from "console";
 import { PongField } from "../../elements/PongField";
 import { EventEmitter } from "stream";
 import { GameEvents } from "../../../customEvents";
-import { ETeamSide } from "../../PongPlayer";
+import { EPlayerRole ,EPlayerRoleFiltered, ETeamSide } from "../../PongPlayer";
 
 export interface Position 
 {
@@ -98,11 +98,11 @@ export class PongGame extends EventEmitter
 		})
 	}
 
-	getPaddle(side: ETeamSide): Paddle
+	getPaddle(role: EPlayerRole): Paddle
 	{
-		if(side === ETeamSide.LEFT)
+		if(role === EPlayerRole.LEFT_ONE)
 			return this.leftPaddle;
-		else if(side === ETeamSide.RIGTH)
+		else if(role === EPlayerRole.RIGHT_ONE)
 			return this.rightPaddle
 		throw error("paddle not found")
 	}

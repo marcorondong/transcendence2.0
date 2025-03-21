@@ -8,30 +8,20 @@ import {Parser} from "../../../../../utils/Parser";
 import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered, EPlayerRole, EPlayerRoleFiltered } from "../../PongPlayer";
 import { error } from "console";
 import { ClientEvents, RoomEvents } from "../../../customEvents";
+import { PongRoom } from "../../PongRoom";
 
-export class PongRoomSingle extends SessionRoom
+export class PongRoomSingle extends PongRoom<PongGame>
 {
-	private isFrameGenerating: boolean;
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
 	private tournamentRoom:boolean;
-	private roundName:string;
-	private isCleaned:boolean;
-	private game:PongGame;
 
 	constructor(privateRoom:boolean = false)
 	{
-		super(privateRoom);
-		this.isFrameGenerating = false;
-		this.roundName = "single Match";
-		this.isCleaned = false;
+		const match = PongGame.createStandardGame();
+		super(privateRoom, match);
+		this.setMatchName("single Match")
 		this.tournamentRoom = false;
-		this.game = PongGame.createStandardGame();
-	}
-
-	getRoundName()
-	{
-		return this.roundName;
 	}
 
 	getMissingPlayerRole():EPlayerRoleFiltered
@@ -39,7 +29,7 @@ export class PongRoomSingle extends SessionRoom
 		if(this.leftPlayer === undefined)
 			return EPlayerRole.LEFT_ONE;
 		else if(this.rightPlayer === undefined)
-			return EPlayerRole.RIGHT_TWO;
+			return EPlayerRole.RIGHT_ONE;
 		throw error("Room is full, no player is missing");
 	}
 
@@ -56,7 +46,7 @@ export class PongRoomSingle extends SessionRoom
 	setRoomAsTournament(roundName:string)
 	{
 		this.tournamentRoom = true;
-		this.roundName = roundName;
+		this.setMatchName(roundName);
 	}
 
 	async getRoomWinner():Promise<PongPlayer>
@@ -71,11 +61,7 @@ export class PongRoomSingle extends SessionRoom
 		return this.getLoser();
 	}
 	
-	getGame():PongGame
-	{
-		return this.game;
-	}
-	
+
 	addPlayer(player: PongPlayer):boolean
 	{
 		if(player.getTeamSideLR()=== ETeamSide.LEFT)
@@ -108,10 +94,10 @@ export class PongRoomSingle extends SessionRoom
 		return true;
 	}
 			
-	addSpectator(connection:WebSocket)
-	{
-		this.addConnectionToRoom(connection);
-	}
+	// addSpectator(connection:WebSocket)
+	// {
+	// 	this.addConnectionToRoom(connection);
+	// }
 	
 	isFull():boolean
 	{
@@ -120,15 +106,15 @@ export class PongRoomSingle extends SessionRoom
 		return false;
 	}
 
-	isRoomCleaned():boolean
-	{
-		return this.isCleaned;
-	}
+	// isRoomCleaned():boolean
+	// {
+	// 	return this.isCleaned;
+	// }
 
-	setRoomCleanedStatus(freshStatus:boolean):void
-	{
-		this.isCleaned = freshStatus;
-	}
+	// setRoomCleanedStatus(freshStatus:boolean):void
+	// {
+	// 	this.isCleaned = freshStatus;
+	// }
 			
 			
 	/**
@@ -143,11 +129,11 @@ export class PongRoomSingle extends SessionRoom
 		}
 	}
 			
-	checkIfPlayerIsStillOnline(player:PongPlayer)
-	{
-		if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
-			this.game.forfeitGame(player.getTeamSideLR());
-	}
+	// checkIfPlayerIsStillOnline(player:PongPlayer)
+	// {
+	// 	if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
+	// 		this.game.forfeitGame(player.getTeamSideLR());
+	// }
 	
 	disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
@@ -178,19 +164,19 @@ export class PongRoomSingle extends SessionRoom
 	public sendCurrentFrame():void
 	{
 		const frame: IPongFrame = this.getGame().getFrame();
-		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.roundName};
+		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)
 	}
 
-	static createMatchStatusUpdate(nottification: string)
-	{
-		return {
-			matchStatus: nottification
-		}
-	}
+	// static createMatchStatusUpdate(nottification: string)
+	// {
+	// 	return {
+	// 		matchStatus: nottification
+	// 	}
+	// }
 
-	private removePlayer(player:PongPlayer)
+	removePlayer(player:PongPlayer)
 	{
 		if(player === this.leftPlayer)
 			return this.leftPlayer = undefined;
@@ -244,19 +230,19 @@ export class PongRoomSingle extends SessionRoom
 		}
 	}
 
-	private assingControlsToPlayer(player:PongPlayer):void 
-	{
-		player.connection.on("message", (data: RawData, isBinnary:boolean) =>
-		{
-			const json = Parser.rawDataToJson(data);
-			if(!json)
-			{
-				player.connection.send("Invalid json");
-				return 
-			}
-			const direction = json.move;
-			const paddle:Paddle = this.getGame().getPaddle(player.getTeamSideLR());
-			this.getGame().movePaddle(paddle, direction);
-		})
-	}
+	// private assingControlsToPlayer(player:PongPlayer):void 
+	// {
+	// 	player.connection.on("message", (data: RawData, isBinnary:boolean) =>
+	// 	{
+	// 		const json = Parser.rawDataToJson(data);
+	// 		if(!json)
+	// 		{
+	// 			player.connection.send("Invalid json");
+	// 			return 
+	// 		}
+	// 		const direction = json.move;
+	// 		const paddle:Paddle = player.getPlayerPaddle(this.game);
+	// 		this.getGame().movePaddle(paddle, direction);
+	// 	})
+	// }
 }
