@@ -1,6 +1,6 @@
-import { PongRoom } from "../PongRoom"
+import { PongRoom } from "../game/modes/singles/PongRoom"
 import { WebSocket, RawData } from "ws";
-import { ETeamSide, PongPlayer } from "../PongPlayer";
+import { ETeamSide, PongPlayer } from "../game/modes/singles/PongPlayer";
 import { RoomEvents } from "../customEvents";
 
 export class SingleMatchMaking

@@ -1,7 +1,7 @@
 import { error } from "console";
 import { EventEmitter } from "stream";
 import { WebSocket, RawData } from "ws";
-import { ClientEvents } from "./customEvents";
+import { ClientEvents } from "../../../customEvents";
 
 export enum EPlayerStatus
 {

@@ -1,9 +1,9 @@
-import { PongGame } from "./PongGame"
-import { Paddle } from "./Paddle"
-import { Ball } from "./Ball"
-import { PongField } from "./PongField"
-import { ScoreBoard } from "./ScoreBoard"
-import { Point } from "./Point"
+import { PongGame } from "../singles/PongGame"
+import { Paddle } from "../../elements/Paddle"
+import { Ball } from "../../elements/Ball"
+import { PongField } from "../../elements/PongField"
+import { ScoreBoard } from "../../elements/ScoreBoard"
+import { Point } from "../../elements/Point"
 
 export class PongGameDoubles extends PongGame
 {

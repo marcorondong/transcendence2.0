@@ -1,13 +1,13 @@
-import {SessionRoom} from "../../utils/SessionRoom"
-import { EGameStatus, PongGame } from "./game/PongGame";
-import { Paddle } from "./game/Paddle";
-import { IPongFrame } from "./game/PongGame";
+import {SessionRoom} from "../../../../../utils/SessionRoom"
+import { EGameStatus, PongGame } from "./PongGame";
+import { Paddle } from "../../elements/Paddle";
+import { IPongFrame } from "./PongGame";
 import raf from "raf";
 import { WebSocket, RawData } from "ws";
-import {Parser} from "../../utils/Parser";
+import {Parser} from "../../../../../utils/Parser";
 import { ETeamSide, EPlayerStatus, PongPlayer, ETeamSideFiltered } from "./PongPlayer";
 import { error } from "console";
-import { ClientEvents, RoomEvents } from "./customEvents";
+import { ClientEvents, RoomEvents } from "../../../customEvents";
 
 export class PongRoom extends SessionRoom
 {

@@ -1,5 +1,5 @@
 import { error } from "console";
-import { ETeamSide, PongPlayer } from "./PongPlayer";
+import { ETeamSide, PongPlayer } from "../singles/PongPlayer";
 import { WebSocket, RawData } from "ws";
 
 export enum EPlayerRole

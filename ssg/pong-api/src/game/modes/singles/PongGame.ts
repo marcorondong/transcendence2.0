@@ -1,13 +1,13 @@
-import { Paddle } from "./Paddle";
-import { Ball } from "./Ball";
-import { VectorDirection, Point } from "./Point";
-import { ScoreBoard, IScore} from "./ScoreBoard";
+import { Paddle } from "../../elements/Paddle";
+import { Ball } from "../../elements/Ball";
+import { VectorDirection, Point } from "../../elements/Point";
+import { ScoreBoard, IScore} from "../../elements/ScoreBoard";
 import raf from 'raf' //raf is request animation frame
 import { error } from "console";
-import { PongField } from "./PongField";
+import { PongField } from "../../elements/PongField";
 import { EventEmitter } from "stream";
-import { GameEvents } from "../customEvents";
-import { ETeamSide } from "../PongPlayer";
+import { GameEvents } from "../../../customEvents";
+import { ETeamSide } from "./PongPlayer";
 
 export interface Position 
 {
