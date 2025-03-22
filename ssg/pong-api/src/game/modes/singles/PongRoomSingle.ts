@@ -28,6 +28,20 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		throw Error("Room is full, no player is missing");
 	}
 
+	getLeftCaptain(): PongPlayer
+	{
+		if (this.leftPlayer === undefined)
+			throw Error("Left player dont exist")
+		return this.leftPlayer;
+	}
+
+	getRightCaptain(): PongPlayer
+	{
+		if (this.rightPlayer === undefined)
+			throw Error("Left player dont exist")
+		return this.rightPlayer;
+	}
+
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingle
 	{
 		const room:PongRoomSingle = new PongRoomSingle();
@@ -47,7 +61,7 @@ export class PongRoomSingle extends APongRoom<PongGame>
 	async getRoomWinner():Promise<PongPlayer>
 	{
 		const winnerSide = await this.getRoomWinnerSide();
-		return this.getWinner(winnerSide);
+		return this.fetchWinnerCaptain(winnerSide);
 	}
 		
 	async getRoomLoser():Promise<PongPlayer>
@@ -121,22 +135,22 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		raf(renderFrame);
 	}
 
-	private getWinner(winningSide: ETeamSideFiltered):PongPlayer
-	{
-		if(winningSide === ETeamSide.LEFT)
-		{
-			if (this.leftPlayer === undefined)
-				throw Error("Left player dont exist")
-			return this.leftPlayer;
-		}
-		else if(winningSide === ETeamSide.RIGTH)
-		{
-			if(this.rightPlayer === undefined)
-				throw Error("Right player dont exist")
-			return this.rightPlayer;
-		}
-		throw new Error("Winning side is undefined");
-	}
+	// private getWinner(winningSide: ETeamSideFiltered):PongPlayer
+	// {
+	// 	if(winningSide === ETeamSide.LEFT)
+	// 	{
+	// 		if (this.leftPlayer === undefined)
+	// 			throw Error("Left player dont exist")
+	// 		return this.leftPlayer;
+	// 	}
+	// 	else if(winningSide === ETeamSide.RIGTH)
+	// 	{
+	// 		if(this.rightPlayer === undefined)
+	// 			throw Error("Right player dont exist")
+	// 		return this.rightPlayer;
+	// 	}
+	// 	throw new Error("Winning side is undefined");
+	// }
 
 	private getLoser(loserSide: ETeamSideFiltered):PongPlayer
 	{

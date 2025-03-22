@@ -1,6 +1,6 @@
 import { SessionRoom } from "../../../utils/SessionRoom";
 import { PongGame, EGameStatus, IPongFrame} from "./modes/singles/PongGame";
-import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered} from "./PongPlayer";
+import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered, ETeamSide} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
 import { Parser } from "../../../utils/Parser";
@@ -27,9 +27,9 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
 	abstract setMissingPlayer(player:PongPlayer):void
 	abstract removePlayer(player:PongPlayer): void;
-//	abstract getRoomWinner(): Promise<PongPlayer>;
-//	abstract getRoomLoser(): Promise<PongPlayer>;
 	abstract getAndSendFramesOnce():void;
+	abstract getLeftCaptain(): PongPlayer;
+	abstract getRightCaptain(): PongPlayer;
 
 
 	static createMatchStatusUpdate(nottification: string)
@@ -131,5 +131,13 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		return this.game.getPongLoserSide();
 	}
 
+	fetchWinnerCaptain(winningSide: ETeamSideFiltered) :PongPlayer
+	{
+		if(winningSide === ETeamSide.LEFT)
+			return this.getLeftCaptain();
+		else if(winningSide === ETeamSide.RIGTH)
+			return this.getRightCaptain();
+		throw new Error("Winning side undefined");
+	}
 
 }
