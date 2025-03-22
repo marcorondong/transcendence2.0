@@ -4,6 +4,8 @@ import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
 import { Parser } from "../../../utils/Parser";
+import { RoomEvents } from "../customEvents";
+import { ClientEvents } from "../customEvents";
 
 export abstract class APongRoom<T extends PongGame> extends SessionRoom
 {
@@ -23,11 +25,10 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 	
 	abstract isFull():boolean;
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
-	abstract addPlayer(player: PongPlayer): void;
+	abstract setMissingPlayer(player:PongPlayer):void
 	abstract removePlayer(player:PongPlayer): void;
 	abstract getRoomWinner(): Promise<PongPlayer>;
 	abstract getRoomLoser(): Promise<PongPlayer>;
-	abstract disconnectBehaviour(rageQuitPlayer: PongPlayer): void;
 	abstract getAndSendFramesOnce():void;
 
 
@@ -86,6 +87,35 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 			}
 			const direction = json.move;
 			this.getGame().movePaddle(playerPaddle, direction);
+		})
+	}
+
+	public addPlayer(player: PongPlayer): void
+	{
+		this.setMissingPlayer(player);
+		this.addConnectionToRoom(player.connection);
+		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
+		this.disconnectBehaviour(player);
+		if(this.isFull())
+			this.emit(RoomEvents.FULL, this);
+	}
+
+	disconnectBehaviour(rageQuitPlayer:PongPlayer)
+	{
+		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
+		{
+			console.log("We have rage quitter here");
+			if(this.game.getGameStatus() === EGameStatus.RUNNING)
+			{
+				console.log("Since game is rage quiter lost");
+				this.game.forfeitGame(player.getTeamSideLR());
+			}
+			else 
+			{
+				this.removePlayer(rageQuitPlayer);
+				this.emit(RoomEvents.EMPTY, this);
+			}
+				
 		})
 	}
 

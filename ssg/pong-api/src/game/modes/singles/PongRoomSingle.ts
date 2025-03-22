@@ -1,10 +1,8 @@
 import { EGameStatus, PongGame } from "./PongGame";
 import { IPongFrame } from "./PongGame";
 import raf from "raf";
-import { WebSocket, RawData } from "ws";
 import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered } from "../../PongPlayer";
 import { error } from "console";
-import { ClientEvents, RoomEvents } from "../../../customEvents";
 import { APongRoom } from "../../APongRoom";
 
 export class PongRoomSingle extends APongRoom<PongGame>
@@ -58,9 +56,9 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		return this.getLoser();
 	}
 
-	addPlayer(player: PongPlayer):void
+	setMissingPlayer(player: PongPlayer): void
 	{
-		if(player.getTeamSideLR()=== ETeamSide.LEFT)
+		if(player.getTeamSideLR() === ETeamSide.LEFT)
 		{
 			if(this.leftPlayer !== undefined)
 				throw new Error(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
@@ -72,11 +70,6 @@ export class PongRoomSingle extends APongRoom<PongGame>
 				throw new Error(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
 			this.rightPlayer = player;
 		}
-		this.addConnectionToRoom(player.connection);
-		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
-		this.disconnectBehaviour(player);
-		if(this.isFull())
-			this.emit(RoomEvents.FULL, this);
 	}
 
 	isFull():boolean
@@ -96,25 +89,6 @@ export class PongRoomSingle extends APongRoom<PongGame>
 			this.isFrameGenerating = true;
 			this.sendFrames();
 		}
-	}
-
-	disconnectBehaviour(rageQuitPlayer:PongPlayer)
-	{
-		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
-		{
-			console.log("We have rage quitter here");
-			if(this.game.getGameStatus() === EGameStatus.RUNNING)
-			{
-				console.log("Since game is rage quiter lost");
-				this.game.forfeitGame(player.getTeamSideLR());
-			}
-			else 
-			{
-				this.removePlayer(rageQuitPlayer);
-				this.emit(RoomEvents.EMPTY, this);
-			}
-				
-		})
 	}
 
 	sendCurrentFrame():void
