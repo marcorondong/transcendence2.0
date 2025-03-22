@@ -12,7 +12,7 @@ export class PongRoomSingle extends APongRoom<PongGame>
 	{
 		const match = PongGame.createStandardGame();
 		super(privateRoom, match);
-		this.setMatchName("single Match");
+		this.setMatchName("single match");
 	}
 
 	getGameFrame() {

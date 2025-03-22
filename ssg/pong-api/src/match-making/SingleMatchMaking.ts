@@ -2,14 +2,19 @@ import { PongRoomSingle } from "../game/modes/singles/PongRoomSingle"
 import { WebSocket, RawData } from "ws";
 import { EPlayerRole, ETeamSide, PongPlayer } from "../game/PongPlayer";
 import { RoomEvents } from "../customEvents";
+import { PongRoomDoubles } from "../game/modes/doubles/PongRoomDoubles";
+import { APongRoom } from "../game/APongRoom";
+import { PongGame } from "../game/modes/singles/PongGame";
 
 export class SingleMatchMaking
 {
 	private singleMatches: Map<string, PongRoomSingle>;
+	private doubleMatches: Map<string, PongRoomDoubles>
 
 	constructor()
 	{
 		this.singleMatches = new Map<string,PongRoomSingle>();
+		this.doubleMatches = new Map<string, PongRoomDoubles>();
 	}
 
 	getAllMatches()
@@ -19,13 +24,21 @@ export class SingleMatchMaking
 	
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
-		const roomForPlayer:PongRoomSingle = this.findRoomToJoin();
+		const roomForPlayer:PongRoomSingle = this.findRoomToJoin(this.singleMatches, "singles");
 		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
 		player.setPlayerRole(playerRole)
 		roomForPlayer.addPlayer(player);
 	}
 
-	createRoom():PongRoomSingle
+	putPlayerinRandomRoomDoubles(player: PongPlayer)
+	{
+		const roomForPlayer:PongRoomDoubles = this.findRoomToJoin(this.doubleMatches, "doubles");
+		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
+		player.setPlayerRole(playerRole)
+		roomForPlayer.addPlayer(player);
+	}
+
+	createRoomSingles():PongRoomSingle
 	{
 		const freshRoom:PongRoomSingle = new PongRoomSingle(false);
 		this.singleMatches.set(freshRoom.getId(), freshRoom);
@@ -33,7 +46,15 @@ export class SingleMatchMaking
 		return freshRoom;
 	}
 
-	removeRoom(room: PongRoomSingle):boolean 
+	createRoomDoubles(): PongRoomDoubles
+	{
+		const freshRoom: PongRoomDoubles = new PongRoomDoubles(false);
+		this.doubleMatches.set(freshRoom.getId(), freshRoom);
+		this.lobbyMatchMonitor(freshRoom);
+		return freshRoom;
+	}
+
+	removeRoom(room: APongRoom<PongGame>):boolean 
 	{
 		return this.singleMatches.delete(room.getId());
 	}
@@ -42,11 +63,17 @@ export class SingleMatchMaking
 	{
 		return this.singleMatches.get(roomId);
 	}
+	
+	findRoomToJoin(mapOfMatches: Map<string, PongRoomSingle>, roomType: "singles"): PongRoomSingle;
 
-	findRoomToJoin(): PongRoomSingle
+	findRoomToJoin(mapOfMathces: Map<string, PongRoomDoubles>, roomType: "doubles"): PongRoomDoubles
+	
+	findRoomToJoin<T extends APongRoom<PongGame>>(
+		mapOfMathces: Map<string, T>, 
+		roomType: "singles" | "doubles"): T
 	{
-		let toReturn:PongRoomSingle | false = false;
-		for(const [key, oneRoom] of this.singleMatches.entries())
+		let toReturn:T | false = false;
+		for(const [key, oneRoom] of mapOfMathces.entries())
 		{
 			if(oneRoom.isPrivate() === false && oneRoom.isFull() === false)
 			{
@@ -59,12 +86,15 @@ export class SingleMatchMaking
 				}
 			}
 		}
-		if(toReturn === false)
-			toReturn = this.createRoom();
+		if (toReturn === false) {
+			return (roomType === "singles" 
+				? (this.createRoomSingles() as unknown as T)
+				: (this.createRoomDoubles() as unknown as T));
+		}
 		return toReturn
 	}
 
-	private cleanRoom(roomToClean:PongRoomSingle)
+	private cleanRoom(roomToClean:APongRoom<PongGame>)
 	{
 		if(roomToClean.isRoomCleaned() === true)
 			return;
@@ -75,14 +105,14 @@ export class SingleMatchMaking
 		this.removeRoom(roomToClean);
 	}
 
-	private async lobbyMatchMonitor(room:PongRoomSingle)
+	private async lobbyMatchMonitor(room:APongRoom<PongGame>)
 	{
 		room.setRoomCleanedStatus(false);
 		this.lobbyMonitor(room);
 		this.matchMonitor(room);
 	}
 
-	private async lobbyMonitor(room:PongRoomSingle)
+	private async lobbyMonitor(room:APongRoom<PongGame>)
 	{
 		room.on(RoomEvents.EMPTY, ()=>
 		{
@@ -98,7 +128,7 @@ export class SingleMatchMaking
 		})
 	}
 
-	private async matchMonitor(room:PongRoomSingle)
+	private async matchMonitor(room:APongRoom<PongGame>)
 	{
 		await room.getGame().waitForFinalWhistle();
 		console.log("match monitor Game finished", room.getId());

@@ -28,11 +28,11 @@ export class MatchMaking
 	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament", tournamentSize:number)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
-		if(matchType == "single")
+		if(matchType === "single")
 		{
 			this.singlesManger.putPlayerinRandomRoom(player)
 		}
-		else if(matchType == "tournament")
+		else if(matchType === "tournament")
 		{
 			if(Tournament.isSizeValid(tournamentSize) === false)
 			{
@@ -40,6 +40,10 @@ export class MatchMaking
 				tournamentSize = Tournament.getDefaultTournamnetSize();
 			}
 			this.tournamentManager.putPlayerInTournament(player, tournamentSize);
+		}
+		else if(matchType === "doubles")
+		{
+			this.singlesManger.putPlayerinRandomRoomDoubles(player)
 		}
 	}
 	
