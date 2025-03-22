@@ -140,4 +140,25 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		throw new Error("Winning side undefined");
 	}
 
+	fetchLoserCaptain(loserSide: ETeamSideFiltered) :PongPlayer
+	{
+		if(loserSide === ETeamSide.LEFT)
+			return this.getLeftCaptain();
+		else if(loserSide === ETeamSide.RIGTH)
+			return this.getRightCaptain();
+		throw new Error("Winning side undefined");
+	}
+
+	async getRoomWinner():Promise<PongPlayer>
+	{
+		const winnerSide = await this.getRoomWinnerSide();
+		return this.fetchWinnerCaptain(winnerSide);
+	}
+		
+	async getRoomLoser():Promise<PongPlayer>
+	{
+		const loserSide = await this.getRoomLoserSide();
+		return this.fetchLoserCaptain(loserSide)
+	}
+
 }
