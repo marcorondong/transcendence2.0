@@ -39,6 +39,18 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		}
 	}
 
+	async getRoomWinner():Promise<PongPlayer>
+	{
+		const winnerSide = await this.getRoomWinnerSide();
+		return this.fetchWinnerCaptain(winnerSide);
+	}
+		
+	async getRoomLoser():Promise<PongPlayer>
+	{
+		const loserSide = await this.getRoomLoserSide();
+		return this.fetchLoserCaptain(loserSide)
+	}
+
 	checkIfPlayerIsStillOnline(player:PongPlayer)
 	{
 		if(player.getPlayerOnlineStatus() != EPlayerStatus.ONLINE)
@@ -75,7 +87,17 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		this.isCleaned = freshStatus;
 	}
 
-	protected assingControlsToPlayer(player:PongPlayer, playerPaddle: Paddle):void 
+	addPlayer(player: PongPlayer): void
+	{
+		this.setMissingPlayer(player);
+		this.addConnectionToRoom(player.connection);
+		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
+		this.disconnectBehaviour(player);
+		if(this.isFull())
+			this.emit(RoomEvents.FULL, this);
+	}
+
+	private assingControlsToPlayer(player:PongPlayer, playerPaddle: Paddle):void 
 	{
 		player.connection.on("message", (data: RawData, isBinnary:boolean) =>
 		{
@@ -90,17 +112,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		})
 	}
 
-	public addPlayer(player: PongPlayer): void
-	{
-		this.setMissingPlayer(player);
-		this.addConnectionToRoom(player.connection);
-		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
-		this.disconnectBehaviour(player);
-		if(this.isFull())
-			this.emit(RoomEvents.FULL, this);
-	}
-
-	disconnectBehaviour(rageQuitPlayer:PongPlayer)
+	private disconnectBehaviour(rageQuitPlayer:PongPlayer)
 	{
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
@@ -119,19 +131,19 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		})
 	}
 
-	async getRoomWinnerSide():Promise<ETeamSideFiltered>
+	private async getRoomWinnerSide():Promise<ETeamSideFiltered>
 	{
 		await this.game.waitForFinalWhistle();
 		return this.game.getPongWinnerSide()
 	}
 		
-	async getRoomLoserSide():Promise<ETeamSideFiltered>
+	private async getRoomLoserSide():Promise<ETeamSideFiltered>
 	{
 		await this.game.waitForFinalWhistle();
 		return this.game.getPongLoserSide();
 	}
 
-	fetchWinnerCaptain(winningSide: ETeamSideFiltered) :PongPlayer
+	private fetchWinnerCaptain(winningSide: ETeamSideFiltered) :PongPlayer
 	{
 		if(winningSide === ETeamSide.LEFT)
 			return this.getLeftCaptain();
@@ -140,7 +152,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		throw new Error("Winning side undefined");
 	}
 
-	fetchLoserCaptain(loserSide: ETeamSideFiltered) :PongPlayer
+	private fetchLoserCaptain(loserSide: ETeamSideFiltered) :PongPlayer
 	{
 		if(loserSide === ETeamSide.LEFT)
 			return this.getLeftCaptain();
@@ -148,17 +160,4 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 			return this.getRightCaptain();
 		throw new Error("Winning side undefined");
 	}
-
-	async getRoomWinner():Promise<PongPlayer>
-	{
-		const winnerSide = await this.getRoomWinnerSide();
-		return this.fetchWinnerCaptain(winnerSide);
-	}
-		
-	async getRoomLoser():Promise<PongPlayer>
-	{
-		const loserSide = await this.getRoomLoserSide();
-		return this.fetchLoserCaptain(loserSide)
-	}
-
 }
