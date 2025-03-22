@@ -19,6 +19,10 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		this.tournamentRoom = false;
 	}
 
+	getGameFrame() {
+		return this.getGame().getFrame();
+	}
+
 	getMissingPlayerRole():EPlayerRoleFiltered
 	{
 		if(this.leftPlayer === undefined)
@@ -81,26 +85,6 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		return false;
 	}
 
-	/**
-	 * function that make sure frame are generated only once. This fixed performance bug
-	*/
-	getAndSendFramesOnce()
-	{
-		if(this.isFrameGenerating === false)
-		{
-			this.isFrameGenerating = true;
-			this.sendFrames();
-		}
-	}
-
-	sendCurrentFrame():void
-	{
-		const frame: IPongFrame = this.getGame().getFrame();
-		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
-		const frameJson = JSON.stringify(frameWithRoomId);
-		this.roomBroadcast(frameJson)
-	}
-
 	removePlayer(player:PongPlayer)
 	{
 		if(player === this.leftPlayer)
@@ -108,19 +92,6 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		else if(player === this.rightPlayer)
 			return this.rightPlayer = undefined;
 		throw error("Player was never added in this room");
-	}
-			
-	private sendFrames()
-	{
-		const renderFrame = () => {
-			this.sendCurrentFrame();
-			if(this.getGame().getGameStatus() === EGameStatus.FINISHED)
-			{
-				return;
-			}
-			raf(renderFrame);
-		};
-		raf(renderFrame);
 	}
 
 }

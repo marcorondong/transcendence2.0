@@ -6,6 +6,7 @@ import { Paddle } from "./elements/Paddle";
 import { Parser } from "../../../utils/Parser";
 import { RoomEvents } from "../customEvents";
 import { ClientEvents } from "../customEvents";
+import raf from "raf";
 
 export abstract class APongRoom<T extends PongGame> extends SessionRoom
 {
@@ -27,9 +28,9 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
 	abstract setMissingPlayer(player:PongPlayer):void
 	abstract removePlayer(player:PongPlayer): void;
-	abstract getAndSendFramesOnce():void;
 	abstract getLeftCaptain(): PongPlayer;
 	abstract getRightCaptain(): PongPlayer;
+	abstract getGameFrame(): any;
 
 
 	static createMatchStatusUpdate(nottification: string)
@@ -49,6 +50,15 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 	{
 		const loserSide = await this.getRoomLoserSide();
 		return this.fetchLoserCaptain(loserSide)
+	}
+
+	getAndSendFramesOnce()
+	{
+		if(this.isFrameGenerating === false)
+		{
+			this.isFrameGenerating = true;
+			this.sendFrames();
+		}
 	}
 
 	checkIfPlayerIsStillOnline(player:PongPlayer)
@@ -95,6 +105,27 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		this.disconnectBehaviour(player);
 		if(this.isFull())
 			this.emit(RoomEvents.FULL, this);
+	}
+
+	sendCurrentFrame():void
+	{
+		const frame = this.getGameFrame();
+		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
+		const frameJson = JSON.stringify(frameWithRoomId);
+		this.roomBroadcast(frameJson)
+	}
+
+	private sendFrames()
+	{
+		const renderFrame = () => {
+			this.sendCurrentFrame();
+			if(this.getGame().getGameStatus() === EGameStatus.FINISHED)
+			{
+				return;
+			}
+			raf(renderFrame);
+		};
+		raf(renderFrame);
 	}
 
 	private assingControlsToPlayer(player:PongPlayer, playerPaddle: Paddle):void 
