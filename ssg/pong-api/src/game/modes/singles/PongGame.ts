@@ -6,7 +6,7 @@ import raf from 'raf' //raf is request animation frame
 import { PongField } from "../../elements/PongField";
 import { EventEmitter } from "stream";
 import { GameEvents } from "../../../customEvents";
-import { EPlayerRole ,EPlayerRoleFiltered, ETeamSide } from "../../PongPlayer";
+import { EPlayerRole ,EPlayerRoleFiltered, ETeamSide, ETeamSideFiltered } from "../../PongPlayer";
 
 export interface Position 
 {
@@ -79,9 +79,14 @@ export class PongGame extends EventEmitter
 		this.gameStatus = newStatus;
 	}
 
-	getPongWinnerSide(): "left" | "right"
+	getPongWinnerSide(): ETeamSideFiltered
 	{
 		return this.score.getWinnerSide();
+	}
+
+	getPongLoserSide(): ETeamSideFiltered
+	{
+		return this.score.getLoserSide();
 	}
 
 	async waitForFinalWhistle(): Promise<PongGame>

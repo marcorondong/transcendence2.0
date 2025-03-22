@@ -1,3 +1,5 @@
+import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
+
 export interface IScore
 {
 	leftGoals: number;
@@ -32,16 +34,31 @@ export class ScoreBoard
 		}
 	}
 
-	getWinnerSide(): "left" | "right"
+	getWinnerSide(): ETeamSideFiltered
 	{
 		if(this.leftPlayerGoals > this.rightPlayerGoals)
-			return "left";
+			return ETeamSide.LEFT
 		if(this.leftPlayerGoals === this.rightPlayerGoals)
 		{
-			console.warn("Not really winner, should not happen")
-			return this.lastScoredSide;
+			throw Error("Not really winner, goals are same");
+			// console.warn("Not really winner, should not happen")
+			// return this.lastScoredSide;
 		}
-		return "right"
+		return ETeamSide.RIGTH
+	}
+
+	getLoserSide(): ETeamSideFiltered
+	{
+		if(this.leftPlayerGoals < this.rightPlayerGoals)
+			return ETeamSide.LEFT;
+		if(this.leftPlayerGoals === this.rightPlayerGoals)
+		{
+			throw Error("Not really loser, goals are same");
+			// console.warn("Not really winner, should not happen")
+			// return this.lastScoredSide;
+		}
+		return ETeamSide.RIGTH
+
 	}
 
 	setScore(leftGoals:number, rightGoals:number)

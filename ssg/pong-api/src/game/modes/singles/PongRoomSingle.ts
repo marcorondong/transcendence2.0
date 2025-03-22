@@ -1,7 +1,7 @@
 import { EGameStatus, PongGame } from "./PongGame";
 import { IPongFrame } from "./PongGame";
 import raf from "raf";
-import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered } from "../../PongPlayer";
+import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered, ETeamSideFiltered } from "../../PongPlayer";
 import { error } from "console";
 import { APongRoom } from "../../APongRoom";
 
@@ -46,14 +46,14 @@ export class PongRoomSingle extends APongRoom<PongGame>
 
 	async getRoomWinner():Promise<PongPlayer>
 	{
-		await this.game.waitForFinalWhistle();
-		return this.getWinner();
+		const winnerSide = await this.getRoomWinnerSide();
+		return this.getWinner(winnerSide);
 	}
 		
 	async getRoomLoser():Promise<PongPlayer>
 	{
-		await this.game.waitForFinalWhistle();
-		return this.getLoser();
+		const loserSide = await this.getRoomLoserSide();
+		return this.getLoser(loserSide)
 	}
 
 	setMissingPlayer(player: PongPlayer): void
@@ -121,35 +121,37 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		raf(renderFrame);
 	}
 
-	private getWinner():PongPlayer
+	private getWinner(winningSide: ETeamSideFiltered):PongPlayer
 	{
-		if(this.game.getPongWinnerSide() === "left")
+		if(winningSide === ETeamSide.LEFT)
 		{
 			if (this.leftPlayer === undefined)
 				throw Error("Left player dont exist")
 			return this.leftPlayer;
 		}
-		else 
+		else if(winningSide === ETeamSide.RIGTH)
 		{
 			if(this.rightPlayer === undefined)
 				throw Error("Right player dont exist")
 			return this.rightPlayer;
 		}
+		throw new Error("Winning side is undefined");
 	}
 
-	private getLoser():PongPlayer
+	private getLoser(loserSide: ETeamSideFiltered):PongPlayer
 	{
-		if(this.game.getPongWinnerSide() === "left")
+		if(loserSide === ETeamSide.RIGTH)
 		{
 			if (this.rightPlayer === undefined)
 				throw Error("Right player dont exist")
 			return this.rightPlayer;
 		}
-		else 
+		else if(loserSide === ETeamSide.LEFT)
 		{
 			if(this.leftPlayer === undefined)
 				throw Error("left player dont exist")
 			return this.leftPlayer;
 		}
+		throw new Error("Loser side is undefined")
 	}
 }

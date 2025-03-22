@@ -1,6 +1,6 @@
 import { SessionRoom } from "../../../utils/SessionRoom";
 import { PongGame, EGameStatus, IPongFrame} from "./modes/singles/PongGame";
-import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus} from "./PongPlayer";
+import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
 import { Parser } from "../../../utils/Parser";
@@ -27,8 +27,8 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
 	abstract setMissingPlayer(player:PongPlayer):void
 	abstract removePlayer(player:PongPlayer): void;
-	abstract getRoomWinner(): Promise<PongPlayer>;
-	abstract getRoomLoser(): Promise<PongPlayer>;
+//	abstract getRoomWinner(): Promise<PongPlayer>;
+//	abstract getRoomLoser(): Promise<PongPlayer>;
 	abstract getAndSendFramesOnce():void;
 
 
@@ -118,5 +118,18 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 				
 		})
 	}
+
+	async getRoomWinnerSide():Promise<ETeamSideFiltered>
+	{
+		await this.game.waitForFinalWhistle();
+		return this.game.getPongWinnerSide()
+	}
+		
+	async getRoomLoserSide():Promise<ETeamSideFiltered>
+	{
+		await this.game.waitForFinalWhistle();
+		return this.game.getPongLoserSide();
+	}
+
 
 }
