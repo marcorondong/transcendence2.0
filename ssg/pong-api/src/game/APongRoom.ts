@@ -23,7 +23,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 	
 	abstract isFull():boolean;
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
-	abstract addPlayer(player: PongPlayer): boolean;
+	abstract addPlayer(player: PongPlayer): void;
 	abstract removePlayer(player:PongPlayer): void;
 	abstract getRoomWinner(): Promise<PongPlayer>;
 	abstract getRoomLoser(): Promise<PongPlayer>;
@@ -74,7 +74,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		this.isCleaned = freshStatus;
 	}
 
-	protected assingControlsToPlayer(player:PongPlayer):void 
+	protected assingControlsToPlayer(player:PongPlayer, playerPaddle: Paddle):void 
 	{
 		player.connection.on("message", (data: RawData, isBinnary:boolean) =>
 		{
@@ -85,8 +85,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 				return 
 			}
 			const direction = json.move;
-			const paddle:Paddle = player.getPlayerPaddle(this.game);
-			this.getGame().movePaddle(paddle, direction);
+			this.getGame().movePaddle(playerPaddle, direction);
 		})
 	}
 

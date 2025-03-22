@@ -58,36 +58,25 @@ export class PongRoomSingle extends APongRoom<PongGame>
 		return this.getLoser();
 	}
 
-	addPlayer(player: PongPlayer):boolean
+	addPlayer(player: PongPlayer):void
 	{
 		if(player.getTeamSideLR()=== ETeamSide.LEFT)
 		{
-			if(this.leftPlayer === undefined)
-				this.leftPlayer = player
-			else 
-			{
-				console.warn(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
-				return false;
-			}
+			if(this.leftPlayer !== undefined)
+				throw new Error(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
+			this.leftPlayer = player
 		}
 		else if(player.getTeamSideLR() === ETeamSide.RIGTH)
 		{
-			if(this.rightPlayer === undefined)
-				this.rightPlayer = player;
-			else 
-			{
-				console.warn(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
-				return false;
-			}
+			if(this.rightPlayer !== undefined)
+				throw new Error(`${player.getTeamSide()} player already exist. Cannot overwrite it`);
+			this.rightPlayer = player;
 		}
 		this.addConnectionToRoom(player.connection);
-		this.assingControlsToPlayer(player);
+		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
 		this.disconnectBehaviour(player);
 		if(this.isFull())
-		{
 			this.emit(RoomEvents.FULL, this);
-		}
-		return true;
 	}
 
 	isFull():boolean

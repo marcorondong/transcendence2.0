@@ -69,6 +69,13 @@ export class PongPlayer extends EventEmitter
 		return this.side;
 	}
 
+	getPlayerRole(): EPlayerRoleFiltered
+	{
+		if(this.role === EPlayerRole.TBD)
+			throw Error("Fetching player role but it is not decided yet");
+		return this.role;
+	}
+
 	getTeamSideLR(): ETeamSideFiltered
 	{
 		const LRside = this.side;
