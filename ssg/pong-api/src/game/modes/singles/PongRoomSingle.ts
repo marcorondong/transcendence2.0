@@ -1,6 +1,4 @@
-import { EGameStatus, PongGame } from "./PongGame";
-import { IPongFrame } from "./PongGame";
-import raf from "raf";
+import { PongGame } from "./PongGame";
 import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered, ETeamSideFiltered } from "../../PongPlayer";
 import { error } from "console";
 import { APongRoom } from "../../APongRoom";
@@ -9,14 +7,12 @@ export class PongRoomSingle extends APongRoom<PongGame>
 {
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
-	private tournamentRoom:boolean;
 
 	constructor(privateRoom:boolean = false)
 	{
 		const match = PongGame.createStandardGame();
 		super(privateRoom, match);
-		this.setMatchName("single Match")
-		this.tournamentRoom = false;
+		this.setMatchName("single Match");
 	}
 
 	getGameFrame() {
@@ -58,7 +54,6 @@ export class PongRoomSingle extends APongRoom<PongGame>
 
 	setRoomAsTournament(roundName:string)
 	{
-		this.tournamentRoom = true;
 		this.setMatchName(roundName);
 	}
 
