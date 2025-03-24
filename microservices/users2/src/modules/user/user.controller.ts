@@ -52,28 +52,33 @@ export async function loginHandler(
 		});
 	}
 	const body = result.data
-	const user = await findUserByEmail(body.email)
-	if (!user) {
-		return reply.code(401).send({ message: "Invalid email or password" });
+	try {
+		const user = await findUserByEmail(body.email)
+		if (!user) {
+			return reply.code(401).send({ message: "Invalid email or password" });
+		}
+		// TODO: Remane password to passwordHash
+		// Veryfy password.
+		const correctPassword = verifyPassword({
+			candidatePassword: body.password,
+			salt: user.salt,
+			hash: user.password,
+		})
+		if (!correctPassword) {
+			return reply.code(401).send({ message: "Invalid email or password" });
+		}
+		const {password, salt, ...rest} = user;
+		// TODO: Maybe this JWT part should be handled by Autentication Service
+		// TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
+		// Generate access token
+		const accessToken = server.jwt.sign(rest);
+		// Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
+		const parsedToken = loginResponseSchema.parse({ accessToken });
+		return reply.code(200).send(parsedToken);
+	} catch (e) {
+		console.error("Login failed:", e);
+		return reply.code(500).send({ message: "Internal server error" });
 	}
-	// TODO: Remane password to passwordHash
-	// Veryfy password.
-	const correctPassword = verifyPassword({
-		candidatePassword: body.password,
-		salt: user.salt,
-		hash: user.password,
-	})
-	if (!correctPassword) {
-		return reply.code(401).send({ message: "Invalid email or password" });
-	}
-	const {password, salt, ...rest} = user;
-	// TODO: Maybe this JWT part should be handled by Autentication Service
-	// TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
-	// Generate access token
-	const accessToken = server.jwt.sign(rest);
-	// Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
-	const parsedToken = loginResponseSchema.parse({ accessToken });
-	return reply.code(200).send(parsedToken);
 }
 
 export async function getUsersHandler(request: FastifyRequest, reply: FastifyReply) {
