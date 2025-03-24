@@ -1,6 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { createProduct, getProducts } from "./product.service";
-import { createProductInput, createProductSchema, productArrayResponseSchema } from "./product.schema";
+import { createProductInput, createProductSchema, productResponseSchema, productArrayResponseSchema } from "./product.schema";
+
+// MR_NOTE:
+// With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
+// With safeParse is for adding an extra layer of security (since it comes from the user).
 
 // TODO: Research from where all those these values are taken. From schema.prisma?
 // TODO: Should I also use try/catch?
@@ -21,11 +25,12 @@ export async function createProductHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 	) {
+	// Serialize/validate/filter input via Zod schemas (createProductSchema.safeParse)
 	const result = createProductSchema.safeParse(request.body);
 	if (!result.success) {
-		// return reply.status(400).send({ error: result.error.format() });
+		// return reply.code(400).send({ error: result.error.format() });
 		// // TODO: For what is "format"?
-		return reply.status(400).send({
+		return reply.code(400).send({
 			message: "Invalid request data",
 			errors: result.error.flatten(),
 		});
@@ -35,10 +40,12 @@ export async function createProductHandler(
 			...result.data,
 			ownerId: request.user.id,
 		});
-		return reply.status(201).send(product);
+		// Serialize/validate/filter input via Zod schemas (productResponseSchema.parse)
+		const parsedProduct = productResponseSchema.parse(product);
+		return reply.code(201).send(parsedProduct);
 	} catch (e) {
 		console.error("Create product failed:", e);
-		return reply.status(500).send({ message: "Internal server error" });
+		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
 
@@ -66,10 +73,11 @@ export async function getProductsHandler(request: FastifyRequest, reply: Fastify
 	try {
 		const products = await getProducts();
 		// return productArrayResponseSchema.parse(products); // Zod serializes dates
-		const serialized = productArrayResponseSchema.parse(products); // Zod serializes dates
-		return reply.status(200).send(serialized);
+		// Serialize/validate/filter response via Zod schemas (productArrayResponseSchema.parse)
+		const parsedProducts = productArrayResponseSchema.parse(products); // Zod serializes dates
+		return reply.code(200).send(parsedProducts);
 	} catch (e) {
 		console.error("Get products failed:", e);
-		return reply.status(500).send({ message: "Internal server error" });
+		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
