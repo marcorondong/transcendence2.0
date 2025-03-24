@@ -6,7 +6,7 @@ import fastifyJWT from '@fastify/jwt';
 import cors from '@fastify/cors';
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
-import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from "fastify-type-provider-zod";
+import { serializerCompiler, validatorCompiler, ZodTypeProvider, jsonSchemaTransform } from "fastify-type-provider-zod";
 
 const PORT = 4000;
 const HOST = '0.0.0.0';
@@ -32,7 +32,7 @@ myFastifyServer.setSerializerCompiler(serializerCompiler);
 myFastifyServer.register(cors, {
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  });
+});
 
 myFastifyServer.register(fastifyJWT, {secret: 'this_is password_should_be_passed_with_docker_secret'});
 myFastifyServer.decorate(

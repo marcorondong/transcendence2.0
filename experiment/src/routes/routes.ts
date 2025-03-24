@@ -32,7 +32,7 @@ export async function login(
    reply.setCookie('access_token', token, {
 	 path: '/',
 	 httpOnly: true,
-	//  secure: true,
+	//  secure: true, // send cookie only over https
    })
    return { accessToken: token }
  }
