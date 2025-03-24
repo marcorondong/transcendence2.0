@@ -1,4 +1,4 @@
-import { PongRoomSingle } from "../game/modes/singles/PongRoomSingle"
+import { PongRoomSingles } from "../game/modes/singles/PongRoomSingles"
 import { WebSocket, RawData } from "ws";
 import { EPlayerRole, ETeamSide, PongPlayer } from "../game/PongPlayer";
 import { RoomEvents } from "../customEvents";
@@ -8,12 +8,12 @@ import { PongGameSingles } from "../game/modes/singles/PongGameSingles";
 
 export class SingleMatchMaking
 {
-	private singleMatches: Map<string, PongRoomSingle>;
+	private singleMatches: Map<string, PongRoomSingles>;
 	private doubleMatches: Map<string, PongRoomDoubles>
 
 	constructor()
 	{
-		this.singleMatches = new Map<string,PongRoomSingle>();
+		this.singleMatches = new Map<string,PongRoomSingles>();
 		this.doubleMatches = new Map<string, PongRoomDoubles>();
 	}
 
@@ -24,7 +24,7 @@ export class SingleMatchMaking
 	
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
-		const roomForPlayer:PongRoomSingle = this.findRoomToJoin(this.singleMatches, "singles");
+		const roomForPlayer:PongRoomSingles = this.findRoomToJoin(this.singleMatches, "singles");
 		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
 		player.setPlayerRole(playerRole)
 		roomForPlayer.addPlayer(player);
@@ -38,9 +38,9 @@ export class SingleMatchMaking
 		roomForPlayer.addPlayer(player);
 	}
 
-	createRoomSingles():PongRoomSingle
+	createRoomSingles():PongRoomSingles
 	{
-		const freshRoom:PongRoomSingle = new PongRoomSingle(false);
+		const freshRoom:PongRoomSingles = new PongRoomSingles(false);
 		this.singleMatches.set(freshRoom.getId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
@@ -64,7 +64,7 @@ export class SingleMatchMaking
 		return this.singleMatches.get(roomId);
 	}
 	
-	findRoomToJoin(mapOfMatches: Map<string, PongRoomSingle>, roomType: "singles"): PongRoomSingle;
+	findRoomToJoin(mapOfMatches: Map<string, PongRoomSingles>, roomType: "singles"): PongRoomSingles;
 
 	findRoomToJoin(mapOfMathces: Map<string, PongRoomDoubles>, roomType: "doubles"): PongRoomDoubles
 	

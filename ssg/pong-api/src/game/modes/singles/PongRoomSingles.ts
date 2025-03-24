@@ -3,7 +3,7 @@ import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered, ETeamSideFilte
 import { error } from "console";
 import { APongRoom } from "../../APongRoom";
 
-export class PongRoomSingle extends APongRoom<PongGameSingles>
+export class PongRoomSingles extends APongRoom<PongGameSingles>
 {
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
@@ -42,9 +42,9 @@ export class PongRoomSingle extends APongRoom<PongGameSingles>
 		return this.rightPlayer;
 	}
 
-	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingle
+	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingles
 	{
-		const room:PongRoomSingle = new PongRoomSingle();
+		const room:PongRoomSingles = new PongRoomSingles();
 		playerOne.setPlayerRole(EPlayerRole.LEFT_ONE);
 		playerTwo.setPlayerRole(EPlayerRole.RIGHT_ONE);
 		room.addPlayer(playerOne);

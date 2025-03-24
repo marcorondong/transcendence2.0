@@ -3,7 +3,7 @@ import { TournamentMatchMaking } from "./TournamentMatchMaking";
 import { IGameRoomQuery } from "..";
 import { WebSocket } from "ws";
 import { PongPlayer } from "../game/PongPlayer";
-import { PongRoomSingle } from "../game/modes/singles/PongRoomSingle";
+import { PongRoomSingles } from "../game/modes/singles/PongRoomSingles";
 import { Tournament } from "../game/modes/singles/Tournament";
 
 export class MatchMaking 
@@ -55,7 +55,7 @@ export class MatchMaking
 			connection.close();
 			return;
 		}
-		const allRooms: Map<string, PongRoomSingle> = this.getAllActiveRooms();
+		const allRooms: Map<string, PongRoomSingles> = this.getAllActiveRooms();
 		const roomToWatch = allRooms.get(roomId);
 		if(roomToWatch != undefined)
 		{
@@ -68,9 +68,9 @@ export class MatchMaking
 		}
 	}
 
-	private getAllActiveRooms(): Map<string, PongRoomSingle>
+	private getAllActiveRooms(): Map<string, PongRoomSingles>
 	{
-		const allRooms: Map<string, PongRoomSingle> = new Map<string, PongRoomSingle>([...this.singlesManger.getAllMatches(),
+		const allRooms: Map<string, PongRoomSingles> = new Map<string, PongRoomSingles>([...this.singlesManger.getAllMatches(),
 			...this.tournamentManager.getMatchesFromAllTournaments()]);
 		return allRooms;
 	}	
