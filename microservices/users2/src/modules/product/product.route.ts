@@ -4,6 +4,8 @@ import { createProductSchema, productArrayResponseSchema, productResponseSchema 
 
 async function productRoutes(server: FastifyInstance) {
 	// This route IS authenticated
+	// Expected response structure and status code for Fastify to validate responses (against Zod schemas).
+	// to validate response structure matches schema (e.g., Fastify/Zod enforcement).
 	server.post("/", {
 		schema: {
 			body: createProductSchema,
