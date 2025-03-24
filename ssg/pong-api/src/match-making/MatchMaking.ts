@@ -25,7 +25,7 @@ export class MatchMaking
 			this.spectatorJoiner(connection, query.roomId);
 	}
 
-	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament", tournamentSize:number)
+	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament" | "doubles", tournamentSize:number)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
 		if(matchType === "single")

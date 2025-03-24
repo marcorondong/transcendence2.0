@@ -62,22 +62,22 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		{
 			case EPlayerRole.LEFT_ONE:
 			{
-				this.setPlayer(player, this.leftPlayerOne);
+				this.setLeftOnePlayer(player);
 				break;
 			}
 			case EPlayerRole.LEFT_TWO:
 			{
-				this.setPlayer(player, this.leftPlayerTwo);
+				this.setLeftTwoPlayer(player);
 				break;
 			}
 			case EPlayerRole.RIGHT_ONE:
 			{
-				this.setPlayer(player, this.rightPlayerOne)
+				this.setRightOnePlayer(player);
 				break;
 			}
 			case EPlayerRole.RIGHT_TWO:
 			{
-				this.setPlayer(player, this.rightPlayerTwo)
+				this.setRightTwoPlayer(player);
 				break;
 			}
 			default:
@@ -118,11 +118,32 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		}
 	}
 
-	private setPlayer(player:PongPlayer, roomPlayer:PongPlayer | undefined)
+	private setLeftOnePlayer(player: PongPlayer)
 	{
-		if(roomPlayer !== undefined)
-			throw Error("Trying to owerwrite LeftPlayerone");
-		roomPlayer = player;
+		if(this.leftPlayerOne !== undefined)
+			throw new Error("Trying to overwrite left player one");
+		this.leftPlayerOne = player;
+	}
+
+	private setLeftTwoPlayer(player: PongPlayer)
+	{
+		if(this.leftPlayerTwo !== undefined)
+			throw new Error("Trying to overwrite left player two");
+		this.leftPlayerTwo = player;
+	}
+
+	private setRightOnePlayer(player: PongPlayer)
+	{
+		if(this.rightPlayerOne !== undefined)
+			throw new Error("Trying to overwrite right player one");
+		this.rightPlayerOne = player;
+	}
+
+	private setRightTwoPlayer(player: PongPlayer)
+	{
+		if(this.rightPlayerTwo !== undefined)
+			throw new Error("Trying to overwrite right player two");
+		this.rightPlayerTwo = player;
 	}
 
 	private unsetPlayer(roomPlayer:PongPlayer | undefined)

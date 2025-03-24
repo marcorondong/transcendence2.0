@@ -4,6 +4,7 @@ import { Ball } from "../../elements/Ball"
 import { PongField } from "../../elements/PongField"
 import { ScoreBoard } from "../../elements/ScoreBoard"
 import { Point } from "../../elements/Point"
+import { EPlayerRole } from "../../PongPlayer"
 
 
 export interface IPongFrameDoubles extends IPongFrame
@@ -54,6 +55,23 @@ export class PongGameDoubles extends PongGame
 			}
 		}
 		
+	}
+
+	getPaddle(role: EPlayerRole): Paddle
+	{
+		switch (role)
+		{
+			case EPlayerRole.LEFT_ONE:
+				return this.leftPaddle;
+			case EPlayerRole.RIGHT_ONE:
+				return this.rightPaddle;
+			case EPlayerRole.LEFT_TWO:
+				return this.leftPaddletwo;
+			case EPlayerRole.RIGHT_TWO:
+				return this.rightPaddletwo;
+			default:
+				throw new Error("Role undefined");
+		}
 	}
 
 	private closerLeftPaddle():Paddle
