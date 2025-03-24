@@ -41,8 +41,6 @@ export class ScoreBoard
 		if(this.leftPlayerGoals === this.rightPlayerGoals)
 		{
 			throw Error("Not really winner, goals are same");
-			// console.warn("Not really winner, should not happen")
-			// return this.lastScoredSide;
 		}
 		return ETeamSide.RIGTH
 	}
@@ -54,8 +52,6 @@ export class ScoreBoard
 		if(this.leftPlayerGoals === this.rightPlayerGoals)
 		{
 			throw Error("Not really loser, goals are same");
-			// console.warn("Not really winner, should not happen")
-			// return this.lastScoredSide;
 		}
 		return ETeamSide.RIGTH
 
