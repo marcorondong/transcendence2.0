@@ -12,16 +12,18 @@ export async function createUser(input: createUserInput) {
 }
 
 export async function findUserByEmail(email: string) {
-	return prisma.user.findUnique({
+	const user = await prisma.user.findUnique({
 		where: {
 			email,
 		},
 	});
+	return user;
 }
 
 // MR_NOTE: This function returns all users with all fields (no filtering)
 export async function findUsers() {
-	return prisma.user.findMany();
+	const users = await prisma.user.findMany();
+	return users;
 }
 
 // MR_NOTE: I could filter the returned field via a schema;

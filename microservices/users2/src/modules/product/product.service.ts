@@ -2,13 +2,14 @@ import prisma from "../../utils/prisma";
 import { createProductInput } from "./product.schema";
 
 export async function createProduct(data: createProductInput & {ownerId: number}) {
-	return prisma.product.create({
+	const product = await prisma.product.create({
 		data,
 	});
+	return product;
 }
 
-// TODO: Research why this one is not async?
 // MR_NOTE: This function returns all products with all fields (no filtering)
-export function getProducts() {
-	return prisma.product.findMany();
+export async function getProducts() {
+	const products = await prisma.product.findMany();
+	return products;
 }
