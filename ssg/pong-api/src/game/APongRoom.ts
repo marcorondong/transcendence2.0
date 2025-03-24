@@ -1,6 +1,6 @@
 import { SessionRoom } from "../../../utils/SessionRoom";
 import { APongGame, EGameStatus } from "./modes/APongGame";
-import { PongGameSingles, IPongFrameSingles} from "./modes/singles/PongGameSingles";
+import { IPongFrameSingles} from "./modes/singles/PongGameSingles";
 import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered, ETeamSide} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
@@ -17,6 +17,14 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	protected game: T;
 	protected matchName: string;
 
+	abstract isFull():boolean;
+	abstract getMissingPlayerRole():EPlayerRoleFiltered;
+	abstract setMissingPlayer(player:PongPlayer):void
+	abstract removePlayer(player:PongPlayer): void;
+	abstract getLeftCaptain(): PongPlayer;
+	abstract getRightCaptain(): PongPlayer;
+	abstract getGameFrame(): any;
+	
 	constructor(privateRoom:boolean = false, match:T)
 	{
 		super(privateRoom);
@@ -26,15 +34,6 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.matchName = "Unknown match"
 	}
 	
-	abstract isFull():boolean;
-	abstract getMissingPlayerRole():EPlayerRoleFiltered;
-	abstract setMissingPlayer(player:PongPlayer):void
-	abstract removePlayer(player:PongPlayer): void;
-	abstract getLeftCaptain(): PongPlayer;
-	abstract getRightCaptain(): PongPlayer;
-	abstract getGameFrame(): any;
-
-
 	static createMatchStatusUpdate(nottification: string)
 	{
 		return {
