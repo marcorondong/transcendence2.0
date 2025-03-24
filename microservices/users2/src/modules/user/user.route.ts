@@ -59,7 +59,10 @@ async function userRoutes(server: FastifyInstance) {
 	// MR_NOTE: I should do this if I haven't enabled Zod globally
 	// const app = server.withTypeProvider<ZodTypeProvider>();
 	// OR: server.withTypeProvider<ZodTypeProvider>().post("/", {...});
+	// This route IS NOT authenticated
 	// The function definition is this: server.get(path, options, handler); (3 arguments)
+	// Expected response structure and status code for Fastify to validate responses (against Zod schemas).
+	// to validate response structure matches schema (e.g., Fastify/Zod enforcement).
 	server.post("/",
 		{
 		schema: {
@@ -71,6 +74,7 @@ async function userRoutes(server: FastifyInstance) {
 	},
 	registerUserHandler);
 
+	// This route IS NOT authenticated
 	server.post("/login", {
 		schema: {
 			response: {

@@ -3,7 +3,7 @@ import { createProductHandler, getProductsHandler } from "./product.controller";
 import { createProductSchema, productArrayResponseSchema, productResponseSchema } from "./product.schema";
 
 async function productRoutes(server: FastifyInstance) {
-	// This route IS authenticated
+	// This route IS authenticated because it doesnt have "config: { authRequired: false },"
 	// Expected response structure and status code for Fastify to validate responses (against Zod schemas).
 	// to validate response structure matches schema (e.g., Fastify/Zod enforcement).
 	server.post("/", {

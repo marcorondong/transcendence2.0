@@ -17,7 +17,7 @@ export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 server.setErrorHandler((error, request, reply) => {
 	console.error("Error Handler:", error);
 	// reply.send(error);
-	reply.status(error.statusCode || 500).send({
+	reply.code(error.statusCode || 500).send({
 		error: error.name,
 		message: error.message,
 		details: error.validation,  // May include validation mismatch info

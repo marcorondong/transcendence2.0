@@ -34,7 +34,6 @@ export const productResponseSchema = z.object({
 const jsonSchema = zodToJsonSchema(z.array(productResponseSchema), "ProductsArray");
 console.log("Expected JSON Schema:", JSON.stringify(jsonSchema, null, 2));
 
-
 // TODO: Tutorial has it as "productsResponseSchema"
 export const productArrayResponseSchema = z.array(productResponseSchema);
 
