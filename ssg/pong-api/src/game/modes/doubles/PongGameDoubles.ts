@@ -1,4 +1,4 @@
-import { IPongFrameSingles, PongGameSingles} from "../singles/PongGameSingles"
+import { IPongFrameSingles} from "../singles/PongGameSingles"
 import { IPaddleJson, Paddle } from "../../elements/Paddle"
 import { Ball } from "../../elements/Ball"
 import { PongField } from "../../elements/PongField"
