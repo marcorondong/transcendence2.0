@@ -23,7 +23,7 @@ export enum EPlayerRole
 	LEFT_TWO,
 	RIGHT_ONE,
 	RIGHT_TWO,
-	TBD
+	TBD  //TBD to be decided
 }
 
 export type ETeamSideFiltered = Exclude<ETeamSide, ETeamSide.TBD>;
@@ -32,7 +32,7 @@ export type EPlayerRoleFiltered = Exclude<EPlayerRole, EPlayerRole.TBD>
 export class PongPlayer extends EventEmitter
 {
 	readonly connection: WebSocket;
-	private side: ETeamSide; //TBD to be decided
+	private side: ETeamSide;
 	private status: EPlayerStatus;
 	private role: EPlayerRole;
 
@@ -119,5 +119,4 @@ export class PongPlayer extends EventEmitter
 	{
 		return game.getPaddle(this.role)
 	}
-
 }
