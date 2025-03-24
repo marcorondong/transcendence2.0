@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUserInput, createUserSchema, createUserResponseSchema, loginInput, loginSchema, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
+import { createUserSchema, createUserResponseSchema, loginInput, loginSchema, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
 import { createUser, findUserByEmail, findUsers } from "./user.service";
 import { verifyPassword } from "../../utils/hash";
 import { server } from "../../app";
@@ -7,44 +7,6 @@ import { server } from "../../app";
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
 // With safeParse is for adding an extra layer of security (since it comes from the user).
-
-// MR_Note: Old function which didnt use automatic Zod for validation/serialization.
-// export async function registerUserHandler(
-// 	request: FastifyRequest<{
-// 		Body: createUserInput;
-// 	}>,
-// 	reply: FastifyReply
-// ) {
-// 	const body = request.body
-// 	try{
-// 		const user = await createUser(body);
-// 		return reply.code(201).send(user);
-// 	}catch(e) {
-// 		console.log(e)
-// 		return reply.code(500).send(e);
-// 		// return reply.code(500).send({ message: "Internal Server Error" });
-// 	}
-// }
-
-// MR_Note: Old function which didnt use automatic Zod for validation/serialization.
-// export async function registerUserHandler(
-// 	request: FastifyRequest<{
-// 		Body: createUserInput;
-// 	}>,
-// 	reply: FastifyReply
-// ) {
-// 	const body = request.body
-// 	try{
-// 		const user = await createUser(body);
-// 		// Filter response via Zod
-// 		const parsedUser = createUserResponseSchema.parse(user);
-// 		return reply.code(201).send(parsedUser);
-// 	}catch(e) {
-// 		console.log(e)
-// 		// TODO: I should check what was the error and then return the correcr code (e.g: 409 Conflict).
-// 		return reply.code(500).send(e);
-// 	}
-// }
 
 export async function registerUserHandler(
 	request: FastifyRequest,
@@ -76,37 +38,6 @@ export async function registerUserHandler(
 		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
-
-// MR_Note: Old function which didnt use automatic Zod for validation/serialization.
-// export async function loginHandler(
-// 	request: FastifyRequest<{
-// 		Body: loginInput
-// 	}>,
-// 	reply: FastifyReply
-// ) {
-// 	const body = request.body
-// 	// Find user by email
-// 	const user = await findUserByEmail(body.email)
-// 	if (!user) {
-// 		return reply.code(401).send({
-// 			message: "Invalid email or password",
-// 		});
-// 	}
-// 	// Veryfy password.
-// 	const correctPassword = verifyPassword({
-// 		candidatePassword: body.password,
-// 		salt: user.salt,
-// 		hash: user.password
-// 	})
-// 	if (correctPassword) {
-// 		const {password, salt, ...rest} = user
-// 		// Generate access token
-// 		return { accessToken: server.jwt.sign(rest) };
-// 	}
-// 	return reply.code(401).send({
-// 		message: "Invalid email or password",
-// 	});
-// }
 
 export async function loginHandler(
 	request: FastifyRequest,
@@ -145,18 +76,12 @@ export async function loginHandler(
 	return reply.code(200).send(parsedToken);
 }
 
-// MR_Note: Old function which didnt use automatic Zod for validation/serialization.
-// export async function getUsersHandler() {
-// 	const users = await findUsers();
-// 	return users;  // Fastify auto-validates response using Zod schema defined in route
-// }
-
 export async function getUsersHandler(request: FastifyRequest, reply: FastifyReply) {
 	try {
 		const users = await findUsers();  // returns all fields
 		// With "parse" Zod will filter out fields not in the schema (e.g., salt, password)
 		// Serialize/validate/filter response via Zod schemas (userArrayResponseSchema.parse)
-		const parsedUsers = userArrayResponseSchema.parse(users); // Zod serializes and filters fields
+		const parsedUsers = userArrayResponseSchema.parse(users);
 		return reply.code(200).send(parsedUsers); // Fastify auto-validates response using Zod schema defined in route
 	} catch (e) {
 		console.error("Get users failed:", e);

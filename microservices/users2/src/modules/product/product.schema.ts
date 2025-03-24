@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { zodToJsonSchema } from "zod-to-json-schema"; // MR_NOTE: This is for previewing the final JSON schema Fastify sees.
+// import { zodToJsonSchema } from "zod-to-json-schema"; // MR_NOTE: This is for debugging (Previewing the final JSON schema Fastify sees)
 
 // TODO: Rename it to "newProduct"
 const productInput = {
@@ -30,11 +30,10 @@ export const productResponseSchema = z.object({
 	...productGenerated,
 })
 
-// MR_NOTE: This is for previewing the final JSON schema Fastify sees.
-const jsonSchema = zodToJsonSchema(z.array(productResponseSchema), "ProductsArray");
-console.log("Expected JSON Schema:", JSON.stringify(jsonSchema, null, 2));
+// MR_NOTE: This is for debugging (Previewing the final JSON schema Fastify sees)
+// const jsonSchema = zodToJsonSchema(z.array(productResponseSchema), "ProductsArray");
+// console.log("Expected JSON Schema:", JSON.stringify(jsonSchema, null, 2));
 
-// TODO: Tutorial has it as "productsResponseSchema"
 export const productArrayResponseSchema = z.array(productResponseSchema);
 
 export type createProductInput = z.infer<typeof createProductSchema>;

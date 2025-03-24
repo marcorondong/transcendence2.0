@@ -12,7 +12,6 @@ import productRoutes from "./modules/product/product.route";
 // Creating server with global Zod type inference
 export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 
-
 // This is for logging serialization errors
 server.setErrorHandler((error, request, reply) => {
 	console.error("Error Handler:", error);

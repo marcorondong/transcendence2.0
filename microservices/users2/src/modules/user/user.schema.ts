@@ -1,4 +1,6 @@
-import { string, z } from "zod";
+import { z } from "zod";
+
+// MR_NOTE: In Zod, everything is required by default.
 
 // Core user schema
 const userCore = {
@@ -25,7 +27,6 @@ export const createUserResponseSchema = z.object({
 });
 
 // Schema for login
-// MR_NOTE: In Zod, everything is required by default.
 export const loginSchema = z.object({
 	email: z.string({
 		required_error: "Email is required",
