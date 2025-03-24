@@ -1,8 +1,8 @@
 import { EventEmitter } from "stream";
 import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "../customEvents";
-import { PongGame } from "./modes/singles/PongGame";
 import { Paddle } from "./elements/Paddle";
+import { APongGame } from "./modes/APongGame";
 
 export enum EPlayerStatus
 {
@@ -46,17 +46,6 @@ export class PongPlayer extends EventEmitter
 		this.connectionMonitor();
 	}
 
-	private connectionMonitor()
-	{
-		this.connection.on("close", ()=> 
-		{
-			this.connection.close();
-			console.log("connnection lost");
-			this.setPlayerStatus(EPlayerStatus.OFFLINE);
-			this.emit(ClientEvents.GONE_OFFLINE, this);
-		})
-	}
-
 	equals(otherPlayer: PongPlayer): boolean
 	{
 		if(this.connection === otherPlayer.connection)
@@ -95,11 +84,6 @@ export class PongPlayer extends EventEmitter
 			throw Error("Unexpected player role setted");
 	}
 
-	private setTeamSide(side: ETeamSideFiltered)
-	{
-		this.side = side;
-	}
-
 	getPlayerOnlineStatus():EPlayerStatus
 	{
 		return this.status;
@@ -115,8 +99,24 @@ export class PongPlayer extends EventEmitter
 		this.connection.send(notification)
 	}
 
-	getPlayerPaddle<T extends PongGame>(game: T): Paddle
+	getPlayerPaddle<T extends APongGame>(game: T): Paddle
 	{
 		return game.getPaddle(this.role)
+	}
+
+	private connectionMonitor()
+	{
+		this.connection.on("close", ()=> 
+		{
+			this.connection.close();
+			console.log("connnection lost");
+			this.setPlayerStatus(EPlayerStatus.OFFLINE);
+			this.emit(ClientEvents.GONE_OFFLINE, this);
+		})
+	}
+
+	private setTeamSide(side: ETeamSideFiltered)
+	{
+		this.side = side;
 	}
 }

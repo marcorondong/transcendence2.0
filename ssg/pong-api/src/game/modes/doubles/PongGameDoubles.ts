@@ -1,26 +1,31 @@
-import { IPongFrame, PongGame, Position } from "../singles/PongGame"
-import { Paddle } from "../../elements/Paddle"
+import { IPongFrameSingles} from "../singles/PongGameSingles"
+import { IPaddleJson, Paddle } from "../../elements/Paddle"
 import { Ball } from "../../elements/Ball"
 import { PongField } from "../../elements/PongField"
 import { ScoreBoard } from "../../elements/ScoreBoard"
 import { Point } from "../../elements/Point"
 import { EPlayerRole } from "../../PongPlayer"
+import { APongGame, Position } from "../APongGame"
 
 
-export interface IPongFrameDoubles extends IPongFrame
+export interface IPongFrameDoubles extends IPongFrameSingles
 {
-	leftSecondPaddle: Position & {height:number};
-	rightSecondPaddle: Position & {height:number};
+	leftSecondPaddle: IPaddleJson;
+	rightSecondPaddle: IPaddleJson;
 }
 
-export class PongGameDoubles extends PongGame
+export class PongGameDoubles extends APongGame
 {
+	private leftPaddleOne: Paddle;
 	private leftPaddletwo: Paddle;
+	private rightPaddleOne: Paddle;
 	private rightPaddletwo: Paddle;
 
 	constructor(leftPaddle: Paddle, leftTwo: Paddle, rightPaddle: Paddle, rightTwo:Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
 	{
-		super(leftPaddle, rightPaddle, ball, score, tableField);
+		super(ball,score,tableField);
+		this.leftPaddleOne = leftPaddle;
+		this.rightPaddleOne = rightPaddle;
 		this.leftPaddletwo = leftTwo;
 		this.rightPaddletwo = rightTwo;
 	}
@@ -38,22 +43,21 @@ export class PongGameDoubles extends PongGame
 		return game;
 	}
 
+	resetPaddlePosition(): void {
+		this.leftPaddleOne.resetPosition();
+		this.leftPaddletwo.resetPosition();
+		this.rightPaddleOne.resetPosition();
+		this.rightPaddletwo.resetPosition();
+	}
+
 	getFrameDoubles(): IPongFrameDoubles {
-		const baseFrame = super.getFrame();
+		const baseFrame = super.getBaseFrame();
 		return {
 			...baseFrame,
-			leftSecondPaddle:
-			{
-				x: this.leftPaddletwo.getPosition().getX(),
-				y: this.leftPaddletwo.getPosition().getY(),
-				height: this.leftPaddletwo.height
-			},
-			rightSecondPaddle:
-			{
-				x: this.rightPaddletwo.getPosition().getX(),
-				y: this.rightPaddletwo.getPosition().getY(),
-				height: this.rightPaddletwo.height
-			}
+			leftSecondPaddle:this.leftPaddletwo.getPaddleJson(),
+			leftPaddle:this.leftPaddleOne.getPaddleJson(),
+			rightSecondPaddle:this.rightPaddletwo.getPaddleJson(),
+			rightPaddle:this.rightPaddleOne.getPaddleJson()
 		}
 		
 	}
@@ -63,9 +67,9 @@ export class PongGameDoubles extends PongGame
 		switch (role)
 		{
 			case EPlayerRole.LEFT_ONE:
-				return this.leftPaddle;
+				return this.leftPaddleOne;
 			case EPlayerRole.RIGHT_ONE:
-				return this.rightPaddle;
+				return this.rightPaddleOne;
 			case EPlayerRole.LEFT_TWO:
 				return this.leftPaddletwo;
 			case EPlayerRole.RIGHT_TWO:
@@ -75,21 +79,21 @@ export class PongGameDoubles extends PongGame
 		}
 	}
 
-	private closerLeftPaddle():Paddle
+	getCloserLeftPaddle():Paddle
 	{
-		const firstDistance = Point.calculateDistance(this.leftPaddle.getPosition(), this.ball.getPosition());
+		const firstDistance = Point.calculateDistance(this.leftPaddleOne.getPosition(), this.ball.getPosition());
 		const secondDistance = Point.calculateDistance(this.leftPaddletwo.getPosition(), this.ball.getPosition());
 		if(firstDistance < secondDistance)
-			return this.leftPaddle;
+			return this.leftPaddleOne;
 		return this.leftPaddletwo;
 	}
 
-	private closerRightPaddle():Paddle
+	getCloserRightPaddle():Paddle
 	{
-		const firstDistance = Point.calculateDistance(this.rightPaddle.getPosition(), this.ball.getPosition());
+		const firstDistance = Point.calculateDistance(this.rightPaddleOne.getPosition(), this.ball.getPosition());
 		const secondDistance = Point.calculateDistance(this.rightPaddletwo.getPosition(), this.ball.getPosition());
 		if(firstDistance < secondDistance)
-			return this.rightPaddle;
+			return this.rightPaddleOne;
 		return this.rightPaddletwo;
 	}
 
@@ -99,11 +103,11 @@ export class PongGameDoubles extends PongGame
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			return this.sideMechanics("left", this.closerLeftPaddle());
+			return this.sideMechanics("left", this.getCloserLeftPaddle());
 		}
 		if(this.ball.isMovingRight())
 		{
-			return this.sideMechanics("right", this.closerRightPaddle());
+			return this.sideMechanics("right", this.getCloserRightPaddle());
 		}	
 	}
 }

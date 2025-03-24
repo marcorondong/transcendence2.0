@@ -1,5 +1,6 @@
 import { SessionRoom } from "../../../utils/SessionRoom";
-import { PongGame, EGameStatus, IPongFrame} from "./modes/singles/PongGame";
+import { APongGame, EGameStatus } from "./modes/APongGame";
+import { IPongFrameSingles} from "./modes/singles/PongGameSingles";
 import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered, ETeamSide} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
@@ -9,13 +10,21 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
-export abstract class APongRoom<T extends PongGame> extends SessionRoom
+export abstract class APongRoom<T extends APongGame> extends SessionRoom
 {
 	protected isFrameGenerating: boolean;
 	protected isCleaned:boolean;
 	protected game: T;
 	protected matchName: string;
 
+	abstract isFull():boolean;
+	abstract getMissingPlayerRole():EPlayerRoleFiltered;
+	abstract setMissingPlayer(player:PongPlayer):void
+	abstract removePlayer(player:PongPlayer): void;
+	abstract getLeftCaptain(): PongPlayer;
+	abstract getRightCaptain(): PongPlayer;
+	abstract getGameFrame(): any;
+	
 	constructor(privateRoom:boolean = false, match:T)
 	{
 		super(privateRoom);
@@ -25,15 +34,6 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 		this.matchName = "Unknown match"
 	}
 	
-	abstract isFull():boolean;
-	abstract getMissingPlayerRole():EPlayerRoleFiltered;
-	abstract setMissingPlayer(player:PongPlayer):void
-	abstract removePlayer(player:PongPlayer): void;
-	abstract getLeftCaptain(): PongPlayer;
-	abstract getRightCaptain(): PongPlayer;
-	abstract getGameFrame(): any;
-
-
 	static createMatchStatusUpdate(nottification: string)
 	{
 		return {
@@ -110,7 +110,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 
 	sendCurrentFrame():void
 	{
-		const frame: IPongFrame | IPongFrameDoubles = this.getGameFrame();
+		const frame: IPongFrameSingles | IPongFrameDoubles = this.getGameFrame();
 		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)

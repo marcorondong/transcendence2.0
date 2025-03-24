@@ -68,7 +68,7 @@ export interface IGameRoomQuery
 	playerId: string;
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
-	matchType: "single" | "tournament";
+	matchType: "singles" | "tournament" | "doubles";
 	tournamentSize: number;
 } 
 
@@ -92,7 +92,7 @@ fastify.register(async function(fastify)
 			playerId= "Player whatever",
 			privateRoom = false,
 			clientType = "player",
-			matchType = "single",
+			matchType = "singles",
 			tournamentSize = Tournament.getDefaultTournamnetSize()
 		} = req.query as IGameRoomQuery;
 

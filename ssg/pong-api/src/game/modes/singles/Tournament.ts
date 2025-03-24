@@ -1,6 +1,6 @@
 import { PongPlayer } from "../../PongPlayer";
 import { EventEmitter } from "node:stream";
-import { PongRoomSingle } from "./PongRoomSingle";
+import { PongRoomSingles } from "./PongRoomSingles";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";
 
 
@@ -18,7 +18,7 @@ export class Tournament extends EventEmitter
 {
 	private requiredPlayers:number;
 	private playerPool:Set<PongPlayer>;
-	private gamesPool:Set<PongRoomSingle>;
+	private gamesPool:Set<PongRoomSingles>;
 	private state: ETournamentState;
 	private roundNumber:number;
 	private readonly id:string;
@@ -29,7 +29,7 @@ export class Tournament extends EventEmitter
 		if(Tournament.isSizeValid(tournamentPlayers) === false)
 			throw Error("Tried to create tournament with not valid size");
 		this.playerPool = new Set<PongPlayer>();
-		this.gamesPool = new Set<PongRoomSingle>();
+		this.gamesPool = new Set<PongRoomSingles>();
 		this.requiredPlayers = tournamentPlayers;
 		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
@@ -46,10 +46,10 @@ export class Tournament extends EventEmitter
 		return defaultSize;
 	}
 
-	getAllTournamentsRoom():Map<string, PongRoomSingle>
+	getAllTournamentsRoom():Map<string, PongRoomSingles>
 	{
-		const allRooms: Map<string, PongRoomSingle> = new Map<string, PongRoomSingle>(
-			[...this.gamesPool].map(room =>[room.getId(), room] as [string, PongRoomSingle])
+		const allRooms: Map<string, PongRoomSingles> = new Map<string, PongRoomSingles>(
+			[...this.gamesPool].map(room =>[room.getId(), room] as [string, PongRoomSingles])
 		);
 		return allRooms;
 		
@@ -88,7 +88,7 @@ export class Tournament extends EventEmitter
 		}
 		else
 		{
-			const jsonNotification = PongRoomSingle.createMatchStatusUpdate("Tournament is full, you cant join")
+			const jsonNotification = PongRoomSingles.createMatchStatusUpdate("Tournament is full, you cant join")
 			player.sendNotification(JSON.stringify(jsonNotification));
 		}
 	}
@@ -100,7 +100,7 @@ export class Tournament extends EventEmitter
 
 	broadcastTournamentAnnouncement(announcement: string)
 	{
-		const jsonNotification = PongRoomSingle.createMatchStatusUpdate(announcement);
+		const jsonNotification = PongRoomSingles.createMatchStatusUpdate(announcement);
 		for(const player of this.playerPool)
 		{
 			player.sendNotification(JSON.stringify(jsonNotification));
@@ -122,12 +122,12 @@ export class Tournament extends EventEmitter
 			const winner = await room.getRoomWinner();
 			const loser = await room.getRoomLoser();
 			console.log("Winner is ", winner.getTeamSide());
-			let notification = PongRoomSingle.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
+			let notification = PongRoomSingles.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
 			if(room.getMatchName() === "finals")
-				notification = PongRoomSingle.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
+				notification = PongRoomSingles.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
 			winner.sendNotification(JSON.stringify(notification));
 			console.log("Loser is ", loser.getTeamSide());
-			notification = PongRoomSingle.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getMatchName()}`);
+			notification = PongRoomSingles.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getMatchName()}`);
 			loser.sendNotification(JSON.stringify(notification));
 			this.kickPlayer(loser);
 			return winner;
@@ -192,7 +192,7 @@ export class Tournament extends EventEmitter
 
 	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
 	{
-		const room:PongRoomSingle = PongRoomSingle.createRoomForTwoPlayers(proPlayer1, proPlayer2);
+		const room:PongRoomSingles = PongRoomSingles.createRoomForTwoPlayers(proPlayer1, proPlayer2);
 		this.gamesPool.add(room);
 		room.setRoomAsTournament(this.getRoundName());
 		room.getGame().startGame();

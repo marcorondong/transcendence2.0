@@ -1,12 +1,12 @@
-import { Paddle } from "../../elements/Paddle";
-import { Ball } from "../../elements/Ball";
-import { VectorDirection, Point } from "../../elements/Point";
-import { ScoreBoard, IScore} from "../../elements/ScoreBoard";
-import raf from 'raf' //raf is request animation frame
-import { PongField } from "../../elements/PongField";
 import { EventEmitter } from "stream";
-import { GameEvents } from "../../../customEvents";
-import { EPlayerRole ,EPlayerRoleFiltered, ETeamSide, ETeamSideFiltered } from "../../PongPlayer";
+import { Ball, IBallJson } from "../elements/Ball";
+import { ScoreBoard, IScore } from "../elements/ScoreBoard";
+import { PongField } from "../elements/PongField";
+import { EPlayerRole, ETeamSideFiltered, ETeamSide } from "../PongPlayer";
+import { GameEvents } from "../../customEvents";
+import { Paddle } from "../elements/Paddle";
+import raf from 'raf' //raf is request animation frame
+import { Point, VectorDirection } from "../elements/Point";
 
 export interface Position 
 {
@@ -22,52 +22,35 @@ export enum EGameStatus
 	FINISHED
 }
 
-export interface IPongFrame
+export interface IPongFrameBase
 {
-	leftPaddle: Position & {height:number};
-	rightPaddle: Position & {height:number};
-	ball: Position & { radius: number };
+	ball: IBallJson;
 	score: IScore;
 	matchStatus: EGameStatus
 }
 
-export class PongGame extends EventEmitter
+export abstract class APongGame extends EventEmitter
 {
-
-	protected leftPaddle: Paddle;
-	protected rightPaddle: Paddle;
 	protected ball: Ball;
 	protected readonly score:ScoreBoard;
 	protected readonly field:PongField;
-
-
 	readonly CRITICAL_DISTANCE;
-	//TODO check if needed private lastFrameTime: number = 0;
 	protected gameStatus:EGameStatus;
-	
-	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
+
+	abstract getPaddle(role:EPlayerRole): Paddle;
+	abstract resetPaddlePosition():void;
+	abstract getCloserLeftPaddle():Paddle;
+	abstract getCloserRightPaddle():Paddle;
+
+	constructor(ball: Ball, score: ScoreBoard, field:PongField)
 	{
 		super();
-		this.leftPaddle = leftPaddle;
-		this.rightPaddle = rightPaddle;
 		this.ball = ball;
-		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.score = score;
-		this.field = tableField;
+		this.field = field;
 		this.gameStatus = EGameStatus.NOT_STARTED;
+		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 	}
-
-	static createStandardGame() :PongGame
-	{
-		const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
-		const rightPaddle: Paddle = new Paddle(new Point(4, 0));
-		const ball: Ball = new Ball(new Point(0, 0));
-		const table: PongField = new PongField();
-		const score: ScoreBoard = new ScoreBoard();
-		const game: PongGame = new PongGame(leftPaddle, rightPaddle, ball, score, table);
-		return game;
-	}
-
 
 	getGameStatus(): EGameStatus
 	{
@@ -89,7 +72,7 @@ export class PongGame extends EventEmitter
 		return this.score.getLoserSide();
 	}
 
-	async waitForFinalWhistle(): Promise<PongGame>
+	async waitForFinalWhistle(): Promise<APongGame>
 	{
 		if(this.gameStatus === EGameStatus.FINISHED)
 			return this;
@@ -100,15 +83,6 @@ export class PongGame extends EventEmitter
 				resolve(this);
 			})
 		})
-	}
-
-	getPaddle(role: EPlayerRole): Paddle
-	{
-		if(role === EPlayerRole.LEFT_ONE)
-			return this.leftPaddle;
-		else if(role === EPlayerRole.RIGHT_ONE)
-			return this.rightPaddle
-		throw Error("paddle not found")
 	}
 
 	pauseGame(): void
@@ -130,31 +104,6 @@ export class PongGame extends EventEmitter
 		this.emit(GameEvents.FINISHED, this);
 	}
 
-	getFrame(): IPongFrame
-	{
-		return {
-			leftPaddle: {
-				x: this.leftPaddle.getPosition().getX(),
-				y: this.leftPaddle.getPosition().getY(),
-				height: this.leftPaddle.height
-			}, 
-			rightPaddle: 
-			{
-				x: this.rightPaddle.getPosition().getX(),
-				y: this.rightPaddle.getPosition().getY(),
-				height: this.rightPaddle.height
-			},
-			ball: 
-			{
-				x: this.ball.getPosition().getX(),
-				y: this.ball.getPosition().getY(),
-				radius: this.ball.getRadius()
-			},
-			score: this.score.getScoreJson(), 
-			matchStatus: this.getGameStatus()
-		};
-	}
-
 	movePaddle(paddle:Paddle, direction: "up" | "down")
 	{
 		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === EGameStatus.RUNNING)
@@ -174,6 +123,15 @@ export class PongGame extends EventEmitter
 		this.finishGame();
 	}
 
+	getBaseFrame(): IPongFrameBase
+	{
+		return {
+			score: this.score.getScoreJson(), 
+			matchStatus: this.getGameStatus(),
+			ball: this.ball.getBallJson()
+		}
+	}
+
 	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
 	{
 		const maxY = this.field.TOP_EDGE_Y + (0.45) * paddle.height;
@@ -189,6 +147,13 @@ export class PongGame extends EventEmitter
 		return true;
 	}
 
+	private start(): void 
+	{
+		this.setGameStatus(EGameStatus.RUNNING);
+		this.score.startCountdown();
+		raf((timestamp:number)=> this.gameLoop(timestamp))
+	}
+
 	protected renderNextFrame()
 	{
 		this.ballMovementMechanics();
@@ -197,19 +162,10 @@ export class PongGame extends EventEmitter
 			this.finishGame();
 	}
 
-	private start(): void 
-	{
-		this.setGameStatus(EGameStatus.RUNNING);
-		this.score.startCountdown();
-		raf((timestamp:number)=> this.gameLoop(timestamp))
-	}
-
 	private gameLoop(timestamp: number):void 
 	{
 		if(this.getGameStatus() === EGameStatus.RUNNING)
 		{
-			//const deltaTime = timestamp - this.lastFrameTime;
-			//this.lastFrameTime = timestamp;
 			this.renderNextFrame();
 		}
 		raf((timestamp:number)=> this.gameLoop(timestamp))
@@ -231,10 +187,9 @@ export class PongGame extends EventEmitter
 		else 
 			strikerSide = "left"
 		this.score.score(strikerSide);
-		this.ball.setPosition(new Point(0,0));
+		this.ball.resetPosition();
 		this.ball.resetDirection(goalSide);
-		this.leftPaddle.resetPosition();
-		this.rightPaddle.resetPosition();
+		this.resetPaddlePosition();
 	}
 	
 	private isLeftGoal(BallPoint:Point):boolean
@@ -349,7 +304,6 @@ export class PongGame extends EventEmitter
 		return false
 	}
 
-
 	protected sideMechanics(side: "left" | "right", closestPaddle: Paddle):void 
 	{
 		const ballY = this.ball.getPosition().getY();
@@ -368,22 +322,21 @@ export class PongGame extends EventEmitter
 		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
 			return this.scoredGoal(side);
 	}
-
+	
 	protected ballMovementMechanics():void
 	{
 		if(this.topEdgeCollision() || this.bottomEdgeCollision())
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			return this.sideMechanics("left", this.leftPaddle);
+			return this.sideMechanics("left", this.getCloserLeftPaddle());
 		}
 		if(this.ball.isMovingRight())
 		{
-			return this.sideMechanics("right", this.rightPaddle);
+			return this.sideMechanics("right", this.getCloserRightPaddle());
 		}
 	}
-
-
+	
 	//TODO it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
 	/**
 	 * 
