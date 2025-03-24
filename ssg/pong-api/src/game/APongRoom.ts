@@ -1,5 +1,5 @@
 import { SessionRoom } from "../../../utils/SessionRoom";
-import { PongGame, EGameStatus, IPongFrame} from "./modes/singles/PongGame";
+import { PongGameSingles, EGameStatus, IPongFrame} from "./modes/singles/PongGameSingles";
 import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered, ETeamSide} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
@@ -9,7 +9,7 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
-export abstract class APongRoom<T extends PongGame> extends SessionRoom
+export abstract class APongRoom<T extends PongGameSingles> extends SessionRoom
 {
 	protected isFrameGenerating: boolean;
 	protected isCleaned:boolean;

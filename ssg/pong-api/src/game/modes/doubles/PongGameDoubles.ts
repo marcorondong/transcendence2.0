@@ -1,4 +1,4 @@
-import { IPongFrame, PongGame, Position } from "../singles/PongGame"
+import { IPongFrame, PongGameSingles, Position } from "../singles/PongGameSingles"
 import { Paddle } from "../../elements/Paddle"
 import { Ball } from "../../elements/Ball"
 import { PongField } from "../../elements/PongField"
@@ -13,7 +13,7 @@ export interface IPongFrameDoubles extends IPongFrame
 	rightSecondPaddle: Position & {height:number};
 }
 
-export class PongGameDoubles extends PongGame
+export class PongGameDoubles extends PongGameSingles
 {
 	private leftPaddletwo: Paddle;
 	private rightPaddletwo: Paddle;

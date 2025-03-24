@@ -1,16 +1,16 @@
-import { PongGame } from "./PongGame";
+import { PongGameSingles } from "./PongGameSingles";
 import { ETeamSide, PongPlayer, EPlayerRole, EPlayerRoleFiltered, ETeamSideFiltered } from "../../PongPlayer";
 import { error } from "console";
 import { APongRoom } from "../../APongRoom";
 
-export class PongRoomSingle extends APongRoom<PongGame>
+export class PongRoomSingle extends APongRoom<PongGameSingles>
 {
 	private leftPlayer?:PongPlayer;
 	private rightPlayer?:PongPlayer;
 
 	constructor(privateRoom:boolean = false)
 	{
-		const match = PongGame.createStandardGame();
+		const match = PongGameSingles.createStandardGame();
 		super(privateRoom, match);
 		this.setMatchName("single match");
 	}
