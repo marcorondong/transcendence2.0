@@ -2,6 +2,13 @@ import { Point } from "./Point";
 
 const MOVE_MODIFIER = 0.05;
 
+export interface IPaddleJson
+{
+	x: number,
+	y: number, 
+	height: number
+}
+
 export class Paddle
 {
 	protected position:Point;
@@ -13,6 +20,15 @@ export class Paddle
 		this.position = position;
 		this.height = height;
 		this.initialPosition = new Point(position.getX(), position.getY());
+	}
+
+	getPaddleJson():IPaddleJson
+	{
+		return {
+			x: this.getPosition().getX(),
+			y: this.getPosition().getY(),
+			height: this.height
+		}
 	}
 
 	moveUp():void 

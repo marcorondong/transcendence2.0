@@ -1,5 +1,5 @@
 import { IPongFrameSingles, PongGameSingles} from "../singles/PongGameSingles"
-import { Paddle } from "../../elements/Paddle"
+import { IPaddleJson, Paddle } from "../../elements/Paddle"
 import { Ball } from "../../elements/Ball"
 import { PongField } from "../../elements/PongField"
 import { ScoreBoard } from "../../elements/ScoreBoard"
@@ -10,8 +10,8 @@ import { APongGame, Position } from "../APongGame"
 
 export interface IPongFrameDoubles extends IPongFrameSingles
 {
-	leftSecondPaddle: Position & {height:number};
-	rightSecondPaddle: Position & {height:number};
+	leftSecondPaddle: IPaddleJson;
+	rightSecondPaddle: IPaddleJson;
 }
 
 export class PongGameDoubles extends APongGame
@@ -56,27 +56,19 @@ export class PongGameDoubles extends APongGame
 			...baseFrame,
 			leftSecondPaddle:
 			{
-				x: this.leftPaddletwo.getPosition().getX(),
-				y: this.leftPaddletwo.getPosition().getY(),
-				height: this.leftPaddletwo.height
+				...this.leftPaddletwo.getPaddleJson()
 			},
 			leftPaddle:
 			{
-				x: this.leftPaddleOne.getPosition().getX(),
-				y: this.leftPaddleOne.getPosition().getY(),
-				height: this.leftPaddleOne.height
+				...this.leftPaddleOne.getPaddleJson()
 			},
 			rightSecondPaddle:
 			{
-				x: this.rightPaddletwo.getPosition().getX(),
-				y: this.rightPaddletwo.getPosition().getY(),
-				height: this.rightPaddletwo.height
+				...this.rightPaddletwo.getPaddleJson()
 			},
 			rightPaddle:
 			{
-				x: this.rightPaddleOne.getPosition().getX(),
-				y: this.rightPaddleOne.getPosition().getY(),
-				height: this.rightPaddleOne.height
+				...this.rightPaddleOne.getPaddleJson()
 			}
 		}
 		

@@ -1,4 +1,4 @@
-import { Paddle } from "../../elements/Paddle";
+import { IPaddleJson, Paddle } from "../../elements/Paddle";
 import { Ball } from "../../elements/Ball";
 import { VectorDirection, Point } from "../../elements/Point";
 import { ScoreBoard, IScore} from "../../elements/ScoreBoard";
@@ -9,8 +9,8 @@ import { APongGame, Position, EGameStatus, IPongFrameBase } from "../APongGame";
 
 export interface IPongFrameSingles extends IPongFrameBase
 {
-	leftPaddle: Position & {height:number};
-	rightPaddle: Position & {height:number};
+	leftPaddle: IPaddleJson
+	rightPaddle: IPaddleJson
 }
 
 export class PongGameSingles extends APongGame
@@ -66,15 +66,11 @@ export class PongGameSingles extends APongGame
 		return {
 			...baseFrame,
 			leftPaddle: {
-				x: this.leftPaddle.getPosition().getX(),
-				y: this.leftPaddle.getPosition().getY(),
-				height: this.leftPaddle.height
+				...this.leftPaddle.getPaddleJson()
 			}, 
 			rightPaddle: 
 			{
-				x: this.rightPaddle.getPosition().getX(),
-				y: this.rightPaddle.getPosition().getY(),
-				height: this.rightPaddle.height
+				...this.rightPaddle.getPaddleJson()
 			}
 		};
 	}
