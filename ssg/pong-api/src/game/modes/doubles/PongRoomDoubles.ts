@@ -1,6 +1,6 @@
 import { APongRoom } from "../../APongRoom";
 import { PongPlayer } from "../../PongPlayer";
-import { PongGameDoubles } from "./PongGameDoubles";
+import { IPongFrameDoubles, PongGameDoubles } from "./PongGameDoubles";
 import { EPlayerRoleFiltered, EPlayerRole } from "../../PongPlayer";
 
 export class PongRoomDoubles extends APongRoom<PongGameDoubles>
@@ -29,8 +29,8 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		return this.rightPlayerOne;
 	}
 
-	getGameFrame() {
-		this.getGame().getFrameDoubles();
+	getGameFrame():IPongFrameDoubles {
+		return this.getGame().getFrameDoubles();
 	}
 
 	isFull():boolean

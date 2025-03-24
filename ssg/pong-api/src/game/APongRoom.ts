@@ -7,6 +7,7 @@ import { Parser } from "../../../utils/Parser";
 import { RoomEvents } from "../customEvents";
 import { ClientEvents } from "../customEvents";
 import raf from "raf";
+import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
 export abstract class APongRoom<T extends PongGame> extends SessionRoom
 {
@@ -109,7 +110,7 @@ export abstract class APongRoom<T extends PongGame> extends SessionRoom
 
 	sendCurrentFrame():void
 	{
-		const frame = this.getGameFrame();
+		const frame: IPongFrame | IPongFrameDoubles = this.getGameFrame();
 		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)

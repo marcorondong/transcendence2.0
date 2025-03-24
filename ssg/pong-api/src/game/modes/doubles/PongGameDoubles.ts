@@ -29,9 +29,9 @@ export class PongGameDoubles extends PongGame
 	{
 		const leftPaddle: Paddle = new Paddle(new Point(-4, 1.25), 0.5);
 		const leftPaddletwo: Paddle = new Paddle(new Point(-4, -1.25), 0.5);
-		const rightPaddle: Paddle = new Paddle(new Point(4, 1.25));
+		const rightPaddle: Paddle = new Paddle(new Point(4, 1.25), 0.5);
 		const rightPaddletwo: Paddle = new Paddle(new Point(4, -1.25), 0.5);
-		const ball: Ball = new Ball(new Point(0, 0));
+		const ball: Ball = new Ball(new Point(0, 1.25));
 		const table: PongField = new PongField();
 		const score: ScoreBoard = new ScoreBoard();
 		const game: PongGameDoubles = new PongGameDoubles(leftPaddle,leftPaddletwo ,rightPaddle, rightPaddletwo, ball, score, table);
@@ -39,8 +39,9 @@ export class PongGameDoubles extends PongGame
 	}
 
 	getFrameDoubles(): IPongFrameDoubles {
+		const baseFrame = super.getFrame();
 		return {
-			...super.getFrame(),
+			...baseFrame,
 			leftSecondPaddle:
 			{
 				x: this.leftPaddletwo.getPosition().getX(),
