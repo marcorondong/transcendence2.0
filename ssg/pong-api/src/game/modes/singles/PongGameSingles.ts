@@ -1,10 +1,10 @@
 import { IPaddleJson, Paddle } from "../../elements/Paddle";
 import { Ball } from "../../elements/Ball";
-import { VectorDirection, Point } from "../../elements/Point";
-import { ScoreBoard, IScore} from "../../elements/ScoreBoard";
+import { Point } from "../../elements/Point";
+import { ScoreBoard } from "../../elements/ScoreBoard";
 import { PongField } from "../../elements/PongField";
-import { EPlayerRole ,EPlayerRoleFiltered, ETeamSide, ETeamSideFiltered } from "../../PongPlayer";
-import { APongGame, Position, EGameStatus, IPongFrameBase } from "../APongGame";
+import { EPlayerRole } from "../../PongPlayer";
+import { APongGame, IPongFrameBase } from "../APongGame";
 
 
 export interface IPongFrameSingles extends IPongFrameBase
