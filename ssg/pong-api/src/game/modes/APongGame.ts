@@ -1,5 +1,5 @@
 import { EventEmitter } from "stream";
-import { Ball } from "../elements/Ball";
+import { Ball, IBallJson } from "../elements/Ball";
 import { ScoreBoard, IScore } from "../elements/ScoreBoard";
 import { PongField } from "../elements/PongField";
 import { EPlayerRole, ETeamSideFiltered, ETeamSide } from "../PongPlayer";
@@ -24,7 +24,7 @@ export enum EGameStatus
 
 export interface IPongFrameBase
 {
-	ball: Position & { radius: number };
+	ball: IBallJson;
 	score: IScore;
 	matchStatus: EGameStatus
 }
@@ -128,12 +128,7 @@ export abstract class APongGame extends EventEmitter
 		return {
 			score: this.score.getScoreJson(), 
 			matchStatus: this.getGameStatus(),
-			ball: 
-			{
-				x: this.ball.getPosition().getX(),
-				y: this.ball.getPosition().getY(),
-				radius: this.ball.getRadius()
-			}
+			ball: this.ball.getBallJson()
 		}
 	}
 

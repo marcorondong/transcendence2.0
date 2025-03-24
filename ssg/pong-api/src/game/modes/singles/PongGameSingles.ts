@@ -65,13 +65,8 @@ export class PongGameSingles extends APongGame
 		const baseFrame: IPongFrameBase = this.getBaseFrame();
 		return {
 			...baseFrame,
-			leftPaddle: {
-				...this.leftPaddle.getPaddleJson()
-			}, 
-			rightPaddle: 
-			{
-				...this.rightPaddle.getPaddleJson()
-			}
+			leftPaddle : this.leftPaddle.getPaddleJson(),
+			rightPaddle: this.rightPaddle.getPaddleJson()
 		};
 	}
 }

@@ -2,6 +2,13 @@ import { Point, VectorDirection } from "./Point"
 
 const MOVE_COEFFICIENT = 5;
 
+export interface IBallJson
+{
+	x: number;
+	y: number;
+	radius: number;
+}
+
 export class Ball
 {
 	protected position:Point;
@@ -19,6 +26,14 @@ export class Ball
 		this.speed = Point.calculateVectorSpeed(vector);
 	}
 
+	getBallJson():IBallJson
+	{
+		return{
+			x: this.getPosition().getX(),
+			y: this.getPosition().getY(),
+			radius: this.getRadius()
+		}
+	}
 	moveBall()
 	{
 		this.position.add(this.vector);

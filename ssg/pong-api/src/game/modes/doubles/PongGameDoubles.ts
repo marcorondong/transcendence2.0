@@ -54,22 +54,10 @@ export class PongGameDoubles extends APongGame
 		const baseFrame = super.getBaseFrame();
 		return {
 			...baseFrame,
-			leftSecondPaddle:
-			{
-				...this.leftPaddletwo.getPaddleJson()
-			},
-			leftPaddle:
-			{
-				...this.leftPaddleOne.getPaddleJson()
-			},
-			rightSecondPaddle:
-			{
-				...this.rightPaddletwo.getPaddleJson()
-			},
-			rightPaddle:
-			{
-				...this.rightPaddleOne.getPaddleJson()
-			}
+			leftSecondPaddle:this.leftPaddletwo.getPaddleJson(),
+			leftPaddle:this.leftPaddleOne.getPaddleJson(),
+			rightSecondPaddle:this.rightPaddletwo.getPaddleJson(),
+			rightPaddle:this.rightPaddleOne.getPaddleJson()
 		}
 		
 	}
