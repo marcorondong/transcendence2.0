@@ -27,9 +27,9 @@ export class PongGameDoubles extends PongGame
 
 	static createStandardGameDobules(): PongGameDoubles
 	{
-		const leftPaddle: Paddle = new Paddle(new Point(-4, 1.25), 0.5);
+		const leftPaddle: Paddle = new Paddle(new Point(-3.5, 1.25), 0.5);
 		const leftPaddletwo: Paddle = new Paddle(new Point(-4, -1.25), 0.5);
-		const rightPaddle: Paddle = new Paddle(new Point(4, 1.25), 0.5);
+		const rightPaddle: Paddle = new Paddle(new Point(3.5, 1.25), 0.5);
 		const rightPaddletwo: Paddle = new Paddle(new Point(4, -1.25), 0.5);
 		const ball: Ball = new Ball(new Point(0, 1.25));
 		const table: PongField = new PongField();
