@@ -5,6 +5,7 @@ import { RoomEvents } from "../customEvents";
 import { PongRoomDoubles } from "../game/modes/doubles/PongRoomDoubles";
 import { APongRoom } from "../game/APongRoom";
 import { PongGameSingles } from "../game/modes/singles/PongGameSingles";
+import { APongGame } from "../game/modes/APongGame";
 
 export class SingleMatchMaking
 {
@@ -54,7 +55,7 @@ export class SingleMatchMaking
 		return freshRoom;
 	}
 
-	removeRoom(room: APongRoom<PongGameSingles>):boolean 
+	removeRoom(room: APongRoom<APongGame>):boolean 
 	{
 		return this.singleMatches.delete(room.getId());
 	}
@@ -94,7 +95,7 @@ export class SingleMatchMaking
 		return toReturn
 	}
 
-	private cleanRoom(roomToClean:APongRoom<PongGameSingles>)
+	private cleanRoom(roomToClean:APongRoom<APongGame>)
 	{
 		if(roomToClean.isRoomCleaned() === true)
 			return;
@@ -105,14 +106,14 @@ export class SingleMatchMaking
 		this.removeRoom(roomToClean);
 	}
 
-	private async lobbyMatchMonitor(room:APongRoom<PongGameSingles>)
+	private async lobbyMatchMonitor(room:APongRoom<APongGame>)
 	{
 		room.setRoomCleanedStatus(false);
 		this.lobbyMonitor(room);
 		this.matchMonitor(room);
 	}
 
-	private async lobbyMonitor(room:APongRoom<PongGameSingles>)
+	private async lobbyMonitor(room:APongRoom<APongGame>)
 	{
 		room.on(RoomEvents.EMPTY, ()=>
 		{
@@ -128,7 +129,7 @@ export class SingleMatchMaking
 		})
 	}
 
-	private async matchMonitor(room:APongRoom<PongGameSingles>)
+	private async matchMonitor(room:APongRoom<APongGame>)
 	{
 		await room.getGame().waitForFinalWhistle();
 		console.log("match monitor Game finished", room.getId());

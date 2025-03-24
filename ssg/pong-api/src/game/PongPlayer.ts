@@ -3,6 +3,7 @@ import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "../customEvents";
 import { PongGameSingles } from "./modes/singles/PongGameSingles";
 import { Paddle } from "./elements/Paddle";
+import { APongGame } from "./modes/APongGame";
 
 export enum EPlayerStatus
 {
@@ -115,7 +116,7 @@ export class PongPlayer extends EventEmitter
 		this.connection.send(notification)
 	}
 
-	getPlayerPaddle<T extends PongGameSingles>(game: T): Paddle
+	getPlayerPaddle<T extends APongGame>(game: T): Paddle
 	{
 		return game.getPaddle(this.role)
 	}

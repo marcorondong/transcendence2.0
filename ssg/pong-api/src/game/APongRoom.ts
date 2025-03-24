@@ -1,5 +1,6 @@
 import { SessionRoom } from "../../../utils/SessionRoom";
-import { PongGameSingles, EGameStatus, IPongFrame} from "./modes/singles/PongGameSingles";
+import { APongGame, EGameStatus } from "./modes/APongGame";
+import { PongGameSingles, IPongFrameSingles} from "./modes/singles/PongGameSingles";
 import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered, ETeamSide} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
@@ -9,7 +10,7 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
-export abstract class APongRoom<T extends PongGameSingles> extends SessionRoom
+export abstract class APongRoom<T extends APongGame> extends SessionRoom
 {
 	protected isFrameGenerating: boolean;
 	protected isCleaned:boolean;
@@ -110,7 +111,7 @@ export abstract class APongRoom<T extends PongGameSingles> extends SessionRoom
 
 	sendCurrentFrame():void
 	{
-		const frame: IPongFrame | IPongFrameDoubles = this.getGameFrame();
+		const frame: IPongFrameSingles | IPongFrameDoubles = this.getGameFrame();
 		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)
