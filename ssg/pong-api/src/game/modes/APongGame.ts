@@ -166,8 +166,6 @@ export abstract class APongGame extends EventEmitter
 	{
 		if(this.getGameStatus() === EGameStatus.RUNNING)
 		{
-			//const deltaTime = timestamp - this.lastFrameTime;
-			//this.lastFrameTime = timestamp;
 			this.renderNextFrame();
 		}
 		raf((timestamp:number)=> this.gameLoop(timestamp))
@@ -306,57 +304,55 @@ export abstract class APongGame extends EventEmitter
 		return false
 	}
 
-		protected sideMechanics(side: "left" | "right", closestPaddle: Paddle):void 
+	protected sideMechanics(side: "left" | "right", closestPaddle: Paddle):void 
+	{
+		const ballY = this.ball.getPosition().getY();
+		let edgeX;
+		if(side === "left")
+			edgeX = this.field.LEFT_EDGE_X;
+		else
+			edgeX = this.field.RIGHT_EDGE_X;
+		const EdgePoint:Point = new Point(edgeX, ballY);
+		const impactPointPaddle:Point | false = this.paddleBounce(closestPaddle, this.ball.getDirection().getX());
+		if(impactPointPaddle !== false)
 		{
-			const ballY = this.ball.getPosition().getY();
-			let edgeX;
-			if(side === "left")
-				edgeX = this.field.LEFT_EDGE_X;
-			else
-				edgeX = this.field.RIGHT_EDGE_X;
-			const EdgePoint:Point = new Point(edgeX, ballY);
-			const impactPointPaddle:Point | false = this.paddleBounce(closestPaddle, this.ball.getDirection().getX());
-			if(impactPointPaddle !== false)
-			{
-				const bounceDir:Point = this.ball.caluclateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
-				return this.ball.setDirection(bounceDir);
-			}
-			if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
-				return this.scoredGoal(side);
+			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
+			return this.ball.setDirection(bounceDir);
 		}
+		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
+			return this.scoredGoal(side);
+	}
 	
-		protected ballMovementMechanics():void
+	protected ballMovementMechanics():void
+	{
+		if(this.topEdgeCollision() || this.bottomEdgeCollision())
+			return this.ball.simpleBounceY();
+		if(this.ball.isMovingLeft())
 		{
-			if(this.topEdgeCollision() || this.bottomEdgeCollision())
-				return this.ball.simpleBounceY();
-			if(this.ball.isMovingLeft())
-			{
-				return this.sideMechanics("left", this.getCloserLeftPaddle());
-			}
-			if(this.ball.isMovingRight())
-			{
-				return this.sideMechanics("right", this.getCloserRightPaddle());
-			}
+			return this.sideMechanics("left", this.getCloserLeftPaddle());
 		}
-	
-	
-		//TODO it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
-		/**
-		 * 
-		 * @param paddle 
-		 * @returns either false or Point it hits
-		 */
-		private paddleBounce(paddle:Paddle, ballDirectionX:number): false | Point
+		if(this.ball.isMovingRight())
 		{
-			const paddleHitPoints = paddle.getPaddleHitBoxPoints(ballDirectionX);
-			for(const point of paddleHitPoints)
-			{
-				if(this.ball.isHit(point) == true)
-				{
-					return point;
-				}
-			}
-			return false;
+			return this.sideMechanics("right", this.getCloserRightPaddle());
 		}
+	}
 	
+	//TODO it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
+	/**
+	 * 
+	 * @param paddle 
+	 * @returns either false or Point it hits
+	 */
+	private paddleBounce(paddle:Paddle, ballDirectionX:number): false | Point
+	{
+		const paddleHitPoints = paddle.getPaddleHitBoxPoints(ballDirectionX);
+		for(const point of paddleHitPoints)
+		{
+			if(this.ball.isHit(point) == true)
+			{
+				return point;
+			}
+		}
+		return false;
+	}
 }
