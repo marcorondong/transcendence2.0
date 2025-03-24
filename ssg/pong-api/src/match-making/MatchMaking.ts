@@ -25,10 +25,10 @@ export class MatchMaking
 			this.spectatorJoiner(connection, query.roomId);
 	}
 
-	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament" | "doubles", tournamentSize:number)
+	private playerJoiner(connection: WebSocket,matchType: "singles" | "tournament" | "doubles", tournamentSize:number)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
-		if(matchType === "single")
+		if(matchType === "singles")
 		{
 			this.singlesManger.putPlayerinRandomRoom(player)
 		}
