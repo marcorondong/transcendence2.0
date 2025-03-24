@@ -187,7 +187,7 @@ export abstract class APongGame extends EventEmitter
 		else 
 			strikerSide = "left"
 		this.score.score(strikerSide);
-		this.ball.setPosition(new Point(0,0));
+		this.ball.resetPosition();
 		this.ball.resetDirection(goalSide);
 		this.resetPaddlePosition();
 	}

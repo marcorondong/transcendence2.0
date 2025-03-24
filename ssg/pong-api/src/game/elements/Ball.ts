@@ -12,6 +12,7 @@ export interface IBallJson
 export class Ball
 {
 	protected position:Point;
+	readonly initialPosition: Point;
 	protected vector:Point;
 	readonly radius;
 	readonly speed:number;
@@ -19,6 +20,7 @@ export class Ball
 
 	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
+		this.initialPosition = new Point(position.getX(), position.getY());
 		this.position = position;
 		this.vector = vector;
 		this.initialVector = vector;
@@ -57,6 +59,12 @@ export class Ball
 		}
 		this.vector = this.initialVector;
 		this.vector.setX(newX);
+	}
+
+	resetPosition():void 
+	{
+		this.position.setX(this.initialPosition.getX());
+		this.position.setY(this.initialPosition.getY());
 	}
 	
 	getDirection(): Point
