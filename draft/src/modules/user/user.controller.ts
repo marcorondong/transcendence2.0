@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUser, findUserByEmail, verifyPassword, generateAccessToken } from "./user.service";
+import { createUser, findUserByEmail, verifyPassword, generateAccessToken, findUsers } from "./user.service";
 import { CreateUserInput, loginInput } from "./user.schema";
 
 
@@ -42,4 +42,10 @@ export async function loginHandler(request: FastifyRequest<{Body: loginInput}>, 
 	
 	const accessToken = await generateAccessToken(user);
 	return reply.code(200).send({ message: 'Login successful', accessToken: accessToken });
+}
+
+export async function getUsersHandler() {
+	const users = await findUsers();
+
+	return users;
 }

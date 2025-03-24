@@ -44,3 +44,15 @@ export async function generateAccessToken(user: any) {
 	const token = myFastifyServer.jwt.sign({ user });
 	return token;
 }
+
+export async function findUsers() {
+	const users = await prisma.user.findMany({
+		select: {
+			id: true,
+			email: true,
+			name: true,
+			password: true,
+		},
+	});
+	return users;
+}

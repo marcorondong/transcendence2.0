@@ -16,4 +16,7 @@ npx prisma migrate reset
 rm -rf prisma/migrations
 npx prisma migrate dev --name init
 
+# links
+jwt.io
+
 

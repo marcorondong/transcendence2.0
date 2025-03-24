@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { registerUserHandler, loginHandler } from './user.controller';
+import { registerUserHandler, loginHandler, getUsersHandler } from './user.controller';
 import { createUserSchema, createUserResponseSchema, loginSchema, loginResponseSchema } from './user.schema';
 
 
@@ -29,6 +29,8 @@ async function userRoutes(fastifyUser: FastifyInstance) {
 		}, 
 		loginHandler
 	);
+
+	fastifyUser.get('/', {preHandler: [fastifyUser.authenticate]},  getUsersHandler);
 
 	fastifyUser.get('/hello', async (request, reply) => {
 		return { "Hello World": "Hello World" };

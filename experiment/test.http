@@ -37,3 +37,6 @@ Content-Type: application/json
     ├── schemas.ts -> schemas of opts
     ├── controllers.ts -> handlers of opts
     └── interfaces.ts -> interfaces to provide type safety
+
+###
+--legacy-peer-deps

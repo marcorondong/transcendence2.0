@@ -3,6 +3,9 @@ import myFastify, { FastifyReply, FastifyRequest } from 'fastify';
 import userRoutes from './modules/user/user.route';
 import fastifyBcrypt from 'fastify-bcrypt';
 import fastifyJWT from '@fastify/jwt';
+import cors from '@fastify/cors';
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from "fastify-type-provider-zod";
 
 const PORT = 4000;
@@ -13,12 +16,23 @@ export const myFastifyServer = myFastify({
 	logger: false
 }).withTypeProvider<ZodTypeProvider>();
 
+declare module 'fastify' {
+	export interface FastifyInstance {
+		authenticate: any;
+	}
+}
+
 myFastifyServer.setValidatorCompiler(validatorCompiler);
 myFastifyServer.setSerializerCompiler(serializerCompiler);
 
 // for (const schema of [userSchemas.createUserSchema, userSchemas.createUserResponseSchema]) {
 // 	myFastifyServer.addSchema(schema);
 // }
+
+myFastifyServer.register(cors, {
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  });
 
 myFastifyServer.register(fastifyJWT, {secret: 'this_is password_should_be_passed_with_docker_secret'});
 myFastifyServer.decorate(
@@ -32,6 +46,25 @@ myFastifyServer.decorate(
 			.send({ message: 'Authentication required' });
 	}
 });
+
+myFastifyServer.register(fastifySwagger, {
+	swagger: {
+		info: {
+		  title: "Fastify API",
+		  description: "API Documentation with Fastify and Swagger",
+		  version: "1.0.0",
+		},
+		host: "localhost:4000",
+		schemes: ["http"],
+		consumes: ["application/json"],
+		produces: ["application/json"],
+	  }
+});
+
+myFastifyServer.register(fastifySwaggerUi, {
+	routePrefix: "/documentation"
+});
+
 myFastifyServer.register(userRoutes, { prefix: "api/users" });
 
 myFastifyServer.register(fastifyBcrypt, { saltWorkFactor: saltRounds });
