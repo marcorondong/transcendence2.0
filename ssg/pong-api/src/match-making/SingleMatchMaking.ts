@@ -35,17 +35,17 @@ export class SingleMatchMaking
 		this.addPlayerToRoom(player, roomForPlayer);
 	}
 
-	createRoomSingles():PongRoomSingles
+	createRoomSingles(privateRoom: boolean):PongRoomSingles
 	{
-		const freshRoom:PongRoomSingles = new PongRoomSingles(false);
+		const freshRoom:PongRoomSingles = new PongRoomSingles(privateRoom);
 		this.singleMatches.set(freshRoom.getId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
 	}
 
-	createRoomDoubles(): PongRoomDoubles
+	createRoomDoubles(privateRoom: boolean): PongRoomDoubles
 	{
-		const freshRoom: PongRoomDoubles = new PongRoomDoubles(false);
+		const freshRoom: PongRoomDoubles = new PongRoomDoubles(privateRoom);
 		this.doubleMatches.set(freshRoom.getId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
@@ -90,8 +90,8 @@ export class SingleMatchMaking
 		}
 		if (toReturn === false) {
 			return (roomType === "singles" 
-				? (this.createRoomSingles() as unknown as T)
-				: (this.createRoomDoubles() as unknown as T));
+				? (this.createRoomSingles(false) as unknown as T)
+				: (this.createRoomDoubles(false) as unknown as T));
 		}
 		return toReturn
 	}
