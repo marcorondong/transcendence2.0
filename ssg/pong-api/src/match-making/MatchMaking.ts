@@ -21,17 +21,27 @@ export class MatchMaking
 	matchJoiner(connection: WebSocket, query: IGameRoomQuery)
 	{
 		if(query.clientType === "player")
-			this.playerJoiner(connection, query.matchType,query.tournamentSize);
+			this.playerJoiner(connection, query.matchType,query.tournamentSize, query.roomId);
 		else if(query.clientType === "spectator")
 			this.spectatorJoiner(connection, query.roomId);
 	}
 
-	private playerJoiner(connection: WebSocket, matchType: "singles" | "tournament" | "doubles", tournamentSize:number)
+	private playerJoiner(connection: WebSocket, matchType: "singles" | "tournament" | "doubles", tournamentSize:number, roomId: string | 0)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
 		if(matchType === "singles")
 		{
-			this.singlesManger.putPlayerinRandomRoom(player)
+			if(roomId === 0)
+				this.singlesManger.putPlayerinRandomRoom(player)
+			else 
+				this.singlesManger.putPlayerInPrivateRoom(player, roomId, "singles");
+		}
+		else if(matchType === "doubles")
+		{
+			if(roomId === 0)
+				this.singlesManger.putPlayerinRandomRoomDoubles(player)
+			else 
+				this.singlesManger.putPlayerInPrivateRoom(player, roomId, "doubles");
 		}
 		else if(matchType === "tournament")
 		{
@@ -41,10 +51,6 @@ export class MatchMaking
 				tournamentSize = Tournament.getDefaultTournamnetSize();
 			}
 			this.tournamentManager.putPlayerInTournament(player, tournamentSize);
-		}
-		else if(matchType === "doubles")
-		{
-			this.singlesManger.putPlayerinRandomRoomDoubles(player)
 		}
 	}
 	

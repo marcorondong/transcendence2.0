@@ -23,6 +23,20 @@ export class SingleMatchMaking
 		return joinedMap;
 	}
 	
+	putPlayerInPrivateRoom(player: PongPlayer, roomId: string, mode: "singles" | "doubles")
+	{
+		let privateRoom:APongRoom<APongGame> | undefined = this.getAllMatches().get(roomId);
+		if(privateRoom === undefined)
+			return this.createHostPrivateRoom(player, mode);
+		else 
+		{
+			if(privateRoom.isFull() === false)
+				this.addPlayerToRoom(player, privateRoom);
+			else 
+				player.sendNotification("Private room is full");
+		}
+	}
+
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoomSingles = this.findRoomToJoin(this.singleMatches, "singles");
@@ -53,7 +67,7 @@ export class SingleMatchMaking
 
 	removeRoom(room: APongRoom<APongGame>):boolean 
 	{
-		if(room instanceof PongGameSingles)
+		if(room instanceof PongRoomSingles)
 			return this.singleMatches.delete(room.getId());
 		else if(room instanceof PongRoomDoubles)
 			return this.doubleMatches.delete(room.getId());
@@ -94,6 +108,22 @@ export class SingleMatchMaking
 				: (this.createRoomDoubles(false) as unknown as T));
 		}
 		return toReturn
+	}
+
+
+	private createHostPrivateRoom(host: PongPlayer, mode: "singles" | "doubles")
+	{
+		if(mode === "singles")
+		{
+			const privateRoomForPlayer = this.createRoomSingles(true);
+			this.addPlayerToRoom(host, privateRoomForPlayer)
+		}
+		else if(mode === "doubles")
+		{
+			const privateRoomForPlayer = this.createRoomDoubles(true);
+			this.addPlayerToRoom(host, privateRoomForPlayer);
+		}
+		return;
 	}
 
 	private addPlayerToRoom(player: PongPlayer, room:APongRoom<APongGame>)
