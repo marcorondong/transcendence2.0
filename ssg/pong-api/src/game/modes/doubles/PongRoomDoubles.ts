@@ -17,6 +17,19 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		this.setMatchName("doubles match");
 	}
 
+	calculateMissingPlayers(): number {
+		let counter = 0;
+		if(this.leftPlayerOne === undefined)
+			counter++;
+		if(this.rightPlayerOne === undefined)
+			counter++;
+		if(this.leftPlayerTwo === undefined)
+			counter++;
+		if(this.rightPlayerTwo === undefined)
+			counter++;
+		return counter;
+	}
+
 	getLeftCaptain(): PongPlayer {
 		if (this.leftPlayerOne === undefined)
 			throw Error("Left player dont exist")

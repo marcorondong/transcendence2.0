@@ -24,6 +24,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	abstract getLeftCaptain(): PongPlayer;
 	abstract getRightCaptain(): PongPlayer;
 	abstract getGameFrame(): any;
+	abstract calculateMissingPlayers(): number
 	
 	constructor(privateRoom:boolean = false, match:T)
 	{
@@ -106,6 +107,10 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.disconnectBehaviour(player);
 		if(this.isFull())
 			this.emit(RoomEvents.FULL, this);
+		else
+		{
+			this.sendLobbyUpdate(player);
+		}
 	}
 
 	sendCurrentFrame():void
@@ -114,6 +119,13 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)
+	}
+
+	private sendLobbyUpdate(player: PongPlayer)
+	{
+		const announcement = `You are player [${player.getPlayerRoleString()}] wait for ${this.calculateMissingPlayers()} more player to join`;
+		const announcementJson = APongRoom.createMatchStatusUpdate(announcement);
+		player.sendNotification(JSON.stringify(announcementJson));
 	}
 
 	private sendFrames()

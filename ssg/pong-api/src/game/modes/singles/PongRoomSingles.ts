@@ -42,6 +42,15 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		return this.rightPlayer;
 	}
 
+	calculateMissingPlayers(): number {
+		let counter = 0;
+		if(this.leftPlayer === undefined)
+			counter++;
+		if(this.rightPlayer === undefined)
+			counter++;
+		return counter;
+	}
+
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingles
 	{
 		const room:PongRoomSingles = new PongRoomSingles();
