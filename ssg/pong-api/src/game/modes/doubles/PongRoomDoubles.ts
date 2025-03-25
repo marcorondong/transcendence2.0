@@ -100,33 +100,29 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		}
 	}
 
-	removePlayer(player: PongPlayer): void
+	removePlayer(player: PongPlayer)
 	{
 		switch(player.getPlayerRole())
 		{
 			case EPlayerRole.LEFT_ONE:
 			{
-				this.unsetPlayer(this.leftPlayerOne);
-				break;
-			}
-			case EPlayerRole.LEFT_TWO:
-			{
-				this.unsetPlayer(this.leftPlayerTwo);
-				break;
+				this.leftPlayerOne = undefined
+				return;
 			}
 			case EPlayerRole.RIGHT_ONE:
 			{
-				this.unsetPlayer(this.rightPlayerOne)
-				break;
+				this.rightPlayerOne = undefined
+				return;
+			}
+			case EPlayerRole.LEFT_TWO:
+			{
+				this.leftPlayerTwo = undefined
+				return;
 			}
 			case EPlayerRole.RIGHT_TWO:
 			{
-				this.unsetPlayer(this.rightPlayerTwo)
-				break;
-			}
-			default:
-			{
-				throw new Error("Player role is unkown for unseting");
+				this.rightPlayerTwo = undefined
+				return;
 			}
 		}
 	}
@@ -158,10 +154,4 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 			throw new Error("Trying to overwrite right player two");
 		this.rightPlayerTwo = player;
 	}
-
-	private unsetPlayer(roomPlayer:PongPlayer | undefined)
-	{
-		roomPlayer = undefined;
-	}
-
 }
