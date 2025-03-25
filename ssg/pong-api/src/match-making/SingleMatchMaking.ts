@@ -138,7 +138,7 @@ export class SingleMatchMaking
 		if(roomToClean.isRoomCleaned() === true)
 			return;
 		roomToClean.sendCurrentFrame(); //send last frame that notify client of finished game.
-		console.log("Clean function");
+		console.log(`Clean function on room ${roomToClean.getId()}`);
 		roomToClean.setRoomCleanedStatus(true);
 		roomToClean.closeAllConecctionsFromRoom();
 		this.removeRoom(roomToClean);
@@ -155,13 +155,13 @@ export class SingleMatchMaking
 	{
 		room.on(RoomEvents.EMPTY, ()=>
 		{
-			console.log("Lobby monitor Removing empty room: ");
+			console.log("Lobby monitor Removing empty room: ", room.getId());
 			this.cleanRoom(room);
 		})
 
 		room.on(RoomEvents.FULL, ()=>
 		{
-			console.log("Room is full lets get started");
+			console.log(`Room ${room.getId()} is full lets get started`);
 			room.getAndSendFramesOnce();
 			room.getGame().startGame();
 		})
@@ -170,7 +170,7 @@ export class SingleMatchMaking
 	private async matchMonitor(room:APongRoom<APongGame>)
 	{
 		await room.getGame().waitForFinalWhistle();
-		console.log("match monitor Game finished", room.getId());
+		console.log("matchMonitor: Game finished", room.getId());
 		this.cleanRoom(room);
 	}
 }

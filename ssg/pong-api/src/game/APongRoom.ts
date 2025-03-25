@@ -204,10 +204,10 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	{
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
-			console.log("We have rage quitter here");
+			console.log("Player disconnect");
 			if(this.game.getGameStatus() === EGameStatus.RUNNING)
 			{
-				console.log("Since game is rage quiter lost");
+				console.log("Game was runnig. Rage quiter side lost");
 				this.game.forfeitGame(player.getTeamSideLR());
 			}
 			else 
