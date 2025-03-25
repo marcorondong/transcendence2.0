@@ -17,9 +17,10 @@ export class SingleMatchMaking
 		this.doubleMatches = new Map<string, PongRoomDoubles>();
 	}
 
-	getAllMatches()
+	getAllMatches(): Map<string, APongRoom<APongGame>>
 	{
-		return this.singleMatches;
+		const joinedMap = new Map<string, APongRoom<APongGame>>([...this.singleMatches, ...this.doubleMatches]);
+		return joinedMap;
 	}
 	
 	putPlayerinRandomRoom(player: PongPlayer)
