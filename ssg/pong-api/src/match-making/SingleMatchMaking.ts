@@ -53,7 +53,12 @@ export class SingleMatchMaking
 
 	removeRoom(room: APongRoom<APongGame>):boolean 
 	{
-		return this.singleMatches.delete(room.getId());
+		if(room instanceof PongGameSingles)
+			return this.singleMatches.delete(room.getId());
+		else if(room instanceof PongRoomDoubles)
+			return this.doubleMatches.delete(room.getId());
+		else 
+			throw new Error("Unknown instance of room");
 	}
 
 	getRoom(roomId:string)
