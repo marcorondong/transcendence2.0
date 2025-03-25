@@ -26,7 +26,7 @@ export interface IPongFrameBase
 {
 	ball: IBallJson;
 	score: IScore;
-	matchStatus: EGameStatus
+	matchStatus: string
 }
 
 export abstract class APongGame extends EventEmitter
@@ -55,6 +55,21 @@ export abstract class APongGame extends EventEmitter
 	getGameStatus(): EGameStatus
 	{
 		return this.gameStatus;
+	}
+
+	getGameStatusString(): string 
+	{
+		switch(this.gameStatus)
+		{
+			case EGameStatus.FINISHED :
+				return "Game finished";
+			case EGameStatus.NOT_STARTED:
+				return "Game didnt start yet. Lobby phase"
+			case EGameStatus.PAUSED:
+				return "Game is paused"
+			case EGameStatus.RUNNING:
+				return "Game is running";
+		}
 	}
 
 	setGameStatus(newStatus:EGameStatus)
@@ -127,7 +142,7 @@ export abstract class APongGame extends EventEmitter
 	{
 		return {
 			score: this.score.getScoreJson(), 
-			matchStatus: this.getGameStatus(),
+			matchStatus: this.getGameStatusString(),
 			ball: this.ball.getBallJson()
 		}
 	}

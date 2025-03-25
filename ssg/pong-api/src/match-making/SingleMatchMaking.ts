@@ -13,29 +13,26 @@ export class SingleMatchMaking
 
 	constructor()
 	{
-		this.singleMatches = new Map<string,PongRoomSingles>();
+		this.singleMatches = new Map<string, PongRoomSingles>();
 		this.doubleMatches = new Map<string, PongRoomDoubles>();
 	}
 
-	getAllMatches()
+	getAllMatches(): Map<string, APongRoom<APongGame>>
 	{
-		return this.singleMatches;
+		const joinedMap = new Map<string, APongRoom<APongGame>>([...this.singleMatches, ...this.doubleMatches]);
+		return joinedMap;
 	}
 	
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoomSingles = this.findRoomToJoin(this.singleMatches, "singles");
-		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
-		player.setPlayerRole(playerRole)
-		roomForPlayer.addPlayer(player);
+		this.addPlayerToRoom(player, roomForPlayer);
 	}
 
 	putPlayerinRandomRoomDoubles(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoomDoubles = this.findRoomToJoin(this.doubleMatches, "doubles");
-		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
-		player.setPlayerRole(playerRole)
-		roomForPlayer.addPlayer(player);
+		this.addPlayerToRoom(player, roomForPlayer);
 	}
 
 	createRoomSingles():PongRoomSingles
@@ -56,7 +53,12 @@ export class SingleMatchMaking
 
 	removeRoom(room: APongRoom<APongGame>):boolean 
 	{
-		return this.singleMatches.delete(room.getId());
+		if(room instanceof PongGameSingles)
+			return this.singleMatches.delete(room.getId());
+		else if(room instanceof PongRoomDoubles)
+			return this.doubleMatches.delete(room.getId());
+		else 
+			throw new Error("Unknown instance of room");
 	}
 
 	getRoom(roomId:string)
@@ -92,6 +94,13 @@ export class SingleMatchMaking
 				: (this.createRoomDoubles() as unknown as T));
 		}
 		return toReturn
+	}
+
+	private addPlayerToRoom(player: PongPlayer, room:APongRoom<APongGame>)
+	{
+		const playerRole:EPlayerRole = room.getMissingPlayerRole();
+		player.setPlayerRole(playerRole)
+		room.addPlayer(player);
 	}
 
 	private cleanRoom(roomToClean:APongRoom<APongGame>)

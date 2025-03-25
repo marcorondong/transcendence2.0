@@ -65,6 +65,24 @@ export class PongPlayer extends EventEmitter
 		return this.role;
 	}
 
+
+	getPlayerRoleString() :string
+	{
+		switch(this.role)
+		{
+			case EPlayerRole.LEFT_ONE:
+				return "Left one";
+			case EPlayerRole.RIGHT_ONE:
+				return "Right one";
+			case EPlayerRole.LEFT_TWO:
+				return "Left two";
+			case EPlayerRole.RIGHT_TWO:
+				return "Right two";
+			default:
+				return "Unknown player role";
+		}
+	}
+
 	getTeamSideLR(): ETeamSideFiltered
 	{
 		const LRside = this.side;

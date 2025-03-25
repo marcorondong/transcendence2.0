@@ -15,6 +15,23 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		this.setMatchName("single match");
 	}
 
+	updateOthers(message: string): void {
+		return;
+	}
+	
+	sendLobbyUpdateToEveryone(extraInfo:string): void {
+		if(this.leftPlayer !== undefined)
+			this.sendLobbyUpdate(this.leftPlayer, extraInfo);
+		if(this.rightPlayer !== undefined)
+			this.sendLobbyUpdate(this.rightPlayer, extraInfo);
+	}
+
+	isEmpty(): boolean {
+		if(this.leftPlayer === undefined && this.rightPlayer === undefined)
+			return true;
+		return false;
+	}
+
 	getGameFrame() {
 		return this.getGame().getFrame();
 	}
@@ -40,6 +57,15 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		if (this.rightPlayer === undefined)
 			throw Error("Left player dont exist")
 		return this.rightPlayer;
+	}
+
+	calculateMissingPlayers(): number {
+		let counter = 0;
+		if(this.leftPlayer === undefined)
+			counter++;
+		if(this.rightPlayer === undefined)
+			counter++;
+		return counter;
 	}
 
 	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingles
