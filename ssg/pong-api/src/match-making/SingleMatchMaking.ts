@@ -26,17 +26,13 @@ export class SingleMatchMaking
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoomSingles = this.findRoomToJoin(this.singleMatches, "singles");
-		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
-		player.setPlayerRole(playerRole)
-		roomForPlayer.addPlayer(player);
+		this.addPlayerToRoom(player, roomForPlayer);
 	}
 
 	putPlayerinRandomRoomDoubles(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoomDoubles = this.findRoomToJoin(this.doubleMatches, "doubles");
-		const playerRole:EPlayerRole = roomForPlayer.getMissingPlayerRole();
-		player.setPlayerRole(playerRole)
-		roomForPlayer.addPlayer(player);
+		this.addPlayerToRoom(player, roomForPlayer);
 	}
 
 	createRoomSingles():PongRoomSingles
@@ -93,6 +89,13 @@ export class SingleMatchMaking
 				: (this.createRoomDoubles() as unknown as T));
 		}
 		return toReturn
+	}
+
+	private addPlayerToRoom(player: PongPlayer, room:APongRoom<APongGame>)
+	{
+		const playerRole:EPlayerRole = room.getMissingPlayerRole();
+		player.setPlayerRole(playerRole)
+		room.addPlayer(player);
 	}
 
 	private cleanRoom(roomToClean:APongRoom<APongGame>)
