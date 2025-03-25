@@ -17,6 +17,10 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		this.setMatchName("doubles match");
 	}
 
+	updateOthers(message: string): void {
+		this.sendLobbyUpdateToEveryone(message);
+	}
+
 	sendLobbyUpdateToEveryone(extraInfo: string): void
 	{
 		if(this.leftPlayerOne !== undefined)

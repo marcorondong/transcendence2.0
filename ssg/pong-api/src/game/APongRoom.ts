@@ -26,6 +26,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 
 
 	abstract sendLobbyUpdateToEveryone(extraInfo:string): void;
+	abstract updateOthers(message: string): void;
 	abstract isFull():boolean;
 	abstract isEmpty(): boolean;
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
@@ -189,7 +190,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 			else 
 			{
 				this.removePlayer(rageQuitPlayer);
-				this.sendLobbyUpdateToEveryone("Someone left lobby.");
+				this.updateOthers("Someone left");
 				if(this.isEmpty())
 					this.emit(RoomEvents.EMPTY, this);
 			}
