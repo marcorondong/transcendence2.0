@@ -13,7 +13,7 @@ export class SingleMatchMaking
 
 	constructor()
 	{
-		this.singleMatches = new Map<string,PongRoomSingles>();
+		this.singleMatches = new Map<string, PongRoomSingles>();
 		this.doubleMatches = new Map<string, PongRoomDoubles>();
 	}
 
