@@ -15,6 +15,19 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		this.setMatchName("single match");
 	}
 
+	sendLobbyUpdateToEveryone(extraInfo:string): void {
+		if(this.leftPlayer !== undefined)
+			this.sendLobbyUpdate(this.leftPlayer, extraInfo);
+		if(this.rightPlayer !== undefined)
+			this.sendLobbyUpdate(this.rightPlayer, extraInfo);
+	}
+
+	isEmpty(): boolean {
+		if(this.leftPlayer === undefined && this.rightPlayer === undefined)
+			return true;
+		return false;
+	}
+
 	getGameFrame() {
 		return this.getGame().getFrame();
 	}

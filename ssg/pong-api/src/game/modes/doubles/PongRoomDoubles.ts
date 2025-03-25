@@ -17,6 +17,25 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		this.setMatchName("doubles match");
 	}
 
+	sendLobbyUpdateToEveryone(extraInfo: string): void
+	{
+		if(this.leftPlayerOne !== undefined)
+			this.sendLobbyUpdate(this.leftPlayerOne, extraInfo);
+		if(this.rightPlayerOne !== undefined)
+			this.sendLobbyUpdate(this.rightPlayerOne, extraInfo);
+		if(this.leftPlayerTwo !== undefined)
+			this.sendLobbyUpdate(this.leftPlayerTwo, extraInfo);
+		if(this.rightPlayerTwo !== undefined)
+			this.sendLobbyUpdate(this.rightPlayerTwo, extraInfo);
+	}
+
+	isEmpty(): boolean {
+		if(this.leftPlayerOne === undefined && this.leftPlayerTwo === undefined
+			&& this.rightPlayerOne === undefined && this.rightPlayerTwo==undefined)
+			return true;
+		return false;
+	}
+
 	calculateMissingPlayers(): number {
 		let counter = 0;
 		if(this.leftPlayerOne === undefined)

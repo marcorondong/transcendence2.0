@@ -10,14 +10,24 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
+export enum EPongRoomState
+{
+	LOBBY,
+	GAME
+}
+
 export abstract class APongRoom<T extends APongGame> extends SessionRoom
 {
 	protected isFrameGenerating: boolean;
 	protected isCleaned:boolean;
 	protected game: T;
 	protected matchName: string;
+	protected roomState: EPongRoomState
 
+
+	abstract sendLobbyUpdateToEveryone(extraInfo:string): void;
 	abstract isFull():boolean;
+	abstract isEmpty(): boolean;
 	abstract getMissingPlayerRole():EPlayerRoleFiltered;
 	abstract setMissingPlayer(player:PongPlayer):void
 	abstract removePlayer(player:PongPlayer): void;
@@ -32,7 +42,8 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.isFrameGenerating = false;
 		this.isCleaned = false;
 		this.game = match;
-		this.matchName = "Unknown match"
+		this.matchName = "Unknown match";
+		this.roomState = EPongRoomState.LOBBY;
 	}
 	
 	static createMatchStatusUpdate(nottification: string)
@@ -52,6 +63,11 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	{
 		const loserSide = await this.getRoomLoserSide();
 		return this.fetchLoserCaptain(loserSide)
+	}
+
+	setPongRoomState(state: EPongRoomState)
+	{
+		this.roomState = state;
 	}
 
 	getAndSendFramesOnce()
@@ -105,11 +121,15 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.addConnectionToRoom(player.connection);
 		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
 		this.disconnectBehaviour(player);
+		this.sendLobbyUpdateToEveryone("Another player joined");
 		if(this.isFull())
+		{
+			this.setPongRoomState(EPongRoomState.GAME);
 			this.emit(RoomEvents.FULL, this);
+		}
 		else
 		{
-			this.sendLobbyUpdate(player);
+			this.sendLobbyUpdate(player, "Welcome!");
 		}
 	}
 
@@ -121,9 +141,9 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.roomBroadcast(frameJson)
 	}
 
-	private sendLobbyUpdate(player: PongPlayer)
+	protected sendLobbyUpdate(player: PongPlayer, extraInfo: string)
 	{
-		const announcement = `You are player [${player.getPlayerRoleString()}] wait for ${this.calculateMissingPlayers()} more player to join`;
+		const announcement = `${extraInfo} You are player [${player.getPlayerRoleString()}] wait for ${this.calculateMissingPlayers()} more player to join`;
 		const announcementJson = APongRoom.createMatchStatusUpdate(announcement);
 		player.sendNotification(JSON.stringify(announcementJson));
 	}
@@ -169,7 +189,9 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 			else 
 			{
 				this.removePlayer(rageQuitPlayer);
-				this.emit(RoomEvents.EMPTY, this);
+				this.sendLobbyUpdateToEveryone("Someone left lobby.");
+				if(this.isEmpty())
+					this.emit(RoomEvents.EMPTY, this);
 			}
 				
 		})
