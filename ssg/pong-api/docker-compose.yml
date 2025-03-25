@@ -3,8 +3,8 @@ services:
     image: pong-api-img 
     container_name: pong-api
     build:
-      context: ..
-      dockerfile: pong-api/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./src/:/pong/pong-api/src/
     ports:
