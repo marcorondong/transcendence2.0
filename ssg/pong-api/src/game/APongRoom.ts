@@ -1,10 +1,10 @@
-import { SessionRoom } from "../../../utils/SessionRoom";
+import { SessionRoom } from "../utils/SessionRoom";
 import { APongGame, EGameStatus } from "./modes/APongGame";
 import { IPongFrameSingles} from "./modes/singles/PongGameSingles";
 import { EPlayerRoleFiltered, PongPlayer, EPlayerStatus, ETeamSideFiltered, ETeamSide} from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
-import { Parser } from "../../../utils/Parser";
+import { Parser } from "../utils/Parser";
 import { RoomEvents } from "../customEvents";
 import { ClientEvents } from "../customEvents";
 import raf from "raf";
