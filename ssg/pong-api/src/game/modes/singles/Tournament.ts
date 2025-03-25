@@ -121,12 +121,12 @@ export class Tournament extends EventEmitter
 		{
 			const winner = await room.getRoomWinner();
 			const loser = await room.getRoomLoser();
-			console.log("Winner is ", winner.getTeamSide());
+			//console.log("Winner is ", winner.getTeamSide());
 			let notification = PongRoomSingles.createMatchStatusUpdate("You won, you will progress to next round once all matches of round are done");
 			if(room.getMatchName() === "finals")
 				notification = PongRoomSingles.createMatchStatusUpdate("TOUUURNAMENT WINNNER, PRASE and JANJE are yours");
 			winner.sendNotification(JSON.stringify(notification));
-			console.log("Loser is ", loser.getTeamSide());
+			//console.log("Loser is ", loser.getTeamSide());
 			notification = PongRoomSingles.createMatchStatusUpdate(`MoSt iMpOrTaNt tO pArTiCiPaTe; Kick out in ${room.getMatchName()}`);
 			loser.sendNotification(JSON.stringify(notification));
 			this.kickPlayer(loser);
@@ -160,7 +160,6 @@ export class Tournament extends EventEmitter
 		}
 		this.roundNumber /= 2;
 		await this.waitForWinners();
-		console.log("Now next round can begin");
 		this.removeAllGamesfromPool();
 		this.createAndStartRound();
 	}

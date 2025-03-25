@@ -6,7 +6,7 @@ import { APongRoom } from "../game/APongRoom";
 import { PongGameSingles } from "../game/modes/singles/PongGameSingles";
 import { APongGame } from "../game/modes/APongGame";
 
-export class SingleMatchMaking
+export class HeadToHeadMatchMaking
 {
 	private singleMatches: Map<string, PongRoomSingles>;
 	private doubleMatches: Map<string, PongRoomDoubles>
@@ -23,6 +23,20 @@ export class SingleMatchMaking
 		return joinedMap;
 	}
 	
+	putPlayerInPrivateRoom(player: PongPlayer, roomId: string, mode: "singles" | "doubles")
+	{
+		let privateRoom:APongRoom<APongGame> | undefined = this.getAllMatches().get(roomId);
+		if(privateRoom === undefined)
+			return this.createHostPrivateRoom(player, mode);
+		else 
+		{
+			if(privateRoom.isFull() === false)
+				this.addPlayerToRoom(player, privateRoom);
+			else 
+				player.sendNotification("Private room is full");
+		}
+	}
+
 	putPlayerinRandomRoom(player: PongPlayer)
 	{
 		const roomForPlayer:PongRoomSingles = this.findRoomToJoin(this.singleMatches, "singles");
@@ -35,17 +49,17 @@ export class SingleMatchMaking
 		this.addPlayerToRoom(player, roomForPlayer);
 	}
 
-	createRoomSingles():PongRoomSingles
+	createRoomSingles(privateRoom: boolean):PongRoomSingles
 	{
-		const freshRoom:PongRoomSingles = new PongRoomSingles(false);
+		const freshRoom:PongRoomSingles = new PongRoomSingles(privateRoom);
 		this.singleMatches.set(freshRoom.getId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
 	}
 
-	createRoomDoubles(): PongRoomDoubles
+	createRoomDoubles(privateRoom: boolean): PongRoomDoubles
 	{
-		const freshRoom: PongRoomDoubles = new PongRoomDoubles(false);
+		const freshRoom: PongRoomDoubles = new PongRoomDoubles(privateRoom);
 		this.doubleMatches.set(freshRoom.getId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
@@ -53,7 +67,7 @@ export class SingleMatchMaking
 
 	removeRoom(room: APongRoom<APongGame>):boolean 
 	{
-		if(room instanceof PongGameSingles)
+		if(room instanceof PongRoomSingles)
 			return this.singleMatches.delete(room.getId());
 		else if(room instanceof PongRoomDoubles)
 			return this.doubleMatches.delete(room.getId());
@@ -90,10 +104,26 @@ export class SingleMatchMaking
 		}
 		if (toReturn === false) {
 			return (roomType === "singles" 
-				? (this.createRoomSingles() as unknown as T)
-				: (this.createRoomDoubles() as unknown as T));
+				? (this.createRoomSingles(false) as unknown as T)
+				: (this.createRoomDoubles(false) as unknown as T));
 		}
 		return toReturn
+	}
+
+
+	private createHostPrivateRoom(host: PongPlayer, mode: "singles" | "doubles")
+	{
+		if(mode === "singles")
+		{
+			const privateRoomForPlayer = this.createRoomSingles(true);
+			this.addPlayerToRoom(host, privateRoomForPlayer)
+		}
+		else if(mode === "doubles")
+		{
+			const privateRoomForPlayer = this.createRoomDoubles(true);
+			this.addPlayerToRoom(host, privateRoomForPlayer);
+		}
+		return;
 	}
 
 	private addPlayerToRoom(player: PongPlayer, room:APongRoom<APongGame>)
@@ -108,7 +138,7 @@ export class SingleMatchMaking
 		if(roomToClean.isRoomCleaned() === true)
 			return;
 		roomToClean.sendCurrentFrame(); //send last frame that notify client of finished game.
-		console.log("Clean function");
+		console.log(`Clean function on room ${roomToClean.getId()}`);
 		roomToClean.setRoomCleanedStatus(true);
 		roomToClean.closeAllConecctionsFromRoom();
 		this.removeRoom(roomToClean);
@@ -125,13 +155,13 @@ export class SingleMatchMaking
 	{
 		room.on(RoomEvents.EMPTY, ()=>
 		{
-			console.log("Lobby monitor Removing empty room: ");
+			console.log("Lobby monitor Removing empty room: ", room.getId());
 			this.cleanRoom(room);
 		})
 
 		room.on(RoomEvents.FULL, ()=>
 		{
-			console.log("Room is full lets get started");
+			console.log(`Room ${room.getId()} is full lets get started`);
 			room.getAndSendFramesOnce();
 			room.getGame().startGame();
 		})
@@ -140,7 +170,7 @@ export class SingleMatchMaking
 	private async matchMonitor(room:APongRoom<APongGame>)
 	{
 		await room.getGame().waitForFinalWhistle();
-		console.log("match monitor Game finished", room.getId());
+		console.log("matchMonitor: Game finished", room.getId());
 		this.cleanRoom(room);
 	}
 }

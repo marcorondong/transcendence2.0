@@ -56,6 +56,13 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		}
 	}
 
+	getRoomIdJSON()
+	{
+		return{
+			roomId: this.getId()
+		}
+	}
+
 	async getRoomWinner():Promise<PongPlayer>
 	{
 		const winnerSide = await this.getRoomWinnerSide();
@@ -154,7 +161,15 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	{
 		const announcement = `${extraInfo} You are player [${player.getPlayerRoleString()}] wait for ${this.calculateMissingPlayers()} more player to join`;
 		const announcementJson = APongRoom.createMatchStatusUpdate(announcement);
-		player.sendNotification(JSON.stringify(announcementJson));
+		const roomIdJson = this.getRoomIdJSON();
+		const message = JSON.stringify(
+			{
+				...roomIdJson,
+				...announcementJson
+			}
+		);
+
+		player.sendNotification(message);
 	}
 
 	private sendFrames()
@@ -189,10 +204,10 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	{
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
 		{
-			console.log("We have rage quitter here");
+			console.log("Player disconnect");
 			if(this.game.getGameStatus() === EGameStatus.RUNNING)
 			{
-				console.log("Since game is rage quiter lost");
+				console.log("Game was runnig. Rage quiter side lost");
 				this.game.forfeitGame(player.getTeamSideLR());
 			}
 			else 
