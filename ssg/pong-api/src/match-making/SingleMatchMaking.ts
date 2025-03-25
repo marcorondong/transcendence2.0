@@ -6,7 +6,7 @@ import { APongRoom } from "../game/APongRoom";
 import { PongGameSingles } from "../game/modes/singles/PongGameSingles";
 import { APongGame } from "../game/modes/APongGame";
 
-export class SingleMatchMaking
+export class HeadToHeadMatchMaking
 {
 	private singleMatches: Map<string, PongRoomSingles>;
 	private doubleMatches: Map<string, PongRoomDoubles>
