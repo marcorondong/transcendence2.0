@@ -5,14 +5,12 @@ export class SessionRoom extends EventEmitter
 {
 	protected readonly id: string;
 	protected connections: Set<WebSocket> = new Set<WebSocket>();
-	protected privateRoom: boolean;
 	protected readonly creationDate:Date; 
 	
-	constructor(privateRoom:boolean = false)
+	constructor()
 	{
 		super();
 		this.id = crypto.randomUUID();
-		this.privateRoom = privateRoom;
 		this.creationDate = new Date();
 	}
 
@@ -58,11 +56,6 @@ export class SessionRoom extends EventEmitter
 		{
 			oneConnection.send(message);
 		}
-	}
-
-	isPrivate():boolean
-	{
-		return this.privateRoom;
 	}
 
 	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean

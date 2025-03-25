@@ -23,6 +23,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	protected game: T;
 	protected matchName: string;
 	protected roomState: EPongRoomState
+	protected readonly privateRoom: boolean;
 
 
 	abstract sendLobbyUpdateToEveryone(extraInfo:string): void;
@@ -37,9 +38,10 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	abstract getGameFrame(): any;
 	abstract calculateMissingPlayers(): number
 	
-	constructor(privateRoom:boolean = false, match:T)
+	constructor(privateRoom:boolean, match:T)
 	{
-		super(privateRoom);
+		super();
+		this.privateRoom = privateRoom;
 		this.isFrameGenerating = false;
 		this.isCleaned = false;
 		this.game = match;
@@ -64,6 +66,12 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	{
 		const loserSide = await this.getRoomLoserSide();
 		return this.fetchLoserCaptain(loserSide)
+	}
+
+
+	isPrivate()
+	{
+		return this.privateRoom;
 	}
 
 	setPongRoomState(state: EPongRoomState)
