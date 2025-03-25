@@ -2,6 +2,8 @@ import { WebSocket, RawData } from 'ws';
 import { PongField } from '../ssg/pong-api/src/game/PongField';
 import { Point } from '../ssg/pong-api/src/game/Point';
 import { getTrailingCommentRanges } from 'typescript';
+import "./geometryUtils";
+import { findIntersectionWithVerticalLine } from './geometryUtils';
 
 export class Bot
 {
