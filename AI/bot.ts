@@ -8,16 +8,19 @@ import { count } from 'console';
 
 export class Bot
 {
+	private readonly REFRESH_RATE = 60;
+	private readonly STEP = 0.05;
+	private readonly BALL_SPEED = 0.1;
+	private readonly BALL_MAX_ANGLE = 25;
+
 	private readonly roomId_: string;
 	private readonly port_: string;
 	private readonly host_: string;
 	private readonly side_: number;
 	private readonly difficulty_: number;
-	private ws_: WebSocket;
-	private readonly REFRESH_RATE = 60;
-	private readonly STEP = 0.05;
-	private readonly BALL_SPEED = 0.1;
-	private readonly BALL_MAX_ANGLE = 25;
+	private readonly firstHit_: number;
+	private readonly ws_: WebSocket;
+
 	private countdown_: number;
 	private score_: number;
 	private lastBall_: Point;
@@ -31,7 +34,8 @@ export class Bot
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
 		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X + 0.5 : field.RIGHT_EDGE_X - 0.5;
-		this.countdown_ = 40;
+		this.firstHit_ = Math.round(Math.abs(this.side_) / this.BALL_SPEED);
+		this.countdown_ = this.firstHit_ + 1;
 		this.lastBall_ = new Point(0, 0);
 		this.paddleY_ = 0;
 		this.targetY_ = 0;
@@ -57,36 +61,46 @@ export class Bot
 			});
 	
 		} catch (error) {
-			console.error(`Failed to initialize WebSocket at ${this.host_}:${this.port_}:`, error);
+			console.error(`WebSocket at ${this.host_}:${this.port_}:`, error);
 		}
 	}
 
 	private handleEvent(event: any) {
 		const gameState = JSON.parse(event.toString());
 		// console.log(gameState);
-		if (gameState.score.leftGoals - gameState.score.rightGoals != this.score_)
-		{
-			this.score_ = gameState.score.leftGoals - gameState.score.rightGoals;
-			this.setCountdown(40);
-		}
-		if (this.countdown_--)
+		if (gameState.score.leftGoals - gameState.score.rightGoals !== this.score_)
+			return this.handleGoal(gameState.score.leftGoals - gameState.score.rightGoals);
+		if (--this.countdown_)
 			return ;
 
 		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
 		const paddlePosition = (this.side_ < 0)
 		? new Point(gameState.leftPaddle.x, gameState.leftPaddle.y)
 		: new Point(gameState.rightPaddle.x, gameState.rightPaddle.y);
+		this.paddleY_ = paddlePosition.getY();
 
 		if (this.seeBall(ballPosition))
 		{
-			this.paddleY_ = paddlePosition.getY();
 			this.calculateTarget(ballPosition.getX(), ballPosition.getY());
-			this.lastBall_ = ballPosition;
-			this.countdown_ = this.REFRESH_RATE - 1;
+			
 			console.log(`target y : ${this.targetY_}, paddleY: ${this.paddleY_}`);
 			if (this.paddleY_ != this.targetY_)
 				this.setMove();
 		}
+	}
+
+	private resetBall() {
+		this.targetY_ = 0;
+		this.lastBall_.setX(0);
+		this.lastBall_.setY(0);
+	}
+
+	private handleGoal(score: number) {
+		this.score_ = score;
+		this.resetBall();
+		this.setMove();
+		if (this.countdown_ <= this.firstHit_)
+			this.setCountdown(this.firstHit_);
 	}
 
 	private setCountdown(ticks: number) {
@@ -96,9 +110,8 @@ export class Bot
 	private calculateTarget(x: number, y: number) {
 		this.targetY_ = 0;
 		const distance = Point.calculateVectorSpeed(Point.calculateVector(this.lastBall_, new Point(x, y)));
-		console.log(`distance: ${distance}
-					last: ${this.lastBall_.getX()}, ${this.lastBall_.getY()}
-					current: ${x}, ${y}`);
+		console.log(`distance: ${distance} \nlast: ${this.lastBall_.getX()}, ${this.lastBall_.getY()} \ncurrent: ${x}, ${y}`);
+
 		if (this.ballBounced(distance))
 		{
 			this.bounceCalculation();
@@ -107,7 +120,9 @@ export class Bot
 		{
 			this.linearCalculation(x, y);
 		}
-
+		this.countdown_ = this.REFRESH_RATE;
+		this.lastBall_.setX(x);
+		this.lastBall_.setY(y);
 	}
 	
 	private ballBounced(distance: number) {
