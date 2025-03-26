@@ -4,6 +4,7 @@ import { Point } from '../ssg/pong-api/src/game/Point';
 import { getTrailingCommentRanges } from 'typescript';
 import "./geometryUtils";
 import { findIntersectionWithVerticalLine } from './geometryUtils';
+import { count } from 'console';
 
 export class Bot
 {
@@ -16,7 +17,9 @@ export class Bot
 	private readonly REFRESH_RATE = 60;
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
+	private readonly BALL_MAX_ANGLE = 25;
 	private countdown_: number;
+	private score_: number;
 	private lastBall_: Point;
 	private paddleY_: number;
 	private targetY_: number;
@@ -28,10 +31,11 @@ export class Bot
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
 		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X + 0.5 : field.RIGHT_EDGE_X - 0.5;
-		this.countdown_ = 1;
+		this.countdown_ = 40;
 		this.lastBall_ = new Point(0, 0);
 		this.paddleY_ = 0;
 		this.targetY_ = 0;
+		this.score_ = 0;
 		this.ws_ = new WebSocket(`wss://${this.host_}:${this.port_}/pong/`, {rejectUnauthorized: false });
 		
 		try {
@@ -58,29 +62,35 @@ export class Bot
 	}
 
 	private handleEvent(event: any) {
-		if (--this.countdown_)
-			return ;
-		try {
-			const gameState = JSON.parse(event.toString());
-			const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
-			const paddlePosition = (this.side_ < 0)
-			? new Point(gameState.leftPaddle.x, gameState.leftPaddle.y)
-			: new Point(gameState.rightPaddle.x, gameState.rightPaddle.y);
-
-			if (this.seeBall(ballPosition))
-			{
-				this.paddleY_ = paddlePosition.getY();
-				this.calculateTarget(ballPosition.getX(), ballPosition.getY());
-				this.lastBall_ = ballPosition;
-				this.countdown_ = this.REFRESH_RATE;
-				console.log(`target y : ${this.targetY_}, paddleY: ${this.paddleY_}`);
-				if (this.paddleY_ != this.targetY_)
-					this.setMove();
-			}
-			
-		} catch (error) {
-			console.error('Error parsing message:', error);
+		const gameState = JSON.parse(event.toString());
+		// console.log(gameState);
+		if (gameState.score.leftGoals - gameState.score.rightGoals != this.score_)
+		{
+			this.score_ = gameState.score.leftGoals - gameState.score.rightGoals;
+			this.setCountdown(40);
 		}
+		if (this.countdown_--)
+			return ;
+
+		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
+		const paddlePosition = (this.side_ < 0)
+		? new Point(gameState.leftPaddle.x, gameState.leftPaddle.y)
+		: new Point(gameState.rightPaddle.x, gameState.rightPaddle.y);
+
+		if (this.seeBall(ballPosition))
+		{
+			this.paddleY_ = paddlePosition.getY();
+			this.calculateTarget(ballPosition.getX(), ballPosition.getY());
+			this.lastBall_ = ballPosition;
+			this.countdown_ = this.REFRESH_RATE - 1;
+			console.log(`target y : ${this.targetY_}, paddleY: ${this.paddleY_}`);
+			if (this.paddleY_ != this.targetY_)
+				this.setMove();
+		}
+	}
+
+	private setCountdown(ticks: number) {
+		this.countdown_ = ticks;
 	}
 	
 	private calculateTarget(x: number, y: number) {
