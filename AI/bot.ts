@@ -15,6 +15,7 @@ export class Bot
 	private ws_: WebSocket;
 	private readonly REFRESH_RATE = 60;
 	private readonly STEP = 0.05;
+	private readonly BALL_SPEED = 0.1;
 	private countdown_: number;
 	private lastBall_: Point;
 	private paddleY_: number;
@@ -26,14 +27,15 @@ export class Bot
 		this.roomId_ = initializers.roomId;
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
-		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X : field.RIGHT_EDGE_X;
-		this.countdown_ = this.REFRESH_RATE;
+		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X + 0.5 : field.RIGHT_EDGE_X - 0.5;
+		this.countdown_ = 1;
 		this.lastBall_ = new Point(0, 0);
 		this.paddleY_ = 0;
 		this.targetY_ = 0;
 		this.ws_ = new WebSocket(`wss://${this.host_}:${this.port_}/pong/`, {rejectUnauthorized: false });
-
+		
 		try {
+
 			this.ws_.on('open', () => {
 				console.log(`Connected to Pong WebSocket at ${this.host_}:${this.port_} for room ${this.roomId_}`);
 			});
@@ -56,7 +58,7 @@ export class Bot
 	}
 
 	private handleEvent(event: any) {
-		if (this.countdown_-- > 0)
+		if (--this.countdown_)
 			return ;
 		try {
 			const gameState = JSON.parse(event.toString());
@@ -68,41 +70,81 @@ export class Bot
 			if (this.seeBall(ballPosition))
 			{
 				this.paddleY_ = paddlePosition.getY();
-				this.targetY_ = this.calculateTarget(ballPosition.getY());
+				this.calculateTarget(ballPosition.getX(), ballPosition.getY());
 				this.lastBall_ = ballPosition;
 				this.countdown_ = this.REFRESH_RATE;
 				console.log(`target y : ${this.targetY_}, paddleY: ${this.paddleY_}`);
 				if (this.paddleY_ != this.targetY_)
 					this.setMove();
 			}
+			
 		} catch (error) {
 			console.error('Error parsing message:', error);
 		}
 	}
+	
+	private calculateTarget(x: number, y: number) {
+		this.targetY_ = 0;
+		const distance = Point.calculateVectorSpeed(Point.calculateVector(this.lastBall_, new Point(x, y)));
+		console.log(`distance: ${distance}
+					last: ${this.lastBall_.getX()}, ${this.lastBall_.getY()}
+					current: ${x}, ${y}`);
+		if (this.ballBounced(distance))
+		{
+			this.bounceCalculation();
+		}
+		else
+		{
+			this.linearCalculation(x, y);
+		}
 
-	private calculateTarget(newY : number): number {
+	}
+	
+	private ballBounced(distance: number) {
+		return Math.abs(distance - (this.BALL_SPEED * this.REFRESH_RATE)) > this.BALL_SPEED;
+	}
+	
+	private ballGoesAway(deltaX: number) {
+		return (this.side_ * deltaX < 0); //if both positive or both negative that means ball is going towards AI paddle
+	}
+	
+	private linearCalculation(newX: number, newY: number) {
 		const deltaY = newY - this.lastBall_.getY();
-		let bigTarget = Math.round((newY + deltaY) * 20);
-		if (bigTarget > 50)
-			bigTarget -= bigTarget - 50;
-		else if (bigTarget < -50)
-			bigTarget -= 50 + bigTarget;
-		return bigTarget / 20;
+		const deltaX = newX - this.lastBall_.getX();
+		if (this.ballGoesAway(deltaX))
+		{
+			console.log("ball away");
+			console.log(deltaX);
+			console.log(deltaY);
+			return;
+		}
+		else
+		{
+			let bigTarget = Math.round((newY + deltaY) * 20);
+			if (bigTarget > 50)
+				bigTarget -= bigTarget - 50;
+			else if (bigTarget < -50)
+				bigTarget -= 50 + bigTarget;
+			this.targetY_ = bigTarget / 20;
+		}
 	}
 
-	private setMove() {
+	private bounceCalculation() {
+
+	}
+
+	private setMove(delay = 1, moves = 0) {
 		let moveCommand = {move: "", paddle: ""};
-		let moves = 1;
 
 		moveCommand.paddle = (this.side_ < 0) ? "left" : "right";
 		moveCommand.move = (this.paddleY_ < this.targetY_) ? "up" : "down";
 
 		while (this.paddleY_ > this.targetY_ + this.STEP) {
-			setTimeout(this.sendMove, 10 * moves++, this.ws_, moveCommand);
+			setTimeout(this.sendMove, delay * moves++, this.ws_, moveCommand);
 			this.paddleY_ -= this.STEP;
 		}
 		while (this.paddleY_ < this.targetY_ - this.STEP) {
-			setTimeout(this.sendMove, 10 * moves++, this.ws_, moveCommand);
+			setTimeout(this.sendMove, delay * moves++, this.ws_, moveCommand);
 			this.paddleY_ += this.STEP;
 		}
 	}
