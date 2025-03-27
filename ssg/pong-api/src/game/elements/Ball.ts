@@ -84,7 +84,7 @@ export class Ball
 		this.getDirection().setY(newY);
 	}
 
-	caluclateComplexBounceDirection(pointA:Point, maxDoubleDistanceFromPoint:number):Point
+	calculateComplexBounceDirection(pointA:Point, maxDoubleDistanceFromPoint:number):Point
 	{
 		const currentDirectionX = this.getDirection().getX();
 		const vector:Point = Point.calculateVector(pointA, this.getPosition());

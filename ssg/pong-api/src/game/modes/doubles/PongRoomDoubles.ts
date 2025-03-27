@@ -10,10 +10,10 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 	private rightPlayerOne?:PongPlayer;
 	private rightPlayerTwo?:PongPlayer;
 
-	constructor(privaetRoom:boolean = false)
+	constructor(privateRoom:boolean = false)
 	{
-		const match = PongGameDoubles.createStandardGameDobules();
-		super(privaetRoom, match);
+		const match = PongGameDoubles.createStandardGameDoubles();
+		super(privateRoom, match);
 		this.setMatchName("doubles match");
 	}
 

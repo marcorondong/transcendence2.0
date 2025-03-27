@@ -331,7 +331,7 @@ export abstract class APongGame extends EventEmitter
 		const impactPointPaddle:Point | false = this.paddleBounce(closestPaddle, this.ball.getDirection().getX());
 		if(impactPointPaddle !== false)
 		{
-			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
+			const bounceDir:Point = this.ball.calculateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
 			return this.ball.setDirection(bounceDir);
 		}
 		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))

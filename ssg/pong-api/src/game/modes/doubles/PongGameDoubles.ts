@@ -30,7 +30,7 @@ export class PongGameDoubles extends APongGame
 		this.rightPaddletwo = rightTwo;
 	}
 
-	static createStandardGameDobules(): PongGameDoubles
+	static createStandardGameDoubles(): PongGameDoubles
 	{
 		const leftPaddle: Paddle = new Paddle(new Point(-3.5, 1.25), 0.5);
 		const leftPaddletwo: Paddle = new Paddle(new Point(-4, -1.25), 0.5);
