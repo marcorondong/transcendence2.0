@@ -61,7 +61,7 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 
 	getRightCaptain(): PongPlayer {
 		if (this.rightPlayerOne === undefined)
-			throw Error("Left player dont exist")
+			throw Error("Right player dont exist")
 		return this.rightPlayerOne;
 	}
 

@@ -82,7 +82,7 @@ export class HeadToHeadMatchMaking
 	
 	findRoomToJoin(mapOfMatches: Map<string, PongRoomSingles>, roomType: "singles"): PongRoomSingles;
 
-	findRoomToJoin(mapOfMathces: Map<string, PongRoomDoubles>, roomType: "doubles"): PongRoomDoubles
+	findRoomToJoin(mapOfMatches: Map<string, PongRoomDoubles>, roomType: "doubles"): PongRoomDoubles
 	
 	findRoomToJoin<T extends APongRoom<PongGameSingles>>(
 		mapOfMatches: Map<string, T>, 
