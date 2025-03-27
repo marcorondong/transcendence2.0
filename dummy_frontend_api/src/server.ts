@@ -9,29 +9,29 @@ import fs from 'fs';
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
-// let privateKey: string;
-// let certificate: string;
+let privateKey: string;
+let certificate: string;
 
-// try
-// {
-// 	privateKey = fs.readFileSync(path.join(__dirname, '../ssl/key.pem'), 'utf8');
-// 	certificate = fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'), 'utf8');
-// }
-// catch (err)
-// {
-// 	console.log('Error reading SSL certificates');
-// 	console.log(err);
-// 	process.exit(1);
-// }
+try
+{
+	privateKey = fs.readFileSync(path.join(__dirname, '../ssl/key.pem'), 'utf8');
+	certificate = fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'), 'utf8');
+}
+catch (err)
+{
+	console.log('Error reading SSL certificates');
+	console.log(err);
+	process.exit(1);
+}
 
 // const fastify: FastifyInstance<Http2SecureServer> = Fastify(
 const fastify: FastifyInstance = Fastify( 
 {
 	// http2: true,
-	// https: {
-	// 	key: privateKey,
-	// 	cert: certificate
-	// },
+	https: {
+		key: privateKey,
+		cert: certificate
+	},
 	logger: false 
 });
 
@@ -42,9 +42,7 @@ fastify.register(fastifyStatic, {
 
 fastify.register(fastifyWebsocket);
 
-fastify.get('/', async (request, reply) => {
-	return reply.sendFile('index.html');
-});
+
 
 fastify.register(async function (fastify)
 {
@@ -61,6 +59,11 @@ fastify.register(async function (fastify)
 
 		connection.on('close', (code: number, reason: Buffer) => onClientDisconnect(code, reason, currentClient));
 
+	});
+
+
+	fastify.get('/', async (request, reply) => {
+		return reply.sendFile('index.html');
 	});
 });
 

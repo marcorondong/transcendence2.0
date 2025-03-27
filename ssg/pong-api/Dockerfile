@@ -2,7 +2,8 @@ FROM node:iron-slim
 
 RUN apt-get update && apt-get install -y openssl
 COPY ./pong-api/scripts/https-keys.sh /pong/pong-api/scripts/https-keys.sh
-RUN bash /pong/pong-api/scripts/https-keys.sh
+#RUN bash /pong/pong-api/scripts/https-keys.sh
+COPY ./pong-api/server-keys /pong/pong-api/server-keys
 
 COPY ./pong-api/nodemon.json /pong/pong-api/
 COPY ./pong-api/package.json /pong/pong-api/
