@@ -5,11 +5,36 @@ import { Message } from './Message';
 import { onClientMessage, onClientDisconnect } from './utils';
 // import fastifyStatic from '@fastify/static';
 // import path from 'path';
+import fs from 'fs';
+
+let privateKey: string;
+let certificate: string;
+
+try 
+{
+	privateKey = fs.readFileSync('/run/secrets/key.pem', 'utf8');
+	certificate = fs.readFileSync('/run/secrets/cert.pem', 'utf8');
+	console.log('SSL certificates loaded successfully.');
+} 
+catch (error) 
+{
+	console.error('Error loading SSL certificates:', error);
+	process.exit(1); // Exit process if SSL files are missing or unreadable
+}
 
 const PORT = 3002;
 const HOST = '0.0.0.0';
 
-const fastify: FastifyInstance = Fastify({ logger: false });
+// const fastify: FastifyInstance<Http2SecureServer> = Fastify(
+const fastify: FastifyInstance = Fastify( 
+{
+	// http2: true,
+	https: {
+		key: privateKey,
+		cert: certificate
+	},
+	logger: false 
+});
 
 // fastify.register(fastifyStatic, {
 // 	root: path.join(__dirname, '../public'),
