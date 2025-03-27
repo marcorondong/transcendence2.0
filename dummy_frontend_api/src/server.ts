@@ -9,29 +9,29 @@ import fs from 'fs';
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
-// let privateKey: string;
-// let certificate: string;
+let privateKey: string;
+let certificate: string;
 
-// try
-// {
-// 	privateKey = fs.readFileSync(path.join(__dirname, '../ssl/key.pem'), 'utf8');
-// 	certificate = fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'), 'utf8');
-// }
-// catch (err)
-// {
-// 	console.log('Error reading SSL certificates');
-// 	console.log(err);
-// 	process.exit(1);
-// }
+try 
+{
+	privateKey = fs.readFileSync('/run/secrets/key.pem', 'utf8');
+	certificate = fs.readFileSync('/run/secrets/cert.pem', 'utf8');
+	console.log('SSL certificates loaded successfully.');
+} 
+catch (error) 
+{
+	console.error('Error loading SSL certificates:', error);
+	process.exit(1); // Exit process if SSL files are missing or unreadable
+}
 
 // const fastify: FastifyInstance<Http2SecureServer> = Fastify(
 const fastify: FastifyInstance = Fastify( 
 {
 	// http2: true,
-	// https: {
-	// 	key: privateKey,
-	// 	cert: certificate
-	// },
+	https: {
+		key: privateKey,
+		cert: certificate
+	},
 	logger: false 
 });
 

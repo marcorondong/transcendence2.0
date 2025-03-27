@@ -1,6 +1,6 @@
-const socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws`);
-const tic_socket = new WebSocket(`ws://${window.location.hostname}:3001/ws`);
-const chat_socket = new WebSocket(`ws://${window.location.hostname}:3002/ws`);
+const socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws`);
+const tic_socket = new WebSocket(`wss://${window.location.hostname}:3001/ws`);
+const chat_socket = new WebSocket(`wss://${window.location.hostname}:3002/ws`);
 
 window.onload = () => 
 {
