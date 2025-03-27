@@ -16,7 +16,6 @@ export class SessionRoom extends EventEmitter
 		this.creationDate = new Date();
 	}
 
-
 	getId():string
 	{
 		return this.id;
@@ -27,20 +26,9 @@ export class SessionRoom extends EventEmitter
 		return this.creationDate;
 	}
 	
-	//TODO: research should this be boolean or Promise async function
-	/**
-	 * 
-	 * @param player player to add
-	 * @returns 
-	 */
 	addConnectionToRoom(connectionToAdd: WebSocket):void
 	{
 		this.connections.add(connectionToAdd);
-	}
-
-	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
-	{
-		return this.connections.delete(connectionToRemove);
 	}
 
 	removeAllConnectionsFromRoom():void
@@ -75,5 +63,10 @@ export class SessionRoom extends EventEmitter
 	isPrivate():boolean
 	{
 		return this.privateRoom;
+	}
+
+	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
+	{
+		return this.connections.delete(connectionToRemove);
 	}
 }

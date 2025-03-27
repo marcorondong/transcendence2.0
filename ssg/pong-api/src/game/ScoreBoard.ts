@@ -1,6 +1,4 @@
-
-
-export interface ScoreI
+export interface IScore
 {
 	leftGoals: number;
 	rightGoals: number;
@@ -52,7 +50,7 @@ export class ScoreBoard
 		this.rightPlayerGoals = rightGoals;
 	}
 
-	getScoreJson():ScoreI
+	getScoreJson():IScore
 	{
 		return {
 			leftGoals: this.leftPlayerGoals,
