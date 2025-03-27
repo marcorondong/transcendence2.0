@@ -1,6 +1,8 @@
 all: up
 
 up:
+	cd yml && rm -rf server-keys
+	cd yml/scripts && ./https-keys.sh
 	cd yml && docker-compose build
 	cd yml && docker-compose up
 

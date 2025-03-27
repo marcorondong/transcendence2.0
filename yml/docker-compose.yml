@@ -11,10 +11,11 @@ services:
     env_file:
       - .env
     secrets:
-      - api_key_tictactoe
+      - cert.pem
+      - key.pem
     environment:
-      - NO_ENV=${MY_VAR}
-      - API_KEY_TICTACTOE_FILE=/run/secrets/api_key_tictactoe
+      SSL_CERT_FILE: "/run/secrets/cert.pem"
+      SSL_KEY_FILE: "/run/secrets/key.pem"
     volumes:
       - ../tictactoe_api/src/:/tictactoe_api/src/
     ports:
@@ -41,10 +42,11 @@ services:
     env_file:
       - .env
     secrets:
-      - api_key_chat
+      - cert.pem
+      - key.pem
     environment:
-      - NO_ENV=${MY_VAR}
-      - API_KEY_CHAT_FILE=/run/secrets/api_key_chat
+      SSL_CERT_FILE: "/run/secrets/cert.pem"
+      SSL_KEY_FILE: "/run/secrets/key.pem"
     volumes:
       - ../chat_api/src/:/chat_api/src/
     ports:
@@ -65,6 +67,14 @@ services:
     build:
       context: ../ssg/
       dockerfile: ./pong-api/Dockerfile
+    env_file:
+      - .env
+    secrets:
+      - cert.pem
+      - key.pem
+    environment:
+      SSL_CERT_FILE: "/run/secrets/cert.pem"
+      SSL_KEY_FILE: "/run/secrets/key.pem"
     volumes:
       - ../ssg/pong-api/src/:/pong/pong-api/src/
     ports:
@@ -86,10 +96,11 @@ services:
     env_file:
       - .env
     secrets:
-      - api_key_dummy_frontend
+      - cert.pem
+      - key.pem
     environment:
-      - NO_ENV=${MY_VAR}
-      - API_KEY_DUMMY_FRONTEND_FILE=/run/secrets/api_key_dummy_frontend
+      SSL_CERT_FILE: "/run/secrets/cert.pem"
+      SSL_KEY_FILE: "/run/secrets/key.pem"
     # volumes:
     #   - ../dummy_frontend_api/src/:/dummy_frontend_api/src/
     #   - ../dummy_frontend_api/public/:/dummy_frontend_api/public/
@@ -116,6 +127,10 @@ services:
 
 
 secrets:
+  cert.pem:
+    file: ./server-keys/cert.pem
+  key.pem:
+    file: ./server-keys/key.pem
   api_key_dummy_frontend:
     file: ./secrets/api_key_dummy_frontend.txt
   api_key_tictactoe:

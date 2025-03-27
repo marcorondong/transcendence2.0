@@ -13,21 +13,19 @@ dotenv.config();
 //Server set up variables
 const PORT:number = 3010;
 const HOST:string = "0.0.0.0"
-const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
-const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
-let privateKey: string; 
+let privateKey: string;
 let certificate: string;
 
 try 
 {
-	privateKey = fs.readFileSync(privateKeyPath, "utf-8");
-	certificate = fs.readFileSync(certificatePath, "utf-8");
-}
-catch
+	privateKey = fs.readFileSync('/run/secrets/key.pem', 'utf8');
+	certificate = fs.readFileSync('/run/secrets/cert.pem', 'utf8');
+	console.log('SSL certificates loaded successfully.');
+} 
+catch (error) 
 {
-	console.error("ssl private key and certificate are not generated. Run https-key.sh script inside scripts folder first")
-	process.exit(1);
-	
+	console.error('Error loading SSL certificates:', error);
+	process.exit(1); // Exit process if SSL files are missing or unreadable
 }
 
 const fastify = Fastify(
