@@ -1,24 +1,66 @@
 services:
   tictactoe_api:
-    image: tictactoe_api_img 
+    image: ${TICTACTOE_API_IMAGE}
     container_name: tictactoe_api
-    build: ../tictactoe_api/
+    build: 
+      context: ../tictactoe_api/
+      dockerfile: Dockerfile
+      args:
+        NO_ARGS: "some_value"
+      # no-cache: true
+    env_file:
+      - .env
+    secrets:
+      - api_key_tictactoe
+    environment:
+      - NO_ENV=${MY_VAR}
+      - API_KEY_TICTACTOE_FILE=/run/secrets/api_key_tictactoe
     volumes:
       - ../tictactoe_api/src/:/tictactoe_api/src/
     ports:
-      - 3001:3001
+      - "${TICTACTOE_PORT}:${TICTACTOE_PORT}"
+    networks:
+      - backend
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:${TICTACTOE_PORT}/health"]
+    #   interval: 30s
+    #   retries: 3
+    #   start_period: 15s
+    #   timeout: 10s
+    restart: always
 
   chat_api:
-    image: chat_api_img 
+    image: ${CHAT_API_IMAGE}
     container_name: chat_api
-    build: ../chat_api/
+    build: 
+      context: ../chat_api/
+      dockerfile: Dockerfile
+      args:
+        NO_ARGS: "some_value"
+        # no-cache: true
+    env_file:
+      - .env
+    secrets:
+      - api_key_chat
+    environment:
+      - NO_ENV=${MY_VAR}
+      - API_KEY_CHAT_FILE=/run/secrets/api_key_chat
     volumes:
       - ../chat_api/src/:/chat_api/src/
     ports:
-      - 3002:3002
+      - "${CHAT_PORT}:${CHAT_PORT}"
+    networks:
+      - backend
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:${CHAT_PORT}/health"]
+    #   interval: 30s
+    #   retries: 3
+    #   start_period: 15s
+    #   timeout: 10s
+    restart: always
 
   pong-api:
-    image: pong-api-img 
+    image: ${PING_API_IMAGE}
     container_name: pong-api
     build:
       context: ../ssg/
@@ -26,161 +68,74 @@ services:
     volumes:
       - ../ssg/pong-api/src/:/pong/pong-api/src/
     ports:
-      - 3010:3010
+      - "${PING_PORT}:${PING_PORT}"
+    networks:
+      - backend
+    restart: always
     command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
 
   dummy_frontend_api:
-    image: dummy_frontend_api_img 
+    image: ${DUMMY_FRONTEND_API_IMAGE} 
     container_name: dummy_frontend_api
-    build: ../dummy_frontend_api/
-    volumes:
-      - ../dummy_frontend_api/src/:/frontend_api/src/
-      - ../dummy_frontend_api/public/:/frontend_api/public/
+    build: 
+      context: ../dummy_frontend_api/
+      dockerfile: Dockerfile
+      args:
+        NO_ARGS: "some_value"
+      # no-cache: true
+    env_file:
+      - .env
+    secrets:
+      - api_key_dummy_frontend
+    environment:
+      - NO_ENV=${MY_VAR}
+      - API_KEY_DUMMY_FRONTEND_FILE=/run/secrets/api_key_dummy_frontend
+    # volumes:
+    #   - ../dummy_frontend_api/src/:/dummy_frontend_api/src/
+    #   - ../dummy_frontend_api/public/:/dummy_frontend_api/public/
     ports:
-      - 3000:3000
+      - "${DUMMY_FRONTEND_PORT}:${DUMMY_FRONTEND_PORT}"
+    networks:
+      - backend
     depends_on:
       - tictactoe_api
       - chat_api
       - pong-api
+    # depends_on:
+    #   tictactoe_api:
+    #       condition: service_healthy
+    #   chat_api:
+    #       condition: service_healthy
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:${DUMMY_FRONTEND_PORT}/health"]
+    #   interval: 30s
+    #   retries: 3
+    #   start_period: 15s
+    #   timeout: 10s
+    restart: always
 
 
-# services:
-#   dummy_frontend_api:
-#     image: ${DUMMY_FRONTEND_API_IMAGE} 
-#     container_name: dummy_frontend_api
-#     build: 
-#       context: ../dummy_frontend_api/
-#       dockerfile: Dockerfile
-#       args:
-#         NO_ARGS: "some_value"
-#       # no-cache: true
-#     env_file:
-#       - .env
-#     secrets:
-#       - api_key_dummy_frontend
-#     environment:
-#       - NO_ENV=${MY_VAR}
-#       - API_KEY_DUMMY_FRONTEND_FILE=/run/secrets/api_key_dummy_frontend
-#     volumes:
-#       - ../dummy_frontend_api/src/:/dummy_frontend_api/src/
-#       - ../dummy_frontend_api/public/:/dummy_frontend_api/public/
-#     ports:
-#       - "${DUMMY_FRONTEND_PORT}:${DUMMY_FRONTEND_PORT}"
-#     networks:
-#       - backend
-#     depends_on:
-#       - tictactoe_api
-#       - chat_api
-#       - pong-api
-#     # depends_on:
-#     #   tictactoe_api:
-#     #       condition: service_healthy
-#     #   chat_api:
-#     #       condition: service_healthy
-#     # healthcheck:
-#     #   test: ["CMD", "curl", "-f", "http://localhost:${DUMMY_FRONTEND_PORT}/health"]
-#     #   interval: 30s
-#     #   retries: 3
-#     #   start_period: 15s
-#     #   timeout: 10s
-#     restart: always
-
-#   tictactoe_api:
-#     image: ${TICTACTOE_API_IMAGE}
-#     container_name: tictactoe_api
-#     build: 
-#       context: ../tictactoe_api/
-#       dockerfile: Dockerfile
-#       args:
-#         NO_ARGS: "some_value"
-#       # no-cache: true
-#     env_file:
-#       - .env
-#     secrets:
-#       - api_key_tictactoe
-#     environment:
-#       - NO_ENV=${MY_VAR}
-#       - API_KEY_TICTACTOE_FILE=/run/secrets/api_key_tictactoe
-#     volumes:
-#       - ../tictactoe_api/src/:/tictactoe_api/src/
-#     ports:
-#       - "${TICTACTOE_PORT}:${TICTACTOE_PORT}"
-#     networks:
-#       - backend
-#     # healthcheck:
-#     #   test: ["CMD", "curl", "-f", "http://localhost:${TICTACTOE_PORT}/health"]
-#     #   interval: 30s
-#     #   retries: 3
-#     #   start_period: 15s
-#     #   timeout: 10s
-#     restart: always
-
-#   chat_api:
-#     image: ${CHAT_API_IMAGE}
-#     container_name: chat_api
-#     build: 
-#       context: ../chat_api/
-#       dockerfile: Dockerfile
-#       args:
-#         NO_ARGS: "some_value"
-#         # no-cache: true
-#     env_file:
-#       - .env
-#     secrets:
-#       - api_key_chat
-#     environment:
-#       - NO_ENV=${MY_VAR}
-#       - API_KEY_CHAT_FILE=/run/secrets/api_key_chat
-#     volumes:
-#       - ../chat_api/src/:/chat_api/src/
-#     ports:
-#       - "${CHAT_PORT}:${CHAT_PORT}"
-#     networks:
-#       - backend
-#     # healthcheck:
-#     #   test: ["CMD", "curl", "-f", "http://localhost:${CHAT_PORT}/health"]
-#     #   interval: 30s
-#     #   retries: 3
-#     #   start_period: 15s
-#     #   timeout: 10s
-#     restart: always
-
-#     pong-api:
-#       image: ${PING_API_IMAGE}
-#       container_name: pong-api
-#       build:
-#         context: ../ssg/
-#         dockerfile: ./pong-api/Dockerfile
-#       volumes:
-#         - ..//ssg/pong-api/src/:/pong/pong-api/src/
-#       ports:
-#         - "${PING_PORT}:${PING_PORT}"
-#       networks:
-#         - backend
-#       restart: always
-#       command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
-
-# secrets:
-#   api_key_dummy_frontend:
-#     file: ./secrets/api_key_dummy_frontend.txt
-#   api_key_tictactoe:
-#     file: ./secrets/api_key_tictactoe.txt
-#   api_key_chat:
-#     file: ./secrets/api_key_chat.txt
+secrets:
+  api_key_dummy_frontend:
+    file: ./secrets/api_key_dummy_frontend.txt
+  api_key_tictactoe:
+    file: ./secrets/api_key_tictactoe.txt
+  api_key_chat:
+    file: ./secrets/api_key_chat.txt
 
 
-# networks:
-#   backend:
-#     driver: bridge
-#   frontend:
-#     driver: bridge
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
 
-# volumes:
-#   sqlite:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /path/of/database/sqlite
-#       o: bind
+volumes:
+  sqlite:
+    driver: local
+    driver_opts:
+      type: none
+      device: /path/of/database/sqlite
+      o: bind
 
 
