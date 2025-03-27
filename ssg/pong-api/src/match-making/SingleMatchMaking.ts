@@ -85,11 +85,11 @@ export class HeadToHeadMatchMaking
 	findRoomToJoin(mapOfMathces: Map<string, PongRoomDoubles>, roomType: "doubles"): PongRoomDoubles
 	
 	findRoomToJoin<T extends APongRoom<PongGameSingles>>(
-		mapOfMathces: Map<string, T>, 
+		mapOfMatches: Map<string, T>, 
 		roomType: "singles" | "doubles"): T
 	{
 		let toReturn:T | false = false;
-		for(const [key, oneRoom] of mapOfMathces.entries())
+		for(const [key, oneRoom] of mapOfMatches.entries())
 		{
 			if(oneRoom.isPrivate() === false && oneRoom.isFull() === false)
 			{
