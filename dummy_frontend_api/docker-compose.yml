@@ -5,6 +5,6 @@ services:
     build: ./
     volumes:
       - ./src/:/dummy_frontend_api/src/
-      # - ./public/:/dummy_frontend_api/public/
+      - ./public/:/dummy_frontend_api/public/
     ports:
       - 3000:3000
