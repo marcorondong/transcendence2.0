@@ -28,9 +28,9 @@ export class Tournament extends EventEmitter
 		super();
 		if(Tournament.isSizeValid(tournamentPlayers) === false)
 			throw Error("Tried to create tournament with not valid size");
+		this.requiredPlayers = tournamentPlayers;
 		this.playerPool = new Set<PongPlayer>();
 		this.gamesPool = new Set<PongRoomSingles>();
-		this.requiredPlayers = tournamentPlayers;
 		this.state = ETournamentState.LOBBY;
 		this.roundNumber = this.requiredPlayers;
 		this.id = crypto.randomUUID();
