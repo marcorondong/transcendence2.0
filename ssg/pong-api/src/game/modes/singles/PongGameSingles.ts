@@ -6,7 +6,6 @@ import { PongField } from "../../elements/PongField";
 import { EPlayerRole } from "../../PongPlayer";
 import { APongGame, IPongFrameBase } from "../APongGame";
 
-
 export interface IPongFrameSingles extends IPongFrameBase
 {
 	leftPaddle: IPaddleJson
@@ -19,14 +18,14 @@ export class PongGameSingles extends APongGame
 	protected leftPaddle: Paddle;
 	protected rightPaddle: Paddle;
 	
-	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
+	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball: Ball, score: ScoreBoard, tableField: PongField)
 	{
 		super(ball, score, tableField);
 		this.leftPaddle = leftPaddle;
 		this.rightPaddle = rightPaddle;
 	}
 
-	static createStandardGame() :PongGameSingles
+	static createStandardGame(): PongGameSingles
 	{
 		const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
 		const rightPaddle: Paddle = new Paddle(new Point(4, 0));
@@ -37,11 +36,13 @@ export class PongGameSingles extends APongGame
 		return game;
 	}
 
-	getCloserLeftPaddle(): Paddle {
+	getCloserLeftPaddle(): Paddle
+	{
 		return this.leftPaddle;
 	}
 
-	getCloserRightPaddle(): Paddle {
+	getCloserRightPaddle(): Paddle
+	{
 		return this.rightPaddle;
 	}
 
