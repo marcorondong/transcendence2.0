@@ -72,12 +72,6 @@ export class Ball
 		return this.vector;
 	}
 
-	simpleBounceX(): void 
-	{
-		const newX = -1 * this.getDirection().getX();
-		this.getDirection().setX(newX);
-	}
-
 	simpleBounceY(): void 
 	{
 		const newY = -1 * this.getDirection().getY();
@@ -106,19 +100,9 @@ export class Ball
 		return this.position;
 	}
 
-	setPosition(point: Point): void 
-	{
-		this.position = point;
-	}
-
 	getRadius(): number
 	{
 		return this.radius;
-	}
-
-	getBallDirection(): VectorDirection
-	{
-		return this.getDirection().getMovementDirection();
 	}
 
 	isMovingLeft(): boolean
@@ -172,7 +156,6 @@ export class Ball
 			return true;
 		return false;
 	}
-
 
 	/**
 	 * 
