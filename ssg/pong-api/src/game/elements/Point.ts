@@ -1,5 +1,3 @@
-import { get } from "http";
-
 export enum VectorDirection{
 	NO = 0,
 	UP = 1,
@@ -18,6 +16,7 @@ export class Point
 {
 	protected xPos: number;
 	protected yPos: number;
+	
 	constructor(x: number, y: number)
 	{
 		this.xPos = x;
