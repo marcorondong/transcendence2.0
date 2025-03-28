@@ -75,7 +75,7 @@ export class Bot
 		console.log(AIState);
 	}
 
-	private handleEvent(event: any) {
+	public handleEvent(event: any) {
 		if (--this.countdown_)
 			return ;
 		const gameState = JSON.parse(event.toString());
@@ -120,26 +120,23 @@ export class Bot
 		return this.ticksUntilTarget_ < this.REFRESH_RATE;
 	}
 
-	private ballVectorOrigin() : Point {
-		let origin;
+	private ballVectorOrigin(): Point {
 		if (this.ballHitPaddle())
-			origin = new Point(this.target_.getX(), this.target_.getY());
-		else
-			origin = new Point(this.lastBall_.getX(), this.lastBall_.getY());
-		return origin;
+			return new Point(this.target_.getX(), this.target_.getY());
+		return new Point(this.lastBall_.getX(), this.lastBall_.getY());
 	}
 
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
 		const distance = distanceBetweenPoints(origin, ballPosition);
 		console.log(`distance between ${origin.getX()} ${origin.getY()} and ball: ${distance}`);
-
 		if (this.ballBounced(distance))
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
+		console.log(`ball position after bounce correction: ${ballPosition.getX()} ${ballPosition.getY()}`);
 		if (this.ballHitPaddle())
 			this.target_.setX(-this.target_.getX());
-		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX(), 0));
-		console.log(`provisional target x : ${this.target_.getX()}, y : ${this.target_.getY()}`);
+		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX()));
+		console.log(`provisional target x : ${this.target_.getX()}, y : ${this.target_.getY()} based on ball position ${ballPosition.getX()} ${ballPosition.getY()}`);
 	}
 
 	private calculateTicks(ballPosition: Point) {
