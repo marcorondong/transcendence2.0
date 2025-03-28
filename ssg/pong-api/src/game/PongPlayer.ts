@@ -40,9 +40,9 @@ export class PongPlayer extends EventEmitter
 	{
 		super();
 		this.connection = socket;
-		this.role = EPlayerRole.TBD;
 		this.side = ETeamSide.TBD;
 		this.status = EPlayerStatus.ONLINE;
+		this.role = EPlayerRole.TBD;
 		this.connectionMonitor();
 	}
 
