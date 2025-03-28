@@ -5,7 +5,7 @@ import { PongField } from "../../elements/PongField"
 import { ScoreBoard } from "../../elements/ScoreBoard"
 import { Point } from "../../elements/Point"
 import { EPlayerRole } from "../../PongPlayer"
-import { APongGame, Position } from "../APongGame"
+import { APongGame} from "../APongGame"
 
 
 export interface IPongFrameDoubles extends IPongFrameSingles

@@ -8,12 +8,6 @@ import { Paddle } from "../elements/Paddle";
 import raf from 'raf' //raf is request animation frame
 import { Point, VectorDirection } from "../elements/Point";
 
-export interface Position 
-{
-	x:number;
-	y:number;
-}
-
 export enum EGameStatus
 {
 	NOT_STARTED,
