@@ -5,10 +5,10 @@ import { EPlayerRoleFiltered, EPlayerRole } from "../../PongPlayer";
 
 export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 {
-	private leftPlayerOne?:PongPlayer;
-	private leftPlayerTwo?:PongPlayer;
-	private rightPlayerOne?:PongPlayer;
-	private rightPlayerTwo?:PongPlayer;
+	private leftPlayerOne?: PongPlayer;
+	private leftPlayerTwo?: PongPlayer;
+	private rightPlayerOne?: PongPlayer;
+	private rightPlayerTwo?: PongPlayer;
 
 	constructor(privateRoom:boolean = false)
 	{
@@ -17,7 +17,8 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		this.setMatchName("doubles match");
 	}
 
-	updateOthers(message: string): void {
+	updateOthers(message: string): void
+	{
 		this.broadcastLobbyUpdate(message);
 	}
 
@@ -33,14 +34,16 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 			this.sendLobbyUpdate(this.rightPlayerTwo, extraInfo);
 	}
 
-	isEmpty(): boolean {
+	isEmpty(): boolean
+	{
 		if(this.leftPlayerOne === undefined && this.leftPlayerTwo === undefined
 			&& this.rightPlayerOne === undefined && this.rightPlayerTwo==undefined)
 			return true;
 		return false;
 	}
 
-	calculateMissingPlayers(): number {
+	calculateMissingPlayers(): number
+	{
 		let counter = 0;
 		if(this.leftPlayerOne === undefined)
 			counter++;
@@ -53,23 +56,26 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		return counter;
 	}
 
-	getLeftCaptain(): PongPlayer {
+	getLeftCaptain(): PongPlayer
+	{
 		if (this.leftPlayerOne === undefined)
 			throw Error("Left player dont exist")
 		return this.leftPlayerOne;
 	}
 
-	getRightCaptain(): PongPlayer {
+	getRightCaptain(): PongPlayer
+	{
 		if (this.rightPlayerOne === undefined)
 			throw Error("Right player dont exist")
 		return this.rightPlayerOne;
 	}
 
-	getGameFrame():IPongFrameDoubles {
+	getGameFrame(): IPongFrameDoubles
+	{
 		return this.getGame().getFrameDoubles();
 	}
 
-	isFull():boolean
+	isFull(): boolean
 	{
 		if(this.leftPlayerOne !== undefined && this.leftPlayerTwo !== undefined
 			&& this.rightPlayerOne !== undefined && this.rightPlayerTwo !== undefined)
@@ -79,7 +85,7 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		return false
 	}
 
-	getMissingPlayerRole():EPlayerRoleFiltered
+	getMissingPlayerRole(): EPlayerRoleFiltered
 	{
 		if(this.leftPlayerOne === undefined)
 			return EPlayerRole.LEFT_ONE;
@@ -123,7 +129,7 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		}
 	}
 
-	removePlayer(player: PongPlayer)
+	removePlayer(player: PongPlayer): void
 	{
 		switch(player.getPlayerRole())
 		{
@@ -150,28 +156,28 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 		}
 	}
 
-	private setLeftOnePlayer(player: PongPlayer)
+	private setLeftOnePlayer(player: PongPlayer): void
 	{
 		if(this.leftPlayerOne !== undefined)
 			throw new Error("Trying to overwrite left player one");
 		this.leftPlayerOne = player;
 	}
 
-	private setLeftTwoPlayer(player: PongPlayer)
+	private setLeftTwoPlayer(player: PongPlayer): void
 	{
 		if(this.leftPlayerTwo !== undefined)
 			throw new Error("Trying to overwrite left player two");
 		this.leftPlayerTwo = player;
 	}
 
-	private setRightOnePlayer(player: PongPlayer)
+	private setRightOnePlayer(player: PongPlayer): void
 	{
 		if(this.rightPlayerOne !== undefined)
 			throw new Error("Trying to overwrite right player one");
 		this.rightPlayerOne = player;
 	}
 
-	private setRightTwoPlayer(player: PongPlayer)
+	private setRightTwoPlayer(player: PongPlayer): void
 	{
 		if(this.rightPlayerTwo !== undefined)
 			throw new Error("Trying to overwrite right player two");
