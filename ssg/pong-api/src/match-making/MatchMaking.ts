@@ -26,7 +26,7 @@ export class MatchMaking
 			this.spectatorJoiner(connection, query.roomId);
 	}
 
-	private playerJoiner(connection: WebSocket, matchType: "singles" | "tournament" | "doubles", tournamentSize:number, roomId: string | 0)
+	private playerJoiner(connection: WebSocket, matchType: "singles" | "tournament" | "doubles", tournamentSize: number, roomId: string | 0)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
 		if(matchType === "singles")
@@ -37,7 +37,7 @@ export class MatchMaking
 			this.tournamentJoiner(player, tournamentSize);
 	}
 	
-	private singlesRoomJoiner(player: PongPlayer,roomId: string | 0)
+	private singlesRoomJoiner(player: PongPlayer, roomId: string | 0)
 	{
 		if(roomId === 0)
 			this.headToHeadManager.putPlayerinRandomRoom(player)
@@ -63,7 +63,7 @@ export class MatchMaking
 		this.tournamentManager.putPlayerInTournament(player, tournamentSize);
 	}
 
-	private spectatorJoiner(connection: WebSocket, roomId:string | 0)
+	private spectatorJoiner(connection: WebSocket, roomId: string | 0): void
 	{
 		if(roomId === 0)
 		{
