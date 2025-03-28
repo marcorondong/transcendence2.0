@@ -23,7 +23,7 @@ export class Point
 		this.yPos = y;
 	}
 
-	static calculateDistance(pointA:Point, pointB: Point)
+	static calculateDistance(pointA: Point, pointB: Point)
 	{
 		const a = pointA.getX();
 		const b = pointA.getY();
@@ -40,7 +40,7 @@ export class Point
  * @param pointB to
  * return point that represent vector from A to B
  */
-	static calculateVector(pointA:Point, pointB:Point): Point
+	static calculateVector(pointA: Point, pointB: Point): Point
 	{
 		const x1 = pointA.getX();
 		const y1 = pointA.getY();
@@ -53,14 +53,14 @@ export class Point
 		return vector;
 	}
 
-	static calculateVectorSpeed(vector:Point):number
+	static calculateVectorSpeed(vector: Point): number
 	{
 		const firstStep = Math.pow(vector.getX(), 2) + Math.pow(vector.getY(),2);
 		const speed = Math.sqrt(firstStep);
 		return speed;
 	}
 
-	equals(otherPoint: Point):boolean
+	equals(otherPoint: Point): boolean
 	{
 		return (otherPoint.xPos === this.xPos && otherPoint.yPos === this.yPos)
 	}
@@ -69,7 +69,7 @@ export class Point
 	 * modify this object with new x and y postion that adds other point(vector) x and y position 
 	 * @param secondPoint x and y that will be added to current object
 	 */
-	add(secondPoint: Point):void
+	add(secondPoint: Point): void
 	{
 		const newX = this.xPos + secondPoint.xPos;
 		const newY = this.yPos + secondPoint.yPos;
@@ -77,27 +77,27 @@ export class Point
 		this.setY(newY);
 	}
 
-	getX():number
+	getX(): number
 	{
 		return this.xPos;
 	}
 
-	setX(newX: number)
+	setX(newX: number): void
 	{
 		this.xPos = newX; 
 	}
 	
-	getY():number 
+	getY(): number 
 	{
 		return this.yPos;
 	}
 	
-	setY(newY: number)
+	setY(newY: number): void
 	{
 		this.yPos = newY;
 	}
 
-	getBiggerAxis():number 
+	getBiggerAxis(): number 
 	{
 		if(Math.abs(this.xPos) > Math.abs(this.yPos))
 			return this.getX();
@@ -113,7 +113,7 @@ export class Point
 		return ((4 * factorX ) + factorY)
 	}
 
-	private getFactor(num:number): 0 | 1 | 2
+	private getFactor(num: number): 0 | 1 | 2
 	{
 		if(num === 0)
 			return 0;
