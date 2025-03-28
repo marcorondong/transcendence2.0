@@ -12,7 +12,7 @@ export class TournamentMatchMaking
 		this.allTournaments = new Map<string, Tournament>();
 	}
 
-	putPlayerInTournament(player: PongPlayer, tournamentSizeQuery: number):void
+	putPlayerInTournament(player: PongPlayer, tournamentSizeQuery: number): void
 	{
 		const tournamentForPlayer:Tournament = this.findTournamentToJoin(tournamentSizeQuery);
 		tournamentForPlayer.addPlayer(player);
@@ -20,9 +20,9 @@ export class TournamentMatchMaking
 		tournamentForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
 	}
 
-	getMatchesFromAllTournaments():Map<string, PongRoomSingles>
+	getMatchesFromAllTournaments(): Map<string, PongRoomSingles>
 	{
-		const allTournamnetsRooms:Map<string, PongRoomSingles> = new Map<string, PongRoomSingles>();
+		const allTournamnetsRooms: Map<string, PongRoomSingles> = new Map<string, PongRoomSingles>();
 		for(const [key, oneTournament] of this.allTournaments)
 		{
 			for(const [key, room] of oneTournament.getAllTournamentsRoom())
@@ -45,7 +45,7 @@ export class TournamentMatchMaking
 		return this.createTournament(tournamentSizeQuerry);
 	}
 
-	private createTournament(tournamentSize:number):Tournament
+	private createTournament(tournamentSize: number): Tournament
 	{
 		const freshTournament:Tournament = new Tournament(tournamentSize);
 		this.allTournaments.set(freshTournament.getId(), freshTournament);
@@ -54,7 +54,7 @@ export class TournamentMatchMaking
 		return freshTournament;
 	}
 
-	private tournamentFullListener(freshTournament:Tournament)
+	private tournamentFullListener(freshTournament: Tournament): void
 	{
 		freshTournament.once(TournamentEvents.FULL, ()=>
 		{
@@ -63,7 +63,7 @@ export class TournamentMatchMaking
 		})
 	}
 
-	private tournamentFinishedListener(freshTournament:Tournament)
+	private tournamentFinishedListener(freshTournament:Tournament): void
 	{
 		freshTournament.once(TournamentEvents.FINISHED, ()=>
 		{
