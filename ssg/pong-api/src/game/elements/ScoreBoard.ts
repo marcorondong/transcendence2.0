@@ -9,8 +9,8 @@ export interface IScore
 
 export class ScoreBoard
 {
-	protected leftPlayerGoals:number;
-	protected rightPlayerGoals:number;
+	protected leftPlayerGoals: number;
+	protected rightPlayerGoals: number;
 	protected secondsLeft: number;
 	protected paused: boolean;
 	private lastScoredSide: "left" | "right";
@@ -46,7 +46,7 @@ export class ScoreBoard
 		{
 			throw Error("Not really winner, goals are same");
 		}
-		return ETeamSide.RIGTH
+		return ETeamSide.RIGTH;
 	}
 
 	getLoserSide(): ETeamSideFiltered
@@ -57,17 +57,17 @@ export class ScoreBoard
 		{
 			throw Error("Not really loser, goals are same");
 		}
-		return ETeamSide.RIGTH
+		return ETeamSide.RIGTH;
 
 	}
 
-	setScore(leftGoals:number, rightGoals:number)
+	setScore(leftGoals: number, rightGoals: number)
 	{
 		this.leftPlayerGoals = leftGoals;
 		this.rightPlayerGoals = rightGoals;
 	}
 
-	getScoreJson():IScore
+	getScoreJson(): IScore
 	{
 		return {
 			leftGoals: this.leftPlayerGoals,
@@ -76,7 +76,7 @@ export class ScoreBoard
 		}
 	}
 
-	startCountdown():void 
+	startCountdown(): void 
 	{
 		this.start();
 		const interval = setInterval( ()=>
@@ -90,23 +90,23 @@ export class ScoreBoard
 		}, 1000);
 	}
 
-	pause():void 
+	pause(): void 
 	{
 		this.paused = true;
 	}
 
-	start():void 
+	start(): void 
 	{
 		this.paused = false;
 	}
 
-	isWinnerDecided():boolean
+	isWinnerDecided(): boolean
 	{
 		if(this.secondsLeft <= 0)
 		{
 			if(this.leftPlayerGoals !== this.rightPlayerGoals)
 				return true;
 		}
-		return false
+		return false;
 	}
 }
