@@ -19,7 +19,7 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		return;
 	}
 	
-	sendLobbyUpdateToEveryone(extraInfo:string): void {
+	broadcastLobbyUpdate(extraInfo:string): void {
 		if(this.leftPlayer !== undefined)
 			this.sendLobbyUpdate(this.leftPlayer, extraInfo);
 		if(this.rightPlayer !== undefined)

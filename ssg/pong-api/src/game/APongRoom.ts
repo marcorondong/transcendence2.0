@@ -26,7 +26,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	protected roomState: EPongRoomState
 
 
-	abstract sendLobbyUpdateToEveryone(extraInfo:string): void;
+	abstract broadcastLobbyUpdate(extraInfo:string): void;
 	abstract updateOthers(message: string): void;
 	abstract isFull():boolean;
 	abstract isEmpty(): boolean;
@@ -137,7 +137,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.addConnectionToRoom(player.connection);
 		this.assingControlsToPlayer(player, player.getPlayerPaddle(this.game));
 		this.disconnectBehaviour(player);
-		this.sendLobbyUpdateToEveryone("Another player joined");
+		this.broadcastLobbyUpdate("Another player joined");
 		if(this.isFull())
 		{
 			this.setPongRoomState(EPongRoomState.GAME);

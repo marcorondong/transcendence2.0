@@ -18,10 +18,10 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles>
 	}
 
 	updateOthers(message: string): void {
-		this.sendLobbyUpdateToEveryone(message);
+		this.broadcastLobbyUpdate(message);
 	}
 
-	sendLobbyUpdateToEveryone(extraInfo: string): void
+	broadcastLobbyUpdate(extraInfo: string): void
 	{
 		if(this.leftPlayerOne !== undefined)
 			this.sendLobbyUpdate(this.leftPlayerOne, extraInfo);
