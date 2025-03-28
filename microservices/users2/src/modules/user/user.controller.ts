@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUserSchema, createUserResponseSchema, loginSchema, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
+import { createUserInput, createUserSchema, createUserResponseSchema, loginInput, loginSchema, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
 import { createUser, findUserByEmail, findUsers } from "./user.service";
 import { verifyPassword } from "../../utils/hash";
 import { server } from "../../app";
@@ -9,20 +9,21 @@ import { server } from "../../app";
 // With safeParse is for adding an extra layer of security (since it comes from the user).
 
 export async function registerUserHandler(
-	request: FastifyRequest,
+	request: FastifyRequest<{ Body: createUserInput }>,
 	reply: FastifyReply,
 ) {
 	// Serialize/validate/filter input via Zod schemas (createUserSchema.safeParse)
-	const result = createUserSchema.safeParse(request.body);
-	if (!result.success) {
-		return reply.code(400).send({
-			message: "Invalid request data",
-			errors: result.error.flatten(),
-		});
-	}
-	const body = result.data;
+	// const result = createUserSchema.safeParse(request.body);
+	// if (!result.success) {
+	// 	return reply.code(400).send({
+	// 		message: "Invalid request data",
+	// 		errors: result.error.flatten(),
+	// 	});
+	// }
+	// const body = result.data;
 	try{
-		const user = await createUser(body);
+		// const user = await createUser(body);
+		const user = await createUser(request.body);
 		// Serialize/validate/filter response via Zod schemas (createUserResponseSchema.parse)
 		const parsedUser = createUserResponseSchema.parse(user);
 		return reply.code(201).send(parsedUser);
@@ -40,19 +41,21 @@ export async function registerUserHandler(
 }
 
 export async function loginHandler(
-	request: FastifyRequest,
+	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
 	// Serialize/validate/filter input via Zod schemas (loginSchema.safeParse)
-	const result = loginSchema.safeParse(request.body);
-	if (!result.success) {
-		return reply.code(400).send({
-			message: "Invalid request data",
-			errors: result.error.flatten(),
-		});
-	}
-	const body = result.data
+	// const result = loginSchema.safeParse(request.body);
+	// if (!result.success) {
+	// 	return reply.code(400).send({
+	// 		message: "Invalid request data",
+	// 		errors: result.error.flatten(),
+	// 	});
+	// }
+	// const body = result.data
+	const body = request.body;
 	try {
+		// const user = await findUserByEmail(body.email)
 		const user = await findUserByEmail(body.email)
 		if (!user) {
 			return reply.code(401).send({ message: "Invalid email or password" });

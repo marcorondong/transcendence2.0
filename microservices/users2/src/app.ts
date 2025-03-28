@@ -2,6 +2,8 @@
 import Fastify, { fastify, FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
 import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from "fastify-type-provider-zod";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUI from "@fastify/swagger-ui";
 import userRoutes from "./modules/user/user.route";
 import productRoutes from "./modules/product/product.route";
 // import { request } from "http";  // It seems that this is not used
@@ -86,7 +88,19 @@ server.get('/healthcheck', async function() {
 });
 
 async function main() {
+	// Register swagger/openAPI plugins
+	await server.register(fastifySwagger, {
+		openapi: {
+			info: {
+				title: "ft_transcendence Users API",
+				description: "Swagger docs for ft_transcendence project",
+				version: "1.0.0",
+			},
+		},
+		transform: jsonSchemaTransform, // <-- important for Zod compatibility
+	});
 	// Register routes
+	await server.register(fastifySwaggerUI, {routePrefix: "/docs",});
 	server.register(userRoutes, {prefix: 'api/users'});
 	server.register(productRoutes, {prefix: 'api/products'});
 	try{

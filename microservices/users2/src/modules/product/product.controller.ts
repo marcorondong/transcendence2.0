@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { createProduct, getProducts } from "./product.service";
-import { createProductSchema, productResponseSchema, productArrayResponseSchema } from "./product.schema";
+import { createProductInput, createProductSchema, productResponseSchema, productArrayResponseSchema } from "./product.schema";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -8,20 +8,21 @@ import { createProductSchema, productResponseSchema, productArrayResponseSchema 
 
 // TODO: Research from where all those these values are taken. From schema.prisma?
 export async function createProductHandler(
-	request: FastifyRequest,
+	request: FastifyRequest<{ Body: createProductInput }>,
 	reply: FastifyReply,
 	) {
 	// Serialize/validate/filter input via Zod schemas (createProductSchema.safeParse)
-	const result = createProductSchema.safeParse(request.body);
-	if (!result.success) {
-		return reply.code(400).send({
-			message: "Invalid request data",
-			errors: result.error.flatten(),
-		});
-	}
+	// const result = createProductSchema.safeParse(request.body);
+	// if (!result.success) {
+	// 	return reply.code(400).send({
+	// 		message: "Invalid request data",
+	// 		errors: result.error.flatten(),
+	// 	});
+	// }
 	try {
 		const product = await createProduct({
-			...result.data,
+			// ...result.data,
+			...request.body,
 			ownerId: request.user.id,
 		});
 		// Serialize/validate/filter input via Zod schemas (productResponseSchema.parse)

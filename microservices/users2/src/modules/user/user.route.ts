@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { registerUserHandler, loginHandler, getUsersHandler } from "./user.controller";
-import { createUserResponseSchema, loginResponseSchema, userArrayResponseSchema } from './user.schema';
+import { createUserSchema, createUserResponseSchema, loginSchema, loginResponseSchema, userArrayResponseSchema } from './user.schema';
 
 async function userRoutes(server: FastifyInstance) {
 	// MR_NOTE: I should do this if I haven't enabled Zod globally
@@ -13,6 +13,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.post("/",
 		{
 		schema: {
+			body: createUserSchema,
 			response: {
 				201: createUserResponseSchema,
 			},
@@ -24,6 +25,7 @@ async function userRoutes(server: FastifyInstance) {
 	// This route IS NOT authenticated
 	server.post("/login", {
 		schema: {
+			body: loginSchema,
 			response: {
 				200: loginResponseSchema,
 			},
