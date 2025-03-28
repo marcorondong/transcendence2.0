@@ -31,22 +31,10 @@ export class Paddle
 		}
 	}
 
-	moveUp(): void 
-	{
-		const newY = this.position.getY() + MOVE_MODIFIER;
-		this.position.setY(newY);
-	}
-
 	resetPosition(): void
 	{
 		this.position.setX(this.initialPosition.getX());
 		this.position.setY(this.initialPosition.getY());
-	}
-
-	moveDown(): void 
-	{
-		const newY = this.position.getY() - MOVE_MODIFIER;
-		this.position.setY(newY);
 	}
 
 	move(direction: "up" | "down"): void 
@@ -94,5 +82,17 @@ export class Paddle
 	getMoveModifier(): number 
 	{
 		return MOVE_MODIFIER;
+	}
+
+	private moveUp(): void 
+	{
+		const newY = this.position.getY() + MOVE_MODIFIER;
+		this.position.setY(newY);
+	}
+
+	private moveDown(): void 
+	{
+		const newY = this.position.getY() - MOVE_MODIFIER;
+		this.position.setY(newY);
 	}
 }
