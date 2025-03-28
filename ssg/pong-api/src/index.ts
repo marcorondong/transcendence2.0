@@ -93,7 +93,7 @@ fastify.register(async function(fastify)
 			privateRoom = false,
 			clientType = "player",
 			matchType = "singles",
-			tournamentSize = Tournament.getDefaultTournamnetSize()
+			tournamentSize = Tournament.getDefaultTournamentSize()
 		} = req.query as IGameRoomQuery;
 
 		const gameQuery: IGameRoomQuery =

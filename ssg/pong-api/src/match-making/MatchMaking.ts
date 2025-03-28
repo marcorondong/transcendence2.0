@@ -57,8 +57,8 @@ export class MatchMaking
 	{
 		if(Tournament.isSizeValid(tournamentSize) === false)
 		{
-			player.sendNotification(`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamnetSize()}`)
-			tournamentSize = Tournament.getDefaultTournamnetSize();
+			player.sendNotification(`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamentSize()}`)
+			tournamentSize = Tournament.getDefaultTournamentSize();
 		}
 		this.tournamentManager.putPlayerInTournament(player, tournamentSize);
 	}

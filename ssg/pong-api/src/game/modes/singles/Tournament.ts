@@ -41,7 +41,7 @@ export class Tournament extends EventEmitter
 		return validSizeTournament.has(requestedSize);
 	}
 
-	static getDefaultTournamnetSize()
+	static getDefaultTournamentSize()
 	{
 		return defaultSize;
 	}
