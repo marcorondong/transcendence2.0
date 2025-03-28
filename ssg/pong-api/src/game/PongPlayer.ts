@@ -66,7 +66,7 @@ export class PongPlayer extends EventEmitter
 	}
 
 
-	getPlayerRoleString() :string
+	getPlayerRoleString(): string
 	{
 		switch(this.role)
 		{
@@ -102,17 +102,17 @@ export class PongPlayer extends EventEmitter
 			throw Error("Unexpected player role setted");
 	}
 
-	getPlayerOnlineStatus():EPlayerStatus
+	getPlayerOnlineStatus(): EPlayerStatus
 	{
 		return this.status;
 	}
 	
-	setPlayerStatus(status: EPlayerStatus)
+	setPlayerStatus(status: EPlayerStatus): void
 	{
 		this.status = status;
 	}
 
-	sendNotification(notification: string)
+	sendNotification(notification: string): void
 	{
 		this.connection.send(notification)
 	}
@@ -122,7 +122,7 @@ export class PongPlayer extends EventEmitter
 		return game.getPaddle(this.role)
 	}
 
-	private connectionMonitor()
+	private connectionMonitor(): void
 	{
 		this.connection.on("close", ()=> 
 		{
@@ -133,7 +133,7 @@ export class PongPlayer extends EventEmitter
 		})
 	}
 
-	private setTeamSide(side: ETeamSideFiltered)
+	private setTeamSide(side: ETeamSideFiltered): void
 	{
 		this.side = side;
 	}
