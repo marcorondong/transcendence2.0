@@ -11,18 +11,18 @@ export interface IPaddleJson
 
 export class Paddle
 {
-	protected position:Point;
-	readonly height:number;
-	readonly initialPosition:Point; 
+	protected position: Point;
+	readonly height: number;
+	readonly initialPosition: Point; 
 
-	constructor(position: Point, height:number = 1)
+	constructor(position: Point, height: number = 1)
 	{
 		this.position = position;
 		this.height = height;
 		this.initialPosition = new Point(position.getX(), position.getY());
 	}
 
-	getPaddleJson():IPaddleJson
+	getPaddleJson(): IPaddleJson
 	{
 		return {
 			x: this.getPosition().getX(),
@@ -31,25 +31,25 @@ export class Paddle
 		}
 	}
 
-	moveUp():void 
+	moveUp(): void 
 	{
 		const newY = this.position.getY() + MOVE_MODIFIER;
 		this.position.setY(newY);
 	}
 
-	resetPosition():void
+	resetPosition(): void
 	{
 		this.position.setX(this.initialPosition.getX());
 		this.position.setY(this.initialPosition.getY());
 	}
 
-	moveDown():void 
+	moveDown(): void 
 	{
 		const newY = this.position.getY() - MOVE_MODIFIER;
 		this.position.setY(newY);
 	}
 
-	move(direction: "up" | "down"):void 
+	move(direction: "up" | "down"): void 
 	{
 		if(direction === "up")
 			this.moveUp();
