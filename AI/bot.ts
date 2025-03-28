@@ -120,16 +120,25 @@ export class Bot
 		return this.ticksUntilTarget_ < this.REFRESH_RATE;
 	}
 
+	private ballVectorOrigin() : Point {
+		let origin;
+		if (this.ballHitPaddle())
+			origin = new Point(this.target_.getX(), this.target_.getY());
+		else
+			origin = new Point(this.lastBall_.getX(), this.lastBall_.getY());
+		return origin;
+	}
+
 	private provisionalTarget(ballPosition: Point) {
-		const countFrom = (this.ballHitPaddle()) ? this.target_ : this.lastBall_;
-		const distance = distanceBetweenPoints(countFrom, ballPosition);
-		console.log(`distance between ${countFrom.getX()} ${countFrom.getY()} and ball: ${distance}`);
+		const origin = this.ballVectorOrigin();
+		const distance = distanceBetweenPoints(origin, ballPosition);
+		console.log(`distance between ${origin.getX()} ${origin.getY()} and ball: ${distance}`);
 
 		if (this.ballBounced(distance))
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
 		if (this.ballHitPaddle())
 			this.target_.setX(-this.target_.getX());
-		this.target_.setY(findIntersectionWithVerticalLine(countFrom, ballPosition, this.target_.getX(), 0));
+		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX(), 0));
 		console.log(`provisional target x : ${this.target_.getX()}, y : ${this.target_.getY()}`);
 	}
 
@@ -146,7 +155,7 @@ export class Bot
 	private calculateTarget(ballPosition: Point) {
 		this.provisionalTarget(ballPosition);
 		this.calculateTicks(ballPosition);
-		if (this.target_.getY() > field.TOP_EDGE_Y || this.target_.getY() < field.BOTTOM_EDGE_Y)
+		while (this.target_.getY() > field.TOP_EDGE_Y || this.target_.getY() < field.BOTTOM_EDGE_Y)
 			this.target_.setY(this.accountForBounce(this.target_.getY()));
 		this.countdown_ = this.REFRESH_RATE;
 		this.updateLastBall(ballPosition);
@@ -154,7 +163,7 @@ export class Bot
 	
 	private ballBounced(distance: number): boolean {
 		const expectedDistance = (this.ballHitPaddle()) ? this.ticksAfterTarget_ : this.REFRESH_RATE;
-		return Math.abs(Math.round(distance / this.BALL_SPEED) - expectedDistance) > 1;
+		return Math.round(distance / this.BALL_SPEED) - expectedDistance < 0;
 	}
 	
 	private ballGoesAway(deltaX: number) {

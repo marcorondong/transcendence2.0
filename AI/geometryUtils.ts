@@ -7,7 +7,7 @@ export function findIntersectionWithVerticalLine(p1: Point, p2: Point, xVertical
 		const b = p1.getY() - m * p1.getX();
 		yResult = m * xVertical + b;
 	}
-	return yResult;
+	return roundTo(yResult, 2);
 }
 
 export function distanceBetweenPoints(p1: Point, p2: Point): number {
