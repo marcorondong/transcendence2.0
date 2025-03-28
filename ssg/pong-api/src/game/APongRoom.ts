@@ -18,12 +18,12 @@ export enum EPongRoomState
 
 export abstract class APongRoom<T extends APongGame> extends SessionRoom
 {
-	protected isFrameGenerating: boolean;
-	protected isCleaned:boolean;
 	protected game: T;
+	protected isCleaned:boolean;
+	protected isFrameGenerating: boolean;
 	protected matchName: string;
-	protected roomState: EPongRoomState
 	protected readonly privateRoom: boolean;
+	protected roomState: EPongRoomState
 
 
 	abstract sendLobbyUpdateToEveryone(extraInfo:string): void;
@@ -41,11 +41,11 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	constructor(privateRoom:boolean, match:T)
 	{
 		super();
-		this.privateRoom = privateRoom;
-		this.isFrameGenerating = false;
-		this.isCleaned = false;
 		this.game = match;
+		this.isCleaned = false;
+		this.isFrameGenerating = false;
 		this.matchName = "Unknown match";
+		this.privateRoom = privateRoom;
 		this.roomState = EPongRoomState.LOBBY;
 	}
 	
