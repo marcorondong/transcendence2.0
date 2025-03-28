@@ -12,13 +12,13 @@ export interface IBallJson
 export class Ball
 {
 	readonly initialPosition: Point;
-	readonly initialVector:Point
+	readonly initialVector: Point
 	readonly radius: number;
-	readonly speed:number;
-	protected position:Point;
-	protected vector:Point;
+	readonly speed: number;
+	protected position: Point;
+	protected vector: Point;
 
-	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
+	constructor(position: Point, vector: Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
 		this.initialPosition = new Point(position.getX(), position.getY());
 		this.initialVector = vector;
@@ -28,7 +28,7 @@ export class Ball
 		this.vector = vector;
 	}
 
-	getBallJson():IBallJson
+	getBallJson(): IBallJson
 	{
 		return{
 			x: this.getPosition().getX(),
@@ -36,17 +36,17 @@ export class Ball
 			radius: this.getRadius()
 		}
 	}
-	moveBall()
+	moveBall(): void
 	{
 		this.position.add(this.vector);
 	}
 
-	setDirection(vector:Point):void 
+	setDirection(vector: Point): void 
 	{
 		this.vector = vector;
 	}
 
-	resetDirection(direction: "left" | "right"):void
+	resetDirection(direction: "left" | "right"): void
 	{
 		let newX = this.initialVector.getX();
 		if(direction === "left" && newX > 0)
@@ -61,7 +61,7 @@ export class Ball
 		this.vector.setX(newX);
 	}
 
-	resetPosition():void 
+	resetPosition(): void 
 	{
 		this.position.setX(this.initialPosition.getX());
 		this.position.setY(this.initialPosition.getY());
@@ -78,13 +78,13 @@ export class Ball
 		this.getDirection().setX(newX);
 	}
 
-	simpleBounceY():void 
+	simpleBounceY(): void 
 	{
 		const newY = -1 * this.getDirection().getY();
 		this.getDirection().setY(newY);
 	}
 
-	calculateComplexBounceDirection(pointA:Point, maxDoubleDistanceFromPoint:number):Point
+	calculateComplexBounceDirection(pointA:Point, maxDoubleDistanceFromPoint:number): Point
 	{
 		const currentDirectionX = this.getDirection().getX();
 		const vector:Point = Point.calculateVector(pointA, this.getPosition());
@@ -101,17 +101,17 @@ export class Ball
 
 	}
 
-	getPosition():Point
+	getPosition(): Point
 	{
 		return this.position;
 	}
 
-	setPosition(point:Point) :void 
+	setPosition(point:Point): void 
 	{
 		this.position = point;
 	}
 
-	getRadius():number
+	getRadius(): number
 	{
 		return this.radius;
 	}
@@ -153,7 +153,7 @@ export class Ball
 	 * 
 	 * @returns distance in which is possible that ball with hit something in next MOVE_COEFFICIENT frames (aka next 5 frames)
 	 */
-	getCriticalDistance():number 
+	getCriticalDistance(): number 
 	{
 		const critDistance = this.radius + (Math.abs(this.getDirection().getBiggerAxis())) * MOVE_COEFFICIENT;
 		return critDistance; 
@@ -161,7 +161,7 @@ export class Ball
 
 
 
-	isHit(otherPoint:Point):boolean
+	isHit(otherPoint:Point): boolean
 	{
 		const centerX = this.getPosition().getX();
 		const centerY = this.getPosition().getY();
