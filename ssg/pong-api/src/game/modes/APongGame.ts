@@ -48,8 +48,8 @@ export abstract class APongGame extends EventEmitter
 		this.ball = ball;
 		this.score = score;
 		this.field = field;
-		this.gameStatus = EGameStatus.NOT_STARTED;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
+		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
 	getGameStatus(): EGameStatus
