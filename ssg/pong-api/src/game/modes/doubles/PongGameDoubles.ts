@@ -21,7 +21,7 @@ export class PongGameDoubles extends APongGame
 	private rightPaddleOne: Paddle;
 	private rightPaddletwo: Paddle;
 
-	constructor(leftPaddle: Paddle, leftTwo: Paddle, rightPaddle: Paddle, rightTwo:Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
+	constructor(leftPaddle: Paddle, leftTwo: Paddle, rightPaddle: Paddle, rightTwo: Paddle, ball: Ball, score: ScoreBoard, tableField: PongField)
 	{
 		super(ball,score,tableField);
 		this.leftPaddleOne = leftPaddle;
@@ -39,7 +39,7 @@ export class PongGameDoubles extends APongGame
 		const ball: Ball = new Ball(new Point(0, 1.25));
 		const table: PongField = new PongField();
 		const score: ScoreBoard = new ScoreBoard();
-		const game: PongGameDoubles = new PongGameDoubles(leftPaddle,leftPaddletwo ,rightPaddle, rightPaddletwo, ball, score, table);
+		const game: PongGameDoubles = new PongGameDoubles(leftPaddle, leftPaddletwo , rightPaddle, rightPaddletwo, ball, score, table);
 		return game;
 	}
 
@@ -79,7 +79,7 @@ export class PongGameDoubles extends APongGame
 		}
 	}
 
-	getCloserLeftPaddle():Paddle
+	getCloserLeftPaddle(): Paddle
 	{
 		const firstDistance = Point.calculateDistance(this.leftPaddleOne.getPosition(), this.ball.getPosition());
 		const secondDistance = Point.calculateDistance(this.leftPaddletwo.getPosition(), this.ball.getPosition());
@@ -88,7 +88,7 @@ export class PongGameDoubles extends APongGame
 		return this.leftPaddletwo;
 	}
 
-	getCloserRightPaddle():Paddle
+	getCloserRightPaddle(): Paddle
 	{
 		const firstDistance = Point.calculateDistance(this.rightPaddleOne.getPosition(), this.ball.getPosition());
 		const secondDistance = Point.calculateDistance(this.rightPaddletwo.getPosition(), this.ball.getPosition());
