@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUserSchema, createUserResponseSchema, loginInput, loginSchema, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
+import { createUserSchema, createUserResponseSchema, loginSchema, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
 import { createUser, findUserByEmail, findUsers } from "./user.service";
 import { verifyPassword } from "../../utils/hash";
 import { server } from "../../app";
@@ -59,15 +59,16 @@ export async function loginHandler(
 		}
 		// TODO: Remane password to passwordHash
 		// Veryfy password.
+		const candidatePassword = body.password;
 		const correctPassword = verifyPassword({
-			candidatePassword: body.password,
+			candidatePassword,
 			salt: user.salt,
-			hash: user.password,
+			hash: user.passwordHash,
 		})
 		if (!correctPassword) {
 			return reply.code(401).send({ message: "Invalid email or password" });
 		}
-		const {password, salt, ...rest} = user;
+		const {passwordHash, salt, ...rest} = user;
 		// TODO: Maybe this JWT part should be handled by Autentication Service
 		// TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
 		// Generate access token

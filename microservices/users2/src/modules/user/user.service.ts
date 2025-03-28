@@ -6,7 +6,7 @@ export async function createUser(input: createUserInput) {
 	const { password, ...rest } = input;
 	const { salt, hash } = hashPassword(password)
 	const user = await prisma.user.create({
-		data: { ...rest, salt, password: hash },
+		data: { ...rest, salt, passwordHash: hash },
 	});
 	return user;
 }

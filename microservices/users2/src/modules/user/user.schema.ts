@@ -51,6 +51,6 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
-export type loginInput = z.infer<typeof loginSchema>; // TODO: This is not used anymore
-export type UserResponse = z.infer<typeof userResponseSchema>; // TODO: This is not used yet (I don't have an endpoint to retrieve single user)
-export type UserArrayResponse = z.infer<typeof userArrayResponseSchema>;
+// export type loginInput = z.infer<typeof loginSchema>; // TODO: This is not used anymore
+// export type UserResponse = z.infer<typeof userResponseSchema>; // TODO: This is not used yet (I don't have an endpoint to retrieve single user)
+// export type UserArrayResponse = z.infer<typeof userArrayResponseSchema>;
