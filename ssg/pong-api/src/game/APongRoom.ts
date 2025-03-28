@@ -49,10 +49,10 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 		this.roomState = EPongRoomState.LOBBY;
 	}
 	
-	static createMatchStatusUpdate(nottification: string)
+	static createMatchStatusUpdate(notification: string)
 	{
 		return {
-			matchStatus: nottification
+			matchStatus: notification
 		}
 	}
 
@@ -187,7 +187,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 
 	private assingControlsToPlayer(player:PongPlayer, playerPaddle: Paddle):void 
 	{
-		player.connection.on("message", (data: RawData, isBinnary:boolean) =>
+		player.connection.on("message", (data: RawData, isBinary:boolean) =>
 		{
 			const json = Parser.rawDataToJson(data);
 			if(!json)
