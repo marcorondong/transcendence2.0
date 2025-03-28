@@ -1,6 +1,5 @@
 import Fastify from "fastify"
 import websocket from "@fastify/websocket"
-import { WebSocket, RawData } from "ws";
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
