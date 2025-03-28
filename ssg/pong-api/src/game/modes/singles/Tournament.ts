@@ -3,7 +3,6 @@ import { EventEmitter } from "node:stream";
 import { PongRoomSingles } from "./PongRoomSingles";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";
 
-
 export enum ETournamentState
 {
 	LOBBY,
@@ -16,14 +15,14 @@ const defaultSize: number = 4 as const;
 
 export class Tournament extends EventEmitter
 {
-	private requiredPlayers:number;
-	private playerPool:Set<PongPlayer>;
-	private gamesPool:Set<PongRoomSingles>;
+	private requiredPlayers: number;
+	private playerPool: Set<PongPlayer>;
+	private gamesPool: Set<PongRoomSingles>;
 	private state: ETournamentState;
-	private roundNumber:number;
-	private readonly id:string;
+	private roundNumber: number;
+	private readonly id: string;
 
-	constructor(tournamentPlayers:number)
+	constructor(tournamentPlayers: number)
 	{
 		super();
 		if(Tournament.isSizeValid(tournamentPlayers) === false)
@@ -36,48 +35,47 @@ export class Tournament extends EventEmitter
 		this.id = crypto.randomUUID();
 	}
 
-	static isSizeValid(requestedSize:number)
+	static isSizeValid(requestedSize: number): boolean
 	{
 		return validSizeTournament.has(requestedSize);
 	}
 
-	static getDefaultTournamentSize()
+	static getDefaultTournamentSize(): number
 	{
 		return defaultSize;
 	}
 
-	getAllTournamentsRoom():Map<string, PongRoomSingles>
+	getAllTournamentsRoom(): Map<string, PongRoomSingles>
 	{
 		const allRooms: Map<string, PongRoomSingles> = new Map<string, PongRoomSingles>(
 			[...this.gamesPool].map(room =>[room.getId(), room] as [string, PongRoomSingles])
 		);
 		return allRooms;
-		
 	}
 
-	getId()
+	getId(): string
 	{
 		return this.id;
 	}
 	
-	getRequiredPlayers():number
+	getRequiredPlayers(): number
 	{
 		return this.requiredPlayers;
 	}
 
-	getState():ETournamentState
+	getState(): ETournamentState
 	{
 		return this.state;
 	}
 	
-	startTournament()
+	startTournament(): void
 	{
 		this.state = ETournamentState.RUNNING;
 		this.emit(TournamentEvents.STARTED);
 		this.createAndStartRound();
 	}
 
-	addPlayer(player:PongPlayer)
+	addPlayer(player: PongPlayer): void
 	{
 		if(this.state==ETournamentState.LOBBY && (this.requiredPlayers > this.playerPool.size))
 		{
@@ -93,12 +91,12 @@ export class Tournament extends EventEmitter
 		}
 	}
 	
-	calculateNumberOfFreeSpots():number
+	calculateNumberOfFreeSpots(): number
 	{
 		return this.requiredPlayers - this.playerPool.size;
 	}
 
-	broadcastTournamentAnnouncement(announcement: string)
+	broadcastTournamentAnnouncement(announcement: string): void
 	{
 		const jsonNotification = PongRoomSingles.createMatchStatusUpdate(announcement);
 		for(const player of this.playerPool)
@@ -107,7 +105,7 @@ export class Tournament extends EventEmitter
 		}
 	}
 
-	kickEveryone()
+	kickEveryone(): void
 	{
 		for(const player of this.playerPool)
 		{
@@ -115,7 +113,7 @@ export class Tournament extends EventEmitter
 		}
 	}
 
-	async waitForWinners()
+	async waitForWinners(): Promise<void>
 	{
 		const winnerPromises = Array.from(this.gamesPool).map(async(room) => 
 		{
@@ -135,13 +133,13 @@ export class Tournament extends EventEmitter
 		await Promise.all(winnerPromises);
 	}
 
-	private finishTournament()
+	private finishTournament(): void
 	{
 		this.state = ETournamentState.FINISHED;
 		this.emit(TournamentEvents.FINISHED);
 	}
 
-	private async createAndStartRound()
+	private async createAndStartRound(): Promise<void>
 	{
 		if(this.playerPool.size == 1)
 		{
@@ -164,13 +162,13 @@ export class Tournament extends EventEmitter
 		this.createAndStartRound();
 	}
 
-	private removeAllGamesfromPool()
+	private removeAllGamesfromPool(): void
 	{
 		for(const oneGame of this.gamesPool)
 			this.gamesPool.delete(oneGame);
 	}
 
-	private connectionMonitor(player:PongPlayer)
+	private connectionMonitor(player:PongPlayer): void
 	{
 		player.on(ClientEvents.GONE_OFFLINE, (unpatient:PongPlayer)=>
 		{
@@ -182,14 +180,14 @@ export class Tournament extends EventEmitter
 		})
 	}
 
-	private kickPlayer(proPlayer:PongPlayer)
+	private kickPlayer(proPlayer:PongPlayer): void
 	{
 		console.log("Kicking player out of tournament");
 		proPlayer.connection.close();
 		this.playerPool.delete(proPlayer);
 	}
 
-	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer)
+	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer): void
 	{
 		const room:PongRoomSingles = PongRoomSingles.createRoomForTwoPlayers(proPlayer1, proPlayer2);
 		this.gamesPool.add(room);
