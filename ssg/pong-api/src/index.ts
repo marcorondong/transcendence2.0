@@ -10,10 +10,10 @@ import { Tournament } from "./game/modes/singles/Tournament";
 dotenv.config();
 
 //Server set up variables
-const PORT:number = 3010;
-const HOST:string = "0.0.0.0"
-const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
-const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
+const PORT: number = 3010;
+const HOST: string = "0.0.0.0"
+const privateKeyPath: string = path.join(__dirname, "../server-keys/key.pem")
+const certificatePath: string = path.join(__dirname, "../server-keys/cert.pem")
 let privateKey: string; 
 let certificate: string;
 
@@ -53,7 +53,7 @@ const fastify = Fastify(
 	: true
 });
 	
-const manager:MatchMaking = new MatchMaking();
+const manager: MatchMaking = new MatchMaking();
 
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
