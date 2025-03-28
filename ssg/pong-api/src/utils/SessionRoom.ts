@@ -5,7 +5,7 @@ export class SessionRoom extends EventEmitter
 {
 	protected readonly id: string;
 	protected connections: Set<WebSocket>;
-	protected readonly creationDate:Date; 
+	protected readonly creationDate: Date; 
 	
 	constructor()
 	{
@@ -15,22 +15,22 @@ export class SessionRoom extends EventEmitter
 		this.creationDate = new Date();
 	}
 
-	getId():string
+	getId(): string
 	{
 		return this.id;
 	}
 
-	getCreationDate():Date 
+	getCreationDate(): Date 
 	{
 		return this.creationDate;
 	}
 	
-	addConnectionToRoom(connectionToAdd: WebSocket):void
+	addConnectionToRoom(connectionToAdd: WebSocket): void
 	{
 		this.connections.add(connectionToAdd);
 	}
 
-	removeAllConnectionsFromRoom():void
+	removeAllConnectionsFromRoom(): void
 	{
 		for(const oneConnection of this.connections)
 		{
@@ -39,7 +39,7 @@ export class SessionRoom extends EventEmitter
 		}
 	}
 	
-	closeAllConecctionsFromRoom():void 
+	closeAllConecctionsFromRoom(): void 
 	{
 		for(const oneConnection of this.connections)
 		{
@@ -59,7 +59,7 @@ export class SessionRoom extends EventEmitter
 		}
 	}
 
-	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
+	private removeConnectionFromRoom(connectionToRemove: WebSocket): boolean
 	{
 		return this.connections.delete(connectionToRemove);
 	}
