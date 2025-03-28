@@ -25,8 +25,8 @@ export class PongGameDoubles extends APongGame
 	{
 		super(ball,score,tableField);
 		this.leftPaddleOne = leftPaddle;
-		this.rightPaddleOne = rightPaddle;
 		this.leftPaddletwo = leftTwo;
+		this.rightPaddleOne = rightPaddle;
 		this.rightPaddletwo = rightTwo;
 	}
 
