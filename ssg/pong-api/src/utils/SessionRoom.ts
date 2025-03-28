@@ -4,13 +4,14 @@ import { WebSocket } from "ws";
 export class SessionRoom extends EventEmitter
 {
 	protected readonly id: string;
-	protected connections: Set<WebSocket> = new Set<WebSocket>();
+	protected connections: Set<WebSocket>;
 	protected readonly creationDate:Date; 
 	
 	constructor()
 	{
 		super();
 		this.id = crypto.randomUUID();
+		this.connections = new Set<WebSocket>();
 		this.creationDate = new Date();
 	}
 
