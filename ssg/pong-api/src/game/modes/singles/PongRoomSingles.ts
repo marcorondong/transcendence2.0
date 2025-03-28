@@ -5,38 +5,42 @@ import { APongRoom } from "../../APongRoom";
 
 export class PongRoomSingles extends APongRoom<PongGameSingles>
 {
-	private leftPlayer?:PongPlayer;
-	private rightPlayer?:PongPlayer;
+	private leftPlayer?: PongPlayer;
+	private rightPlayer?: PongPlayer;
 
-	constructor(privateRoom:boolean = false)
+	constructor(privateRoom: boolean = false)
 	{
 		const match = PongGameSingles.createStandardGame();
 		super(privateRoom, match);
 		this.setMatchName("single match");
 	}
 
-	updateOthers(message: string): void {
+	updateOthers(message: string): void
+	{
 		return;
 	}
 	
-	broadcastLobbyUpdate(extraInfo:string): void {
+	broadcastLobbyUpdate(extraInfo: string): void
+	{
 		if(this.leftPlayer !== undefined)
 			this.sendLobbyUpdate(this.leftPlayer, extraInfo);
 		if(this.rightPlayer !== undefined)
 			this.sendLobbyUpdate(this.rightPlayer, extraInfo);
 	}
 
-	isEmpty(): boolean {
+	isEmpty(): boolean
+	{
 		if(this.leftPlayer === undefined && this.rightPlayer === undefined)
 			return true;
 		return false;
 	}
 
-	getGameFrame() {
+	getGameFrame()
+	{
 		return this.getGame().getFrame();
 	}
 
-	getMissingPlayerRole():EPlayerRoleFiltered
+	getMissingPlayerRole(): EPlayerRoleFiltered
 	{
 		if(this.leftPlayer === undefined)
 			return EPlayerRole.LEFT_ONE;
@@ -59,7 +63,8 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		return this.rightPlayer;
 	}
 
-	calculateMissingPlayers(): number {
+	calculateMissingPlayers(): number
+	{
 		let counter = 0;
 		if(this.leftPlayer === undefined)
 			counter++;
@@ -68,7 +73,7 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		return counter;
 	}
 
-	static createRoomForTwoPlayers(playerOne:PongPlayer, playerTwo:PongPlayer):PongRoomSingles
+	static createRoomForTwoPlayers(playerOne: PongPlayer, playerTwo: PongPlayer): PongRoomSingles
 	{
 		const room:PongRoomSingles = new PongRoomSingles();
 		playerOne.setPlayerRole(EPlayerRole.LEFT_ONE);
@@ -78,7 +83,7 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		return room;
 	}
 
-	setRoomAsTournament(roundName:string)
+	setRoomAsTournament(roundName: string): void
 	{
 		this.setMatchName(roundName);
 	}
@@ -99,14 +104,14 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 		}
 	}
 
-	isFull():boolean
+	isFull(): boolean
 	{
 		if (this.leftPlayer !== undefined  && this.rightPlayer !== undefined)
 			return true
 		return false;
 	}
 
-	removePlayer(player:PongPlayer)
+	removePlayer(player: PongPlayer): void
 	{
 		if(player === this.leftPlayer)
 			return this.leftPlayer = undefined;
@@ -114,5 +119,4 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 			return this.rightPlayer = undefined;
 		throw error("Player was never added in this room");
 	}
-
 }
