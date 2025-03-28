@@ -11,21 +11,21 @@ export interface IBallJson
 
 export class Ball
 {
-	protected position:Point;
 	readonly initialPosition: Point;
-	protected vector:Point;
-	readonly radius;
-	readonly speed:number;
 	readonly initialVector:Point
+	readonly radius: number;
+	readonly speed:number;
+	protected position:Point;
+	protected vector:Point;
 
 	constructor(position:Point, vector:Point = new Point(-0.1, 0.0), radius=0.075) 
 	{
 		this.initialPosition = new Point(position.getX(), position.getY());
-		this.position = position;
-		this.vector = vector;
 		this.initialVector = vector;
 		this.radius = radius;
 		this.speed = Point.calculateVectorSpeed(vector);
+		this.position = position;
+		this.vector = vector;
 	}
 
 	getBallJson():IBallJson
