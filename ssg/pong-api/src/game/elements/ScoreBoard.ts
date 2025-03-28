@@ -9,15 +9,19 @@ export interface IScore
 
 export class ScoreBoard
 {
-	protected leftPlayerGoals:number = 0;
-	protected rightPlayerGoals:number = 0;
-	protected secondsLeft: number = 15;
-	protected paused: boolean = false;
-	private lastScoredSide: "left" | "right" = "left";
+	protected leftPlayerGoals:number;
+	protected rightPlayerGoals:number;
+	protected secondsLeft: number;
+	protected paused: boolean;
+	private lastScoredSide: "left" | "right";
 
 	constructor()
 	{
-
+		this.leftPlayerGoals = 0;
+		this.rightPlayerGoals = 0;
+		this.secondsLeft = 15;
+		this.paused = false;
+		this.lastScoredSide = "left";
 	}
 
 	score(side: "left" | "right")
