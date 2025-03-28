@@ -10,7 +10,7 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 
-export enum EPongRoomState
+enum EPongRoomState
 {
 	LOBBY,
 	GAME
