@@ -75,7 +75,7 @@ export class Bot
 		console.log(AIState);
 	}
 
-	private handleEvent(event: any) {
+	public handleEvent(event: any) {
 		if (--this.countdown_)
 			return ;
 		const gameState = JSON.parse(event.toString());
@@ -120,17 +120,23 @@ export class Bot
 		return this.ticksUntilTarget_ < this.REFRESH_RATE;
 	}
 
-	private provisionalTarget(ballPosition: Point) {
-		const countFrom = (this.ballHitPaddle()) ? this.target_ : this.lastBall_;
-		const distance = distanceBetweenPoints(countFrom, ballPosition);
-		console.log(`distance between ${countFrom.getX()} ${countFrom.getY()} and ball: ${distance}`);
+	private ballVectorOrigin(): Point {
+		if (this.ballHitPaddle())
+			return new Point(this.target_.getX(), this.target_.getY());
+		return new Point(this.lastBall_.getX(), this.lastBall_.getY());
+	}
 
+	private provisionalTarget(ballPosition: Point) {
+		const origin = this.ballVectorOrigin();
+		const distance = distanceBetweenPoints(origin, ballPosition);
+		console.log(`distance between ${origin.getX()} ${origin.getY()} and ball: ${distance}`);
 		if (this.ballBounced(distance))
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
+		console.log(`ball position after bounce correction: ${ballPosition.getX()} ${ballPosition.getY()}`);
 		if (this.ballHitPaddle())
 			this.target_.setX(-this.target_.getX());
-		this.target_.setY(findIntersectionWithVerticalLine(countFrom, ballPosition, this.target_.getX(), 0));
-		console.log(`provisional target x : ${this.target_.getX()}, y : ${this.target_.getY()}`);
+		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX()));
+		console.log(`provisional target x : ${this.target_.getX()}, y : ${this.target_.getY()} based on ball position ${ballPosition.getX()} ${ballPosition.getY()}`);
 	}
 
 	private calculateTicks(ballPosition: Point) {
@@ -146,7 +152,7 @@ export class Bot
 	private calculateTarget(ballPosition: Point) {
 		this.provisionalTarget(ballPosition);
 		this.calculateTicks(ballPosition);
-		if (this.target_.getY() > field.TOP_EDGE_Y || this.target_.getY() < field.BOTTOM_EDGE_Y)
+		while (this.target_.getY() > field.TOP_EDGE_Y || this.target_.getY() < field.BOTTOM_EDGE_Y)
 			this.target_.setY(this.accountForBounce(this.target_.getY()));
 		this.countdown_ = this.REFRESH_RATE;
 		this.updateLastBall(ballPosition);

@@ -1,7 +1,5 @@
 import { Bot } from "./bot";
 
-
-
 new Bot(JSON.stringify(
 	{
 		"difficulty": "hard",
