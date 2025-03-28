@@ -47,7 +47,7 @@ export class TournamentMatchMaking
 
 	private createTournament(tournamentSize: number): Tournament
 	{
-		const freshTournament:Tournament = new Tournament(tournamentSize);
+		const freshTournament: Tournament = new Tournament(tournamentSize);
 		this.allTournaments.set(freshTournament.getId(), freshTournament);
 		this.tournamentFullListener(freshTournament);
 		this.tournamentFinishedListener(freshTournament);

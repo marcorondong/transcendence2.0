@@ -101,7 +101,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 			this.game.forfeitGame(player.getTeamSideLR());
 	}
 
-	setMatchName(roundName:string): void
+	setMatchName(roundName: string): void
 	{
 		this.matchName = roundName;
 	}
