@@ -288,7 +288,7 @@ export abstract class APongGame extends EventEmitter
 	protected topEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const topEdgePoint:Point = new Point(ballX, this.field.TOP_EDGE_Y);
+		const topEdgePoint: Point = new Point(ballX, this.field.TOP_EDGE_Y);
 		if(this.ball.isMovingUp() && this.isObstacleNear(topEdgePoint))
 		{
 			if(this.isBounceEdge("top"))
@@ -302,7 +302,7 @@ export abstract class APongGame extends EventEmitter
 	protected bottomEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const bottomEdgePoint:Point = new Point(ballX, this.field.BOTTOM_EDGE_Y);
+		const bottomEdgePoint: Point = new Point(ballX, this.field.BOTTOM_EDGE_Y);
 		if(this.ball.isMovingDown() && this.isObstacleNear(bottomEdgePoint))
 		{
 			if(this.isBounceEdge("bottom"))
@@ -352,7 +352,7 @@ export abstract class APongGame extends EventEmitter
 	 * @param paddle 
 	 * @returns either false or Point it hits
 	 */
-	private paddleBounce(paddle: Paddle, ballDirectionX:number): false | Point
+	private paddleBounce(paddle: Paddle, ballDirectionX: number): false | Point
 	{
 		const paddleHitPoints = paddle.getPaddleHitBoxPoints(ballDirectionX);
 		for(const point of paddleHitPoints)

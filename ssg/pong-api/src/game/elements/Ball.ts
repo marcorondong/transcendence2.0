@@ -159,8 +159,6 @@ export class Ball
 		return critDistance; 
 	}
 
-
-
 	isHit(otherPoint:Point): boolean
 	{
 		const centerX = this.getPosition().getX();
