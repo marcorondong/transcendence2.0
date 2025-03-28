@@ -170,7 +170,7 @@ export class Tournament extends EventEmitter
 
 	private connectionMonitor(player:PongPlayer): void
 	{
-		player.on(ClientEvents.GONE_OFFLINE, (unpatient:PongPlayer)=>
+		player.on(ClientEvents.GONE_OFFLINE, (unpatient: PongPlayer)=>
 		{
 			if(this.state === ETournamentState.LOBBY)
 			{
@@ -189,7 +189,7 @@ export class Tournament extends EventEmitter
 
 	private createOneRoundMatch(proPlayer1: PongPlayer, proPlayer2: PongPlayer): void
 	{
-		const room:PongRoomSingles = PongRoomSingles.createRoomForTwoPlayers(proPlayer1, proPlayer2);
+		const room: PongRoomSingles = PongRoomSingles.createRoomForTwoPlayers(proPlayer1, proPlayer2);
 		this.gamesPool.add(room);
 		room.setRoomAsTournament(this.getRoundName());
 		room.getGame().startGame();

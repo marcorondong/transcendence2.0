@@ -84,7 +84,7 @@ fastify.register(async function(fastify)
 	});
 
 	//Partial makes all field optional. 
-	fastify.get<{Querystring: Partial<IGameRoomQuery>}>("/pong/", {websocket:true}, (connection, req) =>
+	fastify.get<{Querystring: Partial<IGameRoomQuery>}>("/pong/", {websocket: true}, (connection, req) =>
 	{
 		const {
 			roomId = 0,

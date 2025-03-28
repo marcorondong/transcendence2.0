@@ -14,7 +14,7 @@ export class TournamentMatchMaking
 
 	putPlayerInTournament(player: PongPlayer, tournamentSizeQuery: number): void
 	{
-		const tournamentForPlayer:Tournament = this.findTournamentToJoin(tournamentSizeQuery);
+		const tournamentForPlayer: Tournament = this.findTournamentToJoin(tournamentSizeQuery);
 		tournamentForPlayer.addPlayer(player);
 		const freeSpots = tournamentForPlayer.calculateNumberOfFreeSpots();
 		tournamentForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);

@@ -64,9 +64,9 @@ export class Paddle
 		return this.position;
 	}
 
-	getPaddleHitBoxPoints(ballDirection:number): Point[]
+	getPaddleHitBoxPoints(ballDirection: number): Point[]
 	{
-		const allPoints:Point[] = new Array<Point>();
+		const allPoints: Point[] = new Array<Point>();
 		const x = this.getPosition().getX();
 		const center_y = this.getPosition().getY();
 		for(let y = center_y - (this.height / 2); y <= center_y + (this.height / 2); y += 0.01)

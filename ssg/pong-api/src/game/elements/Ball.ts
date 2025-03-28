@@ -87,7 +87,7 @@ export class Ball
 	calculateComplexBounceDirection(pointA:Point, maxDoubleDistanceFromPoint:number): Point
 	{
 		const currentDirectionX = this.getDirection().getX();
-		const vector:Point = Point.calculateVector(pointA, this.getPosition());
+		const vector: Point = Point.calculateVector(pointA, this.getPosition());
 		const vecY = vector.getY();
 		const centerMissPercent = Math.abs(vecY)/maxDoubleDistanceFromPoint;
 		const xSquared = Math.pow(this.speed, 2) / (1 + Math.pow(centerMissPercent, 2));
@@ -106,7 +106,7 @@ export class Ball
 		return this.position;
 	}
 
-	setPosition(point:Point): void 
+	setPosition(point: Point): void 
 	{
 		this.position = point;
 	}
@@ -159,14 +159,14 @@ export class Ball
 		return critDistance; 
 	}
 
-	isHit(otherPoint:Point): boolean
+	isHit(otherPoint: Point): boolean
 	{
 		const centerX = this.getPosition().getX();
 		const centerY = this.getPosition().getY();
 		const x = otherPoint.getX();
 		const y = otherPoint.getY();
 
-		const result:number = Math.pow((x - centerX), 2) + Math.pow((y - centerY), 2);
+		const result: number = Math.pow((x - centerX), 2) + Math.pow((y - centerY), 2);
 		const radiusSquared = Math.pow(this.radius, 2);
 		if(result <= radiusSquared)
 			return true;
@@ -191,7 +191,7 @@ export class Ball
 			const radians = angle *(Math.PI / 180);
 			const x = centerX + this.radius * Math.cos(radians);
 			const y = centerY + this.radius * Math.sin(radians);
-			const hitPoint:Point = new Point(x, y);
+			const hitPoint: Point = new Point(x, y);
 			allPoints.set(directions[dir], hitPoint);
 		}
 		return allPoints;

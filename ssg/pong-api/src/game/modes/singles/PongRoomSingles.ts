@@ -75,7 +75,7 @@ export class PongRoomSingles extends APongRoom<PongGameSingles>
 
 	static createRoomForTwoPlayers(playerOne: PongPlayer, playerTwo: PongPlayer): PongRoomSingles
 	{
-		const room:PongRoomSingles = new PongRoomSingles();
+		const room: PongRoomSingles = new PongRoomSingles();
 		playerOne.setPlayerRole(EPlayerRole.LEFT_ONE);
 		playerTwo.setPlayerRole(EPlayerRole.RIGHT_ONE);
 		room.addPlayer(playerOne);

@@ -49,7 +49,7 @@ export class Point
 
 		const vectorX = x2 - x1;
 		const vectorY = y2 - y1;
-		const vector:Point = new Point(vectorX, vectorY);
+		const vector: Point = new Point(vectorX, vectorY);
 		return vector;
 	}
 

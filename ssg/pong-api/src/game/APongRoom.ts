@@ -152,7 +152,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 	sendCurrentFrame(): void
 	{
 		const frame: IPongFrameSingles | IPongFrameDoubles = this.getGameFrame();
-		const frameWithRoomId = {...frame, roomId:this.getId(), knockoutName:this.matchName};
+		const frameWithRoomId = {...frame, roomId: this.getId(), knockoutName: this.matchName};
 		const frameJson = JSON.stringify(frameWithRoomId);
 		this.roomBroadcast(frameJson)
 	}
@@ -187,7 +187,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 
 	private assingControlsToPlayer(player: PongPlayer, playerPaddle: Paddle): void 
 	{
-		player.connection.on("message", (data: RawData, isBinary:boolean) =>
+		player.connection.on("message", (data: RawData, isBinary: boolean) =>
 		{
 			const json = Parser.rawDataToJson(data);
 			if(!json)
@@ -202,7 +202,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom
 
 	private disconnectBehaviour(rageQuitPlayer: PongPlayer): void
 	{
-		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player:PongPlayer) =>
+		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player: PongPlayer) =>
 		{
 			console.log("Player disconnect");
 			if(this.game.getGameStatus() === EGameStatus.RUNNING)

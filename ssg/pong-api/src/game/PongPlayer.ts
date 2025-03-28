@@ -91,7 +91,7 @@ export class PongPlayer extends EventEmitter
 		return LRside;
 	}
 
-	setPlayerRole(role: EPlayerRoleFiltered)
+	setPlayerRole(role: EPlayerRoleFiltered): void
 	{
 		this.role = role;
 		if(role === EPlayerRole.LEFT_ONE || role === EPlayerRole.LEFT_TWO)

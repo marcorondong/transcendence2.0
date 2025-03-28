@@ -25,7 +25,7 @@ export class HeadToHeadMatchMaking
 	
 	putPlayerInPrivateRoom(player: PongPlayer, roomId: string, mode: "singles" | "doubles")
 	{
-		let privateRoom:APongRoom<APongGame> | undefined = this.getAllMatches().get(roomId);
+		let privateRoom: APongRoom<APongGame> | undefined = this.getAllMatches().get(roomId);
 		if(privateRoom === undefined)
 			return this.createHostPrivateRoom(player, mode);
 		else 

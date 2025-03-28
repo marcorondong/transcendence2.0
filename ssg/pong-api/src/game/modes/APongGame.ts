@@ -221,8 +221,6 @@ export abstract class APongGame extends EventEmitter
 
 	private isGoal(): boolean
 	{
-		const vectorDir:VectorDirection = this.ball.getBallDirection();
-
 		if(this.ball.isMovingRight())
 		{
 			return this.isRightGoal(this.ball.getPosition());
