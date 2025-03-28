@@ -63,7 +63,7 @@ export class TournamentMatchMaking
 		})
 	}
 
-	private tournamentFinishedListener(freshTournament:Tournament): void
+	private tournamentFinishedListener(freshTournament: Tournament): void
 	{
 		freshTournament.once(TournamentEvents.FINISHED, ()=>
 		{
