@@ -104,22 +104,24 @@ export class Point
 		return this.getY();
 	}
 
-	getMovementDirection(): VectorDirection
-	{
-		const x = this.getX();
-		const y = this.getY();
-		const factorX = this.getFactor(x);
-		const factorY = this.getFactor(y);
-		return ((4 * factorX ) + factorY)
-	}
 
-	private getFactor(num: number): 0 | 1 | 2
-	{
-		if(num === 0)
-			return 0;
-		else if(num > 0)
-			return 1;
-		return 2;
-	}
+	//TODO: either remove at the end or use it for something more complex
+	// getMovementDirection(): VectorDirection
+	// {
+	// 	const x = this.getX();
+	// 	const y = this.getY();
+	// 	const factorX = this.getFactor(x);
+	// 	const factorY = this.getFactor(y);
+	// 	return ((4 * factorX ) + factorY)
+	// }
+
+	// private getFactor(num: number): 0 | 1 | 2
+	// {
+	// 	if(num === 0)
+	// 		return 0;
+	// 	else if(num > 0)
+	// 		return 1;
+	// 	return 2;
+	// }
 
 }
