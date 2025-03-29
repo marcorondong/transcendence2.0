@@ -64,10 +64,7 @@ const start = async () =>
 	try 
 	{
 		await fastify.listen({ port: PORT, host: HOST })
-		const address = fastify.server.address()
-		const port = typeof address === 'string' ? address : address?.port
-		console.log(`Server listening at ${port}`)
-
+		console.log(`Server listening at ${PORT}`)
 	} 
 	catch (err) 
 	{
