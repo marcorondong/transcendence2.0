@@ -4,34 +4,33 @@ import { WebSocket } from "ws";
 export class SessionRoom extends EventEmitter
 {
 	protected readonly id: string;
-	protected connections: Set<WebSocket> = new Set<WebSocket>();
-	protected privateRoom: boolean;
-	protected readonly creationDate:Date; 
+	protected connections: Set<WebSocket>;
+	protected readonly creationDate: Date; 
 	
-	constructor(privateRoom:boolean = false)
+	constructor()
 	{
 		super();
 		this.id = crypto.randomUUID();
-		this.privateRoom = privateRoom;
+		this.connections = new Set<WebSocket>();
 		this.creationDate = new Date();
 	}
 
-	getId():string
+	getId(): string
 	{
 		return this.id;
 	}
 
-	getCreationDate():Date 
+	getCreationDate(): Date 
 	{
 		return this.creationDate;
 	}
 	
-	addConnectionToRoom(connectionToAdd: WebSocket):void
+	addConnectionToRoom(connectionToAdd: WebSocket): void
 	{
 		this.connections.add(connectionToAdd);
 	}
 
-	removeAllConnectionsFromRoom():void
+	removeAllConnectionsFromRoom(): void
 	{
 		for(const oneConnection of this.connections)
 		{
@@ -40,7 +39,7 @@ export class SessionRoom extends EventEmitter
 		}
 	}
 	
-	closeAllConecctionsFromRoom():void 
+	closeAllConecctionsFromRoom(): void 
 	{
 		for(const oneConnection of this.connections)
 		{
@@ -60,12 +59,7 @@ export class SessionRoom extends EventEmitter
 		}
 	}
 
-	isPrivate():boolean
-	{
-		return this.privateRoom;
-	}
-
-	private removeConnectionFromRoom(connectionToRemove: WebSocket):boolean
+	private removeConnectionFromRoom(connectionToRemove: WebSocket): boolean
 	{
 		return this.connections.delete(connectionToRemove);
 	}

@@ -1,3 +1,5 @@
+import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
+
 export interface IScore
 {
 	leftGoals: number;
@@ -7,15 +9,19 @@ export interface IScore
 
 export class ScoreBoard
 {
-	protected leftPlayerGoals:number = 0;
-	protected rightPlayerGoals:number = 0;
-	protected secondsLeft: number = 15;
-	protected paused: boolean = false;
-	private lastScoredSide: "left" | "right" = "left";
+	protected leftPlayerGoals: number;
+	protected rightPlayerGoals: number;
+	protected secondsLeft: number;
+	protected paused: boolean;
+	private lastScoredSide: "left" | "right";
 
 	constructor()
 	{
-
+		this.leftPlayerGoals = 0;
+		this.rightPlayerGoals = 0;
+		this.secondsLeft = 15;
+		this.paused = false;
+		this.lastScoredSide = "left";
 	}
 
 	score(side: "left" | "right")
@@ -32,25 +38,36 @@ export class ScoreBoard
 		}
 	}
 
-	getWinnerSide(): "left" | "right"
+	getWinnerSide(): ETeamSideFiltered
 	{
 		if(this.leftPlayerGoals > this.rightPlayerGoals)
-			return "left";
+			return ETeamSide.LEFT
 		if(this.leftPlayerGoals === this.rightPlayerGoals)
 		{
-			console.warn("Not really winner, should not happen")
-			return this.lastScoredSide;
+			throw Error("Not really winner, goals are same");
 		}
-		return "right"
+		return ETeamSide.RIGTH;
 	}
 
-	setScore(leftGoals:number, rightGoals:number)
+	getLoserSide(): ETeamSideFiltered
+	{
+		if(this.leftPlayerGoals < this.rightPlayerGoals)
+			return ETeamSide.LEFT;
+		if(this.leftPlayerGoals === this.rightPlayerGoals)
+		{
+			throw Error("Not really loser, goals are same");
+		}
+		return ETeamSide.RIGTH;
+
+	}
+
+	setScore(leftGoals: number, rightGoals: number)
 	{
 		this.leftPlayerGoals = leftGoals;
 		this.rightPlayerGoals = rightGoals;
 	}
 
-	getScoreJson():IScore
+	getScoreJson(): IScore
 	{
 		return {
 			leftGoals: this.leftPlayerGoals,
@@ -59,7 +76,7 @@ export class ScoreBoard
 		}
 	}
 
-	startCountdown():void 
+	startCountdown(): void 
 	{
 		this.start();
 		const interval = setInterval( ()=>
@@ -73,23 +90,23 @@ export class ScoreBoard
 		}, 1000);
 	}
 
-	pause():void 
+	pause(): void 
 	{
 		this.paused = true;
 	}
 
-	start():void 
+	start(): void 
 	{
 		this.paused = false;
 	}
 
-	isWinnerDecided():boolean
+	isWinnerDecided(): boolean
 	{
 		if(this.secondsLeft <= 0)
 		{
 			if(this.leftPlayerGoals !== this.rightPlayerGoals)
 				return true;
 		}
-		return false
+		return false;
 	}
 }

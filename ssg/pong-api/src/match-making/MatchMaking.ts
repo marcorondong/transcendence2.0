@@ -1,49 +1,69 @@
-import { SingleMatchMaking } from "./SingleMatchMaking";
+import { HeadToHeadMatchMaking } from "./SingleMatchMaking";
 import { TournamentMatchMaking } from "./TournamentMatchMaking";
 import { IGameRoomQuery } from "..";
 import { WebSocket } from "ws";
-import { PongPlayer } from "../PongPlayer";
-import { PongRoom } from "../PongRoom";
-import { Tournament } from "../Tournament";
+import { PongPlayer } from "../game/PongPlayer";
+import { Tournament } from "../game/modes/singles/Tournament";
+import { APongRoom } from "../game/APongRoom";
+import { APongGame } from "../game/modes/APongGame";
 
 export class MatchMaking 
 {
-	singlesManger: SingleMatchMaking;
+	headToHeadManager: HeadToHeadMatchMaking;
 	tournamentManager: TournamentMatchMaking;
 
 	constructor()
 	{
-		this.singlesManger = new SingleMatchMaking();
+		this.headToHeadManager = new HeadToHeadMatchMaking();
 		this.tournamentManager = new TournamentMatchMaking();
 	}
 
 	matchJoiner(connection: WebSocket, query: IGameRoomQuery)
 	{
 		if(query.clientType === "player")
-			this.playerJoiner(connection, query.matchType,query.tournamentSize);
+			this.playerJoiner(connection, query.matchType,query.tournamentSize, query.roomId);
 		else if(query.clientType === "spectator")
 			this.spectatorJoiner(connection, query.roomId);
 	}
 
-	private playerJoiner(connection: WebSocket,matchType: "single" | "tournament", tournamentSize:number)
+	private playerJoiner(connection: WebSocket, matchType: "singles" | "tournament" | "doubles", tournamentSize: number, roomId: string | 0)
 	{
 		const player: PongPlayer = new PongPlayer(connection);
-		if(matchType == "single")
-		{
-			this.singlesManger.putPlayerinRandomRoom(player)
-		}
-		else if(matchType == "tournament")
-		{
-			if(Tournament.isSizeValid(tournamentSize) === false)
-			{
-				player.sendNotification(`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamnetSize()}`)
-				tournamentSize = Tournament.getDefaultTournamnetSize();
-			}
-			this.tournamentManager.putPlayerInTournament(player, tournamentSize);
-		}
+		if(matchType === "singles")
+			this.singlesRoomJoiner(player, roomId);
+		else if(matchType === "doubles")
+			this.doublesRoomJoiner(player, roomId);
+		else if(matchType === "tournament")
+			this.tournamentJoiner(player, tournamentSize);
 	}
 	
-	private spectatorJoiner(connection: WebSocket, roomId:string | 0)
+	private singlesRoomJoiner(player: PongPlayer, roomId: string | 0)
+	{
+		if(roomId === 0)
+			this.headToHeadManager.putPlayerinRandomRoom(player)
+		else 
+			this.headToHeadManager.putPlayerInPrivateRoom(player, roomId, "singles");
+	}
+
+	private doublesRoomJoiner(player: PongPlayer, roomId: string | 0)
+	{
+		if(roomId === 0)
+			this.headToHeadManager.putPlayerinRandomRoomDoubles(player)
+		else 
+			this.headToHeadManager.putPlayerInPrivateRoom(player, roomId, "doubles");
+	}
+
+	private tournamentJoiner(player: PongPlayer, tournamentSize: number)
+	{
+		if(Tournament.isSizeValid(tournamentSize) === false)
+		{
+			player.sendNotification(`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamentSize()}`)
+			tournamentSize = Tournament.getDefaultTournamentSize();
+		}
+		this.tournamentManager.putPlayerInTournament(player, tournamentSize);
+	}
+
+	private spectatorJoiner(connection: WebSocket, roomId: string | 0): void
 	{
 		if(roomId === 0)
 		{
@@ -51,7 +71,7 @@ export class MatchMaking
 			connection.close();
 			return;
 		}
-		const allRooms: Map<string, PongRoom> = this.getAllActiveRooms();
+		const allRooms: Map<string, APongRoom<APongGame>> = this.getAllActiveRooms();
 		const roomToWatch = allRooms.get(roomId);
 		if(roomToWatch != undefined)
 		{
@@ -64,10 +84,10 @@ export class MatchMaking
 		}
 	}
 
-	private getAllActiveRooms(): Map<string, PongRoom>
+	private getAllActiveRooms(): Map<string, APongRoom<APongGame>>
 	{
-		const allRooms: Map<string, PongRoom> = new Map<string, PongRoom>([...this.singlesManger.getAllMatches(),
-			...this.tournamentManager.getMatchesFromAllTournaments()]);
+		const allRooms: Map<string, APongRoom<APongGame>> = new Map<string, APongRoom<APongGame>>
+			([...this.headToHeadManager.getAllMatches(), ...this.tournamentManager.getMatchesFromAllTournaments()]);
 		return allRooms;
 	}	
 }
