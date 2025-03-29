@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createUserInput, createUserResponseSchema, loginInput, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
 import { createUser, findUserByEmail, findUsers } from "./user.service";
+import { AppError } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
 import { server } from "../../app";
 
@@ -18,14 +19,10 @@ export async function registerUserHandler(
 		const parsedUser = createUserResponseSchema.parse(user);
 		return reply.code(201).send(parsedUser);
 	} catch(e) {
-		// console.log(e)
-		// // Example: Handle unique email constraint (conflict)
-		// if (e.code === "P2002") {
-		// 	return reply.code(409).send({ message: "Email already exists" });
-		// }
-		// TODO: I should check what was the error and then return the correcr code (e.g: 409 Conflict).
-		// return reply.code(500).send(e);
 		console.error("Register user failed:", e);
+		if (e instanceof AppError) {
+			return reply.code(e.statusCode).send({ message: e.message });
+		}
 		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
