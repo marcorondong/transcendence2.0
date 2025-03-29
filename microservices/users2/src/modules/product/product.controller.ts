@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { createProduct, getProducts } from "./product.service";
 import { createProductInput, productResponseSchema, productArrayResponseSchema } from "./product.schema";
+import { AppError } from "../../utils/errors";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -20,6 +21,9 @@ export async function createProductHandler(
 		return reply.code(201).send(parsedProduct);
 	} catch (e) {
 		console.error("Create product failed:", e);
+		if (e instanceof AppError) {
+			return reply.code(e.statusCode).send({ message: e.message });
+		}
 		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
