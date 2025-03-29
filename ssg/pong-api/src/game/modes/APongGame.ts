@@ -1,19 +1,12 @@
-import { Paddle } from "./Paddle";
-import { Ball } from "./Ball";
-import { VectorDirection, Point } from "./Point";
-import { ScoreBoard, IScore} from "./ScoreBoard";
-import raf from 'raf' //raf is request animation frame
-import { error } from "console";
-import { PongField } from "./PongField";
 import { EventEmitter } from "stream";
-import { GameEvents } from "../customEvents";
-import { EPlayerSide } from "../PongPlayer";
-
-interface Position 
-{
-	x:number;
-	y:number;
-}
+import { Ball, IBallJson } from "../elements/Ball";
+import { ScoreBoard, IScore } from "../elements/ScoreBoard";
+import { PongField } from "../elements/PongField";
+import { EPlayerRole, ETeamSideFiltered, ETeamSide } from "../PongPlayer";
+import { GameEvents } from "../../customEvents";
+import { Paddle } from "../elements/Paddle";
+import raf from 'raf' //raf is request animation frame
+import { Point, VectorDirection } from "../elements/Point";
 
 export enum EGameStatus
 {
@@ -23,69 +16,72 @@ export enum EGameStatus
 	FINISHED
 }
 
-export interface IPongFrame
+export interface IPongFrameBase
 {
-	leftPaddle: Position & {height:number};
-	rightPaddle: Position & {height:number};
-	ball: Position & { radius: number };
+	ball: IBallJson;
 	score: IScore;
-	matchStatus: EGameStatus
+	matchStatus: string
 }
 
-export class PingPongGame extends EventEmitter
+export abstract class APongGame extends EventEmitter
 {
-
-	protected leftPaddle: Paddle;
-	protected rightPaddle: Paddle;
 	protected ball: Ball;
-	readonly score:ScoreBoard;
-	readonly field:PongField;
-
-
+	protected readonly score: ScoreBoard;
+	protected readonly field: PongField;
 	readonly CRITICAL_DISTANCE;
-	private lastFrameTime: number = 0;
-	private gameStatus:EGameStatus;
-	
-	constructor(leftPaddle: Paddle, rightPaddle: Paddle, ball:Ball, score:ScoreBoard, tableField:PongField)
+	protected gameStatus: EGameStatus;
+
+	abstract getPaddle(role: EPlayerRole): Paddle;
+	abstract resetPaddlePosition(): void;
+	abstract getCloserLeftPaddle(): Paddle;
+	abstract getCloserRightPaddle(): Paddle;
+
+	constructor(ball: Ball, score: ScoreBoard, field:PongField)
 	{
 		super();
-		this.leftPaddle = leftPaddle;
-		this.rightPaddle = rightPaddle;
 		this.ball = ball;
-		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.score = score;
-		this.field = tableField;
+		this.field = field;
+		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
-
-	static createStandardGame() :PingPongGame
-	{
-		const leftPaddle: Paddle = new Paddle(new Point(-4, 0));
-		const rightPaddle: Paddle = new Paddle(new Point(4, 0));
-		const ball: Ball = new Ball(new Point(0, 0));
-		const table: PongField = new PongField();
-		const score: ScoreBoard = new ScoreBoard();
-		const game: PingPongGame = new PingPongGame(leftPaddle, rightPaddle, ball, score, table);
-		return game;
-	}
-
 
 	getGameStatus(): EGameStatus
 	{
 		return this.gameStatus;
 	}
 
-	setGameStatus(newStatus:EGameStatus)
+	getGameStatusString(): string 
+	{
+		switch(this.gameStatus)
+		{
+			case EGameStatus.FINISHED :
+				return "Game finished";
+			case EGameStatus.NOT_STARTED:
+				return "Game didnt start yet. Lobby phase"
+			case EGameStatus.PAUSED:
+				return "Game is paused"
+			case EGameStatus.RUNNING:
+				return "Game is running";
+		}
+	}
+
+	setGameStatus(newStatus: EGameStatus): void
 	{
 		this.gameStatus = newStatus;
 	}
 
-	getPongWinnerSide(): "left" | "right"
+	getPongWinnerSide(): ETeamSideFiltered
 	{
 		return this.score.getWinnerSide();
 	}
 
-	async waitForFinalWhistle(): Promise<PingPongGame>
+	getPongLoserSide(): ETeamSideFiltered
+	{
+		return this.score.getLoserSide();
+	}
+
+	async waitForFinalWhistle(): Promise<APongGame>
 	{
 		if(this.gameStatus === EGameStatus.FINISHED)
 			return this;
@@ -96,15 +92,6 @@ export class PingPongGame extends EventEmitter
 				resolve(this);
 			})
 		})
-	}
-
-	getPaddle(side: EPlayerSide): Paddle
-	{
-		if(side === EPlayerSide.LEFT)
-			return this.leftPaddle;
-		else if(side === EPlayerSide.RIGTH)
-			return this.rightPaddle
-		throw error("paddle not found")
 	}
 
 	pauseGame(): void
@@ -120,57 +107,41 @@ export class PingPongGame extends EventEmitter
 		this.start();
 	}
 
-	finishGame():void 
+	finishGame(): void 
 	{
 		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
 	}
 
-	getFrame()
-	{
-		return {
-			leftPaddle: {
-				x: this.leftPaddle.getPosition().getX(),
-				y: this.leftPaddle.getPosition().getY(),
-				height: this.leftPaddle.height
-			}, 
-			rightPaddle: 
-			{
-				x: this.rightPaddle.getPosition().getX(),
-				y: this.rightPaddle.getPosition().getY(),
-				height: this.rightPaddle.height
-			},
-			ball: 
-			{
-				x: this.ball.getPosition().getX(),
-				y: this.ball.getPosition().getY(),
-				radius: this.ball.getRadius()
-			},
-			score: this.score.getScoreJson(), 
-			matchStatus: this.getGameStatus()
-		};
-	}
-
-	movePaddle(paddle:Paddle, direction: "up" | "down")
+	movePaddle(paddle: Paddle, direction: "up" | "down"): void
 	{
 		if(this.isPaddleMoveAllowed(paddle,direction) && this.getGameStatus() === EGameStatus.RUNNING)
 			paddle.move(direction);
 	}
 
-	forfeitGame(sideThatLeft: EPlayerSide.LEFT | EPlayerSide.RIGTH)
+	forfeitGame(sideThatLeft: ETeamSide.LEFT | ETeamSide.RIGTH): void
 	{
-		if(sideThatLeft === EPlayerSide.LEFT)
+		if(sideThatLeft === ETeamSide.LEFT)
 		{
 			this.score.setScore(0, 3);
 		}
-		else if(sideThatLeft === EPlayerSide.RIGTH)
+		else if(sideThatLeft === ETeamSide.RIGTH)
 		{
 			this.score.setScore(3, 0);
 		}
 		this.finishGame();
 	}
 
-	private isPaddleMoveAllowed(paddle:Paddle, direction: "up" | "down"):boolean
+	getBaseFrame(): IPongFrameBase
+	{
+		return {
+			score: this.score.getScoreJson(), 
+			matchStatus: this.getGameStatusString(),
+			ball: this.ball.getBallJson()
+		}
+	}
+
+	private isPaddleMoveAllowed(paddle: Paddle, direction: "up" | "down"): boolean
 	{
 		const maxY = this.field.TOP_EDGE_Y + (0.45) * paddle.height;
 		const minY = this.field.BOTTOM_EDGE_Y - (0.45) * paddle.height;
@@ -185,7 +156,14 @@ export class PingPongGame extends EventEmitter
 		return true;
 	}
 
-	private renderNextFrame()
+	private start(): void 
+	{
+		this.setGameStatus(EGameStatus.RUNNING);
+		this.score.startCountdown();
+		raf((timestamp: number)=> this.gameLoop(timestamp))
+	}
+
+	protected renderNextFrame(): void
 	{
 		this.ballMovementMechanics();
 		this.ball.moveBall();
@@ -193,25 +171,16 @@ export class PingPongGame extends EventEmitter
 			this.finishGame();
 	}
 
-	private start(): void 
-	{
-		this.setGameStatus(EGameStatus.RUNNING);
-		this.score.startCountdown();
-		raf((timestamp:number)=> this.gameLoop(timestamp))
-	}
-
-	private gameLoop(timestamp: number):void 
+	private gameLoop(timestamp: number): void 
 	{
 		if(this.getGameStatus() === EGameStatus.RUNNING)
 		{
-			//const deltaTime = timestamp - this.lastFrameTime;
-			this.lastFrameTime = timestamp;
 			this.renderNextFrame();
 		}
-		raf((timestamp:number)=> this.gameLoop(timestamp))
+		raf((timestamp: number)=> this.gameLoop(timestamp))
 	}
 
-	private isObstacleNear(obstaclePoint:Point,criticalDistance: number = this.CRITICAL_DISTANCE):boolean
+	private isObstacleNear(obstaclePoint: Point, criticalDistance: number = this.CRITICAL_DISTANCE): boolean
 	{
 		const currentDistance = Point.calculateDistance(obstaclePoint, this.ball.getPosition());
 		if(currentDistance <= criticalDistance)
@@ -227,13 +196,12 @@ export class PingPongGame extends EventEmitter
 		else 
 			strikerSide = "left"
 		this.score.score(strikerSide);
-		this.ball.setPosition(new Point(0,0));
+		this.ball.resetPosition();
 		this.ball.resetDirection(goalSide);
-		this.leftPaddle.resetPosition();
-		this.rightPaddle.resetPosition();
+		this.resetPaddlePosition();
 	}
 	
-	private isLeftGoal(BallPoint:Point):boolean
+	private isLeftGoal(BallPoint: Point): boolean
 	{
 		if(BallPoint.getX() < this.field.LEFT_EDGE_X)
 		{
@@ -242,7 +210,7 @@ export class PingPongGame extends EventEmitter
 		return false
 	}
 	
-	private isRightGoal(BallPoint:Point):boolean
+	private isRightGoal(BallPoint: Point): boolean
 	{
 		if(BallPoint.getX() > this.field.RIGHT_EDGE_X)
 		{
@@ -251,10 +219,8 @@ export class PingPongGame extends EventEmitter
 		return false
 	}
 
-	private isGoal():boolean
+	private isGoal(): boolean
 	{
-		const vectorDir:VectorDirection = this.ball.getBallDirection();
-
 		if(this.ball.isMovingRight())
 		{
 			return this.isRightGoal(this.ball.getPosition());
@@ -271,7 +237,7 @@ export class PingPongGame extends EventEmitter
 	 * @param ballPoint (usually up point of ball)
 	 * @returns true if ball point touches the top of field
 	 */
-	private isTopHit(ballPoint:Point):boolean
+	private isTopHit(ballPoint: Point): boolean
 	{
 		if(ballPoint.getY() >= this.field.TOP_EDGE_Y)
 		{
@@ -285,7 +251,7 @@ export class PingPongGame extends EventEmitter
 	 * @param ballPoint (usually down point of ball)
 	 * @returns true if ball point touches the top of field
 	 */
-	private isBottomHit(ballPoint:Point):boolean
+	private isBottomHit(ballPoint: Point): boolean
 	{
 		if(ballPoint.getY() <= this.field.BOTTOM_EDGE_Y)
 		{
@@ -294,7 +260,7 @@ export class PingPongGame extends EventEmitter
 		return false
 	}
 
-	private isBounceEdge(side: "top" | "bottom"):boolean 
+	private isBounceEdge(side: "top" | "bottom"): boolean 
 	{
 		const ballHitPoints: Map<VectorDirection, Point> = this.ball.getBallHitBoxPoints();
 		let result = false;
@@ -317,10 +283,10 @@ export class PingPongGame extends EventEmitter
 		return result;
 	}
 
-	private topEdgeCollision(): boolean
+	protected topEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const topEdgePoint:Point = new Point(ballX, this.field.TOP_EDGE_Y);
+		const topEdgePoint: Point = new Point(ballX, this.field.TOP_EDGE_Y);
 		if(this.ball.isMovingUp() && this.isObstacleNear(topEdgePoint))
 		{
 			if(this.isBounceEdge("top"))
@@ -331,10 +297,10 @@ export class PingPongGame extends EventEmitter
 		return false
 	}
 
-	private bottomEdgeCollision():boolean
+	protected bottomEdgeCollision(): boolean
 	{
 		const ballX = this.ball.getPosition().getX();
-		const bottomEdgePoint:Point = new Point(ballX, this.field.BOTTOM_EDGE_Y);
+		const bottomEdgePoint: Point = new Point(ballX, this.field.BOTTOM_EDGE_Y);
 		if(this.ball.isMovingDown() && this.isObstacleNear(bottomEdgePoint))
 		{
 			if(this.isBounceEdge("bottom"))
@@ -345,53 +311,46 @@ export class PingPongGame extends EventEmitter
 		return false
 	}
 
-
-	private sideMechanics(side: "left" | "right"):void 
+	protected sideMechanics(side: "left" | "right", closestPaddle: Paddle): void 
 	{
 		const ballY = this.ball.getPosition().getY();
-		let paddle:Paddle; 
 		let edgeX;
 		if(side === "left")
-		{
 			edgeX = this.field.LEFT_EDGE_X;
-			paddle = this.leftPaddle;
-		}
 		else
-		{
 			edgeX = this.field.RIGHT_EDGE_X;
-			paddle = this.rightPaddle;
-		}
-		const EdgePoint:Point = new Point(edgeX, ballY);
-		const impactPointPaddle:Point | false = this.paddleBounce(paddle, this.ball.getDirection().getX());
+		const EdgePoint: Point = new Point(edgeX, ballY);
+		const impactPointPaddle: Point | false = this.paddleBounce(closestPaddle, this.ball.getDirection().getX());
 		if(impactPointPaddle !== false)
 		{
-			const bounceDir:Point = this.ball.caluclateComplexBounceDirection(paddle.getPosition(), paddle.height);
+			const bounceDir: Point = this.ball.calculateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
 			return this.ball.setDirection(bounceDir);
 		}
 		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
 			return this.scoredGoal(side);
 	}
-
-	private ballMovementMechanics():void
+	
+	protected ballMovementMechanics(): void
 	{
 		if(this.topEdgeCollision() || this.bottomEdgeCollision())
 			return this.ball.simpleBounceY();
 		if(this.ball.isMovingLeft())
 		{
-			return this.sideMechanics("left");
+			return this.sideMechanics("left", this.getCloserLeftPaddle());
 		}
 		if(this.ball.isMovingRight())
 		{
-			return this.sideMechanics("right");
+			return this.sideMechanics("right", this.getCloserRightPaddle());
 		}
 	}
-
+	
+	//TODO it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
 	/**
 	 * 
 	 * @param paddle 
 	 * @returns either false or Point it hits
 	 */
-	private paddleBounce(paddle:Paddle, ballDirectionX:number): false | Point
+	private paddleBounce(paddle: Paddle, ballDirectionX: number): false | Point
 	{
 		const paddleHitPoints = paddle.getPaddleHitBoxPoints(ballDirectionX);
 		for(const point of paddleHitPoints)
