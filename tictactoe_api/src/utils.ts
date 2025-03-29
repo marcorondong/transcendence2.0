@@ -8,37 +8,12 @@ export function onClientMessage(message: string, currentClient: Client): void
 	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
 	if(!data)
 		return;
-	// if(currentClient.getRegistered() === false)
-	// {
-	// 	if(data.microservice === 'tictactoe' && data.registerThisPerson)
-	// 		handleRegisterPerson(data, currentClient);
-	// 	else 
-	// 	{
-	// 		console.log('Error: Client is not registered but send message. Client must register before interacting website. Client may try to send message not throw frondend but else way (ex: Postman). Warning: Possibly port is exposed or hacker attack. Received data:');
-	// 		console.log(JSON.stringify(data, null, 2));
-	// 		currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Client is not registered but send message. Client must register before interacting website. Client may try to send message not throw frondend but else way (ex: Postman). Warning: Possibly port is exposed or hacker attack.', sentData: data }));
-	// 		currentClient.getSocket().close();
-	// 	}
-	// }
-	// else // Client is registered
-	// {
-		if(data.microservice)
-		{
-			if(data.microservice === 'tictactoe')
-				handleTicTacToeMicroserviceRequests(data, currentClient);
-			else if(data.microservice === 'error')
-				handleErrorGeneral(data, currentClient);
-			else
-				unknownMicroserviceRequest(data, currentClient);
-		}
-		else
-			noMicroservicePropertyFound(data, currentClient);
-	// }
+	handleTicTacToeMicroserviceRequests(data, currentClient);
 }
 
 export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client): void
 {
-	if(currentClient.getRegistered() === true)
+	if(currentClient.getRegistration() === true)
 	{
 		if(currentClient.getNickname() === lookingForGame_nickname)
 		{
@@ -83,14 +58,9 @@ export const findClientByNickname = (nickname: string): Client | undefined => {
 
 export function handleRegisterPerson(data: any, currentClient: Client): void
 {
-	// if(allClients.some(client => client.getNickname() === data.registerThisPerson))
-	// {
-	// 	currentClient.getSocket().send(JSON.stringify({ microservice: 'tictactoe', registrationDeclined: data.registerThisPerson + ' is already taken'}));
-	// 	return;
-	// }
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'tictactoe', registrationApproved: data.registerThisPerson}));
 	currentClient.setNickname(data.registerThisPerson);
-	currentClient.setRegistered(true);
+	currentClient.setRegistration(true);
 	allClients.push(currentClient);
 }
 
@@ -124,45 +94,8 @@ export function handleLookingForGame(data: any, currentClient: Client): void
 	}
 }
 
-export function handleErrorGeneral(data: any, currentClient: Client): void
-{
-	if(data.errorMessage && data.sentData)
-	{
-		console.log('Error: Client received incorrect data from server. The error message is:');
-		console.log(data.errorMessage);
-		console.log('Data which client received from server:');
-		console.log(JSON.stringify(data.sentData, null, 2));
-	}
-	else // if errorMessage or sentData property is not found or has a falsy value
-	{
-		console.log('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:');
-		console.log(JSON.stringify(data, null, 2));
-	}
-}
-
-export function unknownMicroserviceRequest(data: any, currentClient: Client): void
-{
-	console.log('Error: Unknown "microservice" request from client. This server only supports "tictactoe" and "error" microservice requests. Received data:');
-	console.log(JSON.stringify(data, null, 2));
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests.', sentData: data }));
-}
-
-export function noMicroservicePropertyFound(data: any, currentClient: Client): void
-{
-	console.log('Error: "microservice" property not found in data sent by client to server. Received data:');
-	console.log(JSON.stringify(data, null, 2));
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "microservice" property not found in data sent by client to server.', sentData: data }));
-}
-
 export function handleTicTacToeMicroserviceRequests(data: any, currentClient: Client): void
 {
-	// if(data.registerThisPerson && currentClient.getRegistered() === true)
-	// {
-	// 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: 'You are already registered as ' + currentClient.getNickname() }));
-	// 	console.log('Error: Client is already registered but trying to register again. Received data:');
-	// 	console.log(JSON.stringify(data, null, 2));
-	// 	currentClient.getSocket().close();
-	// }
 	if(data.registerThisPerson)
 		handleRegisterPerson(data, currentClient);
 	else if(data.lookingForGame)

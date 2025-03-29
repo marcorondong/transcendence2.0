@@ -2,17 +2,27 @@ import Fastify, { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandO
 import fastifyWebsocket from '@fastify/websocket';
 import { Client } from './Client';
 import { onClientMessage, onClientDisconnect } from './utils';
-// import fastifyStatic from '@fastify/static';
-// import path from 'path';
 import fs from 'fs';
 
+const PORT = 3001;
+const HOST = '0.0.0.0';
 let privateKey: string;
 let certificate: string;
 
 try 
 {
-	privateKey = fs.readFileSync('/run/secrets/key.pem', 'utf8');
-	certificate = fs.readFileSync('/run/secrets/cert.pem', 'utf8');
+	const SSL_KEY_FILE = process.env.SSL_KEY_FILE;
+	if (!SSL_KEY_FILE) 
+	{
+		throw new Error('SSL_KEY_FILE environment variable is not set.');
+	}
+	const SSL_CERT_FILE = process.env.SSL_CERT_FILE;
+	if (!SSL_CERT_FILE) 
+	{
+		throw new Error('SSL_CERT_FILE environment variable is not set.');
+	}
+	privateKey = fs.readFileSync(SSL_KEY_FILE, 'utf8');
+	certificate = fs.readFileSync(SSL_CERT_FILE, 'utf8');
 	console.log('SSL certificates loaded successfully.');
 } 
 catch (error) 
@@ -20,9 +30,6 @@ catch (error)
 	console.error('Error loading SSL certificates:', error);
 	process.exit(1); // Exit process if SSL files are missing or unreadable
 }
-
-const PORT = 3001;
-const HOST = '0.0.0.0';
 
 // const fastify: FastifyInstance<Http2SecureServer> = Fastify(
 const fastify: FastifyInstance = Fastify( 
@@ -34,16 +41,8 @@ const fastify: FastifyInstance = Fastify(
 	},
 	logger: false 
 });
-// fastify.register(fastifyStatic, {
-// 	root: path.join(__dirname, '../public'),
-// 	prefix: '/', // optional: default '/'
-// });
 
 fastify.register(fastifyWebsocket);
-
-// fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-// 	return reply.sendFile('tictactoe.html');
-// });
 
 fastify.register(async function (fastify)
 {
@@ -52,7 +51,6 @@ fastify.register(async function (fastify)
 		const socket = connection as unknown as WebSocket;
 		const id = crypto.randomUUID();
 		const currentClient = new Client(id, socket);
-		// allClients.push(currentClient); // This is done after registration is successful
 		console.log('Client connected');
 
 		connection.on('message', (message: string) => onClientMessage(message, currentClient));

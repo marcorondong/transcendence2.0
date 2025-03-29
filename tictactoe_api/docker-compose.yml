@@ -7,3 +7,15 @@ services:
       - ./src/:/tictactoe_api/src/
     ports:
       - 3001:3001
+    secrets:
+      - cert.pem
+      - key.pem
+    environment:
+      SSL_CERT_FILE: "/run/secrets/cert.pem"
+      SSL_KEY_FILE: "/run/secrets/key.pem"
+
+secrets:
+  cert.pem:
+    file: ./server-keys/cert.pem
+  key.pem:
+    file: ./server-keys/key.pem

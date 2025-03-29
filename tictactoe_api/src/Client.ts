@@ -2,15 +2,16 @@
 export class Client 
 {
 	private readonly id: string;
-	private nickname: string = '';
+	private nickname: string;
 	private readonly socket: WebSocket;
 	private friendSocket: WebSocket | null = null;
-	private registered: boolean = false;
+	private registration: boolean = false;
 
 	constructor(id: string, socket: WebSocket) 
 	{
 		this.id = id;
 		this.socket = socket;
+		this.nickname = '';
 	}
 
 	getID(): string
@@ -33,9 +34,9 @@ export class Client
 		return this.friendSocket;
 	}
 
-	getRegistered(): boolean
+	getRegistration(): boolean
 	{
-		return this.registered;
+		return this.registration;
 	}
 
 	setNickname(nickname: string): void
@@ -48,8 +49,8 @@ export class Client
 		this.friendSocket = friendSocket;
 	}
 
-	setRegistered(registered: boolean): void
+	setRegistration(registered: boolean): void
 	{
-		this.registered = registered;
+		this.registration = registered;
 	}
 }
