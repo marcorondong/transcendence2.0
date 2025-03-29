@@ -6,6 +6,7 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import userRoutes from "./modules/user/user.route";
 import productRoutes from "./modules/product/product.route";
+import { AppError } from "./utils/errors";
 // import { request } from "http";  // It seems that this is not used
 
 // Creating server
@@ -108,13 +109,30 @@ async function main() {
 	await server.register(fastifySwaggerUI, {routePrefix: "/docs",});
 	server.register(userRoutes, {prefix: 'api/users'});
 	server.register(productRoutes, {prefix: 'api/products'});
+	// Global error handler
+	server.setErrorHandler((error, request, reply) => {
+		// Custom AppError (e.g., domain-specific errors like "Email exists")
+		if (error instanceof AppError) {
+			return reply.status(error.statusCode).send({
+				message: error.message,
+				code: error.code ?? "UNKNOWN_ERROR",
+			});
+		}
+		// TODO: Remove this. Prisma errors not handled in service layer (fallback safety)
+		if (error.code === "P2002") {
+			return reply.status(409).send({ message: "Unique constraint failed" });
+		}
+		// Unknown/unexpected error
+		console.error("Global error handler caught:", error);
+		return reply.status(500).send({ message: "Internal Server Error" });
+	});
 	try{
 		// Start server
 		await server.listen( {port: 3000, host: "0.0.0.0"});
 		console.log('Server ready at http://localhost:3000');
 	} catch(e) {
 		console.error(e);
-		process.exit(1);
+		// process.exit(1); // I don't want to shut down the server if an error is raised
 	}
 }
 

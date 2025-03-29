@@ -25,7 +25,7 @@ export async function createUser(input: createUserInput) {
 					const target = (e.meta?.target as string[])?.[0] ?? "field";
 					throw new AppError(409, `${capitalize(target)} already exists`);
 				case "P2025":
-					throw new AppError(404, "User not found");
+					throw new AppError(404, "User not found"); // TODO: Should I check this here?
 				case "P2003":
 					throw new AppError(400, "Invalid foreign key");
 			}

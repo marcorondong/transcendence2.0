@@ -23,6 +23,7 @@ export async function registerUserHandler(
 		if (e instanceof AppError) {
 			return reply.code(e.statusCode).send({ message: e.message });
 		}
+		// TODO: Maybe add a throw here to reach the global error handler?
 		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
