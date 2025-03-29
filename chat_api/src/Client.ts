@@ -2,16 +2,17 @@
 export class Client 
 {
 	private readonly id: string;
-    private nickname: string = '';
-    private readonly socket: WebSocket;
+	private nickname: string;
+	private readonly socket: WebSocket;
 	private blockedList: string[] = [];
-	private registered: boolean = false;
+	private registration: boolean = false;
 
-    constructor(id: string, socket: WebSocket) 
+	constructor(id: string, socket: WebSocket) 
 	{
-        this.id = id;
+		this.id = id;
 		this.socket = socket;
-    }
+		this.nickname = '';
+	}
 
 	getId(): string
 	{
@@ -33,9 +34,9 @@ export class Client
 		return this.blockedList;
 	}
 
-	getRegistered(): boolean
+	getRegistration(): boolean
 	{
-		return this.registered;
+		return this.registration;
 	}
 
 	setNickname(nickname: string): void
@@ -48,9 +49,9 @@ export class Client
 		this.blockedList = blockedList;
 	}
 
-	setRegistered(registered: boolean): void
+	setRegistration(registration: boolean): void
 	{
-		this.registered = registered;
+		this.registration = registration;
 	}
 
 	addBlockedUser(nickname: string): void

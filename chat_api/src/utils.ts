@@ -9,37 +9,12 @@ export function onClientMessage(message: string, currentClient: Client): void
 	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
 	if (!data)
 		return;
-	// if(currentClient.getRegistered() === false)
-	// {
-	// 	if(data.microservice === 'chat' && data.registerThisPerson)
-	// 		handleRegisterPerson(data, currentClient);
-	// 	else 
-	// 	{
-	// 		console.log('Error: Client is not registered but send message. Client must register before interacting website. Client may try to send message not throw frondend but else way (ex: Postman). Warning: Possibly port is exposed or hacker attack. Received data:');
-	// 		console.log(JSON.stringify(data, null, 2));
-	// 		currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Client is not registered but send message. Client must register before interacting website. Client may try to send message not throw frondend but else way (ex: Postman). Warning: Possibly port is exposed or hacker attack.', sentData: data }));
-	// 		currentClient.getSocket().close();
-	// 	}
-	// }
-	// else // if client is registered
-	// {
-		if(data.microservice)
-		{
-			if(data.microservice === 'chat')
-				handleChatMicroserviceRequests(data, currentClient);
-			else if (data.microservice === 'error')
-				handleErrorGeneral(data, currentClient);
-			else // if microservice property has an unknown value
-				unknownMicroserviceRequest(data, currentClient);
-		}
-		else // if microservice property is not found or has a falsy value
-			noMicroservicePropertyFound(data, currentClient);
-	// }
+	handleChatMicroserviceRequests(data, currentClient);
 }
 
 export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client)
 {
-	if(currentClient.getRegistered() === true)
+	if(currentClient.getRegistration() === true)
 	{
 		console.log(`Client disconnected with code: ${code}, reason: ${reason.toString()}`);
 		const updatedClients = allClients.filter(client => client !== currentClient);
@@ -58,7 +33,7 @@ export function onClientDisconnect(code: number, reason: Buffer, currentClient: 
 	}
 }
 
-export function parseJsonMessage(message: Buffer, socket: WebSocket): any {
+function parseJsonMessage(message: Buffer, socket: WebSocket): any {
 	let data;
 	try {
 		data = JSON.parse(message.toString());
@@ -73,7 +48,7 @@ export function parseJsonMessage(message: Buffer, socket: WebSocket): any {
 	return data;
 }
 
-export function addMessage(sender: string, receiver: string, message: Message) {
+function addMessage(sender: string, receiver: string, message: Message) {
 	if (!chatHistories[sender]) {
 		chatHistories[sender] = {};
 	}
@@ -87,7 +62,7 @@ export function addMessage(sender: string, receiver: string, message: Message) {
 	chatHistories[sender][receiver].push(message);
 }
 
-export const findClientByNickname = (nickname: string): Client | undefined => {
+const findClientByNickname = (nickname: string): Client | undefined => {
 	for (const client of allClients.values()) {
 		if (client.getNickname() === nickname) {
 			return client;
@@ -96,7 +71,7 @@ export const findClientByNickname = (nickname: string): Client | undefined => {
 	return undefined;
 };
 
-export function handleChatMessage(data: any, currentClient: Client) 
+function messageHandler(data: any, currentClient: Client) 
 {
 	const receiver = findClientByNickname(data.receiver);
 	if (receiver && !receiver.getBlockedList().includes(currentClient.getNickname())) {
@@ -108,7 +83,7 @@ export function handleChatMessage(data: any, currentClient: Client)
 	addMessage(currentClient.getNickname(), data.receiver, message);
 }
 
-export function handleNotification(data: any, currentClient: Client) 
+function notificationHandler(data: any, currentClient: Client) 
 {
 	const receiver = findClientByNickname(data.receiver);
 	if (receiver && !receiver.getBlockedList().includes(currentClient.getNickname())) {
@@ -116,7 +91,7 @@ export function handleNotification(data: any, currentClient: Client)
 	}
 }
 
-export function handleChatHistoryRequest(data: any, currentClient: Client)
+function historyHandler(data: any, currentClient: Client)
 {
 	if(!chatHistories[currentClient.getNickname()] || !chatHistories[currentClient.getNickname()][data.chattingWith])
 	{
@@ -130,25 +105,20 @@ export function handleChatHistoryRequest(data: any, currentClient: Client)
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: chatHistory, block: isBlocked }));
 }
 
-export function handleBlockPerson(data: any, currentClient: Client)
+function blockingHandler(data: any, currentClient: Client)
 {
 	currentClient.getBlockedList().push(data.blockThisPerson);
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', thisPersonBlocked: data.blockThisPerson }));
 }
 
-export function handleUnblockPerson(data: any, currentClient: Client)
+function unblockingHandler(data: any, currentClient: Client)
 {
 	currentClient.setBlockedList(currentClient.getBlockedList().filter(n => n !== data.unblockThisPerson));
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', thisPersonUnblocked: data.unblockThisPerson }));
 }
 
-export function handleRegisterPerson(data: any, currentClient: Client)
+function registrationHandler(data: any, currentClient: Client)
 {
-	// if(allClients.some(client => client.getNickname() === data.registerThisPerson))
-	// {
-	// 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: data.registerThisPerson + ' is already taken'}));
-	// 	return;
-	// }
 	const clientsOnline = Array.from(allClients.values()).map(client => ({nickname: client.getNickname()}));
 	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationApproved: data.registerThisPerson, clientsOnline: clientsOnline }));
 	for(const client of allClients)
@@ -156,11 +126,11 @@ export function handleRegisterPerson(data: any, currentClient: Client)
 		client.getSocket().send(JSON.stringify({ microservice: 'chat', newClientOnline: data.registerThisPerson }));
 	}
 	currentClient.setNickname(data.registerThisPerson);
-	currentClient.setRegistered(true);
+	currentClient.setRegistration(true);
 	allClients.push(currentClient);
 }
 
-export function handleInvitePerson(data: any, currentClient: Client)
+function invitationHandler(data: any, currentClient: Client)
 {
 	const invitee = findClientByNickname(data.inviteThisPerson);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
@@ -171,7 +141,7 @@ export function handleInvitePerson(data: any, currentClient: Client)
 	}
 }
 
-export function handleCancelInvitation(data: any, currentClient: Client)
+function cancelInvitationHandler(data: any, currentClient: Client)
 {
 	const invitee = findClientByNickname(data.cancelInvitation);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
@@ -180,7 +150,7 @@ export function handleCancelInvitation(data: any, currentClient: Client)
 	}
 }
 
-export function handleStartGame(data: any, currentClient: Client)
+function handleStartGame(data: any, currentClient: Client)
 {
 	const invitee = findClientByNickname(data.startGame);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
@@ -189,75 +159,38 @@ export function handleStartGame(data: any, currentClient: Client)
 	}
 }
 
-export function handleErrorInChat(data: any)
+function errorHandler(data: any)
 {
 		console.log('Error: Client sent an error message to "chat" microservice. Client received incorrect data from server. The error message is:');
 		console.log(data.error);
 }
 
-export function handleErrorGeneral(data: any, currentClient: Client)
+function handleChatMicroserviceRequests(data: any, currentClient: Client)
 {
-	if(data.errorMessage && data.sentData)
-	{
-		console.log('Error: Client received incorrect data from server. The error message is:');
-		console.log(data.errorMessage);
-		console.log('Data which client received from server:');
-		console.log(JSON.stringify(data.sentData, null, 2));
-	}
-	else // if errorMessage or sentData property is not found or has a falsy value
-	{
-		console.log('Error: "errorMessage" or "sentData" property not found or has a falsy value in data sent by client to server under received "microservice": "error" request in server side. Received data:');
-		console.log(JSON.stringify(data, null, 2));
-	}
-}
-
-export function handleChatMicroserviceRequests(data: any, currentClient: Client)
-{
-	// if(data.registerThisPerson && currentClient.getRegistered() === false)
-	// {
-	// 	// currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationDeclined: 'You are already registered as ' + currentClient.getNickname() }));
-	// 	// console.log('Error: Client is already registered but trying to register again. Received data:');
-	// 	// console.log(JSON.stringify(data, null, 2));
-	// 	// currentClient.getSocket().close();
-	// }
 	if(data.registerThisPerson)
-		handleRegisterPerson(data, currentClient);
+		registrationHandler(data, currentClient);
 	else if(data.message && data.receiver && data.receiver !== currentClient.getNickname() && currentClient.getNickname())
-		handleChatMessage(data, currentClient);
+		messageHandler(data, currentClient);
 	else if(data.notification)
-		handleNotification(data, currentClient);
+		notificationHandler(data, currentClient);
 	else if(data.chatHistoryRequest)
-		handleChatHistoryRequest(data, currentClient);
+		historyHandler(data, currentClient);
 	else if(data.blockThisPerson)
-		handleBlockPerson(data, currentClient);
+		blockingHandler(data, currentClient);
 	else if(data.unblockThisPerson)
-		handleUnblockPerson(data, currentClient);
+		unblockingHandler(data, currentClient);
 	else if(data.inviteThisPerson)
-		handleInvitePerson(data, currentClient);
+		invitationHandler(data, currentClient);
 	else if(data.invitationCanceled)
-		handleCancelInvitation(data, currentClient);
+		cancelInvitationHandler(data, currentClient);
 	else if (data.startGame)
 		handleStartGame(data, currentClient);
 	else if(data.error)
-		handleErrorInChat(data);
+		errorHandler(data);
 	else // if chat microservice has an unknown request
 	{
 		console.log('Error: Unknown request from client in "chat" microservice. Received data:');
 		console.log(JSON.stringify(data, null, 2));
 	}
-}
-
-export function unknownMicroserviceRequest(data: any, currentClient: Client)
-{
-	console.log('Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests. Received data:');
-	console.log(JSON.stringify(data, null, 2));
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Unknown "microservice" request from client. This server only supports "chat" and "error" microservice requests.', sentData: data }));
-}
-
-export function noMicroservicePropertyFound(data: any, currentClient: Client)
-{
-	console.log('Error: "microservice" property not found or has a falsy value in data sent by client to server. Received data:');
-	console.log(JSON.stringify(data, null, 2));
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "microservice" property not found or has a falsy value in data sent by client to server.', sentData: data }));
 }
 
