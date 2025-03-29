@@ -1,20 +1,19 @@
 import Fastify from "fastify"
 import websocket from "@fastify/websocket"
-import { WebSocket, RawData } from "ws";
 import fs from "fs"
 import path from 'path';
 import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv'
 import { MatchMaking } from "./match-making/MatchMaking";
-import { Tournament } from "./Tournament";
+import { Tournament } from "./game/modes/singles/Tournament";
 
 dotenv.config();
 
 //Server set up variables
-const PORT:number = 3010;
-const HOST:string = "0.0.0.0"
-const privateKeyPath:string = path.join(__dirname, "../server-keys/key.pem")
-const certificatePath:string = path.join(__dirname, "../server-keys/cert.pem")
+const PORT: number = 3010;
+const HOST: string = "0.0.0.0"
+const privateKeyPath: string = path.join(__dirname, "../server-keys/key.pem")
+const certificatePath: string = path.join(__dirname, "../server-keys/cert.pem")
 let privateKey: string; 
 let certificate: string;
 
@@ -54,7 +53,7 @@ const fastify = Fastify(
 	: true
 });
 	
-const manager:MatchMaking = new MatchMaking();
+const manager: MatchMaking = new MatchMaking();
 
 fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
@@ -68,7 +67,7 @@ export interface IGameRoomQuery
 	playerId: string;
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
-	matchType: "single" | "tournament";
+	matchType: "singles" | "tournament" | "doubles";
 	tournamentSize: number;
 } 
 
@@ -85,15 +84,15 @@ fastify.register(async function(fastify)
 	});
 
 	//Partial makes all field optional. 
-	fastify.get<{Querystring: Partial<IGameRoomQuery>}>("/pong/", {websocket:true}, (connection, req) =>
+	fastify.get<{Querystring: Partial<IGameRoomQuery>}>("/pong/", {websocket: true}, (connection, req) =>
 	{
 		const {
 			roomId = 0,
 			playerId= "Player whatever",
 			privateRoom = false,
 			clientType = "player",
-			matchType = "single",
-			tournamentSize = Tournament.getDefaultTournamnetSize()
+			matchType = "singles",
+			tournamentSize = Tournament.getDefaultTournamentSize()
 		} = req.query as IGameRoomQuery;
 
 		const gameQuery: IGameRoomQuery =
@@ -110,7 +109,6 @@ fastify.register(async function(fastify)
 
 	fastify.get("/pingpong/", async (request, reply) => {
 		const filePath = path.join(process.cwd(), "src/public/pong.html");
-		console.log(`Serving file from: ${filePath}`);
 		if (fs.existsSync(filePath)) {
 		  return reply.sendFile("pong.html"); // Serve public/index.html
 		} else {
