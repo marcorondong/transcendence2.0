@@ -75,12 +75,17 @@ server.decorate(
 	}
 );
 
+// Public paths to NOT enforce authentication
+const publicPaths = ["/healthcheck", "/docs", "/docs/json"];
+
 // Hook to check route config (authentication required by default)
 server.addHook("onRequest", async (request, reply) => {
-	const requiresAuth = request.routeOptions?.config?.authRequired !== false;
-	if (!requiresAuth) return;  // Skip auth
-	await server.authenticate(request, reply);  // Enforce auth
-  });
+	const isPublic = publicPaths.some((path) => request.raw.url?.startsWith(path));
+	const requiresAuth = !isPublic && request.routeOptions?.config?.authRequired !== false;
+
+	if (!requiresAuth) return;
+	await server.authenticate(request, reply);
+});
 
 // Route for checking health (if server is up and running)
 server.get('/healthcheck', async function() {
