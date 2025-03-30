@@ -23,7 +23,7 @@ export function onClientDisconnect(code: number, reason: Buffer, currentClient: 
 		const updatedClients = allClients.filter(client => client !== currentClient);
 		allClients.length = 0;
 		allClients.push(...updatedClients);
-		currentClient.getFriendSocket()?.send(JSON.stringify({ microservice: 'tictactoe', friendDisconnected: true }));
+		currentClient.getFriendSocket()?.send(JSON.stringify({ friendDisconnected: true }));
 	}
 	else // if client is not registered
 	{
@@ -40,7 +40,6 @@ export function parseJsonMessage(message: Buffer, socket: WebSocket): any {
 		console.error("Hey Error:", error);
 		console.log('Error: Client sent an invalid JSON string to server. Sent data:');
 		console.log(message.toString());
-		socket.send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Client sent an invalid JSON string to server. Please send a valid JSON string.', sentData: message.toString() }));
 		data = null; // or handle the error as needed
 		socket.close();
 	}
@@ -58,7 +57,7 @@ export const findClientByNickname = (nickname: string): Client | undefined => {
 
 export function handleRegisterPerson(data: any, currentClient: Client): void
 {
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'tictactoe', registrationApproved: data.registerThisPerson}));
+	currentClient.getSocket().send(JSON.stringify({ registrationApproved: data.registerThisPerson}));
 	currentClient.setNickname(data.registerThisPerson);
 	currentClient.setRegistration(true);
 	allClients.push(currentClient);
@@ -77,8 +76,8 @@ export function handleLookingForGame(data: any, currentClient: Client): void
 			const player1Symbol = Math.random() < 0.5 ? 'X' : 'O';
 			const player2Symbol = player1Symbol === 'X' ? 'O' : 'X';
 
-			currentClient.getSocket().send(JSON.stringify({ microservice: 'tictactoe', startGame: true, friendNickname: friendClient.getNickname(), yourSymbol: player1Symbol }));
-			friendClient.getSocket().send(JSON.stringify({ microservice: 'tictactoe', startGame: true, friendNickname: currentClient.getNickname(), yourSymbol: player2Symbol }));
+			currentClient.getSocket().send(JSON.stringify({ startGame: true, friendNickname: friendClient.getNickname(), yourSymbol: player1Symbol }));
+			friendClient.getSocket().send(JSON.stringify({ startGame: true, friendNickname: currentClient.getNickname(), yourSymbol: player2Symbol }));
 
 			lookingForGame_nickname = '';
 
