@@ -1,7 +1,6 @@
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify'
 import fastifyWebsocket from '@fastify/websocket';
 import { Client } from './Client';
-import { Message } from './Message';
 import { onClientMessage, onClientDisconnect } from './utils';
 import fs from 'fs';
 

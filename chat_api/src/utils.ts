@@ -23,7 +23,7 @@ export function onClientDisconnect(code: number, reason: Buffer, currentClient: 
 
 		for(const client of allClients)
 		{
-			client.getSocket().send(JSON.stringify({ microservice: 'chat', clientDisconnected: true, nickname: currentClient.getNickname() }));
+			client.getSocket().send(JSON.stringify({ clientDisconnected: true, nickname: currentClient.getNickname() }));
 		}
 	}
 	else // if client is not registered
@@ -77,7 +77,7 @@ function messageHandler(data: any, currentClient: Client)
 	if (receiver && !receiver.getBlockedList().includes(currentClient.getNickname())) {
 		const message = new Message(data.message, false);
 		addMessage(data.receiver, currentClient.getNickname(), message);
-		receiver.getSocket().send(JSON.stringify({ microservice: 'chat', message: data.message, sender: currentClient.getNickname() }));
+		receiver.getSocket().send(JSON.stringify({ message: data.message, sender: currentClient.getNickname() }));
 	}
 	const message = new Message(data.message, true);
 	addMessage(currentClient.getNickname(), data.receiver, message);
@@ -87,7 +87,7 @@ function notificationHandler(data: any, currentClient: Client)
 {
 	const receiver = findClientByNickname(data.receiver);
 	if (receiver && !receiver.getBlockedList().includes(currentClient.getNickname())) {
-		receiver.getSocket().send(JSON.stringify({ microservice: 'chat', notification: data.notification, sender: currentClient.getNickname() }));
+		receiver.getSocket().send(JSON.stringify({ notification: data.notification, sender: currentClient.getNickname() }));
 	}
 }
 
@@ -97,33 +97,33 @@ function historyHandler(data: any, currentClient: Client)
 	{
 		const message = new Message('', false);
 		addMessage(currentClient.getNickname(), data.chattingWith, message);
-		currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: [] }));
+		currentClient.getSocket().send(JSON.stringify({ chatHistoryProvided: [] }));
 		return;
 	}
 	const isBlocked = currentClient.getBlockedList().includes(data.chattingWith);
 	const chatHistory = chatHistories[currentClient.getNickname()][data.chattingWith];
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', chatHistoryProvided: chatHistory, block: isBlocked }));
+	currentClient.getSocket().send(JSON.stringify({ chatHistoryProvided: chatHistory, block: isBlocked }));
 }
 
 function blockingHandler(data: any, currentClient: Client)
 {
 	currentClient.getBlockedList().push(data.blockThisPerson);
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', thisPersonBlocked: data.blockThisPerson }));
+	currentClient.getSocket().send(JSON.stringify({ thisPersonBlocked: data.blockThisPerson }));
 }
 
 function unblockingHandler(data: any, currentClient: Client)
 {
 	currentClient.setBlockedList(currentClient.getBlockedList().filter(n => n !== data.unblockThisPerson));
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', thisPersonUnblocked: data.unblockThisPerson }));
+	currentClient.getSocket().send(JSON.stringify({ thisPersonUnblocked: data.unblockThisPerson }));
 }
 
 function registrationHandler(data: any, currentClient: Client)
 {
 	const clientsOnline = Array.from(allClients.values()).map(client => ({nickname: client.getNickname()}));
-	currentClient.getSocket().send(JSON.stringify({ microservice: 'chat', registrationApproved: data.registerThisPerson, clientsOnline: clientsOnline }));
+	currentClient.getSocket().send(JSON.stringify({ registrationApproved: data.registerThisPerson, clientsOnline: clientsOnline }));
 	for(const client of allClients)
 	{
-		client.getSocket().send(JSON.stringify({ microservice: 'chat', newClientOnline: data.registerThisPerson }));
+		client.getSocket().send(JSON.stringify({ newClientOnline: data.registerThisPerson }));
 	}
 	currentClient.setNickname(data.registerThisPerson);
 	currentClient.setRegistration(true);
@@ -137,7 +137,7 @@ function invitationHandler(data: any, currentClient: Client)
 	{
 		const message = new Message(data.message, false);
 		addMessage(data.receiver, currentClient.getNickname(), message);
-		invitee.getSocket().send(JSON.stringify({ microservice: 'chat', thisPersonInvitedYou: currentClient.getNickname() }));
+		invitee.getSocket().send(JSON.stringify({ thisPersonInvitedYou: currentClient.getNickname() }));
 	}
 }
 
@@ -146,7 +146,7 @@ function cancelInvitationHandler(data: any, currentClient: Client)
 	const invitee = findClientByNickname(data.cancelInvitation);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
 	{
-		invitee.getSocket().send(JSON.stringify({ microservice: 'chat', invitationCanceled: currentClient.getNickname() }));
+		invitee.getSocket().send(JSON.stringify({ invitationCanceled: currentClient.getNickname() }));
 	}
 }
 
@@ -155,7 +155,7 @@ function handleStartGame(data: any, currentClient: Client)
 	const invitee = findClientByNickname(data.startGame);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
 	{
-		invitee.getSocket().send(JSON.stringify({ microservice: 'chat', startGame: "http://10.14.5.2:3001/"}));
+		invitee.getSocket().send(JSON.stringify({ startGame: "http://10.14.5.2:3001/"}));
 	}
 }
 
