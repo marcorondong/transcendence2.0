@@ -1,51 +1,19 @@
 import { Client } from './Client';
 import { Message } from './Message';
+import os from 'os';
 
 let allClients: Client[] = [];
 const chatHistories: Record<string, Record<string, Message[]>> = {};
 
-export function onClientMessage(message: string, currentClient: Client): void
-{
-	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
-	if (!data)
-		return;
-	handleChatMicroserviceRequests(data, currentClient);
-}
-
-export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client)
-{
-	if(currentClient.getRegistration() === true)
-	{
-		console.log(`Client disconnected with code: ${code}, reason: ${reason.toString()}`);
-		const updatedClients = allClients.filter(client => client !== currentClient);
-		allClients.length = 0;
-		allClients.push(...updatedClients);
-
-		for(const client of allClients)
-		{
-			client.getSocket().send(JSON.stringify({ clientDisconnected: true, nickname: currentClient.getNickname() }));
-		}
-	}
-	else // if client is not registered
-	{
-		console.log(`Client disconnected without registaring with code: ${code}, reason: ${reason.toString()}`);
-		console.log('Client may have used Postman or other tools to send message to server. Warning: Possibly port is exposed or hacker attack.');
-	}
-}
-
-function parseJsonMessage(message: Buffer, socket: WebSocket): any {
+function parseJsonMessage(message: Buffer, socket: WebSocket){
 	let data;
 	try {
-		data = JSON.parse(message.toString());
+		return JSON.parse(message.toString());
 	} catch (error) {
 		console.error("Hey Error:", error);
-		console.log('Error: Client sent an invalid JSON string to server. Sent data:');
-		console.log(message.toString());
-		socket.send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: Client sent an invalid JSON string to server. Please send a valid JSON string.', sentData: message.toString() }));
-		data = null; // or handle the error as needed
-		socket.close();
+		return null;
+		// socket.close();
 	}
-	return data;
 }
 
 function addMessage(sender: string, receiver: string, message: Message) {
@@ -71,126 +39,140 @@ const findClientByNickname = (nickname: string): Client | undefined => {
 	return undefined;
 };
 
-function messageHandler(data: any, currentClient: Client) 
+function messageHandler(message: string, receiver: string, currentClient: Client) 
 {
-	const receiver = findClientByNickname(data.receiver);
-	if (receiver && !receiver.getBlockedList().includes(currentClient.getNickname())) {
-		const message = new Message(data.message, false);
-		addMessage(data.receiver, currentClient.getNickname(), message);
-		receiver.getSocket().send(JSON.stringify({ message: data.message, sender: currentClient.getNickname() }));
+	const receiverClient = findClientByNickname(receiver);
+	if (receiverClient && !receiverClient.getBlockedList().includes(currentClient.getNickname())) {
+		const newMessage = new Message(message, false);
+		addMessage(receiver, currentClient.getNickname(), newMessage);
+		receiverClient.getSocket().send(JSON.stringify({ message: message, sender: currentClient.getNickname() }));
 	}
-	const message = new Message(data.message, true);
-	addMessage(currentClient.getNickname(), data.receiver, message);
+	const newMessage = new Message(message, true);
+	addMessage(currentClient.getNickname(), receiver, newMessage);
 }
 
-function notificationHandler(data: any, currentClient: Client) 
+function notificationHandler(notification: string, receiver: string, currentClient: Client) 
 {
-	const receiver = findClientByNickname(data.receiver);
-	if (receiver && !receiver.getBlockedList().includes(currentClient.getNickname())) {
-		receiver.getSocket().send(JSON.stringify({ notification: data.notification, sender: currentClient.getNickname() }));
+	const receiverClient = findClientByNickname(receiver);
+	if (receiverClient && !receiverClient.getBlockedList().includes(currentClient.getNickname())) {
+		receiverClient.getSocket().send(JSON.stringify({ notification: notification, sender: currentClient.getNickname() }));
 	}
 }
 
-function historyHandler(data: any, currentClient: Client)
+function historyHandler(person: string, currentClient: Client)
 {
-	if(!chatHistories[currentClient.getNickname()] || !chatHistories[currentClient.getNickname()][data.chattingWith])
+	if(!chatHistories[currentClient.getNickname()] || !chatHistories[currentClient.getNickname()][person])
 	{
 		const message = new Message('', false);
-		addMessage(currentClient.getNickname(), data.chattingWith, message);
+		addMessage(currentClient.getNickname(), person, message);
 		currentClient.getSocket().send(JSON.stringify({ chatHistoryProvided: [] }));
 		return;
 	}
-	const isBlocked = currentClient.getBlockedList().includes(data.chattingWith);
-	const chatHistory = chatHistories[currentClient.getNickname()][data.chattingWith];
+	const isBlocked = currentClient.getBlockedList().includes(person);
+	const chatHistory = chatHistories[currentClient.getNickname()][person];
 	currentClient.getSocket().send(JSON.stringify({ chatHistoryProvided: chatHistory, block: isBlocked }));
 }
 
-function blockingHandler(data: any, currentClient: Client)
+function blockingHandler(person: string, currentClient: Client)
 {
-	currentClient.getBlockedList().push(data.blockThisPerson);
-	currentClient.getSocket().send(JSON.stringify({ thisPersonBlocked: data.blockThisPerson }));
+	currentClient.getBlockedList().push(person);
+	currentClient.getSocket().send(JSON.stringify({ thisPersonBlocked: person }));
 }
 
-function unblockingHandler(data: any, currentClient: Client)
+function unblockingHandler(person: string, currentClient: Client)
 {
-	currentClient.setBlockedList(currentClient.getBlockedList().filter(n => n !== data.unblockThisPerson));
-	currentClient.getSocket().send(JSON.stringify({ thisPersonUnblocked: data.unblockThisPerson }));
+	currentClient.setBlockedList(currentClient.getBlockedList().filter(n => n !== person));
+	currentClient.getSocket().send(JSON.stringify({ thisPersonUnblocked: person }));
 }
 
-function registrationHandler(data: any, currentClient: Client)
+function registrationHandler(person: string, currentClient: Client)
 {
 	const clientsOnline = Array.from(allClients.values()).map(client => ({nickname: client.getNickname()}));
-	currentClient.getSocket().send(JSON.stringify({ registrationApproved: data.registerThisPerson, clientsOnline: clientsOnline }));
+	currentClient.getSocket().send(JSON.stringify({ registrationApproved: person, clientsOnline: clientsOnline }));
 	for(const client of allClients)
 	{
-		client.getSocket().send(JSON.stringify({ newClientOnline: data.registerThisPerson }));
+		client.getSocket().send(JSON.stringify({ newClientOnline: person }));
 	}
-	currentClient.setNickname(data.registerThisPerson);
+	currentClient.setNickname(person);
 	currentClient.setRegistration(true);
 	allClients.push(currentClient);
 }
 
-function invitationHandler(data: any, currentClient: Client)
+function invitationHandler(person: string, currentClient: Client)
 {
-	const invitee = findClientByNickname(data.inviteThisPerson);
+	const invitee = findClientByNickname(person);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
 	{
-		const message = new Message(data.message, false);
-		addMessage(data.receiver, currentClient.getNickname(), message);
 		invitee.getSocket().send(JSON.stringify({ thisPersonInvitedYou: currentClient.getNickname() }));
 	}
 }
 
-function cancelInvitationHandler(data: any, currentClient: Client)
+function cancelInvitationHandler(person: string, currentClient: Client)
 {
-	const invitee = findClientByNickname(data.cancelInvitation);
+	const invitee = findClientByNickname(person);
 	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
 	{
 		invitee.getSocket().send(JSON.stringify({ invitationCanceled: currentClient.getNickname() }));
 	}
 }
 
-function handleStartGame(data: any, currentClient: Client)
-{
-	const invitee = findClientByNickname(data.startGame);
-	if(invitee && !invitee.getBlockedList().includes(currentClient.getNickname()))
-	{
-		invitee.getSocket().send(JSON.stringify({ startGame: "http://10.14.5.2:3001/"}));
-	}
+function startGame(person: string, currentClient: Client) {
+    const invitee = findClientByNickname(person);
+
+    if (invitee && !invitee.getBlockedList().includes(currentClient.getNickname())) {
+        invitee.getSocket().send(JSON.stringify({ startGame: "yes"}));
+        currentClient.getSocket().send(JSON.stringify({ startGame: "yes"}));
+    }
 }
 
-function errorHandler(data: any)
+export function onClientMessage(message: string, currentClient: Client): void
 {
-		console.log('Error: Client sent an error message to "chat" microservice. Client received incorrect data from server. The error message is:');
-		console.log(data.error);
-}
-
-function handleChatMicroserviceRequests(data: any, currentClient: Client)
-{
+	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
+	if (!data)
+		return;
 	if(data.registerThisPerson)
-		registrationHandler(data, currentClient);
-	else if(data.message && data.receiver && data.receiver !== currentClient.getNickname() && currentClient.getNickname())
-		messageHandler(data, currentClient);
-	else if(data.notification)
-		notificationHandler(data, currentClient);
+		registrationHandler(data.registerThisPerson, currentClient);
+	else if(data.message && data.receiver && currentClient.getNickname() && data.receiver !== currentClient.getNickname())
+		messageHandler(data.message, data.receiver , currentClient);
+	else if(data.notification && data.receiver && currentClient.getNickname() && data.receiver !== currentClient.getNickname())
+		notificationHandler(data.notification, data.receiver , currentClient);
 	else if(data.chatHistoryRequest)
-		historyHandler(data, currentClient);
+		historyHandler(data.chatHistoryRequest, currentClient);
 	else if(data.blockThisPerson)
-		blockingHandler(data, currentClient);
+		blockingHandler(data.blockThisPerson, currentClient);
 	else if(data.unblockThisPerson)
-		unblockingHandler(data, currentClient);
+		unblockingHandler(data.unblockThisPerson, currentClient);
 	else if(data.inviteThisPerson)
-		invitationHandler(data, currentClient);
+		invitationHandler(data.inviteThisPerson, currentClient);
 	else if(data.invitationCanceled)
-		cancelInvitationHandler(data, currentClient);
+		cancelInvitationHandler(data.invitationCanceled, currentClient);
 	else if (data.startGame)
-		handleStartGame(data, currentClient);
-	else if(data.error)
-		errorHandler(data);
+		startGame(data.startGame, currentClient);
 	else // if chat microservice has an unknown request
 	{
 		console.log('Error: Unknown request from client in "chat" microservice. Received data:');
 		console.log(JSON.stringify(data, null, 2));
+	}
+}
+
+export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client)
+{
+	if(currentClient.getRegistration() === true)
+	{
+		console.log(`Client disconnected with code: ${code}, reason: ${reason.toString()}`);
+		const updatedClients = allClients.filter(client => client !== currentClient);
+		allClients.length = 0;
+		allClients.push(...updatedClients);
+
+		for(const client of allClients)
+		{
+			client.getSocket().send(JSON.stringify({ clientDisconnected: true, nickname: currentClient.getNickname() }));
+		}
+	}
+	else // if client is not registered
+	{
+		console.log(`Client disconnected without registaring with code: ${code}, reason: ${reason.toString()}`);
+		console.log('Client may have used Postman or other tools to send message to server. Warning: Possibly port is exposed or hacker attack.');
 	}
 }
 
