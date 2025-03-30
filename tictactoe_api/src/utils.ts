@@ -3,67 +3,26 @@ import { Client } from './Client';
 let allClients: Client[] = [];
 let lookingForGame_nickname: string = '';
 
-export function onClientMessage(message: string, currentClient: Client): void
-{
-	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
-	if(!data)
-		return;
-	handleTicTacToeMicroserviceRequests(data, currentClient);
-}
-
-export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client): void
-{
-	if(currentClient.getRegistration() === true)
-	{
-		if(currentClient.getNickname() === lookingForGame_nickname)
-		{
-			lookingForGame_nickname = '';
-		}
-		console.log(`Client disconnected with code: ${code}, reason: ${reason.toString()}`);
-		const updatedClients = allClients.filter(client => client !== currentClient);
-		allClients.length = 0;
-		allClients.push(...updatedClients);
-		currentClient.getFriendSocket()?.send(JSON.stringify({ friendDisconnected: true }));
-	}
-	else // if client is not registered
-	{
-		console.log(`Client disconnected without registaring with code: ${code}, reason: ${reason.toString()}`);
-		console.log('Client may have used Postman or other tools to send message to server. Warning: Possibly port is exposed or hacker attack.');
-	}
-}
-
-export function parseJsonMessage(message: Buffer, socket: WebSocket): any {
+function parseJsonMessage(message: Buffer, socket: WebSocket){
 	let data;
 	try {
-		data = JSON.parse(message.toString());
+		return JSON.parse(message.toString());
 	} catch (error) {
 		console.error("Hey Error:", error);
-		console.log('Error: Client sent an invalid JSON string to server. Sent data:');
-		console.log(message.toString());
-		data = null; // or handle the error as needed
-		socket.close();
+		socket.send(JSON.stringify({ error: 'Invalid JSON format' }));
+		return null;
 	}
-	return data;
 }
 
-export const findClientByNickname = (nickname: string): Client | undefined => {
-	for (const client of allClients.values()) {
-		if (client.getNickname() === nickname) {
-			return client;
-		}
-	}
-	return undefined;
-};
-
-export function handleRegisterPerson(data: any, currentClient: Client): void
+function registrationHandler(person: string, currentClient: Client): void
 {
-	currentClient.getSocket().send(JSON.stringify({ registrationApproved: data.registerThisPerson}));
-	currentClient.setNickname(data.registerThisPerson);
+	currentClient.getSocket().send(JSON.stringify({ registrationApproved: person}));
+	currentClient.setNickname(person);
 	currentClient.setRegistration(true);
 	allClients.push(currentClient);
 }
 
-export function handleLookingForGame(data: any, currentClient: Client): void
+function lookingForGame(currentClient: Client): void
 {
 	if(lookingForGame_nickname !== '')
 	{
@@ -93,14 +52,38 @@ export function handleLookingForGame(data: any, currentClient: Client): void
 	}
 }
 
-export function handleTicTacToeMicroserviceRequests(data: any, currentClient: Client): void
+export function onClientMessage(message: string, currentClient: Client): void
 {
+	const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
+	if(!data)
+		return;
 	if(data.registerThisPerson)
-		handleRegisterPerson(data, currentClient);
+		registrationHandler(data.registerThisPerson, currentClient);
 	else if(data.lookingForGame)
-		handleLookingForGame(data, currentClient);
+		lookingForGame(currentClient);
 	else if(data.cancelLookingForGame)
 		lookingForGame_nickname = '';
 	else
 		currentClient.getFriendSocket()?.send(JSON.stringify(data));
+}
+
+export function onClientDisconnect(code: number, reason: Buffer, currentClient: Client): void
+{
+	if(currentClient.getRegistration() === true)
+	{
+		if(currentClient.getNickname() === lookingForGame_nickname)
+		{
+			lookingForGame_nickname = '';
+		}
+		console.log(`Client disconnected with code: ${code}, reason: ${reason.toString()}`);
+		const updatedClients = allClients.filter(client => client !== currentClient);
+		allClients.length = 0;
+		allClients.push(...updatedClients);
+		currentClient.getFriendSocket()?.send(JSON.stringify({ friendDisconnected: true }));
+	}
+	else // if client is not registered
+	{
+		console.log(`Client disconnected without registaring with code: ${code}, reason: ${reason.toString()}`);
+		console.log('Client may have used Postman or other tools to send message to server. Warning: Possibly port is exposed or hacker attack.');
+	}
 }
