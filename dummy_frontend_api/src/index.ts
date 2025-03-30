@@ -112,7 +112,7 @@ window.onload = () =>
 			acceptButton.addEventListener("click", () => {
 				// not fully implemented. Attention.
 				// should be integrated with pingpong
-				chat_socket.send(JSON.stringify({ microservice: 'chat', startGame: person }));
+				chat_socket.send(JSON.stringify({ startGame: person }));
 				appendNotification(person, ' \'s invitation accepted', false);
 				buttonContainer.remove();
 			});
@@ -124,7 +124,7 @@ window.onload = () =>
 			rejectButton.addEventListener("click", () => {
 				// not fully implemented. Attention.
 				// should be integrated with pingpong
-				chat_socket.send(JSON.stringify({ microservice: 'chat', notification: ' rejected your invitation', receiver: person }));
+				chat_socket.send(JSON.stringify({ notification: ' rejected your invitation', receiver: person }));
 				appendNotification(person, ' \'s invitation rejected', false);
 				buttonContainer.remove();
 			});
@@ -157,7 +157,7 @@ window.onload = () =>
 
 		personContainer.addEventListener("click", () => {
 			chatPerson.textContent = text;
-			chat_socket.send(JSON.stringify({ microservice: 'chat', chatHistoryRequest: true, chattingWith: text }));
+			chat_socket.send(JSON.stringify({ chatHistoryRequest: text}));
 			newMessageIndicator.classList.add("hidden"); // Hide the indicator when the person is clicked
 		});
 
@@ -216,7 +216,7 @@ window.onload = () =>
 					alert('You have blocked this person. Unblock to send message');
 					return;
 				}
-				chat_socket.send(JSON.stringify({ microservice: 'chat', message: messageInput.value, receiver: chatPerson.textContent }));
+				chat_socket.send(JSON.stringify({ message: messageInput.value, receiver: chatPerson.textContent }));
 				appendMessage(messageInput.value, true);
 				messageInput.value = '';
 			}
@@ -280,8 +280,10 @@ window.onload = () =>
 
 	cancelLoadingButton.addEventListener('click', () => // reviewed
 	{
-		chat_socket.send(JSON.stringify({ microservice: 'chat', invitationCanceled: chatPerson.textContent }));
+		chat_socket.send(JSON.stringify({ invitationCanceled: chatPerson.textContent }));
 		appendNotification('', 'you have canceled the invitation', false);
+		hideAllPages();
+		showPage(gamePage);
 		showPageChat(peopleOnlineDiv);
 	});
 
@@ -324,21 +326,16 @@ window.onload = () =>
 		//
 		// should be integrated with pingpong
 		appendNotification(chatPerson.textContent ?? '', ' has been invited to play PingPong', false);
-		chat_socket.send(JSON.stringify({ microservice: 'chat', inviteThisPerson: chatPerson.textContent}));
+		chat_socket.send(JSON.stringify({ inviteThisPerson: chatPerson.textContent}));
 		showPageChat(loadingPage_chat);
 	});
 
 	blockButton.addEventListener('click', () =>  // reviewed
 	{
 		if(blockButton.style.backgroundColor === 'white')
-			chat_socket.send(JSON.stringify({ microservice: 'chat', blockThisPerson: chatPerson.textContent }));
+			chat_socket.send(JSON.stringify({ blockThisPerson: chatPerson.textContent }));
 		else if(blockButton.style.backgroundColor === 'green')
-			chat_socket.send(JSON.stringify({ microservice: 'chat', unblockThisPerson: chatPerson.textContent }));
-		else
-		{
-			alert('Something went wrong. Expected blockButton color is green or white, but found ' + blockButton.style.backgroundColor);
-			chat_socket.send(JSON.stringify({ microservice: 'chat', error: 'Something went wrong. Expected blockButton color is green or white, but found ' + blockButton.style.backgroundColor }));
-		}
+			chat_socket.send(JSON.stringify({ unblockThisPerson: chatPerson.textContent }));
 	});
 
 	// showPage(nickname_page);
@@ -411,7 +408,7 @@ window.onload = () =>
 		if (checkWinner()) {
 			gameActive = false;
 			if(!aiFlag)
-				tic_socket.send(JSON.stringify({ microservice: 'tictactoe', yourTurn: true, index: index, gameStatus: 'You lose'}));
+				tic_socket.send(JSON.stringify({ yourTurn: true, index: index, gameStatus: 'You lose'}));
 			info.textContent = 'You win';
 			alert('You win');
 			player1_score.textContent = (++player1Score).toString();
@@ -421,7 +418,7 @@ window.onload = () =>
 		if (board.every(cell => cell !== "")) {
 			gameActive = false;
 			if(!aiFlag)
-				tic_socket.send(JSON.stringify({ microservice: 'tictactoe', yourTurn: true, index: index, gameStatus: 'It is draw'}));
+				tic_socket.send(JSON.stringify({ yourTurn: true, index: index, gameStatus: 'It is draw'}));
 			info.textContent = 'It is draw';
 			alert('It is draw');
 			return;
@@ -433,7 +430,7 @@ window.onload = () =>
 			return;
 		}
 		gameActive = false;
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', yourTurn: true, index: index }));
+		tic_socket.send(JSON.stringify({ yourTurn: true, index: index }));
 		
 	}
 	
@@ -462,20 +459,20 @@ window.onload = () =>
 	
 	function ft_cancelLookingForGame()
 	{
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', cancelLookingForGame: true }));
+		tic_socket.send(JSON.stringify({ cancelLookingForGame: true }));
 		showPage(customisePage);
 	}
 	
 	function ft_lookingForGame()
 	{
 		aiFlag = false;
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', lookingForGame: true }));
+		tic_socket.send(JSON.stringify({ lookingForGame: true }));
 		showPage(loadingPage_tic);
 	}
 	
 	function ft_leaveRoom()
 	{
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', leftRoom: true }));
+		tic_socket.send(JSON.stringify({ leftRoom: true }));
 		board.fill("");
 		cells.forEach(cell => cell.textContent = "");
 		player1Score = 0;
@@ -506,7 +503,7 @@ window.onload = () =>
 		}
 		rematchRequestSender.style.display = 'block';
 		rematchRequestReceiver.style.display = 'none';
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', rematchRequest: true }));
+		tic_socket.send(JSON.stringify({ rematchRequest: true }));
 	}
 	
 	function ft_rematchRequestAccepted()
@@ -520,7 +517,7 @@ window.onload = () =>
 		info.textContent = youAre === 'X' ? 'Your turn' : 'Opponent\'s turn';
 		rematchRequestSender.style.display = 'none';
 		rematchRequestReceiver.style.display = 'none';
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', rematchRequestAccepted: true , yourSymbol: youAre === 'X' ? 'O' : 'X' }));
+		tic_socket.send(JSON.stringify({ rematchRequestAccepted: true , yourSymbol: youAre === 'X' ? 'O' : 'X' }));
 		gameActive = youAre === 'X' ? true : false;
 		showPage(gamePage);
 		showPageChat(peopleOnlineDiv);
@@ -530,7 +527,7 @@ window.onload = () =>
 	{
 		rematchRequestSender.style.display = 'none';
 		rematchRequestReceiver.style.display = 'none';
-		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', rematchRequestCanceled: true }));
+		tic_socket.send(JSON.stringify({ rematchRequestCanceled: true }));
 	}
 	
 	cells.forEach(cell => {
@@ -556,8 +553,8 @@ window.onload = () =>
 		if(nickname_input.value.trim() !== "")
 		{
 			socket.send(JSON.stringify({ microservice: 'frontend', registerThisPerson: nickname_input.value }));
-			// tic_socket.send(JSON.stringify({ microservice: 'tictactoe', registerThisPerson: nickname_input.value }));
-			// chat_socket.send(JSON.stringify({ microservice: 'chat', registerThisPerson: nickname_input.value }));
+			// tic_socket.send(JSON.stringify({ registerThisPerson: nickname_input.value }));
+			// chat_socket.send(JSON.stringify({ registerThisPerson: nickname_input.value }));
 		}
 		else
 		{
@@ -590,8 +587,8 @@ window.onload = () =>
 		{
 			if(data.registrationApproved)
 			{
-				tic_socket.send(JSON.stringify({ microservice: 'tictactoe', registerThisPerson: data.registrationApproved }));
-				chat_socket.send(JSON.stringify({ microservice: 'chat', registerThisPerson: data.registrationApproved }));
+				tic_socket.send(JSON.stringify({ registerThisPerson: data.registrationApproved }));
+				chat_socket.send(JSON.stringify({ registerThisPerson: data.registrationApproved }));
 				me.textContent = data.registrationApproved;
 				showPage(customisePage);
 			}
@@ -605,8 +602,6 @@ window.onload = () =>
 	tic_socket.onmessage = (event) =>
 	{
 		const data = JSON.parse(event.data);
-		if(data.microservice === 'tictactoe')
-		{
 			if(data.registrationApproved)
 			{
 				player1_name.textContent = data.registrationApproved;
@@ -686,145 +681,119 @@ window.onload = () =>
 				rematchRequestSender.style.display = 'none';
 				rematchRequestReceiver.style.display = 'none';
 			}
-		}
+			else
+			{
+				alert('Error: "tictactoe" microservice has no such request handler in client side sent by server to client under received "microservice": "tictactoe" request in client side');
+				return;
+			}
 	}
-
 
 	chat_socket.onmessage = (event) => 
 		{
 			const data = JSON.parse(event.data);
-	
-			if(data.microservice)
+
+			if(data.message)
 			{
-				if(data.microservice === 'chat')
-				{
-					if(data.message)
-					{
-						if(data.sender === chatPerson.textContent)
-							appendMessage(data.message, false);
-						else
-							updateNewMessageIndicator(data.sender, true);
-						return;
-					}
-					else if(data.chatHistoryProvided) // reviewed
-					{
-						chatBox.innerHTML = '';
-						// console.log('Chat history:', data.chatHistory);
-						data.chatHistoryProvided.forEach((message: { text: string; isOwn: boolean; }) => {
-							appendMessage(message.text, message.isOwn);
-						});
-						console.log('aaaaaaaaaaaa' + data.block);
-						if(data.block === true) // if person is blocked, blockButton color is updated accordingly
-						{
-							blockButton.style.backgroundColor = 'green';
-						}
-						else if(data.block === false)
-						{
-							blockButton.style.backgroundColor = 'white';
-						}
-						showPageChat(chat);
-						return;
-					}
-					else if(data.newClientOnline)
-					{
-						appendPerson(data.newClientOnline);
-						return;
-					}
-					else if(data.clientDisconnected)
-					{
-						if(data.nickname === chatPerson.textContent)
-						{
-							alert(data.nickname + ' has disconnected');
-							showPageChat(peopleOnlineDiv);
-						}
-						deletePerson(data.nickname);
-						return;
-					}
-					else if(data.registrationApproved && data.clientsOnline) // reviewed
-					{
-						// me.textContent = data.registrationApproved;
-						data.clientsOnline.forEach((client: { nickname: string }) => {
-							appendPerson(client.nickname);
-						});
-						// showPage(peopleOnlineDiv);
-						return;
-					}
-					else if(data.registrationDeclined) // reviewed
-					{
-						alert(data.registrationDeclined);
-						return;
-					}
-					else if(data.thisPersonBlocked) // reviewed
-					{
-						alert('You have blocked ' + data.thisPersonBlocked);
-						if(data.thisPersonBlocked === chatPerson.textContent)
-						{
-							blockButton.style.backgroundColor = 'green';
-						}
-						return;
-					}
-					else if(data.thisPersonUnblocked) // reviewed
-					{
-						alert('You have unblocked ' + data.thisPersonUnblocked);
-						if(data.thisPersonUnblocked === chatPerson.textContent)
-						{
-							blockButton.style.backgroundColor = 'white';
-						}
-						return;
-					}
-					else if(data.thisPersonInvitedYou) // not fully implemented. Attention.
-					{
-						appendNotification(data.thisPersonInvitedYou, ' has invited you to play PingPong', true);
-						return;
-					}
-					else if(data.invitationCanceled) // not fully implemented. Attention.
-					{
-						alert(data.invitationCanceled + ' has canceled the invitation');
-						appendNotification(data.invitationCanceled, ' has canceled the invitation', false);
-						deleteButtonContainer(data.invitationCanceled);
-						showPageChat(peopleOnlineDiv);
-						return;
-					}
-					else if(data.notification)
-					{
-						appendNotification(data.sender, data.notification, false);
-						return;
-					}
-					else if(data.startGame)
-					{
-						showPageChat(peopleOnlineDiv);
-						window.open(data.startGame, '_blank');
-					}
-					else
-					{
-						chat_socket.send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "chat" microservice has no such request handler in client side sent by server to client under received "microservice": "chat" request in client side', sentData: data}));
-						alert('Error: "chat" microservice has no such request handler in client side sent by server to client under received "microservice": "chat" request in client side');
-						return;
-					}
-				}
-				else if(data.microservice === 'error')
-				{
-					if(data.errorMessage)
-					{
-						alert(data.error);
-					}
-					else
-					{
-						chat_socket.send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "errorMessage" property is not found in the data sent by server to client under received "microservice": "error" request in client side', sentData: data}));
-						alert('Something went wrong. "errorMessage" property is not found in the data sent by server');
-					}
-					return;
-				}
+				if(data.sender === chatPerson.textContent)
+					appendMessage(data.message, false);
 				else
+					updateNewMessageIndicator(data.sender, true);
+				return;
+			}
+			else if(data.chatHistoryProvided) // reviewed
+			{
+				chatBox.innerHTML = '';
+				// console.log('Chat history:', data.chatHistory);
+				data.chatHistoryProvided.forEach((message: { text: string; isOwn: boolean; }) => {
+					appendMessage(message.text, message.isOwn);
+				});
+				console.log('aaaaaaaaaaaa' + data.block);
+				if(data.block === true) // if person is blocked, blockButton color is updated accordingly
 				{
-					chat_socket.send(JSON.stringify({ microservice: 'error', errorMessage: `Error: server sent client data with unknown microservice: ${data.microservice}`, sentData: data }));
-					alert(`Something went wrong. server sent client data with undefined microservice: ${data.microservice}`);
+					blockButton.style.backgroundColor = 'green';
 				}
+				else if(data.block === false)
+				{
+					blockButton.style.backgroundColor = 'white';
+				}
+				showPageChat(chat);
+				return;
+			}
+			else if(data.newClientOnline)
+			{
+				appendPerson(data.newClientOnline);
+				return;
+			}
+			else if(data.clientDisconnected)
+			{
+				if(data.nickname === chatPerson.textContent)
+				{
+					alert(data.nickname + ' has disconnected');
+					showPageChat(peopleOnlineDiv);
+				}
+				deletePerson(data.nickname);
+				return;
+			}
+			else if(data.registrationApproved && data.clientsOnline) // reviewed
+			{
+				// me.textContent = data.registrationApproved;
+				data.clientsOnline.forEach((client: { nickname: string }) => {
+					appendPerson(client.nickname);
+				});
+				// showPage(peopleOnlineDiv);
+				return;
+			}
+			else if(data.registrationDeclined) // reviewed
+			{
+				alert(data.registrationDeclined);
+				return;
+			}
+			else if(data.thisPersonBlocked) // reviewed
+			{
+				alert('You have blocked ' + data.thisPersonBlocked);
+				if(data.thisPersonBlocked === chatPerson.textContent)
+				{
+					blockButton.style.backgroundColor = 'green';
+				}
+				return;
+			}
+			else if(data.thisPersonUnblocked) // reviewed
+			{
+				alert('You have unblocked ' + data.thisPersonUnblocked);
+				if(data.thisPersonUnblocked === chatPerson.textContent)
+				{
+					blockButton.style.backgroundColor = 'white';
+				}
+				return;
+			}
+			else if(data.thisPersonInvitedYou) // not fully implemented. Attention.
+			{
+				appendNotification(data.thisPersonInvitedYou, ' has invited you to play PingPong', true);
+				return;
+			}
+			else if(data.invitationCanceled) // not fully implemented. Attention.
+			{
+				alert(data.invitationCanceled + ' has canceled the invitation');
+				appendNotification(data.invitationCanceled, ' has canceled the invitation', false);
+				deleteButtonContainer(data.invitationCanceled);
+				showPageChat(peopleOnlineDiv);
+				return;
+			}
+			else if(data.notification)
+			{
+				appendNotification(data.sender, data.notification, false);
+				return;
+			}
+			else if(data.startGame)
+			{
+				showPage(pongPage);
+				backPongButton.style.display = 'block';
+				startGame();
 			}
 			else
 			{
-				chat_socket.send(JSON.stringify({ microservice: 'error', errorMessage: 'Error: "microservice" property is not found or has falsy value in the data sent by server to client', sentData: data }));
-				alert('Something went wrong. "microservice" property is not found in the data sent by server');
+				alert('Error: "chat" microservice has no such request handler in client side sent by server to client under received "microservice": "chat" request in client side');
+				return;
 			}
 		}
 
