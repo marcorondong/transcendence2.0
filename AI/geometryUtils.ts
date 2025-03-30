@@ -6,7 +6,6 @@ export function findIntersectionWithVerticalLine(p1: Point, p2: Point, xVertical
 		const m = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
 		const b = p1.getY() - m * p1.getX();
 		yResult = m * xVertical + b;
-		console.log(`yResult: ${yResult} based on p1: ${p1.getX()}, ${p1.getY()} and p2: ${p2.getX()}, ${p2.getY()}\nm: ${m}, xVertical: ${xVertical} and b: ${b}`);
 	}
 	return roundTo(yResult, 2);
 }

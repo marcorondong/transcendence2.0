@@ -19,6 +19,8 @@ export class Bot
 	private readonly difficulty_: number;
 	private readonly ws_: WebSocket;
 
+	private leftScore_: number;
+	private rightScore_: number;
 	private countdown_: number;
 	private lastBall_: Point;
 	private paddleY_: number;
@@ -33,8 +35,10 @@ export class Bot
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
 		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X + this.PADDLE_GAP : field.RIGHT_EDGE_X - this.PADDLE_GAP;
-		this.countdown_ = this.REFRESH_RATE + 1;
+		this.countdown_ = this.REFRESH_RATE;
 		this.lastBall_ = new Point(0, 0);
+		this.leftScore_ = 0;
+		this.rightScore_ = 0;
 		this.paddleY_ = 0;
 		this.target_ = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
 		this.ticksUntilTarget_ = Math.round(Math.abs(this.target_.getX()) / this.BALL_SPEED);
@@ -80,7 +84,9 @@ export class Bot
 			return ;
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
+		this.handleScore(gameState.score);
 		this.logAIState();
+
 		const ballPosition = new Point(roundTo(gameState.ball.x, 2), roundTo(gameState.ball.y, 2));
 		const paddlePosition = (this.side_ < 0)
 		? new Point(roundTo(gameState.leftPaddle.x, 2), roundTo(gameState.leftPaddle.y, 2))
@@ -89,25 +95,34 @@ export class Bot
 
 		this.calculateTarget(ballPosition);
 		this.logAIState();
-		console.log("%s","\n");
 		
-		// console.log(`target y : ${this.target_.getY()}, paddleY: ${this.paddleY_}`);
 		if (this.paddleY_ != this.target_.getY())
 			this.movePaddleToTarget();
 	}
 
-	private resetBall() {
-		this.target_.setY(0);
-		this.lastBall_.setX(0);
+	private resetLastBallAfterGoal(x: number) {
+		const lastBallCorrection = (x > 0) ? this.ticksUntilTarget_ * this.BALL_SPEED : this.ticksUntilTarget_ * -this.BALL_SPEED;
+		this.lastBall_.setX(-lastBallCorrection);
 		this.lastBall_.setY(0);
 	}
 
-	private handleGoal(score: number) {
-		
+	private resetAfterGoal(x: number) {
+		this.target_.setX(x);
+		this.target_.setY(0);
+		this.resetLastBallAfterGoal(x);
+		this.ticksUntilTarget_ = this.ticksAfterTarget_ + (this.REFRESH_RATE - Math.abs(x) / this.BALL_SPEED);
+		this.ticksAfterTarget_ = this.REFRESH_RATE - this.ticksUntilTarget_;
 	}
 
-	private setCountdown(ticks: number) {
-		this.countdown_ = ticks;
+	private handleScore(score: any) {
+		while (score.leftGoals !== this.leftScore_) {
+			this.leftScore_++;
+			this.resetAfterGoal(field.RIGHT_EDGE_X - this.PADDLE_GAP); //if left side scored, ball will got to the right
+		}
+		while (score.rightGoals !== this.rightScore_) {
+			this.rightScore_++;
+			this.resetAfterGoal(field.LEFT_EDGE_X + this.PADDLE_GAP);
+		}
 	}
 
 	private accountForBounce(y: number): number {
@@ -129,14 +144,11 @@ export class Bot
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
 		const distance = distanceBetweenPoints(origin, ballPosition);
-		console.log(`distance between ${origin.getX()} ${origin.getY()} and ball: ${distance}`);
 		if (this.ballBounced(distance))
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
-		console.log(`ball position after bounce correction: ${ballPosition.getX()} ${ballPosition.getY()}`);
 		if (this.ballHitPaddle())
 			this.target_.setX(-this.target_.getX());
 		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX()));
-		console.log(`provisional target x : ${this.target_.getX()}, y : ${this.target_.getY()} based on ball position ${ballPosition.getX()} ${ballPosition.getY()}`);
 	}
 
 	private calculateTicks(ballPosition: Point) {
@@ -160,13 +172,9 @@ export class Bot
 	
 	private ballBounced(distance: number): boolean {
 		const expectedDistance = (this.ballHitPaddle()) ? this.ticksAfterTarget_ : this.REFRESH_RATE;
-		return Math.round(distance / this.BALL_SPEED) - expectedDistance < 0;
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1;
 	}
 	
-	private ballGoesAway(deltaX: number) {
-		return (this.side_ * deltaX < 0); //if both positive or both negative that means ball is going towards AI paddle
-	}
-
 	private movePaddleToTarget(delay = 1, moves = 0) {
 		let moveCommand = {move: "", paddle: ""};
 
@@ -189,7 +197,6 @@ export class Bot
 
 	private sendMove(ws: WebSocket, moveCommand: any) {
 		ws.send(JSON.stringify(moveCommand));
-		// console.log(moveCommand);
 	}
 }
 
