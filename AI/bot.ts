@@ -7,11 +7,13 @@ import { count } from 'console';
 
 export class Bot
 {
+//game dimensions
 	private readonly REFRESH_RATE = 60;
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
 
+//room info
 	private readonly roomId_: string;
 	private readonly port_: string;
 	private readonly host_: string;
@@ -19,31 +21,32 @@ export class Bot
 	private readonly difficulty_: number;
 	private readonly ws_: WebSocket;
 
-	private leftScore_: number;
-	private rightScore_: number;
-	private countdown_: number;
+//dynamic game state
+	private leftScore_ = 0;
+	private rightScore_ = 0;
+	private paddleY_ = 0;
+	private countdown_ = this.REFRESH_RATE;
+	private moveCommand_ = {move: "", paddle: ""};
 	private lastBall_: Point;
-	private paddleY_: number;
 	private target_: Point;
 	private ticksAfterTarget_: number;
 	private ticksUntilTarget_: number;
 
 	constructor(data: string) {
 		const initializers = JSON.parse(data);
+
 		this.difficulty_ = difficultySelector.get(initializers.difficulty) ?? 2;
 		this.roomId_ = initializers.roomId;
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
 		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X + this.PADDLE_GAP : field.RIGHT_EDGE_X - this.PADDLE_GAP;
-		this.countdown_ = this.REFRESH_RATE;
+		this.ws_ = new WebSocket(`wss://${this.host_}:${this.port_}/pong/`, {rejectUnauthorized: false });
+
 		this.lastBall_ = new Point(0, 0);
-		this.leftScore_ = 0;
-		this.rightScore_ = 0;
-		this.paddleY_ = 0;
 		this.target_ = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
 		this.ticksUntilTarget_ = Math.round(Math.abs(this.target_.getX()) / this.BALL_SPEED);
 		this.ticksAfterTarget_ = this.REFRESH_RATE - this.ticksUntilTarget_;
-		this.ws_ = new WebSocket(`wss://${this.host_}:${this.port_}/pong/`, {rejectUnauthorized: false });
+		this.moveCommand_.paddle = (this.side_ < 0) ? "left" : "right";
 		
 		try {
 
@@ -80,29 +83,28 @@ export class Bot
 	}
 
 	public handleEvent(event: any) {
+		// this.makeMove(this.difficulty_);
 		if (--this.countdown_)
 			return ;
+		
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
-		this.handleScore(gameState.score);
-		this.logAIState();
-
+		
 		const ballPosition = new Point(roundTo(gameState.ball.x, 2), roundTo(gameState.ball.y, 2));
-		const paddlePosition = (this.side_ < 0)
-		? new Point(roundTo(gameState.leftPaddle.x, 2), roundTo(gameState.leftPaddle.y, 2))
-		: new Point(roundTo(gameState.rightPaddle.x, 2), roundTo(gameState.rightPaddle.y, 2));
-		this.paddleY_ = paddlePosition.getY();
-
+		this.paddleY_ = (this.side_ < 0) ? roundTo(gameState.leftPaddle.y, 2) : roundTo(gameState.rightPaddle.y, 2);
+		
+		this.handleScore(gameState.score);
 		this.calculateTarget(ballPosition);
 		this.logAIState();
 		
 		if (this.paddleY_ != this.target_.getY())
-			this.movePaddleToTarget();
+			this.makeMove(this.difficulty_);
 	}
 
 	private resetLastBallAfterGoal(x: number) {
-		const lastBallCorrection = (x > 0) ? this.ticksUntilTarget_ * this.BALL_SPEED : this.ticksUntilTarget_ * -this.BALL_SPEED;
-		this.lastBall_.setX(-lastBallCorrection);
+		let lastBallCorrection = this.ticksUntilTarget_ * this.BALL_SPEED + this.PADDLE_GAP;
+		if (x > 0) lastBallCorrection = -lastBallCorrection;
+		this.lastBall_.setX(lastBallCorrection);
 		this.lastBall_.setY(0);
 	}
 
@@ -110,8 +112,7 @@ export class Bot
 		this.target_.setX(x);
 		this.target_.setY(0);
 		this.resetLastBallAfterGoal(x);
-		this.ticksUntilTarget_ = this.ticksAfterTarget_ + (this.REFRESH_RATE - Math.abs(x) / this.BALL_SPEED);
-		this.ticksAfterTarget_ = this.REFRESH_RATE - this.ticksUntilTarget_;
+		this.calculateTicks(this.lastBall_);
 	}
 
 	private handleScore(score: any) {
@@ -175,36 +176,33 @@ export class Bot
 		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1;
 	}
 	
-	private movePaddleToTarget(delay = 1, moves = 0) {
-		let moveCommand = {move: "", paddle: ""};
-
-		moveCommand.paddle = (this.side_ < 0) ? "left" : "right";
-		moveCommand.move = (this.paddleY_ < this.target_.getY()) ? "up" : "down";
-
+	private makeMove(delay: number) {
+		this.moveCommand_.move = (this.paddleY_ < this.target_.getY()) ? "up" : "down";
+		
 		while (this.paddleY_ > this.target_.getY() + this.STEP) {
-			setTimeout(this.sendMove, delay * moves++, this.ws_, moveCommand);
 			this.paddleY_ -= this.STEP;
+			setTimeout(this.sendMove, delay, this.ws_, this.moveCommand_);
 		}
 		while (this.paddleY_ < this.target_.getY() - this.STEP) {
-			setTimeout(this.sendMove, delay * moves++, this.ws_, moveCommand);
 			this.paddleY_ += this.STEP;
+			setTimeout(this.sendMove, delay, this.ws_, this.moveCommand_);
 		}
-	}
-
-	private seeBall(ballPosition: Point): boolean {
-		return (this.side_ - ballPosition.getX() <= this.difficulty_);
 	}
 
 	private sendMove(ws: WebSocket, moveCommand: any) {
-		ws.send(JSON.stringify(moveCommand));
+		if (ws.readyState === WebSocket.OPEN) {
+			ws.send(JSON.stringify(moveCommand));
+		} else {
+			console.error("WebSocket is not open. Unable to send move command.");
+		}
 	}
 }
 
 const field = new PongField;
 
-//difficulty means the fraction of the pong table that the AI can "see"
+//delay of AI reaction: difficulty ms
 const difficultySelector = new Map<string, number>([
-	["easy", 0.5 * field.TABLE_LENGHT_X], 
-	["medium", 0.75 * field.TABLE_LENGHT_X],
-	["hard", 1 * field.TABLE_LENGHT_X],
+	["easy", 40], 
+	["medium", 20],
+	["hard", 0],
 ]);
