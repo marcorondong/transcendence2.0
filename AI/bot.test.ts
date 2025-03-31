@@ -1,6 +1,6 @@
 import { Bot } from "./bot";
 
-function run() {
+function testCountdown() {
 	let bot = new Bot(JSON.stringify(
 		{
 			"difficulty": "hard",

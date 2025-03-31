@@ -12,7 +12,7 @@ export class Bot
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
-
+	
 //room info
 	private readonly roomId_: string;
 	private readonly port_: string;
@@ -20,11 +20,13 @@ export class Bot
 	private readonly side_: number;
 	private readonly difficulty_: number;
 	private readonly ws_: WebSocket;
-
+	
 //dynamic game state
 	private leftScore_ = 0;
 	private rightScore_ = 0;
 	private paddleY_ = 0;
+	private movePaddleTo_ = 0;
+	private paddleTwist_ = 0;
 	private countdown_ = this.FRAME_RATE;
 	private moveCommand_ = {move: "", paddle: ""};
 	private lastBall_: Point;
@@ -32,10 +34,9 @@ export class Bot
 	private framesAfterTarget_: number;
 	private framesUntilTarget_: number;
 
-	constructor(data: string) {
-		const initializers = JSON.parse(data);
-
-		this.difficulty_ = difficultySelector.get(initializers.difficulty) ?? 2;
+	constructor(initializers: any) {
+		this.difficulty_ = difficultySelector.get(initializers.difficulty) ?? 16;
+		this.paddleTwist_ = paddleTwistSelector.get(initializers.difficulty) ?? 0;
 		this.roomId_ = initializers.roomId;
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
@@ -97,7 +98,7 @@ export class Bot
 		this.calculateTarget(ballPosition);
 		this.logAIState();
 		
-		if (this.paddleY_ != this.target_.getY())
+		if (this.paddleY_ != this.movePaddleTo_)
 			this.makeMove(this.difficulty_);
 	}
 
@@ -167,6 +168,7 @@ export class Bot
 		this.calculateframes(ballPosition);
 		while (this.target_.getY() > field.TOP_EDGE_Y || this.target_.getY() < field.BOTTOM_EDGE_Y)
 			this.target_.setY(this.accountForBounce(this.target_.getY()));
+		this.movePaddleTo_ = (this.target_.getX() === this.side_) ? this.target_.getY() : 0;
 		this.updateLastBall(ballPosition);
 	}
 	
@@ -176,14 +178,14 @@ export class Bot
 	}
 	
 	private async makeMove(delay: number) {
-		this.moveCommand_.move = (this.paddleY_ < this.target_.getY()) ? "up" : "down";
-
-		while (this.paddleY_ > this.target_.getY() + this.STEP) {
+		this.moveCommand_.move = (this.paddleY_ < this.movePaddleTo_) ? "up" : "down";
+		
+		while (this.paddleY_ > this.movePaddleTo_ + this.STEP + this.paddleTwist_) {
 			this.paddleY_ -= this.STEP;
 			this.ws_.send(JSON.stringify(this.moveCommand_));
 			await sleep(delay);
 		}
-		while (this.paddleY_ < this.target_.getY() - this.STEP) {
+		while (this.paddleY_ < this.movePaddleTo_ - this.STEP - this.paddleTwist_) {
 			this.paddleY_ += this.STEP;
 			this.ws_.send(JSON.stringify(this.moveCommand_));
 			await sleep(delay);
@@ -199,7 +201,16 @@ const field = new PongField;
 
 //difficulty number = delay between AI moves in ms
 const difficultySelector = new Map<string, number>([
-	["easy", 16], 
+	["easy", 24], 
+	["medium", 16], 
 	["hard", 8],
 	["insane", 0]
 ]);
+
+//the AI will twist the ball. maximum twist = 0.5 a.k.a. half of paddle height 
+const paddleTwistSelector = new Map<string, number>([
+	["easy", 0], 
+	["medium", 0.1], 
+	["hard", 0.25],
+	["insane", 0.45]
+])
