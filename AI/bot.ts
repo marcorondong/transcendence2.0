@@ -8,7 +8,7 @@ import { count } from 'console';
 export class Bot
 {
 //game dimensions
-	private readonly REFRESH_RATE = 60;
+	private readonly FRAME_RATE = 60;
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
@@ -25,12 +25,12 @@ export class Bot
 	private leftScore_ = 0;
 	private rightScore_ = 0;
 	private paddleY_ = 0;
-	private countdown_ = this.REFRESH_RATE;
+	private countdown_ = this.FRAME_RATE;
 	private moveCommand_ = {move: "", paddle: ""};
 	private lastBall_: Point;
 	private target_: Point;
-	private ticksAfterTarget_: number;
-	private ticksUntilTarget_: number;
+	private framesAfterTarget_: number;
+	private framesUntilTarget_: number;
 
 	constructor(data: string) {
 		const initializers = JSON.parse(data);
@@ -44,8 +44,8 @@ export class Bot
 
 		this.lastBall_ = new Point(0, 0);
 		this.target_ = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
-		this.ticksUntilTarget_ = Math.round(Math.abs(this.target_.getX()) / this.BALL_SPEED);
-		this.ticksAfterTarget_ = this.REFRESH_RATE - this.ticksUntilTarget_;
+		this.framesUntilTarget_ = Math.round(Math.abs(this.target_.getX()) / this.BALL_SPEED);
+		this.framesAfterTarget_ = this.FRAME_RATE - this.framesUntilTarget_;
 		this.moveCommand_.paddle = (this.side_ < 0) ? "left" : "right";
 		
 		try {
@@ -75,21 +75,21 @@ export class Bot
 		let AIState = {
 			lastBall: {x: this.lastBall_.getX(), y: this.lastBall_.getY()},
 			target: {x: this.target_.getX(), y: this.target_.getY()},
-			ticksUntilTarget: this.ticksUntilTarget_,
-			ticksAfterTarget: this.ticksAfterTarget_,
+			framesUntilTarget: this.framesUntilTarget_,
+			framesAfterTarget: this.framesAfterTarget_,
 			ballHitPaddle: this.ballHitPaddle(),
 		}
 		console.log(AIState);
 	}
 
 	public handleEvent(event: any) {
-		// this.makeMove(this.difficulty_);
 		if (--this.countdown_)
 			return ;
 		
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
-		
+		this.countdown_ = this.FRAME_RATE;
+
 		const ballPosition = new Point(roundTo(gameState.ball.x, 2), roundTo(gameState.ball.y, 2));
 		this.paddleY_ = (this.side_ < 0) ? roundTo(gameState.leftPaddle.y, 2) : roundTo(gameState.rightPaddle.y, 2);
 		
@@ -102,7 +102,7 @@ export class Bot
 	}
 
 	private resetLastBallAfterGoal(x: number) {
-		let lastBallCorrection = this.ticksUntilTarget_ * this.BALL_SPEED + this.PADDLE_GAP;
+		let lastBallCorrection = this.framesUntilTarget_ * this.BALL_SPEED + this.PADDLE_GAP;
 		if (x > 0) lastBallCorrection = -lastBallCorrection;
 		this.lastBall_.setX(lastBallCorrection);
 		this.lastBall_.setY(0);
@@ -112,7 +112,7 @@ export class Bot
 		this.target_.setX(x);
 		this.target_.setY(0);
 		this.resetLastBallAfterGoal(x);
-		this.calculateTicks(this.lastBall_);
+		this.calculateframes(this.lastBall_);
 	}
 
 	private handleScore(score: any) {
@@ -133,7 +133,7 @@ export class Bot
 	}
 
 	private ballHitPaddle(): boolean {
-		return this.ticksUntilTarget_ < this.REFRESH_RATE;
+		return this.framesUntilTarget_ < this.FRAME_RATE;
 	}
 
 	private ballVectorOrigin(): Point {
@@ -152,9 +152,9 @@ export class Bot
 		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX()));
 	}
 
-	private calculateTicks(ballPosition: Point) {
-		this.ticksUntilTarget_ = Math.round(distanceBetweenPoints(ballPosition, this.target_) / this.BALL_SPEED);
-		this.ticksAfterTarget_ = this.REFRESH_RATE - this.ticksUntilTarget_;
+	private calculateframes(ballPosition: Point) {
+		this.framesUntilTarget_ = Math.round(distanceBetweenPoints(ballPosition, this.target_) / this.BALL_SPEED);
+		this.framesAfterTarget_ = this.FRAME_RATE - this.framesUntilTarget_;
 	}
 
 	private updateLastBall(ballPosition: Point) {
@@ -164,45 +164,42 @@ export class Bot
 	
 	private calculateTarget(ballPosition: Point) {
 		this.provisionalTarget(ballPosition);
-		this.calculateTicks(ballPosition);
+		this.calculateframes(ballPosition);
 		while (this.target_.getY() > field.TOP_EDGE_Y || this.target_.getY() < field.BOTTOM_EDGE_Y)
 			this.target_.setY(this.accountForBounce(this.target_.getY()));
-		this.countdown_ = this.REFRESH_RATE;
 		this.updateLastBall(ballPosition);
 	}
 	
 	private ballBounced(distance: number): boolean {
-		const expectedDistance = (this.ballHitPaddle()) ? this.ticksAfterTarget_ : this.REFRESH_RATE;
+		const expectedDistance = (this.ballHitPaddle()) ? this.framesAfterTarget_ : this.FRAME_RATE;
 		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1;
 	}
 	
-	private makeMove(delay: number) {
+	private async makeMove(delay: number) {
 		this.moveCommand_.move = (this.paddleY_ < this.target_.getY()) ? "up" : "down";
-		
+
 		while (this.paddleY_ > this.target_.getY() + this.STEP) {
 			this.paddleY_ -= this.STEP;
-			setTimeout(this.sendMove, delay, this.ws_, this.moveCommand_);
+			this.ws_.send(JSON.stringify(this.moveCommand_));
+			await sleep(delay);
 		}
 		while (this.paddleY_ < this.target_.getY() - this.STEP) {
 			this.paddleY_ += this.STEP;
-			setTimeout(this.sendMove, delay, this.ws_, this.moveCommand_);
-		}
-	}
-
-	private sendMove(ws: WebSocket, moveCommand: any) {
-		if (ws.readyState === WebSocket.OPEN) {
-			ws.send(JSON.stringify(moveCommand));
-		} else {
-			console.error("WebSocket is not open. Unable to send move command.");
+			this.ws_.send(JSON.stringify(this.moveCommand_));
+			await sleep(delay);
 		}
 	}
 }
 
+function sleep(ms: number) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const field = new PongField;
 
-//delay of AI reaction: difficulty ms
+//difficulty number = delay between AI moves in ms
 const difficultySelector = new Map<string, number>([
-	["easy", 40], 
-	["medium", 20],
-	["hard", 0],
+	["easy", 16], 
+	["hard", 8],
+	["insane", 0]
 ]);
