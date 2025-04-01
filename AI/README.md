@@ -2,19 +2,11 @@
 
 ### 1. Send a POST request to localhost:6969/start-game with request body as JSON:
   
-  {
-  
     host: { type: "string" },
-    
     port: { type: "string" },
-    
     side: { type: "string", enum: ["left", "right"] },
-    
     difficulty: { type: "string", enum: ["easy", "medium", "hard", "insane"] },
-    
     roomId: { type: "string" },
-    
-  }
 
 host and port belonging to a room where a player requested a match against AI.
   
