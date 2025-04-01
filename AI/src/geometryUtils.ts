@@ -1,5 +1,5 @@
 import { networkInterfaces } from 'os';
-import { Point } from '../ssg/pong-api/src/game/Point';
+import { Point } from './Point';
 
 export function findIntersectionWithVerticalLine(p1: Point, p2: Point, xVertical: number, yResult = 0): number {
 	if (p1.getX() != p2.getX()) {

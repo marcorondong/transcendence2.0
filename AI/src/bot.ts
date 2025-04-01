@@ -1,6 +1,6 @@
 import { WebSocket, RawData } from 'ws';
-import { PongField } from '../ssg/pong-api/src/game/PongField';
-import { Point } from '../ssg/pong-api/src/game/Point';
+import { PongField } from './PongField';
+import { Point } from './Point';
 import { getTrailingCommentRanges } from 'typescript';
 import { distanceBetweenPoints, findIntersectionWithVerticalLine, roundTo } from './geometryUtils';
 import { count } from 'console';

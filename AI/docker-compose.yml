@@ -1,0 +1,7 @@
+services:
+  ai-bot:
+    build: .
+    ports:
+      - "6969:6969"
+    environment:
+      - NODE_ENV=production

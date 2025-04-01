@@ -1,4 +1,4 @@
-import {findIntersectionWithVerticalLine} from './geometryUtils';
+import {findIntersectionWithVerticalLine} from './src/geometryUtils';
 import {Point} from '../ssg/pong-api/src/game/Point';
 
 test('decreasing lines', () =>

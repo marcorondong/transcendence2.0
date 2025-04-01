@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+	"start": "node dist/server.js",
+	"build": "tsc"
+	},
   "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+	"fastify": "^4.0.0",
     "@fastify/websocket": "^11.0.2",
+	"@fastify/swagger": "^6.0.0",
     "nodemon": "^3.1.9",
     "nvm": "^0.0.4",
     "typescript": "^5.8.2",

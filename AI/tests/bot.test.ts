@@ -1,4 +1,4 @@
-import { Bot } from "./bot";
+import { Bot } from "./src/bot";
 
 function testCountdown() {
 	let bot = new Bot(JSON.stringify(

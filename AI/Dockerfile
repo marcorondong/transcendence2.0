@@ -1,11 +1,20 @@
-FROM node:iron-slim 
+# Use an official Node.js image as base
+FROM node:20-alpine
 
-RUN mkdir -p /home/node/ai && cd /home/node/ai
+# Set the working directory inside the container
+WORKDIR /app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-RUN npm i && npm install fastify
+# Install dependencies
+RUN npm install
 
+# Copy the rest of the application files
 COPY . .
 
-RUN ["npx", "ts-node", "server.ts"]
+RUN npm run build
+# Expose the Fastify server port
+EXPOSE 6969
+# CMD ["tail", "-f", "/dev/null"]
+CMD ["node", "src/server.js"]
