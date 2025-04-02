@@ -1,7 +1,7 @@
-import { ETournamentState, Tournament} from "../Tournament"
-import { PongPlayer } from "../PongPlayer";
+import { ETournamentState, Tournament} from "../game/modes/singles/Tournament"
+import { PongPlayer } from "../game/PongPlayer";
 import { TournamentEvents } from "../customEvents";
-import { PongRoom } from "../PongRoom";
+import { PongRoomSingles } from "../game/modes/singles/PongRoomSingles";
 
 export class TournamentMatchMaking
 {
@@ -12,17 +12,17 @@ export class TournamentMatchMaking
 		this.allTournaments = new Map<string, Tournament>();
 	}
 
-	putPlayerInTournament(player: PongPlayer, tournamentSizeQuery: number):void
+	putPlayerInTournament(player: PongPlayer, tournamentSizeQuery: number): void
 	{
-		const tournamentForPlayer:Tournament = this.findTournamentToJoin(tournamentSizeQuery);
+		const tournamentForPlayer: Tournament = this.findTournamentToJoin(tournamentSizeQuery);
 		tournamentForPlayer.addPlayer(player);
 		const freeSpots = tournamentForPlayer.calculateNumberOfFreeSpots();
 		tournamentForPlayer.broadcastTournamentAnnouncement(`We are waiting for ${freeSpots} player to join. Be patient`);
 	}
 
-	getMatchesFromAllTournaments():Map<string, PongRoom>
+	getMatchesFromAllTournaments(): Map<string, PongRoomSingles>
 	{
-		const allTournamnetsRooms:Map<string, PongRoom> = new Map<string, PongRoom>();
+		const allTournamnetsRooms: Map<string, PongRoomSingles> = new Map<string, PongRoomSingles>();
 		for(const [key, oneTournament] of this.allTournaments)
 		{
 			for(const [key, room] of oneTournament.getAllTournamentsRoom())
@@ -45,16 +45,16 @@ export class TournamentMatchMaking
 		return this.createTournament(tournamentSizeQuerry);
 	}
 
-	private createTournament(tournamentSize:number):Tournament
+	private createTournament(tournamentSize: number): Tournament
 	{
-		const freshTournament:Tournament = new Tournament(tournamentSize);
+		const freshTournament: Tournament = new Tournament(tournamentSize);
 		this.allTournaments.set(freshTournament.getId(), freshTournament);
 		this.tournamentFullListener(freshTournament);
 		this.tournamentFinishedListener(freshTournament);
 		return freshTournament;
 	}
 
-	private tournamentFullListener(freshTournament:Tournament)
+	private tournamentFullListener(freshTournament: Tournament): void
 	{
 		freshTournament.once(TournamentEvents.FULL, ()=>
 		{
@@ -63,7 +63,7 @@ export class TournamentMatchMaking
 		})
 	}
 
-	private tournamentFinishedListener(freshTournament:Tournament)
+	private tournamentFinishedListener(freshTournament: Tournament): void
 	{
 		freshTournament.once(TournamentEvents.FINISHED, ()=>
 		{
