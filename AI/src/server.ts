@@ -1,7 +1,8 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
-// import swaggerUi from "@fastify/swagger-ui";
+import swaggerUi from "@fastify/swagger-ui";
 import { Bot } from "./bot";
+import { gameRequestSchema } from "./gameRequestSchema";
 
 const fastify = Fastify({ logger: true });
 
@@ -15,60 +16,13 @@ fastify.register(swagger, {
   },
 });
 
-// fastify.register(swaggerUi, {
-// 	routePrefix: '/documentation',
-// 	uiConfig: {
-// 	  docExpansion: 'full',
-// 	  deepLinking: false
-// 	},
-// });
-
-const gameRequestSchema = {
-  description: "Connect a new bot opponent to an existing game",
-  tags: ["Game"],
-  summary: "Creates a bot instance for a game. The bot connects to the game room WebSocket to play.",
-  body: {
-    type: "object",
-    required: ["host", "port", "side", "difficulty"],
-    properties: {
-      host: { type: "string" },
-      port: { type: "string" },
-      side: { type: "string", enum: ["left", "right"] },
-      difficulty: { type: "string", enum: ["easy", "medium", "hard", "insane"] },
-      roomId: { type: "string" },
-    },
-  },
-  response: {
-	200: {
-	  type: "object",
-	  properties: {
-		description: { type: "string" },
-		gameRequest: {
-		  type: "object",
-		  properties: {
-			host: { type: "string" },
-			port: { type: "string" },
-			side: { type: "string" },
-			difficulty: { type: "string" },
-			roomId: { type: "string" },
-		  },
-		},
-	  },
+fastify.register(swaggerUi, {
+	routePrefix: '/documentation',
+	uiConfig: {
+	  docExpansion: 'full',
+	  deepLinking: false
 	},
-	400: {
-	  type: "object",
-	  properties: {
-		error: { type: "string" },
-	  },
-	},
-	500: {
-	  type: "object",
-	  properties: {
-		error: { type: "string" },
-	  },
-	},
-  },
-};
+});
 
 fastify.post("/start-game", { schema: gameRequestSchema }, async (request, reply) => {
   const gameRequest = request.body as object;
