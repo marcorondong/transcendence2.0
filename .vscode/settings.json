@@ -13,4 +13,7 @@
 	"editor.guides.highlightActiveIndentation": true,
 	"editor.guides.indentation": true,
 	"editor.matchBrackets": "always",
+
+	"cSpell.mergeCSpellSettings": true,
+	"cSpell.diagnosticLevel": "Warning",
 }
