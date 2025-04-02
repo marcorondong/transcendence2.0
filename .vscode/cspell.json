@@ -2,7 +2,7 @@
 	"version": "0.2",
 	"language": "en",
 	"enabled": true,
-	
+
 	"minWordLength": 2,
 	"allowCompoundWords": false,
 	"caseSensitive": true,
@@ -14,9 +14,18 @@
 	"useGitignore": true,
 
 	"dictionaries": [
-		"custom-words", "forbidden-words",
-		"typescript", "node", "npm", "javascript", "html", "css", "python",
-		"companies", "softwareTerms", "misc"
+		"custom-words",
+		"forbidden-words",
+		"typescript",
+		"node",
+		"npm",
+		"javascript",
+		"html",
+		"css",
+		"python",
+		"companies",
+		"softwareTerms",
+		"misc"
 	],
 
 	"dictionaryDefinitions": [
@@ -45,6 +54,6 @@
 		"**/package.json",
 		"**/tsconfig.json",
 		"**/*.lock",
-		"**/.gitignore",
-	],
+		"**/.gitignore"
+	]
 }
