@@ -9,10 +9,11 @@ export interface IScore
 
 export class ScoreBoard
 {
-	protected leftPlayerGoals: number;
-	protected rightPlayerGoals: number;
-	protected secondsLeft: number;
-	protected paused: boolean;
+	private leftPlayerGoals: number;
+	private rightPlayerGoals: number;
+	private secondsLeft: number;
+	private paused: boolean;
+	private overtime: boolean;
 	private lastScoredSide: "left" | "right";
 
 	constructor()
@@ -21,7 +22,13 @@ export class ScoreBoard
 		this.rightPlayerGoals = 0;
 		this.secondsLeft = 15;
 		this.paused = false;
+		this.overtime = false;
 		this.lastScoredSide = "left";
+	}
+
+	isOvertime(): boolean
+	{
+		return this.overtime;
 	}
 
 	score(side: "left" | "right")
@@ -85,6 +92,7 @@ export class ScoreBoard
 				this.secondsLeft--;
 			if(this.secondsLeft <= 0)
 			{
+				this.overtime = true;
 				clearInterval(interval)
 			}
 		}, 1000);
