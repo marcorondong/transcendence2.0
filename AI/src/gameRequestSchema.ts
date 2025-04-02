@@ -1,6 +1,6 @@
 
 export const gameRequestSchema = {
-  description: "Connect a new bot opponent to an existing game",
+  description: "Connect a new bot opponent to the pong game server",
   tags: ["Game"],
   summary: "Creates a bot instance for a game. The bot connects to the game room WebSocket to play.",
   body: {

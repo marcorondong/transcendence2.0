@@ -13,17 +13,9 @@ npx nodemon
   
 ### 3. send a POST request to localhost:6969/start-game. 
 
+You can also view it at http://localhost:6969/documentation
+
 The request body is described in AI/src/gameRequestSchema.ts
-
-Host and port is where the ssg-pong service is running
-
-{
-    host: { type: "string" },
-    port: { type: "string" },
-    side: { type: "string", enum: ["left", "right"] },
-    difficulty: { type: "string", enum: ["easy", "medium", "hard", "insane"] },
-    roomId: { type: "string" }
-}
 
 ### 4. Creates a Bot instance with the provided parameters.
 

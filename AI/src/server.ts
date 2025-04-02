@@ -1,8 +1,7 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { Bot } from "./bot";
-import { gameRequestSchema } from "./gameRequestSchema";
+import { gameRoutes } from "./gameRoutes";
 
 const fastify = Fastify({ logger: true });
 
@@ -28,21 +27,7 @@ fastify.register(swaggerUi, {
 	},
 });
 
-fastify.post("/start-game", { schema: gameRequestSchema }, async (request, reply) => {
-  const gameRequest = request.body as object;
-  if (!gameRequest) {
-	return reply.code(400).send({ error: "Invalid game request" });
-  }
-
-  try {
-    new Bot(gameRequest).playGame();
-    reply.code(200).send({ description: "Game successfully started", gameRequest });
-  } catch (error) {
-    request.log.error(error);
-    reply.code(500).send({ error: "Failed to start bot" });
-  }
-});
-
+fastify.register(gameRoutes);
 
 fastify.ready().then(() => {
 	console.log(fastify.swagger());
@@ -51,7 +36,6 @@ fastify.ready().then(() => {
 const start = async () => {
   try {
     await fastify.listen({ port: 6969, host: "0.0.0.0" });
-    console.log("Server running on http://localhost:6969");
   } catch (error) {
     fastify.log.error(error);
   }
