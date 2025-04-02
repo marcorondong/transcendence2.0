@@ -1,0 +1,16 @@
+{
+	"editor.indentSize": "tabSize",
+	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+
+	"git.autofetch": true,
+
+	"editor.renderWhitespace": "all",
+	"editor.rulers": [80],
+
+	"editor.guides.highlightActiveBracketPair": true,
+	"editor.guides.highlightActiveIndentation": true,
+	"editor.guides.indentation": true,
+	"editor.matchBrackets": "always",
+}
