@@ -1,0 +1,28 @@
+services:
+  pong-api:
+    image: pong-api-img 
+    container_name: pong-api
+    build:
+      context: ./pong-api
+      dockerfile: Dockerfile
+    volumes:
+      - ./pong-api/src/:/pong/pong-api/src/
+    ports:
+      - 3010:3010
+    command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
+    networks:
+      - Transcendence2.0
+  ai-bot:
+    build:
+      context: .
+      dockerfile: ./AI/Dockerfile
+    container_name: ai-bot
+    ports:
+      - "6969:6969"   # CLOSE this port when we have users and API!
+    environment:
+      - NODE_ENV=production
+    networks:
+      - Transcendence2.0
+
+networks:
+  Transcendence2.0:

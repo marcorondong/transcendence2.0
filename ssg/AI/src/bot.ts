@@ -1,9 +1,7 @@
-import { WebSocket, RawData } from 'ws';
+import { WebSocket } from 'ws';
 import { PongField } from './PongField';
 import { Point } from './Point';
-import { getTrailingCommentRanges } from 'typescript';
 import { distanceBetweenPoints, findIntersectionWithVerticalLine, roundTo } from './geometryUtils';
-import { count } from 'console';
 
 export class Bot
 {
@@ -27,6 +25,7 @@ export class Bot
 	private paddleY_ = 0;
 	private movePaddleTo_ = 0;
 	private paddleTwist_ = 0;
+	private paddleHeight_ = 0;
 	private countdown_ = this.FRAME_RATE;
 	private moveCommand_ = {move: "", paddle: ""};
 	private lastBall_: Point;
@@ -62,10 +61,12 @@ export class Bot
 	
 			this.ws_.on('error', (event: any) => {
 				console.error(JSON.stringify(event));
+				return ;
 			});
 	
 			this.ws_.on('close', (event: any) => {
 				console.log(`WebSocket closed at ${this.host_}:${this.port_} in room ${this.roomId_}: `, event);
+				return ;
 			});
 	
 			this.ws_.on('message', (event: any) => {
@@ -77,7 +78,7 @@ export class Bot
 		}
 	}
 	
-	public handleEvent(event: any) {
+	public handleEvent(event: object) {
 		if (--this.countdown_)
 			return ;
 		
@@ -87,6 +88,8 @@ export class Bot
 		
 		const ballPosition = new Point(roundTo(gameState.ball.x, 2), roundTo(gameState.ball.y, 2));
 		this.paddleY_ = (this.side_ < 0) ? roundTo(gameState.leftPaddle.y, 2) : roundTo(gameState.rightPaddle.y, 2);
+		if (this.paddleTwist_ >= gameState.leftPaddle.height / 2)
+			this.paddleTwist_ *= gameState.leftPaddle.height;
 		
 		this.handleScore(gameState.score);
 		this.calculateTarget(ballPosition);
@@ -115,23 +118,23 @@ export class Bot
 		}
 	}
 
-	//point of this function is for the AI to leave the middle
+	//the point of this function is for the AI to leave the middle
 	private async twistBall(twist: number) {
 		if (!this.ws_)
 			return;
 		this.moveCommand_.move = "down";
-
-		while (this.paddleY_ > this.movePaddleTo_ - twist)
+		
+		do 
 		{
-			this.paddleY_ -= this.STEP;
 			this.ws_.send(JSON.stringify(this.moveCommand_));
 			await sleep(this.difficulty_);
-		}
+		} while (this.movePaddleTo_ == 0 && (twist -= this.STEP) > 0);
 	}
 	
 	private resetLastBallAfterGoal(x: number) {
 		let lastBallCorrection = this.framesUntilTarget_ * this.BALL_SPEED + this.PADDLE_GAP;
-		if (x > 0) lastBallCorrection = -lastBallCorrection;
+		if (x > 0)
+			lastBallCorrection = -lastBallCorrection;
 		this.lastBall_.setX(lastBallCorrection);
 		this.lastBall_.setY(0);
 	}
@@ -201,8 +204,10 @@ export class Bot
 	
 	private ballBounced(distance: number): boolean {
 		const expectedDistance = (this.ballHitPaddle()) ? this.framesAfterTarget_ : this.FRAME_RATE;
-		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1;
+		console.log(Math.round(distance / this.BALL_SPEED));
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // magic number to account for one or two dropped frames
 	}
+
 	private logAIState() {
 		let AIState = {
 			lastBall: {x: this.lastBall_.getX(), y: this.lastBall_.getY()},
@@ -210,6 +215,7 @@ export class Bot
 			framesUntilTarget: this.framesUntilTarget_,
 			framesAfterTarget: this.framesAfterTarget_,
 			ballHitPaddle: this.ballHitPaddle(),
+			paddleTwist: this.paddleHeight_,
 		}
 		console.log(AIState);
 	}
