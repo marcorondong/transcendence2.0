@@ -22,6 +22,10 @@ fastify.register(swaggerUi, {
 	  docExpansion: 'full',
 	  deepLinking: false
 	},
+	uiHooks: {
+	  onRequest: function (request, reply, next) { next() },
+	  preHandler: function (request, reply, next) { next() }
+	},
 });
 
 fastify.post("/start-game", { schema: gameRequestSchema }, async (request, reply) => {
@@ -31,7 +35,7 @@ fastify.post("/start-game", { schema: gameRequestSchema }, async (request, reply
   }
 
   try {
-    new Bot(gameRequest);
+    new Bot(gameRequest).playGame();
     reply.code(200).send({ description: "Game successfully started", gameRequest });
   } catch (error) {
     request.log.error(error);
@@ -39,6 +43,11 @@ fastify.post("/start-game", { schema: gameRequestSchema }, async (request, reply
   }
 });
 
+
+fastify.ready().then(() => {
+	console.log(fastify.swagger());
+  });
+  
 const start = async () => {
   try {
     await fastify.listen({ port: 6969, host: "0.0.0.0" });
@@ -47,5 +56,4 @@ const start = async () => {
     fastify.log.error(error);
   }
 };
-
 start();

@@ -19,7 +19,7 @@ export class Bot
 	private readonly host_: string;
 	private readonly side_: number;
 	private readonly difficulty_: number;
-	private readonly ws_: WebSocket;
+	private ws_: WebSocket | null;
 	
 //dynamic game state
 	private leftScore_ = 0;
@@ -41,22 +41,27 @@ export class Bot
 		this.host_ = (initializers.host) ?? "127.0.0.1";
 		this.port_ = (initializers.port) ?? "3010";
 		this.side_ = (initializers.side === "left") ? field.LEFT_EDGE_X + this.PADDLE_GAP : field.RIGHT_EDGE_X - this.PADDLE_GAP;
-		this.ws_ = new WebSocket(`wss://${this.host_}:${this.port_}/pong/`, {rejectUnauthorized: false });
-
+		this.ws_ = null;
+		
 		this.lastBall_ = new Point(0, 0);
 		this.target_ = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
 		this.framesUntilTarget_ = Math.round(Math.abs(this.target_.getX()) / this.BALL_SPEED);
 		this.framesAfterTarget_ = this.FRAME_RATE - this.framesUntilTarget_;
 		this.moveCommand_.paddle = (this.side_ < 0) ? "left" : "right";
 		
-		try {
+	}
+	
+	public playGame() {
+		this.ws_ = new WebSocket(`wss://${this.host_}:${this.port_}/pong/`, {rejectUnauthorized: false });
 
+		try {
+	
 			this.ws_.on('open', () => {
 				console.log(`Connected to Pong WebSocket at ${this.host_}:${this.port_} for room ${this.roomId_}`);
 			});
 	
 			this.ws_.on('error', (event: any) => {
-				throw new Error(JSON.stringify(event));
+				console.error(JSON.stringify(event));
 			});
 	
 			this.ws_.on('close', (event: any) => {
@@ -66,23 +71,12 @@ export class Bot
 			this.ws_.on('message', (event: any) => {
 				this.handleEvent(event);
 			});
-	
+			
 		} catch (error) {
 			console.error(`WebSocket at ${this.host_}:${this.port_}:`, error);
 		}
 	}
-
-	private logAIState() {
-		let AIState = {
-			lastBall: {x: this.lastBall_.getX(), y: this.lastBall_.getY()},
-			target: {x: this.target_.getX(), y: this.target_.getY()},
-			framesUntilTarget: this.framesUntilTarget_,
-			framesAfterTarget: this.framesAfterTarget_,
-			ballHitPaddle: this.ballHitPaddle(),
-		}
-		console.log(AIState);
-	}
-
+	
 	public handleEvent(event: any) {
 		if (--this.countdown_)
 			return ;
@@ -90,7 +84,7 @@ export class Bot
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
 		this.countdown_ = this.FRAME_RATE;
-
+		
 		const ballPosition = new Point(roundTo(gameState.ball.x, 2), roundTo(gameState.ball.y, 2));
 		this.paddleY_ = (this.side_ < 0) ? roundTo(gameState.leftPaddle.y, 2) : roundTo(gameState.rightPaddle.y, 2);
 		
@@ -100,49 +94,82 @@ export class Bot
 		
 		if (this.paddleY_ != this.movePaddleTo_)
 			this.makeMove(this.difficulty_);
+		else
+			this.twistBall(this.paddleTwist_)
+	}
+	
+	private async makeMove(delay: number) {
+		if (!this.ws_)
+			return ;
+		this.moveCommand_.move = (this.paddleY_ < this.movePaddleTo_) ? "up" : "down";
+		
+		while (this.paddleY_ > this.movePaddleTo_ + this.STEP + this.paddleTwist_) {
+			this.paddleY_ -= this.STEP;
+			this.ws_.send(JSON.stringify(this.moveCommand_));
+			await sleep(delay);
+		}
+		while (this.paddleY_ < this.movePaddleTo_ - this.STEP - this.paddleTwist_) {
+			this.paddleY_ += this.STEP;
+			this.ws_.send(JSON.stringify(this.moveCommand_));
+			await sleep(delay);
+		}
 	}
 
+	//point of this function is for the AI to leave the middle
+	private async twistBall(twist: number) {
+		if (!this.ws_)
+			return;
+		this.moveCommand_.move = "down";
+
+		while (this.paddleY_ > this.movePaddleTo_ - twist)
+		{
+			this.paddleY_ -= this.STEP;
+			this.ws_.send(JSON.stringify(this.moveCommand_));
+			await sleep(this.difficulty_);
+		}
+	}
+	
 	private resetLastBallAfterGoal(x: number) {
 		let lastBallCorrection = this.framesUntilTarget_ * this.BALL_SPEED + this.PADDLE_GAP;
 		if (x > 0) lastBallCorrection = -lastBallCorrection;
 		this.lastBall_.setX(lastBallCorrection);
 		this.lastBall_.setY(0);
 	}
-
+	
 	private resetAfterGoal(x: number) {
 		this.target_.setX(x);
 		this.target_.setY(0);
 		this.resetLastBallAfterGoal(x);
 		this.calculateframes(this.lastBall_);
 	}
-
+	
 	private handleScore(score: any) {
 		while (score.leftGoals !== this.leftScore_) {
 			this.leftScore_++;
-			this.resetAfterGoal(field.RIGHT_EDGE_X - this.PADDLE_GAP); //if left side scored, ball will got to the right
+			this.resetAfterGoal(field.RIGHT_EDGE_X - this.PADDLE_GAP); //if left side scored, ball will go to the right
 		}
 		while (score.rightGoals !== this.rightScore_) {
 			this.rightScore_++;
 			this.resetAfterGoal(field.LEFT_EDGE_X + this.PADDLE_GAP);
 		}
 	}
-
+	
 	private accountForBounce(y: number): number {
 		const adjustY = (field.TOP_EDGE_Y - Math.abs(y)) * 2;
 		y += (y > 0) ? adjustY : -adjustY;
 		return y;
 	}
-
+	
 	private ballHitPaddle(): boolean {
 		return this.framesUntilTarget_ < this.FRAME_RATE;
 	}
-
+	
 	private ballVectorOrigin(): Point {
 		if (this.ballHitPaddle())
 			return new Point(this.target_.getX(), this.target_.getY());
 		return new Point(this.lastBall_.getX(), this.lastBall_.getY());
 	}
-
+	
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
 		const distance = distanceBetweenPoints(origin, ballPosition);
@@ -152,12 +179,12 @@ export class Bot
 			this.target_.setX(-this.target_.getX());
 		this.target_.setY(findIntersectionWithVerticalLine(origin, ballPosition, this.target_.getX()));
 	}
-
+	
 	private calculateframes(ballPosition: Point) {
 		this.framesUntilTarget_ = Math.round(distanceBetweenPoints(ballPosition, this.target_) / this.BALL_SPEED);
 		this.framesAfterTarget_ = this.FRAME_RATE - this.framesUntilTarget_;
 	}
-
+	
 	private updateLastBall(ballPosition: Point) {
 		this.lastBall_.setX(ballPosition.getX());
 		this.lastBall_.setY(ballPosition.getY());
@@ -176,20 +203,15 @@ export class Bot
 		const expectedDistance = (this.ballHitPaddle()) ? this.framesAfterTarget_ : this.FRAME_RATE;
 		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1;
 	}
-	
-	private async makeMove(delay: number) {
-		this.moveCommand_.move = (this.paddleY_ < this.movePaddleTo_) ? "up" : "down";
-		
-		while (this.paddleY_ > this.movePaddleTo_ + this.STEP + this.paddleTwist_) {
-			this.paddleY_ -= this.STEP;
-			this.ws_.send(JSON.stringify(this.moveCommand_));
-			await sleep(delay);
+	private logAIState() {
+		let AIState = {
+			lastBall: {x: this.lastBall_.getX(), y: this.lastBall_.getY()},
+			target: {x: this.target_.getX(), y: this.target_.getY()},
+			framesUntilTarget: this.framesUntilTarget_,
+			framesAfterTarget: this.framesAfterTarget_,
+			ballHitPaddle: this.ballHitPaddle(),
 		}
-		while (this.paddleY_ < this.movePaddleTo_ - this.STEP - this.paddleTwist_) {
-			this.paddleY_ += this.STEP;
-			this.ws_.send(JSON.stringify(this.moveCommand_));
-			await sleep(delay);
-		}
+		console.log(AIState);
 	}
 }
 
