@@ -1,0 +1,2 @@
+# Ignore Markdown files to prevent interference with Markdown viewers/editors.
+**/*.md
