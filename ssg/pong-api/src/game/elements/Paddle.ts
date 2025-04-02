@@ -12,14 +12,16 @@ export interface IPaddleJson
 export class Paddle
 {
 	protected position: Point;
-	readonly height: number;
-	readonly initialPosition: Point; 
+	private height: number;
+	readonly initialPosition: Point;
+	readonly INITIAL_HEIGHT: number;
 
 	constructor(position: Point, height: number = 1)
 	{
 		this.position = position;
 		this.height = height;
 		this.initialPosition = new Point(position.getX(), position.getY());
+		this.INITIAL_HEIGHT = height;
 	}
 
 	getPaddleJson(): IPaddleJson
@@ -27,8 +29,18 @@ export class Paddle
 		return {
 			x: this.getPosition().getX(),
 			y: this.getPosition().getY(),
-			height: this.height
+			height: this.getHeight()
 		}
+	}
+
+	getHeight(): number
+	{
+		return this.height;
+	}
+
+	setHeight(freshHeight: number): void
+	{
+		this.height = freshHeight;
 	}
 
 	resetPosition(): void
@@ -55,9 +67,13 @@ export class Paddle
 	getPaddleHitBoxPoints(ballDirection: number): Point[]
 	{
 		const allPoints: Point[] = new Array<Point>();
+		if(this.getHeight() <= 0)
+		{
+			return allPoints;
+		}
 		const x = this.getPosition().getX();
 		const center_y = this.getPosition().getY();
-		for(let y = center_y - (this.height / 2); y <= center_y + (this.height / 2); y += 0.01)
+		for(let y = center_y - (this.getHeight() / 2); y <= center_y + (this.getHeight() / 2); y += 0.01)
 		{
 			if(ballDirection > 0)
 			{
@@ -77,6 +93,15 @@ export class Paddle
 			}
 		}
 		return allPoints;
+	}
+
+	shrinkPaddle(): void
+	{
+		const shrinkModifier = this.INITIAL_HEIGHT * 0.2;
+		let freshHeight = this.getHeight() - shrinkModifier;
+		if(freshHeight < 0.01)
+			freshHeight = 0;
+		this.setHeight(freshHeight);
 	}
 
 	getMoveModifier(): number 

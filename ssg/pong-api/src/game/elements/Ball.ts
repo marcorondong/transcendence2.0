@@ -36,6 +36,7 @@ export class Ball
 			radius: this.getRadius()
 		}
 	}
+	
 	moveBall(): void
 	{
 		this.position.add(this.vector);

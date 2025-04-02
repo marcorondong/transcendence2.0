@@ -143,8 +143,8 @@ export abstract class APongGame extends EventEmitter
 
 	private isPaddleMoveAllowed(paddle: Paddle, direction: "up" | "down"): boolean
 	{
-		const maxY = this.field.TOP_EDGE_Y + (0.45) * paddle.height;
-		const minY = this.field.BOTTOM_EDGE_Y - (0.45) * paddle.height;
+		const maxY = this.field.TOP_EDGE_Y + (0.45) * paddle.getHeight();
+		const minY = this.field.BOTTOM_EDGE_Y - (0.45) * paddle.getHeight();
 		let move_modifier = paddle.getMoveModifier();
 		if(direction === "down")
 			move_modifier *= -1;
@@ -320,10 +320,11 @@ export abstract class APongGame extends EventEmitter
 		else
 			edgeX = this.field.RIGHT_EDGE_X;
 		const EdgePoint: Point = new Point(edgeX, ballY);
+		const heightBeforeHit = closestPaddle.getHeight();
 		const impactPointPaddle: Point | false = this.paddleBounce(closestPaddle, this.ball.getDirection().getX());
 		if(impactPointPaddle !== false)
 		{
-			const bounceDir: Point = this.ball.calculateComplexBounceDirection(closestPaddle.getPosition(), closestPaddle.height);
+			const bounceDir: Point = this.ball.calculateComplexBounceDirection(closestPaddle.getPosition(), heightBeforeHit);
 			return this.ball.setDirection(bounceDir);
 		}
 		if(this.isObstacleNear(EdgePoint) && (this.isGoal()))
@@ -357,6 +358,8 @@ export abstract class APongGame extends EventEmitter
 		{
 			if(this.ball.isHit(point) == true)
 			{
+				if(this.score.isOvertime() === true)
+					paddle.shrinkPaddle();
 				return point;
 			}
 		}
