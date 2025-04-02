@@ -52,6 +52,8 @@
     
     <div id="room-container">
         <p>Room ID: <span id="roomId">N/A</span></p>
+        <p>Knockout Stage: <span id="knockoutName">N/A</span></p>
+        <p>Match Status: <span id="matchStatus">N/A</span></p>
         <button onclick="copyRoomId()">Copy Room ID</button>
     </div>
 
@@ -64,6 +66,8 @@
         let gameState = {
             leftPaddle: { x: -4, y: 0, height: 1 },
             rightPaddle: { x: 4, y: 0, height: 1 },
+            leftSecondPaddle: { x: -3.5, y: 0, height: 1 },
+            rightSecondPaddle: { x: 3.5, y: 0, height: 1 },
             ball: { x: 0, y: 0, radius: 0.25 },
             score: { leftGoals: 0, rightGoals: 0, time: false },
             roomId: "N/A"
@@ -83,34 +87,43 @@
 
         wss.onmessage = (event) => {
             gameState = JSON.parse(event.data);
+            
             document.getElementById("roomId").innerText = gameState.roomId || "N/A";
+            document.getElementById("knockoutName").innerText = gameState.knockoutName || "N/A";
+            document.getElementById("matchStatus").innerText = gameState.matchStatus || "N/A";
             drawGame();
         };
 
-        function drawGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+    function drawGame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            let scaleX = canvas.width / 9;
-            let scaleY = canvas.height / 5;
+        let scaleX = canvas.width / 9;
+        let scaleY = canvas.height / 5;
 
-            drawFieldBorders(scaleX, scaleY);
-            drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, gameState.leftPaddle.height * scaleY);
-            drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, gameState.rightPaddle.height * scaleY);
-            drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, gameState.ball.radius * scaleX);
-            drawScore();
+        drawFieldBorders(scaleX, scaleY);
+        drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, gameState.leftPaddle.height * scaleY);
+        drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, gameState.rightPaddle.height * scaleY);
+        
+        // Only draw second paddles if they exist
+        if (gameState.leftSecondPaddle) {
+            drawPaddle(gameState.leftSecondPaddle.x * scaleX, gameState.leftSecondPaddle.y * scaleY, gameState.leftSecondPaddle.height * scaleY);
         }
+        if (gameState.rightSecondPaddle) {
+            drawPaddle(gameState.rightSecondPaddle.x * scaleX, gameState.rightSecondPaddle.y * scaleY, gameState.rightSecondPaddle.height * scaleY);
+        }
+
+        drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, gameState.ball.radius * scaleX);
+        drawScore();
+    }
 
         function drawFieldBorders(scaleX, scaleY) {
             ctx.strokeStyle = "white";
-            ctx.lineWidth = 3; // Increased thickness for visibility
-
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.moveTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
-            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
-            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
-            ctx.lineTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
             ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
             ctx.stroke();
         }
@@ -140,13 +153,10 @@
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowUp") leftPaddleDirection = -1;
             if (event.key === "ArrowDown") leftPaddleDirection = 1;
-            if (event.key === "w") rightPaddleDirection = -1;
-            if (event.key === "s") rightPaddleDirection = 1;
         });
 
         document.addEventListener("keyup", (event) => {
             if (event.key === "ArrowUp" || event.key === "ArrowDown") leftPaddleDirection = 0;
-            if (event.key === "w" || event.key === "s") rightPaddleDirection = 0;
         });
 
         function copyRoomId() {
