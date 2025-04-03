@@ -1,5 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUserInput, createUserResponseSchema, loginInput, loginResponseSchema, userArrayResponseSchema } from "./user.schema";
+import {
+	createUserInput,
+	createUserResponseSchema,
+	loginInput,
+	loginResponseSchema,
+	userArrayResponseSchema,
+} from "./user.schema";
 import { createUser, findUserByEmail, findUsers } from "./user.service";
 import { AppError } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
@@ -13,64 +19,89 @@ export async function registerUserHandler(
 	request: FastifyRequest<{ Body: createUserInput }>,
 	reply: FastifyReply,
 ) {
-	try{
-		const user = await createUser(request.body);
-		// Serialize/validate/filter response via Zod schemas (createUserResponseSchema.parse)
-		const parsedUser = createUserResponseSchema.parse(user);
-		return reply.code(201).send(parsedUser);
-	} catch(e) {
-		console.error("Register user failed:", e);
-		if (e instanceof AppError) {
-			return reply.code(e.statusCode).send({ message: e.message });
-		}
-		// TODO: Maybe add a throw here to reach the global error handler?
-		return reply.code(500).send({ message: "Internal server error" });
-	}
+	const user = await createUser(request.body);
+	// Serialize/validate/filter response via Zod schemas (createUserResponseSchema.parse)
+	const parsedUser = createUserResponseSchema.parse(user);
+	return reply.code(201).send(parsedUser);
 }
+
+// export async function loginHandler(
+// 	request: FastifyRequest<{ Body: loginInput }>,
+// 	reply: FastifyReply,
+// ) {
+// 	const body = request.body;
+// 	try {
+// 		const user = await findUserByEmail(body.email);
+// 		if (!user) {
+// 			return reply
+// 				.code(401)
+// 				.send({ message: "Invalid email or password" });
+// 		}
+// 		// Verify password.
+// 		const candidatePassword = body.password;
+// 		const correctPassword = verifyPassword({
+// 			candidatePassword,
+// 			salt: user.salt,
+// 			hash: user.passwordHash,
+// 		});
+// 		if (!correctPassword) {
+// 			return reply
+// 				.code(401)
+// 				.send({ message: "Invalid email or password" });
+// 		}
+// 		const { passwordHash, salt, ...rest } = user;
+// 		// TODO: Maybe this JWT part should be handled by Authentication Service
+// 		// TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
+// 		// Generate access token
+// 		const accessToken = server.jwt.sign(rest);
+// 		// Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
+// 		const parsedToken = loginResponseSchema.parse({ accessToken });
+// 		return reply.code(200).send(parsedToken);
+// 	} catch (err) {
+// 		console.error("Login failed:", err);
+// 		return reply.code(500).send({ message: "Internal server error" });
+// 	}
+// }
 
 export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
-	const body = request.body;
+	const { email, password } = request.body;
 	try {
-		const user = await findUserByEmail(body.email)
-		if (!user) {
-			return reply.code(401).send({ message: "Invalid email or password" });
-		}
-		// Verify password.
-		const candidatePassword = body.password;
-		const correctPassword = verifyPassword({
-			candidatePassword,
-			salt: user.salt,
+		const user = await findUserByEmail(email); // Might throw 404 Not Found
+		const valid = verifyPassword({
+			candidatePassword: password,
 			hash: user.passwordHash,
-		})
-		if (!correctPassword) {
-			return reply.code(401).send({ message: "Invalid email or password" });
+			salt: user.salt,
+		});
+		if (!valid) {
+			throw new AppError(401, "Invalid email or password");
 		}
-		const {passwordHash, salt, ...rest} = user;
-		// TODO: Maybe this JWT part should be handled by Autentication Service
-		// TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
+		const { passwordHash, salt, ...rest } = user;
 		// Generate access token
 		const accessToken = server.jwt.sign(rest);
 		// Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
 		const parsedToken = loginResponseSchema.parse({ accessToken });
 		return reply.code(200).send(parsedToken);
-	} catch (e) {
-		console.error("Login failed:", e);
-		return reply.code(500).send({ message: "Internal server error" });
+	} catch (err) {
+		// If user not found or password invalid, always send same generic 401
+		if (err instanceof AppError && err.statusCode === 404) {
+			// Change 404 Not Found to 401 Invalid email or password (Hide sensitive info)
+			throw new AppError(401, "Invalid email or password");
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
 	}
 }
 
-export async function getUsersHandler(request: FastifyRequest, reply: FastifyReply) {
-	try {
-		const users = await findUsers();  // returns all fields
-		// With "parse" Zod will filter out fields not in the schema (e.g., salt, password)
-		// Serialize/validate/filter response via Zod schemas (userArrayResponseSchema.parse)
-		const parsedUsers = userArrayResponseSchema.parse(users);
-		return reply.code(200).send(parsedUsers); // Fastify auto-validates response using Zod schema defined in route
-	} catch (e) {
-		console.error("Get users failed:", e);
-		return reply.code(500).send({ message: "Internal server error" });
-	}
+export async function getUsersHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const users = await findUsers();
+	// With "parse" Zod will filter out fields not in userArrayResponseSchema (e.g., salt, password)
+	// Serialize/validate/filter response via Zod schemas (userArrayResponseSchema.parse)
+	const parsedUsers = userArrayResponseSchema.parse(users);
+	return reply.code(200).send(parsedUsers); // Fastify auto-validates response using Zod schema defined in route
 }

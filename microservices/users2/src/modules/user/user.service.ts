@@ -4,60 +4,64 @@ import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import { createUserInput } from "./user.schema";
 
-// Helper function to capitalize conflicting Prisma field 
+// Helper function to capitalize conflicting Prisma field
 function capitalize(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export async function createUser(input: createUserInput) {
 	const { password, ...rest } = input;
-	const { salt, hash } = hashPassword(password)
+	const { salt, hash } = hashPassword(password);
 	try {
 		const user = await prisma.user.create({
 			data: { ...rest, salt, passwordHash: hash },
 		});
 		return user;
-	} catch (e) {
-		if (e instanceof Prisma.PrismaClientKnownRequestError) {
-			// Bubble up with a custom error
-			switch (e.code) {
+	} catch (err) {
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			// Known/Expected errors bubble up to controller as AppError (custom error)
+			switch (err.code) {
 				case "P2002":
-					const target = (e.meta?.target as string[])?.[0] ?? "field";
-					throw new AppError(409, `${capitalize(target)} already exists`);
-				case "P2025":
-					throw new AppError(404, "User not found"); // TODO: Should I check this here?
+					const target =
+						(err.meta?.target as string[])?.[0] ?? "field";
+					throw new AppError(
+						409,
+						`${capitalize(target)} already exists`,
+					);
+				// case "P2025":
+				// 	throw new AppError(404, "User not found"); // TODO: Should I check this here?
 				case "P2003":
 					throw new AppError(400, "Invalid foreign key");
 			}
 		}
-		throw e; // Unhandled errors go to 500 (Let controller handle unexpected errors)
+		// Unknown errors bubble up to global error handler.
+		throw err;
 	}
 }
 
-// TODO: Wrap inside try/catch block?
+// This function returns all user fields (no filtering)
 export async function findUserByEmail(email: string) {
-	const user = await prisma.user.findUnique({
-		where: {
-			email,
-		},
-	});
-	return user;
+	try {
+		const user = await prisma.user.findUnique({
+			where: { email },
+		});
+		if (!user) {
+			// Known/Expected errors bubble up to controller as AppError (custom error)
+			throw new AppError(404, "User not found");
+		}
+		return user;
+	} catch (err) {
+		if (err instanceof AppError) {
+			// Known/Expected errors bubble up to controller as AppError (custom error)
+			throw err;
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
 }
 
-// MR_NOTE: This function returns all users with all fields (no filtering)
+// This function returns all users with all fields (no filtering)
 export async function findUsers() {
 	const users = await prisma.user.findMany();
 	return users;
 }
-
-// MR_NOTE: I could filter the returned field via a schema;
-// But I can also doing directly in prisma like this:
-// export async function findUsers() {
-// 	return prisma.user.findMany( {
-// 		select: {
-// 			email: true,
-// 			name: true,
-// 			id: true,
-// 		},
-// 	});
-// }

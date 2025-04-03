@@ -1,7 +1,12 @@
 // console.log("hello world");
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
-import { ZodTypeProvider, validatorCompiler, serializerCompiler, jsonSchemaTransform } from "fastify-type-provider-zod";
+import {
+	ZodTypeProvider,
+	validatorCompiler,
+	serializerCompiler,
+	jsonSchemaTransform,
+} from "fastify-type-provider-zod";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import userRoutes from "./modules/user/user.route";
@@ -16,35 +21,38 @@ import { AppError } from "./utils/errors";
 export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 
 // This is for logging serialization errors
-server.setErrorHandler((error, request, reply) => {
-	console.error("Error Handler:", error);
-	// reply.send(error);
-	reply.code(error.statusCode || 500).send({
-		error: error.name,
-		message: error.message,
-		details: error.validation,  // May include validation mismatch info
-	});
-});
+// server.setErrorHandler((error, request, reply) => {
+// 	console.error("Error Handler:", error);
+// 	// reply.send(error);
+// 	reply.code(error.statusCode || 500).send({
+// 		error: error.name,
+// 		message: error.message,
+// 		details: error.validation, // May include validation mismatch info
+// 	});
+// });
 
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
 // TODO: This should be done in a "types/fastify.d.ts" file
-// TODO: Reseaarch if "?" is for making it optional.
+// TODO: Research if "?" is for making it optional.
 // Extend TypeScript Fastify's types to add "authRequired" custom field. (augmenting)(augmenting Fastify's type system)
-declare module 'fastify' {
+declare module "fastify" {
 	interface FastifyContextConfig {
-	  authRequired?: boolean;
+		authRequired?: boolean;
 	}
-  }
+}
 
 // Extend TypeScript Fastify's types to add "authenticate" function. (extending public types)(augmenting Fastify's type system)
-declare module 'fastify' {
+declare module "fastify" {
 	export interface FastifyInstance {
-	  authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+		authenticate: (
+			request: FastifyRequest,
+			reply: FastifyReply,
+		) => Promise<void>;
 	}
-  }
+}
 
 // TODO: register this differently. e.g., src/types/jwt.d.ts or in app.ts before initializing Fastify
 // Extend FastifyJWT module to recognize "user" (fields in JWT). (module augmentation)(augmenting Fastify's type system)
@@ -58,7 +66,7 @@ declare module "@fastify/jwt" {
 	}
 }
 
-// TODO: Maybe this JWT part should be handled by Autentication Service
+// TODO: Maybe this JWT part should be handled by Authentication Service
 // Set JWT plugin
 server.register(fastifyJwt, {
 	secret: "supersecret",
@@ -70,10 +78,10 @@ server.decorate(
 	async (request: FastifyRequest, reply: FastifyReply) => {
 		try {
 			await request.jwtVerify();
-		} catch (e) {
-			return reply.send(e);
+		} catch (err) {
+			return reply.send(err);
 		}
-	}
+	},
 );
 
 // Public paths to NOT enforce authentication
@@ -81,16 +89,19 @@ const publicPaths = ["/healthcheck", "/docs", "/docs/json"];
 
 // Hook to check route config (authentication required by default)
 server.addHook("onRequest", async (request, reply) => {
-	const isPublic = publicPaths.some((path) => request.raw.url?.startsWith(path));
-	const requiresAuth = !isPublic && request.routeOptions?.config?.authRequired !== false;
+	const isPublic = publicPaths.some((path) =>
+		request.raw.url?.startsWith(path),
+	);
+	const requiresAuth =
+		!isPublic && request.routeOptions?.config?.authRequired !== false;
 
 	if (!requiresAuth) return;
 	await server.authenticate(request, reply);
 });
 
 // Route for checking health (if server is up and running)
-server.get('/healthcheck', async function() {
-	return {status: "OK"};
+server.get("/healthcheck", async function () {
+	return { status: "OK" };
 });
 
 async function main() {
@@ -106,34 +117,43 @@ async function main() {
 		transform: jsonSchemaTransform, // Important for Zod compatibility
 	});
 	// Register routes
-	await server.register(fastifySwaggerUI, {routePrefix: "/docs",});
-	server.register(userRoutes, {prefix: 'api/users'});
-	server.register(productRoutes, {prefix: 'api/products'});
+	await server.register(fastifySwaggerUI, { routePrefix: "/docs" });
+	server.register(userRoutes, { prefix: "api/users" });
+	server.register(productRoutes, { prefix: "api/products" });
 	// Global error handler
 	server.setErrorHandler((error, request, reply) => {
 		// Custom AppError (e.g., domain-specific errors like "Email exists")
 		if (error instanceof AppError) {
+			request.log.error({
+				msg: error.message,
+				handler: error.handlerName || "unknown",
+				stack: error.stack,
+			});
 			return reply.status(error.statusCode).send({
+				error: true,
 				message: error.message,
+				handler: error.handlerName || "unknown",
 				code: error.code ?? "UNKNOWN_ERROR",
 			});
 		}
-		// TODO: Remove this. Prisma errors not handled in service layer (fallback safety)
-		if (error.code === "P2002") {
-			return reply.status(409).send({ message: "Unique constraint failed" });
-		}
 		// Unknown/unexpected error
-		console.error("Global error handler caught:", error);
-		return reply.status(500).send({ message: "Internal Server Error" });
+		request.log.error({
+			msg: error.message || "Unhandled exception",
+			stack: error.stack,
+		});
+		return reply.status(500).send({
+			error: true,
+			message: "Internal Server Error",
+		});
 	});
-	try{
+	try {
 		// Start server
-		await server.listen( {port: 3000, host: "0.0.0.0"});
-		console.log('Server ready at http://localhost:3000');
-	} catch(e) {
-		console.error(e);
+		await server.listen({ port: 3000, host: "0.0.0.0" });
+		console.log("Server ready at http://localhost:3000");
+	} catch (err) {
+		console.error(err);
 		// process.exit(1); // I don't want to shut down the server if an error is raised
 	}
 }
 
-main()
+main();
