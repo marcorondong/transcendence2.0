@@ -18,7 +18,7 @@ services:
       dockerfile: ./AI/Dockerfile
     container_name: ai-bot
     ports:
-      - "6969:6969"   # CLOSE this port when we have users and API!
+      - "6969:6969"   #TODO close this port when we have users and API!
     environment:
       - NODE_ENV=production
     networks:

@@ -31,7 +31,7 @@ fastify.register(gameRoutes);
 
 fastify.ready().then(() => {
 	console.log(fastify.swagger());
-  });
+});
   
 const start = async () => {
   try {
