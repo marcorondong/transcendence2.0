@@ -1,0 +1,59 @@
+{
+	"version": "0.2",
+	"language": "en",
+	"enabled": true,
+
+	"minWordLength": 2,
+	"allowCompoundWords": false,
+	"caseSensitive": true,
+
+	"maxDuplicateProblems": 20,
+	"maxNumberOfProblems": 100,
+	"numSuggestions": 8,
+
+	"useGitignore": true,
+
+	"dictionaries": [
+		"custom-words",
+		"forbidden-words",
+		"typescript",
+		"node",
+		"npm",
+		"javascript",
+		"html",
+		"css",
+		"python",
+		"companies",
+		"softwareTerms",
+		"misc"
+	],
+
+	"dictionaryDefinitions": [
+		{
+			"name": "custom-words",
+			"path": "./custom-words.txt",
+			"description": "Words used in this project",
+			"addWords": true
+		},
+		{
+			"name": "forbidden-words",
+			"path": "./forbidden-words.txt",
+			"description": "Forbidden words in this project",
+			"addWords": false,
+			"type": "S"
+		}
+	],
+
+	"ignorePaths": [
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/build/**",
+		"**/.git/**",
+		"**/__pycache__/**",
+		"**/prisma/**",
+		"**/package.json",
+		"**/tsconfig.json",
+		"**/*.lock",
+		"**/.gitignore"
+	]
+}
