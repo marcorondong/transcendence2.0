@@ -1,0 +1,11 @@
+# Ignore Markdown files to prevent interference with Markdown viewers/editors.
+*.md
+**/node_modules/
+**/dist/
+**/build/
+**/package.json
+**/package-lock.json
+*.lock
+*.log
+*.sqlite
+*.db
