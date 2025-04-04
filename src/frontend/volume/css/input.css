@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+.custom-button {
+  @apply bg-blue-500 text-white p-4 rounded;
+}

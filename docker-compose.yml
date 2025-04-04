@@ -1,0 +1,15 @@
+services:
+  tailwind:
+    container_name: tailwind
+    image: tailwind-img
+    build:
+      context: ./src/frontend
+      dockerfile: docker/Dockerfile-Tailwind
+    volumes:
+      - ./src/frontend/volume:/app/volume
+    restart: unless-stopped
+    networks:
+      - general
+networks:
+  general:
+    driver: bridge
