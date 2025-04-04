@@ -1,6 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { createProduct, getProducts } from "./product.service";
-import { createProductInput, productResponseSchema, productArrayResponseSchema } from "./product.schema";
+import {
+	createProductInput,
+	productResponseSchema,
+	productArrayResponseSchema,
+} from "./product.schema";
 import { AppError } from "../../utils/errors";
 
 // MR_NOTE:
@@ -10,7 +14,7 @@ import { AppError } from "../../utils/errors";
 export async function createProductHandler(
 	request: FastifyRequest<{ Body: createProductInput }>,
 	reply: FastifyReply,
-	) {
+) {
 	try {
 		const product = await createProduct({
 			...request.body,
@@ -19,17 +23,20 @@ export async function createProductHandler(
 		// Serialize/validate/filter input via Zod schemas (productResponseSchema.parse)
 		const parsedProduct = productResponseSchema.parse(product);
 		return reply.code(201).send(parsedProduct);
-	} catch (e) {
-		console.error("Create product failed:", e);
-		if (e instanceof AppError) {
-			return reply.code(e.statusCode).send({ message: e.message });
+	} catch (err) {
+		console.error("Create product failed:", err);
+		if (err instanceof AppError) {
+			return reply.code(err.statusCode).send({ message: err.message });
 		}
 		// TODO: Maybe add a throw here to reach the global error handler?
 		return reply.code(500).send({ message: "Internal server error" });
 	}
 }
 
-export async function getProductsHandler(request: FastifyRequest, reply: FastifyReply) {
+export async function getProductsHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
 	try {
 		const products = await getProducts();
 		// Serialize/validate/filter response via Zod schemas (productArrayResponseSchema.parse)
@@ -38,8 +45,8 @@ export async function getProductsHandler(request: FastifyRequest, reply: Fastify
 		// console.log("Actual response:", products);  // Logs raw data
 		// console.log("Actual serialized response:", parsedProducts);
 		return reply.code(200).send(parsedProducts);
-	} catch (e) {
-		console.error("Get products failed:", e);
+	} catch (err) {
+		console.error("Get products failed:", err);
 		return reply.code(500).send({ message: "Internal server error" });
 	}
 }

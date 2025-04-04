@@ -13,13 +13,12 @@ import {
 } from "./user.schema";
 import { errorHandler } from "../../utils/errors";
 
+// MR_NOTE:
+// The functions definition is this: server.get(path, options, handler); (3 arguments)
+// Expected response structure and status code for Fastify to validate responses (against Zod schemas).
+// To validate request/response structure must match schema (Fastify/Zod enforcement).
+
 async function userRoutes(server: FastifyInstance) {
-	// MR_NOTE: I should do this if I haven't enabled Zod globally
-	// const app = server.withTypeProvider<ZodTypeProvider>();
-	// OR: server.withTypeProvider<ZodTypeProvider>().post("/", {...});
-	// The function definition is this: server.get(path, options, handler); (3 arguments)
-	// Expected response structure and status code for Fastify to validate responses (against Zod schemas).
-	// to validate response structure matches schema (e.g., Fastify/Zod enforcement).
 	// This route IS NOT authenticated
 	server.post(
 		"/",

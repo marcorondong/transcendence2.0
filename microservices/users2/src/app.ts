@@ -14,29 +14,14 @@ import productRoutes from "./modules/product/product.route";
 import { AppError } from "./utils/errors";
 // import { request } from "http";  // It seems that this is not used
 
-// Creating server
-// const server = Fastify();
-
 // Creating server with global Zod type inference
 export const server = Fastify().withTypeProvider<ZodTypeProvider>();
-
-// This is for logging serialization errors
-// server.setErrorHandler((error, request, reply) => {
-// 	console.error("Error Handler:", error);
-// 	// reply.send(error);
-// 	reply.code(error.statusCode || 500).send({
-// 		error: error.name,
-// 		message: error.message,
-// 		details: error.validation, // May include validation mismatch info
-// 	});
-// });
 
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
 // TODO: This should be done in a "types/fastify.d.ts" file
-// TODO: Research if "?" is for making it optional.
 // Extend TypeScript Fastify's types to add "authRequired" custom field. (augmenting)(augmenting Fastify's type system)
 declare module "fastify" {
 	interface FastifyContextConfig {
