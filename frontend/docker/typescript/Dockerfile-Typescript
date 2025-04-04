@@ -1,24 +1,14 @@
 FROM node:23
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
+# Install TypeScript and nodemon globally
+RUN npm install -g typescript nodemon
 
-COPY package*.json ./
-
-# Install necessary packages
-RUN apk add --no-cache supervisor nodejs npm
-
-RUN mkdir volume
-
-COPY ./docker/tailwind/config/package*.json .
-
-COPY ./docker/tailwind/config/supervisord.conf /etc/supervisord.conf
-
+# Copy your local package.json if needed (optional step)
+COPY ./docker/typescript/config/package*.json ./
 RUN npm install
 
+CMD ["nodemon"]
 
-# CMD ["npx @tailwindcss/cli -i /app/volume/css/input.css -o /app/volume/css/output.css --watch", "--poll"]
-# CMD ["npx", "@tailwindcss/cli", "-i", "./volume/css/input.css", "-o", "./volume/css/output.css", "--watch", "--poll"]
-# CMD ["node", "-e", "setInterval(() => {}, 1000)"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
