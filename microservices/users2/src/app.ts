@@ -125,15 +125,17 @@ async function main() {
 		// Custom AppError (e.g., domain-specific errors like "Email exists")
 		if (error instanceof AppError) {
 			request.log.error({
-				msg: error.message,
+				code: error.code,
 				handler: error.handlerName || "unknown",
+				msg: error.message,
 				stack: error.stack,
 			});
-			return reply.status(error.statusCode).send({
-				error: true,
-				message: error.message,
-				handler: error.handlerName || "unknown",
+			return reply.code(error.statusCode).send({
+				statusCode: error.statusCode,
 				code: error.code ?? "UNKNOWN_ERROR",
+				error: error.errorType,
+				handler: error.handlerName || "unknown",
+				message: error.message,
 			});
 		}
 		// Unknown/unexpected error
@@ -141,10 +143,7 @@ async function main() {
 			msg: error.message || "Unhandled exception",
 			stack: error.stack,
 		});
-		return reply.status(500).send({
-			error: true,
-			message: "Internal Server Error",
-		});
+		return reply.send(error);
 	});
 	try {
 		// Start server

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { AppError } from "../../utils/errors";
+import { AppError, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import { createUserInput } from "./user.schema";
@@ -24,14 +24,24 @@ export async function createUser(input: createUserInput) {
 				case "P2002":
 					const target =
 						(err.meta?.target as string[])?.[0] ?? "field";
-					throw new AppError(
-						409,
-						`${capitalize(target)} already exists`,
-					);
+					throw new AppError({
+						statusCode: 409,
+						code: USER_ERRORS.USER_CREATE,
+						message: `${capitalize(target)} already exists`,
+					});
 				// case "P2025":
-				// 	throw new AppError(404, "User not found"); // TODO: Should I check this here?
+				// TODO: Should I check this here?
+				// throw new AppError({
+				// 	statusCode: 404,
+				// 	code: USER_ERRORS.NOT_FOUND,
+				// 	message: "User not found",
+				// });
 				case "P2003":
-					throw new AppError(400, "Invalid foreign key");
+					throw new AppError({
+						statusCode: 400,
+						code: USER_ERRORS.USER_CREATE,
+						message: "Invalid foreign key",
+					});
 			}
 		}
 		// Unknown errors bubble up to global error handler.
@@ -47,7 +57,11 @@ export async function findUserByEmail(email: string) {
 		});
 		if (!user) {
 			// Known/Expected errors bubble up to controller as AppError (custom error)
-			throw new AppError(404, "User not found");
+			throw new AppError({
+				statusCode: 404,
+				code: USER_ERRORS.NOT_FOUND,
+				message: "User not found",
+			});
 		}
 		return user;
 	} catch (err) {
