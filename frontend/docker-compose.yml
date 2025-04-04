@@ -10,6 +10,17 @@ services:
     restart: unless-stopped
     networks:
       - general
+  typescript:
+    container_name: typescript
+    image: typescript-img
+    build:
+      context: ./
+      dockerfile: docker/typescript/Dockerfile-Typescript
+    volumes:
+      - ./volume:/app/volume
+    restart: unless-stopped
+    networks:
+      - general
 networks:
   general:
     driver: bridge

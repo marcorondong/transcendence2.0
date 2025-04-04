@@ -1,6 +1,9 @@
-FROM alpine
+FROM node:23
 
-WORKDIR /app
+WORKDIR /usr/src/app
+
+
+COPY package*.json ./
 
 # Install necessary packages
 RUN apk add --no-cache supervisor nodejs npm
