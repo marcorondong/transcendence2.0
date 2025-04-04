@@ -8,6 +8,7 @@ tictactoe
 bg
 xs
 keyout
+pingpong
 
 Benjamin
 bszilas

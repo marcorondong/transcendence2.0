@@ -1,172 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Pong</title>
-    <style>
-        body { 
-            text-align: center; 
-            font-family: Arial, sans-serif; 
-            color: white; 
-            background: black; 
-        }
-        #game-container {
-            background: grey; 
-            display: inline-block; 
-            padding: 20px; 
-            border-radius: 10px;
-        }
-        canvas { 
-            background: black; 
-            display: block; 
-            margin: auto; 
-        }
-        #room-container { margin-top: 20px; }
-        #roomId { 
-            font-size: 18px; 
-            padding: 10px; 
-            border: 1px solid white; 
-            display: inline-block; 
-            background: grey; 
-            color: white; 
-            border-radius: 5px;
-        }
-        button { 
-            margin-top: 10px; 
-            padding: 10px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            border: none; 
-            background: white; 
-            color: black; 
-            border-radius: 5px; 
-        }
-        button:hover { background: lightgrey; }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <canvas id="gameCanvas" width="900" height="500"></canvas> 
-    </div>
-    
-    <div id="room-container">
-        <p>Room ID: <span id="roomId">N/A</span></p>
-        <p>Knockout Stage: <span id="knockoutName">N/A</span></p>
-        <p>Match Status: <span id="matchStatus">N/A</span></p>
-        <button onclick="copyRoomId()">Copy Room ID</button>
-    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>WebSocket Pong</title>
+		<style>
+			body {
+				text-align: center;
+				font-family: Arial, sans-serif;
+				color: white;
+				background: black;
+			}
+			#game-container {
+				background: grey;
+				display: inline-block;
+				padding: 20px;
+				border-radius: 10px;
+			}
+			canvas {
+				background: black;
+				display: block;
+				margin: auto;
+			}
+			#room-container {
+				margin-top: 20px;
+			}
+			#roomId {
+				font-size: 18px;
+				padding: 10px;
+				border: 1px solid white;
+				display: inline-block;
+				background: grey;
+				color: white;
+				border-radius: 5px;
+			}
+			button {
+				margin-top: 10px;
+				padding: 10px;
+				font-size: 16px;
+				cursor: pointer;
+				border: none;
+				background: white;
+				color: black;
+				border-radius: 5px;
+			}
+			button:hover {
+				background: lightgrey;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="game-container">
+			<canvas
+				id="gameCanvas"
+				width="900"
+				height="500"
+			></canvas>
+		</div>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const queryParams = window.location.search;
-        const wss = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`);
+		<div id="room-container">
+			<p>Room ID: <span id="roomId">N/A</span></p>
+			<p>Knockout Stage: <span id="knockoutName">N/A</span></p>
+			<p>Match Status: <span id="matchStatus">N/A</span></p>
+			<button onclick="copyRoomId()">Copy Room ID</button>
+		</div>
 
-        let gameState = {
-            leftPaddle: { x: -4, y: 0, height: 1 },
-            rightPaddle: { x: 4, y: 0, height: 1 },
-            leftSecondPaddle: { x: -3.5, y: 0, height: 1 },
-            rightSecondPaddle: { x: 3.5, y: 0, height: 1 },
-            ball: { x: 0, y: 0, radius: 0.25 },
-            score: { leftGoals: 0, rightGoals: 0, time: false },
-            roomId: "N/A"
-        };
+		<script>
+			const canvas = document.getElementById("gameCanvas");
+			const ctx = canvas.getContext("2d");
+			const queryParams = window.location.search;
+			const wss = new WebSocket(
+				`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`,
+			);
 
-        let leftPaddleDirection = 0; 
-        let rightPaddleDirection = 0;
+			let gameState = {
+				leftPaddle: { x: -4, y: 0, height: 1 },
+				rightPaddle: { x: 4, y: 0, height: 1 },
+				leftSecondPaddle: { x: -3.5, y: 0, height: 1 },
+				rightSecondPaddle: { x: 3.5, y: 0, height: 1 },
+				ball: { x: 0, y: 0, radius: 0.25 },
+				score: { leftGoals: 0, rightGoals: 0, time: false },
+				roomId: "N/A",
+			};
 
-        setInterval(() => {
-            if (leftPaddleDirection !== 0) {
-                wss.send(JSON.stringify({ move: leftPaddleDirection > 0 ? "down" : "up", paddle: "left" }));
-            }
-            if (rightPaddleDirection !== 0) {
-                wss.send(JSON.stringify({ move: rightPaddleDirection > 0 ? "down" : "up", paddle: "right" }));
-            }
-        }, 1000 / 60); 
+			let leftPaddleDirection = 0;
+			let rightPaddleDirection = 0;
 
-        wss.onmessage = (event) => {
-            gameState = JSON.parse(event.data);
-            
-            document.getElementById("roomId").innerText = gameState.roomId || "N/A";
-            document.getElementById("knockoutName").innerText = gameState.knockoutName || "N/A";
-            document.getElementById("matchStatus").innerText = gameState.matchStatus || "N/A";
-            drawGame();
-        };
+			setInterval(() => {
+				if (leftPaddleDirection !== 0) {
+					wss.send(
+						JSON.stringify({
+							move: leftPaddleDirection > 0 ? "down" : "up",
+							paddle: "left",
+						}),
+					);
+				}
+				if (rightPaddleDirection !== 0) {
+					wss.send(
+						JSON.stringify({
+							move: rightPaddleDirection > 0 ? "down" : "up",
+							paddle: "right",
+						}),
+					);
+				}
+			}, 1000 / 60);
 
-        
-    function drawGame() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+			wss.onmessage = (event) => {
+				gameState = JSON.parse(event.data);
 
-        let scaleX = canvas.width / 9;
-        let scaleY = canvas.height / 5;
+				document.getElementById("roomId").innerText =
+					gameState.roomId || "N/A";
+				document.getElementById("knockoutName").innerText =
+					gameState.knockoutName || "N/A";
+				document.getElementById("matchStatus").innerText =
+					gameState.matchStatus || "N/A";
+				drawGame();
+			};
 
-        drawFieldBorders(scaleX, scaleY);
-        drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, gameState.leftPaddle.height * scaleY);
-        drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, gameState.rightPaddle.height * scaleY);
-        
-        // Only draw second paddles if they exist
-        if (gameState.leftSecondPaddle) {
-            drawPaddle(gameState.leftSecondPaddle.x * scaleX, gameState.leftSecondPaddle.y * scaleY, gameState.leftSecondPaddle.height * scaleY);
-        }
-        if (gameState.rightSecondPaddle) {
-            drawPaddle(gameState.rightSecondPaddle.x * scaleX, gameState.rightSecondPaddle.y * scaleY, gameState.rightSecondPaddle.height * scaleY);
-        }
+			function drawGame() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, gameState.ball.radius * scaleX);
-        drawScore();
-    }
+				let scaleX = canvas.width / 9;
+				let scaleY = canvas.height / 5;
 
-        function drawFieldBorders(scaleX, scaleY) {
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(-4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
-            ctx.lineTo(-4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
-            ctx.moveTo(4.5 * scaleX + canvas.width / 2, -2.5 * scaleY + canvas.height / 2);
-            ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
-            ctx.stroke();
-        }
+				drawFieldBorders(scaleX, scaleY);
+				drawPaddle(
+					gameState.leftPaddle.x * scaleX,
+					gameState.leftPaddle.y * scaleY,
+					gameState.leftPaddle.height * scaleY,
+				);
+				drawPaddle(
+					gameState.rightPaddle.x * scaleX,
+					gameState.rightPaddle.y * scaleY,
+					gameState.rightPaddle.height * scaleY,
+				);
 
-        function drawPaddle(x, y, height) {
-            ctx.fillStyle = "white";
-            ctx.fillRect(x + canvas.width / 2 - 5, -y + canvas.height / 2 - (height / 2), 10, height);
-        }
+				// Only draw second paddles if they exist
+				if (gameState.leftSecondPaddle) {
+					drawPaddle(
+						gameState.leftSecondPaddle.x * scaleX,
+						gameState.leftSecondPaddle.y * scaleY,
+						gameState.leftSecondPaddle.height * scaleY,
+					);
+				}
+				if (gameState.rightSecondPaddle) {
+					drawPaddle(
+						gameState.rightSecondPaddle.x * scaleX,
+						gameState.rightSecondPaddle.y * scaleY,
+						gameState.rightSecondPaddle.height * scaleY,
+					);
+				}
 
-        function drawBall(x, y, radius) {
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(x + canvas.width / 2, -y + canvas.height / 2, radius, 0, Math.PI * 2);
-            ctx.fill();
-        }
+				drawBall(
+					gameState.ball.x * scaleX,
+					gameState.ball.y * scaleY,
+					gameState.ball.radius * scaleX,
+				);
+				drawScore();
+			}
 
-        function drawScore() {
-            ctx.fillStyle = "white";
-            ctx.font = "24px Arial";
-            ctx.fillText(`Left: ${gameState.score.leftGoals}`, canvas.width / 4, 30);
-            ctx.fillText(`Right: ${gameState.score.rightGoals}`, (canvas.width * 3) / 4, 30);
-            if (gameState.score.time !== false) {
-                ctx.fillText(`Time: ${gameState.score.time}s`, canvas.width / 2 - 40, 30);
-            }
-        }
+			function drawFieldBorders(scaleX, scaleY) {
+				ctx.strokeStyle = "white";
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+				ctx.moveTo(
+					-4.5 * scaleX + canvas.width / 2,
+					-2.5 * scaleY + canvas.height / 2,
+				);
+				ctx.lineTo(
+					-4.5 * scaleX + canvas.width / 2,
+					2.5 * scaleY + canvas.height / 2,
+				);
+				ctx.moveTo(
+					4.5 * scaleX + canvas.width / 2,
+					-2.5 * scaleY + canvas.height / 2,
+				);
+				ctx.lineTo(
+					4.5 * scaleX + canvas.width / 2,
+					2.5 * scaleY + canvas.height / 2,
+				);
+				ctx.stroke();
+			}
 
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowUp") leftPaddleDirection = -1;
-            if (event.key === "ArrowDown") leftPaddleDirection = 1;
-        });
+			function drawPaddle(x, y, height) {
+				ctx.fillStyle = "white";
+				ctx.fillRect(
+					x + canvas.width / 2 - 5,
+					-y + canvas.height / 2 - height / 2,
+					10,
+					height,
+				);
+			}
 
-        document.addEventListener("keyup", (event) => {
-            if (event.key === "ArrowUp" || event.key === "ArrowDown") leftPaddleDirection = 0;
-        });
+			function drawBall(x, y, radius) {
+				ctx.fillStyle = "white";
+				ctx.beginPath();
+				ctx.arc(
+					x + canvas.width / 2,
+					-y + canvas.height / 2,
+					radius,
+					0,
+					Math.PI * 2,
+				);
+				ctx.fill();
+			}
 
-        function copyRoomId() {
-            const roomId = document.getElementById("roomId").innerText;
-            navigator.clipboard.writeText(roomId).then(() => {
-                alert("Room ID copied to clipboard!");
-            }).catch((err) => {
-                console.error("Failed to copy Room ID", err);
-            });
-        }
-    </script>
-</body>
+			function drawScore() {
+				ctx.fillStyle = "white";
+				ctx.font = "24px Arial";
+				ctx.fillText(
+					`Left: ${gameState.score.leftGoals}`,
+					canvas.width / 4,
+					30,
+				);
+				ctx.fillText(
+					`Right: ${gameState.score.rightGoals}`,
+					(canvas.width * 3) / 4,
+					30,
+				);
+				if (gameState.score.time !== false) {
+					ctx.fillText(
+						`Time: ${gameState.score.time}s`,
+						canvas.width / 2 - 40,
+						30,
+					);
+				}
+			}
+
+			document.addEventListener("keydown", (event) => {
+				if (event.key === "ArrowUp") leftPaddleDirection = -1;
+				if (event.key === "ArrowDown") leftPaddleDirection = 1;
+			});
+
+			document.addEventListener("keyup", (event) => {
+				if (event.key === "ArrowUp" || event.key === "ArrowDown")
+					leftPaddleDirection = 0;
+			});
+
+			function copyRoomId() {
+				const roomId = document.getElementById("roomId").innerText;
+				navigator.clipboard
+					.writeText(roomId)
+					.then(() => {
+						alert("Room ID copied to clipboard!");
+					})
+					.catch((err) => {
+						console.error("Failed to copy Room ID", err);
+					});
+			}
+		</script>
+	</body>
 </html>
