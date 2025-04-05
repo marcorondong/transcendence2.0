@@ -90,3 +90,18 @@ class Home {
 const home = new Home();
 
 home.loadComponent();
+export {};
+console.log("hi there");
+
+const queryParams = window.location.search;
+const wss = new WebSocket(
+	// `ws://${window.location.hostname}:${window.location.port}/pong/${queryParams}`,
+	`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`,
+);
+console.log("hi");
+
+wss.onmessage = (event) => {
+	console.log("got message");
+	const gameState = JSON.parse(event.data);
+	console.log("game State", gameState);
+};
