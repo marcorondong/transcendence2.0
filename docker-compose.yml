@@ -18,9 +18,26 @@ services:
       dockerfile: ./AI/Dockerfile
     container_name: ai-bot
     ports:
-      - "6969:6969"   #TODO close this port when we have users and API!
+      - "6969:6969" #TODO close this port when we have users and API!
     environment:
       - NODE_ENV=production
+    networks:
+      - Transcendence2.0
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/nginx/Dockerfile-Nginx
+    container_name: frontend
+    # image: nginx:1.26.2
+    volumes:
+      - ./frontend/volume:/usr/share/nginx/html
+      - ./frontend/docker/nginx/config/default.conf:/etc/nginx/conf.d/default.conf
+      # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
+      # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
+    ports:
+      - "8080:443"
+    restart: unless-stopped
     networks:
       - Transcendence2.0
 
