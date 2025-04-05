@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+.custom-button {
+	@apply bg-blue-500 text-white p-4 rounded;
+}
+.nav-link {
+	@apply dark:hover:text-white dark:text-gray-300 hover:text-black;
+}
