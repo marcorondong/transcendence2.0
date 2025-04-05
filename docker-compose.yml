@@ -1,12 +1,12 @@
 services:
   pong-api:
-    image: pong-api-img 
+    image: pong-api-img
     container_name: pong-api
     build:
-      context: ./pong-api
+      context: ./ssg/pong-api
       dockerfile: Dockerfile
     volumes:
-      - ./pong-api/src/:/pong/pong-api/src/
+      - ./ssg/pong-api/src/:/pong/pong-api/src/
     ports:
       - 3010:3010
     command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
@@ -14,7 +14,7 @@ services:
       - Transcendence2.0
   ai-bot:
     build:
-      context: .
+      context: ./ssg
       dockerfile: ./AI/Dockerfile
     container_name: ai-bot
     ports:
