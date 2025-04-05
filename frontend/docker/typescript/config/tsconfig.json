@@ -2,10 +2,10 @@
 	"compilerOptions": {
 		"target": "ES6", // JavaScript target version
 		"module": "commonjs", // Module system
-		"outDir": "./dist", // Output directory for compiled JS files
+		"outDir": "./volume/javascript", // Output directory for compiled JS files
 		"rootDir": "./volume/typescript", // Root directory for TypeScript files
 		"strict": true // Enable strict type-checking options
 	},
-	"include": ["volume/typescript/**/*.ts"],
+	"include": ["./volume/typescript/**/*.ts"],
 	"exclude": ["node_modules"]
 }

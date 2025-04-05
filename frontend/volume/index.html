@@ -1,13 +1,86 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./css/output.css" rel="stylesheet" />
-  </head>
-  <body>
-    <h1 class="text-blue-700 font-bold underline">Hello world!</h1>
-    <div class="custom-button">my custom button</div>
-    <div class="underline hover:bg-red-600 m-2">should be underlined</div>
-  </body>
+<html
+	lang="en"
+	data-theme="dark"
+>
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="ie=edge"
+		/>
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="./static-files/images/favicon.ico"
+		/>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="./css/custom.css"
+		/>
+		<link
+			href="./css/output.css"
+			rel="stylesheet"
+		/>
+		<title>Transcendence</title>
+	</head>
+
+	<body class="bg-grey-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+		<nav class="flex flex-row justify-between p-9">
+			<img
+				class="rounded-lg"
+				src="./static-files/images/pong-logo.png"
+				width="85px"
+			/>
+			<ul class="flex flex-row gap-4 items-center">
+				<li class="nav-link">
+					<a
+						class=""
+						href="/"
+						>home</a
+					>
+				</li>
+				<li class="nav-link">
+					<a
+						class=""
+						href="highscore"
+						>highscore</a
+					>
+				</li>
+				<li class="nav-link">
+					<a
+						class=""
+						href="profile"
+						>profile</a
+					>
+				</li>
+				<li class="nav-link">
+					<a
+						class=""
+						href="users"
+						>users</a
+					>
+				</li>
+			</ul>
+		</nav>
+
+		<div
+			class="container"
+			id="game"
+		>
+			<div
+				id="content"
+				class="mb-4"
+			></div>
+		</div>
+		<script
+			type="module"
+			src="./javascript/index.js"
+		></script>
+	</body>
 </html>
