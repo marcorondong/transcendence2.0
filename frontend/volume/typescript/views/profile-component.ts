@@ -1,5 +1,3 @@
-"use strict";
-
 class ProfileComponent extends HTMLElement {
 	constructor() {
 		super();

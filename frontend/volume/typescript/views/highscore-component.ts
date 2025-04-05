@@ -1,6 +1,4 @@
-"use strict";
-
-class ProfileComponent extends HTMLElement {
+class HighscoreComponent extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -8,18 +6,18 @@ class ProfileComponent extends HTMLElement {
 	connectedCallback() {
 		console.log("myComponent has been connected");
 		const h1 = document.createElement("h1");
-		h1.textContent = "Profile";
+		h1.textContent = "Highscore";
 		this.appendChild(h1);
 	}
 
 	disconnectedCallback() {
-		console.log("myComponent has been disconnected");
+		console.log("highscore-component has been disconnected");
 	}
 }
 
-customElements.define("profile-component", ProfileComponent);
+customElements.define("highscore-component", HighscoreComponent);
 
 export function createComponent() {
 	console.log("creating element");
-	return document.createElement("profile-component");
+	return document.createElement("highscore-component");
 }
