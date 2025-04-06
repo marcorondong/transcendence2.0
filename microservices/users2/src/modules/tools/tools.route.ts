@@ -29,14 +29,14 @@ export async function setupSwagger(server: FastifyInstance) {
 	});
 
 	server.register(fastifySwaggerUI, {
-		routePrefix: "/api/documentation", // so it’s under /api/tools/swagger
+		routePrefix: "/api/documentation",
 	});
 }
 
 async function toolsRoutes(server: FastifyInstance) {
-	// This route IS NOT authenticated
 	server.get(
 		"/healthcheck",
+		// Remove authentication (this route is public)
 		{ config: { authRequired: false } },
 		async (_, reply) => reply.code(200).send({ status: "ok" }),
 	);

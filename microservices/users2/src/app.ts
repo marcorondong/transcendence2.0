@@ -1,4 +1,3 @@
-// console.log("hello world");
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
 import {
@@ -91,26 +90,10 @@ server.addHook("onRequest", async (request, reply) => {
 	await server.authenticate(request, reply);
 });
 
-// // Route for checking health (if server is up and running)
-// server.get("/healthcheck", async function () {
-// 	return { status: "OK" };
-// });
-
 async function main() {
-	// // Register swagger/openAPI plugins
-	// await server.register(fastifySwagger, {
-	// 	openapi: {
-	// 		info: {
-	// 			title: "ft_transcendence Users API",
-	// 			description: "Swagger docs for ft_transcendence project",
-	// 			version: "1.0.0",
-	// 		},
-	// 	},
-	// 	transform: jsonSchemaTransform, // Important for Zod compatibility
-	// });
-	// Register routes
-	// await server.register(fastifySwaggerUI, { routePrefix: "/docs" });
+	// Register swagger/openAPI plugins
 	await setupSwagger(server);
+	// Register routes
 	await server.register(toolsRoutes, { prefix: "/api" });
 	server.register(userRoutes, { prefix: "api/users" });
 	server.register(productRoutes, { prefix: "api/products" });

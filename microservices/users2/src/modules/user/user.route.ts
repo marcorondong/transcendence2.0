@@ -19,7 +19,6 @@ import { errorHandler } from "../../utils/errors";
 // To validate request/response structure must match schema (Fastify/Zod enforcement).
 
 async function userRoutes(server: FastifyInstance) {
-	// This route IS NOT authenticated
 	server.post(
 		"/",
 		{
@@ -29,12 +28,11 @@ async function userRoutes(server: FastifyInstance) {
 					201: createUserResponseSchema,
 				},
 			},
+			// Remove authentication (this route is public)
 			config: { authRequired: false },
 		},
 		errorHandler(registerUserHandler),
 	);
-
-	// This route IS NOT authenticated
 	server.post(
 		"/login",
 		{
@@ -44,11 +42,11 @@ async function userRoutes(server: FastifyInstance) {
 					200: loginResponseSchema,
 				},
 			},
+			// Remove authentication (this route is public)
 			config: { authRequired: false },
 		},
 		errorHandler(loginHandler),
 	);
-
 	// This route IS authenticated because it doesn't have "config: { authRequired: false },"
 	server.get(
 		"/",
