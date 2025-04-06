@@ -30,7 +30,7 @@ export async function createUser(input: createUserInput) {
 						message: `${capitalize(target)} already exists`,
 					});
 				// case "P2025":
-				// TODO: Should I check this here?
+				// TODO: Check when this error happens. (in mutations: update, delete, etc.)
 				// throw new AppError({
 				// 	statusCode: 404,
 				// 	code: USER_ERRORS.NOT_FOUND,
@@ -49,12 +49,13 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
+// Type definition to allow one field per query
+type UniqueUserField = { id: number } | { name: string } | { email: string };
+
 // This function returns all user fields (no filtering)
-export async function findUserByEmail(email: string) {
+export async function findUserByUnique(where: UniqueUserField) {
 	try {
-		const user = await prisma.user.findUnique({
-			where: { email },
-		});
+		const user = await prisma.user.findUnique({ where });
 		if (!user) {
 			// Known/Expected errors bubble up to controller as AppError (custom error)
 			throw new AppError({

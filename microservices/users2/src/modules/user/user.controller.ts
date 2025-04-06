@@ -6,7 +6,7 @@ import {
 	loginResponseSchema,
 	userArrayResponseSchema,
 } from "./user.schema";
-import { createUser, findUserByEmail, findUsers } from "./user.service";
+import { createUser, findUserByUnique, findUsers } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
 import { server } from "../../app";
@@ -34,7 +34,7 @@ export async function loginHandler(
 ) {
 	const { email, password } = request.body;
 	try {
-		const user = await findUserByEmail(email); // Might throw 404 Not Found
+		const user = await findUserByUnique({ email }); // Might throw 404 Not Found
 		const valid = verifyPassword({
 			candidatePassword: password,
 			hash: user.passwordHash,
