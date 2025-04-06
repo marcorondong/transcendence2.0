@@ -6,7 +6,7 @@ import {
 } from "./user.controller";
 import {
 	createUserSchema,
-	createUserResponseSchema,
+	userResponseSchema,
 	loginSchema,
 	loginResponseSchema,
 	userArrayResponseSchema,
@@ -25,7 +25,7 @@ async function userRoutes(server: FastifyInstance) {
 			schema: {
 				body: createUserSchema,
 				response: {
-					201: createUserResponseSchema,
+					201: userResponseSchema,
 				},
 			},
 			// Remove authentication (this route is public)

@@ -4,12 +4,14 @@ import { z } from "zod";
 
 // Core user schema
 const userCore = {
-	email: z.string({
-		required_error: "Email is required",
-		invalid_type_error: "Email must be a string",
-	}).email(),
+	email: z
+		.string({
+			required_error: "Email is required",
+			invalid_type_error: "Email must be a string",
+		})
+		.email(),
 	name: z.string(),
-}
+};
 
 // Schema for createUser
 export const createUserSchema = z.object({
@@ -20,30 +22,26 @@ export const createUserSchema = z.object({
 	}),
 });
 
-// Schema for createUser response
-export const createUserResponseSchema = z.object({
+// Schema for single user
+export const userResponseSchema = z.object({
 	id: z.number(),
 	...userCore,
 });
 
 // Schema for login
 export const loginSchema = z.object({
-	email: z.string({
-		required_error: "Email is required",
-		invalid_type_error: "Email must be a string",
-	}).email(),
+	email: z
+		.string({
+			required_error: "Email is required",
+			invalid_type_error: "Email must be a string",
+		})
+		.email(),
 	password: z.string(),
-})
+});
 
 // Schema for login response
 export const loginResponseSchema = z.object({
 	accessToken: z.string(),
-})
-
-// Schema for single user 
-export const userResponseSchema = z.object({
-	id: z.number(),
-	...userCore,
 });
 
 // Schema for array of users (for list responses)

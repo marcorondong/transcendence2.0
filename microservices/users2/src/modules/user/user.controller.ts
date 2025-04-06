@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
 	createUserInput,
-	createUserResponseSchema,
+	userResponseSchema,
 	loginInput,
 	loginResponseSchema,
 	userArrayResponseSchema,
@@ -20,8 +20,8 @@ export async function registerUserHandler(
 	reply: FastifyReply,
 ) {
 	const user = await createUser(request.body);
-	// Serialize/validate/filter response via Zod schemas (createUserResponseSchema.parse)
-	const parsedUser = createUserResponseSchema.parse(user);
+	// Serialize/validate/filter response via Zod schemas (userResponseSchema.parse)
+	const parsedUser = userResponseSchema.parse(user);
 	return reply.code(201).send(parsedUser);
 }
 
