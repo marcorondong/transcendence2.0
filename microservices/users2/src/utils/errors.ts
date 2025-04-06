@@ -8,6 +8,14 @@ export const USER_ERRORS = {
 	// INVALID_KEY: "INVALID_FOREIGN_KEY",
 };
 
+export const PRODUCT_ERRORS = {
+	PRODUCT_CREATE: "PRODUCT_CREATE_ERROR",
+	PRODUCT_LOGIN: "PRODUCT_LOGIN_ERROR",
+	NOT_FOUND: "PRODUCT_NOT_FOUND",
+	// ALREADY_EXISTS: "FIELD_VALUE_ALREADY_EXISTS",
+	// INVALID_KEY: "INVALID_FOREIGN_KEY",
+};
+
 export class AppError extends Error {
 	// Used '?' only for fields that might not be defined when error is thrown.
 	public statusCode: number;
