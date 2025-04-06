@@ -57,7 +57,6 @@ export async function findUserByUnique(where: UniqueUserField) {
 	try {
 		const user = await prisma.user.findUnique({ where });
 		if (!user) {
-			// Known/Expected errors bubble up to controller as AppError (custom error)
 			throw new AppError({
 				statusCode: 404,
 				code: USER_ERRORS.NOT_FOUND,
@@ -74,6 +73,77 @@ export async function findUserByUnique(where: UniqueUserField) {
 		throw err;
 	}
 }
+
+// Type definition to allowing multiple fields per query
+type UserField = { id?: number; email?: string; name?: string };
+
+// This function returns all user fields (no filtering)
+export async function findUserBy(where: UserField) {
+	try {
+		const user = await prisma.user.findFirst({ where });
+		if (!user) {
+			throw new AppError({
+				statusCode: 404,
+				code: USER_ERRORS.NOT_FOUND,
+				message: "User not found",
+			});
+		}
+		return user;
+	} catch (err) {
+		if (err instanceof AppError) {
+			// Known/Expected errors bubble up to controller as AppError (custom error)
+			throw err;
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// // This function returns all user fields (no filtering)
+// export async function getUserById(id: number) {
+// 	try {
+// 		const user = await prisma.user.findUnique({ where: { id } });
+// 		if (!user) {
+// 			// Known/Expected errors bubble up to controller as AppError (custom error)
+// 			throw new AppError({
+// 				statusCode: 404,
+// 				code: USER_ERRORS.NOT_FOUND,
+// 				message: "User not found",
+// 			});
+// 		}
+// 		return user;
+// 	} catch (err) {
+// 		if (err instanceof AppError) {
+// 			// Known/Expected errors bubble up to controller as AppError (custom error)
+// 			throw err;
+// 		}
+// 		// Unknown errors bubble up to global error handler.
+// 		throw err;
+// 	}
+// }
+
+// // This function returns all user fields (no filtering)
+// export async function getUserByEmail(email: string) {
+// 	try {
+// 		const user = await prisma.user.findUnique({ where: { email } });
+// 		if (!user) {
+// 			// Known/Expected errors bubble up to controller as AppError (custom error)
+// 			throw new AppError({
+// 				statusCode: 404,
+// 				code: USER_ERRORS.NOT_FOUND,
+// 				message: "User not found",
+// 			});
+// 		}
+// 		return user;
+// 	} catch (err) {
+// 		if (err instanceof AppError) {
+// 			// Known/Expected errors bubble up to controller as AppError (custom error)
+// 			throw err;
+// 		}
+// 		// Unknown errors bubble up to global error handler.
+// 		throw err;
+// 	}
+// }
 
 // This function returns all users with all fields (no filtering)
 export async function findUsers() {

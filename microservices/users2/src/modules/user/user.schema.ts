@@ -28,6 +28,23 @@ export const userResponseSchema = z.object({
 	...userCore,
 });
 
+// Schema to get a user by ID
+export const userIdParamSchema = z.object({
+	id: z.number(),
+});
+
+// Schema to update all user fields
+export const putUserSchema = z.object({
+	...userCore,
+	password: z.string({
+		required_error: "Password is required",
+		invalid_type_error: "Password must be a string",
+	}),
+});
+
+// Schema to update some user fields
+export const patchUserSchema = putUserSchema.partial();
+
 // Schema for login
 export const loginSchema = z.object({
 	email: z
