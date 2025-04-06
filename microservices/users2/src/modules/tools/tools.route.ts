@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
+import { SwaggerOptions } from "@fastify/swagger";
 
 export async function setupSwagger(server: FastifyInstance) {
 	// Remove authentication from Swagger-related routes
@@ -18,6 +19,7 @@ export async function setupSwagger(server: FastifyInstance) {
 	});
 	// Register Swagger + Swagger UI
 	server.register(fastifySwagger, {
+		exposeRoute: true,
 		openapi: {
 			info: {
 				title: "ft_transcendence API",
@@ -26,7 +28,7 @@ export async function setupSwagger(server: FastifyInstance) {
 			},
 		},
 		transform: jsonSchemaTransform,
-	});
+	} as SwaggerOptions);
 
 	server.register(fastifySwaggerUI, {
 		routePrefix: "/api/documentation",
