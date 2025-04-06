@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { AppError } from "../../utils/errors";
+import { AppError, PRODUCT_ERRORS } from "../../utils/errors";
 import prisma from "../../utils/prisma";
 import { createProductInput } from "./product.schema";
 
@@ -18,26 +18,37 @@ export async function createProduct(
 		return product;
 	} catch (err) {
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
-			// Bubble up with a custom error
+			// Known/Expected errors bubble up to controller as AppError (custom error)
 			switch (err.code) {
 				case "P2002":
 					const target =
 						(err.meta?.target as string[])?.[0] ?? "field";
-					throw new AppError(
-						409,
-						`${capitalize(target)} already exists`,
-					);
-				case "P2025":
-					throw new AppError(404, "Product not found"); // TODO: Should I check this here?
+					throw new AppError({
+						statusCode: 409,
+						code: PRODUCT_ERRORS.PRODUCT_CREATE,
+						message: `${capitalize(target)} already exists`,
+					});
+				// case "P2025":
+				// TODO: Should I check this here?
+				// throw new AppError({
+				// 	statusCode: 404,
+				// 	code: PRODUCT_ERRORS.NOT_FOUND,
+				// 	message: "Product not found",
+				// });
 				case "P2003":
-					throw new AppError(400, "Invalid foreign key");
+					throw new AppError({
+						statusCode: 400,
+						code: PRODUCT_ERRORS.PRODUCT_CREATE,
+						message: "Invalid foreign key",
+					});
 			}
 		}
-		throw err; // Unhandled errors go to 500 (Let controller handle unexpected errors)
+		// Unknown errors bubble up to global error handler.
+		throw err;
 	}
 }
 
-// MR_NOTE: This function returns all products with all fields (no filtering)
+// This function returns all products with all fields (no filtering)
 export async function getProducts() {
 	const products = await prisma.product.findMany();
 	return products;

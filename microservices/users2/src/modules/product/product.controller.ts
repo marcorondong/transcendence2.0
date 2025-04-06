@@ -1,11 +1,11 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { createProduct, getProducts } from "./product.service";
 import {
 	createProductInput,
 	productResponseSchema,
 	productArrayResponseSchema,
 } from "./product.schema";
-import { AppError } from "../../utils/errors";
+import { createProduct, getProducts } from "./product.service";
+import { AppError, PRODUCT_ERRORS } from "../../utils/errors";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -15,38 +15,25 @@ export async function createProductHandler(
 	request: FastifyRequest<{ Body: createProductInput }>,
 	reply: FastifyReply,
 ) {
-	try {
-		const product = await createProduct({
-			...request.body,
-			ownerId: request.user.id,
-		});
-		// Serialize/validate/filter input via Zod schemas (productResponseSchema.parse)
-		const parsedProduct = productResponseSchema.parse(product);
-		return reply.code(201).send(parsedProduct);
-	} catch (err) {
-		console.error("Create product failed:", err);
-		if (err instanceof AppError) {
-			return reply.code(err.statusCode).send({ message: err.message });
-		}
-		// TODO: Maybe add a throw here to reach the global error handler?
-		return reply.code(500).send({ message: "Internal server error" });
-	}
+	const product = await createProduct({
+		...request.body,
+		ownerId: request.user.id,
+	});
+	// Serialize/validate/filter input via Zod schemas (productResponseSchema.parse)
+	const parsedProduct = productResponseSchema.parse(product);
+	return reply.code(201).send(parsedProduct);
 }
 
+// MR_NOTE: '_' replace "request" (used when parameter is not used)
 export async function getProductsHandler(
-	request: FastifyRequest,
+	_: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	try {
-		const products = await getProducts();
-		// Serialize/validate/filter response via Zod schemas (productArrayResponseSchema.parse)
-		const parsedProducts = productArrayResponseSchema.parse(products); // Zod serializes dates
-		// MR_NOTE: This is for debugging
-		// console.log("Actual response:", products);  // Logs raw data
-		// console.log("Actual serialized response:", parsedProducts);
-		return reply.code(200).send(parsedProducts);
-	} catch (err) {
-		console.error("Get products failed:", err);
-		return reply.code(500).send({ message: "Internal server error" });
-	}
+	const products = await getProducts();
+	// Serialize/validate/filter response via Zod schemas (productArrayResponseSchema.parse)
+	const parsedProducts = productArrayResponseSchema.parse(products); // Zod serializes dates
+	// MR_NOTE: This is for debugging
+	// console.log("Actual response:", products);  // Logs raw data
+	// console.log("Actual serialized response:", parsedProducts);
+	return reply.code(200).send(parsedProducts);
 }
