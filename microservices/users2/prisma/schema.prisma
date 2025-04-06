@@ -11,10 +11,10 @@ datasource db {
 }
 
 model User {
-	id Int @id @default(autoincrement())  // TODO: Change this to uuid
+	id Int @id @default(autoincrement()) @unique // TODO: Change this to uuid
 	email String @unique
-	name String? // '?' is for an optional paramenter. ("name" later will NOT be optional).
-	passwordHash String // TODO: Change this to paswordHash
+	name String @unique // '?' is for an optional paramenter. ("name" later will NOT be optional).
+	passwordHash String
 	salt String
 	products Product[]
 }
