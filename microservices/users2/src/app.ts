@@ -5,15 +5,12 @@ import {
 	ZodTypeProvider,
 	validatorCompiler,
 	serializerCompiler,
-	jsonSchemaTransform,
 } from "fastify-type-provider-zod";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUI from "@fastify/swagger-ui";
 import userRoutes from "./modules/user/user.route";
 import productRoutes from "./modules/product/product.route";
+import { setupSwagger } from "./modules/tools/tools.route";
 import toolsRoutes from "./modules/tools/tools.route";
 import { AppError } from "./utils/errors";
-// import { request } from "http";  // It seems that this is not used
 
 // Creating server with global Zod type inference
 export const server = Fastify().withTypeProvider<ZodTypeProvider>();
@@ -70,13 +67,18 @@ server.decorate(
 	},
 );
 
-// Public paths to NOT enforce authentication
-const publicPaths = ["/healthcheck", "/docs", "/docs/json"];
-// const publicPaths = [
-// 	"/api/tools/healthcheck",
-// 	"/api/tools/swagger",
-// 	"/api/tools/swagger/json",
-// ];
+// MR_NOTE: Code snippet example for checking path ONLY when in DEVELOPMENT mode
+// const publicPaths: string[] =
+// 	process.env.NODE_ENV !== "production"
+// 		? ["/api/dev/test", "/api/debug/info"]
+// 		: [];
+
+// Public paths to NOT enforce authentication (ONLY for development. Each route must define its own authentication needs)
+const publicPaths: string[] = [
+	// "/api/tools/healthcheck",
+	// "/api/tools/swagger",
+	// "/api/tools/swagger",
+];
 
 // Hook to check route config (authentication required by default)
 server.addHook("onRequest", async (request, reply) => {
@@ -85,31 +87,31 @@ server.addHook("onRequest", async (request, reply) => {
 	);
 	const requiresAuth =
 		!isPublic && request.routeOptions?.config?.authRequired !== false;
-
 	if (!requiresAuth) return;
 	await server.authenticate(request, reply);
 });
 
-// Route for checking health (if server is up and running)
-server.get("/healthcheck", async function () {
-	return { status: "OK" };
-});
+// // Route for checking health (if server is up and running)
+// server.get("/healthcheck", async function () {
+// 	return { status: "OK" };
+// });
 
 async function main() {
-	// Register swagger/openAPI plugins
-	await server.register(fastifySwagger, {
-		openapi: {
-			info: {
-				title: "ft_transcendence Users API",
-				description: "Swagger docs for ft_transcendence project",
-				version: "1.0.0",
-			},
-		},
-		transform: jsonSchemaTransform, // Important for Zod compatibility
-	});
+	// // Register swagger/openAPI plugins
+	// await server.register(fastifySwagger, {
+	// 	openapi: {
+	// 		info: {
+	// 			title: "ft_transcendence Users API",
+	// 			description: "Swagger docs for ft_transcendence project",
+	// 			version: "1.0.0",
+	// 		},
+	// 	},
+	// 	transform: jsonSchemaTransform, // Important for Zod compatibility
+	// });
 	// Register routes
-	await server.register(fastifySwaggerUI, { routePrefix: "/docs" });
-	// await server.register(toolsRoutes, { prefix: "/api/tools" });
+	// await server.register(fastifySwaggerUI, { routePrefix: "/docs" });
+	await setupSwagger(server);
+	await server.register(toolsRoutes, { prefix: "/api" });
 	server.register(userRoutes, { prefix: "api/users" });
 	server.register(productRoutes, { prefix: "api/products" });
 	// Global error handler
