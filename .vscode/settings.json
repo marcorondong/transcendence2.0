@@ -6,8 +6,8 @@
 
 	"git.autofetch": true,
 
-	"editor.renderWhitespace": "all",
-	"editor.rulers": [80],
+	// "editor.renderWhitespace": "all",
+	// "editor.rulers": [80],
 
 	"editor.guides.highlightActiveBracketPair": true,
 	"editor.guides.highlightActiveIndentation": true,

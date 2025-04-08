@@ -1,0 +1,4 @@
+FROM nginx:1.26.2
+
+COPY ./docker/nginx/config/https-keys.sh /https-keys.sh
+RUN bash /https-keys.sh
