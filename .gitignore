@@ -102,7 +102,7 @@ lerna-debug.log*
 
 ###################### IDE & Editor Files ######################
 ### VS Code ###
-**/.vscode
+# **/.vscode
 # !.vscode/settings.json
 # !.vscode/tasks.json
 # !.vscode/launch.json

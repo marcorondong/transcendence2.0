@@ -1,0 +1,17 @@
+{
+	"recommendations": [
+		"GitHub.vscode-pull-request-github",
+		"eamodio.gitlens",
+		"Gruntfuggly.todo-tree",
+		"streetsidesoftware.code-spell-checker",
+		"esbenp.prettier-vscode",
+		"Postman.postman-for-vscode",
+		"ms-azuretools.vscode-docker",
+		"ms-vscode.makefile-tools",
+		"Prisma.prisma",
+		"yy0931.vscode-sqlite3-editor",
+		"bradlc.vscode-tailwindcss",
+		"ritwickdey.LiveServer"
+	],
+	"unwantedRecommendations": []
+}
