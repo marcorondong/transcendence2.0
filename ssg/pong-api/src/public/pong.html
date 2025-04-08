@@ -73,7 +73,7 @@
 			const ctx = canvas.getContext("2d");
 			const queryParams = window.location.search;
 			const wss = new WebSocket(
-				`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`,
+				`ws://${window.location.hostname}:${window.location.port}/pong/${queryParams}`,
 			);
 
 			let gameState = {

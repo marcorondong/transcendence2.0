@@ -9,6 +9,7 @@ bg
 xs
 keyout
 pingpong
+nginx
 
 Benjamin
 bszilas
@@ -17,6 +18,7 @@ benszilas
 Filip
 fseles
 Sekula34
+Sekula
 
 Gabriel
 gdanis

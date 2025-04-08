@@ -1,0 +1,17 @@
+{
+	"name": "config",
+	"version": "1.0.0",
+	"description": "",
+	"main": "volume/javascript/index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"typescript": "^5.8.2"
+	},
+	"dependencies": {
+		"ts-node": "^10.9.2"
+	}
+}
