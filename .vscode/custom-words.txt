@@ -8,6 +8,7 @@ tictactoe
 bg
 xs
 keyout
+nginx
 
 Benjamin
 bszilas
@@ -16,6 +17,7 @@ benszilas
 Filip
 fseles
 Sekula34
+Sekula
 
 Gabriel
 gdanis
