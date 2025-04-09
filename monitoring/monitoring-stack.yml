@@ -27,6 +27,24 @@
     networks:
       - Transcendence2.0
 
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    restart: unless-stopped
+    networks:
+      - Transcendence2.0
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+
   falco:
     image: falcosecurity/falco:latest
     container_name: falco
@@ -51,8 +69,6 @@
     image: falcosecurity/falcosidekick:latest
     container_name: falco-sidekick
     restart: unless-stopped
-    ports:
-      - "2801:2801"
     environment:
       - PROMETHEUS_EXTRA_LABELS=source=falco
       - METRICS_PORT=2801
@@ -65,7 +81,5 @@
     image: grafana/grafana:latest
     container_name: grafana
     restart: unless-stopped
-    ports:
-      - "3100:3000"
     networks:
       - Transcendence2.0
