@@ -1,23 +1,23 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const sessionSchema = z.object({
+export const sessionZodSchema = z.object({
 	userName: z.string(),
 });
 
-export const sessionResponseSchema = z.object({
+export const sessionZodResponseSchema = z.object({
 	userName: z.string(),
-	message: z.string().default('Successfully done'),
+	message: z.string().default("Successfully done"),
 });
 
-export const standardSchema = z.object({
+export const standardZodSchema = z.object({
 	userName: z.string(),
 	friendName: z.string(),
 });
 
-export const standardResponseSchema = z.object({
+export const standardZodResponseSchema = z.object({
 	userName: z.string(),
 	friendName: z.string(),
-	message: z.string().default('Successfully done'),
+	message: z.string().default("Successfully done"),
 });
 
 export const chatHistoryResponseSchema = z.object({
@@ -25,8 +25,8 @@ export const chatHistoryResponseSchema = z.object({
 	chatPartner: z.string(),
 	chatHistory: z.any(),
 	blockButton: z.boolean(),
-	message: z.string().default('Successfully done'),
+	message: z.string().default("Successfully done"),
 });
 
-export type sessionInput = z.infer<typeof sessionSchema>;
-export type standardInput = z.infer<typeof standardSchema>;
+export type sessionInput = z.infer<typeof sessionZodSchema>;
+export type standardInput = z.infer<typeof standardZodSchema>;

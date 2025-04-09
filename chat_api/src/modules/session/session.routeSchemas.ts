@@ -1,57 +1,63 @@
-import { sessionSchema, sessionResponseSchema, standardSchema, standardResponseSchema, chatHistoryResponseSchema } from "./session.zodSchemas";
+import {
+	sessionZodSchema,
+	sessionZodResponseSchema,
+	standardZodSchema,
+	standardZodResponseSchema,
+	chatHistoryResponseSchema,
+} from "./session.zodSchemas";
 
 export const initializeSchema = {
-	body: sessionSchema,
+	body: sessionZodSchema,
 	response: {
-		201: sessionResponseSchema,
+		201: sessionZodResponseSchema,
 	},
 };
 
 export const terminateSchema = {
-	body: sessionSchema,
+	body: sessionZodSchema,
 	response: {
-		204: sessionResponseSchema,
+		204: sessionZodResponseSchema,
 	},
 };
 
-export const chatHistorySchemaa = {
-	body: standardSchema,
+export const chatHistorySchema = {
+	body: standardZodSchema,
 	response: {
 		200: chatHistoryResponseSchema,
 	},
 };
 
-export const friendRequestSchemaa = {
-	body: standardSchema,
+export const friendRequestSchema = {
+	body: standardZodSchema,
 	response: {
-		200: standardResponseSchema,
+		200: standardZodResponseSchema,
 	},
 };
 
 export const friendRequestAcceptedSchema = {
-	body: standardSchema,
+	body: standardZodSchema,
 	response: {
-		200: standardResponseSchema,
+		200: standardZodResponseSchema,
 	},
 };
 
 export const updateBlockStatusSchema = {
-	body: standardSchema,
+	body: standardZodSchema,
 	response: {
-		200: standardResponseSchema,
+		200: standardZodResponseSchema,
 	},
 };
 
 export const inviteToPlaySchema = {
-	body: standardSchema,
+	body: standardZodSchema,
 	response: {
-		200: standardResponseSchema,
+		200: standardZodResponseSchema,
 	},
 };
 
 export const acceptPlayInviteSchema = {
-	body: standardSchema,
+	body: standardZodSchema,
 	response: {
-		200: standardResponseSchema,
+		200: standardZodResponseSchema,
 	},
 };

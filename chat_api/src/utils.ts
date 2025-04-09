@@ -14,83 +14,99 @@ function parseJsonMessage(message: Buffer, socket: WebSocket | null) {
 	}
 }
 
-async function messageHandler(message: string, sender: string, receiver: string, client: Client) 
-{
+async function messageHandler(
+	message: string,
+	sender: string,
+	receiver: string,
+	client: Client,
+) {
 	const isFriend = client.isUserFriend(receiver);
 	const isInBlockList = client.isUserBlocked(receiver);
 	const socket = client.getSocket();
 	if (!socket) {
-		console.log('Socket not found');
+		console.log("Socket not found");
 		return;
 	}
 	if (isInBlockList) {
-		socket.send(JSON.stringify({ message: "You have blocked this user. You can not send message to this user" }));
+		socket.send(
+			JSON.stringify({
+				message:
+					"You have blocked this user. You can not send message to this user",
+			}),
+		);
 		return;
 	}
-	if(!isFriend)
-	{
-		client.getSocket()?.send(JSON.stringify({ message: "You are not friends with this user" }));
+	if (!isFriend) {
+		client
+			.getSocket()
+			?.send(
+				JSON.stringify({
+					message: "You are not friends with this user",
+				}),
+			);
 		return;
 	}
 	let isClientBlocked = false;
 	const receiverClient = liveClients.get(receiver);
 
-	if(receiverClient)
-	{
+	if (receiverClient) {
 		isClientBlocked = receiverClient.isUserBlocked(sender);
-	}else
-	{
+	} else {
 		isClientBlocked = await checkBlockStatusInDB(receiver, sender);
 	}
 
 	addMessageToDatabase(sender, receiver, message, isClientBlocked);
 	client.addToChatHistory(receiver, new Message(message, sender));
 	socket.send(JSON.stringify({ message: message, sender: sender }));
-	if(receiverClient && !isClientBlocked)
-	{
+	if (receiverClient && !isClientBlocked) {
 		receiverClient.addToChatHistory(sender, new Message(message, sender));
-		receiverClient.getSocket()?.send(JSON.stringify({ message: message, sender: sender }));
-
+		receiverClient
+			.getSocket()
+			?.send(JSON.stringify({ message: message, sender: sender }));
 	}
 }
 
-export function onClientMessage(message: string, client: Client): void
-{
+export function onClientMessage(message: string, client: Client): void {
 	const data = parseJsonMessage(Buffer.from(message), client.getSocket());
-	if (!data)
-		return;
+	if (!data) return;
 	const userName = client.getUserName();
-	if(data.message && data.sender && data.receiver && data.sender === userName && data.receiver !== userName)
-	{
+	if (
+		data.message &&
+		data.sender &&
+		data.receiver &&
+		data.sender === userName &&
+		data.receiver !== userName
+	) {
 		messageHandler(data.message, data.sender, data.receiver, client);
-	}
-	else
-	{
-		client.getSocket()?.send(JSON.stringify({ message: "Something went wrong" }));
+	} else {
+		client
+			.getSocket()
+			?.send(JSON.stringify({ message: "Something went wrong" }));
 	}
 	console.log(`Received message from ${userName}: ${message}`);
 }
 
-export function onClientDisconnect(code: number, reason: Buffer, client: Client): void
-{
+export function onClientDisconnect(
+	code: number,
+	reason: Buffer,
+	client: Client,
+): void {
 	// should I remove the client from memory?
 	try {
 		const userName = client.getUserName();
 
 		if (!liveClients.has(userName)) {
 			console.log("Warning: Client not found in live clients");
-		}
-		else
-		{
+		} else {
 			liveClients.delete(userName);
 			console.log("Client removed from memory:", userName);
 		}
 
 		// client.getSocket()?.close(code, reason.toString());
-		console.log(`Client disconnected: ${userName}, Code: ${code}, Reason: ${reason.toString()}`);
-	}
-	catch (error) {
+		console.log(
+			`Client disconnected: ${userName}, Code: ${code}, Reason: ${reason.toString()}`,
+		);
+	} catch (error) {
 		console.error("Error removing client from memory:", error);
 	}
 }
-

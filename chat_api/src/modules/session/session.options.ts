@@ -1,6 +1,23 @@
-import { initializeUserSession, terminateUserSession, provideChatHistory, friendRequest, friendRequestAccepted, updateBlockStatus, inviteToPlay, acceptPlayInvite } from './session.controllers';
-import { initializeSchema, terminateSchema, chatHistorySchemaa, friendRequestSchemaa, friendRequestAcceptedSchema, updateBlockStatusSchema, inviteToPlaySchema, acceptPlayInviteSchema } from "./session.routeSchemas";
-
+import {
+	initializeUserSession,
+	terminateUserSession,
+	provideChatHistory,
+	friendRequest,
+	friendRequestAccepted,
+	updateBlockStatus,
+	inviteToPlay,
+	acceptPlayInvite,
+} from "./session.controllers";
+import {
+	initializeSchema,
+	terminateSchema,
+	chatHistorySchema,
+	friendRequestSchema,
+	friendRequestAcceptedSchema,
+	updateBlockStatusSchema,
+	inviteToPlaySchema,
+	acceptPlayInviteSchema,
+} from "./session.routeSchemas";
 
 export const initializeOpt = {
 	schema: initializeSchema,
@@ -13,12 +30,12 @@ export const terminateOpt = {
 };
 
 export const chatHistoryOpt = {
-	schema: chatHistorySchemaa,
+	schema: chatHistorySchema,
 	handler: provideChatHistory,
 };
 
 export const friendRequestOpt = {
-	schema: friendRequestSchemaa,
+	schema: friendRequestSchema,
 	handler: friendRequest,
 };
 

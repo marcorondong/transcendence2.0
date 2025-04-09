@@ -1,10 +1,8 @@
+import { PrismaClient } from "@prisma/client";
 
-import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
 
-const prisma = new PrismaClient()
-
-export async function createUserInDB (userName: string)
-{
+export async function createUserInDB(userName: string) {
 	const newUser = await prisma.user.create({
 		data: {
 			userName: userName,
@@ -13,8 +11,7 @@ export async function createUserInDB (userName: string)
 	return newUser;
 }
 
-export async function findUserInDB (userName: string)
-{
+export async function findUserInDB(userName: string) {
 	const existingClient = await prisma.user.findUnique({
 		where: {
 			userName: userName,
@@ -27,10 +24,12 @@ export async function findUserInDB (userName: string)
 	return existingClient;
 }
 
-export async function findChatHistoryInDB (userName: string, chatPartner: string)
-{
+export async function findChatHistoryInDB(
+	userName: string,
+	chatPartner: string,
+) {
 	const sortUsers = [userName, chatPartner].sort();
-	const chatId = sortUsers.join('-');
+	const chatId = sortUsers.join("-");
 	const chatHistory = await prisma.conversation.findUnique({
 		where: {
 			conversationId: chatId,
@@ -39,10 +38,7 @@ export async function findChatHistoryInDB (userName: string, chatPartner: string
 			messages: {
 				where: {
 					NOT: {
-						AND: [
-							{ sender: chatPartner },
-							{ block: true },
-						],
+						AND: [{ sender: chatPartner }, { block: true }],
 					},
 				},
 				select: {
@@ -56,8 +52,11 @@ export async function findChatHistoryInDB (userName: string, chatPartner: string
 	return chatHistory?.messages || [];
 }
 
-export async function createNotificationInDB (userName: string, notification: string, pending: boolean)
-{
+export async function createNotificationInDB(
+	userName: string,
+	notification: string,
+	pending: boolean,
+) {
 	await prisma.user.update({
 		where: {
 			userName: userName,
@@ -73,8 +72,10 @@ export async function createNotificationInDB (userName: string, notification: st
 	});
 }
 
-export async function checkBlockStatusInDB (userName: string, friendName: string)
-{
+export async function checkBlockStatusInDB(
+	userName: string,
+	friendName: string,
+) {
 	const existingUser = await prisma.user.findUnique({
 		where: {
 			userName: userName,
@@ -91,16 +92,23 @@ export async function checkBlockStatusInDB (userName: string, friendName: string
 		},
 	});
 
-	if (!existingUser || !existingUser.friendList || existingUser.friendList.length === 0) {
-		console.log('Warning: Friend not found or friend list is empty');
+	if (
+		!existingUser ||
+		!existingUser.friendList ||
+		existingUser.friendList.length === 0
+	) {
+		console.log("Warning: Friend not found or friend list is empty");
 		return false;
 	}
 	const blockStatus = existingUser.friendList[0].block;
 	return blockStatus;
 }
 
-export async function updateBlockStatusInDB(userName: string, friendName: string, blockStatus: boolean)
-{
+export async function updateBlockStatusInDB(
+	userName: string,
+	friendName: string,
+	blockStatus: boolean,
+) {
 	await prisma.user.update({
 		where: {
 			userName: userName,
@@ -120,8 +128,13 @@ export async function updateBlockStatusInDB(userName: string, friendName: string
 	});
 }
 
-export async function updateNotificationCreateFriendAndNotification (userName: string, friendName: string, notification: string, updateNotificationStatus: string, pending: boolean)
-{
+export async function updateNotificationCreateFriendAndNotification(
+	userName: string,
+	friendName: string,
+	notification: string,
+	updateNotificationStatus: string,
+	pending: boolean,
+) {
 	await prisma.user.update({
 		where: {
 			userName: userName,
@@ -151,8 +164,12 @@ export async function updateNotificationCreateFriendAndNotification (userName: s
 	});
 }
 
-export async function createFriendAndNotification(userName: string, friendName: string, notification: string, pending: boolean)
-{
+export async function createFriendAndNotification(
+	userName: string,
+	friendName: string,
+	notification: string,
+	pending: boolean,
+) {
 	await prisma.user.update({
 		where: {
 			userName: userName,
@@ -174,17 +191,22 @@ export async function createFriendAndNotification(userName: string, friendName: 
 	});
 }
 
-export async function addMessageToDatabase(sender: string, receiver: string, message: string, isBlocked: boolean) {
-	console.log('Adding message to conversation...')
-	const sortUsers = [sender, receiver].sort()
-	const conversationId = `${sortUsers[0]}-${sortUsers[1]}`
+export async function addMessageToDatabase(
+	sender: string,
+	receiver: string,
+	message: string,
+	isBlocked: boolean,
+) {
+	console.log("Adding message to conversation...");
+	const sortUsers = [sender, receiver].sort();
+	const conversationId = `${sortUsers[0]}-${sortUsers[1]}`;
 	const existingConversation = await prisma.conversation.findFirst({
 		where: {
 			conversationId: conversationId,
 		},
-	})
+	});
 	if (!existingConversation) {
-		console.log('Conversation not found, creating new conversation...')
+		console.log("Conversation not found, creating new conversation...");
 		const newConversation = await prisma.conversation.create({
 			data: {
 				conversationId: conversationId,
@@ -200,9 +222,9 @@ export async function addMessageToDatabase(sender: string, receiver: string, mes
 					],
 				},
 			},
-		})
+		});
 	} else {
-		console.log('Adding message to existing conversation...')
+		console.log("Adding message to existing conversation...");
 		const updatedConversation = await prisma.conversation.update({
 			where: {
 				id: existingConversation.id,
@@ -218,6 +240,6 @@ export async function addMessageToDatabase(sender: string, receiver: string, mes
 					],
 				},
 			},
-		})
+		});
 	}
 }

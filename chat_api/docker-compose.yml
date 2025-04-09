@@ -1,6 +1,6 @@
 services:
   chat_api:
-    image: chat_api_img 
+    image: chat_api_img
     container_name: chat_api
     build: ./
     volumes:
