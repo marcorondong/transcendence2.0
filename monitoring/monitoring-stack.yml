@@ -1,0 +1,71 @@
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - Transcendence2.0
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - Transcendence2.0
+
+  falco:
+    image: falcosecurity/falco:latest
+    container_name: falco
+    restart: unless-stopped
+    cap_drop:
+      - all
+    cap_add:
+      - sys_admin
+      - sys_resource
+      - sys_ptrace
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - /proc:/host/proc:ro
+      - /etc:/host/etc:ro
+      - /var/log/falco_events:/var/log/falco_events
+      - ./falco.yaml:/etc/falco/falco.yaml
+      - ./falco_rules.yaml:/etc/falco/falco_rules.yaml
+    -networks:
+      - Transcendence2.0
+
+  falco-sidekick:
+    image: falcosecurity/falcosidekick:latest
+    container_name: falco-sidekick
+    restart: unless-stopped
+    ports:
+      - "2801:2801"
+    environment:
+      - PROMETHEUS_EXTRA_LABELS=source=falco
+      - METRICS_PORT=2801
+    depends_on:
+      - falco
+    networks:
+      - Transcendence2.0
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    networks:
+      - Transcendence2.0

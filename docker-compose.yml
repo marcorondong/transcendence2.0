@@ -12,6 +12,7 @@ services:
     command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
     networks:
       - Transcendence2.0
+
   ai-bot:
     build:
       context: ./ssg
@@ -40,6 +41,9 @@ services:
     restart: unless-stopped
     networks:
       - Transcendence2.0
+
+include:
+  monitoring/monitoring-stack.yml
 
 networks:
   Transcendence2.0:

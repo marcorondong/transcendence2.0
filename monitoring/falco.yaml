@@ -1,0 +1,57 @@
+# falco.yaml - config file for Falco
+
+# modern_ebpf
+engine:
+  kind: modern_ebpf
+
+# Where rules files are located
+rules_file:
+  - /etc/falco/falco_rules.yaml
+  - /etc/falco/falco_rules.local.yaml
+
+# Whether to output events in JSON or text
+json_output: true
+json_include_output_property: true
+http_output:
+  enabled: true
+  url: "http://falco-sidekick:2801/"
+
+# Write Falco events to stdout
+stdout_output:
+  enabled: true
+
+# Send Falco events to another program via STDIN
+program_output:
+  enabled: false
+  keep_alive: false
+  program: "curl -X POST -H 'Content-Type: application/json' -d @- http://falco-sidekick:2801/"
+
+# Optional: file output (can disable if not needed)
+# good to keep logs in human readable format
+file_output:
+  enabled: true
+  keep_alive: false
+  filename: /var/log/falco_events/falco_events.log
+
+# Priority levels to log (debug, info, notice, warning, error, critical, alert, emergency)
+log_level: info
+
+# log syslog
+syslog_output:
+  enabled: false
+
+# Time format in logs
+time_format_iso_8601: true
+
+# Modern eBPF driver (detected automatically)
+driver: ebpf
+
+# If using a containerized deployment, set this to avoid logging too much from itself
+syscall_event_drops:
+  threshold: 0.1
+  rate: 0.03333
+  max_burst: 1
+
+# Gvisor support (default: false)
+gvisor_config:
+  enabled: false
