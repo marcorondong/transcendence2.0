@@ -1,0 +1,39 @@
+npm init
+npx tsc --init
+
+
+npx prisma init --datasource-provider sqlite
+DATABASE_URL="file:./DB/user.db"
+npx prisma migrate dev --name myMigrationInit
+
+npx prisma generate
+
+# delete and reset db
+
+npx prisma migrate reset
+rm -rf prisma/migrations
+npx prisma migrate dev --name init
+
+# links
+jwt.io
+npx prisma studio
+
+
+const handlers = {
+    message: messageHandler,
+    notification: notificationHandler,
+    // Add other types here as needed
+};
+
+export function onClientRequest(message: string, currentClient: Client): void {
+    const data = parseJsonMessage(Buffer.from(message), currentClient.getSocket());
+    if (!data) return;
+
+    console.log(data);
+
+    // Identify the handler based on the type of the data
+    const handler = handlers[data.type];
+    if (handler) {
+        handler(data, currentClient);  // Call the appropriate handler
+    }
+}

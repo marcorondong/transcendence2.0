@@ -1,22 +1,22 @@
 
 export class Message 
 {
-	private readonly text: string;
-	private readonly isOwn: boolean;
+	private readonly message: string;
+	private readonly sender: string;
 
-	constructor(text: string, isOwn: boolean) 
+	constructor(message: string, sender: string) 
 	{
-		this.text = text;
-		this.isOwn = isOwn;
+		this.message = message;
+		this.sender = sender;
 	}
 
-	getText(): string
+	getMessage(): string
 	{
-		return this.text;
+		return this.message;
 	}
 
-	getIsOwn(): boolean
+	getSender(): string
 	{
-		return this.isOwn;
+		return this.sender;
 	}
 }

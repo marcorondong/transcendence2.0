@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int          @id @default(autoincrement())
+  userName       String @unique
+  friendList     Friend[]
+  notifications   Notification[]
+}
+
+model Friend {
+  id             Int     @id @default(autoincrement())
+//   friendId       String  @unique
+  friendName     String
+  block          Boolean @default(false)
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int
+}
+
+model Notification {
+  id             Int     @id @default(autoincrement())
+  notification   String
+  pending        Boolean @default(true)
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int
+}
+
+model Conversation {
+  id             Int     @id @default(autoincrement())
+  conversationId String @unique
+  user1          String
+  user2          String
+  block          Boolean @default(false)
+  messages       Message[]
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  message        String
+  createdAt      DateTime     @default(now())
+  sender         String
+  block          Boolean @default(false)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId Int
+}

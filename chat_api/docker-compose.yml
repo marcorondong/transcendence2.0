@@ -5,17 +5,24 @@ services:
     build: ./
     volumes:
       - ./src/:/chat_api/src/
+      - ./prisma/:/chat_api/prisma/
     ports:
       - 3002:3002
     secrets:
       - cert.pem
       - key.pem
+      - api.key
     environment:
       SSL_CERT_FILE: "/run/secrets/cert.pem"
       SSL_KEY_FILE: "/run/secrets/key.pem"
+      API_KEY_FILE: "/run/secrets/api.key"
+      DATABASE_URL: "file:/chat_api/prisma/DB/user.db"
+    command: ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
 
 secrets:
   cert.pem:
     file: ./server-keys/cert.pem
   key.pem:
     file: ./server-keys/key.pem
+  api.key:
+    file: ./server-keys/api.key
