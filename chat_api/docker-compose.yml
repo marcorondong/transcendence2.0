@@ -1,28 +1,68 @@
 services:
   chat_api:
-    image: chat_api_img
-    container_name: chat_api
-    build: ./
-    volumes:
-      - ./src/:/chat_api/src/
-      - ./prisma/:/chat_api/prisma/
-    ports:
-      - 3002:3002
+    image: ${CHAT_IMAGE_NAME}
+    container_name: ${CHAT_CONTAINER_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NO_ARGS: "some_value"
+        # no-cache: true
+    env_file:
+      - .env
     secrets:
       - cert.pem
       - key.pem
       - api.key
+      - db.key
     environment:
       SSL_CERT_FILE: "/run/secrets/cert.pem"
       SSL_KEY_FILE: "/run/secrets/key.pem"
       API_KEY_FILE: "/run/secrets/api.key"
       DATABASE_URL: "file:/chat_api/prisma/DB/user.db"
+    volumes:
+      - src:/chat_api/src/
+      - prisma:/chat_api/prisma/
+    ports:
+      - "${CHAT_PORT}:${CHAT_PORT}"
+    # networks:
+    #   - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${CHAT_PORT}/healthCheck"]
+      interval: 30s
+      retries: 3
+      start_period: 15s
+      timeout: 10s
     command: ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
+    restart: always
 
 secrets:
   cert.pem:
-    file: ./server-keys/cert.pem
+    file: ./secrets/cert.pem
   key.pem:
-    file: ./server-keys/key.pem
+    file: ./secrets/key.pem
   api.key:
-    file: ./server-keys/api.key
+    file: ./secrets/api.key
+  db.key:
+    file: ./secrets/db.key
+
+# networks:
+#   backend:
+#     driver: bridge
+#   frontend:
+#     driver: bridge
+
+
+volumes:
+  src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./src
+      o: bind
+  prisma:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./prisma
+      o: bind

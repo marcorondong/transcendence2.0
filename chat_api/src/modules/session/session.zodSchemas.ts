@@ -22,9 +22,15 @@ export const standardZodResponseSchema = z.object({
 
 export const chatHistoryResponseSchema = z.object({
 	userName: z.string(),
-	chatPartner: z.string(),
+	friendName: z.string(),
 	chatHistory: z.any(),
 	blockButton: z.boolean(),
+	message: z.string().default("Successfully done"),
+});
+
+export const notificationResponseSchema = z.object({
+	userName: z.string(),
+	notification: z.any(),
 	message: z.string().default("Successfully done"),
 });
 

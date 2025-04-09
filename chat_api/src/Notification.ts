@@ -1,17 +1,25 @@
 export class Notification {
-	private readonly notification: string;
-	private readonly pending: boolean;
+	private notification: string;
+	private pending: boolean;
 
 	constructor(notification: string, pending: boolean) {
 		this.notification = notification;
 		this.pending = pending;
 	}
 
-	getMessage(): string {
+	getNotification(): string {
 		return this.notification;
 	}
 
-	getSender(): boolean {
+	getPending(): boolean {
 		return this.pending;
+	}
+
+	setNotification(notification: string): void {
+		this.notification = notification;
+	}
+
+	setPending(pending: boolean): void {
+		this.pending = pending;
 	}
 }

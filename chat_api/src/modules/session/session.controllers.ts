@@ -1,5 +1,4 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-// import { sessionInput, sessionResponseInput, sessionResponseSchema, chatHistoryResponseSchema , chatHistoryInput, friendRequestInput, friendRequestResponseSchema} from "./session.zodSchemas";
 import {
 	sessionInput,
 	sessionZodResponseSchema,
@@ -7,7 +6,6 @@ import {
 	standardZodResponseSchema,
 	chatHistoryResponseSchema,
 } from "./session.zodSchemas";
-import { errorHandler } from "../../utils/errors";
 import { Client } from "../../Client";
 import { liveClients } from "../../index";
 import { Message } from "../../Message";
@@ -22,6 +20,7 @@ import {
 	createFriendAndNotification,
 	updateBlockStatusInDB,
 } from "../../utils/dbUtils";
+import { m } from "../../config/msgs";
 
 export async function initializeUserSession(
 	request: FastifyRequest<{ Body: sessionInput }>,
@@ -47,9 +46,9 @@ export async function initializeUserSession(
 				);
 				const blockedList = new Set(
 					existingClient.friendList
-						.filter((friend) => friend.block === true) // Filter out only blocked friends
+						.filter((friend) => friend.block === true)
 						.map((friend) => friend.friendName),
-				); // Extract the friend names
+				);
 				const notifications = new Set(
 					existingClient.notifications.map(
 						(notification) =>
@@ -81,7 +80,6 @@ export async function initializeUserSession(
 			}
 		}
 	} catch (error) {
-		// errorHandler(error, req, reply);
 		console.error("Error initializing user session:", error);
 		return reply.code(500).send(error);
 	}
@@ -102,16 +100,21 @@ export async function terminateUserSession(
 				"Warning: Client does not exist in memory to terminate";
 			reply.code(409).send(parsedUser);
 		} else {
-			liveClients.get(userName)?.getSocket()?.close();
-			console.log("Client socket closed by terminateUserSession");
-			// liveClients.delete(userName);
-			// console.log("Client removed from memory:", userName);
+			const socket = liveClients.get(userName)?.getSocket();
+			if (socket) {
+				socket.close();
+				console.log("Client socket closed by terminateUserSession");
+			} else {
+				console.log(
+					"Warning: Client not connected. Deleting from memory",
+				);
+				liveClients.delete(userName);
+			}
 			parsedUser.message = "Client has been terminated";
 			reply.code(200).send(parsedUser);
 		}
 	} catch (error) {
 		console.error("Error terminating user session:", error);
-		// errorHandler(error, request, reply);
 		return reply.code(500).send(error);
 	}
 }
@@ -121,17 +124,34 @@ export async function provideChatHistory(
 	reply: FastifyReply,
 ) {
 	try {
-		const user = request.body as standardInput;
+		const user = request.body;
 		const userName = user.userName;
 		const friendName = user.friendName;
 		const client = liveClients.get(userName);
-		const parsedUser = chatHistoryResponseSchema.parse(user);
+		if (userName === friendName) {
+			console.log("Warning: userName and friendName cannot be the same");
+			return reply.code(409).send(
+				JSON.stringify({
+					userName: userName,
+					friendName: friendName,
+					chatHistory: [],
+					blockButton: false,
+					message:
+						"Warning: userName and friendName cannot be the same",
+				}),
+			);
+		}
 		if (!client) {
 			console.log("Warning: Client does not exist in memory");
-			// parsedUser.chatHistory = [];
-			parsedUser.message =
-				"Warning: Client does not exist in memory to retrieve chat history";
-			reply.code(409).send(parsedUser);
+			return reply.code(409).send(
+				JSON.stringify({
+					userName: userName,
+					friendName: friendName,
+					chatHistory: [],
+					blockButton: false,
+					message: "Warning: Client does not exist in memory",
+				}),
+			);
 		} else {
 			if (!client.getChatHistory().has(friendName)) {
 				console.log(
@@ -145,14 +165,19 @@ export async function provideChatHistory(
 					(message) => new Message(message.message, message.sender),
 				);
 				client.getChatHistory().set(friendName, messages);
-				parsedUser.chatHistory = chatHistory;
-				parsedUser.blockButton = client.isUserBlocked(friendName);
-				parsedUser.message =
-					"Chat history has been retrieved from database";
-				reply.code(200).send(parsedUser);
+				reply.code(200).send(
+					JSON.stringify({
+						userName: userName,
+						friendName: friendName,
+						chatHistory: chatHistory,
+						blockButton: client.isUserBlocked(friendName),
+						message:
+							"Chat history has been retrieved from database",
+					}),
+				);
 			} else {
 				console.log("Chat history exists in memory");
-				parsedUser.chatHistory =
+				const history =
 					client
 						.getChatHistory()
 						.get(friendName)
@@ -160,14 +185,61 @@ export async function provideChatHistory(
 							message: message.getMessage(),
 							sender: message.getSender(),
 						})) || [];
-				parsedUser.blockButton = client.isUserBlocked(friendName);
-				parsedUser.message =
-					"Chat history has been retrieved from memory";
-				reply.code(200).send(parsedUser);
+				reply.code(200).send(
+					JSON.stringify({
+						userName: userName,
+						friendName: friendName,
+						chatHistory: history,
+						blockButton: client.isUserBlocked(friendName),
+						message: "Chat history has been retrieved from memory",
+					}),
+				);
 			}
 		}
 	} catch (error) {
 		console.error("Error providing chat history:", error);
+		return reply.code(500).send(error);
+	}
+}
+
+export async function provideNotifications(
+	request: FastifyRequest<{ Body: sessionInput }>,
+	reply: FastifyReply,
+) {
+	try {
+		const user = request.body as sessionInput;
+		const userName = user.userName;
+		if (!liveClients.has(userName)) {
+			console.log("Warning: Client does not exist in memory");
+			return reply.code(409).send(
+				JSON.stringify({
+					userName: userName,
+					notification: "",
+					pending: false,
+					message: "Warning: Client does not exist in memory",
+				}),
+			);
+		} else {
+			const client = liveClients.get(userName);
+			if (client) {
+				const notifications = client
+					.getNotifications()
+					.map((notification) => ({
+						notification: notification.getNotification(),
+						pending: notification.getPending(),
+					}));
+				reply.code(200).send(
+					JSON.stringify({
+						userName: userName,
+						notification: notifications,
+						message:
+							"Notifications have been retrieved from memory",
+					}),
+				);
+			}
+		}
+	} catch (error) {
+		console.error("Error providing notifications:", error);
 		return reply.code(500).send(error);
 	}
 }
@@ -177,62 +249,47 @@ export async function friendRequest(
 	reply: FastifyReply,
 ) {
 	try {
-		const data = request.body as standardInput;
+		const data = request.body;
 		const userName = data.userName;
 		const friendName = data.friendName;
 		const parsedUser = standardZodResponseSchema.parse(data);
-
-		if (!userName || !friendName || userName === friendName) {
-			console.log("Warning: Invalid friend request");
-			const parsedUser = standardZodResponseSchema.parse(data);
-			parsedUser.message = "Warning: Invalid friend request";
-			reply.code(409).send(parsedUser);
-			return;
+		if (userName === friendName) {
+			parsedUser.message = m.invalid;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		}
-
 		const client = liveClients.get(userName);
-
 		if (!client) {
-			console.log(
-				"Warning: Client does not exist in memory (not initialized)",
-			);
-			parsedUser.message =
-				"Warning: Client does not exist in memory to send friend request (not initialized)";
-			reply.code(409).send(parsedUser);
-			return;
+			parsedUser.message = m.notInitialized;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		}
-
 		if (client.isUserFriend(friendName)) {
-			console.log("Warning: Already friends");
-			parsedUser.message = "Warning: Already friends";
-			reply.code(409).send(parsedUser);
-			return;
+			parsedUser.message = m.alreadyFriends;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		} else if (client.isUserBlocked(friendName)) {
-			console.log("Warning: User is blocked");
-			parsedUser.message = "Warning: User is blocked";
-			reply.code(409).send(parsedUser);
-			return;
+			parsedUser.message = m.isBlocked;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		}
-
 		const friendClient = liveClients.get(friendName);
 		let friendExist = false;
-
 		if (friendClient) {
 			friendExist = true;
 		} else if (await findUserInDB(friendName)) {
 			friendExist = true;
 		}
 		if (!friendExist) {
-			console.log("Warning: No such user registered");
-			parsedUser.message = "Warning: Friend does not exist in database";
-			reply.code(409).send(parsedUser);
-			return;
+			parsedUser.message = m.userNotFound;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		}
-
-		const userNameNotification = `${friendName} has been invited to be your friend`;
-		const friendNameNotification = `${userName} has invited you to be friends`;
-		await createNotificationInDB(userName, userNameNotification, false);
-
+		await createNotificationInDB(
+			userName,
+			m.reqUserNotif(friendName),
+			false,
+		);
 		let blocked: boolean = false;
 		if (friendClient) {
 			blocked = friendClient.isUserBlocked(userName);
@@ -242,30 +299,31 @@ export async function friendRequest(
 		if (!blocked) {
 			await createNotificationInDB(
 				friendName,
-				friendNameNotification,
+				m.reqFriendNotif(userName),
 				true,
 			);
 		}
-
 		client.getSocket()?.send(
 			JSON.stringify({
-				notification: userNameNotification,
+				notification: m.reqUserNotif(friendName),
 				pending: false,
 				friendRequest: friendName,
 			}),
 		);
+		client.addNotification(m.reqUserNotif(friendName), false);
 		if (friendClient) {
 			if (!blocked) {
+				friendClient.addNotification(m.reqFriendNotif(userName), true);
 				friendClient.getSocket()?.send(
 					JSON.stringify({
-						notification: friendNameNotification,
+						notification: m.reqFriendNotif(userName),
 						pending: true,
 						friendRequest: userName,
 					}),
 				);
 			}
 		}
-		parsedUser.message = "Friend request sent";
+		parsedUser.message = m.successMsg;
 		reply.code(200).send(parsedUser);
 	} catch (error) {
 		console.error("Error sending friend request:", error);
@@ -284,34 +342,31 @@ export async function friendRequestAccepted(
 		const client = liveClients.get(userName);
 		const parsedUser = standardZodResponseSchema.parse(user);
 		if (!client) {
-			console.log("Warning: Client does not exist in memory");
-			parsedUser.message =
-				"Warning: Client does not exist in memory to accept friend request";
-			reply.code(409).send(parsedUser);
+			parsedUser.message = m.notInitialized;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		} else {
 			if (!client.isUserFriend(friendName)) {
 				console.log("Friend request accepted");
-				const userNameNotification = `${friendName}'s friend request has been accepted`;
-				const friendNameNotification = `${userName} has accepted your friend request`;
-				const updateNotification = `${friendName} has invited you to be friends`;
 				await updateNotificationCreateFriendAndNotification(
 					userName,
 					friendName,
-					userNameNotification,
-					updateNotification,
+					m.acceptUserNotif(friendName),
+					m.reqFriendNotif(friendName),
 					false,
 				);
 				await createFriendAndNotification(
 					friendName,
 					userName,
-					friendNameNotification,
+					m.acceptFriendNotif(userName),
 					false,
 				);
 				client.addToFriendList(friendName);
 				client.getChatHistory().set(friendName, []);
+				client.addNotification(m.acceptUserNotif(friendName), false);
 				client.getSocket()?.send(
 					JSON.stringify({
-						notification: userNameNotification,
+						notification: m.acceptUserNotif(friendName),
 						pending: false,
 						friendRequestAccepted: friendName,
 					}),
@@ -320,22 +375,25 @@ export async function friendRequestAccepted(
 				if (friendClient) {
 					friendClient.addToFriendList(userName);
 					friendClient.getChatHistory().set(userName, []);
+					friendClient.addNotification(
+						m.acceptFriendNotif(userName),
+						false,
+					);
 					friendClient.getSocket()?.send(
 						JSON.stringify({
-							notification: friendNameNotification,
+							notification: m.acceptFriendNotif(userName),
 							pending: false,
 							friendRequestAccepted: userName,
 						}),
 					);
 				}
-				console.log("Friend request accepted and saved to database");
-				parsedUser.message =
-					"Friend request accepted and saved to database";
-				reply.code(201).send(parsedUser);
+				parsedUser.message = m.successMsg;
+				console.log(parsedUser);
+				return reply.code(201).send(parsedUser);
 			} else {
-				console.log("Warning: They are already friends");
-				parsedUser.message = "Warning: They are already friends";
-				reply.code(409).send(parsedUser);
+				parsedUser.message = m.alreadyFriends;
+				console.log(parsedUser);
+				return reply.code(409).send(parsedUser);
 			}
 		}
 	} catch (error) {
@@ -355,38 +413,35 @@ export async function updateBlockStatus(
 		const client = liveClients.get(userName);
 		const parsedUser = standardZodResponseSchema.parse(user);
 		if (!client) {
-			console.log("Warning: Client does not exist in memory");
-			parsedUser.message =
-				"Warning: Client does not exist in memory to update block status";
-			reply.code(409).send(parsedUser);
+			parsedUser.message = m.notInitialized;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		} else {
 			if (client.isUserBlocked(friendName)) {
-				console.log("Unblocking friend");
 				await updateBlockStatusInDB(userName, friendName, false);
 				client.removeFromBlockList(friendName);
-				console.log("Friend unblocked and saved to database");
-				parsedUser.message = "Friend unblocked and saved to database";
-				reply.code(200).send(parsedUser);
+				parsedUser.message = m.unblock;
+				console.log(parsedUser);
+				return reply.code(200).send(parsedUser);
 			} else if (client.isUserFriend(friendName)) {
-				console.log("Blocking friend");
 				await updateBlockStatusInDB(userName, friendName, true);
 				client.addToBlockList(friendName);
-				console.log("Friend blocked and saved to database");
-				parsedUser.message = "Friend blocked and saved to database";
-				reply.code(200).send(parsedUser);
+				parsedUser.message = m.block;
+				console.log(parsedUser);
+				return reply.code(200).send(parsedUser);
 			} else {
-				console.log("Warning: Not friends");
-				parsedUser.message = "Warning: Not friends";
-				reply.code(409).send(parsedUser);
+				parsedUser.message = m.notFriends;
+				console.log(parsedUser);
+				return reply.code(409).send(parsedUser);
 			}
 		}
 	} catch (error) {
 		console.error("Error updating block status:", error);
-		reply.code(500).send(error);
-		return error;
+		return reply.code(500).send(error);
 	}
 }
 
+// TODO: Refactor this function
 export async function inviteToPlay(
 	request: FastifyRequest<{ Body: standardInput }>,
 	reply: FastifyReply,
@@ -398,23 +453,20 @@ export async function inviteToPlay(
 		const client = liveClients.get(userName);
 		const parsedUser = standardZodResponseSchema.parse(user);
 		if (!client) {
-			console.log("Warning: Client does not exist in memory");
-			parsedUser.message =
-				"Warning: Client does not exist in memory to invite to play";
-			reply.code(409).send(parsedUser);
+			parsedUser.message = m.notInitialized;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
+		} else if (!client.isUserFriend(friendName)) {
+			parsedUser.message = m.notFriends;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		} else {
-			const userNameNotification = `${friendName} has been invited to play`;
-			const friendNameNotification = `${userName} has invited you to play`;
-			if (
-				client.isUserFriend(friendName) &&
-				!client.isUserBlocked(friendName)
-			) {
+			if (!client.isUserBlocked(friendName)) {
 				await createNotificationInDB(
 					userName,
-					userNameNotification,
+					m.inviteUserNotif(friendName),
 					false,
 				);
-
 				const friendClient = liveClients.get(friendName);
 				let blocked: boolean = false;
 				if (friendClient) {
@@ -425,45 +477,49 @@ export async function inviteToPlay(
 				if (!blocked) {
 					await createNotificationInDB(
 						friendName,
-						friendNameNotification,
+						m.inviteFriendNotif(userName),
 						true,
 					);
 				}
-
+				client.addNotification(m.inviteUserNotif(friendName), false);
 				client.getSocket()?.send(
 					JSON.stringify({
-						notification: userNameNotification,
+						notification: m.inviteUserNotif(friendName),
 						pending: false,
 						inviteToPlay: friendName,
 					}),
 				);
 				if (friendClient) {
 					if (!blocked) {
+						friendClient.addNotification(
+							m.inviteFriendNotif(userName),
+							true,
+						);
 						friendClient.getSocket()?.send(
 							JSON.stringify({
-								notification: friendNameNotification,
+								notification: m.inviteFriendNotif(userName),
 								pending: true,
 								inviteToPlay: userName,
 							}),
 						);
 					}
 				}
-				console.log("Friend invited to play");
-				parsedUser.message = "Friend invited to play";
-				reply.code(200).send(parsedUser);
+				parsedUser.message = m.successMsg;
+				console.log(parsedUser);
+				return reply.code(200).send(parsedUser);
 			} else {
-				console.log("Warning: Not friends or blocked");
-				parsedUser.message = "Warning: Not friends or blocked";
-				reply.code(409).send(parsedUser);
+				parsedUser.message = m.isBlocked;
+				console.log(parsedUser);
+				return reply.code(409).send(parsedUser);
 			}
 		}
 	} catch (error) {
 		console.error("Error inviting to play:", error);
-		reply.code(500).send(error);
-		return error;
+		return reply.code(500).send(error);
 	}
 }
 
+// TODO: Refactor this function
 export async function acceptPlayInvite(
 	request: FastifyRequest<{ Body: standardInput }>,
 	reply: FastifyReply,
@@ -475,58 +531,74 @@ export async function acceptPlayInvite(
 		const client = liveClients.get(userName);
 		const parsedUser = standardZodResponseSchema.parse(user);
 		if (!client) {
-			console.log("Warning: Client does not exist in memory");
-			parsedUser.message =
-				"Warning: Client does not exist in memory to accept invite";
-			reply.code(409).send(parsedUser);
+			parsedUser.message = m.notInitialized;
+			console.log(parsedUser);
+			return reply.code(409).send(parsedUser);
 		} else {
 			if (client.isUserFriend(friendName)) {
-				console.log("Invite accepted");
-				const userNameNotification = `${friendName}'s invite has been accepted`;
-				const friendNameNotification = `${userName} has accepted your invite`;
-				const updateNotification = `${friendName} has invited you to play`;
+				const isThereInvitation = client
+					.getNotifications()
+					.some(
+						(notification) =>
+							notification.getNotification() ===
+								m.inviteFriendNotif(friendName) &&
+							notification.getPending() === true,
+					);
+				if (!isThereInvitation) {
+					parsedUser.message = m.notInvited;
+					console.log(parsedUser);
+					return reply.code(409).send(parsedUser);
+				}
 				await updateNotificationCreateFriendAndNotification(
 					userName,
 					friendName,
-					userNameNotification,
-					updateNotification,
+					m.playUserNotif(friendName),
+					m.inviteFriendNotif(friendName),
 					false,
 				);
 				await createFriendAndNotification(
 					friendName,
 					userName,
-					friendNameNotification,
+					m.playFriendNotif(userName),
 					false,
 				);
+				client.updateNotification(
+					m.inviteFriendNotif(friendName),
+					false,
+				);
+				client.addNotification(m.playUserNotif(friendName), false);
 				client.getSocket()?.send(
 					JSON.stringify({
-						notification: userNameNotification,
+						notification: m.playUserNotif(friendName),
 						pending: false,
 						inviteAccepted: friendName,
 					}),
 				);
 				const friendClient = liveClients.get(friendName);
 				if (friendClient) {
+					friendClient.addNotification(
+						m.playFriendNotif(userName),
+						false,
+					);
 					friendClient.getSocket()?.send(
 						JSON.stringify({
-							notification: friendNameNotification,
+							notification: m.playFriendNotif(userName),
 							pending: false,
 							inviteAccepted: userName,
 						}),
 					);
 				}
-				console.log("Invite accepted and saved to database");
-				parsedUser.message = "Invite accepted and saved to database";
-				reply.code(200).send(parsedUser);
+				parsedUser.message = m.successMsg;
+				console.log(parsedUser);
+				return reply.code(200).send(parsedUser);
 			} else {
-				console.log("Warning: Not friends");
-				parsedUser.message = "Warning: Not friends";
-				reply.code(409).send(parsedUser);
+				parsedUser.message = m.notFriends;
+				console.log(parsedUser);
+				return reply.code(409).send(parsedUser);
 			}
 		}
 	} catch (error) {
 		console.error("Error inviting to play:", error);
-		reply.code(500).send(error);
-		return error;
+		return reply.code(500).send(error);
 	}
 }

@@ -2,6 +2,7 @@ import {
 	initializeUserSession,
 	terminateUserSession,
 	provideChatHistory,
+	provideNotifications,
 	friendRequest,
 	friendRequestAccepted,
 	updateBlockStatus,
@@ -12,6 +13,7 @@ import {
 	initializeSchema,
 	terminateSchema,
 	chatHistorySchema,
+	notificationSchema,
 	friendRequestSchema,
 	friendRequestAcceptedSchema,
 	updateBlockStatusSchema,
@@ -32,6 +34,11 @@ export const terminateOpt = {
 export const chatHistoryOpt = {
 	schema: chatHistorySchema,
 	handler: provideChatHistory,
+};
+
+export const notificationsOpt = {
+	schema: notificationSchema,
+	handler: provideNotifications,
 };
 
 export const friendRequestOpt = {

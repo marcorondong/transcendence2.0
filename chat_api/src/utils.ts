@@ -10,7 +10,6 @@ function parseJsonMessage(message: Buffer, socket: WebSocket | null) {
 	} catch (error) {
 		console.error("Hey Error:", error);
 		return null;
-		// socket.close();
 	}
 }
 
@@ -37,13 +36,11 @@ async function messageHandler(
 		return;
 	}
 	if (!isFriend) {
-		client
-			.getSocket()
-			?.send(
-				JSON.stringify({
-					message: "You are not friends with this user",
-				}),
-			);
+		client.getSocket()?.send(
+			JSON.stringify({
+				message: "You are not friends with this user",
+			}),
+		);
 		return;
 	}
 	let isClientBlocked = false;
@@ -91,7 +88,7 @@ export function onClientDisconnect(
 	reason: Buffer,
 	client: Client,
 ): void {
-	// should I remove the client from memory?
+	// #TODO should I remove the client from memory?
 	try {
 		const userName = client.getUserName();
 
@@ -101,8 +98,6 @@ export function onClientDisconnect(
 			liveClients.delete(userName);
 			console.log("Client removed from memory:", userName);
 		}
-
-		// client.getSocket()?.close(code, reason.toString());
 		console.log(
 			`Client disconnected: ${userName}, Code: ${code}, Reason: ${reason.toString()}`,
 		);

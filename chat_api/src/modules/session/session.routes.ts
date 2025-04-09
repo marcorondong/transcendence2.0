@@ -1,9 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { errorHandler } from "../../utils/errors";
 import {
 	initializeOpt,
 	terminateOpt,
 	chatHistoryOpt,
+	notificationsOpt,
 	friendRequestOpt,
 	friendRequestAcceptedOpt,
 	updateBlockStatusOpt,
@@ -20,14 +20,12 @@ export async function sessionRoutes(server: FastifyInstance) {
 		server.post("/initialize", initializeOpt);
 		server.delete("/terminate", terminateOpt);
 		server.post("/chatHistory", chatHistoryOpt);
+		server.post("/notifications", notificationsOpt);
 		server.post("/friendRequest", friendRequestOpt);
 		server.post("/friendRequestAccepted", friendRequestAcceptedOpt);
 		server.patch("/updateBlockStatus", updateBlockStatusOpt);
 		server.post("/inviteToPlay", inviteToPlayOpt);
 		server.post("/acceptPlayInvite", acceptPlayInviteOpt);
-		// server.setErrorHandler((error, request, reply) => {
-		// 	errorHandler(error, request, reply);
-		// });
 	} catch (error) {
 		console.error("Error registering session routes:", error);
 	}

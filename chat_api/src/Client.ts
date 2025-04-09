@@ -31,7 +31,6 @@ export class Client {
 		this.socket = socket;
 	}
 
-	// Getters
 	getUserName(): string {
 		return this.userName;
 	}
@@ -56,7 +55,6 @@ export class Client {
 		return Array.from(this.notifications);
 	}
 
-	// Setters
 	setUserName(userName: string): void {
 		this.userName = userName;
 	}
@@ -81,7 +79,6 @@ export class Client {
 		this.notifications = new Set(notifications);
 	}
 
-	// Method to add a message to the chat history for a specific user
 	addToChatHistory(userName: string, message: Message): void {
 		const userChatHistory = this.chatHistory.get(userName) ?? [];
 		userChatHistory.push(message);
@@ -91,7 +88,6 @@ export class Client {
 		this.chatHistory.set(userName, userChatHistory);
 	}
 
-	// Methods to add a user to the block list or friend list
 	addToBlockList(userName: string): void {
 		this.blockList.add(userName);
 	}
@@ -99,11 +95,19 @@ export class Client {
 		this.friendList.add(userName);
 	}
 
-	addNotification(notification: Notification): void {
-		this.notifications.add(notification);
+	addNotification(notification: string, pending: boolean): void {
+		this.notifications.add(new Notification(notification, pending));
 	}
 
-	// Methods to remove a user from the block list or friend list
+	updateNotification(notification: string, pending: boolean)
+	{
+		for (const notif of this.notifications) {
+			if (notif.getNotification() === notification && notif.getPending()) {
+				notif.setPending(pending);
+			}
+		}
+	}
+
 	removeFromBlockList(userName: string): void {
 		this.blockList.delete(userName);
 	}
@@ -111,12 +115,10 @@ export class Client {
 		this.friendList.delete(userName);
 	}
 
-	// Method to get chat history for a specific user
 	getChatHistoryForUser(userName: string): Message[] {
 		return this.chatHistory.get(userName) || [];
 	}
 
-	// Methods to check if a user is blocked or a friend, or if the user is registered
 	isUserBlocked(userName: string): boolean {
 		return this.blockList.has(userName);
 	}

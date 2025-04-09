@@ -19,7 +19,6 @@ import cors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
-// import { ServerError} from './utils/errors';
 
 const PORT = 3002;
 const HOST = "0.0.0.0";
@@ -47,16 +46,16 @@ try {
 	console.log("SSL certificates loaded successfully.");
 } catch (error) {
 	console.error("Error loading SSL certificates:", error);
-	process.exit(1); // Exit process if SSL files are missing or unreadable
+	process.exit(1);
 }
 
 // const fastify: FastifyInstance<Http2SecureServer> = Fastify(
 export const server: FastifyInstance = Fastify({
 	// http2: true,
-	https: {
-		key: privateKey,
-		cert: certificate,
-	},
+	// https: {
+	// 	key: privateKey,
+	// 	cert: certificate,
+	// },
 	logger: false,
 }).withTypeProvider<ZodTypeProvider>();
 
@@ -75,30 +74,27 @@ declare module "fastify" {
 server.decorate(
 	"authenticate",
 	async (request: FastifyRequest, reply: FastifyReply) => {
-		// Extract the Authorization header
 		const url = request.raw.url;
 
 		if (
 			url &&
 			(url.startsWith("/documentation") ||
 				url.startsWith("/ws") ||
-				url.startsWith("/session/healthCheck"))
+				url.startsWith("/session/healthCheck") ||
+				url.startsWith("/swagger-ui"))
 		) {
 			return;
 		}
 
 		const authHeader = request.headers["authorization"];
 
-		// Check if the Authorization header exists and starts with "Bearer "
 		if (!authHeader || !authHeader.startsWith("Bearer ")) {
 			reply.status(401).send({ error: "Unauthorized" });
 			return;
 		}
 
-		// Extract the API key (the part after "Bearer ")
 		const key = authHeader.split(" ")[1];
 
-		// Check if the API key matches the expected one
 		if (key !== apiKey) {
 			reply.status(401).send({ error: "Unauthorized" });
 			return;
