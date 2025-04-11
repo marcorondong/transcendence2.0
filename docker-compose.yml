@@ -1,49 +1,49 @@
-services:
-  pong-api:
-    image: pong-api-img
-    container_name: pong-api
-    build:
-      context: ./ssg/pong-api
-      dockerfile: Dockerfile
-    volumes:
-      - ./ssg/pong-api/src/:/pong/pong-api/src/
-    ports:
-      - 3010:3010
-    command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
-    networks:
-      - Transcendence2.0
+  services:
+    pong-api:
+      image: pong-api-img
+      container_name: pong-api
+      build:
+        context: ./ssg/pong-api
+        dockerfile: Dockerfile
+      volumes:
+        - ./ssg/pong-api/src/:/pong/pong-api/src/
+      ports:
+        - 3010:3010
+      command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
+      networks:
+        - Transcendence2.0
 
-  ai-bot:
-    build:
-      context: ./ssg
-      dockerfile: ./AI/Dockerfile
-    container_name: ai-bot
-    ports:
-      - "6969:6969" #TODO close this port when we have users and API!
-    environment:
-      - NODE_ENV=production
-    networks:
-      - Transcendence2.0
+    ai-bot:
+      build:
+        context: ./ssg
+        dockerfile: ./AI/Dockerfile
+      container_name: ai-bot
+      ports:
+        - "6969:6969" #TODO close this port when we have users and API!
+      environment:
+        - NODE_ENV=production
+      networks:
+        - Transcendence2.0
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: docker/nginx/Dockerfile-Nginx
-    container_name: frontend
-    # image: nginx:1.26.2
-    volumes:
-      - ./frontend/volume:/usr/share/nginx/html
-      - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
-      # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
-      # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
-    ports:
-      - "8080:443"
-    restart: unless-stopped
-    networks:
-      - Transcendence2.0
+    frontend:
+      build:
+        context: ./frontend
+        dockerfile: docker/nginx/Dockerfile-Nginx
+      container_name: frontend
+      # image: nginx:1.26.2
+      volumes:
+        - ./frontend/volume:/usr/share/nginx/html
+        - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+        # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
+        # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
+      ports:
+        - "8080:443"
+      restart: unless-stopped
+      networks:
+        - Transcendence2.0
 
-include:
-  monitoring/monitoring-stack.yml
+  include:
+    - ./monitoring/monitoring-stack.yml
 
-networks:
-  Transcendence2.0:
+  networks:
+    Transcendence2.0:

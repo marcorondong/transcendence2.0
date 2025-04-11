@@ -1,3 +1,4 @@
+services:
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -33,17 +34,19 @@
     restart: unless-stopped
     networks:
       - Transcendence2.0
+    depends_on:
+      - prometheus
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
-    ports:
-      - 8080:8080
     volumes:
     - /:/rootfs:ro
     - /var/run:/var/run:rw
     - /sys:/sys:ro
     - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - Transcendence2.0
 
   falco:
     image: falcosecurity/falco:latest
@@ -59,19 +62,16 @@
       - /var/run/docker.sock:/host/var/run/docker.sock
       - /proc:/host/proc:ro
       - /etc:/host/etc:ro
-      - /var/log/falco_events:/var/log/falco_events
+      - falco_events:/var/log/falco_events
       - ./falco.yaml:/etc/falco/falco.yaml
       - ./falco_rules.yaml:/etc/falco/falco_rules.yaml
-    -networks:
+    networks:
       - Transcendence2.0
 
   falco-sidekick:
     image: falcosecurity/falcosidekick:latest
     container_name: falco-sidekick
     restart: unless-stopped
-    environment:
-      - PROMETHEUS_EXTRA_LABELS=source=falco
-      - METRICS_PORT=2801
     depends_on:
       - falco
     networks:
@@ -83,3 +83,9 @@
     restart: unless-stopped
     networks:
       - Transcendence2.0
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  falco_events:
