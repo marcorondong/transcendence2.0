@@ -77,7 +77,7 @@ export async function findUserByUnique(where: UniqueUserField) {
 // Type definition to allowing multiple User fields per query
 type UserField = { id?: number; email?: string; name?: string };
 
-// // Type definition for sorting by field (from User fields)(This allows adding more fields than UserField too)
+// Type definition for sorting by field (from User fields)(This allows adding more fields than UserField too)
 type SortByField = keyof UserField; // | "_rank" | "createdAt"; // Extend as needed
 
 // Type definition for query options
@@ -87,7 +87,7 @@ type UserQueryOptions = {
 	useOr?: boolean; // To allow OR logic
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: keyof SortByField; // To sort by key, like "id" or "name" (from UserField but extended)
+	sortBy?: SortByField; // To sort by key, like "id" or "name" (from UserField but extended)
 	order?: "asc" | "desc"; // Ascending or descending
 };
 
@@ -141,7 +141,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			throw new AppError({
 				statusCode: 400,
 				code: USER_ERRORS.INVALID_SORT,
-				message: `Invalid sortBy field: ${sortBy}`, // TODO: Fix this
+				message: `Invalid sortBy field: ${sortBy}`,
 			});
 		}
 		if (err instanceof AppError) throw err;
