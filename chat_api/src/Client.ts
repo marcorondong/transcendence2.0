@@ -1,10 +1,10 @@
+import { Friend } from "./Friend";
 import { Message } from "./Message";
 import { Notification } from "./Notification";
 
 export class Client {
 	private userName: string;
-	private friendList: Set<string>;
-	private blockList: Set<string>;
+	private friendList: Set<Friend>;
 	private notifications: Set<Notification>;
 	private registration: boolean;
 	private chatHistory: Map<string, Message[]>;
@@ -13,8 +13,7 @@ export class Client {
 
 	constructor(
 		userName: string,
-		friendList: Set<string> = new Set(),
-		blockList: Set<string> = new Set(),
+		friendList: Set<Friend> = new Set(),
 		notifications: Set<Notification> = new Set(),
 		chatHistory: Map<string, Message[]> = new Map(),
 		registration: boolean = true,
@@ -23,7 +22,6 @@ export class Client {
 	) {
 		this.userName = userName;
 		this.friendList = friendList;
-		this.blockList = blockList;
 		this.notifications = notifications;
 		this.registration = registration;
 		this.chatHistory = chatHistory;
@@ -34,12 +32,17 @@ export class Client {
 	getUserName(): string {
 		return this.userName;
 	}
-	getBlockList(): string[] {
-		return Array.from(this.blockList);
+
+	getFriendList(): Set<Friend> {
+		return this.friendList;
 	}
-	getFriendList(): string[] {
-		return Array.from(this.friendList);
+
+	getFriendNames(): string[] {
+		return Array.from(this.friendList).map((friend) =>
+			friend.getFriendName(),
+		);
 	}
+
 	getRegistration(): boolean {
 		return this.registration;
 	}
@@ -58,12 +61,11 @@ export class Client {
 	setUserName(userName: string): void {
 		this.userName = userName;
 	}
-	setBlockList(blockList: string[]): void {
-		this.blockList = new Set(blockList);
+
+	setFriendList(friendList: Set<Friend>): void {
+		this.friendList = friendList;
 	}
-	setFriendList(friendList: string[]): void {
-		this.friendList = new Set(friendList);
-	}
+
 	setRegistration(registration: boolean): void {
 		this.registration = registration;
 	}
@@ -88,44 +90,58 @@ export class Client {
 		this.chatHistory.set(userName, userChatHistory);
 	}
 
-	addToBlockList(userName: string): void {
-		this.blockList.add(userName);
-	}
-	addToFriendList(userName: string): void {
-		this.friendList.add(userName);
+	addToFriendList(friend: Friend): void {
+		this.friendList.add(friend);
 	}
 
 	addNotification(notification: string, pending: boolean): void {
 		this.notifications.add(new Notification(notification, pending));
 	}
 
-	updateNotification(notification: string, pending: boolean)
-	{
+	updateNotification(notification: string, pending: boolean) {
 		for (const notif of this.notifications) {
-			if (notif.getNotification() === notification && notif.getPending()) {
+			if (
+				notif.getNotification() === notification &&
+				notif.getPending()
+			) {
 				notif.setPending(pending);
 			}
 		}
 	}
 
-	removeFromBlockList(userName: string): void {
-		this.blockList.delete(userName);
-	}
-	removeFromFriendList(userName: string): void {
-		this.friendList.delete(userName);
+	getChatHistoryForUser(userName: string): Message[] | null {
+		return this.chatHistory.get(userName) || null;
 	}
 
-	getChatHistoryForUser(userName: string): Message[] {
-		return this.chatHistory.get(userName) || [];
+	isUserFriend(friendName: string): boolean {
+		for (const friend of this.friendList) {
+			if (friend.getFriendName() === friendName) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	isUserBlocked(userName: string): boolean {
-		return this.blockList.has(userName);
+	isUserBlocked(friendName: string): boolean {
+		for (const friend of this.friendList) {
+			if (friend.getFriendName() === friendName) {
+				return friend.getBlock();
+			}
+		}
+		return false;
 	}
-	isUserFriend(userName: string): boolean {
-		return this.friendList.has(userName);
+
+	updateBlockStatus(friendName: string, block: boolean): void {
+		for (const friend of this.friendList) {
+			if (friend.getFriendName() === friendName) {
+				friend.setBlock(block);
+			}
+		}
 	}
-	isUserRegistered(): boolean {
-		return this.registration;
+
+	updateClient(friendName: string, notification: string): void {
+		this.friendList.add(new Friend(friendName));
+		this.chatHistory.set(friendName, []);
+		this.notifications.add(new Notification(notification, false));
 	}
 }

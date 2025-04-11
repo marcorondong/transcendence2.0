@@ -11,44 +11,45 @@ datasource db {
 }
 
 model User {
-  id             Int          @id @default(autoincrement())
-  userName       String @unique
+  id             String         @id @default(uuid())
+  userName       String         @unique
   friendList     Friend[]
-  notifications   Notification[]
+  notifications  Notification[]
 }
 
 model Friend {
-  id             Int     @id @default(autoincrement())
-//   friendId       String  @unique
+  id             String         @id @default(uuid())
+//   friendId       String         @unique
   friendName     String
-  block          Boolean @default(false)
-  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         Int
+  block          Boolean        @default(false)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+//   @@unique([friendName, userId])
 }
 
 model Notification {
-  id             Int     @id @default(autoincrement())
+  id             String          @id @default(uuid())
   notification   String
-  pending        Boolean @default(true)
-  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         Int
+  pending        Boolean         @default(true)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
 }
 
 model Conversation {
-  id             Int     @id @default(autoincrement())
-  conversationId String @unique
+  id             String          @id @default(uuid())
+  conversationId String          @unique
   user1          String
   user2          String
-  block          Boolean @default(false)
+  block          Boolean         @default(false)
   messages       Message[]
 }
 
 model Message {
-  id             Int          @id @default(autoincrement())
+  id             String          @id @default(uuid())
   message        String
-  createdAt      DateTime     @default(now())
+  createdAt      DateTime        @default(now())
   sender         String
-  block          Boolean @default(false)
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  conversationId Int
+  block          Boolean         @default(false)
+  conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
 }

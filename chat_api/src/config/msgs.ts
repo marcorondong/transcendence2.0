@@ -9,6 +9,8 @@ export const m = {
 	userNotFound: "Warning: Friend does not exist",
 	invalid: "Warning: userName and friendName cannot be the same",
 	successMsg: "Successfully done",
+	internalServerError: "Internal server error",
+	selfRequest: "Warning: You cannot send a friend request to yourself",
 	reqUserNotif: (userName: string) =>
 		`${userName} has been invited to be your friend`,
 	reqFriendNotif: (userName: string) => `${userName} has invited you to be friends`,

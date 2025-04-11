@@ -11,14 +11,17 @@ export const initializeSchema = {
 	summary: "Initialize User Session",
 	description:
 		"Initialize a user session with the provided username. It loads the user data from database to memory if exist or creates new database entry.",
-	body: sessionZodSchema,
 	tags: ["Session"],
+	body: sessionZodSchema,
 	response: {
 		201: sessionZodResponseSchema,
 	},
 };
 
 export const terminateSchema = {
+	summary: "Terminate User Session",
+	description: "Terminate a user session with the provided username.",
+	tags: ["Session"],
 	body: sessionZodSchema,
 	response: {
 		204: sessionZodResponseSchema,

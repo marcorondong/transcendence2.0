@@ -9,21 +9,6 @@ export const swaggerOptions = {
 		schemes: ["http"],
 		consumes: ["application/json"],
 		produces: ["application/json"],
-		// components: {
-		// 	securitySchemes: {
-		// 		bearerAuth: {
-		// 			type: "http",
-		// 			scheme: "bearer",
-		// 			bearerFormat: "JWT",
-		// 			description: "JWT authorization header",
-		// 		},
-		// 	},
-		// },
-		// security: [
-		// 	{
-		// 		bearerAuth: [],
-		// 	},
-		// ],
 	},
 };
 
