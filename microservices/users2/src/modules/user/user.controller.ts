@@ -5,8 +5,14 @@ import {
 	loginInput,
 	loginResponseSchema,
 	userArrayResponseSchema,
+	getUsersQuery,
 } from "./user.schema";
-import { createUser, findUserByUnique, findUsers } from "./user.service";
+import {
+	createUser,
+	findUserByUnique,
+	findUsers,
+	deleteUser,
+} from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
 import { server } from "../../app";
@@ -68,10 +74,60 @@ export async function loginHandler(
 	}
 }
 
-// MR_NOTE: '_' replace "request" (used when parameter is not used)
-export async function getUsersHandler(_: FastifyRequest, reply: FastifyReply) {
-	const users = await findUsers();
-	// Serialize/validate/filter response via Zod schemas (userArrayResponseSchema.parse)
-	const parsedUsers = userArrayResponseSchema.parse(users);
-	return reply.code(200).send(parsedUsers); // Fastify auto-validates response using Zod schema defined in route
+export async function getUserHandler(
+	request: FastifyRequest<{ Params: { id: number } }>,
+	reply: FastifyReply,
+) {
+	const user = await findUserByUnique({ id: request.params.id });
+	const parsedUser = userResponseSchema.parse(user);
+	return reply.code(200).send(parsedUser);
 }
+
+export async function getUsersHandler(
+	request: FastifyRequest<{ Querystring: getUsersQuery }>,
+	reply: FastifyReply,
+) {
+	const { id, email, name, useFuzzy, useOr, skip, take, sortBy, order } =
+		request.query;
+	const users = await findUsers({
+		where: { id, email, name },
+		useFuzzy,
+		useOr,
+		skip,
+		take,
+		sortBy,
+		order,
+	});
+	const parsedUsers = userArrayResponseSchema.parse(users);
+	return reply.code(200).send(parsedUsers);
+}
+
+export async function deleteUserHandler(
+	request: FastifyRequest<{ Params: { id: number } }>,
+	reply: FastifyReply,
+) {
+	await deleteUser(request.params.id);
+	return reply.code(204).send();
+}
+
+// // This functions uses the old deleteUser() that returns the deleted user
+// export async function deleteUserHandler(
+// 	request: FastifyRequest<{ Params: { id: number } }>,
+// 	reply: FastifyReply,
+// ) {
+// 	const deletedUser = await deleteUser(request.params.id);
+// 	// Option 1: Return deleted user (if filtered via schema)
+// 	const parsed = userResponseSchema.parse(deletedUser);
+// 	return reply.code(200).send(parsed);
+
+// 	// Option 2 (if you prefer empty response):
+// 	// return reply.code(204).send();
+// }
+
+// // MR_NOTE: '_' replace "request" (used when parameter is not used)
+// export async function getUsersHandler(_: FastifyRequest, reply: FastifyReply) {
+// 	const users = await findUsers();
+// 	// Serialize/validate/filter response via Zod schemas (userArrayResponseSchema.parse)
+// 	const parsedUsers = userArrayResponseSchema.parse(users);
+// 	return reply.code(200).send(parsedUsers); // Fastify auto-validates response using Zod schema defined in route
+// }

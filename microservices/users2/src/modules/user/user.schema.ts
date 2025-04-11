@@ -64,8 +64,25 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+// Schema for query parameters to find users
+export const getUsersQuerySchema = z.object({
+	id: z.coerce.number().optional(),
+	email: z.string().email().optional(),
+	name: z.string().optional(),
+	useFuzzy: z.coerce.boolean().optional(),
+	useOr: z.coerce.boolean().optional(),
+	skip: z.coerce.number().min(0).optional(),
+	take: z.coerce.number().min(1).max(100).optional(),
+	sortBy: z.enum(["id", "email", "name"]).optional(),
+	order: z.enum(["asc", "desc"]).optional(),
+});
+
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
 export type loginInput = z.infer<typeof loginSchema>;
+export type updateUserPutInput = z.infer<typeof putUserSchema>; // TODO: Should I export this? (putUserInput)
+export type updateUserPatchInput = z.infer<typeof patchUserSchema>; // TODO: Should I export this? (patchUserInput)
+export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
+export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
 // export type UserResponse = z.infer<typeof userResponseSchema>; // TODO: This is not used yet (I don't have an endpoint to retrieve single user)
 // export type UserArrayResponse = z.infer<typeof userArrayResponseSchema>;

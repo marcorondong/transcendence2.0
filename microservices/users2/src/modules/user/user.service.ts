@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
-import { createUserInput } from "./user.schema";
+import { createUserInput, UpdateUserData } from "./user.schema";
 
 // Helper function to capitalize conflicting Prisma field
 function capitalize(str: string) {
@@ -49,6 +49,7 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
+// TODO: Check if all these new type definitions could be put in user.schema.ts
 // Type definition to allow one field per query
 type UniqueUserField = { id: number } | { name: string } | { email: string };
 
@@ -145,6 +146,90 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			});
 		}
 		if (err instanceof AppError) throw err;
+		throw err;
+	}
+}
+
+export async function deleteUser(id: number): Promise<void> {
+	try {
+		await prisma.user.delete({ where: { id } });
+	} catch (err) {
+		if (
+			err instanceof Prisma.PrismaClientKnownRequestError &&
+			err.code === "P2025"
+		) {
+			throw new AppError({
+				statusCode: 404,
+				code: USER_ERRORS.USER_DELETE,
+				message: "User not found",
+			});
+		}
+		throw err;
+	}
+}
+
+// // This functions returns the deleted user
+// export async function deleteUser(id: number) {
+// 	try {
+// 		const deletedUser = await prisma.user.delete({
+// 			where: { id },
+// 		});
+// 		return deletedUser; // TODO: Should I return a "deleteUser"? or just empty/null? what does prisma return?
+// 	} catch (err) {
+// 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+// 			if (err.code === "P2025") {
+// 				// Record to delete does not exist
+// 				throw new AppError({
+// 					statusCode: 404,
+// 					code: USER_ERRORS.USER_DELETE,
+// 					message: "User not found",
+// 				});
+// 			}
+// 		}
+// 		throw err;
+// 	}
+// }
+
+export async function updateUser(id: number, data: UpdateUserData) {
+	try {
+		const updatePayload: Record<string, any> = { ...data };
+		// Hash password if provided
+		if (data.password) {
+			const { salt, hash } = hashPassword(data.password);
+			updatePayload.passwordHash = hash;
+			updatePayload.salt = salt;
+			delete updatePayload.password; // remove plain password
+		}
+		const updatedUser = await prisma.user.update({
+			where: { id },
+			data: updatePayload,
+		});
+		return updatedUser;
+	} catch (err) {
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			switch (err.code) {
+				case "P2002":
+					const field =
+						(err.meta?.target as string[])?.[0] ?? "Field";
+					throw new AppError({
+						statusCode: 409,
+						code: USER_ERRORS.USER_UPDATE,
+						message: `${capitalize(field)} already exists`,
+					});
+				case "P2003":
+					throw new AppError({
+						statusCode: 400,
+						code: USER_ERRORS.USER_UPDATE,
+						message: "Invalid foreign key",
+					});
+				case "P2025":
+					throw new AppError({
+						statusCode: 404,
+						code: USER_ERRORS.USER_UPDATE,
+						message: "User not found",
+					});
+			}
+		}
 		throw err;
 	}
 }
