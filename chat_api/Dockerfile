@@ -7,9 +7,8 @@ WORKDIR /chat_api
 COPY ./package.json ./
 COPY ./tsconfig.json ./
 COPY ./prisma ./prisma/
-# COPY ./src /chat_api/src
 RUN npm install
-ENV DATABASE_URL="file:/chat_api/prisma/DB/user.db"
 RUN npx prisma generate
+RUN npx prisma migrate deploy
 
 CMD ["npm", "run", "dev"]

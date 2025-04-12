@@ -33,7 +33,7 @@ services:
       retries: 3
       start_period: 15s
       timeout: 10s
-    command: ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
+    # command: ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run dev"]
     restart: always
 
 # secrets:
