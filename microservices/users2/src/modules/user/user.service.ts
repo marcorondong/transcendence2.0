@@ -168,7 +168,7 @@ export async function deleteUser(id: number): Promise<void> {
 	}
 }
 
-// // This functions returns the deleted user
+// // This function returns the deleted user
 // export async function deleteUser(id: number) {
 // 	try {
 // 		const deletedUser = await prisma.user.delete({

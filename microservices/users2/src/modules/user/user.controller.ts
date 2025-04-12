@@ -6,12 +6,15 @@ import {
 	loginResponseSchema,
 	userArrayResponseSchema,
 	getUsersQuery,
+	updateUserPutInput,
+	updateUserPatchInput,
 } from "./user.schema";
 import {
 	createUser,
 	findUserByUnique,
 	findUsers,
 	deleteUser,
+	updateUser,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
@@ -108,6 +111,30 @@ export async function deleteUserHandler(
 ) {
 	await deleteUser(request.params.id);
 	return reply.code(204).send();
+}
+
+export async function putUserHandler(
+	request: FastifyRequest<{
+		Params: { id: number };
+		Body: updateUserPutInput;
+	}>,
+	reply: FastifyReply,
+) {
+	const updatedUser = await updateUser(request.params.id, request.body);
+	const parsed = userResponseSchema.parse(updatedUser);
+	return reply.code(200).send(parsed);
+}
+
+export async function patchUserHandler(
+	request: FastifyRequest<{
+		Params: { id: number };
+		Body: updateUserPatchInput;
+	}>,
+	reply: FastifyReply,
+) {
+	const updatedUser = await updateUser(request.params.id, request.body);
+	const parsed = userResponseSchema.parse(updatedUser);
+	return reply.code(200).send(parsed);
 }
 
 // // This functions uses the old deleteUser() that returns the deleted user
