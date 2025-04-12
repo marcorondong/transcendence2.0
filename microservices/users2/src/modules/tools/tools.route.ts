@@ -26,6 +26,17 @@ export async function setupSwagger(server: FastifyInstance) {
 				description: "Swagger docs for ft_transcendence project",
 				version: "1.0.0",
 			},
+			// Enable Auth option in Swagger (to reach authenticated routes)
+			components: {
+				securitySchemes: {
+					bearerAuth: {
+						type: "http",
+						scheme: "bearer",
+						bearerFormat: "JWT",
+					},
+				},
+			},
+			security: [{ bearerAuth: [] }], // Apply Auth option globally to all routes
 		},
 		transform: jsonSchemaTransform,
 	} as SwaggerOptions);
