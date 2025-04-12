@@ -29,13 +29,6 @@ export async function createUser(input: createUserInput) {
 						code: USER_ERRORS.USER_CREATE,
 						message: `${capitalize(target)} already exists`,
 					});
-				// case "P2025":
-				// TODO: Check when this error happens. (in mutations: update, delete, etc.)
-				// throw new AppError({
-				// 	statusCode: 404,
-				// 	code: USER_ERRORS.NOT_FOUND,
-				// 	message: "User not found",
-				// });
 				case "P2003":
 					throw new AppError({
 						statusCode: 400,
@@ -106,24 +99,14 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		sortBy = "id",
 		order = "asc",
 	} = options;
-	// START DEBUGGING =========================================================
-	console.log("✅ Step 1: Received Options", options);
-	// Normalize boolean-like values
-	// useFuzzy = String(useFuzzy).toLowerCase() === "true";
-	// useOr = String(useOr).toLowerCase() === "true";
-	// useFuzzy = typeof useFuzzy === "string" ? useFuzzy === "true" : !!useFuzzy;
-	// useOr = typeof useOr === "string" ? useOr === "true" : !!useOr;
-	// END DEBUGGING ===========================================================
+	// console.log("✅ Step 1: Received Options", options);
 	try {
 		// Transform string fields to `contains` filters if fuzzy search is enabled
-		// console.log("🧪 Raw where input before fuzzy transformation:", where); // Debugging
 		const transformed = Object.entries(where).reduce(
 			(acc, [key, value]) => {
 				if (typeof value === "string" && useFuzzy) {
-					// acc[key] = { contains: value, mode: "insensitive" };
-					// START Debugging =========================================
+					// acc[key] = { contains: value, mode: "insensitive" }; // This worked in older version of Prisma
 					acc[key] = { contains: value };
-					// END Debugging ===========================================
 				} else {
 					acc[key] = value;
 				}
@@ -131,76 +114,21 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			},
 			{} as Record<string, any>,
 		);
-		// START Debugging =====================================================
-		console.log("✅ Step 2: Transformed 'where'", transformed);
-		// const transformed = Object.entries(where)
-		// 	.filter(([_, value]) => value !== undefined)
-		// 	.reduce((acc, [key, value]) => {
-		// 		if (typeof value === "string" && useFuzzy) {
-		// 			acc[key] = { contains: value, mode: "insensitive" };
-		// 		} else {
-		// 			acc[key] = value;
-		// 		}
-		// 		return acc;
-		// 	}, {} as Record<string, any>);
-		// 1. Remove undefined fields from `where`
-		// const cleanedWhere = Object.fromEntries(
-		// 	Object.entries(where).filter(([_, value]) => value !== undefined),
-		// );
-		// console.log("🧪 Cleaned where:", cleanedWhere);
-		// 2. Apply fuzzy transformation only to string fields
-		// const transformed = Object.fromEntries(
-		// 	Object.entries(cleanedWhere).map(([key, value]) => {
-		// 		if (typeof value === "string" && useFuzzy) {
-		// 			return [key, { contains: value, mode: "insensitive" }];
-		// 		}
-		// 		return [key, value];
-		// 	}),
-		// );
-		// END Debugging =======================================================
-		// console.log("🧪 Transformed where:", transformed); // Debugging
+		// console.log("✅ Step 2: Transformed 'where'", transformed);
 		// TODO: Fix this comment: Allow OR queries (map fields to own )
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
 			: transformed;
-		// START Debugging =====================================================
-		console.log("✅ Step 3: Final Query Shape", query);
-		// const query = useOr
-		// ? {
-		// OR: Object.entries(transformed).map(([k, v]) => {
-		// 	// Only include valid filter objects
-		// 	if (
-		// 		typeof v === "object" ||
-		// 		typeof v === "string" ||
-		// 		typeof v === "number"
-		// 	) {
-		// 		return { [k]: v };
-		// 	}
-		// 	return {}; // fallback to prevent crashing
-		// }),
-		// OR: Object.entries(transformed)
-		// 	.filter(([k, v]) => k !== "id") // Skip id if using fuzzy + OR
-		// 	.map(([k, v]) => ({ [k]: v })),
-		//   }
-		// : transformed;
-		// END Debugging========================================================
+		// console.log("✅ Step 3: Final Query Shape", query);
 		const prismaSortBy = { [sortBy]: order };
-		// START Debugging =====================================================
-		// console.log("🧪 Prisma Query Input:", {
-		console.log("✅ Step 4: Final Prisma Query", {
-			where: query,
-			orderBy: prismaSortBy,
-			skip,
-			take,
-		});
-		// END Debugging========================================================
+		// console.log("✅ Step 4: Final Prisma Query", { where: query, orderBy: prismaSortBy, skip, take, });
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
-		console.log("✅ Step 5: Result", users); // Debugging
+		// console.log("✅ Step 5: Result", users);
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -210,7 +138,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		}
 		return users;
 	} catch (err) {
-		console.log("❌ Step 6: Error Caught", err); // Debugging
+		// console.log("❌ Step 6: Error Caught", err);
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
 				statusCode: 400,
@@ -219,7 +147,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			});
 		}
 		if (err instanceof AppError) throw err;
-		console.error("❌ Step 6.2: Unknown error", err); // Debugging
+		// console.error("❌ Step 6.2: Unknown error", err);
 		throw err;
 	}
 }
@@ -241,28 +169,6 @@ export async function deleteUser(id: number): Promise<void> {
 		throw err;
 	}
 }
-
-// // This function returns the deleted user
-// export async function deleteUser(id: number) {
-// 	try {
-// 		const deletedUser = await prisma.user.delete({
-// 			where: { id },
-// 		});
-// 		return deletedUser; // TODO: Should I return a "deleteUser"? or just empty/null? what does prisma return?
-// 	} catch (err) {
-// 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
-// 			if (err.code === "P2025") {
-// 				// Record to delete does not exist
-// 				throw new AppError({
-// 					statusCode: 404,
-// 					code: USER_ERRORS.USER_DELETE,
-// 					message: "User not found",
-// 				});
-// 			}
-// 		}
-// 		throw err;
-// 	}
-// }
 
 export async function updateUser(id: number, data: UpdateUserData) {
 	try {
@@ -307,77 +213,3 @@ export async function updateUser(id: number, data: UpdateUserData) {
 		throw err;
 	}
 }
-
-// // This function returns all user fields (no filtering)
-// export async function findUserBy(where: UserField) {
-// 	try {
-// 		const user = await prisma.user.findFirst({ where });
-// 		if (!user) {
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: USER_ERRORS.NOT_FOUND,
-// 				message: "User not found",
-// 			});
-// 		}
-// 		return user;
-// 	} catch (err) {
-// 		if (err instanceof AppError) {
-// 			// Known/Expected errors bubble up to controller as AppError (custom error)
-// 			throw err;
-// 		}
-// 		// Unknown errors bubble up to global error handler.
-// 		throw err;
-// 	}
-// }
-
-// // This function returns all user fields (no filtering)
-// export async function getUserById(id: number) {
-// 	try {
-// 		const user = await prisma.user.findUnique({ where: { id } });
-// 		if (!user) {
-// 			// Known/Expected errors bubble up to controller as AppError (custom error)
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: USER_ERRORS.NOT_FOUND,
-// 				message: "User not found",
-// 			});
-// 		}
-// 		return user;
-// 	} catch (err) {
-// 		if (err instanceof AppError) {
-// 			// Known/Expected errors bubble up to controller as AppError (custom error)
-// 			throw err;
-// 		}
-// 		// Unknown errors bubble up to global error handler.
-// 		throw err;
-// 	}
-// }
-
-// // This function returns all user fields (no filtering)
-// export async function getUserByEmail(email: string) {
-// 	try {
-// 		const user = await prisma.user.findUnique({ where: { email } });
-// 		if (!user) {
-// 			// Known/Expected errors bubble up to controller as AppError (custom error)
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: USER_ERRORS.NOT_FOUND,
-// 				message: "User not found",
-// 			});
-// 		}
-// 		return user;
-// 	} catch (err) {
-// 		if (err instanceof AppError) {
-// 			// Known/Expected errors bubble up to controller as AppError (custom error)
-// 			throw err;
-// 		}
-// 		// Unknown errors bubble up to global error handler.
-// 		throw err;
-// 	}
-// }
-
-// // This function returns all users with all fields (no filtering)
-// export async function findUsers() {
-// 	const users = await prisma.user.findMany();
-// 	return users;
-// }

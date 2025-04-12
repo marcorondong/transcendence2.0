@@ -65,6 +65,7 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+// TODO: Try to "automate" SortBy according to UserField/UniqueUserField
 // Schema for query parameters to find users
 export const getUsersQuerySchema = z.object({
 	id: z.coerce.number().optional(),
