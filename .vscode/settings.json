@@ -26,5 +26,6 @@
 	"[yaml]": {
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2
-	}
+	},
+	"postman.settings.dotenv-detection-notification-visibility": false
 }

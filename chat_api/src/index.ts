@@ -25,6 +25,9 @@ import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
 import { friendRequest } from "./modules/session/session.controllers";
 import { chatHistoryOpt } from "./modules/session/session.options";
 import { wsRoutes } from "./modules/ws/ws.routes";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const PORT = 3002;
 const HOST = "0.0.0.0";

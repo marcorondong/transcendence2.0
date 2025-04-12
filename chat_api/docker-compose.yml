@@ -10,16 +10,16 @@ services:
         # no-cache: true
     env_file:
       - .env
-    secrets:
-      - cert.pem
-      - key.pem
-      - api.key
-      - db.key
+    # secrets:
+    #   - cert.pem
+    #   - key.pem
+    #   - api.key
+    #   - db.key
     environment:
-      SSL_CERT_FILE: "/run/secrets/cert.pem"
-      SSL_KEY_FILE: "/run/secrets/key.pem"
-      API_KEY_FILE: "/run/secrets/api.key"
       DATABASE_URL: "file:/chat_api/prisma/DB/user.db"
+      # SSL_CERT_FILE: "/run/secrets/cert.pem"
+      # SSL_KEY_FILE: "/run/secrets/key.pem"
+      # API_KEY_FILE: "/run/secrets/api.key"
     volumes:
       - src:/chat_api/src/
       - prisma:/chat_api/prisma/
@@ -36,15 +36,15 @@ services:
     command: ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
     restart: always
 
-secrets:
-  cert.pem:
-    file: ./secrets/cert.pem
-  key.pem:
-    file: ./secrets/key.pem
-  api.key:
-    file: ./secrets/api.key
-  db.key:
-    file: ./secrets/db.key
+# secrets:
+#   cert.pem:
+#     file: ./secrets/cert.pem
+#   key.pem:
+#     file: ./secrets/key.pem
+#   api.key:
+#     file: ./secrets/api.key
+#   db.key:
+#     file: ./secrets/db.key
 
 # networks:
 #   backend:

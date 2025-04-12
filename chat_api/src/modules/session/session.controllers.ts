@@ -40,14 +40,18 @@ export async function initializeUserSession(
 			const existingClient = await findUserInDB(userName);
 			if (existingClient) {
 				console.log("Client already exists in database");
-				const friendList = new Set(
+				const friendList: Set<Friend> = new Set(
 					existingClient.friendList.map(
-						(friend) => new Friend(friend.friendName, friend.block),
+						(friend: { friendName: string; block: boolean }) =>
+							new Friend(friend.friendName, friend.block),
 					),
 				);
-				const notifications = new Set(
+				const notifications: Set<Notification> = new Set(
 					existingClient.notifications.map(
-						(notification) =>
+						(notification: {
+							notification: string;
+							pending: boolean;
+						}) =>
 							new Notification(
 								notification.notification,
 								notification.pending,
@@ -152,7 +156,8 @@ export async function provideChatHistory(
 					friendName,
 				);
 				const messages = chatHistory.map(
-					(message) => new Message(message.message, message.sender),
+					(message: { message: string; sender: string }) =>
+						new Message(message.message, message.sender),
 				);
 				client.getChatHistory().set(friendName, messages);
 				return reply.code(200).send(
