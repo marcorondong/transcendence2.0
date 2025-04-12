@@ -96,6 +96,7 @@ type UserQueryOptions = {
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function findUsers(options: UserQueryOptions = {}) {
+	// let {
 	const {
 		where = {},
 		useFuzzy = false,
@@ -105,12 +106,24 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		sortBy = "id",
 		order = "asc",
 	} = options;
+	// START DEBUGGING =========================================================
+	console.log("✅ Step 1: Received Options", options);
+	// Normalize boolean-like values
+	// useFuzzy = String(useFuzzy).toLowerCase() === "true";
+	// useOr = String(useOr).toLowerCase() === "true";
+	// useFuzzy = typeof useFuzzy === "string" ? useFuzzy === "true" : !!useFuzzy;
+	// useOr = typeof useOr === "string" ? useOr === "true" : !!useOr;
+	// END DEBUGGING ===========================================================
 	try {
 		// Transform string fields to `contains` filters if fuzzy search is enabled
+		// console.log("🧪 Raw where input before fuzzy transformation:", where); // Debugging
 		const transformed = Object.entries(where).reduce(
 			(acc, [key, value]) => {
 				if (typeof value === "string" && useFuzzy) {
-					acc[key] = { contains: value, mode: "insensitive" };
+					// acc[key] = { contains: value, mode: "insensitive" };
+					// START Debugging =========================================
+					acc[key] = { contains: value };
+					// END Debugging ===========================================
 				} else {
 					acc[key] = value;
 				}
@@ -118,17 +131,76 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			},
 			{} as Record<string, any>,
 		);
+		// START Debugging =====================================================
+		console.log("✅ Step 2: Transformed 'where'", transformed);
+		// const transformed = Object.entries(where)
+		// 	.filter(([_, value]) => value !== undefined)
+		// 	.reduce((acc, [key, value]) => {
+		// 		if (typeof value === "string" && useFuzzy) {
+		// 			acc[key] = { contains: value, mode: "insensitive" };
+		// 		} else {
+		// 			acc[key] = value;
+		// 		}
+		// 		return acc;
+		// 	}, {} as Record<string, any>);
+		// 1. Remove undefined fields from `where`
+		// const cleanedWhere = Object.fromEntries(
+		// 	Object.entries(where).filter(([_, value]) => value !== undefined),
+		// );
+		// console.log("🧪 Cleaned where:", cleanedWhere);
+		// 2. Apply fuzzy transformation only to string fields
+		// const transformed = Object.fromEntries(
+		// 	Object.entries(cleanedWhere).map(([key, value]) => {
+		// 		if (typeof value === "string" && useFuzzy) {
+		// 			return [key, { contains: value, mode: "insensitive" }];
+		// 		}
+		// 		return [key, value];
+		// 	}),
+		// );
+		// END Debugging =======================================================
+		// console.log("🧪 Transformed where:", transformed); // Debugging
 		// TODO: Fix this comment: Allow OR queries (map fields to own )
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
 			: transformed;
+		// START Debugging =====================================================
+		console.log("✅ Step 3: Final Query Shape", query);
+		// const query = useOr
+		// ? {
+		// OR: Object.entries(transformed).map(([k, v]) => {
+		// 	// Only include valid filter objects
+		// 	if (
+		// 		typeof v === "object" ||
+		// 		typeof v === "string" ||
+		// 		typeof v === "number"
+		// 	) {
+		// 		return { [k]: v };
+		// 	}
+		// 	return {}; // fallback to prevent crashing
+		// }),
+		// OR: Object.entries(transformed)
+		// 	.filter(([k, v]) => k !== "id") // Skip id if using fuzzy + OR
+		// 	.map(([k, v]) => ({ [k]: v })),
+		//   }
+		// : transformed;
+		// END Debugging========================================================
 		const prismaSortBy = { [sortBy]: order };
+		// START Debugging =====================================================
+		// console.log("🧪 Prisma Query Input:", {
+		console.log("✅ Step 4: Final Prisma Query", {
+			where: query,
+			orderBy: prismaSortBy,
+			skip,
+			take,
+		});
+		// END Debugging========================================================
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
+		console.log("✅ Step 5: Result", users); // Debugging
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -138,6 +210,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		}
 		return users;
 	} catch (err) {
+		console.log("❌ Step 6: Error Caught", err); // Debugging
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
 				statusCode: 400,
@@ -146,6 +219,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			});
 		}
 		if (err instanceof AppError) throw err;
+		console.error("❌ Step 6.2: Unknown error", err); // Debugging
 		throw err;
 	}
 }
