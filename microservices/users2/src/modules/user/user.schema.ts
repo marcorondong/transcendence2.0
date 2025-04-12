@@ -30,7 +30,8 @@ export const userResponseSchema = z.object({
 
 // Schema to get a user by ID
 export const userIdParamSchema = z.object({
-	id: z.number(),
+	// id: z.number(),
+	id: z.coerce.number(),
 });
 
 // Schema to update all user fields
