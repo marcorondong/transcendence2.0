@@ -14,13 +14,15 @@ const userCore = {
 };
 
 // Schema for createUser
-export const createUserSchema = z.object({
-	...userCore,
-	password: z.string({
-		required_error: "Password is required",
-		invalid_type_error: "Password must be a string",
-	}),
-});
+export const createUserSchema = z
+	.object({
+		...userCore,
+		password: z.string({
+			required_error: "Password is required",
+			invalid_type_error: "Password must be a string",
+		}),
+	})
+	.strict(); // Rejects unknown fields
 
 // Schema for single user
 export const userResponseSchema = z.object({
@@ -29,33 +31,39 @@ export const userResponseSchema = z.object({
 });
 
 // Schema to get a user by ID
-export const userIdParamSchema = z.object({
-	// id: z.number(),
-	id: z.coerce.number(),
-});
+export const userIdParamSchema = z
+	.object({
+		// id: z.number(),
+		id: z.coerce.number(),
+	})
+	.strict(); //TODO: See if I have to use strict here too. Rejects unknown fields
 
 // Schema to update all user fields
-export const putUserSchema = z.object({
-	...userCore,
-	password: z.string({
-		required_error: "Password is required",
-		invalid_type_error: "Password must be a string",
-	}),
-});
+export const putUserSchema = z
+	.object({
+		...userCore,
+		password: z.string({
+			required_error: "Password is required",
+			invalid_type_error: "Password must be a string",
+		}),
+	})
+	.strict(); // Rejects unknown fields
 
 // Schema to update some user fields
-export const patchUserSchema = putUserSchema.partial();
+export const patchUserSchema = putUserSchema.partial().strict(); // Rejects unknown fields
 
 // Schema for login
-export const loginSchema = z.object({
-	email: z
-		.string({
-			required_error: "Email is required",
-			invalid_type_error: "Email must be a string",
-		})
-		.email(),
-	password: z.string(),
-});
+export const loginSchema = z
+	.object({
+		email: z
+			.string({
+				required_error: "Email is required",
+				invalid_type_error: "Email must be a string",
+			})
+			.email(),
+		password: z.string(),
+	})
+	.strict(); // Rejects unknown fields
 
 // Schema for login response
 export const loginResponseSchema = z.object({
@@ -67,17 +75,19 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // TODO: Try to "automate" SortBy according to UserField/UniqueUserField
 // Schema for query parameters to find users
-export const getUsersQuerySchema = z.object({
-	id: z.coerce.number().optional(),
-	email: z.string().email().optional(),
-	name: z.string().optional(),
-	useFuzzy: z.coerce.boolean().optional(),
-	useOr: z.coerce.boolean().optional(),
-	skip: z.coerce.number().min(0).optional(),
-	take: z.coerce.number().min(1).max(100).optional(),
-	sortBy: z.enum(["id", "email", "name"]).optional(),
-	order: z.enum(["asc", "desc"]).optional(),
-});
+export const getUsersQuerySchema = z
+	.object({
+		id: z.coerce.number().optional(),
+		email: z.string().email().optional(),
+		name: z.string().optional(),
+		useFuzzy: z.coerce.boolean().optional(),
+		useOr: z.coerce.boolean().optional(),
+		skip: z.coerce.number().min(0).optional(),
+		take: z.coerce.number().min(1).max(100).optional(),
+		sortBy: z.enum(["id", "email", "name"]).optional(),
+		order: z.enum(["asc", "desc"]).optional(),
+	})
+	.strict(); // Rejects unknown fields
 
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
