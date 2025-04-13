@@ -11,7 +11,7 @@ services:
     ports:
       - "3000:3000" # Expose Fastify server to host
     environment:
-      - DATABASE_URL=file:./prisma/dev.db
+      - DATABASE_URL=file:./prisma/database/dev.db
     command: >
       sh -c "npx prisma migrate reset --force --skip-seed &&
              npm run dev"
