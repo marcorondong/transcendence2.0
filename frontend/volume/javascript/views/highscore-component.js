@@ -14,6 +14,5 @@ class HighscoreComponent extends HTMLElement {
 }
 customElements.define("highscore-component", HighscoreComponent);
 export function createComponent() {
-    console.log("creating element");
     return document.createElement("highscore-component");
 }

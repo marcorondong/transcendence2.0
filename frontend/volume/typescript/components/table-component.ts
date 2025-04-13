@@ -23,7 +23,7 @@ export class TableComponent extends HTMLElement {
 		this.table.className = classes;
 	}
 
-	setHeaders(headers) {
+	setHeaders(headers: string[]) {
 		const tr = document.createElement("tr");
 		this.thead.appendChild(tr);
 
@@ -35,7 +35,7 @@ export class TableComponent extends HTMLElement {
 		}
 	}
 
-	setRow(entries) {
+	setRow(entries: string[]) {
 		const tr = document.createElement("tr");
 		this.tbody.appendChild(tr);
 

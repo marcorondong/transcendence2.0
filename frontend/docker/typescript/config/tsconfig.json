@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
-		"target": "ES2020", // JavaScript target version
+		"target": "ES6", // JavaScript target version
 		"module": "ESNext", // Module system
+		"moduleResolution": "node",
 		"esModuleInterop": true, // for compatibility with CommonJS
 		"allowJs": true, // <== important to allow importing .js
 		"checkJs": false, // optional: you can set true to check JS files too

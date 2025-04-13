@@ -45,7 +45,6 @@ class UsersComponent extends HTMLElement {
 customElements.define("users-component", UsersComponent);
 
 export function createComponent() {
-	console.log("creating element");
 	return document.createElement("users-component");
 }
 

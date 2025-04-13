@@ -20,6 +20,5 @@ class HomeComponent extends HTMLElement {
 customElements.define("home-component", HomeComponent);
 
 export function createComponent() {
-	console.log("creating element");
 	return document.createElement("home-component");
 }
