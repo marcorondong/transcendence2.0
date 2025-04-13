@@ -32,7 +32,7 @@
 
 	<body class="bg-grey-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200">
 		<nav
-			class="flex flex-row justify-between px-5 md:px-16 xl:px-32 py-9 mb-9"
+			class="flex justify-between content-center px-5 md:px-16 xl:px-32 py-9 mb-9"
 		>
 			<img
 				class="rounded-lg size-18"
@@ -41,7 +41,7 @@
 			<button
 				data-collapse-toggle="navbar-default"
 				type="button"
-				class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+				class="inline-flex items-center p-2 w-10 h-10 justify-center self-center text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
 				aria-controls="navbar-default"
 				aria-expanded="false"
 				id="navbar-button"
@@ -63,30 +63,26 @@
 					/>
 				</svg>
 			</button>
-			<div
-				class="hidden w-full sm:block sm:w-auto"
+			<ul
+				class="hidden flex w-full sm:w-auto gap-4 justify-center sm:content-center items-center absolute sm:static flex-col sm:flex-row top-30"
 				id="navbar-links"
 			>
-				<ul class="flex flex-row gap-4 items-center">
-					<li>
-						<theme-toggle-component
-							size="5"
-						></theme-toggle-component>
-					</li>
-					<li class="nav-link">
-						<a href="/">home</a>
-					</li>
-					<li class="nav-link">
-						<a href="highscore">highscore</a>
-					</li>
-					<li class="nav-link">
-						<a href="profile">profile</a>
-					</li>
-					<li class="nav-link">
-						<a href="users">users</a>
-					</li>
-				</ul>
-			</div>
+				<li>
+					<theme-toggle-component size="5"></theme-toggle-component>
+				</li>
+				<li class="nav-link">
+					<a href="/">home</a>
+				</li>
+				<li class="nav-link">
+					<a href="highscore">highscore</a>
+				</li>
+				<li class="nav-link">
+					<a href="profile">profile</a>
+				</li>
+				<li class="nav-link">
+					<a href="users">users</a>
+				</li>
+			</ul>
 		</nav>
 
 		<div
