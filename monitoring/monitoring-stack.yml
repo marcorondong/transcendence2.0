@@ -20,11 +20,12 @@ services:
     container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/web.yml:/etc/prometheus/web.yml
+      - ./prometheus/entrypoint.sh:/entrypoint.sh
       - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
+    secrets:
+      - prometheus_admin_password
     networks:
       - Transcendence2.0
 
@@ -37,55 +38,33 @@ services:
     depends_on:
       - prometheus
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - Transcendence2.0
-
-  falco:
-    image: falcosecurity/falco:latest
-    container_name: falco
-    restart: unless-stopped
-    cap_drop:
-      - all
-    cap_add:
-      - sys_admin
-      - sys_resource
-      - sys_ptrace
-    volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock
-      - /proc:/host/proc:ro
-      - /etc:/host/etc:ro
-      - falco_events:/var/log/falco_events
-      - ./falco.yaml:/etc/falco/falco.yaml
-      - ./falco_rules.yaml:/etc/falco/falco_rules.yaml
-    networks:
-      - Transcendence2.0
-
-  falco-sidekick:
-    image: falcosecurity/falcosidekick:latest
-    container_name: falco-sidekick
-    restart: unless-stopped
-    depends_on:
-      - falco
-    networks:
-      - Transcendence2.0
-
   grafana:
-    image: grafana/grafana:latest
+    build:
+      context: ./grafana
     container_name: grafana
     restart: unless-stopped
+    ports:
+      - "3000:3000" # TODO proxy through nginx
     networks:
       - Transcendence2.0
     depends_on:
       - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/entrypoint.sh:/entrypoint.sh
+      - ./grafana/dashboards:/etc/grafana/custom-dashboards
+    secrets:
+      - grafana_admin_password
+      - prometheus_admin_password
+    entrypoint:
+      - /entrypoint.sh
 
 volumes:
+  grafana-data:
   prometheus_data:
-  falco_events:
+
+secrets:
+  grafana_admin_password:
+    file: secrets/grafana_admin_password.txt
+  prometheus_admin_password:
+    file: secrets/prometheus_admin_password.txt

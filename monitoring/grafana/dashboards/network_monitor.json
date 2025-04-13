@@ -1,0 +1,1193 @@
+{
+	"dashboard":
+	{
+		"annotations": {
+		"list": [
+			{
+			"builtIn": 1,
+			"datasource": {
+				"type": "grafana",
+				"uid": "-- Grafana --"
+			},
+			"enable": true,
+			"hide": true,
+			"iconColor": "rgba(0, 211, 255, 1)",
+			"name": "Annotations & Alerts",
+			"type": "dashboard"
+			}
+		]
+		},
+		"editable": true,
+		"fiscalYearStartMonth": 0,
+		"graphTooltip": 0,
+		"id": null,
+		"links": [],
+		"panels": [
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 0,
+			"y": 0
+			},
+			"id": 12,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "irate(node_netstat_Tcp_ActiveOpens[5m])",
+				"fullMetaSearch": false,
+				"includeNullMetadata": true,
+				"legendFormat": "TCP active connections",
+				"range": true,
+				"refId": "A",
+				"useBackend": false
+			},
+			{
+				"datasource": {
+				"type": "prometheus",
+				"uid": "feiriwun0s0zka"
+				},
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "irate(node_netstat_Tcp_PassiveOpens[5m])",
+				"fullMetaSearch": false,
+				"hide": false,
+				"includeNullMetadata": true,
+				"instant": false,
+				"legendFormat": "TCP passive connections",
+				"range": true,
+				"refId": "B",
+				"useBackend": false
+			}
+			],
+			"title": "TCP active/passive connections",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 12,
+			"y": 0
+			},
+			"id": 11,
+			"options": {
+			"legend": {
+				"calcs": [
+				"min",
+				"max",
+				"mean"
+				],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "rate(node_netstat_Tcp_InSegs[5m])",
+				"fullMetaSearch": false,
+				"includeNullMetadata": true,
+				"legendFormat": "In segments",
+				"range": true,
+				"refId": "A",
+				"useBackend": false
+			},
+			{
+				"datasource": {
+				"type": "prometheus",
+				"uid": "feiriwun0s0zka"
+				},
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "rate(node_netstat_Tcp_OutSegs[5m]) * -1",
+				"fullMetaSearch": false,
+				"hide": false,
+				"includeNullMetadata": true,
+				"instant": false,
+				"legendFormat": "out segments",
+				"range": true,
+				"refId": "B",
+				"useBackend": false
+			}
+			],
+			"title": "TCP segments",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": true,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 0,
+			"y": 8
+			},
+			"id": 10,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "rate(node_netstat_Udp_InDatagrams[5m])",
+				"fullMetaSearch": false,
+				"includeNullMetadata": true,
+				"legendFormat": "__auto",
+				"range": true,
+				"refId": "A",
+				"useBackend": false
+			},
+			{
+				"datasource": {
+				"type": "prometheus",
+				"uid": "feiriwun0s0zka"
+				},
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "rate(node_netstat_Udp_OutDatagrams[5m]) * -1",
+				"fullMetaSearch": false,
+				"hide": false,
+				"includeNullMetadata": true,
+				"instant": false,
+				"legendFormat": "__auto",
+				"range": true,
+				"refId": "B",
+				"useBackend": false
+			}
+			],
+			"title": "UPD datagrams received/sent",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 12,
+			"y": 8
+			},
+			"id": 8,
+			"options": {
+			"legend": {
+				"calcs": [
+				"max",
+				"min",
+				"mean"
+				],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"editorMode": "code",
+				"expr": "node_netstat_TcpExt_ListenDrops",
+				"legendFormat": "listen drops",
+				"range": true,
+				"refId": "A"
+			}
+			],
+			"title": "SYNs to LISTEN sockets ignored",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 0,
+			"y": 16
+			},
+			"id": 9,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "irate(node_netstat_TcpExt_TCPSynRetrans[5m])",
+				"fullMetaSearch": false,
+				"includeNullMetadata": true,
+				"legendFormat": "__auto",
+				"range": true,
+				"refId": "A",
+				"useBackend": false
+			}
+			],
+			"title": "SYN retransmits",
+			"type": "timeseries"
+		},
+		{
+			"collapsed": false,
+			"gridPos": {
+			"h": 1,
+			"w": 24,
+			"x": 0,
+			"y": 24
+			},
+			"id": 6,
+			"panels": [],
+			"title": "Row title",
+			"type": "row"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 0,
+			"y": 25
+			},
+			"id": 5,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"editorMode": "code",
+				"expr": "node_sockstat_sockets_used",
+				"legendFormat": "{{name}}",
+				"range": true,
+				"refId": "A"
+			}
+			],
+			"title": "Socket usage",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 12,
+			"y": 25
+			},
+			"id": 7,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "irate(node_netstat_IpExt_InOctets[5m])",
+				"format": "time_series",
+				"fullMetaSearch": false,
+				"includeNullMetadata": true,
+				"legendFormat": "octets in",
+				"range": true,
+				"refId": "A",
+				"useBackend": false
+			},
+			{
+				"datasource": {
+				"type": "prometheus",
+				"uid": "feiriwun0s0zka"
+				},
+				"disableTextWrap": false,
+				"editorMode": "builder",
+				"expr": "irate(node_netstat_IpExt_OutOctets[5m])",
+				"fullMetaSearch": false,
+				"hide": false,
+				"includeNullMetadata": true,
+				"instant": false,
+				"legendFormat": "octets out",
+				"range": true,
+				"refId": "B",
+				"useBackend": false
+			}
+			],
+			"title": "Netstat octets",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 0,
+			"y": 33
+			},
+			"id": 1,
+			"options": {
+			"legend": {
+				"calcs": [
+				"min",
+				"max",
+				"median"
+				],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"datasource": {
+				"type": "prometheus",
+				"uid": "feiriwun0s0zka"
+				},
+				"editorMode": "code",
+				"expr": "node_sockstat_TCP_alloc",
+				"instant": false,
+				"legendFormat": "allocated TCP sockets",
+				"range": true,
+				"refId": "A"
+			},
+			{
+				"datasource": {
+				"type": "prometheus",
+				"uid": "feiriwun0s0zka"
+				},
+				"editorMode": "code",
+				"expr": "node_sockstat_TCP_inuse",
+				"hide": false,
+				"instant": false,
+				"legendFormat": "TCP sockets in use",
+				"range": true,
+				"refId": "B"
+			}
+			],
+			"title": "TCP sockets",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				},
+				"unit": "decbytes"
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 12,
+			"y": 33
+			},
+			"id": 2,
+			"options": {
+			"legend": {
+				"calcs": [
+				"min",
+				"median",
+				"max"
+				],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"editorMode": "code",
+				"expr": "node_sockstat_TCP_mem_bytes",
+				"legendFormat": "__auto",
+				"range": true,
+				"refId": "A"
+			}
+			],
+			"title": "TCP memory usage",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				}
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 0,
+			"y": 41
+			},
+			"id": 3,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"editorMode": "code",
+				"expr": "node_sockstat_UDPLITE_inuse + node_sockstat_UDP_inuse",
+				"legendFormat": "UDP + UDPLITE sockets in use",
+				"range": true,
+				"refId": "A"
+			}
+			],
+			"title": "UPD socket usage",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+			"type": "prometheus",
+			"uid": "feiriwun0s0zka"
+			},
+			"fieldConfig": {
+			"defaults": {
+				"color": {
+				"mode": "palette-classic"
+				},
+				"custom": {
+				"axisBorderShow": false,
+				"axisCenteredZero": false,
+				"axisColorMode": "text",
+				"axisLabel": "",
+				"axisPlacement": "auto",
+				"barAlignment": 0,
+				"barWidthFactor": 0.6,
+				"drawStyle": "line",
+				"fillOpacity": 0,
+				"gradientMode": "none",
+				"hideFrom": {
+					"legend": false,
+					"tooltip": false,
+					"viz": false
+				},
+				"insertNulls": false,
+				"lineInterpolation": "linear",
+				"lineWidth": 1,
+				"pointSize": 5,
+				"scaleDistribution": {
+					"type": "linear"
+				},
+				"showPoints": "auto",
+				"spanNulls": false,
+				"stacking": {
+					"group": "A",
+					"mode": "none"
+				},
+				"thresholdsStyle": {
+					"mode": "off"
+				}
+				},
+				"mappings": [],
+				"thresholds": {
+				"mode": "absolute",
+				"steps": [
+					{
+					"color": "green"
+					},
+					{
+					"color": "red",
+					"value": 80
+					}
+				]
+				},
+				"unit": "decbytes"
+			},
+			"overrides": []
+			},
+			"gridPos": {
+			"h": 8,
+			"w": 12,
+			"x": 12,
+			"y": 41
+			},
+			"id": 4,
+			"options": {
+			"legend": {
+				"calcs": [],
+				"displayMode": "list",
+				"placement": "bottom",
+				"showLegend": true
+			},
+			"tooltip": {
+				"hideZeros": false,
+				"mode": "single",
+				"sort": "none"
+			}
+			},
+			"pluginVersion": "11.6.0",
+			"targets": [
+			{
+				"editorMode": "code",
+				"expr": "node_sockstat_UDP_mem",
+				"legendFormat": "__auto",
+				"range": true,
+				"refId": "A"
+			}
+			],
+			"title": "UDP sockets memory usage ",
+			"type": "timeseries"
+		}
+		],
+		"preload": false,
+		"schemaVersion": 41,
+		"tags": [],
+		"templating": {
+		"list": []
+		},
+		"time": {
+		"from": "now-30m",
+		"to": "now"
+		},
+		"timepicker": {},
+		"timezone": "browser",
+		"title": "Network",
+		"uid": null
+	},
+	"overwrite": true
+}
