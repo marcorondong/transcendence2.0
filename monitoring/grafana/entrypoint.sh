@@ -11,8 +11,7 @@ curl -X 'POST' \
 -u admin:"$(cat /run/secrets/grafana_admin_password)" \
 -d '{
 "access": "proxy",
-"basicAuth": true,
-"basicAuthUser": "transcended_user",
+"basicAuth": false,
 "database": "",
 "isDefault": true,
 "jsonData": {
@@ -21,14 +20,9 @@ curl -X 'POST' \
 	"sigV4Auth": false
 },
 "name": "prometheus",
-"secureJsonData": {
-	"basicAuthPassword": "'"$(cat /run/secrets/prometheus_admin_password)"'",
-	"password": "'"$(cat /run/secrets/prometheus_admin_password)"'"
-},
 "type": "prometheus",
 "typeLogoUrl": "public/app/plugins/datasource/prometheus/img/prometheus_logo.svg",
 "url": "http://prometheus:9090",
-"user": "transcended_user",
 "withCredentials": false
 }'
 

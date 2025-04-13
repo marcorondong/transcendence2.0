@@ -1,10 +1,18 @@
 GRAFANA_PW = monitoring/secrets/grafana_admin_password.txt
-PROMETHEUS_PW = monitoring/secrets/prometheus_admin_password.txt
+SLACK_WEBHOOK = monitoring/secrets/slack_webhook.txt
 SECRET_DIRECTORIES = monitoring/secrets
-SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(PROMETHEUS_PW)
 
-make: $(SECRETS)
+SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK)
+
+all: $(SECRETS)
 	docker-compose up -d
+
+re:
+	docker-compose down
+	make
+
+clean:
+	docker-compose down
 
 $(SECRET_DIRECTORIES):
 	mkdir -p monitoring/secrets
@@ -12,6 +20,4 @@ $(SECRET_DIRECTORIES):
 $(GRAFANA_PW):
 	./monitoring/grafana/create_password.sh
 
-$(PROMETHEUS_PW):
-	./monitoring/prometheus/create_password.sh
-	cat monitoring/secrets/prometheus_admin_password.txt | htpasswd -inB "" >> monitoring/prometheus/web.yml
+.PHONY: all re clean
