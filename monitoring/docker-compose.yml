@@ -1,6 +1,6 @@
 services:
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.9.1
     container_name: node-exporter
     restart: unless-stopped
     volumes:
@@ -16,7 +16,7 @@ services:
       - Transcendence2.0
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.4
     container_name: prometheus
     restart: unless-stopped
     volumes:
@@ -31,7 +31,7 @@ services:
       - "--storage.tsdb.path=/prometheus_data"
 
   blackbox-exporter:
-    image: prom/blackbox-exporter:latest
+    image: prom/blackbox-exporter:v0.26.0
     container_name: blackbox-exporter
     restart: unless-stopped
     networks:
@@ -40,7 +40,7 @@ services:
       - ./blackbox-exporter/blackbox.yml:/etc/blackbox_exporter/config.yml
 
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:v0.28.1
     container_name: alertmanager
     restart: unless-stopped
     volumes:
@@ -55,7 +55,7 @@ services:
       - slack_webhook
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.6.0
     container_name: grafana
     restart: unless-stopped
     ports:
