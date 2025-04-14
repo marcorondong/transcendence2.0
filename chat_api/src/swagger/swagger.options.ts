@@ -1,15 +1,30 @@
+import { FastifyInstance } from "fastify";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUI from "@fastify/swagger-ui";
+import { jsonSchemaTransform } from "fastify-type-provider-zod";
+import { SwaggerOptions } from "@fastify/swagger";
+
 export const swaggerOptions = {
-	swagger: {
+	exposeRoute: true,
+	openapi: {
 		info: {
-			title: "Chat API",
-			description: "API Documentation with Fastify and Swagger",
+			title: "ft_transcendence API",
+			description: "Swagger docs for ft_transcendence project",
 			version: "1.0.0",
 		},
-		host: "localhost:3002",
-		schemes: ["http"],
-		consumes: ["application/json"],
-		produces: ["application/json"],
+		// Enable Auth option in Swagger (to reach authenticated routes)
+		components: {
+			securitySchemes: {
+				bearerAuth: {
+					type: "http",
+					scheme: "bearer",
+					bearerFormat: "JWT",
+				},
+			},
+		},
+		security: [{ bearerAuth: [] }], // Apply Auth option globally to all routes
 	},
+	transform: jsonSchemaTransform,
 };
 
 export const swaggerUiOptions = {

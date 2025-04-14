@@ -26,6 +26,7 @@ import { friendRequest } from "./modules/session/session.controllers";
 import { chatHistoryOpt } from "./modules/session/session.options";
 import { wsRoutes } from "./modules/ws/ws.routes";
 import dotenv from 'dotenv';
+import { SwaggerOptions } from "@fastify/swagger";
 
 dotenv.config();
 
@@ -80,37 +81,37 @@ declare module "fastify" {
 	}
 }
 
-// server.decorate(
-// 	"authenticate",
-// 	async (request: FastifyRequest, reply: FastifyReply) => {
-// 		const url = request.raw.url;
+server.decorate(
+	"authenticate",
+	async (request: FastifyRequest, reply: FastifyReply) => {
+		const url = request.raw.url;
 
-// 		if (
-// 			url &&
-// 			(url.startsWith("/documentation") ||
-// 				url.startsWith("/ws") ||
-// 				url.startsWith("/session/healthCheck") ||
-// 				url.startsWith("/swagger-ui"))
-// 		) {
-// 			return;
-// 		}
+		if (
+			url &&
+			(url.startsWith("/documentation") ||
+				url.startsWith("/ws") ||
+				url.startsWith("/session/healthCheck") ||
+				url.startsWith("/swagger-ui"))
+		) {
+			return;
+		}
 
-// 		const authHeader = request.headers["authorization"];
+		const authHeader = request.headers["authorization"];
 
-// 		if (!authHeader || !authHeader.startsWith("Bearer ")) {
-// 			reply.status(401).send({ error: "Unauthorized" });
-// 			return;
-// 		}
+		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+			reply.status(401).send({ error: "Unauthorized" });
+			return;
+		}
 
-// 		const key = authHeader.split(" ")[1];
+		const key = authHeader.split(" ")[1];
 
-// 		if (key !== apiKey) {
-// 			reply.status(401).send({ error: "Unauthorized" });
-// 			return;
-// 		}
-// 		console.log("User authenticated:", request.headers["authorization"]);
-// 	},
-// );
+		if (key !== apiKey) {
+			reply.status(401).send({ error: "Unauthorized" });
+			return;
+		}
+		console.log("User authenticated:", request.headers["authorization"]);
+	},
+);
 
 // server.addHook(
 // 	"onRequest",
@@ -126,7 +127,7 @@ server.register(cors, {
 	methods: ["GET", "POST", "PUT", "DELETE"],
 });
 
-server.register(fastifySwagger, swaggerOptions);
+server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
 server.register(fastifySwaggerUi, swaggerUiOptions);
 
 server.register(sessionRoutes, { prefix: "/session" });
