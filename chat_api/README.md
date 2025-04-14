@@ -1,85 +1,164 @@
+# 🛰️ Frontend Communication Protocol
 
-Protocol for Front End for now
+This document defines the request and reply structures for communication between the **frontend** and **backend**.
 
-request -> request of frontend (frontend sends request)
-reply -> reply of backend (frontend receives reply of backend)
+Each interaction follows this pattern:
+
+- **Request** → Sent from frontend
+- **Reply** → Sent from backend
+
+---
+
+## 📩 1. Message Someone
+
+**User1 sends a message to User2**
+
+### Request (from User1)
+```json
+{
+  "message": "any message",
+  "relatedId": "UUID of user2"
+} 
+```
+
+### Reply (to User1)
+```json
+{
+  "message": "any message",
+  "relatedId": "UUID of user1"
+}
+```
+### Reply (to User2)
+```json
+{
+  "message": "any message",
+  "relatedId": "UUID of user1"
+}
+```
+
+## 🚫 2. Block / Unblock a User
+
+** User1 blocks or unblocks User2 **
+
+### Request (from User1)
+```json
+{
+  "block": true,
+  "relatedId": "UUID of user2"
+}
+```
+
+### Reply (to User1)
+```json
+{
+  "block": true,
+  "relatedId": "UUID of user2"
+}
+```
+Note: No reply is sent to User2 by default. Can be add upon request.
+
+## 📨 3. Invite Someone
+
+**User1 sends an invitation to User2**
+
+### Request (from User1)
+```json
+{
+  "invite": true,
+  "relatedId": "UUID of user2"
+}
+```
+
+### Reply (to User2)
+``` json
+{
+  "invite": true,
+  "relatedId": "UUID of user1"
+}
+```
+Note: No reply is sent to User1. Can be add upon request.
+
+## ✅ 4. Accept Invitation
+
+**User2 accepts User1's invitation**
+
+### Request (from User2)
+```json
+{
+  "inviteAccepted": true,
+  "relatedId": "UUID of user1"
+}
+```
+
+### Reply (to User1)
+``` json
+{
+  "openSocket": true,
+  "relatedId": "UUID of user2"
+}
+```
+
+### 🔌 Socket Initialization
+
+**Once the socket is established, User1 must notify the backend**
+
+### Request (from User1)
+```json
+{
+  "socketOpened": true,
+  "relatedId": "UUID of user2"
+}
+```
+
+### Reply (to User2)
+``` json
+{
+  "joinRoom": true,
+  "roomId": "room id to build connection with"
+}
+```
+
+## 👤 5. New Client Joined
+
+**A new client (e.g., user101) joins the app**
+
+### Reply (to user101)
+```json
+{
+  "peopleOnline": ["array", "of", "all", "online", "people"]
+} 
+```
+### Reply (to all other users)
+``` json
+{
+  "newClient": "UUID of user101"
+}
+```
+
+## 🔌 Disconnection Event
+
+**When a client disconnects, the backend sends a disconnection event.**
+
+### Reply (to other clients)
+```json
+{
+  "clientDisconnected": true,
+  "relatedId": "UUID of the disconnected client"
+}
+```
+Note: This event informs all other clients about the disconnection, and they can update their UI accordingly (e.g., removing the user from the online list).
 
 
-1) Message someone (user1 sends message to user2)
+## ❌ Error Handling
 
-request from user1 -> {"message": "any message", "relatedId": "UUID of user2"}
+**In case of an error, the backend replies with an error message**
 
-reply for user1 -> {"message": "any message", senderId: "UUID of user1"} for user1
-reply for user1 -> {"message": "any message", senderId: "UUID of user1"} for user2
-
-Note: in case user2 blocked user1, user2 will receive nothing
-
-2) Block (user1 blocks/unblocks user2)
-
-request from user1 -> {"block": true, "relatedId": "UUID of user2"}
-
-reply for user1  -> {block: true, "relatedId": "UUID of user2"}
-no reply for user2 (can be added if needed)
-
-3) Invite someone (user1 invites user2)
-
-request from user1 -> {"invite": true, "relatedId": "UUID of user2"}
-
-no reply for user1 (can be added if needed)
-reply for user2 -> {"invite": true, "relatedId": "UUID of user1"}
-
-4) Invite Accepted (user2 -> user1 assuming user2 accept user1 invitation)
-
-request from user2 -> { "inviteAccepted": true, "relatedId": "UUID of user1"}
-
-reply for user1 -> { "openSocket": true, "relatedId": "UUID of user2" }
-
-Note: After socket connection is establish for user1, user1 should inform backend
-
-request from user1 -> { "socketOpened": true, "relatedId": "UUID of user2" }
-
-reply for user2 -> { "joinRoom": true, "roomId": "room id to to build connection with}
-
-5) New Client ( new client user101 joined)
-
-reply for user101 -> { "peopleOnline": "array of all online people" }
-reply for all other users -> { "newClient": "UUID of user101",} 
-
-
-<!-- 1) Message someone (user1 sends message to user2)
-
-request from user1 -> {"message": "any message", recipientId: "UUID of user2"}
-
-reply for user1 -> {"message": "any message", senderId: "UUID of user1"} for user1
-reply for user1 -> {"message": "any message", senderId: "UUID of user1"} for user2
-
-Note: in case user2 blocked user1, user2 will receive nothing
-
-2) Block (user1 blocks/unblocks user2)
-
-request from user1 -> {"block": "UUID of user2"}
-
-reply for user1  -> {block: "UUID of user2"}
-no reply for user2
-
-3) Invite someone (user1 invites user2)
-
-request from user1 -> {"invite": "UUID of user2"}
-
-no reply for user1 (can be added if needed)
-reply for user2 -> {"invite": "UUID of user1"}
-
-4) Invite Accepted (user2 -> user1 assuming user2 accept user1 invitation)
-
-request from user2 -> { "inviteAccepted": "UUID of user1"}
-
-reply for user1 -> { "openSocket": "UUID of user2" }
-
-Note: After socket connection is establish for user1, user1 should inform backend
-
-request from user1 -> { "socketOpened": "UUID of user2" }
-
-reply for user2 -> { "joinRoom": "room id to send in params} -->
-
-
+### Reply (to client)
+```json
+{
+  "error": true,
+  "relatedId": "UUID of the client",
+  "errorMessage": "Description of the error"
+}
+``` 
 
