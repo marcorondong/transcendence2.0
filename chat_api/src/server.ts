@@ -22,7 +22,7 @@ fastify.register(async function (fastify) {
 		);
 		socket.send(
 			JSON.stringify({
-				senderId: client.getId(), // optional
+				relatedId: client.getId(), // optional
 				welcomeMessage: "Welcome to the chat server!", // optional
 				peopleOnline: peopleOnline,
 			}),
@@ -42,7 +42,7 @@ fastify.register(async function (fastify) {
 		});
 
 		connection.on("close", async () => {
-			await onClientDisconnect(client);
+			onClientDisconnect(client);
 		});
 	});
 });
