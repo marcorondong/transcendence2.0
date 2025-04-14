@@ -1,0 +1,11 @@
+.field {
+    width: 800px;
+    height: 500 px;
+    background-color: black;
+}
+canvas {
+    /* border: 1px solid black; */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: black;
+}

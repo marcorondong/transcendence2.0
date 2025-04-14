@@ -1,17 +1,16 @@
-
 # Base image with Node.js
 FROM node:23-bullseye-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json (from context `users/`)
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the app code
+# Copy the rest of the app code (from context `users/`)
 COPY . .
 
 # Generate Prisma client (after schema and node_modules are present)
