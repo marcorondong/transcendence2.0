@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+//   url      = env("DATABASE_URL") // TODO: Decide if fix location or .env location
+  url      = "file:./database/dev.db"
+}
+
+model User {
+  id           Int       @id @unique @default(autoincrement()) // TODO: Change this to uuid
+  email        String    @unique
+  name         String    @unique
+  passwordHash String
+  salt         String
+  products     Product[]
+}
+
+model Product {
+  id        Int      @id @default(autoincrement()) // TODO: Change this to uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String //@db.VarChar(255)
+  content   String?
+  price     Float
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id])
+}
