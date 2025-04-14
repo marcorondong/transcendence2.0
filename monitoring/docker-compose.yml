@@ -8,10 +8,10 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
     command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     networks:
       - Transcendence2.0
 
@@ -27,9 +27,9 @@ services:
     networks:
       - Transcendence2.0
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus_data'
-  
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus_data"
+
   blackbox-exporter:
     image: prom/blackbox-exporter:latest
     container_name: blackbox-exporter
@@ -50,7 +50,7 @@ services:
     depends_on:
       - prometheus
     command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
     secrets:
       - slack_webhook
 
