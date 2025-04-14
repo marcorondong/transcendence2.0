@@ -8,7 +8,7 @@ services:
     volumes:
       - ./ssg/pong-api/src/:/pong/pong-api/src/
     ports:
-      - 3010:3010
+      - 3010:3010 #TODO remove it will not be exposed at final version
     command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
     networks:
       - Transcendence2.0
