@@ -75,6 +75,13 @@ fastify.register(async function (fastify) {
 		});
 	});
 
+	fastify.get("/playerRoom/:playerId", async (request, reply) =>{
+		const { playerId } = request.params as { playerId: string };
+		reply.send({
+			roomId: manager.getPlayerRoomId(playerId)
+		})
+	})
+
 	//Partial makes all field optional.
 	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
 		"/pong/",
