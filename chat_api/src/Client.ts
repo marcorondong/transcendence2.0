@@ -1,61 +1,40 @@
 
-export class Client 
+export class Client
 {
 	private readonly id: string;
-    private nickname: string;
-    private readonly socket: WebSocket;
-	private blockedList: string[] = [];
-	private registered: boolean = false;
+	private readonly socket: WebSocket;
+	private blockList: Set<string>;
 
-    constructor(id: string, nickname: string, socket: WebSocket) 
+	constructor(id: string, socket: WebSocket, blockList: Set<string> = new Set<string>())
 	{
-        this.id = id;
+		this.id = id;
 		this.socket = socket;
-        this.nickname = '';
-    }
+		this.blockList = blockList;
+	}
 
 	getId(): string
 	{
 		return this.id;
 	}
-
-	getNickname(): string
-	{
-		return this.nickname;
-	}
-
 	getSocket(): WebSocket
 	{
 		return this.socket;
 	}
-
-	getBlockedList(): string[]
+	getBlockList(): Set<string>
 	{
-		return this.blockedList;
+		return this.blockList;
 	}
-
-	getRegistered(): boolean
+	
+	addBlockedUser(id: string): void
 	{
-		return this.registered;
+		this.blockList.add(id);
 	}
-
-	setNickname(nickname: string): void
+	removeBlockedUser(id: string): void
 	{
-		this.nickname = nickname;
+		this.blockList.delete(id);
 	}
-
-	setBlockedList(blockedList: string[]): void
+	isBlocked(id: string): boolean
 	{
-		this.blockedList = blockedList;
-	}
-
-	setRegistered(registered: boolean): void
-	{
-		this.registered = registered;
-	}
-
-	addBlockedUser(nickname: string): void
-	{
-		this.blockedList.push(nickname);
+		return this.blockList.has(id);
 	}
 }
