@@ -1,4 +1,4 @@
-export enum VectorDirection{
+export enum VectorDirection {
 	NO = 0,
 	UP = 1,
 	DOWN = 2,
@@ -9,39 +9,35 @@ export enum VectorDirection{
 
 	LEFT = 8,
 	LEFT_UP = 9,
-	LEFT_DOWN = 10
+	LEFT_DOWN = 10,
 }
 
-export class Point
-{
+export class Point {
 	protected xPos: number;
 	protected yPos: number;
-	
-	constructor(x: number, y: number)
-	{
+
+	constructor(x: number, y: number) {
 		this.xPos = x;
 		this.yPos = y;
 	}
 
-	static calculateDistance(pointA: Point, pointB: Point)
-	{
+	static calculateDistance(pointA: Point, pointB: Point) {
 		const a = pointA.getX();
 		const b = pointA.getY();
 		const p = pointB.getX();
 		const q = pointB.getY();
 
-		const distance_squared = Math.pow((a - p), 2) + Math.pow((b - q), 2)
+		const distance_squared = Math.pow(a - p, 2) + Math.pow(b - q, 2);
 		return Math.sqrt(distance_squared);
 	}
 
-/**
- * 
- * @param pointA from 
- * @param pointB to
- * return point that represent vector from A to B
- */
-	static calculateVector(pointA: Point, pointB: Point): Point
-	{
+	/**
+	 *
+	 * @param pointA from
+	 * @param pointB to
+	 * return point that represent vector from A to B
+	 */
+	static calculateVector(pointA: Point, pointB: Point): Point {
 		const x1 = pointA.getX();
 		const y1 = pointA.getY();
 		const x2 = pointB.getX();
@@ -53,57 +49,48 @@ export class Point
 		return vector;
 	}
 
-	static calculateVectorSpeed(vector: Point): number
-	{
-		const firstStep = Math.pow(vector.getX(), 2) + Math.pow(vector.getY(),2);
+	static calculateVectorSpeed(vector: Point): number {
+		const firstStep =
+			Math.pow(vector.getX(), 2) + Math.pow(vector.getY(), 2);
 		const speed = Math.sqrt(firstStep);
 		return speed;
 	}
 
-	equals(otherPoint: Point): boolean
-	{
-		return (otherPoint.xPos === this.xPos && otherPoint.yPos === this.yPos)
+	equals(otherPoint: Point): boolean {
+		return otherPoint.xPos === this.xPos && otherPoint.yPos === this.yPos;
 	}
 
 	/**
-	 * modify this object with new x and y postion that adds other point(vector) x and y position 
+	 * modify this object with new x and y position that adds other point(vector) x and y position
 	 * @param secondPoint x and y that will be added to current object
 	 */
-	add(secondPoint: Point): void
-	{
+	add(secondPoint: Point): void {
 		const newX = this.xPos + secondPoint.xPos;
 		const newY = this.yPos + secondPoint.yPos;
 		this.setX(newX);
 		this.setY(newY);
 	}
 
-	getX(): number
-	{
+	getX(): number {
 		return this.xPos;
 	}
 
-	setX(newX: number): void
-	{
-		this.xPos = newX; 
+	setX(newX: number): void {
+		this.xPos = newX;
 	}
-	
-	getY(): number 
-	{
+
+	getY(): number {
 		return this.yPos;
 	}
-	
-	setY(newY: number): void
-	{
+
+	setY(newY: number): void {
 		this.yPos = newY;
 	}
 
-	getBiggerAxis(): number 
-	{
-		if(Math.abs(this.xPos) > Math.abs(this.yPos))
-			return this.getX();
+	getBiggerAxis(): number {
+		if (Math.abs(this.xPos) > Math.abs(this.yPos)) return this.getX();
 		return this.getY();
 	}
-
 
 	//TODO: either remove at the end or use it for something more complex
 	// getMovementDirection(): VectorDirection
@@ -123,5 +110,4 @@ export class Point
 	// 		return 1;
 	// 	return 2;
 	// }
-
 }
