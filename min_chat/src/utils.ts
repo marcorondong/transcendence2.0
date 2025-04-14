@@ -13,24 +13,6 @@ function errorCaught(error: unknown, client: Client) {
 	);
 }
 
-function roomIdHandler(
-	client: Client,
-	friendClient: Client,
-) {
-	try {
-		const gameIdAskedFromFilip = crypto.randomUUID();
-
-		client.getSocket().send(
-			JSON.stringify({
-				startGame: true,
-				roomId: gameIdAskedFromFilip,
-			}),
-		);
-	} catch (error) {
-		errorCaught(error, client);
-	}
-}
-
 async function socketOpenedHandler(
 	client: Client,
 	friendClient: Client,
@@ -51,7 +33,7 @@ async function socketOpenedHandler(
 			JSON.stringify({
 				joinRoom: true,
 				roomId: roomId,
-				Notification: "Open socket with provided roomID", // optional
+				Notification: "Open socket with provided roomID", // TODO for debugging purposes
 			}),
 		);
 	} catch (error) {
@@ -59,16 +41,13 @@ async function socketOpenedHandler(
 	}
 }
 
-function inviteAcceptedHandler(
-	client: Client,
-	friendClient: Client,
-) {
+function inviteAcceptedHandler(client: Client, friendClient: Client) {
 	try {
 		friendClient.getSocket().send(
 			JSON.stringify({
 				openSocket: true,
 				senderId: client.getId(),
-				Notification: "Open Socket and let me know", // optional
+				Notification: "Open Socket and let me know", // TODO for debugging purposes
 			}),
 		);
 	} catch (error) {
@@ -76,63 +55,41 @@ function inviteAcceptedHandler(
 	}
 }
 
-function inviteHandler(
-	client: Client,
-	friendClient: Client,
-) {
+function inviteHandler(client: Client, friendClient: Client) {
 	try {
 		friendClient.getSocket().send(
 			JSON.stringify({
 				invite: true,
 				senderId: client.getId(),
-				notification: `${client.getId()} wants to play Ping Pong with you!`, // optional
+				notification: `${client.getId()} wants to play Ping Pong with you!`, // TODO for debugging purposes
 			}),
 		);
 	} catch (error) {
-		errorCaught(error, client); // for debugging purposes
+		errorCaught(error, client);
 	}
 }
 
-function blockHandler(
-	client: Client,
-	friendClient: Client,
-) {
+function blockHandler(client: Client, friendClient: Client) {
 	try {
 		if (client.isBlocked(friendClient.getId())) {
 			client.removeBlockedUser(friendClient.getId());
-			console.log(
-				// for debugging purposes
-				`Client ${client.getId()} unblocked ${friendClient.getId()}`,
-			);
-			client.getSocket().send(
-				// optional
-				JSON.stringify({
-					notification: `You have unblocked ${friendClient.getId()}`, // optional
-				}),
-			);
 		} else {
 			client.addBlockedUser(friendClient.getId());
-			console.log(
-				// for debugging purposes
-				`Client ${client.getId()} blocked ${friendClient.getId()}`,
-			);
-			client.getSocket().send(
-				// optional
-				JSON.stringify({
-					notification: `You have blocked ${friendClient.getId()}`, // optional
-				}),
-			);
 		}
+		console.log(
+			`Client ${client.getId()} blocked/unblocked ${friendClient.getId()}`,
+		); // TODO for debugging purposes
+		client.getSocket().send(
+			JSON.stringify({
+				block: `Block status changed for ${friendClient.getId()}`,
+			}),
+		);
 	} catch (error) {
-		errorCaught(error, client); // for debugging purposes
+		errorCaught(error, client);
 	}
 }
 
-function messageHandler(
-	message: string,
-	client: Client,
-	friendClient: Client,
-) {
+function messageHandler(message: string, client: Client, friendClient: Client) {
 	try {
 		client.getSocket().send(
 			JSON.stringify({
@@ -149,7 +106,7 @@ function messageHandler(
 			);
 		}
 	} catch (error) {
-		errorCaught(error, client); // for debugging purposes
+		errorCaught(error, client);
 	}
 }
 
@@ -168,16 +125,14 @@ export async function onClientMessage(
 			throw new Error("Server: You blocked this UUID");
 		if (data.recipientId === client.getId())
 			throw new Error("Server: You cannot send a message to yourself");
-		if (data.message)
-			await messageHandler(data.message, client, friendClient);
-		else if (data.block) await blockHandler(client, friendClient);
-		else if (data.invite) await inviteHandler(client, friendClient);
+		if (data.message) messageHandler(data.message, client, friendClient);
+		else if (data.block) blockHandler(client, friendClient);
+		else if (data.invite) inviteHandler(client, friendClient);
 		else if (data.inviteAccepted)
-			await inviteAcceptedHandler(client, friendClient);
+			inviteAcceptedHandler(client, friendClient);
 		else if (data.socketOpened)
 			await socketOpenedHandler(client, friendClient);
-		else if (data.roomId) await roomIdHandler(client, friendClient);
-		else throw new Error("Server: Unknown type in received data");
+		else throw new Error("Server: Unknown request");
 	} catch (error) {
 		errorCaught(error, client);
 	}
