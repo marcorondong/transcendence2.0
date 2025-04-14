@@ -17,18 +17,20 @@ async function socketOpenedHandler(
 	client: Client,
 	friendClient: Client,
 ): Promise<void> {
-	const url = `http://localhost:3010/playerRoom/${friendClient.getId()}`;
-	const response = await fetch(url, {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-		},
-	});
-	if (!response.ok) {
-		throw new Error("Network response was not ok");
-	}
-	const roomId = await response.json();
 	try {
+		// TODO filip's api end point. For now, we are using a mock UUID
+		// const url = `http://localhost:3010/playerRoom/${friendClient.getId()}`;
+		// const response = await fetch(url, {
+		// 	method: "GET",
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 	},
+		// });
+		// if (!response.ok) {
+		// 	throw new Error("Network response was not ok");
+		// }
+		// const roomId = await response.json();
+		const roomId = crypto.randomUUID(); // TODO for debugging purposes
 		friendClient.getSocket().send(
 			JSON.stringify({
 				joinRoom: true,
