@@ -17,6 +17,7 @@ const HOST: string = "0.0.0.0";
 let privateKey: string;
 let certificate: string;
 
+//TODO remove comments
 // try
 // {
 // 	privateKey = fs.readFileSync(privateKeyPath, "utf-8");
@@ -42,7 +43,7 @@ const fastify = Fastify({
 						target: "pino-pretty",
 						options: {
 							colorize: true, //enables colors
-							translateTime: "HH:MM:ss Z", //formating timestamt
+							translateTime: "HH:MM:ss Z", //formatting timestamp
 							ignore: "pid,hostname", //Hide fields
 						},
 					},
@@ -73,6 +74,13 @@ fastify.register(async function (fastify) {
 			hello: "ssl",
 		});
 	});
+
+	fastify.get("/playerRoom/:playerId", async (request, reply) =>{
+		const { playerId } = request.params as { playerId: string };
+		reply.send({
+			roomId: manager.getPlayerRoomId(playerId)
+		})
+	})
 
 	//Partial makes all field optional.
 	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
@@ -113,7 +121,7 @@ fastify.register(async function (fastify) {
 const startServer = async () => {
 	try {
 		await fastify.listen({ port: PORT, host: HOST });
-		console.log(`Pong server is runnig on https://${HOST}:${PORT}`);
+		console.log(`Pong server is running on https://${HOST}:${PORT}`);
 	} catch (err) {
 		console.log(err);
 		process.exit(1);
