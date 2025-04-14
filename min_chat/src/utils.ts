@@ -2,7 +2,7 @@ import { Client } from "./Client";
 import { onlineClients } from "./server";
 
 // TODO for debugging purposes
-async function errorCaught(error: unknown, client: Client): Promise<void> {
+function errorCaught(error: unknown, client: Client) {
 	console.error(`${error}`);
 	client.getSocket().send(
 		JSON.stringify({
@@ -13,10 +13,10 @@ async function errorCaught(error: unknown, client: Client): Promise<void> {
 	);
 }
 
-async function roomIdHandler(
+function roomIdHandler(
 	client: Client,
 	friendClient: Client,
-): Promise<void> {
+) {
 	try {
 		const gameIdAskedFromFilip = crypto.randomUUID();
 
@@ -59,10 +59,10 @@ async function socketOpenedHandler(
 	}
 }
 
-async function inviteAcceptedHandler(
+function inviteAcceptedHandler(
 	client: Client,
 	friendClient: Client,
-): Promise<void> {
+) {
 	try {
 		friendClient.getSocket().send(
 			JSON.stringify({
@@ -76,10 +76,10 @@ async function inviteAcceptedHandler(
 	}
 }
 
-async function inviteHandler(
+function inviteHandler(
 	client: Client,
 	friendClient: Client,
-): Promise<void> {
+) {
 	try {
 		friendClient.getSocket().send(
 			JSON.stringify({
@@ -93,10 +93,10 @@ async function inviteHandler(
 	}
 }
 
-async function blockHandler(
+function blockHandler(
 	client: Client,
 	friendClient: Client,
-): Promise<void> {
+) {
 	try {
 		if (client.isBlocked(friendClient.getId())) {
 			client.removeBlockedUser(friendClient.getId());
@@ -128,11 +128,11 @@ async function blockHandler(
 	}
 }
 
-async function messageHandler(
+function messageHandler(
 	message: string,
 	client: Client,
 	friendClient: Client,
-): Promise<void> {
+) {
 	try {
 		client.getSocket().send(
 			JSON.stringify({
@@ -183,7 +183,7 @@ export async function onClientMessage(
 	}
 }
 
-export async function onClientDisconnect(client: Client): Promise<void> {
+export function onClientDisconnect(client: Client) {
 	console.log(`Client ${client.getId()} disconnected`); // for debugging purposes
 	onlineClients.delete(client.getId());
 	onlineClients.forEach((person) => {
