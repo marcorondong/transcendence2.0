@@ -16,6 +16,10 @@ export class MatchMaking {
 		this.tournamentManager = new TournamentMatchMaking();
 	}
 
+	public getPlayerRoomId(playerId: string): string {
+		return this.headToHeadManager.getRoomIdOfPlayer(playerId);
+	}
+
 	matchJoiner(connection: WebSocket, query: IGameRoomQuery) {
 		if (query.clientType === "player")
 			this.playerJoiner(

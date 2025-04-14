@@ -23,6 +23,18 @@ export class HeadToHeadMatchMaking {
 		return joinedMap;
 	}
 
+	//TODO: Improve it after authorization is done to work with JWT stuff
+	getRoomIdOfPlayer(playerId: string): string
+	{
+		const allMatches: Map<string, APongRoom<APongGame>> = this.getAllMatches();
+		//TODO implement proper logic of looking of all rooms for requested player not just first one
+		for (const [key, room] of allMatches.entries()) {
+			console.log(`Key: ${key}, Room:`, room);
+			return room.getId();
+		}
+		return "No Room found";
+	}
+
 	putPlayerInPrivateRoom(
 		player: PongPlayer,
 		roomId: string,
