@@ -1,111 +1,93 @@
 import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
 
-export interface IScore
-{
+export interface IScore {
 	leftGoals: number;
 	rightGoals: number;
 	time: number;
 }
 
-export class ScoreBoard
-{
-	protected leftPlayerGoals: number;
-	protected rightPlayerGoals: number;
-	protected secondsLeft: number;
-	protected paused: boolean;
+export class ScoreBoard {
+	private leftPlayerGoals: number;
+	private rightPlayerGoals: number;
+	private secondsLeft: number;
+	private paused: boolean;
+	private overtime: boolean;
 	private lastScoredSide: "left" | "right";
 
-	constructor()
-	{
+	constructor() {
 		this.leftPlayerGoals = 0;
 		this.rightPlayerGoals = 0;
 		this.secondsLeft = 15;
 		this.paused = false;
+		this.overtime = false;
 		this.lastScoredSide = "left";
 	}
 
-	score(side: "left" | "right")
-	{
-		if(side === "left")
-		{
+	isOvertime(): boolean {
+		return this.overtime;
+	}
+
+	score(side: "left" | "right") {
+		if (side === "left") {
 			this.leftPlayerGoals++;
 			this.lastScoredSide = "left";
-		}
-		else
-		{
+		} else {
 			this.rightPlayerGoals++;
-			this.lastScoredSide="right";
+			this.lastScoredSide = "right";
 		}
 	}
 
-	getWinnerSide(): ETeamSideFiltered
-	{
-		if(this.leftPlayerGoals > this.rightPlayerGoals)
-			return ETeamSide.LEFT
-		if(this.leftPlayerGoals === this.rightPlayerGoals)
-		{
+	getWinnerSide(): ETeamSideFiltered {
+		if (this.leftPlayerGoals > this.rightPlayerGoals) return ETeamSide.LEFT;
+		if (this.leftPlayerGoals === this.rightPlayerGoals) {
 			throw Error("Not really winner, goals are same");
 		}
-		return ETeamSide.RIGTH;
+		return ETeamSide.RIGHT;
 	}
 
-	getLoserSide(): ETeamSideFiltered
-	{
-		if(this.leftPlayerGoals < this.rightPlayerGoals)
-			return ETeamSide.LEFT;
-		if(this.leftPlayerGoals === this.rightPlayerGoals)
-		{
+	getLoserSide(): ETeamSideFiltered {
+		if (this.leftPlayerGoals < this.rightPlayerGoals) return ETeamSide.LEFT;
+		if (this.leftPlayerGoals === this.rightPlayerGoals) {
 			throw Error("Not really loser, goals are same");
 		}
-		return ETeamSide.RIGTH;
-
+		return ETeamSide.RIGHT;
 	}
 
-	setScore(leftGoals: number, rightGoals: number)
-	{
+	setScore(leftGoals: number, rightGoals: number) {
 		this.leftPlayerGoals = leftGoals;
 		this.rightPlayerGoals = rightGoals;
 	}
 
-	getScoreJson(): IScore
-	{
+	getScoreJson(): IScore {
 		return {
 			leftGoals: this.leftPlayerGoals,
 			rightGoals: this.rightPlayerGoals,
-			time: this.secondsLeft
-		}
+			time: this.secondsLeft,
+		};
 	}
 
-	startCountdown(): void 
-	{
+	startCountdown(): void {
 		this.start();
-		const interval = setInterval( ()=>
-		{
-			if(this.paused === false)
-				this.secondsLeft--;
-			if(this.secondsLeft <= 0)
-			{
-				clearInterval(interval)
+		const interval = setInterval(() => {
+			if (this.paused === false) this.secondsLeft--;
+			if (this.secondsLeft <= 0) {
+				this.overtime = true;
+				clearInterval(interval);
 			}
 		}, 1000);
 	}
 
-	pause(): void 
-	{
+	pause(): void {
 		this.paused = true;
 	}
 
-	start(): void 
-	{
+	start(): void {
 		this.paused = false;
 	}
 
-	isWinnerDecided(): boolean
-	{
-		if(this.secondsLeft <= 0)
-		{
-			if(this.leftPlayerGoals !== this.rightPlayerGoals)
-				return true;
+	isWinnerDecided(): boolean {
+		if (this.secondsLeft <= 0) {
+			if (this.leftPlayerGoals !== this.rightPlayerGoals) return true;
 		}
 		return false;
 	}
