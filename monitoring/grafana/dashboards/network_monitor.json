@@ -25,8 +25,7 @@
 		"panels": [
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -117,8 +116,7 @@
 			},
 			{
 				"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 				},
 				"disableTextWrap": false,
 				"editorMode": "builder",
@@ -138,8 +136,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -234,8 +231,7 @@
 			},
 			{
 				"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 				},
 				"disableTextWrap": false,
 				"editorMode": "builder",
@@ -255,8 +251,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -347,8 +342,7 @@
 			},
 			{
 				"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 				},
 				"disableTextWrap": false,
 				"editorMode": "builder",
@@ -368,8 +362,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -464,8 +457,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -573,8 +565,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -665,8 +656,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -758,8 +748,7 @@
 			},
 			{
 				"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 				},
 				"disableTextWrap": false,
 				"editorMode": "builder",
@@ -779,8 +768,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -864,8 +852,7 @@
 			"targets": [
 			{
 				"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 				},
 				"editorMode": "code",
 				"expr": "node_sockstat_TCP_alloc",
@@ -876,8 +863,7 @@
 			},
 			{
 				"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 				},
 				"editorMode": "code",
 				"expr": "node_sockstat_TCP_inuse",
@@ -893,8 +879,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -990,8 +975,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -1082,8 +1066,7 @@
 		},
 		{
 			"datasource": {
-			"type": "prometheus",
-			"uid": "feiriwun0s0zka"
+			"type": "prometheus"
 			},
 			"fieldConfig": {
 			"defaults": {
@@ -1176,7 +1159,9 @@
 		],
 		"preload": false,
 		"schemaVersion": 41,
-		"tags": [],
+		"tags": [
+			"network_monitor"
+		],
 		"templating": {
 		"list": []
 		},

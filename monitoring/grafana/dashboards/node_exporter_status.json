@@ -25,8 +25,7 @@
 		"panels": [
 			{
 			"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 			},
 			"fieldConfig": {
 				"defaults": {
@@ -118,8 +117,7 @@
 			},
 			{
 			"datasource": {
-				"type": "prometheus",
-				"uid": "feiriwun0s0zka"
+				"type": "prometheus"
 			},
 			"fieldConfig": {
 				"defaults": {
@@ -171,8 +169,7 @@
 			"targets": [
 				{
 				"datasource": {
-					"type": "prometheus",
-					"uid": "feiriwun0s0zka"
+					"type": "prometheus"
 				},
 				"editorMode": "code",
 				"expr": "node_scrape_collector_success",
@@ -187,7 +184,9 @@
 		],
 		"preload": false,
 		"schemaVersion": 41,
-		"tags": [],
+		"tags": [
+			"node_exporter_status"
+		],
 		"templating": {
 			"list": []
 		},

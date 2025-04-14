@@ -1,23 +1,23 @@
 global:
   resolve_timeout: 5m
-  slack_api_url_file: '/run/secrets/slack_webhook'
+  slack_api_url_file: "/run/secrets/slack_webhook"
 
 route:
-  receiver: 'default'
-  group_by: ['alertname']
+  receiver: "default"
+  group_by: ["alertname"]
   routes:
-  - receiver: 'slack'
+    - receiver: "slack"
 
 receivers:
-  - name: 'default'
-  - name: 'slack'
+  - name: "default"
+  - name: "slack"
     slack_configs:
-      - channel: '#alerts'
+      - channel: "#alerts"
         send_resolved: true
 
 inhibit_rules:
   - source_match:
-      alertname: endpoints_unresponsive
+      alertname: endpoints_down
     target_match:
       alertname: endpoints_slow
-    equal: ['instance']
+    equal: ["instance"]

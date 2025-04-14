@@ -1,9 +1,9 @@
 groups:
   - name: blackbox-alerts
     rules:
-      - alert: endpoints_unresponsive
+      - alert: endpoints_down
         expr: probe_success == 0
-        for: 30s
+        for: 1m
         labels:
           severity: warning
         annotations:

@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { gameRoutes } from "./gameRoutes";
+import { healthRoute } from "./gameRoutes";
 
 const fastify = Fastify({ logger: true });
 
@@ -28,6 +29,7 @@ fastify.register(swaggerUi, {
 });
 
 fastify.register(gameRoutes);
+fastify.register(healthRoute);
 
 fastify.ready().then(() => {
 	console.log(fastify.swagger());
