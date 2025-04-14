@@ -22,18 +22,15 @@ fastify.register(async function (fastify) {
 		);
 		socket.send(
 			JSON.stringify({
-				type: "welcome",
-				id: client.getId(),
-				message: "Welcome to the chat server!",
+				senderId: client.getId(), // optional
+				welcomeMessage: "Welcome to the chat server!", // optional
 				peopleOnline: peopleOnline,
 			}),
 		);
-		onlineClients.values().forEach((person) => {
+		onlineClients.forEach((person) => {
 			person.getSocket().send(
 				JSON.stringify({
-					type: "newClient",
-					id: client.getId(),
-					message: `${client.getId()} has joined the chat`,
+					newClient: client.getId(),
 				}),
 			);
 		});
