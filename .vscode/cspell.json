@@ -55,6 +55,7 @@
 		"**/tsconfig.json",
 		"**/*.lock",
 		"**/grafana/dashboards/*.json",
-		"**/.gitignore"
+		"**/.gitignore",
+		"**/.dockerignore"
 	]
 }

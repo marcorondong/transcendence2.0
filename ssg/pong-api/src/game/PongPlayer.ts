@@ -4,40 +4,35 @@ import { ClientEvents } from "../customEvents";
 import { Paddle } from "./elements/Paddle";
 import { APongGame } from "./modes/APongGame";
 
-export enum EPlayerStatus
-{
+export enum EPlayerStatus {
 	ONLINE,
-	OFFLINE
+	OFFLINE,
 }
 
-export enum ETeamSide
-{
+export enum ETeamSide {
 	LEFT,
-	RIGTH,
-	TBD
+	RIGHT,
+	TBD,
 }
 
-export enum EPlayerRole
-{
+export enum EPlayerRole {
 	LEFT_ONE,
 	LEFT_TWO,
 	RIGHT_ONE,
 	RIGHT_TWO,
-	TBD  //TBD to be decided
+	TBD, //TBD to be decided
 }
 
 export type ETeamSideFiltered = Exclude<ETeamSide, ETeamSide.TBD>;
-export type EPlayerRoleFiltered = Exclude<EPlayerRole, EPlayerRole.TBD>
+export type EPlayerRoleFiltered = Exclude<EPlayerRole, EPlayerRole.TBD>;
 
-export class PongPlayer extends EventEmitter
-{
+export class PongPlayer extends EventEmitter {
 	readonly connection: WebSocket;
 	private side: ETeamSide;
 	private status: EPlayerStatus;
 	private role: EPlayerRole;
 
-	constructor(socket: WebSocket)
-	{
+	constructor(socket: WebSocket) {
 		super();
 		this.connection = socket;
 		this.side = ETeamSide.TBD;
@@ -46,30 +41,23 @@ export class PongPlayer extends EventEmitter
 		this.connectionMonitor();
 	}
 
-	equals(otherPlayer: PongPlayer): boolean
-	{
-		if(this.connection === otherPlayer.connection)
-			return true;
-		return false
+	equals(otherPlayer: PongPlayer): boolean {
+		if (this.connection === otherPlayer.connection) return true;
+		return false;
 	}
 
-	getTeamSide(): ETeamSide
-	{
+	getTeamSide(): ETeamSide {
 		return this.side;
 	}
 
-	getPlayerRole(): EPlayerRoleFiltered
-	{
-		if(this.role === EPlayerRole.TBD)
+	getPlayerRole(): EPlayerRoleFiltered {
+		if (this.role === EPlayerRole.TBD)
 			throw Error("Fetching player role but it is not decided yet");
 		return this.role;
 	}
 
-
-	getPlayerRoleString(): string
-	{
-		switch(this.role)
-		{
+	getPlayerRoleString(): string {
+		switch (this.role) {
 			case EPlayerRole.LEFT_ONE:
 				return "Left one";
 			case EPlayerRole.RIGHT_ONE:
@@ -83,58 +71,51 @@ export class PongPlayer extends EventEmitter
 		}
 	}
 
-	getTeamSideLR(): ETeamSideFiltered
-	{
+	getTeamSideLR(): ETeamSideFiltered {
 		const LRside = this.side;
-		if(LRside === ETeamSide.TBD)
+		if (LRside === ETeamSide.TBD)
 			throw Error("Calling function without deciding player side");
 		return LRside;
 	}
 
-	setPlayerRole(role: EPlayerRoleFiltered): void
-	{
+	setPlayerRole(role: EPlayerRoleFiltered): void {
 		this.role = role;
-		if(role === EPlayerRole.LEFT_ONE || role === EPlayerRole.LEFT_TWO)
+		if (role === EPlayerRole.LEFT_ONE || role === EPlayerRole.LEFT_TWO)
 			this.setTeamSide(ETeamSide.LEFT);
-		else if(role === EPlayerRole.RIGHT_ONE || role === EPlayerRole.RIGHT_TWO)
-			this.setTeamSide(ETeamSide.RIGTH);
-		else 
-			throw Error("Unexpected player role setted");
+		else if (
+			role === EPlayerRole.RIGHT_ONE ||
+			role === EPlayerRole.RIGHT_TWO
+		)
+			this.setTeamSide(ETeamSide.RIGHT);
+		else throw Error("Unexpected player role set");
 	}
 
-	getPlayerOnlineStatus(): EPlayerStatus
-	{
+	getPlayerOnlineStatus(): EPlayerStatus {
 		return this.status;
 	}
-	
-	setPlayerStatus(status: EPlayerStatus): void
-	{
+
+	setPlayerStatus(status: EPlayerStatus): void {
 		this.status = status;
 	}
 
-	sendNotification(notification: string): void
-	{
-		this.connection.send(notification)
+	sendNotification(notification: string): void {
+		this.connection.send(notification);
 	}
 
-	getPlayerPaddle<T extends APongGame>(game: T): Paddle
-	{
-		return game.getPaddle(this.role)
+	getPlayerPaddle<T extends APongGame>(game: T): Paddle {
+		return game.getPaddle(this.role);
 	}
 
-	private connectionMonitor(): void
-	{
-		this.connection.on("close", ()=> 
-		{
+	private connectionMonitor(): void {
+		this.connection.on("close", () => {
 			this.connection.close();
-			console.log("connnection lost");
+			console.log("connection lost");
 			this.setPlayerStatus(EPlayerStatus.OFFLINE);
 			this.emit(ClientEvents.GONE_OFFLINE, this);
-		})
+		});
 	}
 
-	private setTeamSide(side: ETeamSideFiltered): void
-	{
+	private setTeamSide(side: ETeamSideFiltered): void {
 		this.side = side;
 	}
 }

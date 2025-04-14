@@ -1,6 +1,7 @@
 ########################## Security & Sensitive Files #########################
 # env
 # .env
+*.sensitive_env
 *.pem
 secrets/
 
