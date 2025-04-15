@@ -1,57 +1,49 @@
-import Fastify, { FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions } from 'fastify'
-import fastifyWebsocket from '@fastify/websocket';
-import { Client } from './Client';
-import { onClientMessage, onClientDisconnect } from './utils';
-// import fastifyStatic from '@fastify/static';
-// import path from 'path';
+const socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws`);
 
-const PORT = 3001;
-const HOST = '0.0.0.0';
-
-const fastify: FastifyInstance = Fastify({ logger: false });
-
-// fastify.register(fastifyStatic, {
-// 	root: path.join(__dirname, '../public'),
-// 	prefix: '/', // optional: default '/'
-// });
-
-fastify.register(fastifyWebsocket);
-
-// fastify.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
-// 	return reply.sendFile('tictactoe.html');
-// });
-
-fastify.register(async function (fastify)
+window.onload = () => 
 {
-	fastify.get('/ws', { websocket: true }, (connection, req) => 
-	{
-		const socket = connection as unknown as WebSocket;
-		const id = crypto.randomUUID();
-		const currentClient = new Client(id, socket);
-		// allClients.push(currentClient); // This is done after registration is successful
-		console.log('Client connected');
+	// const gamePage = document.getElementById('gamePage') as HTMLDivElement;
+	const cells = document.querySelectorAll('.cell');
+	const player1_name = document.getElementById('player1_name') as HTMLDivElement;
+	const player2_name = document.getElementById('player2_name') as HTMLDivElement;
+	const player1_score = document.getElementById('player1_score') as HTMLDivElement;
+	const player2_score = document.getElementById('player2_score') as HTMLDivElement;
+	const playWith = document.getElementById("playWith") as HTMLDivElement;
+	const info = document.getElementById("info") as HTMLDivElement;
+	// const rematchButton = document.getElementById('rematchButton') as HTMLButtonElement;
+	// const leaveButton = document.getElementById('leaveButton')
 
-		connection.on('message', (message: string) => onClientMessage(message, currentClient));
-
-		connection.on('close', (code: number, reason: Buffer) => onClientDisconnect(code, reason, currentClient));
+	cells.forEach((cell) => {
+		cell.addEventListener("click", (event) => {
+			const cell = event.target as HTMLDivElement;
+			const index = Number(cell.dataset.index);
+			socket.send(JSON.stringify({ index: index }));
+		});
 	});
-});
 
-const start = async () => 
-{
-	try 
-	{
-		await fastify.listen({ port: PORT, host: HOST })
-		const address = fastify.server.address()
-		const port = typeof address === 'string' ? address : address?.port
-		console.log(`Server listening at ${port}`)
-
-	} 
-	catch (err) 
-	{
-		fastify.log.error(err)
-		process.exit(1)
-	}
-}
-
-start();
+	socket.onmessage = (event) => {
+		try {
+			const data = JSON.parse(event.data);
+			console.log(data);
+			if (data.index !== undefined && data.sign !== undefined) {
+				cells[data.index].textContent = data.sign;
+			} else if (data.gameSetup) {
+				playWith.textContent = `${data.yourSign}`;
+				if(data.turn)
+					info.textContent = `Your turn`;
+				else
+					info.textContent = `Opponent's turn`;
+				player1_name.textContent = data.userId;
+				player2_name.textContent = data.opponentId;
+			} else if (data.gameOver) {
+				alert(data.gameOver);
+			} else if (data.error) {
+				alert(data.error);
+			} else {
+				alert("Invalid message received");
+			}
+		} catch (error) {
+			alert(`${error}`);
+		}
+	};
+};

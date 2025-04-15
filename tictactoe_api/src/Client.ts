@@ -1,55 +1,52 @@
+import { el } from "@faker-js/faker/.";
 
-export class Client 
-{
+export class Client {
 	private readonly id: string;
-	private nickname: string = '';
 	private readonly socket: WebSocket;
-	private friendSocket: WebSocket | null = null;
-	private registered: boolean = false;
+	private friendClient: Client | null = null;
+	private sign: string;
+	private turn: boolean = false;
 
-	constructor(id: string, socket: WebSocket) 
-	{
+	constructor(id: string, socket: WebSocket, sign: string = "") {
 		this.id = id;
 		this.socket = socket;
+		this.sign = sign;
 	}
 
-	getID(): string
-	{
+	getId(): string {
 		return this.id;
 	}
 
-	getNickname(): string
-	{
-		return this.nickname;
-	}
-
-	getSocket(): WebSocket
-	{
+	getSocket(): WebSocket {
 		return this.socket;
 	}
 
-	getFriendSocket(): WebSocket | null
-	{
-		return this.friendSocket;
+	getFriendClient(): Client | null {
+		return this.friendClient;
 	}
 
-	getRegistered(): boolean
-	{
-		return this.registered;
+	getSign(): string {
+		return this.sign;
 	}
 
-	setNickname(nickname: string): void
-	{
-		this.nickname = nickname;
+	getTurn(): boolean {
+		return this.turn;
 	}
 
-	setFriendSocket(friendSocket: WebSocket): void
-	{
-		this.friendSocket = friendSocket;
+	setFriendClient(friendClient: Client): void {
+		this.friendClient = friendClient;
 	}
 
-	setRegistered(registered: boolean): void
-	{
-		this.registered = registered;
+	setSign(sign: string): void {
+		this.sign = sign;
+		if (sign === "X") {
+			this.turn = true;
+		} else {
+			this.turn = false;
+		}
+	}
+
+	setTurn(turn: boolean): void {
+		this.turn = turn;
 	}
 }

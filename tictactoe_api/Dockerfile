@@ -1,10 +1,15 @@
 FROM node:iron-slim
 
-RUN apt-get update
+RUN apt-get update -y && apt-get install -y openssl
 
-COPY ./package.json /tictactoe_api/
-COPY ./tsconfig.json /tictactoe_api/
-# COPY ./src /tictactoe_api/src
-RUN npm --prefix /tictactoe_api install
+WORKDIR /tictactoe_api
 
-CMD ["npm", "--prefix", "/tictactoe_api", "run", "dev"]
+COPY ./package.json ./
+COPY ./tsconfig.json ./
+COPY ./prisma ./prisma/
+COPY ./src ./
+COPY ./public ./
+RUN npm install
+RUN npx prisma generate
+
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]

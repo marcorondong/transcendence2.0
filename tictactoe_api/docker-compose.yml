@@ -1,9 +1,15 @@
 services:
   tictactoe_api:
-    image: tictactoe_api_img 
-    container_name: tictactoe_api
-    build: ./
+    image: tictactoe_img 
+    container_name: tictactoe_container
+    build: .
+    environment:
+      - DATABASE_URL=file:/tictactoe_api/DB/tictactoe.db
     volumes:
       - ./src/:/tictactoe_api/src/
+      - ./prisma/:/tictactoe_api/prisma/
+      - ./public/:/tictactoe_api/public/
+      - /home/iguliyev/DBs/tictactoe/:/tictactoe_api/DB/
     ports:
       - 3001:3001
+    restart: always
