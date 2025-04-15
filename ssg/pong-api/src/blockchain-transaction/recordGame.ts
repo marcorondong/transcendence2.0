@@ -14,7 +14,7 @@ if(env.error)
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS!;
 const FUJI_RPC_URL = process.env.FUJI_RPC_URL!;
-const PRIVATE_KEY = process.env.PRIVATE_KEY!;
+const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY!;
 
 export async function recordGame(
   gameId: string,
@@ -25,7 +25,7 @@ export async function recordGame(
 ) {
 	try{
 		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
-		const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+		const wallet = new ethers.Wallet(WALLET_PRIVATE_KEY, provider);
 		const contract = new ethers.Contract(CONTRACT_ADDRESS, abi.abi, wallet);
 
 		const tx = await contract.recordGame(gameId, player1, player2, score1, score2);
