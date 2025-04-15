@@ -17,6 +17,7 @@ fuji
 EVM
 Etherium
 abi
+pingpong
 
 
 Gabriel

@@ -6,6 +6,7 @@ import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
 import { Tournament } from "./game/modes/singles/Tournament";
+import { recordGame } from "./blockchain-transaction/recordGame";
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ export interface IGameRoomQuery {
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
+		recordGame("game_xyz1", "Filip", "Test", 3, 1)
 		reply.send({
 			hello: "ssl",
 		});
