@@ -68,3 +68,6 @@ In hardhat project file `scripts/deploy.ts` is for deploying contract
 `npx hardhat run scripts/deploy2.ts --network fuji` -> for deploying contract on fuji network once fuji network is set up
 
 TournamentScores deployed to: 0x1d031C721F4A89845B716dF92410E0A90A8Fe1E4
+
+
+[Link to snowtrace of our TournamentScores contract](https://testnet.snowtrace.io/address/0x1d031C721F4A89845B716dF92410E0A90A8Fe1E4)

@@ -50,6 +50,58 @@ export async function recordGame(
 	}
 }
 
+export async function interpretGame(gameId: string)
+{
+	try{
+		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
+		const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+		const contract = new ethers.Contract(CONTRACT_ADDRESS, abi.abi, wallet);
+
+		const game = await contract.getGame(gameId);
+		console.log(`✅ Game fetched: ${gameId}`, game);
+	}
+	catch (error)
+	{
+		console.error("❌ Failed to fetch game from blockchain:", error);
+	}
+}
+
+export async function gameLog(gameId: string)
+{
+	try{
+		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
+		const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+		const contract = new ethers.Contract(CONTRACT_ADDRESS, abi.abi, wallet);
+
+		const game = await contract.getGameLog(gameId);
+		console.log(`✅ Game log fetched: ${gameId}`, game);
+	}
+	catch (error)
+	{
+		console.error("❌ Failed to fetch game log from blockchain:", error);
+	}
+}
+
+export async function listenToGameLogs() {
+	try {
+		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
+		const contract = new ethers.Contract(CONTRACT_ADDRESS, abi.abi, provider);
+
+		contract.on("GameLog", (gameId, player1Id, player1Score, player2Id, player2Score, timestamp) => {
+			console.log("📡 GameLog Event:");
+			console.log("  🎮 Game ID:     ", gameId);
+			console.log("  👤 Player 1:     ", player1Id, "Score:", player1Score);
+			console.log("  👤 Player 2:     ", player2Id, "Score:", player2Score);
+			console.log("  🕒 Timestamp:    ", new Date(timestamp * 1000).toLocaleString());
+			console.log("──────────────────────────────────────────────");
+		});
+
+		console.log("✅ Listening for GameLog events...");
+	} catch (error) {
+		console.error("❌ Failed to set up GameLog listener:", error);
+	}
+}
+
 // export async function interpretGame()
 // {
 // 	try{
