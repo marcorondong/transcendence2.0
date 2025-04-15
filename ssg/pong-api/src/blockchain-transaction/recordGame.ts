@@ -22,7 +22,7 @@ const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS!;
 const FUJI_RPC_URL = process.env.FUJI_RPC_URL!;
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY!;
 
-export async function recordGame(
+export async function recordGameOnBlockchain(
 	gameId: string,
 	player1: string,
 	player2: string,
@@ -42,7 +42,9 @@ export async function recordGame(
 			score2,
 		);
 		await tx.wait();
-		console.log(`✅ Game recorded on blockchain: ${gameId}`);
+		console.log(`✅ Game recorded on blockchain:\n\tGameId: ${gameId}
+			\n\tPlayer1: ${player1}, Score: ${score1}
+			\n\tPlayer2: ${player2}, Score: ${score2}`);
 	} catch (error) {
 		console.error("❌ Failed to record game on blockchain:", error);
 	}

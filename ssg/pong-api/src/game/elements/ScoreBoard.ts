@@ -91,4 +91,14 @@ export class ScoreBoard {
 		}
 		return false;
 	}
+
+	getLeftPlayerGoals():number
+	{
+		return this.leftPlayerGoals;
+	}
+
+	getRightPlayerGoals():number
+	{
+		return this.rightPlayerGoals;
+	}
 }
