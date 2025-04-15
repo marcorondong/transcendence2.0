@@ -22,8 +22,6 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus_data
-    ports:
-      - "9090:9090" # TODO route though nginx
     networks:
       - Transcendence2.0
     command:

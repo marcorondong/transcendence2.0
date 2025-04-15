@@ -19,7 +19,7 @@ fastify.register(swagger, {
 });
 
 fastify.register(swaggerUi, {
-	routePrefix: '/documentation',
+	routePrefix: '/AI-docs',
 	uiConfig: {
 	  docExpansion: 'full',
 	  deepLinking: false
