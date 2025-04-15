@@ -32,9 +32,8 @@ export async function gameRoutes(fastify: FastifyInstance) {
 export async function healthRoute(fastify: FastifyInstance) {
 	fastify.get(
 		'/health',
-		{ schema: healthSchema },
 		async (request, reply) => {
-			reply.code(200).send({ status: "ok" });
+			reply.code(200).send();
 		}
 	);
 }

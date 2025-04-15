@@ -1,8 +1,10 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { gameRoutes } from "./gameRoutes";
-import { healthRoute } from "./gameRoutes";
+import {
+	gameRoutes,
+	healthRoute
+} from "./gameRoutes";
 
 const fastify = Fastify({ logger: true });
 
