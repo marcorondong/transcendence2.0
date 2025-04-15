@@ -19,7 +19,6 @@ export class BlockchainQueue {
 				await item.putOnBlockchain();
 			} catch (err) {
 				console.error("❌ Error putting match on blockchain:", err);
-				// Optionally push `item` back to retry
 			}
 		}
 		this.isProcessing = false;
