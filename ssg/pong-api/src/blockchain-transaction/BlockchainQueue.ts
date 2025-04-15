@@ -10,20 +10,18 @@ export class BlockchainQueue {
 	}
 
 	private static async processQueue() {
-		if (this.isProcessing || this.queue.length === 0) return;
+		if (this.isProcessing) return;
 		this.isProcessing = true;
-		const nextMatch = this.queue.shift();
-		if(nextMatch)
-		{
-			try{
-				nextMatch.putOnBlockchain();
-			}
-			catch(e)
-			{
-				console.error("Error from BlockchainQueue:", e);
+		while (this.queue.length > 0) {
+			const item = this.queue.shift();
+			if (!item) continue;
+			try {
+				await item.putOnBlockchain();
+			} catch (err) {
+				console.error("❌ Error putting match on blockchain:", err);
+				// Optionally push `item` back to retry
 			}
 		}
 		this.isProcessing = false;
-		this.processQueue();
 	}
 }

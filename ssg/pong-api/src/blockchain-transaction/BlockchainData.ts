@@ -21,8 +21,8 @@ export class BlockchainData {
 		this.score2 = score2;
 	}
 
-	putOnBlockchain() {
-		recordGameOnBlockchain(
+	async putOnBlockchain() {
+		await recordGameOnBlockchain(
 			this.gameId,
 			this.player1,
 			this.player2,
