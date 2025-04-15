@@ -7,3 +7,8 @@ async function main() {
 
   console.log(`TournamentScores deployed to: ${contract.target}`);
 }
+
+main().catch((error) => {
+	console.error(error);
+	process.exitCode = 1;
+  });
