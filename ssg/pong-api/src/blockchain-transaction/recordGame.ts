@@ -4,12 +4,18 @@ import abi from "./TournamentScores.json"; // adjust path as needed
 import path from "path";
 
 const env = dotenv.config({
-	path: path.resolve(__dirname, "../../.env")
+	path: path.resolve(__dirname, "../../.env"),
 });
 
-if(env.error)
-{
-	console.warn("Failed to load .env file with data for contract transaction", env.error);
+if (env.error) {
+	console.warn(
+		"❌ Failed to load .env file with data for contract transaction. Check if env file is placed in microservice root as ./.env",
+		env.error,
+	);
+} else {
+	console.log(
+		"✅ Environment file for setting up wallet and blockchain loaded",
+	);
 }
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS!;
@@ -17,23 +23,27 @@ const FUJI_RPC_URL = process.env.FUJI_RPC_URL!;
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY!;
 
 export async function recordGame(
-  gameId: string,
-  player1: string,
-  player2: string,
-  score1: number,
-  score2: number
+	gameId: string,
+	player1: string,
+	player2: string,
+	score1: number,
+	score2: number,
 ) {
-	try{
+	try {
 		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
 		const wallet = new ethers.Wallet(WALLET_PRIVATE_KEY, provider);
 		const contract = new ethers.Contract(CONTRACT_ADDRESS, abi.abi, wallet);
 
-		const tx = await contract.recordGame(gameId, player1, player2, score1, score2);
+		const tx = await contract.recordGame(
+			gameId,
+			player1,
+			player2,
+			score1,
+			score2,
+		);
 		await tx.wait();
 		console.log(`✅ Game recorded on blockchain: ${gameId}`);
-	}
-	catch (error)
-	{
+	} catch (error) {
 		console.error("❌ Failed to record game on blockchain:", error);
 	}
 }

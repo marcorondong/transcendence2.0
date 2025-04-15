@@ -48,18 +48,18 @@ export interface IGameRoomQuery {
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
-		recordGame("game_xyz3", "Filip", "Test", 3, 1)
+		recordGame("game_xyz31", "Filip", "Test", 3, 1);
 		reply.send({
 			hello: "ssl",
 		});
 	});
 
-	fastify.get("/playerRoom/:playerId", async (request, reply) =>{
+	fastify.get("/playerRoom/:playerId", async (request, reply) => {
 		const { playerId } = request.params as { playerId: string };
 		reply.send({
-			roomId: manager.getPlayerRoomId(playerId)
-		})
-	})
+			roomId: manager.getPlayerRoomId(playerId),
+		});
+	});
 
 	//Partial makes all field optional.
 	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
