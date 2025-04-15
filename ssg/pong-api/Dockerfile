@@ -1,4 +1,4 @@
-FROM node:iron-slim
+FROM node:22.14.0-bullseye-slim
 
 RUN apt-get update && apt-get install -y openssl
 COPY ./scripts/https-keys.sh /pong/pong-api/scripts/https-keys.sh
