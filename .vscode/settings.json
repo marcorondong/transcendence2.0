@@ -1,0 +1,30 @@
+{
+	"editor.indentSize": "tabSize",
+	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+
+	"git.autofetch": true,
+
+	// "editor.renderWhitespace": "all",
+	// "editor.rulers": [80],
+
+	"editor.guides.highlightActiveBracketPair": true,
+	"editor.guides.highlightActiveIndentation": true,
+	"editor.guides.indentation": true,
+	"editor.matchBrackets": "always",
+
+	"cSpell.mergeCSpellSettings": true,
+	"cSpell.diagnosticLevel": "Warning",
+
+	"prettier.enable": true,
+	"prettier.useEditorConfig": true,
+	"prettier.requireConfig": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+
+	"[yaml]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	}
+}

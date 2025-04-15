@@ -1,6 +1,7 @@
 ########################## Security & Sensitive Files #########################
 # env
 # .env
+*.sensitive_env
 *.pem
 
 ############################ Binary and Blob Files ############################
@@ -102,7 +103,7 @@ lerna-debug.log*
 
 ###################### IDE & Editor Files ######################
 ### VS Code ###
-**/.vscode
+# **/.vscode
 # !.vscode/settings.json
 # !.vscode/tasks.json
 # !.vscode/launch.json
