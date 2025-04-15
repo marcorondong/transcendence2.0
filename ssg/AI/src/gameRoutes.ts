@@ -28,7 +28,7 @@ export async function gameRoutes(fastify: FastifyInstance) {
 		},
 	);
 }
-
+//TODO fix health
 export async function healthRoute(fastify: FastifyInstance) {
 	fastify.get(
 		'/health',

@@ -45,23 +45,23 @@ scrape_configs:
     static_configs:
       - targets: ["blackbox-exporter:9115"]
 
-  # - job_name: 'blackbox-http'
-  #   metrics_path: /probe
-  #   params:
-  #     module: [http_2xx]
-  #   static_configs:
-  #     - targets:
-  #     #somehow
-  #       # - http://pong-api:3010/pingpong/
-  #       # - http://ai-bot:6969/health
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       target_label: __param_target
-  #     - source_labels: [__param_target]
-  #       target_label: instance
-  #     - target_label: __address__
-  #       replacement: blackbox-exporter:9115
+#monitor backend endpoints in docker network
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://ai-bot:6969/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
 
+#monitor user endpoints but in docker network
   - job_name: "blackbox-https"
     metrics_path: /probe
     params:

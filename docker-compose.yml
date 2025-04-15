@@ -24,25 +24,25 @@ services:
     networks:
       - Transcendence2.0
 
-    frontend:
-      build:
-        context: ./frontend
-        dockerfile: docker/nginx/Dockerfile-Nginx
-      container_name: frontend
-      # image: nginx:1.26.2
-      volumes:
-        - ./frontend/volume:/usr/share/nginx/html
-        - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
-        # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
-        # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
-      ports:
-        - "8080:443"
-      restart: unless-stopped
-      networks:
-        - Transcendence2.0
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/nginx/Dockerfile-Nginx
+    container_name: frontend
+    # image: nginx:1.26.2
+    volumes:
+      - ./frontend/volume:/usr/share/nginx/html
+      - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
+      # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
+    ports:
+      - "8080:443"
+    restart: unless-stopped
+    networks:
+      - Transcendence2.0
 
-  include:
-    - ./monitoring/docker-compose.yml
+include:
+  - ./monitoring/monitoring-docker-compose.yml
 
-  networks:
-    Transcendence2.0:
+networks:
+  Transcendence2.0:

@@ -16,7 +16,7 @@ services:
       - Transcendence2.0
 
   prometheus:
-    image: prom/prometheus:v2.53.4
+    image: prom/prometheus
     container_name: prometheus
     restart: unless-stopped
     volumes:
@@ -70,6 +70,9 @@ services:
       - ./grafana/dashboards:/etc/grafana/custom-dashboards
     secrets:
       - grafana_admin_password
+    environment:
+      - GH_SERVER_ROOT_URL=https://localhost:8080/grafana/
+      # - GF_SERVER_SERVE_FROM_SUB_PATH=true
     entrypoint:
       - /entrypoint.sh
 
