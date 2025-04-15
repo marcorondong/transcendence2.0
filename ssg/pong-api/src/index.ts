@@ -48,7 +48,6 @@ export interface IGameRoomQuery {
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
-		recordGameOnBlockchain("game_xyz31", "Filip", "Test", 3, 1);
 		reply.send({
 			hello: "ssl",
 		});
