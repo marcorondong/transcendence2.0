@@ -1,21 +1,14 @@
-export const extraGameSchema = {
+
+export const gameRequestSchema = {
 	description: "Connect a new bot opponent to the pong game server",
-	tags: ["Game vs extra AI"],
+	tags: ["Game vs mandatory AI"],
 	summary:
-		"The bot can move faster or slower depending on difficulty",
+		"The bot moves at the one speed required by subject",
 	body: {
 		type: "object",
 		properties: {
-			host: { type: "string" },
-			port: { type: "string" },
-			side: { type: "string", enum: ["left", "right"] },
-			difficulty: {
-				type: "string",
-				enum: ["easy", "medium", "hard", "insane"],
-			},
 			roomId: { type: "string" },
 		},
-		required: ["host", "port", "side"],
 	},
 	response: {
 		200: {
@@ -25,10 +18,6 @@ export const extraGameSchema = {
 				gameRequest: {
 					type: "object",
 					properties: {
-						host: { type: "string" },
-						port: { type: "string" },
-						side: { type: "string" },
-						difficulty: { type: "string" },
 						roomId: { type: "string" },
 					},
 				},
@@ -49,21 +38,21 @@ export const extraGameSchema = {
 	},
 };
 
-export const gameRequestSchema = {
+export const extraGameSchema = {
 	description: "Connect a new bot opponent to the pong game server",
-	tags: ["Game vs mandatory AI"],
+	tags: ["Game vs extra AI"],
 	summary:
-		"The bot moves at only one speed",
+		"The bot can move faster or slower depending on difficulty",
 	body: {
 		type: "object",
 		properties: {
-			host: { type: "string" },
-			port: { type: "string" },
-			side: { type: "string", enum: ["left", "right"] },
-			difficulty: { type: "string" },
+			difficulty: {
+				type: "string",
+				enum: ["easy", "medium", "hard", "insane"],
+				default: "medium",
+			},
 			roomId: { type: "string" },
 		},
-		required: ["host", "port", "side"],
 	},
 	response: {
 		200: {
@@ -73,9 +62,6 @@ export const gameRequestSchema = {
 				gameRequest: {
 					type: "object",
 					properties: {
-						host: { type: "string" },
-						port: { type: "string" },
-						side: { type: "string" },
 						difficulty: { type: "string" },
 						roomId: { type: "string" },
 					},

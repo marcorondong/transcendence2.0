@@ -18,7 +18,6 @@ export async function gameRoutes(fastify: FastifyInstance) {
 				"host": request.body.host,
 				"port": request.body.port,
 				"side": request.body.side,
-				"difficulty": "medium",
 				"roomId": request.body.roomId,
 			});
 			try {
