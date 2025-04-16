@@ -51,7 +51,7 @@ export class ThemeToggleComponent extends HTMLElement {
     switchTheme() { }
     connectedCallback() {
         this.button = document.createElement("button");
-        this.button.classList.add("cursor-pointer");
+        this.button.classList.add("cursor-pointer", "pong-button");
         this.append(this.button);
         this.darkIcon.setIcon(this.darkIconName);
         this.lightIcon.setIcon(this.lightIconName);

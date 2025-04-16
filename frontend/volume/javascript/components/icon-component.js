@@ -70,6 +70,7 @@ export class IconComponent extends HTMLElement {
             console.log("ICON has been CONNECTED");
             this.nameFromAttribute();
             this.sizeFromAttribute();
+            const div = document.createElement("div");
             const iconElement = yield this.fetchIcon();
             this.applySize(iconElement);
             if (iconElement) {

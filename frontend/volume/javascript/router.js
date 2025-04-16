@@ -37,7 +37,7 @@ export class Router {
     }
     constructor() {
         this.containerDiv = document.getElementById("content");
-        this.navLinks = document.querySelectorAll("nav li a");
+        this.navLinks = document.querySelectorAll("nav a");
         this.component = null;
         this.navComponents = this.createComponentNames();
         this.addEventListenerNavLinks();

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html
 	lang="en"
 	data-theme="dark"
@@ -30,73 +30,68 @@
 		<title>Transcendence</title>
 	</head>
 
-	<body class="bg-grey-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200">
-		<nav
-			class="flex justify-between content-center px-5 md:px-16 xl:px-32 py-9 mb-9"
-		>
-			<img
-				class="rounded-lg size-18"
-				src="./static-files/images/pong-logo.png"
-			/>
-			<button
-				data-collapse-toggle="navbar-default"
-				type="button"
-				class="inline-flex items-center p-2 w-10 h-10 justify-center self-center text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-				aria-controls="navbar-default"
-				aria-expanded="false"
-				id="navbar-button"
-			>
-				<span class="sr-only">Open main menu</span>
-				<svg
-					class="size-5"
-					aria-hidden="true"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 17 14"
-				>
-					<path
-						stroke="currentColor"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M1 1h15M1 7h15M1 13h15"
-					/>
-				</svg>
-			</button>
-			<ul
-				class="hidden flex w-full sm:w-auto gap-4 justify-center sm:content-center items-center absolute sm:static flex-col sm:flex-row top-30"
-				id="navbar-links"
-			>
-				<li>
-					<theme-toggle-component size="5"></theme-toggle-component>
-				</li>
-				<li class="nav-link">
-					<a href="/">home</a>
-				</li>
-				<li class="nav-link">
-					<a href="highscore">highscore</a>
-				</li>
-				<li class="nav-link">
-					<a href="profile">profile</a>
-				</li>
-				<li class="nav-link">
-					<a href="users">users</a>
-				</li>
-			</ul>
-		</nav>
+	<body
+		class="bg-grey-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
+	>
+		<div class="relative px-5 md:px-16 xl:px-32">
+			<nav class="mb-9 flex content-center justify-between py-9">
+				<img
+					class="size-18 rounded-lg"
+					src="./static-files/images/pong-logo.png"
+				/>
+				<div class="flex items-center gap-4">
+					<button
+						data-collapse-toggle="navbar-default"
+						type="button"
+						class="pong-button sm:hidden"
+						aria-controls="navbar-default"
+						aria-expanded="false"
+						id="navbar-button"
+					>
+						<icon-component
+							size="6"
+							name="menu"
+						></icon-component>
+					</button>
+					<ul
+						class="top-30 absolute left-0 flex hidden w-full flex-col items-stretch justify-center gap-4 p-6 sm:static sm:flex sm:w-auto sm:flex-row sm:content-center sm:items-center sm:p-0 dark:bg-indigo-950 dark:sm:bg-transparent"
+						id="navbar-links"
+					>
+						<a href="/"> <li class="pong-nav-link">home</li></a>
+						<a href="highscore">
+							<li class="pong-nav-link">highscore</li></a
+						>
+						<a href="profile">
+							<li class="pong-nav-link">profile</li></a
+						>
+						<a href="users">
+							<li class="pong-nav-link">users</li>
+						</a>
+						<a href="users">
+							<li>
+								<button class="pong-button-info w-full">
+									login
+								</button>
+							</li></a
+						>
+					</ul>
 
-		<div
-			class="container"
-			id="game"
-		>
+					<theme-toggle-component size="6"></theme-toggle-component>
+				</div>
+			</nav>
 			<div
-				id="content"
-				class="mb-4 px-5 md:px-16 xl:px-32"
-			></div>
+				class="container"
+				id="game"
+			>
+				<div
+					id="content"
+					class="mb-4 px-5 md:px-16 xl:px-32"
+				></div>
+			</div>
+			<script
+				type="module"
+				src="./javascript/main.js"
+			></script>
 		</div>
-		<script
-			type="module"
-			src="./javascript/main.js"
-		></script>
 	</body>
 </html>

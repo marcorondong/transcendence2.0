@@ -1,6 +1,6 @@
 export class Router {
 	containerDiv = document.getElementById("content");
-	navLinks = document.querySelectorAll<HTMLAnchorElement>("nav li a");
+	navLinks = document.querySelectorAll<HTMLAnchorElement>("nav a");
 	component: Node | null = null;
 
 	navComponents: string[] = this.createComponentNames();
