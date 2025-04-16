@@ -4,20 +4,10 @@
 ```
 docker-compose up
 ```
-### 2. open the [game](https://localhost:3010/pingpong) in your browser 
+### 2. open the [game](http://localhost:3010/pingpong) in your browser 
   
-### 3. send a POST request from [Swagger docs](http://localhost:6969/documentation) or directly to http://localhost:6969/start-game. 
-
-#### request body:
-
-Host : "pong-api" , since that is the game server name in the docker network.
-
-Port : "3010" at the moment for testing.
-
-Side :
-"right" if you have opened the game (you are waiting for an AI opponent).
-"left" if the game is empty (you connect after the AI).
+### 3. send a POST request from [Swagger docs](http://localhost:6969/documentation) or directly to http://localhost:6969/game-mandatory. 
 
 ### 4. Creates a Bot instance with the provided parameters.
 
-The bot connects to the WebSocket at host:port to play the game
+The bot connects to the WebSocket at localhost:3010 to play the game

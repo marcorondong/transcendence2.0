@@ -1,7 +1,6 @@
 import { WebSocket } from "ws";
 import { PongField } from "./PongField";
 import { Point } from "./Point";
-import { gameRequestSchema } from "./gameRequestSchema";
 import {
 	distanceBetweenPoints,
 	findIntersectionWithVerticalLine,
