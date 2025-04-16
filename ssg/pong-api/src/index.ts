@@ -52,6 +52,13 @@ fastify.register(async function (fastify) {
 		});
 	});
 
+	fastify.get("/healthcheck", async (request, reply) => {
+		reply.code(200).send({
+			message:
+				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
+		});
+	});
+
 	fastify.get("/playerRoom/:playerId", async (request, reply) => {
 		const { playerId } = request.params as { playerId: string };
 		reply.send({
