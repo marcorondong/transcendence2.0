@@ -45,3 +45,19 @@ export const gameRequestSchema = {
 	},
   },
 };
+
+export const healthSchema = {
+	description: "endpoint for blackbox scraper",
+	tags: ["health"],
+	summary: "returns status 200 for a GET request so the scraper can stay quiet",
+	response: {
+	  200: {
+		type: "object",
+		properties: {
+		  status: { type: "string" },
+		},
+		required: ["status"],
+	  },
+	},
+  };
+  
