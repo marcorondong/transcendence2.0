@@ -16,17 +16,14 @@ services:
       - Transcendence2.0
 
   prometheus:
-    image: prom/prometheus:v3.3.0-rc.1
+    image: prom/prometheus:v3.3.0
     container_name: prometheus
     restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
-      - prometheus_data:/prometheus_data
+      - prometheus_data:/prometheus
     networks:
       - Transcendence2.0
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus_data"
 
   blackbox-exporter:
     image: prom/blackbox-exporter:v0.26.0
@@ -53,7 +50,8 @@ services:
       - slack_webhook
 
   grafana:
-    image: grafana/grafana:11.6.0
+    build: 
+      context: ./grafana
     container_name: grafana
     restart: unless-stopped
     networks:
@@ -65,8 +63,6 @@ services:
       - ./grafana:/etc/grafana
     secrets:
       - grafana_admin_password
-    entrypoint:
-      - /etc/grafana/entrypoint.sh
 
 volumes:
   grafana-data:

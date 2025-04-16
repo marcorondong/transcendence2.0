@@ -1,16 +1,16 @@
 #!/bin/bash
 
-PW=$(cat /run/secrets/grafana_admin_password)
+set -e
 
 (sleep 10
 
-grafana cli --homepath "/usr/share/grafana" admin reset-admin-password "$PW"
+grafana cli --homepath "/usr/share/grafana" admin reset-admin-password $(cat /run/secrets/grafana_admin_password)
 
 curl -X 'POST' \
 	'http://localhost:3000/api/datasources' \
 	-H 'accept: application/json' \
 	-H 'Content-Type: application/json' \
-	-u admin:"$PW" \
+	-u admin:"$(cat /run/secrets/grafana_admin_password)" \
 	-d '{
 	"access": "proxy",
 	"basicAuth": false,
@@ -30,7 +30,7 @@ curl -X 'POST' \
 
 TAGS=$(curl -X 'GET' \
 	'http://localhost:3000/api/dashboards/tags' \
-	-u "admin:$PW" \
+	-u "admin:$(cat /run/secrets/grafana_admin_password)" \
 	-H 'accept: application/json')
 
 for FILE in /etc/grafana/custom-dashboards/*.json; do
@@ -42,7 +42,7 @@ for FILE in /etc/grafana/custom-dashboards/*.json; do
 			'http://localhost:3000/api/dashboards/db' \
 			-H 'accept: application/json' \
 			-H 'Content-Type: application/json' \
-			-u admin:"$PW" \
+			-u admin:"$(cat /run/secrets/grafana_admin_password)" \
 			-d "@$FILE"
 	else
 		echo "Skipping: $FILENAME (already tagged)"

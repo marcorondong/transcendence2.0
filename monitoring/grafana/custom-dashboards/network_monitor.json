@@ -646,88 +646,76 @@
 				"type": "timeseries"
 			},
 			{
-				"datasource": {
-					"type": "prometheus"
+				"id": 7,
+				"type": "timeseries",
+				"title": "Netstat octets",
+				"gridPos": {
+					"x": 12,
+					"y": 25,
+					"h": 8,
+					"w": 12
 				},
 				"fieldConfig": {
 					"defaults": {
-						"color": {
-							"mode": "palette-classic"
-						},
 						"custom": {
-							"axisBorderShow": false,
-							"axisCenteredZero": false,
-							"axisColorMode": "text",
-							"axisLabel": "",
-							"axisPlacement": "auto",
+							"drawStyle": "line",
+							"lineInterpolation": "linear",
 							"barAlignment": 0,
 							"barWidthFactor": 0.6,
-							"drawStyle": "line",
+							"lineWidth": 1,
 							"fillOpacity": 0,
 							"gradientMode": "none",
-							"hideFrom": {
-								"legend": false,
-								"tooltip": false,
-								"viz": false
-							},
+							"spanNulls": false,
 							"insertNulls": false,
-							"lineInterpolation": "linear",
-							"lineWidth": 1,
+							"showPoints": "auto",
 							"pointSize": 5,
+							"stacking": {
+								"mode": "none",
+								"group": "A"
+							},
+							"axisPlacement": "auto",
+							"axisLabel": "",
+							"axisColorMode": "text",
+							"axisBorderShow": false,
 							"scaleDistribution": {
 								"type": "linear"
 							},
-							"showPoints": "auto",
-							"spanNulls": false,
-							"stacking": {
-								"group": "A",
-								"mode": "none"
+							"axisCenteredZero": true,
+							"hideFrom": {
+								"tooltip": false,
+								"viz": false,
+								"legend": false
 							},
 							"thresholdsStyle": {
 								"mode": "off"
 							}
+						},
+						"color": {
+							"mode": "palette-classic"
 						},
 						"mappings": [],
 						"thresholds": {
 							"mode": "absolute",
 							"steps": [
 								{
-									"color": "green"
+									"color": "green",
+									"value": null
 								},
 								{
 									"color": "red",
 									"value": 80
 								}
 							]
-						}
+						},
+						"unit": "decbytes"
 					},
 					"overrides": []
-				},
-				"gridPos": {
-					"h": 8,
-					"w": 12,
-					"x": 12,
-					"y": 25
-				},
-				"id": 7,
-				"options": {
-					"legend": {
-						"calcs": [],
-						"displayMode": "list",
-						"placement": "bottom",
-						"showLegend": true
-					},
-					"tooltip": {
-						"hideZeros": false,
-						"mode": "single",
-						"sort": "none"
-					}
 				},
 				"pluginVersion": "11.6.0",
 				"targets": [
 					{
 						"disableTextWrap": false,
-						"editorMode": "builder",
+						"editorMode": "code",
 						"expr": "irate(node_netstat_IpExt_InOctets[5m])",
 						"format": "time_series",
 						"fullMetaSearch": false,
@@ -742,8 +730,8 @@
 							"type": "prometheus"
 						},
 						"disableTextWrap": false,
-						"editorMode": "builder",
-						"expr": "irate(node_netstat_IpExt_OutOctets[5m])",
+						"editorMode": "code",
+						"expr": "- irate(node_netstat_IpExt_OutOctets[5m])",
 						"fullMetaSearch": false,
 						"hide": false,
 						"includeNullMetadata": true,
@@ -754,8 +742,22 @@
 						"useBackend": false
 					}
 				],
-				"title": "Netstat octets",
-				"type": "timeseries"
+				"datasource": {
+					"type": "prometheus"
+				},
+				"options": {
+					"tooltip": {
+						"mode": "single",
+						"sort": "none",
+						"hideZeros": false
+					},
+					"legend": {
+						"showLegend": true,
+						"displayMode": "list",
+						"placement": "bottom",
+						"calcs": []
+					}
+				}
 			},
 			{
 				"datasource": {

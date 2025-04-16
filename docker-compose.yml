@@ -19,6 +19,8 @@ services:
     container_name: ai-bot
     environment:
       - NODE_ENV=production
+    ports:
+      - 6969:6969 #TODO keep now for swagger documentation, remove later
     networks:
       - Transcendence2.0
 
