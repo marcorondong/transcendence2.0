@@ -62,9 +62,7 @@ export class Bot {
 	}
 
 	public playGame() {
-		this.ws = new WebSocket(`wss://${this.host}:${this.port}/pong/`, {
-			rejectUnauthorized: false,
-		});
+		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong/`);
 
 		try {
 			this.ws.on("open", () => {

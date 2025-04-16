@@ -1,11 +1,10 @@
 export const extraGameSchema = {
 	description: "Connect a new bot opponent to the pong game server",
-	tags: ["Game"],
+	tags: ["Game vs extra AI"],
 	summary:
 		"The bot can move faster or slower depending on difficulty",
 	body: {
 		type: "object",
-		required: ["host", "port", "side"],
 		properties: {
 			host: { type: "string" },
 			port: { type: "string" },
@@ -16,6 +15,7 @@ export const extraGameSchema = {
 			},
 			roomId: { type: "string" },
 		},
+		required: ["host", "port", "side"],
 	},
 	response: {
 		200: {
@@ -51,12 +51,11 @@ export const extraGameSchema = {
 
 export const gameRequestSchema = {
 	description: "Connect a new bot opponent to the pong game server",
-	tags: ["Game"],
+	tags: ["Game vs mandatory AI"],
 	summary:
 		"The bot moves at only one speed",
 	body: {
 		type: "object",
-		required: ["host", "port", "side"],
 		properties: {
 			host: { type: "string" },
 			port: { type: "string" },
@@ -64,6 +63,7 @@ export const gameRequestSchema = {
 			difficulty: { type: "string" },
 			roomId: { type: "string" },
 		},
+		required: ["host", "port", "side"],
 	},
 	response: {
 		200: {

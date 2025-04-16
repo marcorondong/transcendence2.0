@@ -47,12 +47,14 @@ scrape_configs:
 
 #monitor backend endpoints in docker network
   - job_name: 'blackbox-http'
+    scrape_interval: 1m
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
       - targets:
-        - http://ai-bot:6969/health
+        - http://ai-bot:6969/healthcheck
+        - http://pong-api:3010/healthcheck
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -63,6 +65,7 @@ scrape_configs:
 
 #monitor user endpoints but in docker network
   - job_name: "blackbox-https"
+    scrape_interval: 1m
     metrics_path: /probe
     params:
       module: [https_no_verify]

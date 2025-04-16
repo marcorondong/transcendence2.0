@@ -8,14 +8,19 @@ import { Bot } from "./bot";
 
 export async function gameRoutes(fastify: FastifyInstance) {
 	fastify.post(
-		"/game-extra",
-		{ schema: extraGameSchema },
+		"/game-mandatory",
+		{ schema: gameRequestSchema },
 		async (request: any, reply: any) => {
-			const gameRequest = request.body as object;
-			if (!gameRequest) {
+			if (!request.body) {
 				return reply.code(400).send({ error: "Invalid game request" });
 			}
-
+			const gameRequest = new Object({
+				"host": request.body.host,
+				"port": request.body.port,
+				"side": request.body.side,
+				"difficulty": "medium",
+				"roomId": request.body.roomId,
+			});
 			try {
 				new Bot(gameRequest).playGame();
 				reply
@@ -31,19 +36,14 @@ export async function gameRoutes(fastify: FastifyInstance) {
 		},
 	);
 	fastify.post(
-		"/game-mandatory",
-		{ schema: gameRequestSchema },
+		"/game-extra",
+		{ schema: extraGameSchema },
 		async (request: any, reply: any) => {
-			if (!request.body) {
+			const gameRequest = request.body as object;
+			if (!gameRequest) {
 				return reply.code(400).send({ error: "Invalid game request" });
 			}
-			const gameRequest = new Object({
-				"host": request.body.host,
-				"port": request.body.port,
-				"side": request.body.side,
-				"difficulty": "medium",
-				"roomId": request.body.roomId,
-			});
+
 			try {
 				new Bot(gameRequest).playGame();
 				reply
