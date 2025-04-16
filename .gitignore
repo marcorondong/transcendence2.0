@@ -3,6 +3,7 @@
 # .env
 *.sensitive_env
 *.pem
+secrets/
 
 ############################ Binary and Blob Files ############################
 *.pdf
@@ -106,7 +107,7 @@ lerna-debug.log*
 # **/.vscode
 # !.vscode/settings.json
 # !.vscode/tasks.json
-# !.vscode/launch.json
+**/.vscode/launch.json
 # !.vscode/extensions.json
 **/.history
 

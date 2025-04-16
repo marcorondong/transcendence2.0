@@ -1,0 +1,75 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    networks:
+      - Transcendence2.0
+
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    networks:
+      - Transcendence2.0
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.26.0
+    container_name: blackbox-exporter
+    restart: unless-stopped
+    networks:
+      - Transcendence2.0
+    volumes:
+      - ./blackbox-exporter/blackbox.yml:/etc/blackbox_exporter/config.yml
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    networks:
+      - Transcendence2.0
+    depends_on:
+      - prometheus
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    secrets:
+      - slack_webhook
+
+  grafana:
+    build: 
+      context: ./grafana
+    container_name: grafana
+    restart: unless-stopped
+    networks:
+      - Transcendence2.0
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana:/etc/grafana
+    secrets:
+      - grafana_admin_password
+
+volumes:
+  grafana-data:
+  prometheus_data:
+
+secrets:
+  grafana_admin_password:
+    file: secrets/grafana_admin_password.txt
+  slack_webhook:
+    file: secrets/slack_webhook.txt

@@ -17,10 +17,10 @@ services:
       context: ./ssg
       dockerfile: ./AI/Dockerfile
     container_name: ai-bot
-    ports:
-      - "6969:6969" #TODO close this port when we have users and API!
     environment:
       - NODE_ENV=production
+    ports:
+      - 6969:6969 #TODO keep now for swagger documentation, remove later
     networks:
       - Transcendence2.0
 
@@ -40,6 +40,9 @@ services:
     restart: unless-stopped
     networks:
       - Transcendence2.0
+
+include:
+  - ./monitoring/monitoring-docker-compose.yml
 
 networks:
   Transcendence2.0:

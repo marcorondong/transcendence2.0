@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { gameRequestSchema } from "./gameRequestSchema";
+import { healthSchema } from "./gameRequestSchema";
 import { Bot } from "./bot";
 
 export async function gameRoutes(fastify: FastifyInstance) {
@@ -25,5 +26,14 @@ export async function gameRoutes(fastify: FastifyInstance) {
 				reply.code(500).send({ error: "Failed to start bot" });
 			}
 		},
+	);
+}
+//TODO fix health
+export async function healthRoute(fastify: FastifyInstance) {
+	fastify.get(
+		'/health',
+		async (request, reply) => {
+			reply.code(200).send();
+		}
 	);
 }

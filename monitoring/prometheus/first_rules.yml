@@ -1,0 +1,20 @@
+groups:
+  - name: blackbox-alerts
+    rules:
+      - alert: endpoints_down
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Blackbox probe failed for {{ $labels.instance }}"
+          description: "The probe to {{ $labels.instance }} has failed (status: 0)."
+
+      - alert: endpoints_slow
+        expr: avg_over_time(probe_duration_seconds{job="blackbox-http"}[5m]) > 1
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "Blackbox probe latency high for {{ $labels.instance }}"
+          description: "The probe to {{ $labels.instance }} has high latency ({{ $value }} seconds)."
