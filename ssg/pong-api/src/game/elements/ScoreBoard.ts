@@ -92,13 +92,11 @@ export class ScoreBoard {
 		return false;
 	}
 
-	getLeftPlayerGoals():number
-	{
+	getLeftPlayerGoals(): number {
 		return this.leftPlayerGoals;
 	}
 
-	getRightPlayerGoals():number
-	{
+	getRightPlayerGoals(): number {
 		return this.rightPlayerGoals;
 	}
 }
