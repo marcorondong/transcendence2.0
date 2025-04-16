@@ -1,9 +1,7 @@
-
 export const gameRequestSchema = {
 	description: "Connect a new bot opponent to the pong game server",
 	tags: ["Game vs mandatory AI"],
-	summary:
-		"The bot moves at the one speed required by subject",
+	summary: "The bot moves at the one speed required by subject",
 	body: {
 		type: "object",
 		properties: {
@@ -41,8 +39,7 @@ export const gameRequestSchema = {
 export const extraGameSchema = {
 	description: "Connect a new bot opponent to the pong game server",
 	tags: ["Game vs extra AI"],
-	summary:
-		"The bot can move faster or slower depending on difficulty",
+	summary: "The bot can move faster or slower depending on difficulty",
 	body: {
 		type: "object",
 		properties: {

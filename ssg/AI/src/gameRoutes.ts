@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { 
+import {
 	gameRequestSchema,
 	extraGameSchema,
 	healthSchema,
@@ -15,19 +15,17 @@ export async function gameRoutes(fastify: FastifyInstance) {
 				return reply.code(400).send({ error: "Invalid game request" });
 			}
 			const gameRequest = new Object({
-				"host": request.body.host,
-				"port": request.body.port,
-				"side": request.body.side,
-				"roomId": request.body.roomId,
+				host: request.body.host,
+				port: request.body.port,
+				side: request.body.side,
+				roomId: request.body.roomId,
 			});
 			try {
 				new Bot(gameRequest).playGame();
-				reply
-					.code(200)
-					.send({
-						description: "Game successfully started",
-						gameRequest,
-					});
+				reply.code(200).send({
+					description: "Game successfully started",
+					gameRequest,
+				});
 			} catch (error) {
 				request.log.error(error);
 				reply.code(500).send({ error: "Failed to start bot" });
@@ -45,12 +43,10 @@ export async function gameRoutes(fastify: FastifyInstance) {
 
 			try {
 				new Bot(gameRequest).playGame();
-				reply
-					.code(200)
-					.send({
-						description: "Game successfully started",
-						gameRequest,
-					});
+				reply.code(200).send({
+					description: "Game successfully started",
+					gameRequest,
+				});
 			} catch (error) {
 				request.log.error(error);
 				reply.code(500).send({ error: "Failed to start bot" });
@@ -61,10 +57,10 @@ export async function gameRoutes(fastify: FastifyInstance) {
 
 export async function healthRoute(fastify: FastifyInstance) {
 	fastify.get(
-		'/healthcheck',
+		"/healthcheck",
 		{ schema: healthSchema },
 		async (request: any, reply: any) => {
 			reply.code(200).send({ status: "ok" });
-		}
+		},
 	);
 }
