@@ -61,30 +61,30 @@ export const createUserSchema = z
 		...userCore,
 		password: passwordField,
 	})
-	.strict() // Rejects unknown fields
-	.superRefine((data, ctx) => {
-		const password = data.password; // TODO: Maybe change it toLowerCase too
-		const name = data.name.toLowerCase();
-		const email = data.email.toLowerCase();
-		if (password.toLowerCase().includes(name)) {
-			ctx.addIssue({
-				path: ["password"],
-				code: z.ZodIssueCode.custom,
-				message: "Password cannot contain the username",
-				fatal: true, // Abort further checks
-			});
-			return z.NEVER; // Abort further checks
-		}
-		if (password.toLowerCase() === email) {
-			ctx.addIssue({
-				path: ["password"],
-				code: z.ZodIssueCode.custom,
-				message: "Password cannot be same as the email",
-				fatal: true, // Abort further checks
-			});
-			return z.NEVER; // Abort further checks
-		}
-	});
+	.strict(); // Rejects unknown fields
+// .superRefine((data, ctx) => {
+// 	const password = data.password; // TODO: Maybe change it toLowerCase too
+// 	const name = data.name.toLowerCase();
+// 	const email = data.email.toLowerCase();
+// 	if (password.toLowerCase().includes(name)) {
+// 		ctx.addIssue({
+// 			path: ["password"],
+// 			code: z.ZodIssueCode.custom,
+// 			message: "Password cannot contain the username",
+// 			fatal: true, // Abort further checks
+// 		});
+// 		return z.NEVER; // Abort further checks
+// 	}
+// 	if (password.toLowerCase() === email) {
+// 		ctx.addIssue({
+// 			path: ["password"],
+// 			code: z.ZodIssueCode.custom,
+// 			message: "Password cannot be same as the email",
+// 			fatal: true, // Abort further checks
+// 		});
+// 		return z.NEVER; // Abort further checks
+// 	}
+// });
 
 // Schema for single user
 export const userResponseSchema = z.object({
@@ -101,12 +101,13 @@ export const userIdParamSchema = z
 	.strict(); //TODO: See if I have to use strict here too. Rejects unknown fields
 
 // Schema to update all user fields
-export const putUserSchema = z
-	.object({
-		...userCore,
-		password: passwordField,
-	})
-	.strict(); // Rejects unknown fields
+export const putUserSchema = createUserSchema;
+// export const putUserSchema = z
+// 	.object({
+// 		...userCore,
+// 		password: passwordField,
+// 	})
+// 	.strict(); // Rejects unknown fields
 
 // Schema to update some user fields
 export const patchUserSchema = putUserSchema.partial().strict(); // Rejects unknown fields
