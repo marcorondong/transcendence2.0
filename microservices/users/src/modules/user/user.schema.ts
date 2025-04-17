@@ -10,7 +10,21 @@ const userCore = {
 			invalid_type_error: "Email must be a string",
 		})
 		.email(),
-	name: z.string(),
+	name: z
+		.string({
+			required_error: "Name is required",
+			invalid_type_error: "Name must be a string",
+		})
+		.min(3, "Name must be at least 3 characters long")
+		.refine((val) => val.trim().length > 0, {
+			message: "Name must not be empty or whitespace only",
+		})
+		.refine((val) => !/^\d+$/.test(val), {
+			message: "Name must not be numbers only",
+		})
+		.refine((val) => /[a-zA-Z]/.test(val), {
+			message: "Name must contain at least one letter",
+		}),
 };
 
 // Schema for createUser
