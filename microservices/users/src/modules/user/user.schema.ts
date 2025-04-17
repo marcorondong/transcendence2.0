@@ -2,6 +2,13 @@ import { z } from "zod";
 
 // MR_NOTE: In Zod, everything is required by default.
 
+// Helper function to convert blank strings to undefined
+const blankToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+	z.preprocess((val) => {
+		if (typeof val === "string" && val.trim() === "") return undefined;
+		return val;
+	}, schema.optional());
+
 // Name field schema
 export const nameField = z
 	.string({
@@ -139,7 +146,9 @@ export const getUsersQuerySchema = z
 	.object({
 		id: z.coerce.number().optional(),
 		email: z.string().email().optional(),
+		// email: blankToUndefined(z.string().email()),
 		name: z.string().optional(),
+		// name: blankToUndefined(z.string()),
 		useFuzzy: z.coerce.boolean().optional(),
 		useOr: z.coerce.boolean().optional(),
 		skip: z.coerce.number().min(0).optional(),
