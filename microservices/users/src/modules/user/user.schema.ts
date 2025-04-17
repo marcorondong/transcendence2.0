@@ -2,59 +2,68 @@ import { z } from "zod";
 
 // MR_NOTE: In Zod, everything is required by default.
 
+// Name field schema
+export const nameField = z
+	.string({
+		required_error: "Name is required",
+		invalid_type_error: "Name must be a string",
+	})
+	.min(3, "Name must be at least 3 characters long")
+	.refine((val) => val.trim().length > 0, {
+		message: "Name must not be empty or whitespace only",
+	})
+	.refine((val) => !/^\d+$/.test(val), {
+		message: "Name must not be numbers only",
+	})
+	.refine((val) => /[a-zA-Z]/.test(val), {
+		message: "Name must contain at least one letter",
+	});
+
+// Email field schema
+export const emailField = z
+	.string({
+		required_error: "Email is required",
+		invalid_type_error: "Email must be a string",
+	})
+	.email()
+	.refine((val) => val === val.toLowerCase(), {
+		message: "Invalid email format",
+	});
+
+// Password field schema
+export const passwordField = z
+	.string({
+		required_error: "Password is required",
+		invalid_type_error: "Password must be a string",
+	})
+	.min(6, "Password must be at least 6 characters long")
+	.refine(
+		(val) =>
+			/[a-z]/.test(val) && // lowercase
+			/[A-Z]/.test(val) && // uppercase
+			/\d/.test(val) && // digit
+			/[^a-zA-Z0-9]/.test(val), // symbol
+		{
+			message:
+				"Password must include at least one uppercase, one lowercase, one number, and one symbol",
+		},
+	);
+
 // Core user schema
 const userCore = {
-	email: z
-		.string({
-			required_error: "Email is required",
-			invalid_type_error: "Email must be a string",
-		})
-		.email()
-		.refine((val) => val === val.toLowerCase(), {
-			message: "Invalid email format",
-		}),
-	name: z
-		.string({
-			required_error: "Name is required",
-			invalid_type_error: "Name must be a string",
-		})
-		.min(3, "Name must be at least 3 characters long")
-		.refine((val) => val.trim().length > 0, {
-			message: "Name must not be empty or whitespace only",
-		})
-		.refine((val) => !/^\d+$/.test(val), {
-			message: "Name must not be numbers only",
-		})
-		.refine((val) => /[a-zA-Z]/.test(val), {
-			message: "Name must contain at least one letter",
-		}),
+	email: emailField,
+	name: nameField,
 };
 
 // Schema for createUser
 export const createUserSchema = z
 	.object({
 		...userCore,
-		password: z
-			.string({
-				required_error: "Password is required",
-				invalid_type_error: "Password must be a string",
-			})
-			.min(6, "Password must be at least 6 characters long")
-			.refine(
-				(val) =>
-					/[a-z]/.test(val) && // lowercase
-					/[A-Z]/.test(val) && // uppercase
-					/\d/.test(val) && // digit
-					/[^a-zA-Z0-9]/.test(val), // symbol
-				{
-					message:
-						"Password must include at least one uppercase, one lowercase, one number, and one symbol",
-				},
-			),
+		password: passwordField,
 	})
 	.strict() // Rejects unknown fields
 	.superRefine((data, ctx) => {
-		const password = data.password;
+		const password = data.password; // TODO: Maybe change it toLowerCase too
 		const name = data.name.toLowerCase();
 		const email = data.email.toLowerCase();
 		if (password.toLowerCase().includes(name)) {
@@ -95,10 +104,7 @@ export const userIdParamSchema = z
 export const putUserSchema = z
 	.object({
 		...userCore,
-		password: z.string({
-			required_error: "Password is required",
-			invalid_type_error: "Password must be a string",
-		}),
+		password: passwordField,
 	})
 	.strict(); // Rejects unknown fields
 
