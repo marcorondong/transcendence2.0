@@ -34,12 +34,48 @@ const userCore = {
 export const createUserSchema = z
 	.object({
 		...userCore,
-		password: z.string({
-			required_error: "Password is required",
-			invalid_type_error: "Password must be a string",
-		}),
+		password: z
+			.string({
+				required_error: "Password is required",
+				invalid_type_error: "Password must be a string",
+			})
+			.min(6, "Password must be at least 6 characters long")
+			.refine(
+				(val) =>
+					/[a-z]/.test(val) && // lowercase
+					/[A-Z]/.test(val) && // uppercase
+					/\d/.test(val) && // digit
+					/[^a-zA-Z0-9]/.test(val), // symbol
+				{
+					message:
+						"Password must include at least one uppercase, one lowercase, one number, and one symbol",
+				},
+			),
 	})
-	.strict(); // Rejects unknown fields
+	.strict() // Rejects unknown fields
+	.superRefine((data, ctx) => {
+		const password = data.password;
+		const name = data.name.toLowerCase();
+		const email = data.email.toLowerCase();
+		if (password.toLowerCase().includes(name)) {
+			ctx.addIssue({
+				path: ["password"],
+				code: z.ZodIssueCode.custom,
+				message: "Password cannot contain the username",
+				fatal: true, // Abort further checks
+			});
+			return z.NEVER; // Abort further checks
+		}
+		if (password.toLowerCase() === email) {
+			ctx.addIssue({
+				path: ["password"],
+				code: z.ZodIssueCode.custom,
+				message: "Password cannot be same as the email",
+				fatal: true, // Abort further checks
+			});
+			return z.NEVER; // Abort further checks
+		}
+	});
 
 // Schema for single user
 export const userResponseSchema = z.object({
