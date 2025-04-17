@@ -9,7 +9,10 @@ const userCore = {
 			required_error: "Email is required",
 			invalid_type_error: "Email must be a string",
 		})
-		.email(),
+		.email()
+		.refine((val) => val === val.toLowerCase(), {
+			message: "Invalid email format",
+		}),
 	name: z
 		.string({
 			required_error: "Name is required",
