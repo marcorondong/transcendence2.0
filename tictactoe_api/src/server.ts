@@ -17,7 +17,6 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { SwaggerOptions } from "@fastify/swagger";
 import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
 import { Player } from "./Player";
-import { createPlayerInDB } from "./dbUtils";
 import { gameRoutes } from "./apiRequests/routes";
 import { faker } from "@faker-js/faker";
 
@@ -53,7 +52,6 @@ server.register(async function (server) {
 		const id = faker.person.firstName();
 		const socket = connection as unknown as WebSocket;
 		const player = new Player(id, socket);
-		createPlayerInDB(player.getId());
 		console.log("Player connected. playerId:", player.getId());
 
 		if (friendPlayer) {

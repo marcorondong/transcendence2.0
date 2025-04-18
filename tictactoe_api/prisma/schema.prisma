@@ -11,17 +11,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Player {
-  id        String   @id
-  gamesAsX  Game[]   @relation("PlayerX")
-  gamesAsO  Game[]   @relation("PlayerO")
-}
-
 model Game {
   id        String   @id @default(uuid())
-  playerX   Player   @relation("PlayerX", fields: [playerXId], references: [id])
   playerXId String
-  playerO   Player   @relation("PlayerO", fields: [playerOId], references: [id])
   playerOId String
   result    String
 }

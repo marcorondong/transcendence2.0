@@ -114,10 +114,6 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.PlayerScalarFieldEnum = {
-  id: 'id'
-};
-
 exports.Prisma.GameScalarFieldEnum = {
   id: 'id',
   playerXId: 'playerXId',
@@ -132,7 +128,6 @@ exports.Prisma.SortOrder = {
 
 
 exports.Prisma.ModelName = {
-  Player: 'Player',
   Game: 'Game'
 };
 
