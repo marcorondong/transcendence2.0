@@ -4,6 +4,10 @@ const sortDirections = ["asc", "desc"] as const;
 const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
+const userPublicFields = ["id", "email", "name"] as const;
+const userSortByEnum = z.enum(userPublicFields);
+export type UserPublicField = (typeof userPublicFields)[number];
+
 export type UniqueUserField =
 	| { id: number }
 	| { email: string }
@@ -154,7 +158,8 @@ const baseGetUsersQuerySchema = z.object({
 	useOr: z.coerce.boolean(),
 	skip: z.coerce.number().min(0),
 	take: z.coerce.number().min(1).max(100),
-	sortBy: z.enum(["id", "email", "name"]),
+	// sortBy: z.enum(["id", "email", "name"]),
+	sortBy: userSortByEnum,
 	// order: z.enum(["asc", "desc"]),
 	order: sortDirectionEnum,
 });

@@ -5,6 +5,7 @@ import prisma from "../../utils/prisma";
 import { createUserInput, UpdateUserData } from "./user.schema";
 import {
 	SortDirection,
+	UserPublicField,
 	UniqueUserField,
 } from "./user.schema";
 
@@ -102,7 +103,7 @@ export async function findUserByUnique(where: UniqueUserField) {
 type UserField = { id?: number; email?: string; name?: string };
 
 // Type definition for sorting by field (from User fields)(This allows adding more fields than UserField too)
-type SortByField = keyof UserField; // | "_rank" | "createdAt"; // Extend as needed
+// type SortByField = keyof UserField; // | "_rank" | "createdAt"; // Extend as needed
 
 // Type definition for query options
 type UserQueryOptions = {
@@ -111,7 +112,8 @@ type UserQueryOptions = {
 	useOr?: boolean; // To allow OR logic
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: SortByField; // To sort by key, like "id" or "name" (from UserField but extended)
+	// sortBy?: SortByField; // To sort by key, like "id" or "name" (from UserField but extended)
+	sortBy?: UserPublicField;
 	// order?: "asc" | "desc"; // Ascending or descending
 	order?: SortDirection;
 };
