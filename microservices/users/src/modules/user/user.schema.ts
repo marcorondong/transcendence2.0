@@ -15,13 +15,46 @@ export type UniqueUserField =
 
 export type UserField = Partial<Record<UserPublicField, string | number>>;
 
+//=====================START ORIGINAL===========================================
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
-export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
-	z.preprocess(
-		(val) =>
-			typeof val === "string" && val.trim() === "" ? undefined : val,
-		schema.optional(),
-	);
+// export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
+// 	z.preprocess(
+// 		(val) =>
+// 			typeof val === "string" && val.trim() === "" ? undefined : val,
+// 		schema.optional(),
+// 	);
+//=======================END ORIGINAL===========================================
+//=====================START 1 Change===========================================
+// export const blankToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+// 	z.preprocess((val) => {
+// 		if (typeof val === "string" && val.trim() === "") return undefined;
+// 		// Apply coercion manually if the schema is z.coerce.*
+// 		if (
+// 			schema instanceof z.ZodEffects &&
+// 			schema._def.effect.type === "coerce"
+// 		) {
+// 			return schema._def.effect.transform(val);
+// 		}
+// 		return val;
+// 	}, schema.optional());
+//=======================END 1 Change===========================================
+export const blankToUndefined = <T extends z.ZodTypeAny>(
+	schema: T,
+): z.ZodEffects<z.ZodOptional<T>, z.infer<T> | undefined, unknown> =>
+	z.preprocess((val) => {
+		if (typeof val === "string" && val.trim() === "") return undefined;
+		// Coerce booleans
+		if (schema instanceof z.ZodBoolean) {
+			if (val === "true") return true;
+			if (val === "false") return false;
+		}
+		// Coerce numbers
+		if (schema instanceof z.ZodNumber && typeof val === "string") {
+			const num = Number(val);
+			if (!isNaN(num)) return num;
+		}
+		return val;
+	}, schema.optional());
 
 // Helper function to recursively wrap all fields in an object schema with blankToUndefined()
 export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
@@ -157,7 +190,19 @@ const baseGetUsersQuerySchema = z.object({
 	email: z.string().email(),
 	name: z.string(),
 	useFuzzy: z.coerce.boolean(),
+	// useFuzzy: z
+	// 	.preprocess(
+	// 		(val) => (val === "true" ? true : val === "false" ? false : val),
+	// 		z.boolean(),
+	// 	)
+	// 	.optional(),
 	useOr: z.coerce.boolean(),
+	// useOr: z
+	// 	.preprocess(
+	// 		(val) => (val === "true" ? true : val === "false" ? false : val),
+	// 		z.boolean(),
+	// 	)
+	// 	.optional(),
 	skip: z.coerce.number().min(0),
 	take: z.coerce.number().min(1).max(100),
 	// sortBy: z.enum(["id", "email", "name"]),
