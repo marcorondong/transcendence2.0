@@ -1,54 +1,36 @@
 import { z, ZodTypeAny, ZodObject } from "zod";
 
+// Type definition for ordering (ascending/descending)
 const sortDirections = ["asc", "desc"] as const;
 const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
+// Type definition for sorting by field (from User fields)
 const userPublicFields = ["id", "email", "name"] as const;
 const userSortByEnum = z.enum(userPublicFields);
 export type UserPublicField = (typeof userPublicFields)[number];
 
+// Type definition to allow one field per query (used in )
 export type UniqueUserField =
 	| { id: number }
 	| { email: string }
 	| { name: string };
 
+// Type definition to allowing multiple User fields per query
 export type UserField = Partial<Record<UserPublicField, string | number>>;
 
-//=====================START ORIGINAL===========================================
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
-// export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
-// 	z.preprocess(
-// 		(val) =>
-// 			typeof val === "string" && val.trim() === "" ? undefined : val,
-// 		schema.optional(),
-// 	);
-//=======================END ORIGINAL===========================================
-//=====================START 1 Change===========================================
-// export const blankToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
-// 	z.preprocess((val) => {
-// 		if (typeof val === "string" && val.trim() === "") return undefined;
-// 		// Apply coercion manually if the schema is z.coerce.*
-// 		if (
-// 			schema instanceof z.ZodEffects &&
-// 			schema._def.effect.type === "coerce"
-// 		) {
-// 			return schema._def.effect.transform(val);
-// 		}
-// 		return val;
-// 	}, schema.optional());
-//=======================END 1 Change===========================================
 export const blankToUndefined = <T extends z.ZodTypeAny>(
 	schema: T,
 ): z.ZodEffects<z.ZodOptional<T>, z.infer<T> | undefined, unknown> =>
 	z.preprocess((val) => {
 		if (typeof val === "string" && val.trim() === "") return undefined;
-		// Coerce booleans
+		// Coerce booleans (since .preprocess() removes coercion)
 		if (schema instanceof z.ZodBoolean) {
 			if (val === "true") return true;
 			if (val === "false") return false;
 		}
-		// Coerce numbers
+		// Coerce numbers (since .preprocess() removes coercion)
 		if (schema instanceof z.ZodNumber && typeof val === "string") {
 			const num = Number(val);
 			if (!isNaN(num)) return num;
@@ -183,31 +165,16 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
-// TODO: Try to "automate" SortBy according to UserField/UniqueUserField
 // Base schema for query parameters
 const baseGetUsersQuerySchema = z.object({
 	id: z.coerce.number().min(1),
 	email: z.string().email(),
 	name: z.string(),
 	useFuzzy: z.coerce.boolean(),
-	// useFuzzy: z
-	// 	.preprocess(
-	// 		(val) => (val === "true" ? true : val === "false" ? false : val),
-	// 		z.boolean(),
-	// 	)
-	// 	.optional(),
 	useOr: z.coerce.boolean(),
-	// useOr: z
-	// 	.preprocess(
-	// 		(val) => (val === "true" ? true : val === "false" ? false : val),
-	// 		z.boolean(),
-	// 	)
-	// 	.optional(),
 	skip: z.coerce.number().min(0),
 	take: z.coerce.number().min(1).max(100),
-	// sortBy: z.enum(["id", "email", "name"]),
 	sortBy: userSortByEnum,
-	// order: z.enum(["asc", "desc"]),
 	order: sortDirectionEnum,
 });
 
