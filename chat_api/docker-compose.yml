@@ -1,9 +1,10 @@
 services:
   chat_api:
-    image: chat_api_img 
-    container_name: chat_api
-    build: ./
+    image: chat_img
+    container_name: chat_container
+    build: .
     volumes:
-      - ./src/:/chat_api/src/
+      - ./src:/chat_api/src
     ports:
-      - 3002:3002
+      - "3002:3002"
+    restart: always
