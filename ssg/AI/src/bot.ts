@@ -1,7 +1,6 @@
 import { WebSocket } from "ws";
 import { PongField } from "./PongField";
 import { Point } from "./Point";
-import { gameRequestSchema } from "./gameRequestSchema";
 import {
 	distanceBetweenPoints,
 	findIntersectionWithVerticalLine,
@@ -39,10 +38,10 @@ export class Bot {
 
 	constructor(initializers: any) {
 		//room info
-		this.difficulty = difficultySelector.get(initializers.difficulty) ?? 16;
+		this.difficulty = difficultySelector.get(initializers.difficulty) ?? 1000 / 60;
 		this.roomId = initializers.roomId;
 		this.port = initializers.port ?? "3010";
-		this.host = initializers.host ?? "127.0.0.1";
+		this.host = initializers.host ?? "pong-api";
 		this.side =
 			initializers.side === "left"
 				? field.LEFT_EDGE_X + this.PADDLE_GAP
@@ -62,9 +61,7 @@ export class Bot {
 	}
 
 	public playGame() {
-		this.ws = new WebSocket(`wss://${this.host}:${this.port}/pong/`, {
-			rejectUnauthorized: false,
-		});
+		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong/`);
 
 		try {
 			this.ws.on("open", () => {
@@ -266,7 +263,7 @@ const field = new PongField();
 //difficulty number = delay between AI moves in ms
 const difficultySelector = new Map<string, number>([
 	["easy", 24],
-	["medium", 16],
+	["medium", 1000 / 60],
 	["hard", 8],
 	["insane", 0],
 ]);
