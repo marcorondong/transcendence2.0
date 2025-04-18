@@ -29,6 +29,7 @@ import { errorHandler } from "../../utils/errors";
 // TODO: Add explanation to routes and that authentication is enabled by default?
 
 async function userRoutes(server: FastifyInstance) {
+	// 1. Create a new user
 	server.post(
 		"/",
 		{
@@ -43,6 +44,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(registerUserHandler),
 	);
+	// 2. Log in to get authorization token (to access private/authenticated routes)
 	server.post(
 		"/login",
 		{
@@ -57,7 +59,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(loginHandler),
 	);
-	// 1. Get a single user by ID
+	// 3. Get a single user by ID
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.get(
 		"/:id",
@@ -71,7 +73,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(getUserHandler),
 	);
-	// 2. Get all users (with filters/sorting/pagination)
+	// 4. Get all users (with filters/sorting/ordering/pagination)
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.get(
 		"/",
@@ -85,7 +87,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(getUsersHandler),
 	);
-	// 3. Update all user fields (PUT)
+	// 5. Update ALL user fields (PUT)
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.put(
 		"/:id",
@@ -100,7 +102,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(putUserHandler),
 	);
-	// 4. Update some user fields (PATCH)
+	// 6. Update SOME user fields (PATCH)
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.patch(
 		"/:id",
@@ -115,7 +117,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(patchUserHandler),
 	);
-	// 5. Delete a user by ID
+	// 7. Delete a user by ID
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.delete(
 		"/:id",

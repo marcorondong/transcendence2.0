@@ -2,7 +2,14 @@ import { Prisma } from "@prisma/client";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
-import { createUserInput, UpdateUserData } from "./user.schema";
+import {
+	createUserInput,
+	UpdateUserData,
+	SortDirection,
+	UserPublicField,
+	UniqueUserField,
+	UserField,
+} from "./user.schema";
 
 // Helper function to capitalize conflicting Prisma field
 function capitalize(str: string) {
@@ -15,14 +22,6 @@ function checkPasswordConstraints(
 	userData: { name: string; email: string },
 ) {
 	const lowerPassword = password.toLowerCase();
-	// const lowerName = userData.name.toLowerCase();
-	// const lowerEmail = userData.email.toLowerCase();
-	// if (lowerPassword.includes(lowerName)) {
-	// 	throw new Error("Password cannot contain the username");
-	// }
-	// if (lowerPassword === lowerEmail) {
-	// 	throw new Error("Password cannot be same as the email");
-	// }
 	if (userData.name && lowerPassword.includes(userData.name.toLowerCase())) {
 		throw new Error("Password cannot contain the username");
 	}
@@ -76,10 +75,6 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
-// TODO: Check if all these new type definitions could be put in user.schema.ts
-// Type definition to allow one field per query
-type UniqueUserField = { id: number } | { name: string } | { email: string };
-
 // This function returns all user fields (no filtering)
 export async function findUserByUnique(where: UniqueUserField) {
 	try {
@@ -102,12 +97,6 @@ export async function findUserByUnique(where: UniqueUserField) {
 	}
 }
 
-// Type definition to allowing multiple User fields per query
-type UserField = { id?: number; email?: string; name?: string };
-
-// Type definition for sorting by field (from User fields)(This allows adding more fields than UserField too)
-type SortByField = keyof UserField; // | "_rank" | "createdAt"; // Extend as needed
-
 // Type definition for query options
 type UserQueryOptions = {
 	where?: UserField; // To filter by UserField
@@ -115,11 +104,10 @@ type UserQueryOptions = {
 	useOr?: boolean; // To allow OR logic
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: SortByField; // To sort by key, like "id" or "name" (from UserField but extended)
-	order?: "asc" | "desc"; // Ascending or descending
+	sortBy?: UserPublicField; // To sort by id, email, name
+	order?: SortDirection; // to order asc/desc
 };
 
-// TODO: MR: Check if better to allow findUsers() and findUsers({}), or only `findUsers({})`
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function findUsers(options: UserQueryOptions = {}) {
@@ -135,11 +123,10 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	} = options;
 	// console.log("✅ Step 1: Received Options", options);
 	try {
-		// Transform string fields to `contains` filters if fuzzy search is enabled
+		// Enable fuzzy search (transform string fields to `contains` filters)
 		const transformed = Object.entries(where).reduce(
 			(acc, [key, value]) => {
 				if (typeof value === "string" && useFuzzy) {
-					// acc[key] = { contains: value, mode: "insensitive" }; // This worked in older version of Prisma
 					acc[key] = { contains: value };
 				} else {
 					acc[key] = value;
@@ -149,7 +136,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			{} as Record<string, any>,
 		);
 		// console.log("✅ Step 2: Transformed 'where'", transformed);
-		// TODO: Fix this comment: Allow OR queries (map fields to own )
+		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
 			: transformed;
