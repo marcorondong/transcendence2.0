@@ -4,99 +4,70 @@ import Fastify, {
 	FastifyRequest,
 } from "fastify";
 import fastifyWebsocket from "@fastify/websocket";
-import { Client } from "./Client";
-// import { onClientMessage, onClientDisconnect } from './utils';
-import { faker } from "@faker-js/faker";
 import fastifyStatic from "@fastify/static";
 import path from "path";
+import {
+	ZodTypeProvider,
+	validatorCompiler,
+	serializerCompiler,
+	jsonSchemaTransform,
+} from "fastify-type-provider-zod";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
+import { SwaggerOptions } from "@fastify/swagger";
+import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
+import { Player } from "./Player";
 import { createPlayerInDB } from "./dbUtils";
+import { gameRoutes } from "./gameRoutes/game.routes";
+import { faker } from "@faker-js/faker";
 
 const PORT = 3001;
 const HOST = "0.0.0.0";
-let friendClient: Client | null = null;
+let friendPlayer: Player | null = null;
 
-const fastify: FastifyInstance = Fastify({ logger: false });
+const server: FastifyInstance = Fastify({
+	logger: false,
+}).withTypeProvider<ZodTypeProvider>();
 
-fastify.register(fastifyStatic, {
+server.setValidatorCompiler(validatorCompiler);
+server.setSerializerCompiler(serializerCompiler);
+
+server.register(fastifyStatic, {
 	root: path.join(__dirname, "../public"),
 	prefix: "/",
 });
 
-fastify.register(fastifyWebsocket);
+server.register(fastifyWebsocket);
 
-fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
+server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
+server.register(fastifySwaggerUi, swaggerUiOptions);
+
+server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
 	return reply.sendFile("tictactoe.html");
-	// return reply.send("Hello World!");
 });
 
+server.register(gameRoutes, { prefix: "/tictactoe" });
 
-fastify.register(async function (fastify) {
-	fastify.get("/ws", { websocket: true }, (connection, req) => {
+server.register(async function (server) {
+	server.get("/ws", { websocket: true }, (connection, req) => {
 		const id = faker.person.firstName();
 		const socket = connection as unknown as WebSocket;
-		const client = new Client(id, socket);
-		createPlayerInDB(client.getId());
-		console.log("Client connected. clientId:", client.getId());
+		const player = new Player(id, socket);
+		createPlayerInDB(player.getId());
+		console.log("Player connected. playerId:", player.getId());
 
-		if (friendClient === null) {
-			friendClient = client;
+		if (friendPlayer) {
+			const opponent = friendPlayer;
+			friendPlayer = null;
+			player.finishSetup(opponent);
 		} else {
-			const sign = Math.random() < 0.5 ? "X" : "O";
-			const friendSign = sign === "X" ? "O" : "X";
-			client.setFriendClient(friendClient);
-			client.setSign(sign);
-			client.getSocket().send(
-				JSON.stringify({
-					gameSetup: true,
-					userId: client.getId(),
-					opponentId: friendClient.getId(),
-					yourSign: sign,
-					turn: client.getTurn(),
-				}),
-			);
-			friendClient.setFriendClient(client);
-			friendClient.setSign(friendSign);
-			friendClient.getSocket().send(
-				JSON.stringify({
-					gameSetup: true,
-					userId: friendClient.getId(),
-					opponentId: client.getId(),
-					yourSign: friendSign,
-					turn: friendClient.getTurn(),
-				}),
-			);
-			friendClient = null;
+			friendPlayer = player;
 		}
-
 		connection.on("message", (message: string) => {
 			try {
 				const data = JSON.parse(message);
 				if (data.index !== undefined) {
-					const friend = client.getFriendClient();
-					if (friend) {
-						if (client.getTurn()) {
-							client.getSocket().send(
-								JSON.stringify({
-									index: data.index,
-									sign: client.getSign(),
-								}),
-							);
-							friend.getSocket().send(
-								JSON.stringify({
-									index: data.index,
-									sign: client.getSign(),
-								}),
-							);
-							client.setTurn(false);
-							friend.setTurn(true);
-						} else {
-							client
-								.getSocket()
-								.send(
-									JSON.stringify({ error: "Not your turn" }),
-								);
-						}
-					}
+					player.sendIndex(data.index);
 				}
 			} catch (error) {
 				console.error(error);
@@ -105,8 +76,8 @@ fastify.register(async function (fastify) {
 		});
 
 		connection.on("close", (code: number, reason: Buffer) => {
-			console.log("Client disconnected: clientId:", client.getId());
-			const friend = client.getFriendClient();
+			console.log("player disconnected: playerId:", player.getId());
+			const friend = player.getOpponentPlayer();
 			if (friend) {
 				friend.getSocket().send(
 					JSON.stringify({
@@ -115,21 +86,21 @@ fastify.register(async function (fastify) {
 				);
 				friend.getSocket().close();
 			} else {
-				friendClient = null;
+				friendPlayer = null;
 			}
 		});
-		// connection.on('message', (message: string) => onClientMessage(message, client));
+		// connection.on('message', (message: string) => onPlayerMessage(message, player));
 
-		// connection.on('close', (code: number, reason: Buffer) => onClientDisconnect(code, reason, client));
+		// connection.on('close', (code: number, reason: Buffer) => onPlayerDisconnect(code, reason, player));
 	});
 });
 
 const start = async () => {
 	try {
-		await fastify.listen({ port: PORT, host: HOST });
+		await server.listen({ port: PORT, host: HOST });
 		console.log(`Server listening at ${PORT}`);
 	} catch (err) {
-		fastify.log.error(err);
+		server.log.error(err);
 		process.exit(1);
 	}
 };

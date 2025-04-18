@@ -122,8 +122,7 @@ exports.Prisma.GameScalarFieldEnum = {
   id: 'id',
   playerXId: 'playerXId',
   playerOId: 'playerOId',
-  result: 'result',
-  createdAt: 'createdAt'
+  result: 'result'
 };
 
 exports.Prisma.SortOrder = {

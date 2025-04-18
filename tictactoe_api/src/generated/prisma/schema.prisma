@@ -18,17 +18,16 @@ model Player {
 }
 
 model Game {
-  id        String   @id
-  playerX   Player   @relation("PlayerX", fields: [playerXId], references: [id])
+  id        String @id @default(uuid())
+  playerX   Player @relation("PlayerX", fields: [playerXId], references: [id])
   playerXId String
-  playerO   Player   @relation("PlayerO", fields: [playerOId], references: [id])
+  playerO   Player @relation("PlayerO", fields: [playerOId], references: [id])
   playerOId String
   result    String
-  createdAt DateTime @default(now())
 }
 
 enum GameResult {
+  DRAW
   X_WINS
   O_WINS
-  DRAW
 }

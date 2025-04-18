@@ -25,18 +25,18 @@ window.onload = () =>
 		try {
 			const data = JSON.parse(event.data);
 			console.log(data);
-			if (data.index !== undefined && data.sign !== undefined) {
+			if (data.index !== undefined && data.sign !== undefined && data.turn !== undefined) {
 				cells[data.index].textContent = data.sign;
-			} else if (data.gameSetup) {
-				playWith.textContent = `${data.yourSign}`;
-				if(data.turn)
-					info.textContent = `Your turn`;
-				else
-					info.textContent = `Opponent's turn`;
+				info.textContent = data.turn;
+			} else if (data.gameSetup && data.userId && data.opponentId && data.sign && data.turn) {
+				playWith.textContent = `${data.sign}`;
+				info.textContent = `${data.turn}`;
 				player1_name.textContent = data.userId;
 				player2_name.textContent = data.opponentId;
 			} else if (data.gameOver) {
-				alert(data.gameOver);
+				info.textContent = data.gameOver;
+			} else if (data.warning) {
+				alert(data.warning);
 			} else if (data.error) {
 				alert(data.error);
 			} else {

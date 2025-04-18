@@ -5,14 +5,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
 const websocket_1 = __importDefault(require("@fastify/websocket"));
-const Client_1 = require("./Client");
+const Player_1 = require("./Player");
 const faker_1 = require("@faker-js/faker");
 const static_1 = __importDefault(require("@fastify/static"));
 const path_1 = __importDefault(require("path"));
 const dbUtils_1 = require("./dbUtils");
 const PORT = 3001;
 const HOST = "0.0.0.0";
-let friendClient = null;
+let game = null;
+let friendPlayer = null;
 const fastify = (0, fastify_1.default)({ logger: false });
 fastify.register(static_1.default, {
     root: path_1.default.join(__dirname, "../public"),
@@ -26,59 +27,22 @@ fastify.register(async function (fastify) {
     fastify.get("/ws", { websocket: true }, (connection, req) => {
         const id = faker_1.faker.person.firstName();
         const socket = connection;
-        const client = new Client_1.Client(id, socket);
-        (0, dbUtils_1.createPlayerInDB)(client.getId());
-        console.log("Client connected. clientId:", client.getId());
-        if (friendClient === null) {
-            friendClient = client;
+        const player = new Player_1.Player(id, socket);
+        (0, dbUtils_1.createPlayerInDB)(player.getId());
+        console.log("Player connected. playerId:", player.getId());
+        if (friendPlayer) {
+            const opponent = friendPlayer;
+            friendPlayer = null;
+            player.finishSetup(opponent);
         }
         else {
-            const sign = Math.random() < 0.5 ? "X" : "O";
-            const friendSign = sign === "X" ? "O" : "X";
-            client.setFriendClient(friendClient);
-            client.setSign(sign);
-            client.getSocket().send(JSON.stringify({
-                gameSetup: true,
-                userId: client.getId(),
-                opponentId: friendClient.getId(),
-                yourSign: sign,
-                turn: client.getTurn(),
-            }));
-            friendClient.setFriendClient(client);
-            friendClient.setSign(friendSign);
-            friendClient.getSocket().send(JSON.stringify({
-                gameSetup: true,
-                userId: friendClient.getId(),
-                opponentId: client.getId(),
-                yourSign: friendSign,
-                turn: friendClient.getTurn(),
-            }));
-            friendClient = null;
+            friendPlayer = player;
         }
         connection.on("message", (message) => {
             try {
                 const data = JSON.parse(message);
                 if (data.index !== undefined) {
-                    const friend = client.getFriendClient();
-                    if (friend) {
-                        if (client.getTurn()) {
-                            client.getSocket().send(JSON.stringify({
-                                index: data.index,
-                                sign: client.getSign(),
-                            }));
-                            friend.getSocket().send(JSON.stringify({
-                                index: data.index,
-                                sign: client.getSign(),
-                            }));
-                            client.setTurn(false);
-                            friend.setTurn(true);
-                        }
-                        else {
-                            client
-                                .getSocket()
-                                .send(JSON.stringify({ error: "Not your turn" }));
-                        }
-                    }
+                    player.sendIndex(data.index);
                 }
             }
             catch (error) {
@@ -87,8 +51,8 @@ fastify.register(async function (fastify) {
             }
         });
         connection.on("close", (code, reason) => {
-            console.log("Client disconnected: clientId:", client.getId());
-            const friend = client.getFriendClient();
+            console.log("player disconnected: playerId:", player.getId());
+            const friend = player.getOpponentPlayer();
             if (friend) {
                 friend.getSocket().send(JSON.stringify({
                     gameOver: "Your friend has left the game",
@@ -96,7 +60,7 @@ fastify.register(async function (fastify) {
                 friend.getSocket().close();
             }
             else {
-                friendClient = null;
+                friendPlayer = null;
             }
         });
     });
