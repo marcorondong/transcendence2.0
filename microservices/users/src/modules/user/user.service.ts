@@ -9,8 +9,42 @@ function capitalize(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// Helper function to check password constraints (no username/email)
+function checkPasswordConstraints(
+	password: string,
+	userData: { name: string; email: string },
+) {
+	const lowerPassword = password.toLowerCase();
+	// const lowerName = userData.name.toLowerCase();
+	// const lowerEmail = userData.email.toLowerCase();
+	// if (lowerPassword.includes(lowerName)) {
+	// 	throw new Error("Password cannot contain the username");
+	// }
+	// if (lowerPassword === lowerEmail) {
+	// 	throw new Error("Password cannot be same as the email");
+	// }
+	if (userData.name && lowerPassword.includes(userData.name.toLowerCase())) {
+		throw new Error("Password cannot contain the username");
+	}
+	if (userData.email && lowerPassword === userData.email.toLowerCase()) {
+		throw new Error("Password cannot be same as the email");
+	}
+}
+
 export async function createUser(input: createUserInput) {
 	const { password, ...rest } = input;
+	try {
+		checkPasswordConstraints(password, {
+			name: rest.name,
+			email: rest.email,
+		});
+	} catch (err) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_CREATE,
+			message: (err as Error).message,
+		});
+	}
 	const { salt, hash } = hashPassword(password);
 	try {
 		const user = await prisma.user.create({
@@ -173,8 +207,30 @@ export async function deleteUser(id: number): Promise<void> {
 export async function updateUser(id: number, data: UpdateUserData) {
 	try {
 		const updatePayload: Record<string, any> = { ...data };
-		// Hash password if provided
 		if (data.password) {
+			// Find user for password constrains check
+			const currentUser = await prisma.user.findUnique({ where: { id } });
+			if (!currentUser) {
+				throw new AppError({
+					statusCode: 404,
+					code: USER_ERRORS.USER_UPDATE,
+					message: "User not found",
+				});
+			}
+			// Check password constraints
+			try {
+				checkPasswordConstraints(data.password, {
+					name: data.name ?? currentUser.name,
+					email: data.email ?? currentUser.email,
+				});
+			} catch (err) {
+				throw new AppError({
+					statusCode: 400,
+					code: USER_ERRORS.USER_UPDATE,
+					message: (err as Error).message,
+				});
+			}
+			// Hash password if provided
 			const { salt, hash } = hashPassword(data.password);
 			updatePayload.passwordHash = hash;
 			updatePayload.salt = salt;
