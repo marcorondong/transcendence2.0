@@ -1,29 +1,33 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { gamesZodSchema, GamesParams, headToHeadZodSchema, HeadToHeadParams } from "./game.zodSchemas";
+import {
+	idZodSchema,
+	IdParams,
+	headToHeadZodSchema,
+	HeadToHeadParams,
+} from "./zodSchemas";
 import { getGamesById, getGamesHeadToHead } from "../dbUtils";
 
 export async function gamesHandler(
-	req: FastifyRequest<{ Params: GamesParams }>,
+	req: FastifyRequest<{ Params: IdParams }>,
 	res: FastifyReply,
 ) {
-	const { id } = gamesZodSchema.parse(req.params);
+	const { id } = idZodSchema.parse(req.params);
 	const games = await getGamesById(id);
+	console.log("Games", games);
 	res.status(200).send(games);
 }
 
-export async function totalHandler(
-	req: FastifyRequest<{ Params: GamesParams }>,
+export async function totalStatsHandler(
+	req: FastifyRequest<{ Params: IdParams }>,
 	res: FastifyReply,
 ) {
-	const { id } = gamesZodSchema.parse(req.params);
+	const { id } = idZodSchema.parse(req.params);
 	const games = await getGamesById(id);
-
 	const totalStats = {
 		wins: 0,
 		losses: 0,
 		draws: 0,
 	};
-
 	games.forEach((game) => {
 		if (game.result === "DRAW") totalStats.draws++;
 		else if (
@@ -33,12 +37,11 @@ export async function totalHandler(
 			totalStats.wins++;
 		else totalStats.losses++;
 	});
-
 	res.status(200).send(totalStats);
 }
 
 export async function headToHeadHandler(
-	req: FastifyRequest<{ Params: GamesParams }>,
+	req: FastifyRequest<{ Params: HeadToHeadParams }>,
 	res: FastifyReply,
 ) {
 	const { id, opponentId } = headToHeadZodSchema.parse(req.params);
@@ -49,9 +52,6 @@ export async function headToHeadHandler(
 		losses: 0,
 		draws: 0,
 	};
-
-	console.log("Head to Head Stats", games);
-
 	games.forEach((game) => {
 		if (game.result === "DRAW") headToHeadStats.draws++;
 		else if (

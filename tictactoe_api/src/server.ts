@@ -18,7 +18,7 @@ import { SwaggerOptions } from "@fastify/swagger";
 import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
 import { Player } from "./Player";
 import { createPlayerInDB } from "./dbUtils";
-import { gameRoutes } from "./gameRoutes/game.routes";
+import { gameRoutes } from "./apiRequests/routes";
 import { faker } from "@faker-js/faker";
 
 const PORT = 3001;

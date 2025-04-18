@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { gamesOpt, totalOpt, headToHeadOpt } from "./game.options";
+import { gamesOpt, totalStatsOpt, headToHeadOpt } from "./options";
 
 
 export async function gameRoutes(server: FastifyInstance) {
 	server.get("/games/:id", gamesOpt);
-	server.get("/total/:id", totalOpt);
+	server.get("/totalStats/:id", totalStatsOpt);
 	server.get("/headToHead/:id/:opponentId", headToHeadOpt);
 }
 
