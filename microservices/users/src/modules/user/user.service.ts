@@ -7,6 +7,7 @@ import {
 	SortDirection,
 	UserPublicField,
 	UniqueUserField,
+	UserField,
 } from "./user.schema";
 
 // Helper function to capitalize conflicting Prisma field
@@ -100,7 +101,7 @@ export async function findUserByUnique(where: UniqueUserField) {
 }
 
 // Type definition to allowing multiple User fields per query
-type UserField = { id?: number; email?: string; name?: string };
+// type UserField = { id?: number; email?: string; name?: string };
 
 // Type definition for sorting by field (from User fields)(This allows adding more fields than UserField too)
 // type SortByField = keyof UserField; // | "_rank" | "createdAt"; // Extend as needed

@@ -13,6 +13,8 @@ export type UniqueUserField =
 	| { email: string }
 	| { name: string };
 
+export type UserField = Partial<Record<UserPublicField, string | number>>;
+
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
 export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
 	z.preprocess(
