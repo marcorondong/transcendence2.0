@@ -4,6 +4,11 @@ const sortDirections = ["asc", "desc"] as const;
 const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
+export type UniqueUserField =
+	| { id: number }
+	| { email: string }
+	| { name: string };
+
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
 export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
 	z.preprocess(

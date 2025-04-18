@@ -5,6 +5,7 @@ import prisma from "../../utils/prisma";
 import { createUserInput, UpdateUserData } from "./user.schema";
 import {
 	SortDirection,
+	UniqueUserField,
 } from "./user.schema";
 
 // Helper function to capitalize conflicting Prisma field
@@ -73,7 +74,7 @@ export async function createUser(input: createUserInput) {
 
 // TODO: Check if all these new type definitions could be put in user.schema.ts
 // Type definition to allow one field per query
-type UniqueUserField = { id: number } | { name: string } | { email: string };
+// type UniqueUserField = { id: number } | { name: string } | { email: string };
 
 // This function returns all user fields (no filtering)
 export async function findUserByUnique(where: UniqueUserField) {
