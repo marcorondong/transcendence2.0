@@ -1,13 +1,27 @@
-import { z } from "zod";
+import { z, ZodTypeAny, ZodObject } from "zod";
 
 // MR_NOTE: In Zod, everything is required by default.
 
-// Helper function to convert blank strings to undefined
-const blankToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
-	z.preprocess((val) => {
-		if (typeof val === "string" && val.trim() === "") return undefined;
-		return val;
-	}, schema.optional());
+// Helper function to convert empty strings to undefined (Protection against invalid queries)
+export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
+	z.preprocess(
+		(val) =>
+			typeof val === "string" && val.trim() === "" ? undefined : val,
+		schema.optional(),
+	);
+
+// Helper function to recursively wrap all fields in an object schema with blankToUndefined()
+export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
+	const shape = schema.shape;
+
+	const newShape = Object.fromEntries(
+		Object.entries(shape).map(([key, value]) => [
+			key,
+			blankToUndefined(value as ZodTypeAny),
+		]),
+	);
+	return z.object(newShape) as T;
+};
 
 // Name field schema
 export const nameField = z
@@ -99,11 +113,18 @@ export const userResponseSchema = z.object({
 	...userCore,
 });
 
+// OLD schema to get a user by ID
+// export const userIdParamSchema = z
+// 	.object({
+// 		// id: z.number(),
+// 		id: z.coerce.number(),
+// 	})
+// 	.strict();
+
 // Schema to get a user by ID
 export const userIdParamSchema = z
 	.object({
-		// id: z.number(),
-		id: z.coerce.number(),
+		id: blankToUndefined(z.coerce.number().min(1)),
 	})
 	.strict(); //TODO: See if I have to use strict here too. Rejects unknown fields
 
@@ -140,23 +161,41 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+// OLD Schema for query parameters to find users
+// export const getUsersQuerySchema = z
+// 	.object({
+// 		id: z.coerce.number().optional(),
+// 		email: z.string().email().optional(),
+// 		// email: blankToUndefined(z.string().email()),
+// 		name: z.string().optional(),
+// 		// name: blankToUndefined(z.string()),
+// 		useFuzzy: z.coerce.boolean().optional(),
+// 		useOr: z.coerce.boolean().optional(),
+// 		skip: z.coerce.number().min(0).optional(),
+// 		take: z.coerce.number().min(1).max(100).optional(),
+// 		sortBy: z.enum(["id", "email", "name"]).optional(),
+// 		order: z.enum(["asc", "desc"]).optional(),
+// 	})
+// 	.strict(); // Rejects unknown fields
+
 // TODO: Try to "automate" SortBy according to UserField/UniqueUserField
 // Schema for query parameters to find users
-export const getUsersQuerySchema = z
-	.object({
-		id: z.coerce.number().optional(),
-		email: z.string().email().optional(),
-		// email: blankToUndefined(z.string().email()),
-		name: z.string().optional(),
-		// name: blankToUndefined(z.string()),
-		useFuzzy: z.coerce.boolean().optional(),
-		useOr: z.coerce.boolean().optional(),
-		skip: z.coerce.number().min(0).optional(),
-		take: z.coerce.number().min(1).max(100).optional(),
-		sortBy: z.enum(["id", "email", "name"]).optional(),
-		order: z.enum(["asc", "desc"]).optional(),
-	})
-	.strict(); // Rejects unknown fields
+const baseGetUsersQuerySchema = z.object({
+	id: z.coerce.number().min(1),
+	email: z.string().email(),
+	name: z.string(),
+	useFuzzy: z.coerce.boolean(),
+	useOr: z.coerce.boolean(),
+	skip: z.coerce.number().min(0),
+	take: z.coerce.number().min(1).max(100),
+	sortBy: z.enum(["id", "email", "name"]),
+	order: z.enum(["asc", "desc"]),
+});
+
+// Refined schema for query parameters to find users
+export const getUsersQuerySchema = sanitizeQuerySchema(
+	baseGetUsersQuerySchema,
+).strict(); // Rejects unknown fields
 
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
