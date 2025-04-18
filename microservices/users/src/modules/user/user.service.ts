@@ -15,14 +15,6 @@ function checkPasswordConstraints(
 	userData: { name: string; email: string },
 ) {
 	const lowerPassword = password.toLowerCase();
-	// const lowerName = userData.name.toLowerCase();
-	// const lowerEmail = userData.email.toLowerCase();
-	// if (lowerPassword.includes(lowerName)) {
-	// 	throw new Error("Password cannot contain the username");
-	// }
-	// if (lowerPassword === lowerEmail) {
-	// 	throw new Error("Password cannot be same as the email");
-	// }
 	if (userData.name && lowerPassword.includes(userData.name.toLowerCase())) {
 		throw new Error("Password cannot contain the username");
 	}
@@ -119,7 +111,6 @@ type UserQueryOptions = {
 	order?: "asc" | "desc"; // Ascending or descending
 };
 
-// TODO: MR: Check if better to allow findUsers() and findUsers({}), or only `findUsers({})`
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function findUsers(options: UserQueryOptions = {}) {
@@ -135,11 +126,10 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	} = options;
 	// console.log("✅ Step 1: Received Options", options);
 	try {
-		// Transform string fields to `contains` filters if fuzzy search is enabled
+		// Enable fuzzy search (transform string fields to `contains` filters)
 		const transformed = Object.entries(where).reduce(
 			(acc, [key, value]) => {
 				if (typeof value === "string" && useFuzzy) {
-					// acc[key] = { contains: value, mode: "insensitive" }; // This worked in older version of Prisma
 					acc[key] = { contains: value };
 				} else {
 					acc[key] = value;
@@ -149,7 +139,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			{} as Record<string, any>,
 		);
 		// console.log("✅ Step 2: Transformed 'where'", transformed);
-		// TODO: Fix this comment: Allow OR queries (map fields to own )
+		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
 			: transformed;

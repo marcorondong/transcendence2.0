@@ -136,25 +136,3 @@ export async function patchUserHandler(
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
 }
-
-// // This functions uses the old deleteUser() that returns the deleted user
-// export async function deleteUserHandler(
-// 	request: FastifyRequest<{ Params: { id: number } }>,
-// 	reply: FastifyReply,
-// ) {
-// 	const deletedUser = await deleteUser(request.params.id);
-// 	// Option 1: Return deleted user (if filtered via schema)
-// 	const parsed = userResponseSchema.parse(deletedUser);
-// 	return reply.code(200).send(parsed);
-
-// 	// Option 2 (if you prefer empty response):
-// 	// return reply.code(204).send();
-// }
-
-// // MR_NOTE: '_' replace "request" (used when parameter is not used)
-// export async function getUsersHandler(_: FastifyRequest, reply: FastifyReply) {
-// 	const users = await findUsers();
-// 	// Serialize/validate/filter response via Zod schemas (userArrayResponseSchema.parse)
-// 	const parsedUsers = userArrayResponseSchema.parse(users);
-// 	return reply.code(200).send(parsedUsers); // Fastify auto-validates response using Zod schema defined in route
-// }
