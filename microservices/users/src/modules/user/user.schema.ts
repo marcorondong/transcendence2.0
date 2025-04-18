@@ -10,15 +10,39 @@ export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
 		schema.optional(),
 	);
 
+// export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
+// 	const shape = schema.shape;
+// 	const newShape = Object.fromEntries(
+// 		Object.entries(shape).map(([key, value]) => [
+// 			key,
+// 			blankToUndefined(value as ZodTypeAny),
+// 		]),
+// 	);
+// 	return z.object(newShape) as T;
+// };
+
 // Helper function to recursively wrap all fields in an object schema with blankToUndefined()
 export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
 	const shape = schema.shape;
-
 	const newShape = Object.fromEntries(
-		Object.entries(shape).map(([key, value]) => [
-			key,
-			blankToUndefined(value as ZodTypeAny),
-		]),
+		Object.entries(shape).map(([key, value]) => {
+			// Handle nested object
+			if (value instanceof z.ZodObject) {
+				return [key, sanitizeQuerySchema(value)];
+			}
+			// Handle array of objects
+			if (value instanceof z.ZodArray) {
+				const inner = value._def.type;
+				if (inner instanceof z.ZodObject) {
+					const sanitizedInner = sanitizeQuerySchema(inner);
+					return [key, z.array(sanitizedInner)];
+				}
+				// If not object, fallback to blankToUndefined on array itself
+				return [key, blankToUndefined(value as ZodTypeAny)];
+			}
+			// Default: sanitize top-level field
+			return [key, blankToUndefined(value as ZodTypeAny)];
+		}),
 	);
 	return z.object(newShape) as T;
 };
