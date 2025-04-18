@@ -1,5 +1,9 @@
 import { z, ZodTypeAny, ZodObject } from "zod";
 
+const sortDirections = ["asc", "desc"] as const;
+const sortDirectionEnum = z.enum(sortDirections);
+export type SortDirection = (typeof sortDirections)[number];
+
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
 export const blankToUndefined = <T extends ZodTypeAny>(schema: T) =>
 	z.preprocess(
@@ -146,7 +150,8 @@ const baseGetUsersQuerySchema = z.object({
 	skip: z.coerce.number().min(0),
 	take: z.coerce.number().min(1).max(100),
 	sortBy: z.enum(["id", "email", "name"]),
-	order: z.enum(["asc", "desc"]),
+	// order: z.enum(["asc", "desc"]),
+	order: sortDirectionEnum,
 });
 
 // Refined schema for query parameters to find users

@@ -3,6 +3,9 @@ import { AppError, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import { createUserInput, UpdateUserData } from "./user.schema";
+import {
+	SortDirection,
+} from "./user.schema";
 
 // Helper function to capitalize conflicting Prisma field
 function capitalize(str: string) {
@@ -108,7 +111,8 @@ type UserQueryOptions = {
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
 	sortBy?: SortByField; // To sort by key, like "id" or "name" (from UserField but extended)
-	order?: "asc" | "desc"; // Ascending or descending
+	// order?: "asc" | "desc"; // Ascending or descending
+	order?: SortDirection;
 };
 
 // TODO: MR: Check if I can avoid using keyword `any`
