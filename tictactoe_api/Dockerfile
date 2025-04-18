@@ -10,6 +10,6 @@ COPY ./prisma ./prisma/
 COPY ./src ./
 COPY ./public ./
 RUN npm install
-RUN npx prisma generate
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
+CMD ["sh", "-c", "npx prisma generate & npx prisma migrate deploy && npm run dev"]
+# CMD ["sh", "-c", "npx prisma generate && npx prisma migrate reset --force --skip-seed && npm run dev"]
