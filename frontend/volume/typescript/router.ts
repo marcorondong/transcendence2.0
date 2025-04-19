@@ -43,7 +43,6 @@ export class Router {
 	constructor() {
 		this.addEventListenerNavLinks();
 		window.addEventListener("popstate", () => {
-			console.log("loading: ", window.location.pathname);
 			this.loadComponent();
 		});
 	}
@@ -51,20 +50,18 @@ export class Router {
 	async importComponent(componentName: string) {
 		let scriptname: string;
 		if (componentName === "/" || componentName === "/index.html") {
-			scriptname = "./views/home-component.js";
+			scriptname = "./views/home-view.js";
 		} else if (this.navComponents.indexOf(componentName) > -1) {
-			scriptname = `./views${componentName}-component.js`;
+			scriptname = `./views${componentName}-view.js`;
 		} else {
-			scriptname = `./views/error-component.js`;
+			scriptname = `./views/error-view.js`;
 		}
 		const js = await import(scriptname);
-		console.log("successfully imported component javascript:", scriptname);
 		return js;
 	}
 
 	async appendComponent() {
 		const componentName = window.location.pathname;
-		console.log("COMPONENT NAME", componentName);
 		try {
 			const js = await this.importComponent(componentName);
 			if (js && this.containerDiv) {

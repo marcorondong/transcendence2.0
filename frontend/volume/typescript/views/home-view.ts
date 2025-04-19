@@ -1,10 +1,10 @@
-class HomeComponent extends HTMLElement {
+class HomeView extends HTMLElement {
 	constructor() {
 		super();
 	}
 
 	connectedCallback() {
-		console.log("HomeComponent has been connected");
+		console.log("HOME VIEW has been CONNECTED");
 		const h1 = document.createElement("h1");
 		h1.className =
 			"mb-4 font-bold leading-none text-gray-900 text-3xl dark:text-gray-200";
@@ -13,12 +13,12 @@ class HomeComponent extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("HomeComponent has been disconnected");
+		console.log("HOME VIEW has been DISCONNECTED");
 	}
 }
 
-customElements.define("home-component", HomeComponent);
+customElements.define("home-view", HomeView);
 
 export function createComponent() {
-	return document.createElement("home-component");
+	return document.createElement("home-view");
 }

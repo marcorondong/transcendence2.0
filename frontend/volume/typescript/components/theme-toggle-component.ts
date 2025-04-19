@@ -1,6 +1,6 @@
 import {IconComponent} from "./icon-component.js";
 
-export class ThemeToggleComponent extends HTMLElement {
+class ThemeToggleComponent extends HTMLElement {
 	constructor() {
 		super();
 		this.initSystemMode();
@@ -57,6 +57,7 @@ export class ThemeToggleComponent extends HTMLElement {
 	switchTheme() {}
 
 	connectedCallback() {
+		console.log("TOGGLE has been CONNECTED");
 		this.button = document.createElement("button");
 		this.button.classList.add("cursor-pointer", "pong-button");
 		this.append(this.button);
@@ -85,13 +86,11 @@ export class ThemeToggleComponent extends HTMLElement {
 		});
 	}
 
-	disconnectedCallback() {}
-}
-
-export function createThemeToggleComponent(): ThemeToggleComponent {
-	return document.createElement(
-		"theme-toggle-component",
-	) as ThemeToggleComponent;
+	disconnectedCallback() {
+		console.log("TOGGLE has been DISCONNECTED");
+	}
 }
 
 customElements.define("theme-toggle-component", ThemeToggleComponent);
+
+export{ThemeToggleComponent};

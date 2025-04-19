@@ -51,7 +51,6 @@ class IconComponent extends HTMLElement {
 
 	applySize(iconElement: HTMLElement | undefined) {
 		if (iconElement) {
-			console.log("applying size:", this.iconSize);
 			iconElement.classList.remove("size-6");
 			const remSize = this.iconSize * 4;
 			iconElement.setAttribute("height", `${remSize}px`);
@@ -72,7 +71,7 @@ class IconComponent extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("ICON COMPONENT has been DISCONNECTED");
+		console.log("ICON  has been DISCONNECTED");
 	}
 }
 

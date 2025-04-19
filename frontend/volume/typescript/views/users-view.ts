@@ -1,6 +1,6 @@
-import { createTableComponent } from "../components/table-component.js";
+import { TableComponent } from "../components/table-component.js";
 
-class UsersComponent extends HTMLElement {
+export class UsersView extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -8,7 +8,7 @@ class UsersComponent extends HTMLElement {
 	data: any;
 
 	async connectedCallback() {
-		console.log("users Component has been connected");
+		console.log("users View has been connected");
 
 		// this.data = await getData();
 		// if (!this.data) {
@@ -27,7 +27,7 @@ class UsersComponent extends HTMLElement {
 		h1.textContent = "Users";
 		this.appendChild(h1);
 
-		const tableComponent = createTableComponent();
+		const tableComponent = new TableComponent();
 		this.appendChild(tableComponent);
 		tableComponent.setHeaders(["Name", "Alias", "Wins", "Losses"]);
 		tableComponent.setClass("table table-hover table-striped");
@@ -38,15 +38,16 @@ class UsersComponent extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("Users Component has been disconnected");
+		console.log("USERS VIEW has been DISCONNECTED");
 	}
 }
 
-customElements.define("users-component", UsersComponent);
+customElements.define("users-view", UsersView);
 
 export function createComponent() {
-	return document.createElement("users-component");
+	return document.createElement("users-view");
 }
+
 
 async function getData() {
 	const url = "https://localhost:8080/api/v1/users/list/?page=1";

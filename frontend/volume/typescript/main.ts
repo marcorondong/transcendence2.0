@@ -1,8 +1,6 @@
 import { Router } from "./router.js";
 import "./components/icon-component.js";
-import { createThemeToggleComponent } from "./components/theme-toggle-component.js";
-
-createThemeToggleComponent();
+import "./components/theme-toggle-component.js";
 
 const router = new Router();
 
@@ -26,6 +24,10 @@ navbarButton?.addEventListener("click", () => {
 	} else {
 		navbarLinks?.classList.add("hidden");
 	}
+});
+
+navbarLinks?.addEventListener("click", () => {
+		navbarLinks?.classList.add("hidden");
 });
 
 // const queryParams = window.location.search;
