@@ -19,6 +19,7 @@ import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
 import { Player } from "./Player";
 import { gameRoutes } from "./apiRequests/routes";
 import { faker } from "@faker-js/faker";
+import cors from "@fastify/cors";
 
 const PORT = 3001;
 const HOST = "0.0.0.0";
@@ -38,6 +39,11 @@ server.register(fastifyStatic, {
 
 server.register(fastifyWebsocket);
 
+server.register(cors, {
+	origin: "*",
+	methods: ["GET", "POST", "PUT", "DELETE"],
+});
+
 server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
 server.register(fastifySwaggerUi, swaggerUiOptions);
 
@@ -45,7 +51,7 @@ server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
 	return reply.sendFile("tictactoe.html");
 });
 
-server.register(gameRoutes, { prefix: "/tictactoe" });
+// server.register(gameRoutes, { prefix: "/tictactoe" });
 
 server.register(async function (server) {
 	server.get("/ws", { websocket: true }, (connection, req) => {

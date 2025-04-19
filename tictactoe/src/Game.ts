@@ -1,5 +1,5 @@
 import { Player } from "./Player";
-import { createGameInDB } from "./dbUtils";
+import { postResult } from "./dbUtils";
 
 export class Game {
 	private currentTurn: Player | null = null;
@@ -41,7 +41,7 @@ export class Game {
 		);
 	}
 
-	checkWin(player: Player) {
+	async checkWin(player: Player) {
 		const opponent = player.getOpponentPlayer();
 		if (!opponent) {
 			return this.sendError(player, "Opponent not found");
@@ -67,17 +67,19 @@ export class Game {
 				this.sendGameOver(opponent, `You lose!`);
 				const playerSign = player.getSign();
 				if (playerSign === "X") {
-					createGameInDB(
-						player.getId(),
-						opponent.getId(),
-						playerSign,
-					);
+					await postResult(player.getId(), opponent.getId(), playerSign)
+					// createGameInDB(
+					// 	player.getId(),
+					// 	opponent.getId(),
+					// 	playerSign,
+					// );
 				} else {
-					createGameInDB(
-						opponent.getId(),
-						player.getId(),
-						playerSign,
-					);
+					await postResult(opponent.getId(), player.getId(), playerSign)
+					// createGameInDB(
+					// 	opponent.getId(),
+					// 	player.getId(),
+					// 	playerSign,
+					// );
 				}
 				player.getSocket().close();
 				opponent.getSocket().close();
@@ -89,9 +91,11 @@ export class Game {
 			this.sendGameOver(opponent, "It's a draw!");
 			const playerSign = player.getSign();
 			if (playerSign === "X") {
-				createGameInDB(player.getId(), opponent.getId(), "DRAW");
+				await postResult(player.getId(), opponent.getId(), "DRAW")
+				// createGameInDB(player.getId(), opponent.getId(), "DRAW");
 			} else {
-				createGameInDB(opponent.getId(), player.getId(), "DRAW");
+				await postResult(opponent.getId(), player.getId(), "DRAW")
+				// createGameInDB(opponent.getId(), player.getId(), "DRAW");
 			}
 			player.getSocket().close();
 			opponent.getSocket().close();

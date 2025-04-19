@@ -1,0 +1,47 @@
+import Fastify, {
+	FastifyInstance,
+	FastifyReply,
+	FastifyRequest,
+} from "fastify";
+
+import {
+	ZodTypeProvider,
+	validatorCompiler,
+	serializerCompiler,
+	jsonSchemaTransform,
+} from "fastify-type-provider-zod";
+
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
+import { SwaggerOptions } from "@fastify/swagger";
+
+import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
+import { gameRoutes } from "./routes/routes";
+
+const PORT = 3003;
+const HOST = "0.0.0.0";
+
+const server: FastifyInstance = Fastify({
+	logger: false,
+}).withTypeProvider<ZodTypeProvider>();
+
+server.setValidatorCompiler(validatorCompiler);
+server.setSerializerCompiler(serializerCompiler);
+
+server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
+server.register(fastifySwaggerUi, swaggerUiOptions);
+
+server.register(gameRoutes, { prefix: "/tictactoe" });
+
+
+const start = async () => {
+	try {
+		await server.listen({ port: PORT, host: HOST });
+		console.log(`Server listening at ${PORT}`);
+	} catch (err) {
+		server.log.error(err);
+		process.exit(1);
+	}
+};
+
+start();
