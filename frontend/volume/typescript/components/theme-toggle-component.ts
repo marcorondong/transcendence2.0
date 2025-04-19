@@ -1,4 +1,4 @@
-import { createIconComponent, IconComponent } from "./icon-component.js";
+import {IconComponent} from "./icon-component.js";
 
 export class ThemeToggleComponent extends HTMLElement {
 	constructor() {
@@ -42,8 +42,8 @@ export class ThemeToggleComponent extends HTMLElement {
 	darkIconName = "moon";
 	lightIconName = "sun";
 	systemModeLight: boolean;
-	darkIcon = createIconComponent();
-	lightIcon = createIconComponent();
+	darkIcon = new IconComponent();
+	lightIcon = new IconComponent();
 	iconSize: number = 5;
 	button: HTMLElement;
 

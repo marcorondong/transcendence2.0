@@ -1,4 +1,4 @@
-export class IconComponent extends HTMLElement {
+class IconComponent extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -76,8 +76,6 @@ export class IconComponent extends HTMLElement {
 	}
 }
 
-export function createIconComponent(): IconComponent {
-	return document.createElement("icon-component") as IconComponent;
-}
-
 customElements.define("icon-component", IconComponent);
+
+export{IconComponent};

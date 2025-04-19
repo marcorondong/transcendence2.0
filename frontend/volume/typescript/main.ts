@@ -1,8 +1,7 @@
 import { Router } from "./router.js";
-import { createIconComponent } from "./components/icon-component.js";
+import "./components/icon-component.js";
 import { createThemeToggleComponent } from "./components/theme-toggle-component.js";
 
-createIconComponent();
 createThemeToggleComponent();
 
 const router = new Router();
