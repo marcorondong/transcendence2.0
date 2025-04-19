@@ -1,4 +1,8 @@
+import { PongComponent } from "../components/pong-component.js";
+
 class HomeView extends HTMLElement {
+	pong = new PongComponent();
+
 	constructor() {
 		super();
 	}
