@@ -1,0 +1,13 @@
+modules:
+  https_no_verify:
+    prober: http
+    timeout: 1m
+    http:
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: true
+  http_2xx:
+    prober: http
+    timeout: 1m
+    http:
+      preferred_ip_protocol: "ip4"

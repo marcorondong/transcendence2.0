@@ -1,0 +1,24 @@
+# version: "3.9"
+
+services:
+  users:
+    image: users:V1.0.0
+    container_name: users
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/app # Mount full project
+      - users_node_modules:/app/node_modules # Keep node_modules container-managed
+      - users_db:/app/prisma/database # Keep DB container-managed & ephemeral
+    ports:
+      - "3000:3000" # Expose Fastify server to host
+    # environment:
+    #   - DATABASE_URL=file:./prisma/database/dev.db
+    command: >
+      sh -c "npx prisma migrate reset --force --skip-seed &&
+             npm run dev"
+
+volumes:
+  users_node_modules:
+  users_db:
