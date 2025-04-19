@@ -34,6 +34,25 @@
 		class="bg-grey-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
 	>
 		<div class="relative px-5 md:px-16 xl:px-32 h-screen">
+			<navigation-component>
+
+						<a href="/"> <li class="pong-nav-link">home</li></a>
+						<a href="highscore">
+							<li class="pong-nav-link">highscore</li></a
+						>
+						<a href="profile">
+							<li class="pong-nav-link">profile</li></a
+						>
+						<a href="users">
+							<li class="pong-nav-link">users</li>
+						</a>
+						<a href="users">
+							<li>
+								<button class="pong-button-info w-full">
+									login
+								</button>
+							</li></a
+			</navigation-component>
 			<nav class="mb-9 flex content-center justify-between py-9">
 				<img
 					class="size-18 rounded-lg"
@@ -41,11 +60,7 @@
 				/>
 				<div class="flex items-center gap-4">
 					<button
-						data-collapse-toggle="navbar-default"
-						type="button"
 						class="pong-button sm:hidden"
-						aria-controls="navbar-default"
-						aria-expanded="false"
 						id="navbar-button"
 					>
 						<icon-component

@@ -1,10 +1,13 @@
 import { Router } from "./router.js";
 import "./components/icon-component.js";
 import "./components/theme-toggle-component.js";
+import "./components/navigation-component.js";
 
 const router = new Router();
 
 router.loadComponent();
+
+
 
 const navbarButton = document.getElementById("navbar-button");
 const navbarLinks = document.getElementById("navbar-links");
