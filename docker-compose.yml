@@ -33,8 +33,6 @@ services:
     volumes:
       - ./frontend/volume:/usr/share/nginx/html
       - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
-      # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
-      # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
     ports:
       - "8080:443"
     restart: unless-stopped
