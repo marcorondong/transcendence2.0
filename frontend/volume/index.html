@@ -31,69 +31,30 @@
 	</head>
 
 	<body
-		class="bg-grey-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
+		class="bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
 	>
-		<div class="relative px-5 md:px-16 xl:px-32 h-screen">
+		<div class="relative px-5 md:px-16 xl:px-32">
 			<navigation-component>
-
-						<a href="/"> <li class="pong-nav-link">home</li></a>
-						<a href="highscore">
-							<li class="pong-nav-link">highscore</li></a
-						>
-						<a href="profile">
-							<li class="pong-nav-link">profile</li></a
-						>
-						<a href="users">
-							<li class="pong-nav-link">users</li>
-						</a>
-						<a href="users">
-							<li>
-								<button class="pong-button-info w-full">
-									login
-								</button>
-							</li></a
+				<ul id="navigation">
+					<a href="/"> <li class="pong-nav-link">home</li></a>
+					<a href="highscore">
+						<li class="pong-nav-link">highscore</li></a
+					>
+					<a href="profile">
+						<li class="pong-nav-link">profile</li></a
+					>
+					<a href="users">
+						<li class="pong-nav-link">users</li>
+					</a>
+					<a href="users">
+						<li>
+							<button class="pong-button-info w-full">
+								login
+							</button>
+						</li></a
+					>
+				</ul>
 			</navigation-component>
-			<nav class="mb-9 flex content-center justify-between py-9">
-				<img
-					class="size-18 rounded-lg"
-					src="./static-files/images/pong-logo.png"
-				/>
-				<div class="flex items-center gap-4">
-					<button
-						class="pong-button sm:hidden"
-						id="navbar-button"
-					>
-						<icon-component
-							size="6"
-							name="menu"
-						></icon-component>
-					</button>
-					<ul
-						class="inset-0 bg-indigo-950 top-30 absolute flex hidden w-full flex-col items-stretch justify-start gap-4 p-6 sm:static sm:flex sm:w-auto sm:flex-row sm:content-center sm:items-center sm:p-0 dark:bg-indigo-950 dark:sm:bg-transparent"
-						id="navbar-links"
-					>
-						<a href="/"> <li class="pong-nav-link">home</li></a>
-						<a href="highscore">
-							<li class="pong-nav-link">highscore</li></a
-						>
-						<a href="profile">
-							<li class="pong-nav-link">profile</li></a
-						>
-						<a href="users">
-							<li class="pong-nav-link">users</li>
-						</a>
-						<a href="users">
-							<li>
-								<button class="pong-button-info w-full">
-									login
-								</button>
-							</li></a
-						>
-					</ul>
-
-					<theme-toggle-component size="6"></theme-toggle-component>
-				</div>
-			</nav>
 			<div
 				class="container"
 				id="game"

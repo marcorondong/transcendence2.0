@@ -1,6 +1,6 @@
 export class Router {
 	containerDiv = document.getElementById("content");
-	navLinks = document.querySelectorAll<HTMLAnchorElement>("nav a");
+	navLinks = document.querySelectorAll<HTMLAnchorElement>("#navigation a");
 	component: Node | null = null;
 
 	navComponents: string[] = this.createComponentNames();
@@ -48,15 +48,15 @@ export class Router {
 	}
 
 	async importComponent(componentName: string) {
-		let scriptname: string;
+		let scriptName: string;
 		if (componentName === "/" || componentName === "/index.html") {
-			scriptname = "./views/home-view.js";
+			scriptName = "./views/home-view.js";
 		} else if (this.navComponents.indexOf(componentName) > -1) {
-			scriptname = `./views${componentName}-view.js`;
+			scriptName = `./views${componentName}-view.js`;
 		} else {
-			scriptname = `./views/error-view.js`;
+			scriptName = `./views/error-view.js`;
 		}
-		const js = await import(scriptname);
+		const js = await import(scriptName);
 		return js;
 	}
 

@@ -1,23 +1,24 @@
 import { Router } from "./router.js";
 import "./components/icon-component.js";
 import "./components/theme-toggle-component.js";
-import "./components/navigation-component.js";
+import "./components/header-component.js";
 
 const router = new Router();
 
 router.loadComponent();
-
-
 
 const navbarButton = document.getElementById("navbar-button");
 const navbarLinks = document.getElementById("navbar-links");
 const dataTheme = document.getElementById("theme-toggle");
 
 dataTheme?.addEventListener("click", () => {
-	if (document.documentElement.getAttribute("data-theme") === "dark") {
-		document.documentElement.setAttribute("data-theme", "light");
-	} else {
-		document.documentElement.setAttribute("data-theme", "dark");
+	const theme = document.documentElement.getAttribute("data-theme");
+	if (theme) {
+		if (theme === "dark") {
+			document.documentElement.setAttribute("data-theme", "light");
+		} else {
+			document.documentElement.setAttribute("data-theme", "dark");
+		}
 	}
 });
 
@@ -30,7 +31,7 @@ navbarButton?.addEventListener("click", () => {
 });
 
 navbarLinks?.addEventListener("click", () => {
-		navbarLinks?.classList.add("hidden");
+	navbarLinks?.classList.add("hidden");
 });
 
 // const queryParams = window.location.search;

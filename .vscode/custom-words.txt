@@ -9,6 +9,8 @@ Gabriel
 gabrieldanis
 grafana
 healthcheck
+highscore
+ie
 iguliyev
 Ismayil
 ismayilguliyev28
@@ -29,7 +31,9 @@ ssg
 sysfs
 TBD
 tictactoe
+UA
 unhashing
 vec
 vect
+xl
 xs

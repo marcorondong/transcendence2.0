@@ -1,4 +1,4 @@
-import {IconComponent} from "./icon-component.js";
+import { IconComponent } from "./icon-component.js";
 
 class ThemeToggleComponent extends HTMLElement {
 	constructor() {
@@ -41,11 +41,11 @@ class ThemeToggleComponent extends HTMLElement {
 
 	darkIconName = "moon";
 	lightIconName = "sun";
-	systemModeLight: boolean;
+	systemModeLight: boolean = false;
 	darkIcon = new IconComponent();
 	lightIcon = new IconComponent();
 	iconSize: number = 5;
-	button: HTMLElement;
+	button: HTMLElement = document.createElement("button");
 
 	sizeFromAttribute() {
 		const size = Number(this.getAttribute("size"));
@@ -54,11 +54,14 @@ class ThemeToggleComponent extends HTMLElement {
 		}
 	}
 
+	setSize(size: number) {
+		this.iconSize = size;
+	}
+
 	switchTheme() {}
 
 	connectedCallback() {
 		console.log("TOGGLE has been CONNECTED");
-		this.button = document.createElement("button");
 		this.button.classList.add("cursor-pointer", "pong-button");
 		this.append(this.button);
 		this.darkIcon.setIcon(this.darkIconName);
@@ -93,4 +96,4 @@ class ThemeToggleComponent extends HTMLElement {
 
 customElements.define("theme-toggle-component", ThemeToggleComponent);
 
-export{ThemeToggleComponent};
+export { ThemeToggleComponent };

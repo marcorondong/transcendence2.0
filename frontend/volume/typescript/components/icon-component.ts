@@ -77,4 +77,4 @@ class IconComponent extends HTMLElement {
 
 customElements.define("icon-component", IconComponent);
 
-export{IconComponent};
+export { IconComponent };
