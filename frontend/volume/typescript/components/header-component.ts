@@ -9,7 +9,7 @@ export class HeaderComponent extends HTMLElement {
 	}
 
 	connectedCallback() {
-		console.log("NAVIGATION CONNECTED");
+		console.log("Header CONNECTED");
 
 		this.classList.add(
 			"mb-9",
@@ -83,7 +83,7 @@ export class HeaderComponent extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("NAVIGATION DISCONNECTED");
+		console.log("Header DISCONNECTED");
 	}
 }
 
