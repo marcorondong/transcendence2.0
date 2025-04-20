@@ -1,18 +1,48 @@
-import { Pong } from "../types/Pong.ts";
+import { Ball, Paddle, Pong } from "../types/Pong.ts";
 
 export class PongComponent extends HTMLElement {
 	gameState: Pong | undefined = undefined;
 	wss: WebSocket | undefined = undefined;
 
 	// VARS
-	canvasWidth = 900;
-	canvasHeight = 500;
-	canvasWidthHalf = 0;
-	canvasHeightHalf = 0;
+	aspectRatio = 16 / 9;
+	canvasWidth = 800;
+	paddleDirection = 0;
+	canvasHeight: Number;
+	canvasWidthHalf: Number;
+	canvasHeightHalf: Number;
+
+	adjustToCanvasWidth() {
+		this.canvasHeight = this.canvasWidth / this.aspectRatio;
+		canvasWidthHalf = this.canvasWidth / 2;
+		canvasHeightHalf = this.canvasHeight / 2;
+		scaleX = this.canvasWidthHalf / 4;
+		scaleY = this.canvasHeightHalf / 2.46;
+		paddleWidth = this.canvasWidth / 100;
+	}
 
 	// CANVAS
 	canvas = document.createElement("canvas");
 	ctx = this.canvas.getContext("2d");
+
+	scaleGameState(state: Pong) {
+		if (state?.ball) {
+			console.log("ball Y", state.ball.y);
+			state.ball.x *= this.scaleX;
+			state.ball.y *= this.scaleY;
+			state.ball.radius *= this.scaleX;
+		}
+		if (state?.leftPaddle) {
+			state.leftPaddle.x *= this.scaleX;
+			state.leftPaddle.y *= this.scaleY;
+			state.leftPaddle.height *= this.scaleY;
+		}
+		if (state?.rightPaddle) {
+			state.rightPaddle.x *= this.scaleX;
+			state.rightPaddle.y *= this.scaleY;
+			state.rightPaddle.height *= this.scaleY;
+		}
+	}
 
 	drawCenterLine() {
 		if (!this.ctx) {
@@ -27,38 +57,95 @@ export class PongComponent extends HTMLElement {
 		this.ctx.stroke();
 	}
 
+	drawPaddle(paddle: Paddle | undefined) {
+		if (!this.ctx || !paddle) {
+			return;
+		}
+		// SETTING X FOR LEFT OR RIGHT PADDLE
+		let x: number = paddle.x + this.canvasWidthHalf;
+		if (x > 1) {
+			x -= this.paddleWidth;
+		}
+		this.ctx.fillStyle = "white";
+		this.ctx.fillRect(
+			x,
+			-paddle.y + this.canvasHeightHalf - paddle.height / 2,
+			this.paddleWidth,
+			paddle.height,
+		);
+	}
+
+	drawBall(ball: Ball | undefined) {
+		if (!this.ctx || !ball) {
+			return;
+		}
+		this.ctx.fillStyle = "white";
+		this.ctx.beginPath();
+		this.ctx.arc(
+			ball.x + this.canvasWidthHalf,
+			-ball.y + this.canvasHeightHalf,
+			ball.radius,
+			0,
+			Math.PI * 2,
+		);
+		this.ctx.fill();
+	}
+
+	sendPaddleState() {
+		if (this.paddleDirection !== 0 && this.wss) {
+			this.wss.send(
+				JSON.stringify({
+					move: this.paddleDirection > 0 ? "down" : "up",
+					paddle: "left",
+				}),
+			);
+		}
+	}
+	displayScore(state: Pong) {
+		if (!this.ctx) {
+			return;
+		}
+		this.ctx.font = "48px sans-serif";
+		this.ctx.textAlign = "center";
+		const space = this.canvas.width / 10;
+		this.ctx.fillText(
+			String(state.score?.leftGoals ?? 0),
+			this.canvasWidthHalf - space,
+			50,
+		);
+		this.ctx.fillText(
+			String(state.score?.rightGoals ?? 0),
+			this.canvasWidthHalf + space,
+			50,
+		);
+	}
+
 	gameLoop = () => {
 		if (!this.ctx) return;
 
-		const mult = this.canvasWidthHalf / 4;
-
-		const ballX =
-			this.canvasWidthHalf + (this.gameState?.ball?.x ?? 0) * mult;
-		const ballY =
-			this.canvasHeightHalf + (this.gameState?.ball?.y ?? 0) * mult;
-		const ballRadius = (this.gameState?.ball?.radius ?? 0) * mult;
-		console.log("ball radius:", ballRadius);
-
-		// Clear the canvas
+		// CLEAR THE CANVAS
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		this.drawCenterLine();
-
-		// Draw the circle
-		this.ctx.beginPath();
-		this.ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-		this.ctx.fillStyle = "white";
-		this.ctx.fill();
-		this.ctx.closePath();
+		if (this.gameState) {
+			const state = structuredClone(this.gameState);
+			this.scaleGameState(state);
+			this.drawCenterLine();
+			this.drawPaddle(state.leftPaddle);
+			this.drawPaddle(state.rightPaddle);
+			this.drawBall(state.ball);
+			this.displayScore(state);
+			this.sendPaddleState();
+			if (state.matchStatus === "Game finished") {
+				return;
+			}
+		}
 
 		requestAnimationFrame(this.gameLoop);
 	};
 
 	constructor() {
 		super();
-		this.canvas.width = 900;
-		this.canvas.height = 500;
-		this.canvasWidthHalf = this.canvas.width / 2;
-		this.canvasHeightHalf = this.canvas.height / 2;
+		this.canvas.width = this.canvasWidth;
+		this.canvas.height = this.canvasHeight;
 	}
 
 	connectedCallback() {
@@ -85,7 +172,6 @@ export class PongComponent extends HTMLElement {
 		);
 
 		this.wss.onmessage = (event) => {
-			// console.log("got message");
 			this.gameState = JSON.parse(event.data);
 			if (this.gameState) {
 				matchStatus.innerText =
@@ -95,8 +181,6 @@ export class PongComponent extends HTMLElement {
 					"Knockout Name: " +
 					(this.gameState?.knockoutName ?? "no info");
 			}
-
-			// console.log("game State", this.gameState);
 		};
 		this.gameLoop();
 	}
@@ -111,10 +195,19 @@ export class PongComponent extends HTMLElement {
 	}
 
 	onKeydown(event) {
-		console.log("you pressed down");
+		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+			event.preventDefault();
+		}
+		if (event.key === "ArrowUp") this.paddleDirection = -1;
+		if (event.key === "ArrowDown") this.paddleDirection = 1;
 	}
 	onKeyup(event) {
-		console.log("you pressed up");
+		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+			event.preventDefault();
+		}
+		event.preventDefault();
+		if (event.key === "ArrowUp" || event.key === "ArrowDown")
+			this.paddleDirection = 0;
 	}
 	onClick(event) {
 		// if(event.target.id === 'start'){

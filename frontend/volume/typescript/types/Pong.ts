@@ -2,8 +2,8 @@ export interface Pong {
 	score?: Score;
 	matchStatus: string;
 	ball?: Ball;
-	leftPaddle?: LeftPaddle;
-	rightPaddle?: RightPaddle;
+	leftPaddle?: Paddle;
+	rightPaddle?: Paddle;
 	roomId: string;
 	knockoutName?: string;
 }
@@ -20,13 +20,7 @@ export interface Ball {
 	radius: number;
 }
 
-export interface LeftPaddle {
-	x: number;
-	y: number;
-	height: number;
-}
-
-export interface RightPaddle {
+export interface Paddle {
 	x: number;
 	y: number;
 	height: number;
