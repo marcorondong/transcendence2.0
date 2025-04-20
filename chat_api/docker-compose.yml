@@ -1,7 +1,7 @@
 services:
   chat_api:
-    image: chat_img
-    container_name: chat_container
+    image: chat_api_img
+    container_name: chat_api_container
     build: .
     volumes:
       - ./src:/chat_api/src
@@ -10,7 +10,7 @@ services:
     restart: always
 
   chat_db:
-    image: chat_db-image
+    image: chat_db_image
     container_name: chat_db_container
     build: ../chat_db
     environment:
