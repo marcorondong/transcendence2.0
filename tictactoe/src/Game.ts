@@ -67,7 +67,12 @@ export class Game {
 				this.sendGameOver(opponent, `You lose!`);
 				const playerSign = player.getSign();
 				if (playerSign === "X") {
-					await postResult(player.getId(), opponent.getId(), playerSign)
+					const response = await postResult(player.getId(), opponent.getId(), playerSign);
+					if (!response) {
+						console.error("Failed to save game result");
+						this.sendError(player, "Failed to save game result");
+						return;
+					}
 					// createGameInDB(
 					// 	player.getId(),
 					// 	opponent.getId(),
@@ -81,6 +86,8 @@ export class Game {
 					// 	playerSign,
 					// );
 				}
+				player.setDisconnected(false);
+				opponent.setDisconnected(false);
 				player.getSocket().close();
 				opponent.getSocket().close();
 				return;
@@ -97,6 +104,8 @@ export class Game {
 				await postResult(opponent.getId(), player.getId(), "DRAW")
 				// createGameInDB(opponent.getId(), player.getId(), "DRAW");
 			}
+			player.setDisconnected(false);
+			opponent.setDisconnected(false);
 			player.getSocket().close();
 			opponent.getSocket().close();
 			return;

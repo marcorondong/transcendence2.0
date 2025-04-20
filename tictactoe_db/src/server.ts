@@ -1,20 +1,12 @@
-import Fastify, {
-	FastifyInstance,
-	FastifyReply,
-	FastifyRequest,
-} from "fastify";
-
+import Fastify, { FastifyInstance } from "fastify";
 import {
 	ZodTypeProvider,
 	validatorCompiler,
 	serializerCompiler,
-	jsonSchemaTransform,
 } from "fastify-type-provider-zod";
-
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { SwaggerOptions } from "@fastify/swagger";
-
 import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
 import { gameRoutes } from "./routes/routes";
 
@@ -27,12 +19,9 @@ const server: FastifyInstance = Fastify({
 
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
-
 server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
 server.register(fastifySwaggerUi, swaggerUiOptions);
-
 server.register(gameRoutes, { prefix: "/tictactoe" });
-
 
 const start = async () => {
 	try {

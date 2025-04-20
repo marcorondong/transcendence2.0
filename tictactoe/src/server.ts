@@ -4,22 +4,11 @@ import Fastify, {
 	FastifyRequest,
 } from "fastify";
 import fastifyWebsocket from "@fastify/websocket";
-import fastifyStatic from "@fastify/static";
-import path from "path";
-import {
-	ZodTypeProvider,
-	validatorCompiler,
-	serializerCompiler,
-	jsonSchemaTransform,
-} from "fastify-type-provider-zod";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
-import { SwaggerOptions } from "@fastify/swagger";
-import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
+import fastifyStatic from "@fastify/static"; // TODO remove this after frontend is built
+import path from "path"; // TODO remove this after frontend is built
 import { Player } from "./Player";
-import { gameRoutes } from "./apiRequests/routes";
-import { faker } from "@faker-js/faker";
-import cors from "@fastify/cors";
+import { faker } from "@faker-js/faker"; // TODO remove this in production
+import { postResult } from "./dbUtils";
 
 const PORT = 3001;
 const HOST = "0.0.0.0";
@@ -27,11 +16,9 @@ let friendPlayer: Player | null = null;
 
 const server: FastifyInstance = Fastify({
 	logger: false,
-}).withTypeProvider<ZodTypeProvider>();
+});
 
-server.setValidatorCompiler(validatorCompiler);
-server.setSerializerCompiler(serializerCompiler);
-
+// TODO remove this after frontend is built
 server.register(fastifyStatic, {
 	root: path.join(__dirname, "../public"),
 	prefix: "/",
@@ -39,27 +26,17 @@ server.register(fastifyStatic, {
 
 server.register(fastifyWebsocket);
 
-server.register(cors, {
-	origin: "*",
-	methods: ["GET", "POST", "PUT", "DELETE"],
-});
-
-server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
-server.register(fastifySwaggerUi, swaggerUiOptions);
-
+// TODO remove this after frontend is built
 server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
 	return reply.sendFile("tictactoe.html");
 });
 
-// server.register(gameRoutes, { prefix: "/tictactoe" });
-
 server.register(async function (server) {
 	server.get("/ws", { websocket: true }, (connection, req) => {
-		const id = faker.person.firstName();
+		const id = faker.person.firstName(); // TODO extract id from JWT token
 		const socket = connection as unknown as WebSocket;
 		const player = new Player(id, socket);
-		console.log("Player connected. playerId:", player.getId());
-
+		console.log("Player connected. playerId:", player.getId()); // TODO remove this in production
 		if (friendPlayer) {
 			const opponent = friendPlayer;
 			friendPlayer = null;
@@ -72,23 +49,56 @@ server.register(async function (server) {
 				const data = JSON.parse(message);
 				if (data.index !== undefined) {
 					player.sendIndex(data.index);
+				} else {
+					player.getGame()?.sendError(player, "Invalid message");
 				}
 			} catch (error) {
-				console.error(error);
-				socket.send(JSON.stringify({ error: "Something went wrong" }));
+				console.error(error); // TODO remove this in production
+				socket.send(JSON.stringify({ error: "Something went wrong" })); // TODO maybe no need to inform the player about the error
 			}
 		});
 
-		connection.on("close", (code: number, reason: Buffer) => {
-			console.log("player disconnected: playerId:", player.getId());
-			const friend = player.getOpponentPlayer();
-			if (friend) {
-				friend.getSocket().send(
+		connection.on("close", async (code: number, reason: Buffer) => {
+			console.log("player disconnected: playerId:", player.getId()); // TODO remove this in production
+			const opponent = player.getOpponentPlayer();
+			if (opponent && player.getDisconnected() === true) {
+				const opponentSign = opponent.getSign();
+				if (opponentSign === "X") {
+					const response = await postResult(
+						opponent.getId(),
+						player.getId(),
+						opponentSign,
+					);
+					if (!response) {
+						console.error("Failed to save game result");
+						opponent.getSocket().send(
+							JSON.stringify({
+								error: "Failed to save game result",
+							}),
+						);
+					}
+				} else {
+					const response = await postResult(
+						player.getId(),
+						opponent.getId(),
+						opponentSign,
+					);
+					if (!response) {
+						console.error("Failed to save game result");
+						opponent.getSocket().send(
+							JSON.stringify({
+								error: "Failed to save game result",
+							}),
+						);
+					}
+				}
+				opponent.getSocket().send(
 					JSON.stringify({
 						gameOver: "Your friend has left the game",
 					}),
 				);
-				friend.getSocket().close();
+				opponent.setDisconnected(false);
+				opponent.getSocket().close();
 			} else {
 				friendPlayer = null;
 			}

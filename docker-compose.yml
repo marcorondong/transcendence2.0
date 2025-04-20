@@ -50,6 +50,8 @@ services:
       - ./tictactoe/public/:/tictactoe_api/public/ # TODO remove this when there is real frontend
     ports:
       - 3001:3001 # TODO remove this in production
+    depends_on:
+      - tictactoe_db
     networks:
       - Transcendence2.0
     restart: always

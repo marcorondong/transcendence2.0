@@ -7,6 +7,7 @@ export class Player {
 	private readonly socket: WebSocket;
 	private opponentPlayer: Player | null = null;
 	private sign: string = "";
+	private disconnected: boolean = true;
 	private game: Game | null = null;
 
 	constructor(id: string, socket: WebSocket) {
@@ -41,17 +42,24 @@ export class Player {
 		return null;
 	}
 
-	sendSetup(): void {
-		console.log("sign:", this.sign, "\nturn:", this.getTurn());
-		this.socket.send(
-			JSON.stringify({
-				gameSetup: true,
-				userId: this.id,
-				opponentId: this.getOpponentId(),
-				sign: this.sign,
-				turn: this.getTurn(),
-			}),
-		);
+	getTurn(): string {
+		if(this.game?.getCurrentTurn() === this)
+			return "Your turn";
+		else
+			return "Opponent's turn";
+	}
+
+	getDisconnected(): boolean {
+		return this.disconnected;
+	}
+
+	setDisconnected(disconnected: boolean): void {
+		this.disconnected = disconnected;
+	}
+
+	changeTurn(): void {
+		if (this.opponentPlayer)
+			this.game?.setCurrentTurn(this.opponentPlayer);
 	}
 
 	finishSetup(opponentPlayer: Player): void {
@@ -73,16 +81,17 @@ export class Player {
 		opponentPlayer.sendSetup();
 	}
 
-	getTurn(): string {
-		if(this.game?.getCurrentTurn() === this)
-			return "Your turn";
-		else
-			return "Opponent's turn";
-	}
-
-	changeTurn(): void {
-		if (this.opponentPlayer)
-			this.game?.setCurrentTurn(this.opponentPlayer);
+	sendSetup(): void {
+		// console.log("sign:", this.sign, "\nturn:", this.getTurn()); // TODO remove this in production
+		this.socket.send(
+			JSON.stringify({
+				gameSetup: true,
+				userId: this.id,
+				opponentId: this.getOpponentId(),
+				sign: this.sign,
+				turn: this.getTurn(),
+			}),
+		);
 	}
 
 	sendIndex(index: number): void {

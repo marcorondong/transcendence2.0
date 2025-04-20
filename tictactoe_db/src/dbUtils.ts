@@ -2,7 +2,11 @@ import { PrismaClient } from "../node_modules/generated/prisma";
 
 const prisma = new PrismaClient();
 
-export async function createGameInDB(playerXId: string, playerOId: string, result: string) {
+export async function createGameInDB(
+	playerXId: string,
+	playerOId: string,
+	result: string,
+) {
 	await prisma.game.create({
 		data: { playerXId, playerOId, result },
 	});
@@ -11,10 +15,7 @@ export async function createGameInDB(playerXId: string, playerOId: string, resul
 export async function getGamesById(playerId: string) {
 	const games = await prisma.game.findMany({
 		where: {
-			OR: [
-				{ playerXId: playerId },
-				{ playerOId: playerId },
-			],
+			OR: [{ playerXId: playerId }, { playerOId: playerId }],
 		},
 	});
 	return games;
@@ -25,20 +26,13 @@ export async function getGamesHeadToHead(playerId: string, opponentId: string) {
 		where: {
 			OR: [
 				{
-					AND: [
-						{ playerXId: playerId },
-						{ playerOId: opponentId },
-					],
+					AND: [{ playerXId: playerId }, { playerOId: opponentId }],
 				},
 				{
-					AND: [
-						{ playerXId: opponentId },
-						{ playerOId: playerId },
-					],
+					AND: [{ playerXId: opponentId }, { playerOId: playerId }],
 				},
 			],
 		},
 	});
 	return games;
-
 }
