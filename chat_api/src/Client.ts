@@ -5,7 +5,7 @@ export class Client
 	private readonly socket: WebSocket;
 	private blockList: Set<string>;
 
-	constructor(id: string, socket: WebSocket, blockList: Set<string> = new Set<string>())
+	constructor(id: string, socket: WebSocket, blockList: Set<string>)
 	{
 		this.id = id;
 		this.socket = socket;

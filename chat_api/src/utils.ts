@@ -1,5 +1,6 @@
 import { Client } from "./Client";
 import { onlineClients } from "./server";
+import { patchRequestBlockUser, patchRequestUnblockUser } from "./dbUtils";
 
 // TODO for debugging purposes
 function errorCaught(error: unknown, client: Client) {
@@ -71,11 +72,13 @@ function inviteHandler(client: Client, friendClient: Client) {
 	}
 }
 
-function blockHandler(client: Client, friendClient: Client) {
+async function blockHandler(client: Client, friendClient: Client) {
 	try {
 		if (client.isBlocked(friendClient.getId())) {
+			await patchRequestUnblockUser(client.getId(), friendClient.getId());
 			client.removeBlockedUser(friendClient.getId());
 		} else {
+			await patchRequestBlockUser(client.getId(), friendClient.getId());
 			client.addBlockedUser(friendClient.getId());
 		}
 		console.log(
@@ -86,6 +89,35 @@ function blockHandler(client: Client, friendClient: Client) {
 				block: true,
 				relatedId: friendClient.getId(),
 				notification: `Block status changed for ${friendClient.getId()}`, // TODO for debugging purposes
+			}),
+		);
+	} catch (error) {
+		errorCaught(error, client);
+	}
+}
+
+function blockStatusHandler(client: Client, friendClient: Client) {
+	try {
+		const blockStatus = client.isBlocked(friendClient.getId());
+		client.getSocket().send(
+			JSON.stringify({
+				blockStatus: blockStatus,
+				relatedId: friendClient.getId(),
+				notification: `Block status for ${friendClient.getId()}`, // TODO for debugging purposes
+			}),
+		);
+	} catch (error) {
+		errorCaught(error, client);
+	}
+}
+
+function blockListHandler(client: Client) {
+	try {
+		const blockList = Array.from(client.getBlockList());
+		client.getSocket().send(
+			JSON.stringify({
+				blockList: blockList,
+				notification: `Block list of ${client.getId()}`, // TODO for debugging purposes
 			}),
 		);
 	} catch (error) {
@@ -122,15 +154,18 @@ export async function onClientMessage(
 		console.log(`Client ${client.getId()} interacted with the server`); // for debugging purposes
 		const data = JSON.parse(message.toString());
 		if (data.terminate) return client.getSocket().close();
+		else if (data.blockList) return blockListHandler(client);
 		if (!data.relatedId) throw new Error("Server: relatedId not found");
-		const friendClient = onlineClients.get(data.relatedId);
-		if (!friendClient) throw new Error("Server: UUID not found");
-		if (client.isBlocked(friendClient.getId()) && !data.block)
-			throw new Error("Server: You blocked this UUID");
 		if (data.relatedId === client.getId())
 			throw new Error("Server: You cannot send a message to yourself");
+		const friendClient = onlineClients.get(data.relatedId);
+		if (!friendClient) throw new Error("Server: UUID not found");
+		if (data.block) return blockHandler(client, friendClient);
+		else if (data.blockStatus)
+			return blockStatusHandler(client, friendClient);
+		if (client.isBlocked(friendClient.getId()))
+			throw new Error("Server: You blocked this UUID");
 		if (data.message) messageHandler(data.message, client, friendClient);
-		else if (data.block) blockHandler(client, friendClient);
 		else if (data.invite) inviteHandler(client, friendClient);
 		else if (data.inviteAccepted)
 			inviteAcceptedHandler(client, friendClient);

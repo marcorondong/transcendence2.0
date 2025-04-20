@@ -3,6 +3,7 @@ import fastifyWebsocket from "@fastify/websocket";
 import { Client } from "./Client";
 import { onClientMessage, onClientDisconnect } from "./utils";
 import { faker } from "@faker-js/faker";
+import { postRequestCreateUser, getRequestBlockList } from "./dbUtils";
 
 const PORT = 3002;
 const HOST = "0.0.0.0";
@@ -13,29 +14,31 @@ const fastify: FastifyInstance = Fastify({ logger: false });
 fastify.register(fastifyWebsocket);
 
 fastify.register(async function (fastify) {
-	fastify.get("/ws", { websocket: true }, (connection, req) => {
-		const id = faker.person.firstName();
-		const socket = connection;
-		const client = new Client(id, socket);
-		const peopleOnline = Array.from(onlineClients.values()).map((client) =>
-			client.getId(),
-		);
-		socket.send(
-			JSON.stringify({
-				relatedId: client.getId(), // optional
-				welcomeMessage: "Welcome to the chat server!", // optional
-				peopleOnline: peopleOnline,
-			}),
-		);
-		onlineClients.forEach((person) => {
-			person.getSocket().send(
+	fastify.get("/ws", { websocket: true }, async (connection, req) => {
+			const id = faker.person.firstName(); // TODO change once I can get the id from JWT
+			const user = await postRequestCreateUser(id);
+			const socket = connection;
+			const blockList = new Set<string>(user.blockList);
+			const client = new Client(id, socket, blockList);
+			const peopleOnline = Array.from(onlineClients.values()).map((client) =>
+				client.getId(),
+			);
+			socket.send(
 				JSON.stringify({
-					newClient: client.getId(),
+					relatedId: client.getId(), // TODO optional
+					welcomeMessage: "Welcome to the chat server!", //TODO optional
+					peopleOnline: peopleOnline,
 				}),
 			);
-		});
-		onlineClients.set(id, client);
-		console.log(`Client ${client.getId()} connected`);
+			onlineClients.forEach((person) => {
+				person.getSocket().send(
+					JSON.stringify({
+						newClient: client.getId(),
+					}),
+				);
+			});
+			onlineClients.set(id, client);
+			console.log(`Client ${client.getId()} connected`);
 
 		connection.on("message", async (message: string) => {
 			await onClientMessage(message, client);

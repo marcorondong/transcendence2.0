@@ -8,3 +8,18 @@ services:
     ports:
       - "3002:3002"
     restart: always
+
+  chat_db:
+    image: chat_db-image
+    container_name: chat_db_container
+    build: ../chat_db
+    environment:
+      - DATABASE_URL=file:/chat_db/DB/chatDB.db
+    volumes:
+      - ../chat_db/src/:/chat_db/src/
+      - ../chat_db/prisma/:/chat_db/prisma/
+      # - ./public/:/chat_db/public/
+      # - /home/iguliyev/DBs/chat/:/chat_db/DB/ # TODO uncomment this line when using the local DB
+    ports:
+      - 3004:3004
+    restart: always
