@@ -1,0 +1,103 @@
+name: PR Outdated Label
+
+# === 🧠 scheduled check every 2 hours ===
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 */2 * * *" # every 2 hours UTC
+
+jobs:
+  label_outdated_pr:
+    name: Label/Unlabel outdated PRs
+    runs-on: ubuntu-latest
+
+    # === ✅ Only run on open PRs during scheduled events ===
+    if: github.event_name != 'schedule' || github.event.pull_request.state == 'open'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensures full history is fetched for accurate comparison
+
+      - name: Fetch main
+        run: git fetch origin main
+
+      # === 🔍 Check if PR branch is up-to-date ===
+      - name: Check if branch is outdated
+        id: check
+        run: |
+          if ! git merge-base --is-ancestor origin/main ${{ github.event.pull_request.head.sha }}; then
+            echo "not_up_to_date=true" >> $GITHUB_OUTPUT
+          else
+            echo "not_up_to_date=false" >> $GITHUB_OUTPUT
+          fi
+
+      # ✅ 🏷️ Add 'outdated' label if needed and not already present
+      - name: Add 'outdated' label if needed
+        if: steps.check.outputs.not_up_to_date == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const hasOutdated = labels.some(label => label.name === 'outdated');
+
+            if (!hasOutdated) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['outdated']
+              });
+            }
+
+      # ✅ 💬 Add comment if needed and not already present
+      - name: Comment about outdated status if not already commented
+        if: steps.check.outputs.not_up_to_date == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commentBody = "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch.";
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const alreadyCommented = comments.some(comment => comment.body === commentBody);
+
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: commentBody
+              });
+            }
+
+      # ✅ 🧹 Remove 'outdated' label if PR is now up-to-date
+      - name: Remove 'outdated' label if up-to-date
+        if: steps.check.outputs.not_up_to_date == 'false'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'outdated'
+              });
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
