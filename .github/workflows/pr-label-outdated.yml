@@ -102,7 +102,7 @@ jobs:
             }
 
   # ───────────────────────────────────────────────
-  # ⏰ JOB 2: Scheduled (loops through all open PRs)
+  # ⏰ JOB 2: Scheduled (checks open PRs via GitHub API only)
   # ───────────────────────────────────────────────
   label_on_schedule_event:
     if: github.event_name == 'schedule'
@@ -110,19 +110,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Detect and label outdated PRs
+      - name: Label outdated PRs via API
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { repo, owner } = context.repo;
 
-            // 1. Get all open PRs targeting 'main'
+            // 1. Get the latest commit on main
+            const mainRef = await github.rest.repos.getCommit({
+              owner,
+              repo,
+              ref: 'heads/main',
+            });
+            const mainSha = mainRef.data.sha;
+
+            // 2. Get all open PRs targeting main
             const prs = await github.paginate(
               github.rest.pulls.list,
               { owner, repo, state: 'open', base: 'main' }
@@ -130,21 +133,18 @@ jobs:
 
             for (const pr of prs) {
               const prNumber = pr.number;
-              const prHead = pr.head.sha;
 
-              // 2. Fetch the latest commits
-              await exec.exec('git', ['fetch', 'origin', 'main']);
-              await exec.exec('git', ['fetch', 'origin', pr.head.ref]);
+              // 3. Compare base (main) with PR head
+              const compare = await github.rest.repos.compareCommits({
+                owner,
+                repo,
+                base: mainSha,
+                head: pr.head.sha,
+              });
 
-              // 3. Check if up-to-date
-              let isUpToDate = true;
-              try {
-                await exec.exec(`git merge-base --is-ancestor origin/main ${prHead}`);
-              } catch (error) {
-                isUpToDate = false;
-              }
+              const isUpToDate = compare.status !== 'behind';
 
-              // 4. List labels
+              // 4. Get current labels
               const { data: labels } = await github.rest.issues.listLabelsOnIssue({
                 owner,
                 repo,
@@ -153,13 +153,13 @@ jobs:
 
               const hasOutdated = labels.some(label => label.name === 'outdated');
 
-              // 5. Add/remove label
+              // 5. Label or unlabel
               if (!isUpToDate && !hasOutdated) {
                 await github.rest.issues.addLabels({
                   owner,
                   repo,
                   issue_number: prNumber,
-                  labels: ['outdated']
+                  labels: ['outdated'],
                 });
 
                 await github.rest.issues.createComment({
@@ -168,14 +168,15 @@ jobs:
                   issue_number: prNumber,
                   body: "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch."
                 });
+              }
 
-              } else if (isUpToDate && hasOutdated) {
+              if (isUpToDate && hasOutdated) {
                 try {
                   await github.rest.issues.removeLabel({
                     owner,
                     repo,
                     issue_number: prNumber,
-                    name: 'outdated'
+                    name: 'outdated',
                   });
                 } catch (e) {
                   if (e.status !== 404) throw e;
@@ -183,5 +184,5 @@ jobs:
               }
             }
 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
