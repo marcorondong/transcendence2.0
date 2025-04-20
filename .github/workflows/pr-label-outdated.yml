@@ -5,6 +5,7 @@ on:
     branches: [main]
   schedule:
     - cron: "0 */2 * * *" # every 2 hours UTC
+  workflow_dispatch:
 
 permissions:
   issues: write
