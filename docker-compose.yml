@@ -24,36 +24,6 @@ services:
     networks:
       - Transcendence2.0
 
-  chat_api:
-    image: chat_api_img
-    container_name: chat_api_container
-    build: ./chat_api
-    volumes:
-      - ./chat_api/src:/chat_api/src
-    ports:
-      - "3002:3002" # TODO remove it will not be exposed at final version
-    depends_on:
-      - chat_db
-    networks:
-      - Transcendence2.0
-    restart: always
-
-  chat_db:
-    image: chat_db_image
-    container_name: chat_db_container
-    build: ./chat_db
-    environment:
-      - DATABASE_URL=file:/chat_db/DB/chatDB.db
-    volumes:
-      - ./chat_db/src/:/chat_db/src/ # TODO remove in production
-      - ./chat_db/prisma/:/chat_db/prisma/ # TODO remove in production
-      # - /home/iguliyev/DBs/chat/:/chat_db/DB/ # TODO edit host path and uncomment this line in production
-    ports:
-      - 3004:3004 # TODO remove it will not be exposed at final version
-    networks:
-      - Transcendence2.0
-    restart: always
-
   frontend:
     build:
       context: ./frontend
