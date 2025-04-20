@@ -13,8 +13,13 @@ jobs:
     name: Label/Unlabel outdated PRs
     runs-on: ubuntu-latest
 
+    # Add permissions to allow writing to pull requests and issues
+    permissions:
+      pull-requests: write
+      issues: write
+
     # === ✅ Only run on open PRs during scheduled events ===
-    if: github.event_name != 'schedule' || github.event.pull_request.state == 'open'
+    if: github.event_name != 'schedule' || (github.event.pull_request && github.event.pull_request.state == 'open')
 
     steps:
       - name: Checkout
