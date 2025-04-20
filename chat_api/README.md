@@ -57,7 +57,29 @@ Each interaction follows this pattern:
 ```
 Note: No reply is sent to User2 by default. Can be add upon request.
 
-## 📨 3. Invite Someone
+
+## 🚫 3. Block Status Check
+
+** User1 checks User2 block status **
+
+### Request (from User1)
+```json
+{
+  "blockStatus": true,
+  "relatedId": "UUID of user2"
+}
+```
+
+### Reply (to User1)
+```json
+{
+  "blockStatus": true or false,
+  "relatedId": "UUID of user2"
+}
+```
+Note: No reply is sent to User2 by default. Can be add upon request.
+
+## 📨 4. Invite Someone
 
 **User1 sends an invitation to User2**
 
@@ -78,7 +100,7 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ```
 Note: No reply is sent to User1. Can be add upon request.
 
-## ✅ 4. Accept Invitation
+## ✅ 5. Accept Invitation
 
 **User2 accepts User1's invitation**
 
@@ -118,7 +140,7 @@ Note: No reply is sent to User1. Can be add upon request.
 }
 ```
 
-## 👤 5. New Client Joined
+## 👤 6. New Client Joined
 
 **A new client (e.g., user101) joins the app**
 
