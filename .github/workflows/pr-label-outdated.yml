@@ -16,7 +16,7 @@ jobs:
   # 🔁 JOB 1: PR-triggered (reacts to PR creation/update)
   # ───────────────────────────────────────────────
   label_on_pr_event:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'pull_request'
     name: Label outdated PR (on PR activity)
     runs-on: ubuntu-latest
 
@@ -107,7 +107,7 @@ jobs:
   # ⏰ JOB 2: Scheduled (checks open PRs via GitHub API only)
   # ───────────────────────────────────────────────
   label_on_schedule_event:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     name: Label outdated PRs (scheduled check)
     runs-on: ubuntu-latest
 
