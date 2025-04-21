@@ -1,29 +1,50 @@
 import { Ball, Paddle, Pong } from "../types/Pong.ts";
+import { printMessage } from "./pong-utils.js";
 
 export class PongComponent extends HTMLElement {
 	gameState: Pong | undefined = undefined;
 	wss: WebSocket | undefined = undefined;
+	canvas = document.createElement("canvas");
+	ctx = this.canvas.getContext("2d");
 
 	// VARS
 	aspectRatio = 16 / 9;
-	canvasWidth = 800;
+	canvasToWindow = 0.8;
+	canvasWidth: number;
 	paddleDirection = 0;
-	canvasHeight: Number;
-	canvasWidthHalf: Number;
-	canvasHeightHalf: Number;
+	canvasHeight: number;
+	canvasWidthHalf: number;
+	canvasHeightHalf: number;
+	scaleX: number;
+	scaleY: number;
+	paddleWidth: number;
+
+	// Buttons
+	fullscreenButton = document.createElement("button");
+
+	adjustCanvasToWindow() {
+		this.canvasWidth = window.innerWidth * this.canvasToWindow;
+		this.adjustToCanvasWidth();
+		if (this.canvas) {
+			this.canvas.width = this.canvasWidth;
+			this.canvas.height = this.canvasHeight;
+		}
+	}
+
+	goFullscreen() {
+		if (this.canvas.requestFullscreen) {
+			this.canvas.requestFullscreen();
+		}
+	}
 
 	adjustToCanvasWidth() {
 		this.canvasHeight = this.canvasWidth / this.aspectRatio;
-		canvasWidthHalf = this.canvasWidth / 2;
-		canvasHeightHalf = this.canvasHeight / 2;
-		scaleX = this.canvasWidthHalf / 4;
-		scaleY = this.canvasHeightHalf / 2.46;
-		paddleWidth = this.canvasWidth / 100;
+		this.canvasWidthHalf = this.canvasWidth / 2;
+		this.canvasHeightHalf = this.canvasHeight / 2;
+		this.scaleX = this.canvasWidthHalf / 4;
+		this.scaleY = this.canvasHeightHalf / 2.46;
+		this.paddleWidth = this.canvasWidth / 100;
 	}
-
-	// CANVAS
-	canvas = document.createElement("canvas");
-	ctx = this.canvas.getContext("2d");
 
 	scaleGameState(state: Pong) {
 		if (state?.ball) {
@@ -135,6 +156,12 @@ export class PongComponent extends HTMLElement {
 			this.displayScore(state);
 			this.sendPaddleState();
 			if (state.matchStatus === "Game finished") {
+				printMessage(
+					"Game Over",
+					this.ctx,
+					this.canvasWidth,
+					this.canvasHeight,
+				);
 				return;
 			}
 		}
@@ -144,8 +171,7 @@ export class PongComponent extends HTMLElement {
 
 	constructor() {
 		super();
-		this.canvas.width = this.canvasWidth;
-		this.canvas.height = this.canvasHeight;
+		this.adjustCanvasToWindow();
 	}
 
 	connectedCallback() {
@@ -158,12 +184,18 @@ export class PongComponent extends HTMLElement {
 		document.addEventListener("keydown", this, false);
 		document.addEventListener("keyup", this, false);
 		document.addEventListener("click", this);
+		window.addEventListener("resize", this);
 
 		const gameDataContainer = document.createElement("div");
 		const matchStatus = document.createElement("div");
 		const roomId = document.createElement("div");
 		const knockoutName = document.createElement("div");
 		gameDataContainer.append(matchStatus, roomId, knockoutName);
+
+		this.fullscreenButton.id = "fullscreen-button";
+		this.fullscreenButton.classList.add("pong-button");
+		this.fullscreenButton.innerText = "go fullscreen";
+		this.appendChild(this.fullscreenButton);
 
 		this.append(gameDataContainer);
 		const queryParams = window.location.search;
@@ -210,19 +242,19 @@ export class PongComponent extends HTMLElement {
 			this.paddleDirection = 0;
 	}
 	onClick(event) {
-		// if(event.target.id === 'start'){
-		// 	this.pong.startGame();
-		// }
-		// if(event.target.id === 'pause'){
-		// 	this.pong.pauseGame();
-		// }
+		if (event.target.id === "fullscreen-button") {
+			this.goFullscreen();
+		}
+	}
+	onResize() {
+		this.adjustCanvasToWindow();
 	}
 
 	disconnectedCallback() {
 		console.log("Pong DISCONNECTED");
 		document.removeEventListener("keydown", this, false);
 		document.removeEventListener("keyup", this, false);
-		this.removeEventListener("click", this);
+		document.removeEventListener("click", this, false);
 	}
 }
 
