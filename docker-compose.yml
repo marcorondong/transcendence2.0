@@ -41,6 +41,41 @@ services:
     networks:
       - Transcendence2.0
 
+  chat_api:
+    image: chat_api_img
+    container_name: chat_api_container
+    build:
+      context: ./chat_api
+      dockerfile: Dockerfile
+    volumes:
+      - ./chat_api/src:/chat_api/src
+    ports:
+      - "3002:3002"
+    networks:
+      - Transcendence2.0
+    depends_on:
+    - chat_db
+    restart: always
+
+  chat_db:
+    image: chat_db_image
+    container_name: chat_db_container
+    build:
+      context: ./chat_db
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=file:/chat_db/DB/chatDB.db
+    volumes:
+      - ./chat_db/src/:/chat_db/src/
+      - ./chat_db/prisma/:/chat_db/prisma/
+      # - ./public/:/chat_db/public/
+      # - /home/iguliyev/DBs/chat/:/chat_db/DB/ # TODO uncomment this line when using the local DB
+    ports:
+      - 3004:3004
+    networks:
+      - Transcendence2.0
+    restart: always
+
 include:
   - ./monitoring/monitoring-docker-compose.yml
 
