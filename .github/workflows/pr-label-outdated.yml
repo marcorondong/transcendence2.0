@@ -149,8 +149,9 @@ jobs:
                 head: pr.head.sha,
               });
 
-              const isUpToDate = compare.status !== 'behind';
-              console.log(`🔍 PR #${pr.number} is ${isUpToDate ? '✅ up-to-date' : '❌ behind main'}`);
+              const isUpToDate = compare.status === 'identical';
+              console.log(`🔍 PR #${pr.number} comparison status: ${compare.status}`);
+              console.log(`🔍 PR #${pr.number} is ${isUpToDate ? '✅ up-to-date' : '❌ outdated (needs to merge main)'}`);
 
               // 4. Get current labels
               const { data: labels } = await github.rest.issues.listLabelsOnIssue({
