@@ -43,7 +43,7 @@ jobs:
         if: steps.check.outputs.not_up_to_date == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
           script: |
             const { data: labels } = await github.rest.issues.listLabelsOnIssue({
               owner: context.repo.owner,
@@ -66,7 +66,7 @@ jobs:
         if: steps.check.outputs.not_up_to_date == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
           script: |
             const commentBody = "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch.";
             const { data: comments } = await github.rest.issues.listComments({
@@ -90,7 +90,7 @@ jobs:
         if: steps.check.outputs.not_up_to_date == 'false'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
           script: |
             try {
               await github.rest.issues.removeLabel({
@@ -115,7 +115,7 @@ jobs:
       - name: Label outdated PRs via API
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
           script: |
             const { repo, owner } = context.repo;
 
