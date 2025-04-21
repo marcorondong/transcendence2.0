@@ -48,7 +48,6 @@ export class PongComponent extends HTMLElement {
 
 	scaleGameState(state: Pong) {
 		if (state?.ball) {
-			console.log("ball Y", state.ball.y);
 			state.ball.x *= this.scaleX;
 			state.ball.y *= this.scaleY;
 			state.ball.radius *= this.scaleX;
@@ -126,18 +125,19 @@ export class PongComponent extends HTMLElement {
 		if (!this.ctx) {
 			return;
 		}
-		this.ctx.font = "48px sans-serif";
+		const fontSize = Math.trunc(this.canvasHeight / 8);
+		this.ctx.font = `${fontSize}px sans-serif`;
 		this.ctx.textAlign = "center";
 		const space = this.canvas.width / 10;
 		this.ctx.fillText(
 			String(state.score?.leftGoals ?? 0),
 			this.canvasWidthHalf - space,
-			50,
+			fontSize * 1.2,
 		);
 		this.ctx.fillText(
 			String(state.score?.rightGoals ?? 0),
 			this.canvasWidthHalf + space,
-			50,
+			fontSize * 1.2,
 		);
 	}
 
@@ -185,6 +185,8 @@ export class PongComponent extends HTMLElement {
 		document.addEventListener("keyup", this, false);
 		document.addEventListener("click", this);
 		window.addEventListener("resize", this);
+		this.canvas.addEventListener("touchstart", this);
+		this.canvas.addEventListener("touchend", this);
 
 		const gameDataContainer = document.createElement("div");
 		const matchStatus = document.createElement("div");
@@ -226,6 +228,24 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 
+	onTouchstart(event) {
+		const touch = event.touches[0];
+		const rect = this.canvas.getBoundingClientRect();
+		console.log("top of canvas", rect.top);
+		const y = touch.clientY - rect.top;
+		console.log("y", y);
+
+		if (y < this.canvasHeightHalf) {
+			this.paddleDirection = -1;
+		} else {
+			this.paddleDirection = 1;
+		}
+	}
+
+	onTouchend(event) {
+		this.paddleDirection = 0;
+	}
+
 	onKeydown(event) {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
@@ -237,7 +257,6 @@ export class PongComponent extends HTMLElement {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
 		}
-		event.preventDefault();
 		if (event.key === "ArrowUp" || event.key === "ArrowDown")
 			this.paddleDirection = 0;
 	}
