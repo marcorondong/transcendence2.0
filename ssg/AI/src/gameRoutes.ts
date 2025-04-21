@@ -1,12 +1,41 @@
 import { FastifyInstance } from "fastify";
-import { gameRequestSchema } from "./gameRequestSchema";
+import {
+	gameRequestSchema,
+	extraGameSchema,
+	healthSchema,
+} from "./gameRequestSchema";
 import { Bot } from "./bot";
 
 export async function gameRoutes(fastify: FastifyInstance) {
 	fastify.post(
-		"/start-game",
+		"/game-mandatory",
 		{ schema: gameRequestSchema },
-		async (request, reply) => {
+		async (request: any, reply: any) => {
+			if (!request.body) {
+				return reply.code(400).send({ error: "Invalid game request" });
+			}
+			const gameRequest = new Object({
+				host: request.body.host,
+				port: request.body.port,
+				side: request.body.side,
+				roomId: request.body.roomId,
+			});
+			try {
+				new Bot(gameRequest).playGame();
+				reply.code(200).send({
+					description: "Game successfully started",
+					gameRequest,
+				});
+			} catch (error) {
+				request.log.error(error);
+				reply.code(500).send({ error: "Failed to start bot" });
+			}
+		},
+	);
+	fastify.post(
+		"/game-extra",
+		{ schema: extraGameSchema },
+		async (request: any, reply: any) => {
 			const gameRequest = request.body as object;
 			if (!gameRequest) {
 				return reply.code(400).send({ error: "Invalid game request" });
@@ -14,16 +43,24 @@ export async function gameRoutes(fastify: FastifyInstance) {
 
 			try {
 				new Bot(gameRequest).playGame();
-				reply
-					.code(200)
-					.send({
-						description: "Game successfully started",
-						gameRequest,
-					});
+				reply.code(200).send({
+					description: "Game successfully started",
+					gameRequest,
+				});
 			} catch (error) {
 				request.log.error(error);
 				reply.code(500).send({ error: "Failed to start bot" });
 			}
+		},
+	);
+}
+
+export async function healthRoute(fastify: FastifyInstance) {
+	fastify.get(
+		"/healthcheck",
+		{ schema: healthSchema },
+		async (request: any, reply: any) => {
+			reply.code(200).send({ status: "ok" });
 		},
 	);
 }

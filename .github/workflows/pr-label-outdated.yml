@@ -1,0 +1,197 @@
+name: PR Outdated Label
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 */2 * * *" # every 2 hours UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ───────────────────────────────────────────────
+  # 🔁 JOB 1: PR-triggered (reacts to PR creation/update)
+  # ───────────────────────────────────────────────
+  label_on_pr_event:
+    if: github.event_name == 'pull_request'
+    name: Label outdated PR (on PR activity)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }} # Make sure you created this secret
+          fetch-depth: 0
+
+      - name: Fetch main
+        run: git fetch origin main
+
+      - name: Check if branch is outdated
+        id: check
+        run: |
+          if ! git merge-base --is-ancestor origin/main ${{ github.event.pull_request.head.sha }}; then
+            echo "not_up_to_date=true" >> $GITHUB_OUTPUT
+          else
+            echo "not_up_to_date=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add 'outdated' label if needed
+        if: steps.check.outputs.not_up_to_date == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          script: |
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const hasOutdated = labels.some(label => label.name === 'outdated');
+
+            if (!hasOutdated) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['outdated']
+              });
+            }
+
+      - name: Comment about outdated status
+        if: steps.check.outputs.not_up_to_date == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          script: |
+            const commentBody = "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch.";
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const alreadyCommented = comments.some(comment => comment.body === commentBody);
+
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: commentBody
+              });
+            }
+
+      - name: Remove 'outdated' label if up-to-date
+        if: steps.check.outputs.not_up_to_date == 'false'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'outdated'
+              });
+            } catch (e) {
+              if (e.status !== 404) throw e;
+            }
+
+  # ───────────────────────────────────────────────
+  # ⏰ JOB 2: Scheduled (checks open PRs via GitHub API only)
+  # ───────────────────────────────────────────────
+  label_on_schedule_event:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    name: Label outdated PRs (scheduled check)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Label outdated PRs via API
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          script: |
+            const { repo, owner } = context.repo;
+            console.log(`🔁 Running scheduled PR check for repo ${owner}/${repo}`);
+
+            // 1. Get the latest commit on main
+            const mainRef = await github.rest.repos.getCommit({
+              owner,
+              repo,
+              ref: 'heads/main',
+            });
+            const mainSha = mainRef.data.sha;
+            console.log(`✅ Latest main commit: ${mainSha}`);
+
+            // 2. Get all open PRs targeting main
+            const prs = await github.paginate(
+              github.rest.pulls.list,
+              { owner, repo, state: 'open', base: 'main' }
+            );
+            console.log(`📋 Found ${prs.length} open PR(s) targeting main`);
+
+            for (const pr of prs) {
+              const prNumber = pr.number;
+              console.log(`🔎 Checking PR #${pr.number}: ${pr.title}`);
+              console.log(`🔄 Comparing main@${mainSha} to PR head @${pr.head.sha}`);
+
+              // 3. Compare base (main) with PR head
+              const compare = await github.rest.repos.compareCommits({
+                owner,
+                repo,
+                base: mainSha,
+                head: pr.head.sha,
+              });
+
+              const isUpToDate = compare.status === 'identical';
+              console.log(`🔍 PR #${pr.number} comparison status: ${compare.status}`);
+              console.log(`🔍 PR #${pr.number} is ${isUpToDate ? '✅ up-to-date' : '❌ outdated (needs to merge main)'}`);
+
+              // 4. Get current labels
+              const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                owner,
+                repo,
+                issue_number: prNumber,
+              });
+
+              const hasOutdated = labels.some(label => label.name === 'outdated');
+
+              // 5. Label or unlabel
+              if (!isUpToDate && !hasOutdated) {
+                await github.rest.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  labels: ['outdated'],
+                });
+
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body: "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch."
+                });
+              }
+
+              if (isUpToDate && hasOutdated) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    name: 'outdated',
+                  });
+                } catch (e) {
+                  if (e.status !== 404) throw e;
+                }
+              }
+            }
+
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

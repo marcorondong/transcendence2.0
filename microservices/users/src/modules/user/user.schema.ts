@@ -1,28 +1,129 @@
-import { z } from "zod";
+import { z, ZodTypeAny, ZodObject } from "zod";
 
-// MR_NOTE: In Zod, everything is required by default.
+// Type definition for ordering (ascending/descending)
+const sortDirections = ["asc", "desc"] as const;
+const sortDirectionEnum = z.enum(sortDirections);
+export type SortDirection = (typeof sortDirections)[number];
+
+// Type definition for sorting by field (from User fields)
+const userPublicFields = ["id", "email", "name"] as const;
+const userSortByEnum = z.enum(userPublicFields);
+export type UserPublicField = (typeof userPublicFields)[number];
+
+// Type definition to allow one field per query (used in )
+export type UniqueUserField =
+	| { id: number }
+	| { email: string }
+	| { name: string };
+
+// Type definition to allowing multiple User fields per query
+export type UserField = Partial<Record<UserPublicField, string | number>>;
+
+// Helper function to convert empty strings to undefined (Protection against invalid queries)
+export const blankToUndefined = <T extends z.ZodTypeAny>(
+	schema: T,
+): z.ZodEffects<z.ZodOptional<T>, z.infer<T> | undefined, unknown> =>
+	z.preprocess((val) => {
+		if (typeof val === "string" && val.trim() === "") return undefined;
+		// Coerce booleans (since .preprocess() removes coercion)
+		if (schema instanceof z.ZodBoolean) {
+			if (val === "true") return true;
+			if (val === "false") return false;
+		}
+		// Coerce numbers (since .preprocess() removes coercion)
+		if (schema instanceof z.ZodNumber && typeof val === "string") {
+			const num = Number(val);
+			if (!isNaN(num)) return num;
+		}
+		return val;
+	}, schema.optional());
+
+// Helper function to recursively wrap all fields in an object schema with blankToUndefined()
+export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
+	const shape = schema.shape;
+	const newShape = Object.fromEntries(
+		Object.entries(shape).map(([key, value]) => {
+			// Handle nested object
+			if (value instanceof z.ZodObject) {
+				return [key, sanitizeQuerySchema(value)];
+			}
+			// Handle array of objects
+			if (value instanceof z.ZodArray) {
+				const inner = value._def.type;
+				if (inner instanceof z.ZodObject) {
+					const sanitizedInner = sanitizeQuerySchema(inner);
+					return [key, z.array(sanitizedInner)];
+				}
+				// If not object, fallback to blankToUndefined on array itself
+				return [key, blankToUndefined(value as ZodTypeAny)];
+			}
+			// Default: sanitize top-level field
+			return [key, blankToUndefined(value as ZodTypeAny)];
+		}),
+	);
+	return z.object(newShape) as T;
+};
+
+// Name field schema
+export const nameField = z
+	.string({
+		required_error: "Name is required",
+		invalid_type_error: "Name must be a string",
+	})
+	.min(3, "Name must be at least 3 characters long")
+	.refine((val) => val.trim().length > 0, {
+		message: "Name must not be empty or whitespace only",
+	})
+	.refine((val) => !/^\d+$/.test(val), {
+		message: "Name must not be numbers only",
+	})
+	.refine((val) => /[a-zA-Z]/.test(val), {
+		message: "Name must contain at least one letter",
+	});
+
+// Email field schema
+export const emailField = z
+	.string({
+		required_error: "Email is required",
+		invalid_type_error: "Email must be a string",
+	})
+	.email()
+	.refine((val) => val === val.toLowerCase(), {
+		message: "Invalid email format",
+	});
+
+// Password field schema
+export const passwordField = z
+	.string({
+		required_error: "Password is required",
+		invalid_type_error: "Password must be a string",
+	})
+	.min(6, "Password must be at least 6 characters long")
+	.refine(
+		(val) =>
+			/[a-z]/.test(val) && // lowercase
+			/[A-Z]/.test(val) && // uppercase
+			/\d/.test(val) && // digit
+			/[^a-zA-Z0-9]/.test(val), // symbol
+		{
+			message:
+				"Password must include at least one uppercase, one lowercase, one number, and one symbol",
+		},
+	);
 
 // Core user schema
 const userCore = {
-	email: z
-		.string({
-			required_error: "Email is required",
-			invalid_type_error: "Email must be a string",
-		})
-		.email(),
-	name: z.string(),
+	email: emailField,
+	name: nameField,
 };
 
 // Schema for createUser
 export const createUserSchema = z
 	.object({
 		...userCore,
-		password: z.string({
-			required_error: "Password is required",
-			invalid_type_error: "Password must be a string",
-		}),
+		password: passwordField,
 	})
-	.strict(); // Rejects unknown fields
+	.strict();
 
 // Schema for single user
 export const userResponseSchema = z.object({
@@ -33,23 +134,14 @@ export const userResponseSchema = z.object({
 // Schema to get a user by ID
 export const userIdParamSchema = z
 	.object({
-		// id: z.number(),
-		id: z.coerce.number(),
-	})
-	.strict(); //TODO: See if I have to use strict here too. Rejects unknown fields
-
-// Schema to update all user fields
-export const putUserSchema = z
-	.object({
-		...userCore,
-		password: z.string({
-			required_error: "Password is required",
-			invalid_type_error: "Password must be a string",
-		}),
+		id: blankToUndefined(z.coerce.number().min(1)),
 	})
 	.strict(); // Rejects unknown fields
 
-// Schema to update some user fields
+// Schema to update ALL user fields
+export const putUserSchema = createUserSchema;
+
+// Schema to update SOME user fields
 export const patchUserSchema = putUserSchema.partial().strict(); // Rejects unknown fields
 
 // Schema for login
@@ -73,28 +165,28 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
-// TODO: Try to "automate" SortBy according to UserField/UniqueUserField
-// Schema for query parameters to find users
-export const getUsersQuerySchema = z
-	.object({
-		id: z.coerce.number().optional(),
-		email: z.string().email().optional(),
-		name: z.string().optional(),
-		useFuzzy: z.coerce.boolean().optional(),
-		useOr: z.coerce.boolean().optional(),
-		skip: z.coerce.number().min(0).optional(),
-		take: z.coerce.number().min(1).max(100).optional(),
-		sortBy: z.enum(["id", "email", "name"]).optional(),
-		order: z.enum(["asc", "desc"]).optional(),
-	})
-	.strict(); // Rejects unknown fields
+// Base schema for query parameters
+const baseGetUsersQuerySchema = z.object({
+	id: z.coerce.number().min(1),
+	email: z.string().email(),
+	name: z.string(),
+	useFuzzy: z.coerce.boolean(),
+	useOr: z.coerce.boolean(),
+	skip: z.coerce.number().min(0),
+	take: z.coerce.number().min(1).max(100),
+	sortBy: userSortByEnum,
+	order: sortDirectionEnum,
+});
+
+// Refined schema for query parameters to find users
+export const getUsersQuerySchema = sanitizeQuerySchema(
+	baseGetUsersQuerySchema,
+).strict(); // Rejects unknown fields
 
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
 export type loginInput = z.infer<typeof loginSchema>;
-export type updateUserPutInput = z.infer<typeof putUserSchema>; // TODO: Should I export this? (putUserInput)
-export type updateUserPatchInput = z.infer<typeof patchUserSchema>; // TODO: Should I export this? (patchUserInput)
+export type updateUserPutInput = z.infer<typeof putUserSchema>;
+export type updateUserPatchInput = z.infer<typeof patchUserSchema>;
 export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
-// export type UserResponse = z.infer<typeof userResponseSchema>; // TODO: This is not used yet (I don't have an endpoint to retrieve single user)
-// export type UserArrayResponse = z.infer<typeof userArrayResponseSchema>;
