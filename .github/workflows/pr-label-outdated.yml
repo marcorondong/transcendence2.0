@@ -16,7 +16,7 @@ jobs:
   # 🔁 JOB 1: PR-triggered (reacts to PR creation/update)
   # ───────────────────────────────────────────────
   label_on_pr_event:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     name: Label outdated PR (on PR activity)
     runs-on: ubuntu-latest
 
