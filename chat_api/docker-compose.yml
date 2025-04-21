@@ -5,6 +5,8 @@ services:
     build: .
     volumes:
       - ./src:/chat_api/src
+    environment:
+      - NODE_ENV=production
     ports:
       - "3002:3002"
     restart: always
@@ -15,11 +17,13 @@ services:
     build: ../chat_db
     environment:
       - DATABASE_URL=file:/chat_db/DB/chatDB.db
+      - NODE_ENV=development
+      - PORT=3004
+      - HOST=0.0.0.0
     volumes:
       - ../chat_db/src/:/chat_db/src/
       - ../chat_db/prisma/:/chat_db/prisma/
-      # - ./public/:/chat_db/public/
-      # - /home/iguliyev/DBs/chat/:/chat_db/DB/ # TODO uncomment this line when using the local DB
+      - /home/iguliyev/DBs/chat/:/chat_db/DB/ # TODO uncomment this line when using the local DB
     ports:
       - 3004:3004
     restart: always

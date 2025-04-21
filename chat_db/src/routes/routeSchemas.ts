@@ -3,7 +3,6 @@ import {
 	idsZodSchema,
 	blockStatusResponseSchema,
 	blockListResponseSchema,
-	// chatHistoryResponseSchema,
 } from "./zodSchemas";
 
 export const createUserSchema = {
@@ -34,7 +33,7 @@ export const blockStatusSchema = {
 	params: idsZodSchema,
 	response: {
 		200: blockStatusResponseSchema,
-	}
+	},
 };
 
 export const blockListSchema = {
@@ -46,14 +45,3 @@ export const blockListSchema = {
 		200: blockListResponseSchema,
 	},
 };
-
-// export const chatHistorySchema = {
-// 	summary: "Chat History",
-// 	description: "Get the chat history of a user.",
-// 	tags: ["Chat"],
-// 	params: idsZodSchema,
-// 	response: {
-// 		200: chatHistoryResponseSchema,
-// 	},
-// };
-

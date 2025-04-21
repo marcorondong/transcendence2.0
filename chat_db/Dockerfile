@@ -1,6 +1,6 @@
-FROM node:iron-slim
+FROM node:23-bullseye-slim
 
-RUN apt-get update -y && apt-get install -y openssl sqlite3
+RUN apt-get update -y && apt-get install -y sqlite3
 
 WORKDIR /chat_db
 
@@ -11,7 +11,7 @@ COPY ./src ./
 RUN npm install
 
 # TODO uncomment below line in production
-# CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && ts-node src/server.ts"]
+# CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start"]
 
 # TODO remove below line in production
 CMD ["sh", "-c", "npx prisma generate && npx prisma migrate reset --force --skip-seed && npm run dev"] 

@@ -15,11 +15,11 @@ fastify.register(fastifyWebsocket);
 
 fastify.register(async function (fastify) {
 	fastify.get("/ws", { websocket: true }, async (connection, req) => {
-			const id = faker.person.firstName(); // TODO change once I can get the id from JWT
-			const user = await postRequestCreateUser(id);
+			const userId = faker.person.firstName(); // TODO change once I can get the userId from JWT
+			const user = await postRequestCreateUser(userId);
 			const socket = connection;
 			const blockList = new Set<string>(user.blockList);
-			const client = new Client(id, socket, blockList);
+			const client = new Client(userId, socket, blockList);
 			const peopleOnline = Array.from(onlineClients.values()).map((client) =>
 				client.getId(),
 			);
@@ -37,7 +37,7 @@ fastify.register(async function (fastify) {
 					}),
 				);
 			});
-			onlineClients.set(id, client);
+			onlineClients.set(userId, client);
 			console.log(`Client ${client.getId()} connected`);
 
 		connection.on("message", async (message: string) => {

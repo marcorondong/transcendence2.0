@@ -1,40 +1,28 @@
-
-export class Client
-{
-	private readonly id: string;
+export class Client {
+	private readonly userId: string;
 	private readonly socket: WebSocket;
 	private blockList: Set<string>;
-
-	constructor(id: string, socket: WebSocket, blockList: Set<string>)
-	{
-		this.id = id;
+	constructor(userId: string, socket: WebSocket, blockList: Set<string>) {
+		this.userId = userId;
 		this.socket = socket;
 		this.blockList = blockList;
 	}
-
-	getId(): string
-	{
-		return this.id;
+	getId(): string {
+		return this.userId;
 	}
-	getSocket(): WebSocket
-	{
+	getSocket(): WebSocket {
 		return this.socket;
 	}
-	getBlockList(): Set<string>
-	{
+	getBlockList(): Set<string> {
 		return this.blockList;
 	}
-	
-	addBlockedUser(id: string): void
-	{
-		this.blockList.add(id);
+	addBlockedUser(userId: string): void {
+		this.blockList.add(userId);
 	}
-	removeBlockedUser(id: string): void
-	{
-		this.blockList.delete(id);
+	removeBlockedUser(userId: string): void {
+		this.blockList.delete(userId);
 	}
-	isBlocked(id: string): boolean
-	{
-		return this.blockList.has(id);
+	isBlocked(userId: string): boolean {
+		return this.blockList.has(userId);
 	}
 }

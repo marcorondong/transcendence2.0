@@ -1,5 +1,17 @@
-import { createUserSchema, blockUserSchema, unblockUserSchema, blockStatusSchema, blockListSchema } from "./routeSchemas";
-import { createUserHandler, blockUserHandler, unblockUserHandler, blockStatusHandler, blockListHandler } from "./controllers";
+import {
+	createUserSchema,
+	blockUserSchema,
+	unblockUserSchema,
+	blockStatusSchema,
+	blockListSchema,
+} from "./routeSchemas";
+import {
+	createUserHandler,
+	blockUserHandler,
+	unblockUserHandler,
+	blockStatusHandler,
+	blockListHandler,
+} from "./controllers";
 
 export const createUserOpt = {
 	schema: createUserSchema,
@@ -25,9 +37,3 @@ export const blockListOpt = {
 	schema: blockListSchema,
 	handler: blockListHandler,
 };
-
-// export const chatHistoryOpt = {
-// 	schema: chatHistorySchema,
-// 	handler: chatHistoryHandler,
-// };
-

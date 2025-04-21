@@ -1,6 +1,6 @@
 
 export async function postRequestCreateUser(
-	id: string,
+	userId: string,
 ) {
 	try {
 		const response = await fetch("http://chat_db_container:3004/chat/createUser", {
@@ -8,7 +8,7 @@ export async function postRequestCreateUser(
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ id }),
+			body: JSON.stringify({ userId }),
 		});
 		if (!response.ok) {
 			throw new Error(`Request failed with status ${response.status}`);
@@ -22,7 +22,7 @@ export async function postRequestCreateUser(
 }
 
 export async function patchRequestBlockUser(
-	id: string,
+	userId: string,
 	friendId: string,
 ) {
 	try {
@@ -31,7 +31,7 @@ export async function patchRequestBlockUser(
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ id, friendId }),
+			body: JSON.stringify({ userId, friendId }),
 		});
 		if (!response.ok) {
 			throw new Error(`Request failed with status ${response.status}`);
@@ -45,7 +45,7 @@ export async function patchRequestBlockUser(
 }
 
 export async function patchRequestUnblockUser(
-	id: string,
+	userId: string,
 	friendId: string,
 ) {
 	try {
@@ -54,7 +54,7 @@ export async function patchRequestUnblockUser(
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ id, friendId }),
+			body: JSON.stringify({ userId, friendId }),
 		});
 		if (!response.ok) {
 			throw new Error(`Request failed with status ${response.status}`);
@@ -68,11 +68,11 @@ export async function patchRequestUnblockUser(
 }
 
 export async function getRequestBlockStatus(
-	id: string,
+	userId: string,
 	friendId: string,
 ) {
 	try {
-		const response = await fetch(`http://chat_db_container:3004/chat/blockStatus/${id}/${friendId}`, {
+		const response = await fetch(`http://chat_db_container:3004/chat/blockStatus/${userId}/${friendId}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -90,10 +90,10 @@ export async function getRequestBlockStatus(
 }
 
 export async function getRequestBlockList(
-	id: string,
+	userId: string,
 ) {
 	try {
-		const response = await fetch(`http://chat_db_container:3004/chat/blockList/${id}`, {
+		const response = await fetch(`http://chat_db_container:3004/chat/blockList/${userId}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",

@@ -1,6 +1,6 @@
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
 
-export const swaggerOptions = {
+export const swaggerOption = {
 	exposeRoute: true,
 	openapi: {
 		info: {
@@ -22,6 +22,20 @@ export const swaggerOptions = {
 	transform: jsonSchemaTransform,
 };
 
-export const swaggerUiOptions = {
+export const swaggerUiOption = {
 	routePrefix: "/documentation",
+};
+
+export const serverOption = {
+	logger: {
+		level: "warn",
+		transport: {
+			target: "pino-pretty",
+			options: {
+				colorize: true,
+				ignore: "INFO",
+				translateTime: "HH:MM:ss Z",
+			},
+		},
+	},
 };
