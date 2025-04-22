@@ -8,7 +8,7 @@ import {
 } from "fastify-type-provider-zod";
 import { serverOption, swaggerOption, swaggerUiOption } from "./utils/options";
 import { chatRoutes } from "./routes/routes";
-import { globalErrorHandler } from "./errors/globalErrorHandler";
+import { globalErrorHandler } from "./utils/globalErrorHandler";
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const HOST = process.env.HOST || "0.0.0.0";

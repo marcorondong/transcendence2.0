@@ -4,7 +4,7 @@ export const swaggerOption = {
 	exposeRoute: true,
 	openapi: {
 		info: {
-			title: "ft_transcendence API",
+			title: "ft_transcendence chat_db API",
 			description: "Swagger docs for chat_db",
 			version: "1.0.0",
 		},

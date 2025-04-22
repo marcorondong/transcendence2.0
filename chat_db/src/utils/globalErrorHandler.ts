@@ -5,20 +5,21 @@ export function globalErrorHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	reply.log.error(error, "Error in production");
+	reply.log.error(error);
 
 	if (process.env.NODE_ENV === "production") {
-		reply.status(500).send({
-			error: "Internal Server Error",
-			message: "An unexpected error occurred.",
+		reply.status(503).send({
+			error: "Service Unavailable",
+			message:
+				"Requested service is not available right now. Please try again later.",
 		});
 		return;
 	}
-
-	reply.status((error as any).statusCode || 500).send({
+	const statusCode = (error as any).statusCode || 500;
+	reply.status(statusCode).send({
 		error: error.name || "Internal Server Error",
 		message: error.message || "An unexpected error occurred.",
-		statusCode: (error as any).statusCode || 500,
-		stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+		statusCode: statusCode,
+		stack: error.stack,
 	});
 }
