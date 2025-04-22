@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "0 */2 * * *" # every 2 hours UTC
+    - cron: "*/5 * * * *" # every 2 hours UTC --> "0 */2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          github-token: ${{ secrets.REPO_ACCESS_TOKEN }} # Make sure you created this secret
+          token: ${{ secrets.REPO_ACCESS_TOKEN }} # Make sure you created this secret
           fetch-depth: 0
 
       - name: Fetch main
