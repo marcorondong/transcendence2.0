@@ -108,8 +108,19 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ```
 Note: No reply is sent to User1. Can be add upon request.
 
+## ❌ 5. Terminate user
+
+**If you want to close websocket connection of client**
+
+### Request (from User)
+```json
+{
+  "type": "terminate",
+}
+``` 
+
 <!-- No need this step as process is simpler now -->
-<!-- ## ✅ 5. Accept Invitation
+<!-- ## ✅ Accept Invitation
 
 **User2 accepts User1's invitation**
 
@@ -150,7 +161,7 @@ Note: No reply is sent to User1. Can be add upon request.
 }
 ``` -->
 
-## 👤 5. New Client Joined
+## 👤 New Client Joined
 
 **A new client (e.g., user101) joins the app**
 

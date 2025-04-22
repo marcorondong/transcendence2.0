@@ -27,6 +27,7 @@ export function messageHandler(data: MessageInput, client: Client) {
 	const { message, relatedId } = messageSchema.parse(data);
 	const friendClient = onlineClients.get(relatedId);
 	if (!friendClient) throw new Error("Server: related UUID not found");
+	if (client.isBlocked(relatedId)) throw new Error("Server: user is blocked");
 	const messageResponse = messageResponseSchema.parse({
 		type: "messageResponse",
 		message: message,
@@ -72,6 +73,7 @@ export async function inviteHandler(data: InviteInput, client: Client) {
 	const { relatedId } = inviteSchema.parse(data);
 	const friendClient = onlineClients.get(relatedId);
 	if (!friendClient) throw new Error("Server: related UUID not found");
+	if (client.isBlocked(relatedId)) throw new Error("Server: user is blocked");
 	if (!friendClient.isBlocked(client.getId())) {
 		// const roomId = await getRequestRoomId(client.getId());
 		const inviteResponse = inviteResponseSchema.parse({
