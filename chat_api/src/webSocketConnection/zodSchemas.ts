@@ -67,6 +67,22 @@ export const newClientResponseSchema = z
 	})
 	.strict();
 
+export const disconnectedResponseSchema = z
+	.object({
+		type: z.literal("disconnected"),
+		relatedId: z.string(),
+		notification: z.string().optional(),
+	})
+	.strict();
+
+export const errorResponseSchema = z
+	.object({
+		type: z.literal("error"),
+		relatedId: z.string(),
+		error: z.string(),
+	})
+	.strict();
+
 export const peopleOnlineResponseSchema = z
 	.object({
 		type: z.literal("peopleOnline"),

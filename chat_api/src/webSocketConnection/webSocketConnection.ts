@@ -9,6 +9,8 @@ import {
 	blockListSchema,
 	peopleOnlineResponseSchema,
 	newClientResponseSchema,
+	errorResponseSchema,
+	disconnectedResponseSchema,
 } from "./zodSchemas";
 export const onlineClients: Map<string, Client> = new Map<string, Client>();
 
@@ -54,25 +56,25 @@ export async function webSocketConnection(server: FastifyInstance) {
 				await webSocketRequests(message, client);
 			} catch (error) {
 				server.log.error(error);
-				socket.send(
-					JSON.stringify({
-						type: "error",
-						error: `${error}`,
-					}),
-				);
+				const errorResponse = errorResponseSchema.parse({
+					type: "error",
+					relatedId: client.getId(),
+					error: `${error}`,
+				});
+				socket.send(JSON.stringify(errorResponse));
 			}
 		});
 
 		socket.on("close", async () => {
 			console.log(`Client ${client.getId()} disconnected`); // TODO for debugging purposes
 			onlineClients.delete(client.getId());
+			const disconnectedResponse = disconnectedResponseSchema.parse({
+				type: "disconnected",
+				relatedId: client.getId(),
+				notification: `${client.getId()} left the server!`,
+			});
 			onlineClients.forEach((person) => {
-				person.getSocket().send(
-					JSON.stringify({
-						clientDisconnected: true,
-						relatedId: client.getId(),
-					}),
-				);
+				person.getSocket().send(JSON.stringify(disconnectedResponse));
 			});
 		});
 	});

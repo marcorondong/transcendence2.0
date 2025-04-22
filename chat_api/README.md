@@ -16,6 +16,7 @@ Each interaction follows this pattern:
 ### Request (from User1)
 ```json
 {
+  "type": "message",
   "message": "any message",
   "relatedId": "UUID of user2"
 } 
@@ -24,6 +25,7 @@ Each interaction follows this pattern:
 ### Reply (to User1)
 ```json
 {
+  "type": "messageResponse",
   "message": "any message",
   "relatedId": "UUID of user1"
 }
@@ -31,6 +33,7 @@ Each interaction follows this pattern:
 ### Reply (to User2)
 ```json
 {
+  "type": "messageResponse",
   "message": "any message",
   "relatedId": "UUID of user1"
 }
@@ -43,7 +46,7 @@ Each interaction follows this pattern:
 ### Request (from User1)
 ```json
 {
-  "block": true,
+  "type": "block",
   "relatedId": "UUID of user2"
 }
 ```
@@ -51,8 +54,9 @@ Each interaction follows this pattern:
 ### Reply (to User1)
 ```json
 {
-  "block": true,
-  "relatedId": "UUID of user2"
+  "type": "blockResponse",
+  "relatedId": "UUID of user2",
+  "notification": "optional for debugging",
 }
 ```
 Note: No reply is sent to User2 by default. Can be add upon request.
@@ -65,7 +69,7 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ### Request (from User1)
 ```json
 {
-  "blockStatus": true,
+  "type": "blockStatus",
   "relatedId": "UUID of user2"
 }
 ```
@@ -73,8 +77,10 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ### Reply (to User1)
 ```json
 {
+  "type": "blockStatusResponse",
   "blockStatus": true or false,
-  "relatedId": "UUID of user2"
+  "relatedId": "UUID of user2",
+  "notification": "optional for debugging",
 }
 ```
 Note: No reply is sent to User2 by default. Can be add upon request.
@@ -86,7 +92,7 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ### Request (from User1)
 ```json
 {
-  "invite": true,
+  "type": "invite",
   "relatedId": "UUID of user2"
 }
 ```
@@ -94,13 +100,16 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ### Reply (to User2)
 ``` json
 {
-  "invite": true,
-  "relatedId": "UUID of user1"
+  "type": "inviteResponse",
+  "relatedId": "UUID of user1",
+  "roomId": "Room id to open socket",
+  "notification": "optional for debugging",
 }
 ```
 Note: No reply is sent to User1. Can be add upon request.
 
-## ✅ 5. Accept Invitation
+<!-- No need this step as process is simpler now -->
+<!-- ## ✅ 5. Accept Invitation
 
 **User2 accepts User1's invitation**
 
@@ -118,9 +127,10 @@ Note: No reply is sent to User1. Can be add upon request.
   "openSocket": true,
   "relatedId": "UUID of user2"
 }
-```
+``` -->
 
-### 🔌 Socket Initialization
+<!-- No need this step as process is simpler now -->
+<!-- ### 🔌 Socket Initialization
 
 **Once the socket is established, User1 must notify the backend**
 
@@ -138,22 +148,26 @@ Note: No reply is sent to User1. Can be add upon request.
   "joinRoom": true,
   "roomId": "room id to build connection with"
 }
-```
+``` -->
 
-## 👤 6. New Client Joined
+## 👤 5. New Client Joined
 
 **A new client (e.g., user101) joins the app**
 
 ### Reply (to user101)
 ```json
 {
-  "peopleOnline": ["array", "of", "all", "online", "people"]
+  "type": "peopleOnline",
+  "peopleOnline": ["array", "of", "all", "online", "people"],
+  "notification": "optional for debugging",
 } 
 ```
 ### Reply (to all other users)
 ``` json
 {
-  "newClient": "UUID of user101"
+  "type": "newClient",
+  "relatedId": "UUID of user101",
+  "notification": "optional for debugging",
 }
 ```
 
@@ -164,8 +178,9 @@ Note: No reply is sent to User1. Can be add upon request.
 ### Reply (to other clients)
 ```json
 {
-  "clientDisconnected": true,
-  "relatedId": "UUID of the disconnected client"
+  "type": "disconnected",
+  "relatedId": "UUID of the disconnected client",
+  "notification": "optional for debugging",
 }
 ```
 Note: This event informs all other clients about the disconnection, and they can update their UI accordingly (e.g., removing the user from the online list).
@@ -178,9 +193,9 @@ Note: This event informs all other clients about the disconnection, and they can
 ### Reply (to client)
 ```json
 {
-  "error": true,
+  "type": "error",
   "relatedId": "UUID of the client",
-  "errorMessage": "Description of the error"
+  "error": "Description of the error"
 }
 ``` 
 
