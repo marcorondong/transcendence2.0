@@ -52,7 +52,7 @@ export class Router {
 		if (componentName === "/" || componentName === "/index.html") {
 			scriptName = "./views/home-view.js";
 		} else if (this.navComponents.indexOf(componentName) > -1) {
-			scriptName = `./views${componentName}-view.js`;
+			scriptName = `./views${componentName}.js`;
 		} else {
 			scriptName = `./views/error-view.js`;
 		}

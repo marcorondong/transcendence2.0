@@ -11,17 +11,14 @@ export class HeaderComponent extends HTMLElement {
 	connectedCallback() {
 		console.log("Header CONNECTED");
 
-		this.classList.add(
-			"mb-9",
-			"flex",
-			"content-center",
-			"justify-between",
-			"py-9",
-		);
+		// this.classList.add("flex", "content-center", "justify-between", "py-9");
+		const logoAnchor = document.createElement("a");
+		logoAnchor.href = "/";
 		const logo = document.createElement("img");
 		logo.classList.add("size-18", "rounded-lg");
-		logo.src = "./static-files/images/pong-logo.png";
-		this.appendChild(logo);
+		logo.src = "/static-files/images/pong-logo.png";
+		logoAnchor.appendChild(logo);
+		this.appendChild(logoAnchor);
 
 		const navigation = document.createElement("div");
 		navigation.classList.add("flex", "items-center", "gap-4");
@@ -33,11 +30,21 @@ export class HeaderComponent extends HTMLElement {
 		this.menuIcon.setIcon("menu");
 		menuButton.appendChild(this.menuIcon);
 		navigation.appendChild(menuButton);
+		const closeButton = document.createElement("button");
+		const closeIcon = new IconComponent("close", 6);
+		closeButton.append(closeIcon);
+		closeButton.classList.add(
+			"absolute",
+			"pong-button",
+			"z-43",
+			"right-6",
+			"top-6",
+			"hidden",
+		);
 
 		const list = document.getElementById("navigation");
 		if (list) {
 			list.classList.add(
-				"top-30",
 				"absolute",
 				"inset-0",
 				"flex",
@@ -48,6 +55,7 @@ export class HeaderComponent extends HTMLElement {
 				"justify-start",
 				"gap-4",
 				"p-6",
+				"pt-30",
 				"sm:static",
 				"sm:flex",
 				"sm:w-auto",
@@ -59,8 +67,11 @@ export class HeaderComponent extends HTMLElement {
 				"sm:bg-transparent",
 				"dark:bg-indigo-950",
 				"dark:sm:bg-transparent",
+				"z-42",
 			);
 			navigation.appendChild(list);
+
+			this.appendChild(closeButton);
 		}
 
 		const themeToggle = new ThemeToggleComponent();
@@ -70,15 +81,18 @@ export class HeaderComponent extends HTMLElement {
 		this.appendChild(navigation);
 
 		this.menuIcon.addEventListener("click", () => {
-			if (list?.classList.contains("hidden")) {
-				list?.classList.remove("hidden");
-			} else {
-				list?.classList.add("hidden");
-			}
+			list?.classList.remove("hidden");
+			closeButton.classList.remove("hidden");
+		});
+
+		closeButton.addEventListener("click", () => {
+			list?.classList.add("hidden");
+			closeButton.classList.add("hidden");
 		});
 
 		list?.addEventListener("click", () => {
 			list?.classList.add("hidden");
+			closeButton.classList.add("hidden");
 		});
 	}
 
@@ -87,4 +101,4 @@ export class HeaderComponent extends HTMLElement {
 	}
 }
 
-customElements.define("navigation-component", HeaderComponent);
+customElements.define("header-component", HeaderComponent);

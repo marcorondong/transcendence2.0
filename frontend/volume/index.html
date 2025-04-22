@@ -16,37 +16,40 @@
 		<link
 			rel="icon"
 			type="image/x-icon"
-			href="./static-files/images/favicon.ico"
+			href="/static-files/images/favicon.ico"
 		/>
 		<link
 			rel="stylesheet"
 			type="text/css"
-			href="./css/custom.css"
+			href="/css/custom.css"
 		/>
 		<link
-			href="./css/output.css"
+			href="/css/output.css"
 			rel="stylesheet"
 		/>
 		<title>Transcendence</title>
 	</head>
 
 	<body
-		class="bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
+		class="relative bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
 	>
-		<div class="relative px-5 md:px-16 xl:px-32">
-			<navigation-component>
+		<div class="mx-5 md:mx-24 lg:mx-32 xl:mx-64">
+			<header-component
+				class="mb-9 flex content-center justify-between self-stretch py-9"
+			>
 				<ul id="navigation">
 					<a href="/"> <li class="pong-nav-link">home</li></a>
-					<a href="highscore">
+					<a href="pong-view"> <li class="pong-nav-link">pong</li></a>
+					<a href="highscore-view">
 						<li class="pong-nav-link">highscore</li></a
 					>
-					<a href="profile">
+					<a href="profile-view">
 						<li class="pong-nav-link">profile</li></a
 					>
-					<a href="users">
+					<a href="users-view">
 						<li class="pong-nav-link">users</li>
 					</a>
-					<a href="users">
+					<a href="users-view">
 						<li>
 							<button class="pong-button-info w-full">
 								login
@@ -54,20 +57,16 @@
 						</li></a
 					>
 				</ul>
-			</navigation-component>
+			</header-component>
 			<div
-				class="container"
-				id="game"
-			>
-				<div
-					id="content"
-					class="mb-4 px-5 md:px-16 xl:px-32"
-				></div>
-			</div>
-			<script
-				type="module"
-				src="./javascript/main.js"
-			></script>
+				id="content"
+				class=""
+			></div>
 		</div>
+		<script
+			type="module"
+			src="/javascript/main.js"
+			defer
+		></script>
 	</body>
 </html>
