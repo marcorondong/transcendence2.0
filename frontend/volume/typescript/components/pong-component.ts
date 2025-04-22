@@ -1,4 +1,5 @@
 import { Ball, Paddle, Pong } from "../types/Pong.ts";
+import { IconComponent } from "./icon-component.js";
 import { printMessage } from "./pong-utils.js";
 
 export class PongComponent extends HTMLElement {
@@ -9,7 +10,7 @@ export class PongComponent extends HTMLElement {
 
 	// VARS
 	aspectRatio = 16 / 9;
-	canvasToWindow = 0.8;
+	canvasToWindow = 0.6;
 	canvasWidth: number;
 	paddleDirection = 0;
 	canvasHeight: number;
@@ -146,7 +147,7 @@ export class PongComponent extends HTMLElement {
 
 		// CLEAR THE CANVAS
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		if (this.gameState) {
+		if (this.gameState && this.gameState.ball) {
 			const state = structuredClone(this.gameState);
 			this.scaleGameState(state);
 			this.drawCenterLine();
@@ -164,6 +165,14 @@ export class PongComponent extends HTMLElement {
 				);
 				return;
 			}
+		} else {
+			this.drawCenterLine();
+			printMessage(
+				"Waiting for Opponent...",
+				this.ctx,
+				this.canvasWidth,
+				this.canvasHeight,
+			);
 		}
 
 		requestAnimationFrame(this.gameLoop);
@@ -177,27 +186,73 @@ export class PongComponent extends HTMLElement {
 	connectedCallback() {
 		console.log("Pong CONNECTED");
 
-		this.canvas.classList.add("bg-black");
+		this.classList.add("shrink-0", "w-fit");
+		const canvasContainer = document.createElement("div");
+		canvasContainer.classList.add(
+			"p-1",
+			"sm:p-3",
+			"xl:p-5",
+			"mb-10",
+			"sm:border-5",
+			"xl:border-6",
+			"border-3",
+			"sm:rounded-xl",
+			"rounded-lg",
+			"bg-indigo-950",
+			"border-cyan-300",
+			"glow",
+			"shrink-0",
+			"w-fit",
+			"relative",
+			"group",
+		);
 
-		this.append(this.canvas);
+		this.canvas.classList.add("bg-black", "rounded-lg");
+		canvasContainer.appendChild(this.canvas);
+
+		this.append(canvasContainer);
 
 		document.addEventListener("keydown", this, false);
 		document.addEventListener("keyup", this, false);
-		document.addEventListener("click", this);
+		// document.addEventListener("click", this);
 		window.addEventListener("resize", this);
 		this.canvas.addEventListener("touchstart", this);
 		this.canvas.addEventListener("touchend", this);
 
 		const gameDataContainer = document.createElement("div");
+		gameDataContainer.classList.add(
+			"text-[5px]",
+			"sm:text-xs",
+			"md:text-sm",
+			"lg:text:md",
+		);
 		const matchStatus = document.createElement("div");
 		const roomId = document.createElement("div");
 		const knockoutName = document.createElement("div");
 		gameDataContainer.append(matchStatus, roomId, knockoutName);
 
+		this.fullscreenButton.addEventListener("click", () => {
+			this.goFullscreen();
+		});
+
 		this.fullscreenButton.id = "fullscreen-button";
-		this.fullscreenButton.classList.add("pong-button");
-		this.fullscreenButton.innerText = "go fullscreen";
-		this.appendChild(this.fullscreenButton);
+		this.fullscreenButton.classList.add(
+			"top-3",
+			"right-3",
+			"md:top-5",
+			"md:right-5",
+			"lg:top-8",
+			"lg:right-8",
+			"hidden",
+			"absolute",
+			"opacity-60",
+			"group-hover:block",
+			"pong-button-pale",
+		);
+		const fullscreenIcon = new IconComponent("fullscreen", 7);
+		fullscreenIcon.id = "fullscreen-icon";
+		this.fullscreenButton.appendChild(fullscreenIcon);
+		canvasContainer.appendChild(this.fullscreenButton);
 
 		this.append(gameDataContainer);
 		const queryParams = window.location.search;
@@ -231,11 +286,16 @@ export class PongComponent extends HTMLElement {
 	onTouchstart(event) {
 		const touch = event.touches[0];
 		const rect = this.canvas.getBoundingClientRect();
-		console.log("top of canvas", rect.top);
 		const y = touch.clientY - rect.top;
-		console.log("y", y);
+		console.log("y:", y);
+		let halfPoint: number;
+		if (document.fullscreenElement) {
+			halfPoint = window.innerHeight / 2;
+		} else {
+			halfPoint = this.canvasHeightHalf;
+		}
 
-		if (y < this.canvasHeightHalf) {
+		if (y < halfPoint) {
 			this.paddleDirection = -1;
 		} else {
 			this.paddleDirection = 1;
@@ -253,6 +313,7 @@ export class PongComponent extends HTMLElement {
 		if (event.key === "ArrowUp") this.paddleDirection = -1;
 		if (event.key === "ArrowDown") this.paddleDirection = 1;
 	}
+
 	onKeyup(event) {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
@@ -260,11 +321,7 @@ export class PongComponent extends HTMLElement {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown")
 			this.paddleDirection = 0;
 	}
-	onClick(event) {
-		if (event.target.id === "fullscreen-button") {
-			this.goFullscreen();
-		}
-	}
+	onClick(event) {}
 	onResize() {
 		this.adjustCanvasToWindow();
 	}

@@ -1,6 +1,12 @@
 class IconComponent extends HTMLElement {
-	constructor() {
+	constructor(iconName?: string, iconSize?: number) {
 		super();
+		if (iconName) {
+			this.setIcon(iconName);
+		}
+		if (iconSize) {
+			this.setSize(iconSize);
+		}
 	}
 
 	iconName: string | null = null;
@@ -24,7 +30,7 @@ class IconComponent extends HTMLElement {
 		if (this.iconName) {
 			try {
 				const iconData = await fetch(
-					`./static-files/icons/${this.iconName}.svg`,
+					`/static-files/icons/${this.iconName}.svg`,
 				);
 				const contentType = iconData.headers.get("Content-Type");
 				if (!contentType || !contentType.includes("image/svg+xml")) {
@@ -41,7 +47,7 @@ class IconComponent extends HTMLElement {
 		}
 	}
 
-	async setIcon(name: string) {
+	setIcon(name: string) {
 		this.iconName = name;
 	}
 
@@ -62,7 +68,6 @@ class IconComponent extends HTMLElement {
 		console.log("ICON has been CONNECTED");
 		this.nameFromAttribute();
 		this.sizeFromAttribute();
-		const div = document.createElement("div");
 		const iconElement = await this.fetchIcon();
 		this.applySize(iconElement);
 		if (iconElement) {

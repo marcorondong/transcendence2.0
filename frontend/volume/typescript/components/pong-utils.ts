@@ -22,10 +22,9 @@ export function printTextCentered(
 	if (!ctx) {
 		return;
 	}
-	console.log("trying to print: ", message);
 	ctx.globalAlpha = 1;
 	ctx.fillStyle = "rgb(240 240 240)";
-	const fontSize = 28;
+	const fontSize = Math.trunc(canvasHeightHalf / 7);
 	ctx.font = `${fontSize}px sans-serif`;
 	ctx.textAlign = "center";
 	ctx.fillText(message, canvasWidthHalf, canvasHeightHalf);
