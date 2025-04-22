@@ -17,7 +17,7 @@ permissions:
 env:
   OUTDATED_LABEL: outdated
   OUTDATED_COMMENT: "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch."
-  COMMENT_LOOKBACK_COUNT: 3
+  COMMENT_LOOKBACK_COUNT: 2
 
 jobs:
   # ───────────────────────────────────────────────
@@ -296,3 +296,18 @@ jobs:
                 }
               }
             }
+
+# ───────────────────────────────────────────────
+# 🛠 DEBUGGING TIPS
+# To enable step debug logs:
+# → Go to repo Settings > Actions > Secrets and add:
+#    Name: ACTIONS_STEP_DEBUG
+#    Value: true
+#
+# Inside github-script blocks, log debug messages like:
+# → core.debug("This is a custom debug message");
+# (note: core.debug() only shows up if ACTIONS_STEP_DEBUG is true)
+#
+# Runner-level debug (less common):
+# → Add secret: ACTIONS_RUNNER_DEBUG = true
+# ───────────────────────────────────────────────
