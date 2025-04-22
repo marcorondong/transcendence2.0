@@ -276,6 +276,7 @@ jobs:
                     body: commentBody,
                   });
                 }
+              }
 
               if (!is_outdated && hasOutdated) {
                 try {
