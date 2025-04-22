@@ -1,7 +1,6 @@
-export async function postRequestCreateUser(
-	userId: string,
-) {
-	const response = await fetch("http://chat_db_container:3004/chat/createUser", {
+export async function postRequestCreateUser(userId: string) {
+	const url = `http://chat_db_container:3004/chat/createUser`;
+	const response = await fetch(url, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -15,11 +14,9 @@ export async function postRequestCreateUser(
 	return data;
 }
 
-export async function patchRequestBlockUser(
-	userId: string,
-	friendId: string,
-) {
-	const response = await fetch("http://chat_db_container:3004/chat/blockUser", {
+export async function patchRequestBlockUser(userId: string, friendId: string) {
+	const url = `http://chat_db_container:3004/chat/blockUser`;
+	const response = await fetch(url, {
 		method: "PATCH",
 		headers: {
 			"Content-Type": "application/json",
@@ -37,7 +34,8 @@ export async function patchRequestUnblockUser(
 	userId: string,
 	friendId: string,
 ) {
-	const response = await fetch("http://chat_db_container:3004/chat/unblockUser", {
+	const url = `http://chat_db_container:3004/chat/unblockUser`;
+	const response = await fetch(url, {
 		method: "PATCH",
 		headers: {
 			"Content-Type": "application/json",
@@ -51,7 +49,7 @@ export async function patchRequestUnblockUser(
 	return data;
 }
 
-export async function getRequestRoomId( userId: string ) {
+export async function getRequestRoomId(userId: string) {
 	const url = `http://pong-api:3010/playerRoom/${userId}`;
 	const response = await fetch(url, {
 		method: "POST",
