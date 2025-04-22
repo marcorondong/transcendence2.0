@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "*/5 * * * *" # every 2 hours UTC --> "0 */2 * * *"
+    - cron: "0 5 * * *" # Every day at 05:00 UTC ## Every 2 hours UTC:"0 */2 * * *" ## Every 5 min UTC: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,7 @@ permissions:
 env:
   OUTDATED_LABEL: outdated
   OUTDATED_COMMENT: "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch."
+  COMMENT_LOOKBACK_COUNT: 3
 
 jobs:
   # ───────────────────────────────────────────────
@@ -97,71 +98,42 @@ jobs:
             const commentBody = process.env.OUTDATED_COMMENT;
 
             console.log(`💬 Checking for outdated comment on PR #${prNumber}`);
-
-            // START Testing
             const { data: comments } = await github.rest.issues.listComments({
               owner,
               repo,
               issue_number: prNumber,
             });
 
-            console.log(`📋 Found ${comments.length} comments on PR #${prNumber}`);
+            // Get last N comments
+            const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 1;
+            const recentComments = comments.slice(-lookback);
 
-            // Dump all comments
-            comments.forEach((c, i) => {
-              console.log(`--- Comment ${i + 1} ---`);
-              console.log(`ID: ${c.id}`);
-              console.log(`Author: ${c.user.login}`);
-              console.log(`Created: ${c.created_at}`);
-              console.log(`Body: ${c.body}`);
-              console.log("------------------------");
-            });
+            // Check if any of the last N comments is the outdated warning
+            console.log(`🔍 Checking last ${recentComments.length} comment(s) for outdated warning...`);
+            const foundInRecent = recentComments.some(c => c.body === commentBody);
 
-            // Approach 1: naive "last comment"
-            const naiveLast = comments[comments.length - 1];
-            console.log(`🧪 Naive last comment (comments[length - 1]):`);
-            console.log(`🧾 Body: ${naiveLast?.body}`);
-            console.log(`⏱️ Created: ${naiveLast?.created_at}`);
+            if (foundInRecent) {
+              console.log("✅ Outdated warning already present among the last N comments — skipping.");
+            } else {
+              // Optionally: delete old instance of the same comment elsewhere (outside the last N)
+              const previous = comments.find(c => c.body === commentBody);
+              if (previous) {
+                console.log("🧽 Deleting older outdated comment to re-post a fresh one");
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: previous.id,
+                });
+              }
 
-            // Approach 2: sorted by date
-            const sorted = [...comments].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            const sortedLast = sorted[sorted.length - 1];
-            console.log(`🧪 Sorted last comment (sorted by created_at):`);
-            console.log(`🧾 Body: ${sortedLast?.body}`);
-            console.log(`⏱️ Created: ${sortedLast?.created_at}`);
-
-            // Extra: PR update time
-            console.log(`⏱️ PR updated_at: ${pr?.updated_at ?? context.payload.pull_request.updated_at}`);
-            // END testing
-
-            // const { data: comments } = await github.rest.issues.listComments({
-            //   owner,
-            //   repo,
-            //   issue_number: prNumber,
-            // });
-
-            // const lastComment = comments[comments.length - 1];
-            // if (lastComment?.body === commentBody) {
-            //   console.log("✅ Last comment is already the outdated warning — no action needed.");
-            // } else {
-            //   const previous = comments.find(c => c.body === commentBody);
-            //   if (previous) {
-            //     console.log("🧽 Deleting old outdated comment to re-post");
-            //     await github.rest.issues.deleteComment({
-            //       owner,
-            //       repo,
-            //       comment_id: previous.id,
-            //     });
-            //   }
-
-            //   console.log("💬 Posting fresh outdated warning");
-            //   await github.rest.issues.createComment({
-            //     owner,
-            //     repo,
-            //     issue_number: prNumber,
-            //     body: commentBody,
-            //   });
-            // }
+              console.log("💬 Posting fresh outdated warning");
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: commentBody,
+              });
+            }
 
       - name: Remove label if up-to-date
         if: steps.outdated_check.outputs.is_outdated == 'false'
@@ -208,7 +180,7 @@ jobs:
           script: |
             const { repo, owner } = context.repo;
             const outdatedLabel = process.env.OUTDATED_LABEL;
-            const outdatedComment = process.env.OUTDATED_COMMENT;
+            const commentBody = process.env.OUTDATED_COMMENT;
 
             console.log(`🔁 Running scheduled PR check for ${owner}/${repo}`);
 
@@ -257,44 +229,6 @@ jobs:
               const { data: labels } = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber });
               const hasOutdated = labels.some(label => label.name === outdatedLabel);
 
-              // START testing
-              const { data: comments } = await github.rest.issues.listComments({
-                owner,
-                repo,
-                issue_number: prNumber,
-              });
-
-              console.log(`📋 Found ${comments.length} comments on PR #${prNumber}`);
-
-              // Dump all comments
-              comments.forEach((c, i) => {
-                console.log(`--- Comment ${i + 1} ---`);
-                console.log(`ID: ${c.id}`);
-                console.log(`Author: ${c.user.login}`);
-                console.log(`Created: ${c.created_at}`);
-                console.log(`Body: ${c.body}`);
-                console.log("------------------------");
-              });
-
-              // Approach 1: naive "last comment"
-              const naiveLast = comments[comments.length - 1];
-              console.log(`🧪 Naive last comment (comments[length - 1]):`);
-              console.log(`🧾 Body: ${naiveLast?.body}`);
-              console.log(`⏱️ Created: ${naiveLast?.created_at}`);
-
-              // Approach 2: sorted by date
-              const sorted = [...comments].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-              const sortedLast = sorted[sorted.length - 1];
-              console.log(`🧪 Sorted last comment (sorted by created_at):`);
-              console.log(`🧾 Body: ${sortedLast?.body}`);
-              console.log(`⏱️ Created: ${sortedLast?.created_at}`);
-
-              // Extra: PR update time
-              console.log(`⏱️ PR updated_at: ${pr?.updated_at ?? context.payload.pull_request.updated_at}`);
-
-
-              // END Testing
-
               // 5. Label or unlabel
               if (is_outdated && !hasOutdated) {
                 console.log(`➕ Adding '${outdatedLabel}' label to PR #${prNumber}`);
@@ -312,13 +246,21 @@ jobs:
                   issue_number: prNumber,
                 });
 
-                const lastComment = comments[comments.length - 1];
-                if (lastComment?.body === outdatedComment) {
-                  console.log("✅ Last comment is already the outdated warning — no action needed.");
+                // Get last N comments
+                const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 1;
+                const recentComments = comments.slice(-lookback);
+
+                // Check if any of the last N comments is the outdated warning
+                console.log(`🔍 Checking last ${recentComments.length} comment(s) for outdated warning...`);
+                const foundInRecent = recentComments.some(c => c.body === commentBody);
+
+                if (foundInRecent) {
+                  console.log("✅ Outdated warning already present among the last N comments — skipping.");
                 } else {
-                  const previous = comments.find(c => c.body === outdatedComment);
+                  // Optionally: delete old instance of the same comment elsewhere (outside the last N)
+                  const previous = comments.find(c => c.body === commentBody);
                   if (previous) {
-                    console.log("🧽 Deleting old outdated comment to re-post");
+                    console.log("🧽 Deleting older outdated comment to re-post a fresh one");
                     await github.rest.issues.deleteComment({
                       owner,
                       repo,
@@ -331,10 +273,9 @@ jobs:
                     owner,
                     repo,
                     issue_number: prNumber,
-                    body: outdatedComment,
+                    body: commentBody,
                   });
                 }
-              }
 
               if (!is_outdated && hasOutdated) {
                 try {
