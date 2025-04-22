@@ -98,7 +98,7 @@ jobs:
 
             console.log(`💬 Checking for outdated comment on PR #${prNumber}`);
 
-            # START Testing
+            // START Testing
             const { data: comments } = await github.rest.issues.listComments({
               owner,
               repo,
@@ -132,36 +132,36 @@ jobs:
 
             // Extra: PR update time
             console.log(`⏱️ PR updated_at: ${pr?.updated_at ?? context.payload.pull_request.updated_at}`);
-            # END testing
+            // END testing
 
-            # const { data: comments } = await github.rest.issues.listComments({
-            #   owner,
-            #   repo,
-            #   issue_number: prNumber,
-            # });
+            // const { data: comments } = await github.rest.issues.listComments({
+            //   owner,
+            //   repo,
+            //   issue_number: prNumber,
+            // });
 
-            # const lastComment = comments[comments.length - 1];
-            # if (lastComment?.body === commentBody) {
-            #   console.log("✅ Last comment is already the outdated warning — no action needed.");
-            # } else {
-            #   const previous = comments.find(c => c.body === commentBody);
-            #   if (previous) {
-            #     console.log("🧽 Deleting old outdated comment to re-post");
-            #     await github.rest.issues.deleteComment({
-            #       owner,
-            #       repo,
-            #       comment_id: previous.id,
-            #     });
-            #   }
+            // const lastComment = comments[comments.length - 1];
+            // if (lastComment?.body === commentBody) {
+            //   console.log("✅ Last comment is already the outdated warning — no action needed.");
+            // } else {
+            //   const previous = comments.find(c => c.body === commentBody);
+            //   if (previous) {
+            //     console.log("🧽 Deleting old outdated comment to re-post");
+            //     await github.rest.issues.deleteComment({
+            //       owner,
+            //       repo,
+            //       comment_id: previous.id,
+            //     });
+            //   }
 
-            #   console.log("💬 Posting fresh outdated warning");
-            #   await github.rest.issues.createComment({
-            #     owner,
-            #     repo,
-            #     issue_number: prNumber,
-            #     body: commentBody,
-            #   });
-            # }
+            //   console.log("💬 Posting fresh outdated warning");
+            //   await github.rest.issues.createComment({
+            //     owner,
+            //     repo,
+            //     issue_number: prNumber,
+            //     body: commentBody,
+            //   });
+            // }
 
       - name: Remove label if up-to-date
         if: steps.outdated_check.outputs.is_outdated == 'false'
@@ -257,7 +257,7 @@ jobs:
               const { data: labels } = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber });
               const hasOutdated = labels.some(label => label.name === outdatedLabel);
 
-              # START testing
+              // START testing
               const { data: comments } = await github.rest.issues.listComments({
                 owner,
                 repo,
@@ -293,7 +293,7 @@ jobs:
               console.log(`⏱️ PR updated_at: ${pr?.updated_at ?? context.payload.pull_request.updated_at}`);
 
 
-              # END Testing
+              // END Testing
 
               // 5. Label or unlabel
               if (is_outdated && !hasOutdated) {
