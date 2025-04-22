@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "*/5 * * * *" # every 2 hours UTC --> "0 */2 * * *"
+    - cron: "0 5 * * *" # Every day at 05:00 UTC ## Every 2 hours UTC:"0 */2 * * *" ## Every 5 min UTC: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,6 +17,7 @@ permissions:
 env:
   OUTDATED_LABEL: outdated
   OUTDATED_COMMENT: "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch."
+  COMMENT_LOOKBACK_COUNT: 2
 
 jobs:
   # ───────────────────────────────────────────────
@@ -103,13 +104,21 @@ jobs:
               issue_number: prNumber,
             });
 
-            const lastComment = comments[comments.length - 1];
-            if (lastComment?.body === commentBody) {
-              console.log("✅ Last comment is already the outdated warning — no action needed.");
+            // Get last N comments
+            const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 1;
+            const recentComments = comments.slice(-lookback);
+
+            // Check if any of the last N comments is the outdated warning
+            console.log(`🔍 Checking last ${recentComments.length} comment(s) for outdated warning...`);
+            const foundInRecent = recentComments.some(c => c.body === commentBody);
+
+            if (foundInRecent) {
+              console.log("✅ Outdated warning already present among the last N comments — skipping.");
             } else {
+              // Optionally: delete old instance of the same comment elsewhere (outside the last N)
               const previous = comments.find(c => c.body === commentBody);
               if (previous) {
-                console.log("🧽 Deleting old outdated comment to re-post");
+                console.log("🧽 Deleting older outdated comment to re-post a fresh one");
                 await github.rest.issues.deleteComment({
                   owner,
                   repo,
@@ -171,7 +180,7 @@ jobs:
           script: |
             const { repo, owner } = context.repo;
             const outdatedLabel = process.env.OUTDATED_LABEL;
-            const outdatedComment = process.env.OUTDATED_COMMENT;
+            const commentBody = process.env.OUTDATED_COMMENT;
 
             console.log(`🔁 Running scheduled PR check for ${owner}/${repo}`);
 
@@ -237,13 +246,21 @@ jobs:
                   issue_number: prNumber,
                 });
 
-                const lastComment = comments[comments.length - 1];
-                if (lastComment?.body === outdatedComment) {
-                  console.log("✅ Last comment is already the outdated warning — no action needed.");
+                // Get last N comments
+                const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 1;
+                const recentComments = comments.slice(-lookback);
+
+                // Check if any of the last N comments is the outdated warning
+                console.log(`🔍 Checking last ${recentComments.length} comment(s) for outdated warning...`);
+                const foundInRecent = recentComments.some(c => c.body === commentBody);
+
+                if (foundInRecent) {
+                  console.log("✅ Outdated warning already present among the last N comments — skipping.");
                 } else {
-                  const previous = comments.find(c => c.body === outdatedComment);
+                  // Optionally: delete old instance of the same comment elsewhere (outside the last N)
+                  const previous = comments.find(c => c.body === commentBody);
                   if (previous) {
-                    console.log("🧽 Deleting old outdated comment to re-post");
+                    console.log("🧽 Deleting older outdated comment to re-post a fresh one");
                     await github.rest.issues.deleteComment({
                       owner,
                       repo,
@@ -256,7 +273,7 @@ jobs:
                     owner,
                     repo,
                     issue_number: prNumber,
-                    body: outdatedComment,
+                    body: commentBody,
                   });
                 }
               }
@@ -279,3 +296,18 @@ jobs:
                 }
               }
             }
+
+# ───────────────────────────────────────────────
+# 🛠 DEBUGGING TIPS
+# To enable step debug logs:
+# → Go to repo Settings > Actions > Secrets and add:
+#    Name: ACTIONS_STEP_DEBUG
+#    Value: true
+#
+# Inside github-script blocks, log debug messages like:
+# → core.debug("This is a custom debug message");
+# (note: core.debug() only shows up if ACTIONS_STEP_DEBUG is true)
+#
+# Runner-level debug (less common):
+# → Add secret: ACTIONS_RUNNER_DEBUG = true
+# ───────────────────────────────────────────────
