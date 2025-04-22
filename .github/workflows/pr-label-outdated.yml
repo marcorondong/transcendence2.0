@@ -194,7 +194,7 @@ jobs:
                 const isOutdated = compareStatus !== 'identical';
                 console.log(`🔍 compare.status: ${compareStatus}`);
                 console.log(`📘 is_outdated: ${isOutdated}`);
-                console.log(`🔍 PR is ${is_outdated ? '❌ outdated (needs to merge main)' : '✅ up-to-date'}`);
+                console.log(`🔍 PR is ${isOutdated ? '❌ outdated (needs to merge main)' : '✅ up-to-date'}`);
                 return isOutdated;
               }
 
