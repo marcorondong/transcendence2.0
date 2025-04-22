@@ -3,6 +3,8 @@ name: PR Outdated Label
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
   schedule:
     - cron: "*/5 * * * *" # every 2 hours UTC --> "0 */2 * * *"
   workflow_dispatch:
@@ -94,20 +96,34 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const commentBody = process.env.OUTDATED_COMMENT;
 
-            console.log(`💬 Checking if comment exists on PR #${prNumber}`);
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
-            const alreadyCommented = comments.some(comment => comment.body === commentBody);
+            console.log(`💬 Checking for outdated comment on PR #${prNumber}`);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
 
-            if (!alreadyCommented) {
-              console.log("💬 Comment not found — adding new comment");
+            const lastComment = comments[comments.length - 1];
+            if (lastComment?.body === commentBody) {
+              console.log("✅ Last comment is already the outdated warning — no action needed.");
+            } else {
+              const previous = comments.find(c => c.body === commentBody);
+              if (previous) {
+                console.log("🧽 Deleting old outdated comment to re-post");
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: previous.id,
+                });
+              }
+
+              console.log("💬 Posting fresh outdated warning");
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number: prNumber,
                 body: commentBody,
               });
-            } else {
-              console.log("✅ Comment already exists");
             }
 
       - name: Remove label if up-to-date
@@ -140,7 +156,7 @@ jobs:
   # ⏰ JOB 2: Scheduled (checks open PRs via GitHub API only)
   # ───────────────────────────────────────────────
   label_on_schedule_event:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: Label outdated PRs (scheduled check)
     runs-on: ubuntu-latest
 
@@ -214,13 +230,35 @@ jobs:
                   labels: [outdatedLabel],
                 });
 
-                console.log("💬 Adding comment about outdated PR");
-                await github.rest.issues.createComment({
+                console.log(`💬 Checking for outdated comment on PR #${prNumber}`);
+                const { data: comments } = await github.rest.issues.listComments({
                   owner,
                   repo,
                   issue_number: prNumber,
-                  body: outdatedComment,
                 });
+
+                const lastComment = comments[comments.length - 1];
+                if (lastComment?.body === outdatedComment) {
+                  console.log("✅ Last comment is already the outdated warning — no action needed.");
+                } else {
+                  const previous = comments.find(c => c.body === outdatedComment);
+                  if (previous) {
+                    console.log("🧽 Deleting old outdated comment to re-post");
+                    await github.rest.issues.deleteComment({
+                      owner,
+                      repo,
+                      comment_id: previous.id,
+                    });
+                  }
+
+                  console.log("💬 Posting fresh outdated warning");
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    body: outdatedComment,
+                  });
+                }
               }
 
               if (!is_outdated && hasOutdated) {
