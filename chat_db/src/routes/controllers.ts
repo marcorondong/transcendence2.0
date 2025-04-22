@@ -1,5 +1,6 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { idZodSchema, idsZodSchema, IdInput, IdsInput } from "./zodSchemas";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { idZodSchema, idsZodSchema } from "./zodSchemas";
+import type { IdInput, IdsInput } from "./zodSchemas";
 import {
 	createUser,
 	addToBlockList,
