@@ -3,15 +3,18 @@ import {
 	totalStatsSchema,
 	headToHeadSchema,
 	createGameSchema,
-	deleteIdSchema,
 } from "./routeSchemas";
 import {
 	gameHistoryHandler,
 	totalStatsHandler,
 	headToHeadHandler,
 	createGameHandler,
-	deleteIdHandler,
 } from "./controllers";
+
+export const createGameOpt = {
+	schema: createGameSchema,
+	handler: createGameHandler,
+};
 
 export const gameHistoryOpt = {
 	schema: gameHistorySchema,
@@ -27,14 +30,3 @@ export const headToHeadOpt = {
 	schema: headToHeadSchema,
 	handler: headToHeadHandler,
 };
-
-export const createGameOpt = {
-	schema: createGameSchema,
-	handler: createGameHandler,
-};
-
-export const deleteIdOpt = {
-	schema: deleteIdSchema,
-	handler: deleteIdHandler,
-};
-

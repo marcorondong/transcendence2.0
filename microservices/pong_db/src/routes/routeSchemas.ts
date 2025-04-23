@@ -1,10 +1,19 @@
 import {
 	idZodSchema,
 	idsZodSchema,
+	gameSchema,
 	gameHistoryResponseSchema,
 	statsResponseSchema,
 	successResponseSchema,
 } from "./zodSchemas";
+
+export const createGameSchema = {
+	summary: "Create Game",
+	description: "Create a new game record",
+	tags: ["Game"],
+	body: gameSchema,
+	response: { 201: successResponseSchema },
+};
 
 export const gameHistorySchema = {
 	summary: "Get Game History",
@@ -28,20 +37,4 @@ export const headToHeadSchema = {
 	tags: ["Game"],
 	params: idsZodSchema,
 	response: { 200: statsResponseSchema },
-};
-
-export const createGameSchema = {
-	summary: "Create Game",
-	description: "Create a new game record",
-	tags: ["Game"],
-	body: idsZodSchema,
-	response: { 201: successResponseSchema },
-};
-
-export const deleteIdSchema = {
-	summary: "Delete Game ID",
-	description: "Delete a game record by ID",
-	tags: ["Game"],
-	body: idZodSchema,
-	response: { 200: successResponseSchema },
 };

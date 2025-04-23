@@ -12,6 +12,27 @@ services:
     command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
     networks:
       - Transcendence2.0
+
+  pong_db:
+    image: pong_db_image
+    container_name: pong_db_container
+    build: ./microservices/pong_db
+    environment:
+      # - pass env variables from .env file
+      - DATABASE_URL=file:/pong_db/DB/pongDB.db
+      - NODE_ENV=development
+      - PORT=3011
+      - HOST=0.0.0.0
+    volumes:
+      - ./microservices/pong_db/src/:/pong_db/src/ #TODO remove in production
+      - ./microservices/pong_db/prisma/:/pong_db/prisma/ #TODO remove in production
+      # - /home/iguliyev/DBs/pong/:/pong_db/DB/ #TODO adjust local path and uncomment in production
+    ports:
+      - 3011:3011 #TODO remove it in production
+    networks:
+      - Transcendence2.0
+    restart: always
+
   ai-bot:
     build:
       context: ./ssg

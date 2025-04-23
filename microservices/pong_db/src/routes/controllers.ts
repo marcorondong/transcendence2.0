@@ -1,66 +1,53 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import type { IdInput, IdsInput, GameInput, StatsInput } from "./zodSchemas";
+import httpError from "http-errors";
 import {
-	idZodSchema,
-	idsZodSchema,
-	gameHistoryResponseSchema,
-	statsResponseSchema,
-	successResponseSchema,
-} from "./zodSchemas";
-import type { IdInput, IdsInput } from "./zodSchemas";
-import {
+	createGame,
 	getGameHistory,
 	getTotalStats,
 	getHeadToHeadStats,
-	createGame,
-	deleteId,
 } from "./service";
+
+export async function createGameHandler(
+	request: FastifyRequest<{ Body: GameInput }>,
+	reply: FastifyReply,
+) {
+	const { winnerId, loserId } = request.body;
+	if (winnerId === loserId)
+		throw new httpError.BadRequest(
+			"winnerId and loserId cannot be the same",
+		);
+	await createGame(winnerId, loserId);
+	reply.status(201).send({ success: true });
+}
 
 export async function gameHistoryHandler(
 	request: FastifyRequest<{ Params: IdInput }>,
 	reply: FastifyReply,
 ) {
-	const { userId } = idZodSchema.parse(request.params);
+	const { userId } = request.params;
 	const gameHistory = await getGameHistory(userId);
-	const gameHistoryResponse = gameHistoryResponseSchema.parse(gameHistory);
-	reply.status(200).send({ gameHistoryResponse });
+	reply.status(200).send(gameHistory);
 }
 
 export async function totalStatsHandler(
 	request: FastifyRequest<{ Params: IdInput }>,
 	reply: FastifyReply,
 ) {
-	const { userId } = idZodSchema.parse(request.params);
-	const stats = await getTotalStats(userId);
-	const statsResponse = statsResponseSchema.parse(stats);
-	reply.status(200).send({ statsResponse });
+	const { userId } = request.params;
+	const totalStats = await getTotalStats(userId);
+	reply.status(200).send(totalStats);
 }
 
 export async function headToHeadHandler(
 	request: FastifyRequest<{ Params: IdsInput }>,
 	reply: FastifyReply,
 ) {
-	const { userId, opponentId } = idsZodSchema.parse(request.params);
+	const { userId, opponentId } = request.params;
+	if (userId === opponentId)
+		throw new httpError.BadRequest(
+			"userId and opponentId cannot be the same",
+		);
 	const stats = await getHeadToHeadStats(userId, opponentId);
-	const statsResponse = statsResponseSchema.parse(stats);
-	reply.status(200).send({ statsResponse });
-}
-
-export async function createGameHandler(
-	request: FastifyRequest<{ Body: IdsInput }>,
-	reply: FastifyReply,
-) {
-	const { winnerId, loserId } = idsZodSchema.parse(request.body);
-	await createGame(winnerId, loserId);
-	const successResponse = successResponseSchema.parse({ success: true });
-	reply.status(201).send(successResponse);
-}
-
-export async function deleteIdHandler(
-	request: FastifyRequest<{ Body: IdInput }>,
-	reply: FastifyReply,
-) {
-	const { userId } = idZodSchema.parse(request.body);
-	await deleteId(userId);
-	const successResponse = successResponseSchema.parse({ success: true });
-	reply.status(200).send(successResponse);
+	reply.status(200).send(stats);
 }
