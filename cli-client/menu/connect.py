@@ -1,5 +1,6 @@
 from websockets.sync.client import connect
 import json
+import curses
 
 HOST = "localhost"
 PORT = "3010"
@@ -7,12 +8,12 @@ ROUTE = "/pong/"
 WS_ROUTE = f"ws://{HOST}:{PORT}{ROUTE}"
 
 TAB_SIZE = 2
-CONTROLS_TUTORIAL="Use 'w' to go up with paddle, 's' to go down with paddle, 'q' to stop. Look at browser; rendering is not implemented in cli yet."
+CONTROLS_TUTORIAL="Use 'w' to go up with paddle, 's' to go down with paddle, 'q' to quit. Look at browser; rendering is not implemented in cli yet."
 
 move_mapping = {
-	"w":"up",
-	"s":"down",
-	"q":"stop",
+	ord("w") :"up",
+	ord("s") :"down",
+	ord("q") :"quit",
 }
 
 def send_move(websocket, move):
@@ -20,20 +21,17 @@ def send_move(websocket, move):
 	websocket.send(json.dumps(data))
 
 def get_move(stdscr):
-	move = stdscr.getkey()
-	if move in move_mapping:
-		return move_mapping[move]
-	else:
-		return "none"
+	move = stdscr.getch()
+	return move_mapping.get(move, "none")
 
 def client(stdscr):
-	with connect(WS_ROUTE) as websocket:
+	with connect(WS_ROUTE, close_timeout=0.1, ping_timeout=0.1) as websocket:
 		stdscr.addstr(0, TAB_SIZE, CONTROLS_TUTORIAL)
 		stdscr.refresh()
 		while True:
 			move = get_move(stdscr)
-			if move == "stop":
-				#FIXME this does not work how i want i to. It should stop immediately but it does not 
-				#print("We should break")
-				return
-			send_move(websocket, move)
+			if move == "quit":
+				websocket.close()
+				break
+			if move != "none":
+				send_move(websocket, move)

@@ -56,13 +56,8 @@ def callHandlerFunction(stdscr, selectedItem):
 	"""
 	stdscr.clear()
 	curses.curs_set(0)
-	if selectedItem in menuItems:
-		handler = menuItems[selectedItem]
-		handler(stdscr)
-	else:
-		stdscr.addstr(1, TAB_SIZE, selectedItem + " is not implemented yet")
-		pressAnyKey(stdscr)
-
+	handler = menuItems.get(selectedItem, pressAnyKey) # if selectedItem has no defined handler, press any key to return to menu
+	handler(stdscr)
 
 def menuLoop(stdscr, title, items):
 	"""
@@ -70,7 +65,7 @@ def menuLoop(stdscr, title, items):
 	Args:
 		stdscr: The standard screen object.
 		title: The title of the menu.
-		items: The list of items (as strings) to display. possible items see defineMenu.py
+		items: The list of items (as strings) to display. see also menuItems.py
 	"""
 
 	menuLength = items.__len__() + 1

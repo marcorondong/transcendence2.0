@@ -3,17 +3,16 @@ from menu.drawMenu import menuLoop
 from window.windowColors import setColors
 import curses
 
-def main(stdscr):
-	setColors(stdscr, curses.COLOR_BLUE, curses.COLOR_BLACK)
+def mainMenu(stdscr):
+	setColors(stdscr, curses.COLOR_WHITE, curses.COLOR_BLACK)
 	guestUser = "guest"
 	menuName = "Welcome " + guestUser + "! Main menu:"
 	menuLoop(stdscr, menuName, [
 		"Random Game",
-		"Random Game",
 		"Register",
-		"nonexistent",
+		"nonexistent menu option",
 	])
 	
 if __name__ == "__main__":
-	curses.wrapper(main)
+	curses.wrapper(mainMenu)
 		# curses.wrapper(main) initializes the screen and handles cleanup

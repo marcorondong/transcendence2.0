@@ -19,7 +19,7 @@ clean:
 	docker-compose down
 
 cli: all
-	python3 cli-client/mainMenu.py
+	make -C cli-client
 
 $(SECRET_DIRECTORIES):
 	mkdir -p $(SECRET_DIRECTORIES)
