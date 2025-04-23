@@ -1,5 +1,15 @@
-import {gamesSchema, totalStatsSchema, headToHeadSchema, createGameSchema} from './routeSchemas';
-import { gamesHandler, totalStatsHandler, headToHeadHandler, createGameHandler } from './controllers';
+import {
+	gamesSchema,
+	totalStatsSchema,
+	headToHeadSchema,
+	createGameSchema,
+} from "./routeSchemas";
+import {
+	gamesHandler,
+	totalStatsHandler,
+	headToHeadHandler,
+	createGameHandler,
+} from "./controllers";
 
 export const gamesOpt = {
 	schema: gamesSchema,
@@ -20,4 +30,3 @@ export const createGameOpt = {
 	schema: createGameSchema,
 	handler: createGameHandler,
 };
-

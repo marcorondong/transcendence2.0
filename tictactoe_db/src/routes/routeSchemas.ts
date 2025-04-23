@@ -11,9 +11,7 @@ export const gamesSchema = {
 	description: "Fetches all games associated with a specific player ID.",
 	tags: ["tictactoe"],
 	params: idZodSchema,
-	response: {
-		200: gamesResponseSchema,
-	},
+	response: { 200: gamesResponseSchema },
 };
 
 export const totalStatsSchema = {
@@ -21,9 +19,7 @@ export const totalStatsSchema = {
 	description: "Fetches the total statistics for a player based on their ID.",
 	tags: ["tictactoe"],
 	params: idZodSchema,
-	response: {
-		200: statsResponseSchema,
-	},
+	response: { 200: statsResponseSchema },
 };
 
 export const headToHeadSchema = {
@@ -32,9 +28,7 @@ export const headToHeadSchema = {
 		"Fetches the head-to-head statistics between two players based on their IDs.",
 	tags: ["tictactoe"],
 	params: headToHeadZodSchema,
-	response: {
-		200: statsResponseSchema,
-	},
+	response: { 200: statsResponseSchema },
 };
 
 export const createGameSchema = {
@@ -42,7 +36,5 @@ export const createGameSchema = {
 	description: "Creates a new game with the specified players and result.",
 	tags: ["tictactoe"],
 	body: createGameZodSchema,
-	// response: {
-	// 	201: createGameZodSchema,
-	// },
+	// response: { 201: createGameZodSchema },
 };

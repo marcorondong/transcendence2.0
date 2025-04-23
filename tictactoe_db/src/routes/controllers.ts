@@ -67,10 +67,14 @@ export async function headToHeadHandler(
 }
 
 export async function createGameHandler(
-	req: FastifyRequest<{ Body: { playerXId: string; playerOId: string; result: string } }>,
+	req: FastifyRequest<{
+		Body: { playerXId: string; playerOId: string; result: string };
+	}>,
 	res: FastifyReply,
 ) {
-	const { playerXId, playerOId, result } = createGameZodSchema.parse(req.body);
+	const { playerXId, playerOId, result } = createGameZodSchema.parse(
+		req.body,
+	);
 	await createGameInDB(playerXId, playerOId, result);
 	res.status(201).send({ message: "Game created successfully" });
 }
