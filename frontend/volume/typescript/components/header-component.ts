@@ -45,17 +45,19 @@ export class HeaderComponent extends HTMLElement {
 		const list = document.getElementById("navigation");
 		if (list) {
 			list.classList.add(
-				"absolute",
-				"inset-0",
+				"fixed",
+				"top-0",
+				"right-0",
+				"left-0",
+				"bottom-0",
 				"flex",
 				"hidden",
 				"w-full",
 				"flex-col",
 				"items-stretch",
-				"justify-start",
+				"justify-center",
 				"gap-4",
 				"p-6",
-				"pt-30",
 				"sm:static",
 				"sm:flex",
 				"sm:w-auto",

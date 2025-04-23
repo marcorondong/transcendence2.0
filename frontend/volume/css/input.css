@@ -12,5 +12,5 @@
 	@apply cursor-pointer rounded-full bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-cyan-600 dark:bg-cyan-700 dark:text-amber-50 hover:dark:bg-cyan-600;
 }
 .pong-nav-link {
-	@apply rounded-full p-2 text-center transition-colors duration-300 hover:bg-indigo-100 hover:text-black dark:text-amber-100 hover:dark:bg-indigo-900 hover:dark:text-amber-100;
+	@apply rounded-full p-2 text-center transition-colors duration-300 hover:bg-indigo-100 hover:text-black dark:text-amber-100 hover:dark:bg-indigo-900 hover:dark:text-amber-100 active:dark:bg-indigo-500;
 }

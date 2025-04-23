@@ -9,12 +9,35 @@ export class Router {
 		const array: string[] = [];
 		for (const link of this.navLinks) {
 			const str = link.href;
-			const n = str.lastIndexOf("/");
-			const result = str.substring(n);
+			const result = this.stringAfterSlash(str);
 			array.push(result);
 		}
 
 		return array;
+	}
+
+	stringAfterSlash(link: string) {
+		const n = link.lastIndexOf("/");
+		return link.substring(n);
+	}
+
+	setActiveViewinNavigation(link: string) {
+		const navLinks = [...this.navLinks];
+		navLinks.map((l) => {
+			const li = l.querySelector("li");
+			if (li) {
+				li.classList.remove("dark:bg-indigo-900");
+			}
+		});
+		const linkElement = navLinks.find(
+			(l) =>
+				this.stringAfterSlash(l.href) === this.stringAfterSlash(link),
+		);
+
+		const listItem = linkElement?.querySelector("li");
+		if (listItem) {
+			listItem.classList.add("dark:bg-indigo-900");
+		}
 	}
 
 	addEventListenerNavLinks() {
@@ -62,6 +85,7 @@ export class Router {
 
 	async appendComponent() {
 		const componentName = window.location.pathname;
+		this.setActiveViewinNavigation(componentName);
 		try {
 			const js = await this.importComponent(componentName);
 			if (js && this.containerDiv) {

@@ -24,6 +24,16 @@ export class PongComponent extends HTMLElement {
 	fullscreenButton = document.createElement("button");
 
 	adjustCanvasToWindow() {
+		const windowWidth = window.innerWidth;
+		if (windowWidth < 640) {
+			this.canvasToWindow = 0.9;
+		}
+		if (windowWidth >= 640 && windowWidth < 1024) {
+			this.canvasToWindow = 0.75;
+		}
+		if (windowWidth >= 1024) {
+			this.canvasToWindow = 0.6;
+		}
 		this.canvasWidth = window.innerWidth * this.canvasToWindow;
 		this.adjustToCanvasWidth();
 		if (this.canvas) {
@@ -214,7 +224,6 @@ export class PongComponent extends HTMLElement {
 
 		document.addEventListener("keydown", this, false);
 		document.addEventListener("keyup", this, false);
-		// document.addEventListener("click", this);
 		window.addEventListener("resize", this);
 		this.canvas.addEventListener("touchstart", this);
 		this.canvas.addEventListener("touchend", this);
@@ -243,11 +252,12 @@ export class PongComponent extends HTMLElement {
 			"md:right-5",
 			"lg:top-8",
 			"lg:right-8",
-			"hidden",
+			"invisible",
 			"absolute",
 			"opacity-60",
-			"group-hover:block",
+			"group-hover:visible",
 			"pong-button-pale",
+			"touch-visible",
 		);
 		const fullscreenIcon = new IconComponent("fullscreen", 7);
 		fullscreenIcon.id = "fullscreen-icon";
@@ -322,6 +332,7 @@ export class PongComponent extends HTMLElement {
 			this.paddleDirection = 0;
 	}
 	onClick(event) {}
+
 	onResize() {
 		this.adjustCanvasToWindow();
 	}
