@@ -11,14 +11,14 @@ export class PongComponent extends HTMLElement {
 	// VARS
 	aspectRatio = 16 / 9;
 	canvasToWindow = 0.6;
-	canvasWidth: number;
+	canvasWidth: number = 0;
 	paddleDirection = 0;
-	canvasHeight: number;
-	canvasWidthHalf: number;
-	canvasHeightHalf: number;
-	scaleX: number;
-	scaleY: number;
-	paddleWidth: number;
+	canvasHeight: number = 0;
+	canvasWidthHalf: number = 0;
+	canvasHeightHalf: number = 0;
+	scaleX: number = 0;
+	scaleY: number = 0;
+	paddleWidth: number = 0;
 
 	// Buttons
 	fullscreenButton = document.createElement("button");

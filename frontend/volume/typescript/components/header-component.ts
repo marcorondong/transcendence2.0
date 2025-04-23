@@ -11,7 +11,7 @@ export class HeaderComponent extends HTMLElement {
 	connectedCallback() {
 		console.log("Header CONNECTED");
 
-		// this.classList.add("flex", "content-center", "justify-between", "py-9");
+		// LOGO ON LEFT SIDE
 		const logoAnchor = document.createElement("a");
 		logoAnchor.href = "/";
 		const logo = document.createElement("img");
@@ -20,16 +20,18 @@ export class HeaderComponent extends HTMLElement {
 		logoAnchor.appendChild(logo);
 		this.appendChild(logoAnchor);
 
-		const navigation = document.createElement("div");
+		// CONTAINER FOR NAVIGATION
+		const navigation = document.createElement("nav");
 		navigation.classList.add("flex", "items-center", "gap-4");
-
 		const menuButton = document.createElement("button");
 		menuButton.classList.add("pong-button", "sm:hidden");
-		menuButton.id = "navbar-button";
 		this.menuIcon.setSize(6);
 		this.menuIcon.setIcon("menu");
 		menuButton.appendChild(this.menuIcon);
 		navigation.appendChild(menuButton);
+		this.appendChild(navigation);
+
+		// CLOSE BUTTON
 		const closeButton = document.createElement("button");
 		const closeIcon = new IconComponent("close", 6);
 		closeButton.append(closeIcon);
@@ -41,7 +43,9 @@ export class HeaderComponent extends HTMLElement {
 			"top-6",
 			"hidden",
 		);
+		this.appendChild(closeButton);
 
+		// LIST OF NAVIGATION LINKS
 		const list = document.getElementById("navigation");
 		if (list) {
 			list.classList.add(
@@ -72,16 +76,14 @@ export class HeaderComponent extends HTMLElement {
 				"z-42",
 			);
 			navigation.appendChild(list);
-
-			this.appendChild(closeButton);
 		}
 
+		// THEME TOGGLE
 		const themeToggle = new ThemeToggleComponent();
 		themeToggle.setSize(6);
 		navigation.appendChild(themeToggle);
 
-		this.appendChild(navigation);
-
+		// EVENT LISTENERS
 		this.menuIcon.addEventListener("click", () => {
 			list?.classList.remove("hidden");
 			closeButton.classList.remove("hidden");
