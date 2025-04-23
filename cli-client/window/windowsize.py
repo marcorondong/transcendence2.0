@@ -1,6 +1,6 @@
 import curses
 
-def get_window_size(stdscr):
+def getWindowSize(stdscr):
 	"""
 	Get the current size of the terminal window.
 	
@@ -10,11 +10,11 @@ def get_window_size(stdscr):
 	height, width = stdscr.getmaxyx()
 	return height, width
 
-def print_window_size(stdscr):
+def printWindowSize(stdscr):
 	"""
 	Print the current size of the terminal window.
 	"""
-	size = get_window_size(stdscr)
+	size = getWindowSize(stdscr)
 	if size:
 		height, width = size
 		stdscr.addstr(0, 0, f"Window size: {height} rows, {width} columns")
@@ -28,7 +28,7 @@ def main(stdscr):
 	"""
 	while True:
 		stdscr.clear()
-		print_window_size(stdscr)
+		printWindowSize(stdscr)
 		stdscr.refresh()
 
 curses.wrapper(main)

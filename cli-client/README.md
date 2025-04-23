@@ -2,8 +2,8 @@
 1. cd into `cli-client` folder
 2. create virtual env `virtualenv venv`
 3. Activate virtual env => `source venv/bin/activate`
-4. Optional: check if virtual env is activated by running `which python3`. It should give output something like `<workspaceFolder>/cli-client/venv/bin/python3`. if it is like `/usr/bin/ptyhon3` it is NOT activated
-5. run `pip install -r  requirements.txt` for installing dependecies
+4. Optional: check if virtual env is activated by running `which python3`. It should give output something like `<workspaceFolder>/cli-client/venv/bin/python3`. if it is like `/usr/bin/python3` it is NOT activated
+5. run `pip install -r  requirements.txt` for installing dependencies
 
 ## App
 0. RUN pong-api server
