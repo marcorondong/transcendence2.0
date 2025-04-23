@@ -70,4 +70,9 @@ export class PongGameSingles extends APongGame {
 			rightPaddle: this.rightPaddle.getPaddleJson(),
 		};
 	}
+
+	getScoreBoard(): ScoreBoard
+	{
+		return this.score;
+	}
 }
