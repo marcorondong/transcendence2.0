@@ -1,13 +1,12 @@
 import asyncio
 import websockets
-import ssl
 import json
 import readchar
 
 HOST = "localhost"
 PORT = "3010"
 ROUTE = "/pong/"
-WS_ROUTE = f"wss://{HOST}:{PORT}{ROUTE}"
+WS_ROUTE = f"ws://{HOST}:{PORT}{ROUTE}"
 
 CONTROLS_TUTORIAL="Use 'w' to go up with paddle, 's' to go down with paddle, 'q' to stop. Look at browser; rendering is not implemented in cli yet."
 
@@ -31,8 +30,7 @@ async def get_move():
 
 
 async def client():
-	ssl_context = ssl._create_unverified_context()
-	async with websockets.connect(WS_ROUTE, ssl=ssl_context) as websocket:
+	async with websockets.connect(WS_ROUTE) as websocket:
 		print(f"Connected to server.{CONTROLS_TUTORIAL}")
 		while True:
 			move = await get_move()
