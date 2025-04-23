@@ -1,5 +1,17 @@
 import requests
 import curses
+from menu.connect import client, TAB_SIZE
+
+BACK_BUTTON = "Back"
+
+def randomGame(stdscr):
+	"""
+	get a random game
+	"""
+	stdscr.addstr(1, TAB_SIZE, "click http://localhost:3010/pingpong")
+	client(stdscr)
+	pressAnyKey(stdscr)
+	stdscr.refresh()
 
 def register(stdscr):
 	"""
@@ -30,14 +42,6 @@ def logout(stdscr):
 	"""
 	print("Logging out...")
 	# logic later
-
-def randomGame(stdscr):
-	"""
-	get a random game
-	"""
-	stdscr.addstr(1, 0, "To queue for a random game...")
-	stdscr.addstr(2, 0, "click http://localhost:3010/pingpong to visit website")
-	pressAnyKey(stdscr)
 
 def pressAnyKey(stdscr):
 	"""

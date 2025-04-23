@@ -1,8 +1,5 @@
 import curses
-from menu.menuItems import menuItems
-
-tab = 2
-backButton = "Back"
+from menu.menuItems import menuItems, pressAnyKey, TAB_SIZE, BACK_BUTTON
 
 def cursorUp(stdscr, menuLength, position):
 	if position > 1:
@@ -26,7 +23,7 @@ def drawMenu(stdscr, title, items, position):
 	Args:
 		stdscr: The standard screen object.
 		title: The title of the menu.
-		items: The list of items (as strings) to display. possible items see defineMenu.py
+		items: The list of items (as strings) to display. possible items see menuItems.py
 		position: The current position of the cursor.
 	"""
 
@@ -34,23 +31,23 @@ def drawMenu(stdscr, title, items, position):
 	curses.curs_set(2)
 
 	stdscr.addstr(0, 0, title)
-	stdscr.addstr(items.__len__() + 1, tab * 2, backButton)
+	stdscr.addstr(items.__len__() + 1, TAB_SIZE * 2, BACK_BUTTON)
 
 	for i, line in enumerate(items):
-		stdscr.addstr(i + 1, tab * 2, line)
+		stdscr.addstr(i + 1, TAB_SIZE * 2, line)
 		
-	stdscr.move(position, tab)
+	stdscr.move(position, TAB_SIZE)
 	stdscr.refresh()
 
 def drawCursor(stdscr, position):
 	"""
-	Draws the cursor on the screen without refreshing the menu items.
+	Puts the cursor to (position, TAB_SIZE) without refreshing the menu items.
 	Args:
 		stdscr: The standard screen object.
 		position: The current position of the cursor.
 	"""
 	
-	stdscr.move(position, tab)
+	stdscr.move(position, TAB_SIZE)
 	stdscr.refresh()
 
 def callHandlerFunction(stdscr, selectedItem):
@@ -59,8 +56,13 @@ def callHandlerFunction(stdscr, selectedItem):
 	"""
 	stdscr.clear()
 	curses.curs_set(0)
-	handler = menuItems[selectedItem]
-	handler(stdscr)
+	if selectedItem in menuItems:
+		handler = menuItems[selectedItem]
+		handler(stdscr)
+	else:
+		stdscr.addstr(1, TAB_SIZE, selectedItem + " is not implemented yet")
+		pressAnyKey(stdscr)
+
 
 def menuLoop(stdscr, title, items):
 	"""
@@ -81,7 +83,7 @@ def menuLoop(stdscr, title, items):
 		elif key == curses.KEY_DOWN:
 			position = cursorDown(stdscr, menuLength, position)
 		elif key == curses.KEY_ENTER or key in [10, 13]:
-			if position == menuLength:
+			if position == menuLength: # last position is the "Back" button
 				break
 			else:
 				selectedItem = items[position - 1]
