@@ -11,9 +11,3 @@ modules:
     timeout: 1m
     http:
       preferred_ip_protocol: "ip4"
-
-  # uncomment to test post requests
-  # http_post_2xx:
-  #   prober: http
-  #   http:
-  #     method: POST
