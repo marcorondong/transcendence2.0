@@ -25,7 +25,7 @@ def get_move(stdscr):
 	return move_mapping.get(move, "none")
 
 def client(stdscr):
-	with connect(WS_ROUTE, close_timeout=0.1, ping_timeout=0.1) as websocket:
+	with connect(WS_ROUTE, close_timeout=0.1, ping_interval=None) as websocket:
 		stdscr.addstr(0, TAB_SIZE, CONTROLS_TUTORIAL)
 		stdscr.refresh()
 		while True:

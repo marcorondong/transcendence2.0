@@ -9,7 +9,6 @@ def randomGame(stdscr):
 	get a random game
 	"""
 	client(stdscr)
-	pressAnyKey(stdscr)
 
 def register(stdscr):
 	"""
