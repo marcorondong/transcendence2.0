@@ -1,0 +1,313 @@
+name: PR Outdated Label
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 5 * * *" # Every day at 05:00 UTC ## Every 2 hours UTC:"0 */2 * * *" ## Every 5 min UTC: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  OUTDATED_LABEL: outdated
+  OUTDATED_COMMENT: "⚠️ This PR is out-of-date with the base branch (`main`). Please merge the latest changes from `main` into your branch."
+  COMMENT_LOOKBACK_COUNT: 2
+
+jobs:
+  # ───────────────────────────────────────────────
+  # 🔁 JOB 1: PR-triggered (reacts to PR creation/update)
+  # ───────────────────────────────────────────────
+  label_on_pr_event:
+    if: github.event_name == 'pull_request'
+    name: Label outdated PR (on PR activity)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+          fetch-depth: 0
+
+      - name: Fetch main
+        run: git fetch origin main
+
+      - name: Check if PR is outdated (modular)
+        id: outdated_check
+        shell: bash
+        run: |
+          echo "🔍 Checking if PR is outdated..."
+
+          check_if_outdated() {
+            local base_sha="$1"
+            local head_sha="$2"
+            echo "📌 Base (main): $base_sha"
+            echo "📌 Head (PR):  $head_sha"
+
+            if git merge-base --is-ancestor "$base_sha" "$head_sha"; then
+              echo "✅ PR is up-to-date with main."
+              echo "is_outdated=false" >> $GITHUB_OUTPUT
+            else
+              echo "❌ PR is outdated — needs merge from main."
+              echo "is_outdated=true" >> $GITHUB_OUTPUT
+            fi
+          }
+
+          check_if_outdated origin/main "${{ github.event.pull_request.head.sha }}"
+
+      - name: Add label if missing
+        if: steps.outdated_check.outputs.is_outdated == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const labelName = process.env.OUTDATED_LABEL;
+            console.log(`🏷️  Checking labels for PR #${prNumber}`);
+
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber });
+            const hasLabel = labels.some(label => label.name === labelName);
+
+            if (!hasLabel) {
+              console.log(`➕ Adding '${labelName}' label`);
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: prNumber,
+                labels: [labelName],
+              });
+            } else {
+              console.log(`✅ '${labelName}' label already present`);
+            }
+
+      - name: Comment about outdated status
+        if: steps.outdated_check.outputs.is_outdated == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const commentBody = process.env.OUTDATED_COMMENT;
+
+            console.log(`💬 Checking for outdated comment on PR #${prNumber}`);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+
+            // Get last N comments
+            const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 1;
+            const recentComments = comments.slice(-lookback);
+
+            // Check if any of the last N comments is the outdated warning
+            console.log(`🔍 Checking last ${recentComments.length} comment(s) for outdated warning...`);
+            const foundInRecent = recentComments.some(c => c.body === commentBody);
+
+            if (foundInRecent) {
+              console.log("✅ Outdated warning already present among the last N comments — skipping.");
+            } else {
+              // Optionally: delete old instance of the same comment elsewhere (outside the last N)
+              const previous = comments.find(c => c.body === commentBody);
+              if (previous) {
+                console.log("🧽 Deleting older outdated comment to re-post a fresh one");
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: previous.id,
+                });
+              }
+
+              console.log("💬 Posting fresh outdated warning");
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: commentBody,
+              });
+            }
+
+      - name: Remove label if up-to-date
+        if: steps.outdated_check.outputs.is_outdated == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const labelName = process.env.OUTDATED_LABEL;
+
+            try {
+              console.log(`➖ Removing '${labelName}' label if exists...`);
+              await github.rest.issues.removeLabel({
+                owner,
+                repo,
+                issue_number: prNumber,
+                name: labelName
+              });
+            } catch (e) {
+              if (e.status === 404) {
+                console.log(`🚫 Label '${labelName}' not found — nothing to remove.`);
+              } else {
+                throw e;
+              }
+            }
+
+  # ───────────────────────────────────────────────
+  # ⏰ JOB 2: Scheduled (checks open PRs via GitHub API only)
+  # ───────────────────────────────────────────────
+  label_on_schedule_event:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    name: Label outdated PRs (scheduled check)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Label outdated PRs via API
+        uses: actions/github-script@v7
+        env:
+          OUTDATED_LABEL: ${{ env.OUTDATED_LABEL }}
+          OUTDATED_COMMENT: ${{ env.OUTDATED_COMMENT }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { repo, owner } = context.repo;
+            const outdatedLabel = process.env.OUTDATED_LABEL;
+            const commentBody = process.env.OUTDATED_COMMENT;
+
+            console.log(`🔁 Running scheduled PR check for ${owner}/${repo}`);
+
+            // 1. Get the latest commit on main
+            const mainRef = await github.rest.repos.getCommit({
+              owner,
+              repo,
+              ref: 'heads/main',
+            });
+            const mainSha = mainRef.data.sha;
+            console.log(`✅ Latest main commit: ${mainSha}`);
+
+            // 2. Get all open PRs targeting main
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              base: 'main'
+            });
+            console.log(`📋 Found ${prs.length} open PR(s) targeting main`);
+
+            for (const pr of prs) {
+              const prNumber = pr.number;
+              console.log(`🔎 Checking PR #${pr.number}: ${pr.title}`);
+              console.log(`🔄 Comparing main@${mainSha} to PR head @${pr.head.sha}`);
+
+              // 3. Compare base (main) with PR head
+              const compare = await github.rest.repos.compareCommits({
+                owner,
+                repo,
+                base: mainSha,
+                head: pr.head.sha,
+              });
+
+              function checkIfOutdated(compareStatus) {
+                const isOutdated = compareStatus !== 'identical';
+                console.log(`🔍 compare.status: ${compareStatus}`);
+                console.log(`📘 is_outdated: ${isOutdated}`);
+                console.log(`🔍 PR is ${isOutdated ? '❌ outdated (needs to merge main)' : '✅ up-to-date'}`);
+                return isOutdated;
+              }
+
+              const is_outdated = checkIfOutdated(compare.status);
+
+              // 4. Get current labels
+              const { data: labels } = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber });
+              const hasOutdated = labels.some(label => label.name === outdatedLabel);
+
+              // 5. Label or unlabel
+              if (is_outdated && !hasOutdated) {
+                console.log(`➕ Adding '${outdatedLabel}' label to PR #${prNumber}`);
+                await github.rest.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  labels: [outdatedLabel],
+                });
+
+                console.log(`💬 Checking for outdated comment on PR #${prNumber}`);
+                const { data: comments } = await github.rest.issues.listComments({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                });
+
+                // Get last N comments
+                const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 1;
+                const recentComments = comments.slice(-lookback);
+
+                // Check if any of the last N comments is the outdated warning
+                console.log(`🔍 Checking last ${recentComments.length} comment(s) for outdated warning...`);
+                const foundInRecent = recentComments.some(c => c.body === commentBody);
+
+                if (foundInRecent) {
+                  console.log("✅ Outdated warning already present among the last N comments — skipping.");
+                } else {
+                  // Optionally: delete old instance of the same comment elsewhere (outside the last N)
+                  const previous = comments.find(c => c.body === commentBody);
+                  if (previous) {
+                    console.log("🧽 Deleting older outdated comment to re-post a fresh one");
+                    await github.rest.issues.deleteComment({
+                      owner,
+                      repo,
+                      comment_id: previous.id,
+                    });
+                  }
+
+                  console.log("💬 Posting fresh outdated warning");
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    body: commentBody,
+                  });
+                }
+              }
+
+              if (!is_outdated && hasOutdated) {
+                try {
+                  console.log(`➖ Removing '${outdatedLabel}' label from PR #${prNumber}`);
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    name: outdatedLabel,
+                  });
+                } catch (e) {
+                  if (e.status === 404) {
+                    console.log(`🚫 Label '${outdatedLabel}' not found.`);
+                  } else {
+                    throw e;
+                  }
+                }
+              }
+            }
+
+# ───────────────────────────────────────────────
+# 🛠 DEBUGGING TIPS
+# To enable step debug logs:
+# → Go to repo Settings > Actions > Secrets and add:
+#    Name: ACTIONS_STEP_DEBUG
+#    Value: true
+#
+# Inside github-script blocks, log debug messages like:
+# → core.debug("This is a custom debug message");
+# (note: core.debug() only shows up if ACTIONS_STEP_DEBUG is true)
+#
+# Runner-level debug (less common):
+# → Add secret: ACTIONS_RUNNER_DEBUG = true
+# ───────────────────────────────────────────────

@@ -1,0 +1,26 @@
+name: Require up-to-date with main
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check_up_to_date:
+    name: Block merge if PR is outdated
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Fetch latest main
+        run: git fetch origin main
+
+      - name: Ensure branch is up-to-date with main
+        run: |
+          if ! git merge-base --is-ancestor origin/main ${{ github.event.pull_request.head.sha }}; then
+            echo "Error: Your branch is not up-to-date with 'main'. Please merge the latest 'main' into your branch."
+            exit 1
+          fi
