@@ -1,0 +1,17 @@
+services:
+  pong_db:
+    image: pong_db_image
+    container_name: pong_db_container
+    build: ../pong_db
+    environment:
+      - DATABASE_URL=file:/pong_db/DB/pongDB.db
+      - NODE_ENV=development
+      - PORT=3011
+      - HOST=0.0.0.0
+    volumes:
+      - ../pong_db/src/:/pong_db/src/
+      - ../pong_db/prisma/:/pong_db/prisma/
+      - /home/iguliyev/DBs/pong/:/pong_db/DB/
+    ports:
+      - 3011:3011
+    restart: always
