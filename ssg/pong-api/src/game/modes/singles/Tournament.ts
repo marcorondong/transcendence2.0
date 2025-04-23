@@ -2,6 +2,8 @@ import { PongPlayer } from "../../PongPlayer";
 import { EventEmitter } from "node:stream";
 import { PongRoomSingles } from "./PongRoomSingles";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";
+import { BlockchainQueue } from "../../../blockchain-transaction/BlockchainQueue";
+import { BlockchainData } from "../../../blockchain-transaction/BlockchainData";
 
 export enum ETournamentState {
 	LOBBY,
@@ -105,10 +107,21 @@ export class Tournament extends EventEmitter {
 		}
 	}
 
+	private sendMatchToQueue(room: PongRoomSingles)
+	{
+		const gameId: string = room.getId();
+		const player1: string = "Left player"; //TODO: replace with actual player Id once authorization is done
+		const player2: string = "Right Player"; //TODO: replace with actual player Id once authorization is done
+		const score1: number = room.getGame().getScoreBoard().getLeftPlayerGoals();
+		const score2: number = room.getGame().getScoreBoard().getRightPlayerGoals();
+		BlockchainQueue.putMatchInQue(new BlockchainData(gameId, player1, player2, score1, score2));
+	}
+
 	async waitForWinners(): Promise<void> {
 		const winnerPromises = Array.from(this.gamesPool).map(async (room) => {
 			const winner = await room.getRoomWinner();
 			const loser = await room.getRoomLoser();
+			this.sendMatchToQueue(room);
 			//console.log("Winner is ", winner.getTeamSide());
 			let notification = PongRoomSingles.createMatchStatusUpdate(
 				"You won, you will progress to next round once all matches of round are done",
