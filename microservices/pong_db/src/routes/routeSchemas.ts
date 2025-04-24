@@ -38,3 +38,10 @@ export const headToHeadSchema = {
 	params: idsZodSchema,
 	response: { 200: statsResponseSchema },
 };
+
+export const healthCheckSchema = {
+	summary: "Health Check",
+	description: "Check the health of the service",
+	tags: ["Health"],
+	response: { 200: successResponseSchema },
+};

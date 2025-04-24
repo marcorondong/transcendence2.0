@@ -51,3 +51,10 @@ export async function headToHeadHandler(
 	const stats = await getHeadToHeadStats(userId, opponentId);
 	reply.status(200).send(stats);
 }
+
+export async function healthCheckHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	reply.status(200).send({ success: true });
+}

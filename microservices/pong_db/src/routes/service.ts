@@ -1,8 +1,8 @@
-import { PrismaClient } from "../../node_modules/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import type { GameInput, GamesInput, StatsInput } from "./zodSchemas";
 import httpError from "http-errors";
 
-export const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
 async function getGamesByIdAndOpponentId(userId: string, opponentId: string) {
 	const games = await prisma.game.findMany({

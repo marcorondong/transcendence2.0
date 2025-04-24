@@ -4,6 +4,7 @@ import {
 	totalStatsOpt,
 	headToHeadOpt,
 	createGameOpt,
+	healthCheckOpt,
 } from "./options";
 
 export async function pongRoutes(server: FastifyInstance) {
@@ -11,4 +12,5 @@ export async function pongRoutes(server: FastifyInstance) {
 	server.get("/game-history/:userId", gameHistoryOpt);
 	server.get("/total-stats/:userId", totalStatsOpt);
 	server.get("/head-to-head/:userId/:opponentId", headToHeadOpt);
+	server.get("/health-check", healthCheckOpt);
 }

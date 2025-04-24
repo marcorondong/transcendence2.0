@@ -3,12 +3,14 @@ import {
 	totalStatsSchema,
 	headToHeadSchema,
 	createGameSchema,
+	healthCheckSchema,
 } from "./routeSchemas";
 import {
 	gameHistoryHandler,
 	totalStatsHandler,
 	headToHeadHandler,
 	createGameHandler,
+	healthCheckHandler,
 } from "./controllers";
 
 export const createGameOpt = {
@@ -29,4 +31,9 @@ export const totalStatsOpt = {
 export const headToHeadOpt = {
 	schema: headToHeadSchema,
 	handler: headToHeadHandler,
+};
+
+export const healthCheckOpt = {
+	schema: healthCheckSchema,
+	handler: healthCheckHandler,
 };
