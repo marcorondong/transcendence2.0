@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { IdInput, IdsInput, GameInput, StatsInput } from "./zodSchemas";
+import type { IdInput, IdsInput, GameInput } from "./zodSchemas";
 import httpError from "http-errors";
 import {
 	createGame,

@@ -1,15 +1,15 @@
 import {
+	createGameSchema,
 	gameHistorySchema,
 	totalStatsSchema,
 	headToHeadSchema,
-	createGameSchema,
 	healthCheckSchema,
 } from "./routeSchemas";
 import {
+	createGameHandler,
 	gameHistoryHandler,
 	totalStatsHandler,
 	headToHeadHandler,
-	createGameHandler,
 	healthCheckHandler,
 } from "./controllers";
 

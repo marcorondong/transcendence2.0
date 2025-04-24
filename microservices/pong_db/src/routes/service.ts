@@ -55,15 +55,12 @@ export async function getGameHistory(userId: string) {
 }
 
 export async function getTotalStats(userId: string) {
-	const initialStats: StatsInput = { total: 0, wins: 0, losses: 0 };
 	const games = await getGameHistory(userId);
-	if (!games || games.length === 0) return initialStats;
 	const totalStats = statsCalculation(games, userId);
 	return totalStats;
 }
 
 export async function getHeadToHeadStats(userId: string, opponentId: string) {
-	const initialStats: StatsInput = { total: 0, wins: 0, losses: 0 };
 	const games = await getGamesByIdAndOpponentId(userId, opponentId);
 	const totalStats = statsCalculation(games, userId);
 	return totalStats;

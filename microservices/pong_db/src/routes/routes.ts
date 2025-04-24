@@ -1,9 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import {
+	createGameOpt,
 	gameHistoryOpt,
 	totalStatsOpt,
 	headToHeadOpt,
-	createGameOpt,
 	healthCheckOpt,
 } from "./options";
 
