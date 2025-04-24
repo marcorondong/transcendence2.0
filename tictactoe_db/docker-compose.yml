@@ -6,12 +6,12 @@ services:
     environment:
       - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
       - NODE_ENV=development
-      - PORT=3011
+      - PORT=3003
       - HOST=0.0.0.0
     volumes:
-      - ./src/:/pong_db/src/
-      - ./prisma/:/pong_db/prisma/
-      - /home/iguliyev/DBs/pong/:/pong_db/DB/
+      - ./src/:/tictactoe_db/src/
+      - ./prisma/:/tictactoe_db/prisma/
+      - /home/iguliyev/DBs/tictactoe/:/tictactoe_db/DB/
     ports:
-      - 3011:3011
+      - 3003:3003
     restart: always

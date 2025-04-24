@@ -1,9 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/generated/prisma"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -15,5 +14,11 @@ model Game {
   id        String   @id @default(uuid())
   playerXId String
   playerOId String
-  result    String
+  result    GameResult
+}
+
+enum GameResult {
+  O
+  X
+  DRAW
 }

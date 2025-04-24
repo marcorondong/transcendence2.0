@@ -1,40 +1,47 @@
 import {
 	idZodSchema,
-	gamesResponseSchema,
+	idsZodSchema,
+	gameSchema,
+	gameHistoryResponseSchema,
 	statsResponseSchema,
-	headToHeadZodSchema,
-	createGameZodSchema,
+	successResponseSchema,
 } from "./zodSchemas";
 
-export const gamesSchema = {
-	summary: "Get all games for a player",
-	description: "Fetches all games associated with a specific player ID.",
-	tags: ["tictactoe"],
+export const createGameSchema = {
+	summary: "Create Game",
+	description: "Create a new game record",
+	tags: ["Game"],
+	body: gameSchema,
+	response: { 201: successResponseSchema },
+};
+
+export const gameHistorySchema = {
+	summary: "Get Game History",
+	description: "Get the game history for a specific user",
+	tags: ["Game"],
 	params: idZodSchema,
-	response: { 200: gamesResponseSchema },
+	response: { 200: gameHistoryResponseSchema },
 };
 
 export const totalStatsSchema = {
-	summary: "Get total statistic for a player (wins, losses, draws)",
-	description: "Fetches the total statistics for a player based on their ID.",
-	tags: ["tictactoe"],
+	summary: "Get Total Stats",
+	description: "Get the total stats for a specific user",
+	tags: ["Game"],
 	params: idZodSchema,
 	response: { 200: statsResponseSchema },
 };
 
 export const headToHeadSchema = {
-	summary: "Get head-to-head statistics between two players",
-	description:
-		"Fetches the head-to-head statistics between two players based on their IDs.",
-	tags: ["tictactoe"],
-	params: headToHeadZodSchema,
+	summary: "Get Head to Head Stats",
+	description: "Get the head-to-head stats between two users",
+	tags: ["Game"],
+	params: idsZodSchema,
 	response: { 200: statsResponseSchema },
 };
 
-export const createGameSchema = {
-	summary: "Create a new game",
-	description: "Creates a new game with the specified players and result.",
-	tags: ["tictactoe"],
-	body: createGameZodSchema,
-	// response: { 201: createGameZodSchema },
+export const healthCheckSchema = {
+	summary: "Health Check",
+	description: "Check the health of the service",
+	tags: ["Health"],
+	response: { 200: successResponseSchema },
 };

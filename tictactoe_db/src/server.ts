@@ -1,32 +1,30 @@
-import Fastify, { FastifyInstance } from "fastify";
+import Fastify from "fastify";
+import { serverOption, swaggerOption, swaggerUiOption } from "./utils/options";
 import {
 	ZodTypeProvider,
 	validatorCompiler,
 	serializerCompiler,
 } from "fastify-type-provider-zod";
-import fastifySwagger from "@fastify/swagger";
+import { globalErrorHandler } from "./utils/globalErrorHandler";
+import fastifySwagger, { SwaggerOptions } from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
-import { SwaggerOptions } from "@fastify/swagger";
-import { swaggerOptions, swaggerUiOptions } from "./swagger/swagger.options";
-import { gameRoutes } from "./routes/routes";
+import { tictactoeRoutes } from "./routes/routes";
 
-const PORT = 3003;
-const HOST = "0.0.0.0";
+const PORT = parseInt(process.env.PORT || "3003", 10);
+const HOST = process.env.HOST || "0.0.0.0";
 
-const server: FastifyInstance = Fastify({
-	logger: false,
-}).withTypeProvider<ZodTypeProvider>();
-
+const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
-server.register(fastifySwagger, swaggerOptions as SwaggerOptions);
-server.register(fastifySwaggerUi, swaggerUiOptions);
-server.register(gameRoutes, { prefix: "/tictactoe" });
+server.setErrorHandler(globalErrorHandler);
+server.register(fastifySwagger, swaggerOption as SwaggerOptions);
+server.register(fastifySwaggerUi, swaggerUiOption);
+server.register(tictactoeRoutes, { prefix: "/pong" });
 
 const start = async () => {
 	try {
 		await server.listen({ port: PORT, host: HOST });
-		console.log(`Server listening at ${PORT}`);
+		console.log(`Server is running at ${PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

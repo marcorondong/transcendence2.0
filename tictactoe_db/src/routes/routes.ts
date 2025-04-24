@@ -1,18 +1,16 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 import {
-	gamesOpt,
+	createGameOpt,
+	gameHistoryOpt,
 	totalStatsOpt,
 	headToHeadOpt,
-	createGameOpt,
+	healthCheckOpt,
 } from "./options";
 
-export async function gameRoutes(server: FastifyInstance) {
-	try {
-		server.get("/games/:id", gamesOpt);
-		server.get("/totalStats/:id", totalStatsOpt);
-		server.get("/headToHead/:id/:opponentId", headToHeadOpt);
-		server.post("/createGame", createGameOpt);
-	} catch (error) {
-		console.error("Error registering routes:", error);
-	}
+export async function tictactoeRoutes(server: FastifyInstance) {
+	server.post("/create-game", createGameOpt);
+	server.get("/game-history/:userId", gameHistoryOpt);
+	server.get("/total-stats/:userId", totalStatsOpt);
+	server.get("/head-to-head/:userId/:opponentId", headToHeadOpt);
+	server.get("/health-check", healthCheckOpt);
 }
