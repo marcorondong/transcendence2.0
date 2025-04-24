@@ -1,6 +1,8 @@
-import { th } from "@faker-js/faker/.";
 import { Game } from "./Game";
-import { get } from "http";
+import {
+	zodIndexResponse,
+	zodSetupResponse,
+} from "../webSocketConnection/zodSchema";
 
 export class Player {
 	private readonly id: string;
@@ -43,10 +45,8 @@ export class Player {
 	}
 
 	getTurn(): string {
-		if(this.game?.getCurrentTurn() === this)
-			return "Your turn";
-		else
-			return "Opponent's turn";
+		if (this.game?.getCurrentTurn() === this) return "Your turn";
+		else return "Opponent's turn";
 	}
 
 	getDisconnected(): boolean {
@@ -58,8 +58,41 @@ export class Player {
 	}
 
 	changeTurn(): void {
-		if (this.opponentPlayer)
-			this.game?.setCurrentTurn(this.opponentPlayer);
+		if (this.opponentPlayer) this.game?.setCurrentTurn(this.opponentPlayer);
+	}
+
+	sendSetup(): void {
+		const setupResponse = zodSetupResponse.parse({
+			gameSetup: true,
+			userId: this.id,
+			opponentId: this.getOpponentId(),
+			sign: this.sign,
+			turn: this.getTurn(),
+		});
+		this.socket.send(JSON.stringify(setupResponse));
+	}
+
+	sendIndex(index: number): void {
+		if (this.opponentPlayer) {
+			if (this.game?.setBoard(index, this)) {
+				this.changeTurn();
+				const indexResponse = zodIndexResponse.parse({
+					index: index,
+					sign: this.sign,
+					turn: this.getTurn(),
+				});
+				const opponentIndexResponse = zodIndexResponse.parse({
+					index: index,
+					sign: this.sign,
+					turn: this.opponentPlayer.getTurn(),
+				});
+				this.socket.send(JSON.stringify(indexResponse));
+				this.opponentPlayer
+					.getSocket()
+					.send(JSON.stringify(opponentIndexResponse));
+				this.game?.checkWin(this);
+			}
+		}
 	}
 
 	finishSetup(opponentPlayer: Player): void {
@@ -73,47 +106,10 @@ export class Player {
 		opponentPlayer.game = game;
 		if (sign === "X") {
 			this.game.setCurrentTurn(this);
-		}
-		else {
+		} else {
 			this.game.setCurrentTurn(opponentPlayer);
 		}
 		this.sendSetup();
 		opponentPlayer.sendSetup();
-	}
-
-	sendSetup(): void {
-		// console.log("sign:", this.sign, "\nturn:", this.getTurn()); // TODO remove this in production
-		this.socket.send(
-			JSON.stringify({
-				gameSetup: true,
-				userId: this.id,
-				opponentId: this.getOpponentId(),
-				sign: this.sign,
-				turn: this.getTurn(),
-			}),
-		);
-	}
-
-	sendIndex(index: number): void {
-		if (this.opponentPlayer) {
-			if (this.game?.setBoard(index, this)) {
-				this.changeTurn();
-				this.socket.send(
-					JSON.stringify({
-						index: index,
-						sign: this.sign,
-						turn: this.getTurn(),
-					}),
-				);
-				this.opponentPlayer.getSocket().send(
-					JSON.stringify({
-						index: index,
-						sign: this.sign,
-						turn: this.opponentPlayer.getTurn(),
-					}),
-				);
-				this.game?.checkWin(this);
-			}
-		}
 	}
 }

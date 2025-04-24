@@ -7,7 +7,7 @@ export async function postResult(player: string, opponent: string, playerSign: s
 	  };
 
 	  try {
-		const response = await fetch("http://tictactoe_db_container:3003/tictactoe/createGame", {
+		const response = await fetch("http://tictactoe_db_container:3003/tictactoe/create-game", {
 		  method: 'POST',
 		  headers: {
 			'Content-Type': 'application/json',

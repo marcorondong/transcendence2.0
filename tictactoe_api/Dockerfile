@@ -12,6 +12,6 @@ COPY ./public ./
 RUN npm install
 
 # TODO uncomment below line in production
-# CMD ["sh", "-c", "ts-node src/server.ts"]
+# CMD ["npm run start"]
 # TODO remove below line in production
-CMD ["sh", "-c", "npm run dev"]
+CMD ["npm", "run", "dev"]

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "nodemon --exec ts-node --watch 'src/**/*.ts' src/server.ts"
+    "dev": "nodemon --exec ts-node --watch 'src/**/*.ts' src/server.ts",
+	"start": "ts-node src/server.ts"
   },
   "author": "",
   "license": "ISC",
