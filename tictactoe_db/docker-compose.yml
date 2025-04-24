@@ -1,0 +1,17 @@
+services:
+  tictactoe_db:
+    image: tictactoe_db_image
+    container_name: tictactoe_db_container
+    build: .
+    environment:
+      - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
+      - NODE_ENV=development
+      - PORT=3011
+      - HOST=0.0.0.0
+    volumes:
+      - ./src/:/pong_db/src/
+      - ./prisma/:/pong_db/prisma/
+      - /home/iguliyev/DBs/pong/:/pong_db/DB/
+    ports:
+      - 3011:3011
+    restart: always
