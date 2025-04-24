@@ -293,7 +293,7 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 
-	onTouchstart(event) {
+	onTouchstart(event: TouchEvent) {
 		const touch = event.touches[0];
 		const rect = this.canvas.getBoundingClientRect();
 		const y = touch.clientY - rect.top;
@@ -312,11 +312,11 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 
-	onTouchend(event) {
+	onTouchend(event: TouchEvent) {
 		this.paddleDirection = 0;
 	}
 
-	onKeydown(event) {
+	onKeydown(event: KeyboardEvent) {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
 		}
@@ -324,14 +324,14 @@ export class PongComponent extends HTMLElement {
 		if (event.key === "ArrowDown") this.paddleDirection = 1;
 	}
 
-	onKeyup(event) {
+	onKeyup(event: KeyboardEvent) {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
 		}
 		if (event.key === "ArrowUp" || event.key === "ArrowDown")
 			this.paddleDirection = 0;
 	}
-	onClick(event) {}
+	onClick(event: MouseEvent) {}
 
 	onResize() {
 		this.adjustCanvasToWindow();
