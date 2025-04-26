@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html
 	lang="en"
 	data-theme="dark"
@@ -16,73 +16,57 @@
 		<link
 			rel="icon"
 			type="image/x-icon"
-			href="./static-files/images/favicon.ico"
+			href="/static-files/images/favicon.ico"
 		/>
 		<link
 			rel="stylesheet"
 			type="text/css"
-			href="./css/custom.css"
+			href="/css/custom.css"
 		/>
 		<link
-			href="./css/output.css"
+			href="/css/output.css"
 			rel="stylesheet"
 		/>
 		<title>Transcendence</title>
 	</head>
 
-	<body class="bg-grey-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-		<nav
-			class="flex flex-row justify-between px-5 md:px-16 xl:px-32 py-9 mb-9"
-		>
-			<img
-				class="rounded-lg"
-				src="./static-files/images/pong-logo.png"
-				width="85px"
-			/>
-			<ul class="flex flex-row gap-4 items-center">
-				<li class="nav-link">
-					<a
-						class=""
-						href="/"
-						>home</a
+	<body
+		class="relative bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
+	>
+		<div class="mx-3 sm:mx-5 md:mx-24 lg:mx-32 xl:mx-64">
+			<header-component
+				class="mb-9 flex content-center justify-between self-stretch py-9"
+			>
+				<ul id="navigation">
+					<a href="/"> <li class="pong-nav-link">home</li></a>
+					<a href="pong-view"> <li class="pong-nav-link">pong</li></a>
+					<a href="highscore-view">
+						<li class="pong-nav-link">highscore</li></a
 					>
-				</li>
-				<li class="nav-link">
-					<a
-						class=""
-						href="highscore"
-						>highscore</a
+					<a href="profile-view">
+						<li class="pong-nav-link">profile</li></a
 					>
-				</li>
-				<li class="nav-link">
-					<a
-						class=""
-						href="profile"
-						>profile</a
+					<a href="users-view">
+						<li class="pong-nav-link">users</li>
+					</a>
+					<a href="users-view">
+						<li>
+							<button class="pong-button-info w-full">
+								login
+							</button>
+						</li></a
 					>
-				</li>
-				<li class="nav-link">
-					<a
-						class=""
-						href="users"
-						>users</a
-					>
-				</li>
-			</ul>
-		</nav>
-
-		<div
-			class="container"
-			id="game"
-		>
+				</ul>
+			</header-component>
 			<div
 				id="content"
-				class="mb-4 px-5 md:px-16 xl:px-32"
+				class=""
 			></div>
 		</div>
 		<script
 			type="module"
-			src="./javascript/main.js"
+			src="/javascript/main.js"
+			defer
 		></script>
 	</body>
 </html>

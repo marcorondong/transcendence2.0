@@ -8,8 +8,6 @@ services:
     volumes:
       - ./volume:/app/volume
     restart: unless-stopped
-    networks:
-      - general
   typescript:
     container_name: typescript
     image: typescript-img
@@ -19,8 +17,3 @@ services:
     volumes:
       - ./volume:/app/volume
     restart: unless-stopped
-    networks:
-      - general
-networks:
-  general:
-    driver: bridge
