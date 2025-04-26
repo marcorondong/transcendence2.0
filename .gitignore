@@ -35,6 +35,8 @@ yarn.lock
 .yarn-integrity
 
 ### Generated & Compiled Code ###
+**/javascript/
+output.css
 examples/typescript-server.js
 test/types/index.js
 **/dist/

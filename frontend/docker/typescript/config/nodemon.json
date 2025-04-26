@@ -1,5 +1,0 @@
-{
-	"watch": ["volume/typescript"],
-	"ext": "ts",
-	"exec": "tsc"
-}

@@ -2,13 +2,15 @@
 	"name": "config",
 	"version": "1.0.0",
 	"description": "",
-	"main": "volume/javascript/index.js",
+	"main": "./volume/javascript/main.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"prettier": "^3.5.3",
+		"prettier-plugin-tailwindcss": "^0.6.11",
 		"typescript": "^5.8.2"
 	},
 	"dependencies": {
