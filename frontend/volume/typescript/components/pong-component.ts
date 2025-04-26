@@ -1,4 +1,4 @@
-import { Ball, Paddle, Pong } from "../types/Pong.ts";
+import { Ball, Paddle, Pong } from "../types/Pong";
 import { IconComponent } from "./icon-component.js";
 import { printMessage } from "./pong-utils.js";
 

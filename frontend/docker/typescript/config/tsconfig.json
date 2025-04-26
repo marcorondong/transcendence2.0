@@ -9,7 +9,7 @@
 		"resolveJsonModule": true,
 		"outDir": "./volume/javascript", // Output directory for compiled JS files
 		"rootDir": "./volume/typescript", // Root directory for TypeScript files
-		"strict": true // Enable strict type-checking options
+		"strict": true // Enable strict type-checking options,
 	},
 	"include": ["./volume/typescript/**/*.ts"],
 	"exclude": ["node_modules"]
