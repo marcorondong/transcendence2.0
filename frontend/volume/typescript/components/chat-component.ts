@@ -6,7 +6,7 @@ class ChatComponent extends HTMLElement {
 
 		// const queryParams = window.location.search;
 		this.ws = new WebSocket(
-			`ws://${window.location.hostname}:${window.location.port}/ws`,
+			`wss://${window.location.hostname}:${window.location.port}/ws`,
 		);
 
 		this.ws.onmessage = (event) => {
