@@ -1,14 +1,15 @@
 {
 	"compilerOptions": {
-		"target": "ES2020", // JavaScript target version
+		"target": "ES6", // JavaScript target version
 		"module": "ESNext", // Module system
+		"moduleResolution": "node",
 		"esModuleInterop": true, // for compatibility with CommonJS
 		"allowJs": true, // <== important to allow importing .js
 		"checkJs": false, // optional: you can set true to check JS files too
 		"resolveJsonModule": true,
 		"outDir": "./volume/javascript", // Output directory for compiled JS files
 		"rootDir": "./volume/typescript", // Root directory for TypeScript files
-		"strict": true // Enable strict type-checking options
+		"strict": true // Enable strict type-checking options,
 	},
 	"include": ["./volume/typescript/**/*.ts"],
 	"exclude": ["node_modules"]
