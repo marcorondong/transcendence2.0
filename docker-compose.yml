@@ -79,7 +79,7 @@ services:
     networks:
       - Transcendence2.0
     depends_on:
-    - chat_db
+      - chat_db
     restart: always
 
   chat_db:
