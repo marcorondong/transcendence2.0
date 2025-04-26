@@ -21,7 +21,7 @@ export class Router {
 		return link.substring(n);
 	}
 
-	setActiveViewinNavigation(link: string) {
+	setActiveViewInNavigation(link: string) {
 		const navLinks = [...this.navLinks];
 		navLinks.map((l) => {
 			const li = l.querySelector("li");
@@ -85,7 +85,7 @@ export class Router {
 
 	async appendComponent() {
 		const componentName = window.location.pathname;
-		this.setActiveViewinNavigation(componentName);
+		this.setActiveViewInNavigation(componentName);
 		try {
 			const js = await this.importComponent(componentName);
 			if (js && this.containerDiv) {
