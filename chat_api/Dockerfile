@@ -6,7 +6,10 @@ WORKDIR /chat_api
 
 COPY ./package.json ./
 COPY ./tsconfig.json ./
-# COPY ./src /chat_api/src
+COPY ./src ./
 RUN npm install
 
+# TODO uncomment below line in production
+# CMD ["npm run start"]
+# TODO remove below line in production
 CMD ["npm", "run", "dev"]

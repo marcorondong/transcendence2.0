@@ -1,5 +1,5 @@
 export async function postRequestCreateUser(userId: string) {
-	const url = `http://chat_db_container:3004/chat/createUser`;
+	const url = `http://chat_db_container:3004/chat/create-user`;
 	const response = await fetch(url, {
 		method: "POST",
 		headers: {
@@ -15,7 +15,7 @@ export async function postRequestCreateUser(userId: string) {
 }
 
 export async function patchRequestBlockUser(userId: string, friendId: string) {
-	const url = `http://chat_db_container:3004/chat/blockUser`;
+	const url = `http://chat_db_container:3004/chat/block-user`;
 	const response = await fetch(url, {
 		method: "PATCH",
 		headers: {
@@ -34,7 +34,7 @@ export async function patchRequestUnblockUser(
 	userId: string,
 	friendId: string,
 ) {
-	const url = `http://chat_db_container:3004/chat/unblockUser`;
+	const url = `http://chat_db_container:3004/chat/unblock-user`;
 	const response = await fetch(url, {
 		method: "PATCH",
 		headers: {
