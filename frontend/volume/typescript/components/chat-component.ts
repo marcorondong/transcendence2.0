@@ -1,15 +1,15 @@
 class ChatComponent extends HTMLElement {
-	wss: WebSocket | undefined = undefined;
+	ws: WebSocket | undefined = undefined;
 
 	constructor() {
 		super();
 
-		const queryParams = window.location.search;
-		this.wss = new WebSocket(
-			`wss://${window.location.hostname}:${window.location.port}/chat/${queryParams}`,
+		// const queryParams = window.location.search;
+		this.ws = new WebSocket(
+			`ws://${window.location.hostname}:${window.location.port}/ws`,
 		);
 
-		this.wss.onmessage = (event) => {
+		this.ws.onmessage = (event) => {
 			const test = JSON.parse(event.data);
 			if (test) {
 				console.log("from Websocket", test);
