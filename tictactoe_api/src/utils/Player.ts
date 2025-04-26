@@ -3,6 +3,7 @@ import {
 	zodIndexResponse,
 	zodSetupResponse,
 } from "../webSocketConnection/zodSchema";
+import { getHeadToHeadStats } from "../utils/dbUtils";
 
 export class Player {
 	private readonly id: string;
@@ -61,13 +62,18 @@ export class Player {
 		if (this.opponentPlayer) this.game?.setCurrentTurn(this.opponentPlayer);
 	}
 
-	sendSetup(): void {
+	async sendSetup() {
+		const stats = await getHeadToHeadStats(this.id, this.getOpponentId()!);
 		const setupResponse = zodSetupResponse.parse({
 			gameSetup: true,
 			userId: this.id,
 			opponentId: this.getOpponentId(),
 			sign: this.sign,
 			turn: this.getTurn(),
+			wins: stats.wins,
+			losses: stats.losses,
+			draws: stats.draws,
+			total: stats.total,
 		});
 		this.socket.send(JSON.stringify(setupResponse));
 	}

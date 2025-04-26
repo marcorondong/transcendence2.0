@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="flex justify-center items-center h-screen m-0 bg-gray-200">
-	<div id="gamePage" class="text-center p-5 bg-white rounded-lg shadow-md">
+	<div id="game_page" class="text-center p-5 bg-white rounded-lg shadow-md">
 
 		<div class="info mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
 			<div class="play-with mb-2">Your sign: <span id="playWith" class="font-semibold"></span></div>
@@ -39,11 +39,26 @@
 						<th id='player2_name' class="border border-gray-300 px-4 py-2">Player 2</th>
 					</tr>
 				</thead>
+			</table>
+		</div>
+
+		<div class="score-table-container flex justify-center mt-4">
+			<table class="score-table border-collapse border border-gray-300">
+				<thead>
+					<tr>
+						<th id='wins' class="border border-gray-300 px-4 py-2">wins</th>
+						<th id='losses' class="border border-gray-300 px-4 py-2">losses</th>
+						<th id='draws' class="border border-gray-300 px-4 py-2">draws</th>
+						<th id='total' class="border border-gray-300 px-4 py-2">total</th>
+					</tr>
+				</thead>
+
 				<tbody>
 					<tr>
-						<td id="totalScore" class="border border-gray-300 px-4 py-2">Score</td>
-						<td id="player1_score" class="border border-gray-300 px-4 py-2">0</td>
-						<td id="player2_score" class="border border-gray-300 px-4 py-2">0</td>
+						<td id='player1_wins' class="border border-gray-300 px-4 py-2">0</td>
+						<td id='player1_losses' class="border border-gray-300 px-4 py-2">0</td>
+						<td id='player1_draws' class="border border-gray-300 px-4 py-2">0</td>
+						<td id='player1_total' class="border border-gray-300 px-4 py-2">0</td>
 					</tr>
 				</tbody>
 			</table>
@@ -60,6 +75,26 @@
 			<button id="declineRematchButton" class="btn bg-blue-500 text-white py-2 px-4 rounded">Decline</button>
 		</div> -->
 	</div>
+
+	<div id="nickname_page" class="page flex flex-col space-y-4">
+		<div class="flex justify-center">
+			<input id="nickname_input" type="text" placeholder="Enter your nickname" class="border border-gray-300 rounded-lg p-2 w-3/3">
+		</div>
+		<div class="flex justify-center">
+			<button id="nickname_button" class="btn bg-blue-500 text-white py-2 px-4 rounded">Submit</button>
+		</div>
+	</div>
+
+	<div id="loading" class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-200 flex-col">
+		<div class="loader border-t-4 border-blue-500 rounded-full w-16 h-16 animate-spin"></div>
+		<button id="cancelButton" class="btn bg-red-500 text-white py-2 px-4 rounded mt-4">Cancel</button>
+	</div>
+
+	<!-- <div id="error" class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-200">
+		<div class="error-message text-red-500 text-xl">Error loading game. Please try again.</div>
+	</div> -->
+
+
 	
 	<script src="index.js"></script>
 </body>

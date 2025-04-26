@@ -28,6 +28,10 @@ export const zodSetupResponse = z
 		opponentId: z.string().min(1, { message: "Opponent ID is required" }), // TODO add .uuid("Invalid player ID format"),
 		sign: z.enum(["X", "O"]),
 		turn: z.enum(["Your turn", "Opponent's turn"]),
+		wins: z.number().int().nonnegative(),
+		losses: z.number().int().nonnegative(),
+		draws: z.number().int().nonnegative(),
+		total: z.number().int().nonnegative(),
 	})
 	.strict();
 

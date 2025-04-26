@@ -7,7 +7,7 @@ import { zodSchema } from "./zodSchema";
 let friendPlayer: Player | null = null;
 
 export async function webSocketConnection(server: FastifyInstance) {
-	server.get("", { websocket: true }, (socket, request) => {
+	server.get("/:userId", { websocket: true }, (socket, request) => {
 		const id = faker.person.firstName(); // TODO extract id from JWT token
 		const player = new Player(id, socket);
 		console.log("Player connected. playerId:", player.getId()); // TODO remove this in production
