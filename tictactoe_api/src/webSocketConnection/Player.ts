@@ -2,8 +2,10 @@ import { Game } from "./Game";
 import {
 	zodIndexResponse,
 	zodSetupResponse,
-} from "../webSocketConnection/zodSchema";
-import { getHeadToHeadStats } from "../utils/dbUtils";
+	zodErrorResponse,
+	zodGameOverResponse,
+} from "./zodSchema";
+import { getHeadToHeadStats, postResult } from "./httpRequests";
 
 export class Player {
 	private readonly id: string;
@@ -63,29 +65,26 @@ export class Player {
 	}
 
 	async sendSetup() {
-		console.log("Sending setup to player:", this.id);
-		const stats = await getHeadToHeadStats(this.id, this.getOpponentId()!);
-		if (!stats) {
-			console.error("Failed to get head to head stats");
-			this.socket.send(
-				JSON.stringify({
-					error: "Failed to get head to head stats",
-				}),
-			);
+		try {
+			const stats = await getHeadToHeadStats(this.id, this.getOpponentId()!);
+			const setupResponse = zodSetupResponse.parse({
+				gameSetup: true,
+				userId: this.id,
+				opponentId: this.getOpponentId(),
+				sign: this.sign,
+				turn: this.getTurn(),
+				wins: stats.wins,
+				losses: stats.losses,
+				draws: stats.draws,
+				total: stats.total,
+			});
+			this.socket.send(JSON.stringify(setupResponse));
+		} catch (error) {
+			console.error("Error sending setup:", error); // TODO remove this in production
+			this.sendError(`Error sending setup: ${error}`); // TODO remove this in production
+			this.setDisconnected(false);
+			this.socket.close(4000, "Error sending setup");
 		}
-		console.log("Head to head stats:", stats);
-		const setupResponse = zodSetupResponse.parse({
-			gameSetup: true,
-			userId: this.id,
-			opponentId: this.getOpponentId(),
-			sign: this.sign,
-			turn: this.getTurn(),
-			wins: stats.wins,
-			losses: stats.losses,
-			draws: stats.draws,
-			total: stats.total,
-		});
-		this.socket.send(JSON.stringify(setupResponse));
 	}
 
 	sendIndex(index: number): void {
@@ -106,9 +105,26 @@ export class Player {
 				this.opponentPlayer
 					.getSocket()
 					.send(JSON.stringify(opponentIndexResponse));
-				this.game?.checkWin(this);
+				this.game.checkWin(this);
 			}
 		}
+		else {
+			this.sendError("Opponent not found");
+		}
+	}
+
+	sendError(message: string): void {
+		const errorResponse = zodErrorResponse.parse({
+			error: message,
+		});
+		this.socket.send(JSON.stringify(errorResponse));
+	}
+
+	sendGameOver(message: string): void {
+		const gameOverResponse = zodGameOverResponse.parse({
+			gameOver: message,
+		});
+		this.socket.send(JSON.stringify(gameOverResponse));
 	}
 
 	finishSetup(opponentPlayer: Player): void {
@@ -127,5 +143,22 @@ export class Player {
 		}
 		this.sendSetup();
 		opponentPlayer.sendSetup();
+	}
+
+	async opponentDisconnected() {
+		try {
+			if (this.sign === "X")
+				await postResult(this.id, this.opponentPlayer?.getId()!, this.sign);
+			else
+				await postResult(this.opponentPlayer?.getId()!, this.id, this.sign)
+			this.sendGameOver("Opponent disconnected. You win!");
+			this.disconnected = false;
+			this.socket.close();
+		} catch (error) {
+			console.error("Error handling opponent disconnect:", error); // TODO remove this in production
+			this.sendError(`Error handling opponent disconnect: ${error}`); // TODO remove this in production
+			this.setDisconnected(false);
+			this.socket.close(4000, "Error handling opponent disconnect");
+		}
 	}
 }

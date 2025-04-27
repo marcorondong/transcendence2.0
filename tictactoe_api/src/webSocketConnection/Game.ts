@@ -1,10 +1,10 @@
 import { Player } from "./Player";
-import { postResult } from "./dbUtils";
+import { postResult } from "./httpRequests";
 import {
 	zodGameOverResponse,
 	zodWarningResponse,
 	zodErrorResponse,
-} from "../webSocketConnection/zodSchema";
+} from "./zodSchema";
 
 export class Game {
 	private currentTurn: Player | null = null;
@@ -44,51 +44,53 @@ export class Game {
 	}
 
 	async winDetected(player: Player, opponent: Player) {
-		this.sendGameOver(player, `You win!`);
-		this.sendGameOver(opponent, `You lose!`);
-		const playerSign = player.getSign();
-		if (playerSign === "X") {
-			const response = await postResult(
-				player.getId(),
-				opponent.getId(),
-				playerSign,
-			);
-			if (!response) {
-				console.error("Failed to save game result");
-				this.sendError(player, "Failed to save game result");
-				return;
+		try {
+			this.sendGameOver(player, `You win!`);
+			this.sendGameOver(opponent, `You lose!`);
+			const playerSign = player.getSign();
+			if (playerSign === "X") {
+				await postResult(player.getId(), opponent.getId(), playerSign);
+			} else {
+				await postResult(opponent.getId(), player.getId(), playerSign);
 			}
-		} else {
-			const response = await postResult(
-				opponent.getId(),
-				player.getId(),
-				playerSign,
-			);
-			if (!response) {
-				console.error("Failed to save game result");
-				this.sendError(player, "Failed to save game result");
-				return;
-			}
+			player.setDisconnected(false);
+			opponent.setDisconnected(false);
+			player.getSocket().close();
+			opponent.getSocket().close();
+		} catch (error) {
+			console.error("Error posting result:", error);
+			this.sendError(player, "Error posting result");
+			this.sendError(opponent, "Error posting result");
+			player.setDisconnected(false);
+			opponent.setDisconnected(false);
+			player.getSocket().close();
+			opponent.getSocket().close();
 		}
-		player.setDisconnected(false);
-		opponent.setDisconnected(false);
-		player.getSocket().close();
-		opponent.getSocket().close();
 	}
 
 	async drawDetected(player: Player, opponent: Player) {
-		this.sendGameOver(player, "It's a draw!");
-		this.sendGameOver(opponent, "It's a draw!");
-		const playerSign = player.getSign();
-		if (playerSign === "X") {
-			await postResult(player.getId(), opponent.getId(), "DRAW");
-		} else {
-			await postResult(opponent.getId(), player.getId(), "DRAW");
+		try {
+			this.sendGameOver(player, "It's a draw!");
+			this.sendGameOver(opponent, "It's a draw!");
+			const playerSign = player.getSign();
+			if (playerSign === "X") {
+				await postResult(player.getId(), opponent.getId(), "DRAW");
+			} else {
+				await postResult(opponent.getId(), player.getId(), "DRAW");
+			}
+			player.setDisconnected(false);
+			opponent.setDisconnected(false);
+			player.getSocket().close();
+			opponent.getSocket().close();
+		} catch (error) {
+			console.error("Error posting result:", error);
+			this.sendError(player, "Error posting result");
+			this.sendError(opponent, "Error posting result");
+			player.setDisconnected(false);
+			opponent.setDisconnected(false);
+			player.getSocket().close();
+			opponent.getSocket().close();
 		}
-		player.setDisconnected(false);
-		opponent.setDisconnected(false);
-		player.getSocket().close();
-		opponent.getSocket().close();
 	}
 
 	async checkWin(player: Player) {

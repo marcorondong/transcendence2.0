@@ -40,10 +40,11 @@ window.onload = function () {
         }
     });
     function openSocket(nickname) {
-        var socket = new WebSocket("ws://".concat(window.location.hostname, ":").concat(window.location.port, "/ws/").concat(nickname));
+        var socket = new WebSocket("ws://".concat(window.location.hostname, ":").concat(window.location.port, "/tictactoe/").concat(nickname));
         console.log("Connecting to WebSocket server at ws://".concat(window.location.hostname, ":").concat(window.location.port, "/ws/").concat(nickname));
         cancelButton.addEventListener("click", function () {
             socket.close();
+            showPage(nickname_page);
         });
         cells.forEach(function (cell) {
             cell.addEventListener("click", function (event) {
@@ -85,6 +86,8 @@ window.onload = function () {
                 }
                 else if (data.gameOver) {
                     info.textContent = data.gameOver;
+                    alert(data.gameOver);
+                    showPage(nickname_page);
                 }
                 else if (data.warning) {
                     alert(data.warning);

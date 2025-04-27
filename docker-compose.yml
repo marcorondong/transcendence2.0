@@ -93,7 +93,7 @@ services:
     volumes:
       - ./tictactoe_db/src/:/tictactoe_db/src/ # TODO remove this in production
       - ./tictactoe_db/prisma/:/tictactoe_db/prisma/ # TODO remove this in production
-      # - /home/iguliyev/DBs/tictactoe/:/tictactoe_api/DB/ # TODO uncomment this line when using the local DB
+      # - /home/iguliyev/DBs/tictactoe/:/tictactoe_api/DB/ # TODO define path to db and uncomment this line when using the local DB
     ports:
       - 3003:3003 # TODO remove this in production
     networks:

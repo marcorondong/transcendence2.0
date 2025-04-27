@@ -47,10 +47,11 @@ window.onload = () =>
 	});
 
 	function openSocket(nickname: string) {
-		const socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/${nickname}`);
+		const socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/tictactoe/${nickname}`);
 		console.log(`Connecting to WebSocket server at ws://${window.location.hostname}:${window.location.port}/ws/${nickname}`);
 		cancelButton.addEventListener("click", () => {
 			socket.close();
+			showPage(nickname_page);
 		});
 
 		cells.forEach((cell) => {
@@ -95,6 +96,8 @@ window.onload = () =>
 					showPage(game_page);
 				} else if (data.gameOver) {
 					info.textContent = data.gameOver;
+					alert(data.gameOver);
+					showPage(nickname_page);
 				} else if (data.warning) {
 					alert(data.warning);
 				} else if (data.error) {

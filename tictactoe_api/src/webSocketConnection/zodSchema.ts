@@ -13,6 +13,21 @@ export const zodSchema = z
 	})
 	.strict();
 
+export const zodIdSchema = z
+	.object({
+		id: z.string().min(1, { message: "ID is required" }),
+	})
+	.strict();
+
+export const statsSchema = z
+	.object({
+		total: z.number().int().nonnegative(),
+		wins: z.number().int().nonnegative(),
+		losses: z.number().int().nonnegative(),
+		draws: z.number().int().nonnegative(),
+	})
+	.strict();
+
 export const zodIndexResponse = z
 	.object({
 		index: indexSchema,

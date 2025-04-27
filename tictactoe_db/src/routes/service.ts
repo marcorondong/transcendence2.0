@@ -42,7 +42,6 @@ function statsCalculation(games: GamesInput, userId: string) {
 		else totalStats.losses++;
 		totalStats.total++;
 	});
-	console.log("Total Stats: ", totalStats);
 	return totalStats;
 }
 

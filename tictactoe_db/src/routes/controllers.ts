@@ -15,7 +15,7 @@ export async function createGameHandler(
 	const { playerXId, playerOId, result } = request.body;
 	if (playerXId === playerOId)
 		throw new httpError.BadRequest(
-			"winnerId and loserId cannot be the same",
+			"playerXId and playerOId cannot be the same",
 		);
 	await createGame(playerXId, playerOId, result);
 	reply.status(201).send({ success: true });

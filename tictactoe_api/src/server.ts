@@ -27,7 +27,7 @@ server.register(fastifyStatic, {
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 server.register(fastifyWebsocket);
-server.register(webSocketConnection, { prefix: "/ws" });
+server.register(webSocketConnection, { prefix: "/tictactoe" });
 
 // TODO remove this after frontend is built
 server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
@@ -39,7 +39,7 @@ const start = async () => {
 		await server.listen({ port: PORT, host: HOST });
 		console.log(`Server listening at ${PORT}`);
 	} catch (err) {
-		server.log.error(err);
+		server.log.error("Error catch in start()",err);
 		process.exit(1);
 	}
 };
