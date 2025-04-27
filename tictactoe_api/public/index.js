@@ -41,7 +41,6 @@ window.onload = function () {
     });
     function openSocket(nickname) {
         var socket = new WebSocket("ws://".concat(window.location.hostname, ":").concat(window.location.port, "/tictactoe/").concat(nickname));
-        console.log("Connecting to WebSocket server at ws://".concat(window.location.hostname, ":").concat(window.location.port, "/ws/").concat(nickname));
         cancelButton.addEventListener("click", function () {
             socket.close();
             showPage(nickname_page);
