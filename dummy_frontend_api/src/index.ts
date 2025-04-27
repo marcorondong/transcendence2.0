@@ -342,11 +342,6 @@ window.onload = () =>
 	});
 
 	// showPage(nickname_page);
-
-
-
-
-	
 	function ft_aiMove()
 	{
 		let index_ai_options: number [] = [0, 1, 2, 3, 4, 5, 6, 7, 8];

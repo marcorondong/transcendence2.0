@@ -2,16 +2,16 @@ FROM node:iron-slim
 
 RUN apt-get update -y && apt-get install -y openssl sqlite3
 
-WORKDIR /tictactoe_api
+WORKDIR /tictactoe_db
 
 COPY ./package.json ./
 COPY ./tsconfig.json ./
+COPY ./prisma ./prisma/
 COPY ./src ./
-# TODO remove below line in production
-COPY ./public ./
 RUN npm install
 
 # TODO uncomment below line in production
-# CMD ["npm run start"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start"]
+
 # TODO remove below line in production
-CMD ["npm", "run", "dev"]
+# CMD ["sh", "-c", "npx prisma generate && npx prisma migrate reset --force --skip-seed && npm run dev"] 
