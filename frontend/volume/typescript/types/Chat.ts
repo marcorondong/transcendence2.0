@@ -6,6 +6,7 @@ interface Chat {
 	blockStatus?: boolean;
 	peopleOnline?: string[];
 	error?: string;
+	message?: string;
 }
 
 interface ChatUser {

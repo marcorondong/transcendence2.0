@@ -4,6 +4,7 @@ class ChatComponent extends HTMLElement {
 	// VARIABLES
 	ws: WebSocket | undefined = undefined;
 	onlineUsers: ChatUser[] = [];
+	selectedUser: ChatUser | undefined;
 
 	//ICONS
 	plusIcon = new IconComponent("plus", 4);
@@ -16,8 +17,12 @@ class ChatComponent extends HTMLElement {
 	// ELEMENTS
 	nav: HTMLElement = document.createElement("nav");
 	main: HTMLElement = document.createElement("div");
+	mainMessages: HTMLElement = document.createElement("div");
+	mainUsers: HTMLElement = document.createElement("div");
 	navUsersContainer: HTMLElement = document.createElement("div");
 	navUsersCount: HTMLElement = document.createElement("span");
+	chatInput = document.createElement("input");
+	sendButton: HTMLElement = document.createElement("button");
 
 	constructor() {
 		super();
@@ -28,9 +33,15 @@ class ChatComponent extends HTMLElement {
 		);
 
 		this.ws.onmessage = (event) => {
-			const test: Chat = JSON.parse(event.data);
-			if (test.type === "peopleOnline" && test.peopleOnline) {
-				test.peopleOnline.map((person) => {
+			const chatServiceData: Chat = JSON.parse(event.data);
+			if (chatServiceData.type === "message" && this.selectedUser) {
+				this.selectedUser.messages.push(chatServiceData.message ?? "");
+			}
+			if (
+				chatServiceData.type === "peopleOnline" &&
+				chatServiceData.peopleOnline
+			) {
+				chatServiceData.peopleOnline.map((person) => {
 					if (
 						!this.onlineUsers.some((myUser) => myUser.id === person)
 					) {
@@ -39,14 +50,53 @@ class ChatComponent extends HTMLElement {
 							messages: [],
 						};
 						this.onlineUsers.push(newUser);
-						this.navUsersCount.innerText = String(
-							this.onlineUsers.length,
-						);
+						this.updateUsers();
 					}
 				});
-				console.log("ChatUsers that are online:", this.onlineUsers);
 			}
 		};
+	}
+
+	updateUsers() {
+		this.displayOnlineUsers();
+		this.navUsersCount.innerText = String(this.onlineUsers.length);
+	}
+
+	displayOnlineUsers() {
+		this.mainUsers.replaceChildren();
+		if (this.onlineUsers.length === 0) {
+			this.mainUsers.innerText = "no Users Online";
+			return;
+		}
+		for (const user of this.onlineUsers) {
+			const button = document.createElement("button");
+			button.classList.add("pong-button-info", "selectUser-group");
+			button.id = user.id;
+			button.innerText = user.id;
+			this.mainUsers.appendChild(button);
+		}
+	}
+
+	displayCurrentChat() {
+		this.mainMessages.replaceChildren();
+		if (this.onlineUsers.length === 0) {
+			this.mainMessages.innerText = "no Chat History available";
+			return;
+		}
+		if (!this.selectedUser) {
+			this.selectedUser = this.onlineUsers[0];
+		}
+
+		if (this.selectedUser.messages.length === 0) {
+			this.mainMessages.innerText = "no Chat History available";
+		}
+		console.log("about to display messages", this.selectedUser.messages);
+
+		for (const message of this.selectedUser.messages) {
+			const div = document.createElement("div");
+			div.innerText = message;
+			this.mainUsers.appendChild(div);
+		}
 	}
 
 	handleEvent(event: Event) {
@@ -67,7 +117,9 @@ class ChatComponent extends HTMLElement {
 		// HANDLE ALL BUTTONS
 		const button = target.closest("button");
 		if (button) {
+			this.handleSelectUser(button);
 			this.handleMinMaxButton(button);
+			this.handleSendButton(button);
 		}
 	}
 
@@ -83,7 +135,7 @@ class ChatComponent extends HTMLElement {
 			this.plusIcon.classList.add("hidden");
 			this.classList.add("h-3/4", "w-full", "sm:w-3/4");
 			this.classList.remove("h-auto", "w-auto");
-			this.main.classList.add("block");
+			this.main.classList.add("grid");
 			this.main.classList.remove("hidden");
 		} else {
 			// CLICKED TO MINIMIZE
@@ -94,18 +146,60 @@ class ChatComponent extends HTMLElement {
 			this.classList.remove("h-3/4", "w-full", "sm:w-3/4");
 			this.classList.add("h-auto", "w-auto");
 			this.main.classList.add("hidden");
-			this.main.classList.remove("block");
+			this.main.classList.remove("grid");
 		}
 	}
 
-	async connectedCallback() {
+	handleSelectUser(button: HTMLButtonElement) {
+		if (!button.classList.contains("selectUser-group")) {
+			return;
+		}
+		this.selectedUser = this.onlineUsers.find(
+			(user) => user.id === button.textContent,
+		);
+		console.log("current selected user", this.selectedUser);
+		this.displayCurrentChat();
+	}
+
+	handleSendButton(button: HTMLButtonElement) {
+		if (button.id !== "send-button") {
+			return;
+		}
+		console.log("trying to send message");
+		const chat: Chat = {
+			type: "message",
+			message: this.chatInput.innerText,
+			relatedId: this.selectedUser?.id,
+		};
+		if (this.ws) {
+			this.ws.send(JSON.stringify(chat));
+		}
+	}
+
+	connectedCallback() {
 		console.log("Chat CONNECTED");
 		document.addEventListener("click", this);
-		this.nav.classList.add("flex", "w-full", "items-center");
+		this.classList.add("flex", "flex-col");
+		this.nav.classList.add(
+			"flex",
+			"w-full",
+			"items-center",
+			"justify-between",
+		);
 		this.append(this.nav);
 
+		// MAIN CONTAINER OF CHAT
 		this.main.classList.add("hidden");
-		this.main.innerText = "hi ther this is chat";
+		this.main.classList.add(
+			"grid",
+			"gap-4",
+			"grid-cols-[1fr_30%]",
+			"grid-rows-[1fr_10rem]",
+			"h-full",
+		);
+		this.main.append(this.mainMessages, this.mainUsers);
+		this.mainMessages.classList.add("flex", "flex-col", "gap-3", "p-4");
+		this.mainUsers.classList.add("flex", "flex-col", "gap-3", "p-4");
 		this.appendChild(this.main);
 
 		this.navUsersContainer.appendChild(this.usersIcon);
@@ -123,6 +217,16 @@ class ChatComponent extends HTMLElement {
 		this.minMaxButton.id = "min-max-button";
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
 		this.nav.append(this.minMaxButton);
+
+		this.displayCurrentChat();
+		this.displayOnlineUsers();
+
+		this.chatInput.type = "text";
+		this.chatInput.placeholder = "start your epic conversation";
+		this.sendButton.innerText = "send";
+		this.sendButton.classList.add("pong-button");
+		this.sendButton.id = "send-button";
+		this.main.append(this.chatInput, this.sendButton);
 	}
 
 	disconnectedCallback() {
