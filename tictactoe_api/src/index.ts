@@ -1,5 +1,5 @@
 
-let socket: WebSocket;
+
 window.onload = () => 
 {
 	// const gamePage = document.getElementById('gamePage') as HTMLDivElement;
@@ -20,14 +20,6 @@ window.onload = () =>
 	// const rematchButton = document.getElementById('rematchButton') as HTMLButtonElement;
 	// const leaveButton = document.getElementById('leaveButton')
 
-	cells.forEach((cell) => {
-		cell.addEventListener("click", (event) => {
-			const cell = event.target as HTMLDivElement;
-			const index = Number(cell.dataset.index);
-			socket.send(JSON.stringify({ index: index }));
-		});
-	});
-
 	const hideAllPages = () => {
 		const pages = [nickname_page, loading, game_page];
 		pages.forEach((page) => {
@@ -47,49 +39,75 @@ window.onload = () =>
 		const nicknameInput = document.getElementById("nickname_input") as HTMLInputElement;
 		const nickname = nicknameInput.value.trim();
 		if (nickname) {
-			socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/${nickname}`);
+			openSocket(nickname);
 			showPage(loading);
 		} else {
 			alert("Please enter a valid nickname.");
 		}
 	});
 
-	cancelButton.addEventListener("click", () => {
-		socket.close();
-		showPage(nickname_page);
-	});
+	function openSocket(nickname: string) {
+		const socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/${nickname}`);
+		console.log(`Connecting to WebSocket server at ws://${window.location.hostname}:${window.location.port}/ws/${nickname}`);
+		cancelButton.addEventListener("click", () => {
+			socket.close();
+		});
+
+		cells.forEach((cell) => {
+			cell.addEventListener("click", (event) => {
+				const cell = event.target as HTMLDivElement;
+				const index = Number(cell.dataset.index);
+				socket.send(JSON.stringify({ index: index }));
+			});
+		});
+
+		// socket.onopen = () => {
+		// 	socket.send(JSON.stringify({ nickname: nickname }));
+		// };
+
+		socket.onclose = () => {
+			showPage(nickname_page);
+		};
+
+		socket.onerror = (error) => {
+			alert(`WebSocket error: ${error}`);
+		};
+
+		socket.onmessage = (event) => {
+			try {
+				const data = JSON.parse(event.data);
+				console.log(data);
+				if (data.index !== undefined && data.sign !== undefined && data.turn !== undefined) {
+					cells[data.index].textContent = data.sign;
+					info.textContent = data.turn;
+				} else if (data.gameSetup) {
+					cells.forEach((cell) => {
+						cell.textContent = "";
+					});
+					playWith.textContent = `${data.sign}`;
+					info.textContent = `${data.turn}`;
+					player1_name.textContent = data.userId;
+					player2_name.textContent = data.opponentId;
+					player1_wins.textContent = data.wins;
+					player1_losses.textContent = data.losses;
+					player1_draws.textContent = data.draws;
+					player1_total.textContent = data.total;
+					showPage(game_page);
+				} else if (data.gameOver) {
+					info.textContent = data.gameOver;
+				} else if (data.warning) {
+					alert(data.warning);
+				} else if (data.error) {
+					alert(data.error);
+				} else {
+					alert("Invalid message received");
+				}
+			} catch (error) {
+				alert(`${error}`);
+			}
+		};
+	}
 
 	showPage(nickname_page);
-
-	socket.onmessage = (event) => {
-		try {
-			const data = JSON.parse(event.data);
-			console.log(data);
-			if (data.index !== undefined && data.sign !== undefined && data.turn !== undefined) {
-				cells[data.index].textContent = data.sign;
-				info.textContent = data.turn;
-			} else if (data.gameSetup && data.userId && data.opponentId && data.sign && data.turn) {
-				playWith.textContent = `${data.sign}`;
-				info.textContent = `${data.turn}`;
-				player1_name.textContent = data.userId;
-				player2_name.textContent = data.opponentId;
-				player1_wins.textContent = data.wins;
-				player1_losses.textContent = data.losses;
-				player1_draws.textContent = data.draws;
-				player1_total.textContent = data.total;
-				showPage(game_page);
-			} else if (data.gameOver) {
-				info.textContent = data.gameOver;
-			} else if (data.warning) {
-				alert(data.warning);
-			} else if (data.error) {
-				alert(data.error);
-			} else {
-				alert("Invalid message received");
-			}
-		} catch (error) {
-			alert(`${error}`);
-		}
-	};
 
 };

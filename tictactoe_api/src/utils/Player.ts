@@ -63,7 +63,17 @@ export class Player {
 	}
 
 	async sendSetup() {
+		console.log("Sending setup to player:", this.id);
 		const stats = await getHeadToHeadStats(this.id, this.getOpponentId()!);
+		if (!stats) {
+			console.error("Failed to get head to head stats");
+			this.socket.send(
+				JSON.stringify({
+					error: "Failed to get head to head stats",
+				}),
+			);
+		}
+		console.log("Head to head stats:", stats);
 		const setupResponse = zodSetupResponse.parse({
 			gameSetup: true,
 			userId: this.id,

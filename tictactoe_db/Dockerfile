@@ -11,7 +11,7 @@ COPY ./src ./
 RUN npm install
 
 # TODO uncomment below line in production
-# CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start"]
 
 # TODO remove below line in production
-CMD ["sh", "-c", "npx prisma generate && npx prisma migrate reset --force --skip-seed && npm run dev"] 
+# CMD ["sh", "-c", "npx prisma generate && npx prisma migrate reset --force --skip-seed && npm run dev"] 

@@ -15,6 +15,7 @@ model Game {
   playerXId String
   playerOId String
   result    GameResult
+  createdAt DateTime @default(now())
 }
 
 enum GameResult {

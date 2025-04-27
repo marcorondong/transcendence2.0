@@ -7,8 +7,9 @@ import { zodSchema } from "./zodSchema";
 let friendPlayer: Player | null = null;
 
 export async function webSocketConnection(server: FastifyInstance) {
-	server.get("/:userId", { websocket: true }, (socket, request) => {
-		const id = faker.person.firstName(); // TODO extract id from JWT token
+	server.get("/:id", { websocket: true }, (socket, request) => {
+		// const id = faker.person.firstName(); // TODO extract id from JWT token
+		const id = (request.params as { id: string }).id;
 		const player = new Player(id, socket);
 		console.log("Player connected. playerId:", player.getId()); // TODO remove this in production
 		if (friendPlayer) {
@@ -28,6 +29,11 @@ export async function webSocketConnection(server: FastifyInstance) {
 				console.error(error); // TODO remove this in production
 				socket.send(JSON.stringify(error)); // TODO send standard error message in production
 			}
+		});
+
+		socket.on("error", (error: Error) => {
+			console.error("WebSocket error:", error); // TODO remove this in production
+			socket.send(JSON.stringify({ error: "WebSocket error" })); // TODO send standard error message in production
 		});
 
 		socket.on("close", async (code: number, reason: Buffer) => {
