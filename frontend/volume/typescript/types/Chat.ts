@@ -7,9 +7,16 @@ interface Chat {
 	peopleOnline?: string[];
 	error?: string;
 	message?: string;
+	messageResponse?: MessageResponse;
 }
 
 interface ChatUser {
 	id: string;
 	messages: string[];
+}
+
+interface MessageResponse {
+	message: string;
+	relatedId: string;
+	type: string;
 }

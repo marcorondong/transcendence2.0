@@ -33,10 +33,45 @@ class ChatComponent extends HTMLElement {
 		);
 
 		this.ws.onmessage = (event) => {
+			console.log("websocket event");
 			const chatServiceData: Chat = JSON.parse(event.data);
-			if (chatServiceData.type === "message" && this.selectedUser) {
-				this.selectedUser.messages.push(chatServiceData.message ?? "");
+			console.log("websocket data", chatServiceData);
+
+			if (chatServiceData.type === "messageResponse") {
+				this.selectedUser?.messages.push(chatServiceData.message ?? "");
+				this.displayCurrentChat();
 			}
+
+			// RECIEVING MESSAGE
+			if (
+				chatServiceData.messageResponse &&
+				chatServiceData.messageResponse.type === "messageResponse"
+			) {
+				console.log(" in handle recieving message");
+				const sender = this.onlineUsers.find(
+					(user) =>
+						user.id === chatServiceData.messageResponse?.relatedId,
+				);
+				if (sender) {
+					sender.messages.push(
+						chatServiceData.messageResponse.message ?? "",
+					);
+				}
+				this.displayCurrentChat();
+				console.log("updated online users object", this.onlineUsers);
+			}
+
+			// A NEW USER CAME ONLINE
+			if (chatServiceData.type === "newClient") {
+				const user: ChatUser = {
+					id: chatServiceData.relatedId ?? "",
+					messages: [],
+				};
+				this.onlineUsers.push(user);
+				this.updateUsers();
+			}
+
+			// WHEN USER LOGS IN, SETTING UP PEOPLE THAT ARE ONLINE
 			if (
 				chatServiceData.type === "peopleOnline" &&
 				chatServiceData.peopleOnline
@@ -60,6 +95,9 @@ class ChatComponent extends HTMLElement {
 	updateUsers() {
 		this.displayOnlineUsers();
 		this.navUsersCount.innerText = String(this.onlineUsers.length);
+		if (this.onlineUsers.length === 1) {
+			this.displayCurrentChat();
+		}
 	}
 
 	displayOnlineUsers() {
@@ -88,14 +126,14 @@ class ChatComponent extends HTMLElement {
 		}
 
 		if (this.selectedUser.messages.length === 0) {
-			this.mainMessages.innerText = "no Chat History available";
+			this.mainMessages.innerText = `no Chat History available with ${this.selectedUser.id}`;
 		}
 		console.log("about to display messages", this.selectedUser.messages);
 
 		for (const message of this.selectedUser.messages) {
 			const div = document.createElement("div");
 			div.innerText = message;
-			this.mainUsers.appendChild(div);
+			this.mainMessages.appendChild(div);
 		}
 	}
 
@@ -168,7 +206,7 @@ class ChatComponent extends HTMLElement {
 		console.log("trying to send message");
 		const chat: Chat = {
 			type: "message",
-			message: this.chatInput.innerText,
+			message: this.chatInput.value,
 			relatedId: this.selectedUser?.id,
 		};
 		if (this.ws) {
