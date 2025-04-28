@@ -7,7 +7,7 @@ PONG_ENV = ssg/pong-api/.env
 #we can add more to this list if needed
 SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
-SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK)
+SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV)
 
 all: $(SECRETS)
 	docker-compose up -d
