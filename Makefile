@@ -10,17 +10,17 @@ SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV)
 
 all: $(SECRETS)
-	docker-compose up -d
+	docker compose up -d
 
 re: clean
 	make
 
 clean:
-	docker-compose down
+	docker compose down
 
 dev:
-	docker-compose build --no-cache
-	docker-compose up
+	docker compose build --no-cache
+	docker compose up
 
 nuke: clean
 	docker system prune -a --volumes
