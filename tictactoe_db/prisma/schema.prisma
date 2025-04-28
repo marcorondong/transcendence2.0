@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id        String   @id @default(uuid())
+  playerXId String
+  playerOId String
+  result    GameResult
+  createdAt DateTime @default(now())
+}
+
+enum GameResult {
+  O
+  X
+  DRAW
+}

@@ -2,21 +2,28 @@
 MONITORING_SECRETS = ./monitoring/secrets
 GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
+PONG_ENV = ssg/pong-api/.env
 
 #we can add more to this list if needed
 SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
-SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK)
+SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV)
 
 all: $(SECRETS)
 	docker-compose up -d
 
-re:
-	docker-compose down
+re: clean
 	make
 
 clean:
 	docker-compose down
+
+dev:
+	docker-compose build --no-cache
+	docker-compose up
+
+nuke: clean
+	docker system prune -a --volumes
 
 cli: all
 	make -C cli-client
@@ -27,12 +34,5 @@ $(SECRET_DIRECTORIES):
 #simple script since i can automate password protection in entrypoint of grafana
 $(GRAFANA_PW):
 	./monitoring/grafana/create_password.sh
-
-# more complicated decrypt with ansible-vault
-# package installation required
-# it will prompt for the encryption password
-# $(SLACK_WEBHOOK):
-# 	cp ./monitoring/alertmanager/slack_webhook.txt.encrypted $(SLACK_WEBHOOK)
-# 	ansible-vault decrypt $(SLACK_WEBHOOK) || (rm $(SLACK_WEBHOOK) && exit 1)
 
 .PHONY: all re clean

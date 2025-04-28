@@ -47,7 +47,7 @@ scrape_configs:
 
 #monitor backend endpoints in docker network
   - job_name: 'blackbox-http'
-    scrape_interval: 1m
+    scrape_interval: 10m
     metrics_path: /probe
     params:
       module: [http_2xx]
@@ -55,6 +55,9 @@ scrape_configs:
       - targets:
         - http://ai-bot:6969/healthcheck
         - http://pong-api:3010/healthcheck
+        - http://pong_db_container:3011/pong/health-check
+        - http://tictactoe_db:3003/tictactoe/health-check
+        - http://tictactoe_api:3001/tictactoe/health-check
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -65,7 +68,7 @@ scrape_configs:
 
 #monitor user endpoints but in docker network
   - job_name: "blackbox-https"
-    scrape_interval: 1m
+    scrape_interval: 10m
     metrics_path: /probe
     params:
       module: [https_no_verify]

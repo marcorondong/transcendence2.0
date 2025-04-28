@@ -1,10 +1,17 @@
 FROM node:iron-slim
 
-RUN apt-get update
+RUN apt-get update -y && apt-get install -y openssl sqlite3
 
-COPY ./package.json /tictactoe_api/
-COPY ./tsconfig.json /tictactoe_api/
-# COPY ./src /tictactoe_api/src
-RUN npm --prefix /tictactoe_api install
+WORKDIR /tictactoe_api
 
-CMD ["npm", "--prefix", "/tictactoe_api", "run", "dev"]
+COPY ./package.json ./
+COPY ./tsconfig.json ./
+COPY ./src ./
+# TODO remove below line in production
+COPY ./public ./
+RUN npm install
+
+# TODO uncomment below line in production
+# CMD ["npm run start"]
+# TODO remove below line in production
+CMD ["npm", "run", "dev"]

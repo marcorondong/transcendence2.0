@@ -18,6 +18,8 @@ getch
 getmaxyx
 grafana
 healthcheck
+highscore
+ie
 HEHE
 iguliyev
 Ismayil
@@ -38,7 +40,9 @@ stdscr
 sysfs
 TBD
 tictactoe
+UA
 unhashing
 vec
 vect
+xl
 xs
