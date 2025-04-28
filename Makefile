@@ -25,6 +25,9 @@ dev:
 nuke: clean
 	docker system prune -a --volumes
 
+cli: all
+	make -C cli-client
+
 $(SECRET_DIRECTORIES):
 	mkdir -p $(SECRET_DIRECTORIES)
 

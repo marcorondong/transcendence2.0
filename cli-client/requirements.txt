@@ -1,2 +1,2 @@
-readchar==4.2.1
-websockets==15.0
+requests==2.25.1
+websockets==15.0.1
