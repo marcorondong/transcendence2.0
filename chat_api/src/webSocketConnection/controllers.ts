@@ -35,7 +35,7 @@ export function messageHandler(data: MessageInput, client: Client) {
 	});
 	client.getSocket().send(JSON.stringify(messageResponse));
 	if (!friendClient.isBlocked(client.getId()))
-		friendClient.getSocket().send(JSON.stringify({ messageResponse }));
+		friendClient.getSocket().send(JSON.stringify(messageResponse));
 }
 
 export async function blockHandler(data: BlockInput, client: Client) {
