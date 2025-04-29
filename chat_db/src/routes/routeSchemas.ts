@@ -30,6 +30,14 @@ export const unblockUserSchema = {
 	response: { 200: successResponseSchema },
 };
 
+export const toggleBlockSchema = {
+	summary: "Toggle Block User",
+	description: "Toggle the block status of a user.",
+	tags: ["Chat"],
+	body: idsZodSchema,
+	response: { 200: successResponseSchema },
+};
+
 export const blockStatusSchema = {
 	summary: "Block Status",
 	description: "Check if a user is blocked.",

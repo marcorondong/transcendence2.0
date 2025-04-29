@@ -2,6 +2,7 @@ import {
 	createUserSchema,
 	blockUserSchema,
 	unblockUserSchema,
+	toggleBlockSchema,
 	blockStatusSchema,
 	blockListSchema,
 	healthCheckSchema,
@@ -10,6 +11,7 @@ import {
 	createUserHandler,
 	blockUserHandler,
 	unblockUserHandler,
+	toggleBlockHandler,
 	blockStatusHandler,
 	blockListHandler,
 	healthCheckHandler,
@@ -28,6 +30,11 @@ export const blockUserOpt = {
 export const unblockUserOpt = {
 	schema: unblockUserSchema,
 	handler: unblockUserHandler,
+};
+
+export const toggleBlockOpt = {
+	schema: toggleBlockSchema,
+	handler: toggleBlockHandler,
 };
 
 export const blockStatusOpt = {

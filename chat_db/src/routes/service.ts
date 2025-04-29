@@ -39,6 +39,15 @@ export async function removeFromBlockList(userId: string, friendId: string) {
 	});
 }
 
+export async function toggleBlock(userId: string, friendId: string) {
+	const isUserInBlockList = await getBlockStatus(userId, friendId);
+	if (isUserInBlockList) {
+		await removeFromBlockList(userId, friendId);
+	} else {
+		await addToBlockList(userId, friendId);
+	}
+}
+
 export async function getBlockStatus(userId: string, friendId: string) {
 	const existingUser = await getUserIfExists(userId);
 	if (!existingUser) throw new httpError.NotFound("User not found");
