@@ -11,9 +11,7 @@ export const createUserSchema = {
 	description: "Create a new user. If the user already exists, it will be ignored.",
 	tags: ["Chat"],
 	body: idZodSchema,
-	response: {
-		201: successResponseSchema,
-	},
+	response: { 201: successResponseSchema },
 };
 
 export const blockUserSchema = {
@@ -21,9 +19,7 @@ export const blockUserSchema = {
 	description: "Add a user to the block list.",
 	tags: ["Chat"],
 	body: idsZodSchema,
-	response: {
-		200: successResponseSchema,
-	},
+	response: { 200: successResponseSchema },
 };
 
 export const unblockUserSchema = {
@@ -31,9 +27,7 @@ export const unblockUserSchema = {
 	description: "Remove a user from the block list.",
 	tags: ["Chat"],
 	body: idsZodSchema,
-	response: {
-		200: successResponseSchema,
-	},
+	response: { 200: successResponseSchema },
 };
 
 export const blockStatusSchema = {
@@ -41,9 +35,7 @@ export const blockStatusSchema = {
 	description: "Check if a user is blocked.",
 	tags: ["Chat"],
 	params: idsZodSchema,
-	response: {
-		200: blockStatusResponseSchema,
-	},
+	response: { 200: blockStatusResponseSchema },
 };
 
 export const blockListSchema = {
@@ -51,9 +43,7 @@ export const blockListSchema = {
 	description: "Get the block list of a user.",
 	tags: ["Chat"],
 	params: idZodSchema,
-	response: {
-		200: blockListResponseSchema,
-	},
+	response: { 200: blockListResponseSchema },
 };
 
 export const healthCheckSchema = {
