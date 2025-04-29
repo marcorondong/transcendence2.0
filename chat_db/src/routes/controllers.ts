@@ -15,8 +15,8 @@ export async function createUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId } = idZodSchema.parse(request.body);
-	await createUser(userId);
-	reply.status(201).send({ success: true });
+	const user = await createUser(userId);
+	reply.status(201).send(user);
 }
 
 export async function blockUserHandler(

@@ -11,7 +11,7 @@ export const createUserSchema = {
 	description: "Create a new user. If the user already exists, it will be ignored.",
 	tags: ["Chat"],
 	body: idZodSchema,
-	response: { 201: successResponseSchema },
+	response: { 201: blockListResponseSchema },
 };
 
 export const blockUserSchema = {
