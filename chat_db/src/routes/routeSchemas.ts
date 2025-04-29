@@ -3,6 +3,7 @@ import {
 	idsZodSchema,
 	blockStatusResponseSchema,
 	blockListResponseSchema,
+	successResponseSchema,
 } from "./zodSchemas";
 
 export const createUserSchema = {
@@ -10,6 +11,9 @@ export const createUserSchema = {
 	description: "Create a new user.",
 	tags: ["Chat"],
 	body: idZodSchema,
+	response: {
+		201: successResponseSchema,
+	},
 };
 
 export const blockUserSchema = {
@@ -17,6 +21,9 @@ export const blockUserSchema = {
 	description: "Add a user to the block list.",
 	tags: ["Chat"],
 	body: idsZodSchema,
+	response: {
+		200: successResponseSchema,
+	},
 };
 
 export const unblockUserSchema = {
@@ -24,6 +31,9 @@ export const unblockUserSchema = {
 	description: "Remove a user from the block list.",
 	tags: ["Chat"],
 	body: idsZodSchema,
+	response: {
+		200: successResponseSchema,
+	},
 };
 
 export const blockStatusSchema = {

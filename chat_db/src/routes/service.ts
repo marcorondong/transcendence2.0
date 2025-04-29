@@ -13,12 +13,11 @@ async function getUserIfExists(userId: string) {
 
 export async function createUser(userId: string) {
 	const existingUser = await getUserIfExists(userId);
-	if (existingUser) return existingUser;
-	const newUser = await prisma.user.create({
+	if (existingUser) return;
+	await prisma.user.create({
 		data: { id: userId },
 		select: { blockList: true },
 	});
-	return newUser;
 }
 
 export async function addToBlockList(userId: string, friendId: string) {
@@ -43,7 +42,7 @@ export async function getBlockStatus(userId: string, friendId: string) {
 	const existingUser = await getUserIfExists(userId);
 	if (!existingUser) throw new httpError.NotFound("User not found");
 	const existingFriend = await getUserIfExists(friendId);
-	if (!existingFriend) throw new httpError.NotFound("User not found");
+	if (!existingFriend) throw new httpError.NotFound("Friend user not found");
 	for (const friend of existingUser.blockList)
 		if (friend.id === friendId) return true;
 	return false;

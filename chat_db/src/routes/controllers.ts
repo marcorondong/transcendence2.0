@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { idZodSchema, idsZodSchema } from "./zodSchemas";
+import { idZodSchema, idsZodSchema, successResponseSchema, blockStatusResponseSchema, blockListResponseSchema } from "./zodSchemas";
 import type { IdInput, IdsInput } from "./zodSchemas";
 import {
 	createUser,
@@ -14,8 +14,9 @@ export async function createUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId } = idZodSchema.parse(request.body);
-	const user = await createUser(userId);
-	reply.status(201).send(user);
+	await createUser(userId);
+	const successResponse = successResponseSchema.parse({ success: true} );
+	reply.status(201).send(successResponse);
 }
 
 export async function blockUserHandler(
@@ -24,7 +25,8 @@ export async function blockUserHandler(
 ) {
 	const { userId, friendId } = idsZodSchema.parse(request.body);
 	await addToBlockList(userId, friendId);
-	reply.status(200).send({ message: "User blocked successfully" });
+	const successResponse = successResponseSchema.parse({ success: true });
+	reply.status(200).send(successResponse);
 }
 
 export async function unblockUserHandler(
@@ -33,7 +35,8 @@ export async function unblockUserHandler(
 ) {
 	const { userId, friendId } = idsZodSchema.parse(request.body);
 	await removeFromBlockList(userId, friendId);
-	reply.status(200).send({ message: "User unblocked successfully" });
+	const successResponse = successResponseSchema.parse({ success: true});
+	reply.status(200).send(successResponse);
 }
 
 export async function blockStatusHandler(
@@ -42,7 +45,8 @@ export async function blockStatusHandler(
 ) {
 	const { userId, friendId } = idsZodSchema.parse(request.params);
 	const blockStatus = await getBlockStatus(userId, friendId);
-	reply.status(200).send({ blockStatus });
+	const blockStatusResponse = blockStatusResponseSchema.parse( { blockStatus } );
+	reply.status(200).send(blockStatusResponse);
 }
 
 export async function blockListHandler(
@@ -51,5 +55,6 @@ export async function blockListHandler(
 ) {
 	const { userId } = idZodSchema.parse(request.params);
 	const blockList = await getBlockList(userId);
-	reply.status(200).send({ blockList });
+	const blockListResponse = blockListResponseSchema.parse({ blockList });
+	reply.status(200).send({ blockListResponse });
 }
