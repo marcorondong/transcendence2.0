@@ -58,7 +58,6 @@ export async function blockListHandler(
 ) {
 	const { userId } = idZodSchema.parse(request.params);
 	const blockList = await getBlockList(userId);
-	console.log("blockList", blockList);
 	reply.status(200).send({ blockList });
 }
 

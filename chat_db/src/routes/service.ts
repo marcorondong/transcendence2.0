@@ -13,11 +13,12 @@ async function getUserIfExists(userId: string) {
 
 export async function createUser(userId: string) {
 	const existingUser = await getUserIfExists(userId);
-	if (existingUser) return;
-	await prisma.user.create({
+	if (existingUser) return existingUser;
+	const user = await prisma.user.create({
 		data: { userId: userId },
 		select: { blockList: true },
 	});
+	return user;
 }
 
 export async function addToBlockList(userId: string, friendId: string) {
