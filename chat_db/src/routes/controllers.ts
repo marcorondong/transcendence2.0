@@ -58,3 +58,11 @@ export async function blockListHandler(
 	const blockListResponse = blockListResponseSchema.parse({ blockList });
 	reply.status(200).send({ blockListResponse });
 }
+
+export async function healthCheckHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const healthCheckResponse = successResponseSchema.parse({ success: true });
+	reply.status(200).send(healthCheckResponse);
+}

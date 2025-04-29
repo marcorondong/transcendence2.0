@@ -4,6 +4,7 @@ import {
 	unblockUserSchema,
 	blockStatusSchema,
 	blockListSchema,
+	healthCheckSchema,
 } from "./routeSchemas";
 import {
 	createUserHandler,
@@ -11,6 +12,7 @@ import {
 	unblockUserHandler,
 	blockStatusHandler,
 	blockListHandler,
+	healthCheckHandler,
 } from "./controllers";
 
 export const createUserOpt = {
@@ -36,4 +38,9 @@ export const blockStatusOpt = {
 export const blockListOpt = {
 	schema: blockListSchema,
 	handler: blockListHandler,
+};
+
+export const healthCheckOpt = {
+	schema: healthCheckSchema,
+	handler: healthCheckHandler,
 };

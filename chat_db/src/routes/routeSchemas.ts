@@ -8,7 +8,7 @@ import {
 
 export const createUserSchema = {
 	summary: "Create User",
-	description: "Create a new user.",
+	description: "Create a new user. If the user already exists, it will be ignored.",
 	tags: ["Chat"],
 	body: idZodSchema,
 	response: {
@@ -54,4 +54,11 @@ export const blockListSchema = {
 	response: {
 		200: blockListResponseSchema,
 	},
+};
+
+export const healthCheckSchema = {
+	summary: "Health Check",
+	description: "Check the health of the service",
+	tags: ["Health"],
+	response: { 200: successResponseSchema },
 };

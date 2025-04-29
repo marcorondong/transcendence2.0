@@ -5,6 +5,7 @@ import {
 	unblockUserOpt,
 	blockStatusOpt,
 	blockListOpt,
+	healthCheckOpt,
 } from "./options";
 
 export async function chatRoutes(server: FastifyInstance) {
@@ -13,4 +14,5 @@ export async function chatRoutes(server: FastifyInstance) {
 	server.patch("/unblock-user", unblockUserOpt);
 	server.get("/block-status/:userId/:friendId", blockStatusOpt);
 	server.get("/block-list/:userId", blockListOpt);
+	server.get("/health-check", healthCheckOpt);
 }
