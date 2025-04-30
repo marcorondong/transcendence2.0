@@ -23,7 +23,7 @@ export const swaggerOption = {
 };
 
 export const swaggerUiOption = {
-	routePrefix: "/chat/documentation",
+	routePrefix: "/chat-db/documentation",
 };
 
 export const serverOption = {

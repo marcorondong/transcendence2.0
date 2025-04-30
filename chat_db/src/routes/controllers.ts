@@ -8,6 +8,7 @@ import {
 	getBlockStatus,
 	getBlockList,
 } from "./service";
+import { healthCheck } from "./dbUtils";
 
 export async function createUserHandler(
 	request: FastifyRequest<{ Body: IdInput }>,
@@ -67,5 +68,6 @@ export async function healthCheckHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
+	await healthCheck();
 	reply.status(200).send({ success: true });
 }

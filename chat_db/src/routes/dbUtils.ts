@@ -31,3 +31,7 @@ export async function disconnectUser(userId: string, friendId: string) {
 		data: { blockList: { disconnect: { userId: friendId } } },
 	});
 }
+
+export async function healthCheck() {
+	await prisma.$queryRaw`SELECT 1`;
+}
