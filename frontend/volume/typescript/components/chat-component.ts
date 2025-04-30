@@ -1,4 +1,5 @@
 import { IconComponent } from "./icon-component.js";
+import { Chat, ChatUser } from "../types/Chat.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -21,8 +22,9 @@ class ChatComponent extends HTMLElement {
 	mainUsers: HTMLElement = document.createElement("div");
 	navUsersContainer: HTMLElement = document.createElement("div");
 	navUsersCount: HTMLElement = document.createElement("span");
-	chatInput = document.createElement("input");
+	chatInput = document.createElement("textarea");
 	sendButton: HTMLElement = document.createElement("button");
+	chatContainer: HTMLElement = document.createElement("div");
 
 	constructor() {
 		super();
@@ -115,10 +117,25 @@ class ChatComponent extends HTMLElement {
 		}
 	}
 
+	chatBubble(message: string) {
+		const div = document.createElement("div");
+		div.innerText = message;
+		div.classList.add(
+			"dark:bg-slate-500",
+			"text-slate-300",
+			"rounded-3xl",
+			"px-4",
+			"py-2",
+		);
+		return div;
+	}
+
 	displayCurrentChat() {
 		this.mainMessages.replaceChildren();
 		if (this.onlineUsers.length === 0) {
-			this.mainMessages.innerText = "no Chat History available";
+			const chatBubble = this.chatBubble("no Chat History available");
+			chatBubble.classList.add("text-slate-400");
+			this.mainMessages.appendChild(chatBubble);
 			return;
 		}
 		if (!this.selectedUser) {
@@ -126,14 +143,17 @@ class ChatComponent extends HTMLElement {
 		}
 
 		if (this.selectedUser.messages.length === 0) {
-			this.mainMessages.innerText = `no Chat History available with ${this.selectedUser.id}`;
+			const chatBubble = this.chatBubble(
+				`no Chat History available with ${this.selectedUser.id}`,
+			);
+			chatBubble.classList.add("text-slate-400");
+			this.mainMessages.appendChild(chatBubble);
 		}
 		console.log("about to display messages", this.selectedUser.messages);
 
 		for (const message of this.selectedUser.messages) {
-			const div = document.createElement("div");
-			div.innerText = message;
-			this.mainMessages.appendChild(div);
+			const chatBubble = this.chatBubble(message);
+			this.mainMessages.appendChild(chatBubble);
 		}
 	}
 
@@ -220,9 +240,15 @@ class ChatComponent extends HTMLElement {
 		this.classList.add("flex", "flex-col");
 		this.nav.classList.add(
 			"flex",
+			"gap-4",
 			"w-full",
 			"items-center",
 			"justify-between",
+			"bg-indigo-800",
+			"rounded-3xl",
+			"px-4",
+			"py-2",
+			"border-cyan-500",
 		);
 		this.append(this.nav);
 
@@ -232,11 +258,12 @@ class ChatComponent extends HTMLElement {
 			"grid",
 			"gap-4",
 			"grid-cols-[1fr_30%]",
-			"grid-rows-[1fr_10rem]",
+			"grid-rows-[1fr_8rem]",
 			"h-full",
+			"my-4",
 		);
 		this.main.append(this.mainMessages, this.mainUsers);
-		this.mainMessages.classList.add("flex", "flex-col", "gap-3", "p-4");
+		this.mainMessages.classList.add("flex", "flex-col", "gap-6", "p-4");
 		this.mainUsers.classList.add("flex", "flex-col", "gap-3", "p-4");
 		this.appendChild(this.main);
 
@@ -251,7 +278,7 @@ class ChatComponent extends HTMLElement {
 		this.nav.appendChild(this.navUsersContainer);
 
 		this.minusIcon.classList.add("hidden");
-		this.minMaxButton.classList.add("pong-button");
+		this.minMaxButton.classList.add("pong-button-secondary");
 		this.minMaxButton.id = "min-max-button";
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
 		this.nav.append(this.minMaxButton);
@@ -259,12 +286,38 @@ class ChatComponent extends HTMLElement {
 		this.displayCurrentChat();
 		this.displayOnlineUsers();
 
-		this.chatInput.type = "text";
+		this.chatContainer.classList.add(
+			"col-span-full",
+			"w-full",
+			"flex",
+			"items-stretch",
+			"gap-4",
+		);
+		this.main.append(this.chatContainer);
 		this.chatInput.placeholder = "start your epic conversation";
-		this.sendButton.innerText = "send";
-		this.sendButton.classList.add("pong-button");
+		this.chatInput.style.resize = "none";
+		this.chatInput.classList.add(
+			"bg-indigo-950",
+			"border-2",
+			"border-indigo-900",
+			"rounded-xl",
+			"px-8",
+			"py-4",
+			"self-star",
+			"grow-1",
+		);
+		const sendIcon = new IconComponent("send", 4);
+		this.sendButton.append(sendIcon);
+		this.sendButton.classList.add(
+			"pong-button",
+			"self-stretch",
+			"basis-14",
+			"flex",
+			"justify-center",
+			"items-center",
+		);
 		this.sendButton.id = "send-button";
-		this.main.append(this.chatInput, this.sendButton);
+		this.chatContainer.append(this.chatInput, this.sendButton);
 	}
 
 	disconnectedCallback() {

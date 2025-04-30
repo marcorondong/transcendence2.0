@@ -1,4 +1,4 @@
-interface Chat {
+export interface Chat {
 	type: string;
 	relatedId?: string;
 	roomId?: string;
@@ -10,12 +10,12 @@ interface Chat {
 	messageResponse?: MessageResponse;
 }
 
-interface ChatUser {
+export interface ChatUser {
 	id: string;
 	messages: string[];
 }
 
-interface MessageResponse {
+export interface MessageResponse {
 	message: string;
 	relatedId: string;
 	type: string;
