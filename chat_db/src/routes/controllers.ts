@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { IdInput, IdsInput } from "./zodSchemas";
 import {
-	createUser,
+	createOrGetUser,
 	addToBlockList,
 	removeFromBlockList,
 	toggleBlock,
@@ -14,7 +14,7 @@ export async function createUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId } = request.body;
-	const user = await createUser(userId);
+	const user = await createOrGetUser(userId);
 	reply.status(201).send(user);
 }
 
