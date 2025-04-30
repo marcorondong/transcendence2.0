@@ -8,7 +8,6 @@ import {
 	getBlockStatus,
 	getBlockList,
 } from "./service";
-import httpError from "http-errors";
 
 export async function createUserHandler(
 	request: FastifyRequest<{ Body: IdInput }>,
@@ -24,8 +23,6 @@ export async function blockUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	if (userId === friendId)
-		throw new httpError.BadRequest("userId and friendId cannot be the same");
 	await addToBlockList(userId, friendId);
 	reply.status(200).send({ success: true });
 }
@@ -35,8 +32,6 @@ export async function unblockUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	if (userId === friendId)
-		throw new httpError.BadRequest("userId and friendId cannot be the same");
 	await removeFromBlockList(userId, friendId);
 	reply.status(200).send({ success: true });
 }
@@ -46,8 +41,6 @@ export async function toggleBlockHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	if (userId === friendId)
-		throw new httpError.BadRequest("userId and friendId cannot be the same");
 	await toggleBlock(userId, friendId);
 	reply.status(200).send({ success: true });
 }
@@ -57,8 +50,6 @@ export async function blockStatusHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.params;
-	if (userId === friendId)
-		throw new httpError.BadRequest("userId and friendId cannot be the same");
 	const blockStatus = await getBlockStatus(userId, friendId);
 	reply.status(200).send({ blockStatus });
 }

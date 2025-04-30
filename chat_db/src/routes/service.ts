@@ -49,6 +49,7 @@ export async function toggleBlock(userId: string, friendId: string) {
 }
 
 export async function getBlockStatus(userId: string, friendId: string) {
+	if (userId === friendId) throw new httpError.BadRequest("userId and friendId cannot be the same");
 	const existingUser = await getUserIfExists(userId);
 	if (!existingUser) throw new httpError.NotFound("User not found");
 	const existingFriend = await getUserIfExists(friendId);
