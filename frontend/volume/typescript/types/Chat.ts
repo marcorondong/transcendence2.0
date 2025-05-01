@@ -10,9 +10,15 @@ export interface Chat {
 	messageResponse?: MessageResponse;
 }
 
+export interface Message {
+	id: string;
+	content: string;
+}
+
 export interface ChatUser {
 	id: string;
-	messages: string[];
+	messages: Message[];
+	blocked: boolean;
 }
 
 export interface MessageResponse {
