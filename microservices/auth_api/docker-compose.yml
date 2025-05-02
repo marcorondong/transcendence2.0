@@ -1,0 +1,20 @@
+services:
+  auth_api:
+    image: auth_api_img
+    container_name: auth_api_container
+    build: .
+    volumes:
+      - ./src/:/auth_api/src/
+      - ./public/:/auth_api/public/
+    environment:
+      - NODE_ENV=development
+      - PORT=2999
+      - HOST=0.0.0.0
+    ports:
+      - 2999:2999
+    restart: always
+
+include:
+  - ../users/docker-compose.yml
+  - ../../chat_api/docker-compose.yml
+  - ../../ssg/pong-api/docker-compose.yml

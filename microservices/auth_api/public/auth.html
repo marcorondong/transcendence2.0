@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AUTH</title>
+	<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+	<div id="auth_page" class="text-center p-5 bg-white rounded-lg shadow-md">
+		<h1 class="text-2xl font-bold mb-4">Authentication</h1>
+		<div id="auth_form" class="mb-4">
+			<input type="text" id="name" placeholder="Name" class="border border-gray-300 p-2 rounded mb-2 w-full">
+			<input type="text" id="email" placeholder="Email" class="border border-gray-300 p-2 rounded mb-2 w-full">
+			<input type="password" id="password" placeholder="Password" class="border border-gray-300 p-2 rounded mb-2 w-full">
+			<button id="login_button" class="bg-blue-500 text-white py-2 px-4 rounded">Login</button>
+			<button id="register_button" class="bg-green-500 text-white py-2 px-4 rounded">Register</button>
+			<button id="test_button" class="bg-yellow-500 text-white py-2 px-4 rounded">Test</button>
+			<button id="open_socket_button" class="bg-purple-500 text-white py-2 px-4 rounded">Open Socket</button>
+			<button id="open_socket_button_pong" class="bg-purple-500 text-white py-2 px-4 rounded">Open Socket Pong</button>
+
+			<button id="logout_button" class="bg-red-500 text-white py-2 px-4 rounded">Logout</button>
+		</div>
+		<div id="message" class="text-red-500"></div>
+		<div id="user_info" class="hidden">
+			<p class="font-semibold"><span id="logged_in_user"></span></p>
+			<!-- <button id="logout_button" class="bg-red-500 text-white py-2 px-4 rounded">Logout</button> -->
+		</div>
+	</div>
+	<script>
+		document.getElementById('login_button').addEventListener('click', async function() {
+			console.log('Login button clicked');
+			const email = document.getElementById('email').value;
+			const password = document.getElementById('password').value;
+			try {
+				const response = await fetch(
+					'http://localhost:2999/auth-api/sign-in', 
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							email: email,
+							password: password
+						})
+					}
+				);
+
+				if (!response.ok) {
+					throw new Error('Network response was not ok ' + response.statusText);
+				}
+				const result = await response.json();
+				if (result.error) {
+					throw new Error(result.error);
+				}
+				console.log(result);
+				document.getElementById('message').innerText = 'Login successful!';
+				document.getElementById('logged_in_user').innerText = "Signed in as: " + name;
+				document.getElementById('user_info').classList.remove('hidden');
+
+			}
+			catch (error) {
+				document.getElementById('message').innerText = 'Error: ' + error.message;
+				console.error('Error:', error);
+			}
+		});
+
+		document.getElementById('register_button').addEventListener('click', async function() {
+			console.log('Register button clicked');
+			const name = document.getElementById('name').value;
+			const email = document.getElementById('email').value;
+			const password = document.getElementById('password').value;
+			try {
+				const response = await fetch(
+					'http://localhost:3000/api/users/', 
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						name: name,
+						email: email,
+						password: password
+					})
+				});
+
+				if (!response.ok) {
+					throw new Error('Network response was not ok ' + response.statusText);
+				}
+				const result = await response.json();
+				if (result.error) {
+					throw new Error(result.error);
+				}
+				document.getElementById('message').innerText = 'Registration successful!';
+				document.getElementById('logged_in_user').innerText = "Registered as: " + name;
+				// document.getElementById('user_info').classList.remove('hidden');
+			} catch (error) {
+				document.getElementById('message').innerText = 'Error: ' + error.message;
+				console.error('Error:', error);
+			}
+		});
+
+		document.getElementById('logout_button').addEventListener('click', async function() {
+			// Add your logout logic here
+			console.log('Logout button clicked');
+			try {
+				const response = await fetch(
+					'http://localhost:2999/auth-api/sign-out', 
+					{
+						method: 'DELETE',
+					}
+				);
+				if (!response.ok) {
+					throw new Error('Network response was not ok ' + response.statusText);
+				}
+			} catch (error) {
+				document.getElementById('message').innerText = 'Error: ' + error.message;
+				console.error('Error:', error);
+			}
+			document.getElementById('message').innerText = 'Logged out successfully!';
+			document.getElementById('user_info').classList.add('hidden');
+		});
+
+		document.getElementById('open_socket_button').addEventListener('click', function() {
+			console.log('Open socket button clicked');
+			const socket = new WebSocket('ws://localhost:3002/ws');
+			socket.addEventListener('open', function(event) {
+				console.log('WebSocket is open now.');
+				socket.send('Hello Server!');
+			});
+			socket.addEventListener('message', function(event) {
+				console.log('Message from server ', event.data);
+			});
+			socket.addEventListener('close', function(event) {
+				console.log('WebSocket is closed now.');
+			});
+		});
+
+		document.getElementById('open_socket_button_pong').addEventListener('click', function() {
+			console.log('Open socket pong button clicked');
+			const socket = new WebSocket('ws://localhost:3010/pong/');
+			socket.addEventListener('open', function(event) {
+				console.log('WebSocket is open now.');
+			});
+			socket.addEventListener('message', function(event) {
+				console.log('Message from server ', event.data);
+			});
+			socket.addEventListener('close', function(event) {
+				console.log('WebSocket is closed now.');
+			});
+		});
+
+		document.getElementById('test_button').addEventListener('click', async function() {
+			console.log('Test button clicked');
+			const email = document.getElementById('email').value;
+			const password = document.getElementById('password').value;
+			try {
+				const response = await fetch(
+					'http://localhost:2999/auth-api/test', 
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+					}
+				);
+				if (!response.ok) {
+					throw new Error('Network response was not ok ' + response.statusText);
+				}
+				const result = await response.json();
+				if (result.error) {
+					throw new Error(result.error);
+				}
+				document.getElementById('message').innerText = 'Test successful!';
+			} catch (error) {
+				document.getElementById('message').innerText = 'Error: ' + error.message;
+				console.error('Error:', error);
+			}
+		});
+	</script>
+	<style>
+		#auth_page {
+			width: 300px;
+			margin: auto;
+			margin-top: 100px;
+		}
+		#auth_form {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+		#message {
+			margin-top: 10px;
+		}
+		#user_info {
+			margin-top: 20px;
+		}
+	</style>
+</body>
+</html>
