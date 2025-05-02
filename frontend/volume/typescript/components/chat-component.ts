@@ -5,7 +5,7 @@ class ChatComponent extends HTMLElement {
 	// VARIABLES
 	ws: WebSocket | undefined = undefined;
 	onlineUsers: ChatUser[] = [];
-	selectedUser: ChatUser | undefined;
+	selectedUser: ChatUser | undefined = undefined;
 
 	//ICONS
 	plusIcon = new IconComponent("plus", 4);
@@ -14,6 +14,9 @@ class ChatComponent extends HTMLElement {
 
 	// BUTTONS
 	minMaxButton = document.createElement("button");
+	sendButton = document.createElement("button");
+	blockButton = document.createElement("button");
+	inviteButton = document.createElement("button");
 
 	// ELEMENTS
 	nav = document.createElement("nav");
@@ -23,20 +26,19 @@ class ChatComponent extends HTMLElement {
 	navUsersContainer = document.createElement("div");
 	navUsersCount = document.createElement("span");
 	chatInput = document.createElement("textarea");
-	sendButton = document.createElement("button");
 	chatContainer = document.createElement("div");
 
 	constructor() {
 		super();
 
-		// const queryParams = window.location.search;
+		// OPEN NEW WEBSOCKET
 		this.ws = new WebSocket(
 			`wss://${window.location.hostname}:${window.location.port}/ws`,
 		);
 
 		// WEBSOCKET CONNECTION CLOSED
 		this.ws.onclose = () => {
-			console.log("websocket has close");
+			console.log("websocket has closed");
 			this.onlineUsers = [];
 			this.selectedUser = undefined;
 			if (this.plusIcon.classList.contains("hidden")) {
@@ -48,7 +50,6 @@ class ChatComponent extends HTMLElement {
 		};
 
 		this.ws.onmessage = (event) => {
-			console.log("websocket event");
 			const chatServiceData: Chat = JSON.parse(event.data);
 			console.log("websocket data", chatServiceData);
 
@@ -61,16 +62,14 @@ class ChatComponent extends HTMLElement {
 				this.displayCurrentChat();
 			}
 
-			// ANOTHER USER LEAVES THE CHAT
+			// A USER LEAVES THE CHAT
 			if (chatServiceData.type === "disconnected") {
-				console.log("somebody left the chat");
 				if (this.selectedUser?.id === chatServiceData.relatedId) {
 					this.selectedUser = undefined;
 				}
 				const userToRemove = this.onlineUsers.findIndex(
 					(u) => u.id === chatServiceData.relatedId,
 				);
-				console.log("index of user to remove", userToRemove);
 				if (userToRemove !== undefined) {
 					this.onlineUsers.splice(userToRemove, 1);
 				}
@@ -78,12 +77,21 @@ class ChatComponent extends HTMLElement {
 				this.updateUsers();
 			}
 
+			// CHAT SERVICE CONFIRMS BLOCKED USER
+			if (chatServiceData.type === "blockResponse") {
+				const id = chatServiceData.relatedId;
+				const userToBlock = this.onlineUsers.find((u) => u.id === id);
+				if (userToBlock) {
+					userToBlock.blocked = !userToBlock.blocked;
+					this.updateBlockButton(userToBlock);
+				}
+			}
+
 			// RECEIVING MESSAGE
 			if (
 				chatServiceData.messageResponse &&
 				chatServiceData.messageResponse.type === "messageResponse"
 			) {
-				console.log(" in handle recieving message");
 				const sender = this.onlineUsers.find(
 					(user) =>
 						user.id === chatServiceData.messageResponse?.relatedId,
@@ -95,7 +103,6 @@ class ChatComponent extends HTMLElement {
 					});
 				}
 				this.displayCurrentChat();
-				console.log("updated online users object", this.onlineUsers);
 			}
 
 			// A NEW USER CAME ONLINE
@@ -131,6 +138,20 @@ class ChatComponent extends HTMLElement {
 		};
 	}
 
+	updateBlockButton(user: ChatUser | undefined) {
+		if (!user) {
+			return;
+		}
+
+		if (user.blocked) {
+			this.blockButton.classList.remove("pong-button");
+			this.blockButton.classList.add("pong-button-wrong");
+		} else {
+			this.blockButton.classList.add("pong-button");
+			this.blockButton.classList.remove("pong-button-wrong");
+		}
+	}
+
 	updateUsers() {
 		this.displayOnlineUsers();
 		this.navUsersCount.innerText = String(this.onlineUsers.length);
@@ -147,29 +168,17 @@ class ChatComponent extends HTMLElement {
 		}
 		for (const user of this.onlineUsers) {
 			const userRow = document.createElement("div");
-			userRow.classList.add("flex", "gap-2", "items-center");
+			userRow.classList.add("flex", "gap-1", "items-center");
 			this.mainUsers.append(userRow);
 			const userButton = document.createElement("button");
 			userButton.classList.add(
-				"pong-button-info",
+				"pong-button-special",
 				"selectUser-group",
 				"grow-1",
 			);
 			userButton.id = user.id;
 			userButton.innerText = user.id;
 			userRow.append(userButton);
-
-			if (user.id === this.selectedUser?.id) {
-				const blockButton = document.createElement("button");
-				blockButton.classList.add("pong-button-info");
-				const blockIcon = new IconComponent("block", 6);
-				blockButton.append(blockIcon);
-				const inviteButton = document.createElement("button");
-				inviteButton.classList.add("pong-button-info");
-				const inviteIcon = new IconComponent("game", 6);
-				inviteButton.append(inviteIcon);
-				userRow.append(blockButton, inviteButton);
-			}
 		}
 	}
 
@@ -193,9 +202,13 @@ class ChatComponent extends HTMLElement {
 		if (this.onlineUsers.length === 0) {
 			this.chatInput.disabled = true;
 			this.sendButton.disabled = true;
+			this.blockButton.disabled = true;
+			this.inviteButton.disabled = true;
 		} else {
 			this.chatInput.disabled = false;
 			this.sendButton.disabled = false;
+			this.blockButton.disabled = false;
+			this.inviteButton.disabled = false;
 		}
 		this.mainMessages.replaceChildren();
 		if (this.onlineUsers.length === 0) {
@@ -219,12 +232,13 @@ class ChatComponent extends HTMLElement {
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
 		}
-		console.log("about to display messages", this.selectedUser.messages);
 
 		for (const message of this.selectedUser.messages) {
 			const chatBubble = this.chatBubble(message);
 			this.mainMessages.appendChild(chatBubble);
 		}
+
+		this.updateBlockButton(this.selectedUser);
 	}
 
 	handleEvent(event: Event) {
@@ -257,6 +271,8 @@ class ChatComponent extends HTMLElement {
 			this.handleSelectUser(button);
 			this.handleMinMaxButton(button);
 			this.handleSendButton(button);
+			this.handleBlockButton(button);
+			this.handleInviteButton(button);
 		}
 	}
 
@@ -270,20 +286,46 @@ class ChatComponent extends HTMLElement {
 			this.minusIcon.classList.add("block");
 			this.plusIcon.classList.remove("block");
 			this.plusIcon.classList.add("hidden");
-			this.classList.add("h-3/4", "w-full", "sm:w-3/4");
-			this.classList.remove("h-auto", "w-auto");
-			this.main.classList.add("grid");
-			this.main.classList.remove("hidden");
+			this.classList.add(
+				"p-3",
+				"h-3/4",
+				"aspect-auto",
+				"lg:w-auto",
+				"lg:aspect-5/4",
+				"max-h-200",
+				"w-full",
+				"grid",
+				"grid-cols-[1fr_30%]",
+				"grid-rows-[auto_1fr_auto]",
+				"gap-3",
+			);
+			this.classList.remove("h-auto", "w-auto", "p-2");
+			this.mainUsers.classList.remove("hidden");
+			this.mainMessages.classList.remove("hidden");
+			this.chatContainer.classList.remove("hidden");
 		} else {
 			// CLICKED TO MINIMIZE
 			this.plusIcon.classList.remove("hidden");
 			this.plusIcon.classList.add("block");
 			this.minusIcon.classList.remove("block");
 			this.minusIcon.classList.add("hidden");
-			this.classList.remove("h-3/4", "w-full", "sm:w-3/4");
-			this.classList.add("h-auto", "w-auto");
-			this.main.classList.add("hidden");
-			this.main.classList.remove("grid");
+			this.classList.remove(
+				"p-3",
+				"h-3/4",
+				"aspect-auto",
+				"lg:w-auto",
+				"lg:aspect-5/4",
+				"max-h-200",
+				"w-full",
+				"grid",
+				"grid-cols-[1fr_30%]",
+				"grid-rows-[auto_1fr_auto]",
+				"gap-3",
+			);
+			this.classList.add("h-auto", "w-auto", "p-2");
+			this.chatContainer.classList.add("hidden");
+			this.mainUsers.classList.add("hidden");
+			this.mainMessages.classList.add("hidden");
 		}
 	}
 
@@ -294,7 +336,6 @@ class ChatComponent extends HTMLElement {
 		this.selectedUser = this.onlineUsers.find(
 			(user) => user.id === button.textContent,
 		);
-		console.log("current selected user", this.selectedUser);
 		this.displayCurrentChat();
 		this.displayOnlineUsers();
 	}
@@ -303,7 +344,6 @@ class ChatComponent extends HTMLElement {
 		if (button.id !== "send-button") {
 			return;
 		}
-		console.log("trying to send message");
 		const chat: Chat = {
 			type: "message",
 			message: this.chatInput.value,
@@ -327,15 +367,28 @@ class ChatComponent extends HTMLElement {
 		if (this.ws) {
 			this.ws.send(JSON.stringify(chat));
 		}
-		this.chatInput.value = "";
+	}
+
+	handleInviteButton(button: HTMLButtonElement) {
+		if (button.id !== "invite-button") {
+			return;
+		}
+		console.log("trying to invite a user");
+		// const chat: Chat = {
+		// 	type: "block",
+		// 	relatedId: this.selectedUser?.id,
+		// };
+		// if (this.ws) {
+		// 	this.ws.send(JSON.stringify(chat));
+		// }
 	}
 
 	connectedCallback() {
 		console.log("Chat CONNECTED");
 		document.addEventListener("click", this);
 		document.addEventListener("keydown", this);
-		this.classList.add("flex", "flex-col");
 		this.nav.classList.add(
+			"col-span-full",
 			"flex",
 			"gap-4",
 			"w-full",
@@ -347,20 +400,11 @@ class ChatComponent extends HTMLElement {
 			"py-2",
 			"border-cyan-500",
 		);
-		this.append(this.nav);
+		this.append(this.nav, this.mainMessages, this.mainUsers);
 
 		// MAIN CONTAINER OF CHAT
-		this.main.classList.add(
-			"hidden",
-			"grid",
-			"gap-4",
-			"grid-cols-[1fr_30%]",
-			"grid-rows-[1fr_auto]",
-			"h-full",
-			"my-4",
-		);
-		this.main.append(this.mainMessages, this.mainUsers);
 		this.mainMessages.classList.add(
+			"hidden",
 			"flex",
 			"flex-col",
 			"gap-1",
@@ -370,10 +414,9 @@ class ChatComponent extends HTMLElement {
 			"overflow-x-hidden",
 		);
 		this.mainUsers.classList.add(
+			"hidden",
 			"rounded-xl",
 			"bg-indigo-950",
-			// "border-indigo-900",
-			// "border-s-2",
 			"flex",
 			"flex-col",
 			"gap-2",
@@ -382,7 +425,6 @@ class ChatComponent extends HTMLElement {
 			"overflow-y-auto",
 			"overflow-x-hidden",
 		);
-		this.appendChild(this.main);
 
 		this.navUsersContainer.appendChild(this.usersIcon);
 		this.navUsersContainer.classList.add(
@@ -404,19 +446,19 @@ class ChatComponent extends HTMLElement {
 		this.displayOnlineUsers();
 
 		this.chatContainer.classList.add(
+			"hidden",
 			"disabled:bg-indigo-950",
 			"rounded-xl",
 			"bg-indigo-950",
-			"px-8",
-			"py-4",
+			"p-3",
 			"col-span-full",
 			"w-full",
 			"h-full",
 			"flex",
-			"gap-4",
-			"items-end",
+			"gap-2",
+			"items-center",
 		);
-		this.main.append(this.chatContainer);
+		this.append(this.chatContainer);
 		this.chatInput.placeholder = "enter your message";
 		this.chatInput.style.resize = "none";
 		this.chatInput.classList.add(
@@ -424,7 +466,7 @@ class ChatComponent extends HTMLElement {
 			"field-sizing-content",
 			"max-h-60",
 		);
-		const sendIcon = new IconComponent("send", 4);
+		const sendIcon = new IconComponent("send", 5);
 		this.sendButton.append(sendIcon);
 		this.sendButton.classList.add(
 			"pong-button",
@@ -433,7 +475,20 @@ class ChatComponent extends HTMLElement {
 			"items-center",
 		);
 		this.sendButton.id = "send-button";
-		this.chatContainer.append(this.chatInput, this.sendButton);
+		this.blockButton.id = "block-button";
+		this.blockButton.classList.add("pong-button");
+		const blockIcon = new IconComponent("block", 5);
+		this.blockButton.append(blockIcon);
+		this.inviteButton.classList.add("pong-button");
+		this.inviteButton.id = "invite-button";
+		const inviteIcon = new IconComponent("game", 5);
+		this.inviteButton.append(inviteIcon);
+		this.chatContainer.append(
+			this.chatInput,
+			this.sendButton,
+			this.inviteButton,
+			this.blockButton,
+		);
 	}
 
 	disconnectedCallback() {
