@@ -85,10 +85,7 @@ export class PongGameSingles extends APongGame {
 		}
 		catch (error)
 		{
-			if(error instanceof Error)
-				console.error(`❌ Failed to stored to database: ${error.message}`);
-			else
-				console.error("Unknown error: ", error);
+			console.error(`❌ Failed to store to database: ${error}`);
 		}
 	}
 
