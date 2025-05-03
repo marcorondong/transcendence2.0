@@ -19,10 +19,10 @@ function capitalize(str: string) {
 // Helper function to check password constraints (no username/email)
 function checkPasswordConstraints(
 	password: string,
-	userData: { name: string; email: string },
+	userData: { username: string; email: string },
 ) {
 	const lowerPassword = password.toLowerCase();
-	if (userData.name && lowerPassword.includes(userData.name.toLowerCase())) {
+	if (userData.username && lowerPassword.includes(userData.username.toLowerCase())) {
 		throw new Error("Password cannot contain the username");
 	}
 	if (userData.email && lowerPassword === userData.email.toLowerCase()) {
@@ -34,7 +34,7 @@ export async function createUser(input: createUserInput) {
 	const { password, ...rest } = input;
 	try {
 		checkPasswordConstraints(password, {
-			name: rest.name,
+			username: rest.username,
 			email: rest.email,
 		});
 	} catch (err) {
@@ -104,7 +104,7 @@ type UserQueryOptions = {
 	useOr?: boolean; // To allow OR logic
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: UserPublicField; // To sort by id, email, name
+	sortBy?: UserPublicField; // To sort by id, email, username
 	order?: SortDirection; // to order asc/desc
 };
 
@@ -207,7 +207,7 @@ export async function updateUser(id: number, data: UpdateUserData) {
 			// Check password constraints
 			try {
 				checkPasswordConstraints(data.password, {
-					name: data.name ?? currentUser.name,
+					username: data.username ?? currentUser.username,
 					email: data.email ?? currentUser.email,
 				});
 			} catch (err) {

@@ -90,10 +90,10 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
-	const { id, email, name, useFuzzy, useOr, skip, take, sortBy, order } =
+	const { id, email, username, useFuzzy, useOr, skip, take, sortBy, order } =
 		request.query;
 	const users = await findUsers({
-		where: { id, email, name },
+		where: { id, email, username },
 		useFuzzy,
 		useOr,
 		skip,

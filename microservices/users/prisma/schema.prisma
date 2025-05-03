@@ -14,7 +14,7 @@ datasource db {
 model User {
   id           Int       @id @unique @default(autoincrement()) // TODO: Change this to uuid
   email        String    @unique
-  name         String    @unique
+  username     String    @unique
   passwordHash String
   salt         String
   products     Product[]
