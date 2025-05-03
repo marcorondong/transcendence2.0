@@ -44,9 +44,8 @@ server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
 declare module '@fastify/jwt' {
 	interface FastifyJWT {
 		user: {
-			name: string;
 			id: string;
-			email: string;
+			name: string; // TODO change to nickname
 		};
 	}
 }

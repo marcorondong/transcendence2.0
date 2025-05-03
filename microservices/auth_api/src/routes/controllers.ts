@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { SignInInput } from "./zodSchemas";
 import {
-	signIn,
+	signInRequest,
 } from "./service";
 
 export async function signInHandler(
@@ -9,14 +9,7 @@ export async function signInHandler(
 	reply: FastifyReply,
 ) {
 	const { email, password } = request.body;
-	const checkCredentials = await signIn(email, password);
-	if (!checkCredentials) {
-		return reply.status(401).send({ success: false });
-	}
-	const payload = {
-		// id: 5,
-		email: email,
-	}
+	const payload = await signInRequest(email, password);
 	const accessToken = await reply.jwtSign(payload, {expiresIn: "1h"});
 	reply.setCookie("access_token", accessToken, {
 		path: "/",
@@ -25,7 +18,7 @@ export async function signInHandler(
 		sameSite: "strict",
 		maxAge: 60 * 60,
 	});
-	reply.status(200).send({ success: accessToken });
+	reply.status(201).send({ success: true });
 }
 
 export async function signOutHandler(
@@ -34,6 +27,13 @@ export async function signOutHandler(
 ) {
 	reply.clearCookie("access_token", { path: "/" });
 	return reply.status(200).send({ success: true });
+}
+
+export async function verifyJWTHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	reply.status(200).send({ success: true });
 }
 
 export async function healthCheckHandler(

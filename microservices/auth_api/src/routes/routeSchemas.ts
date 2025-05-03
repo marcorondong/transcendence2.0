@@ -8,12 +8,19 @@ export const signInSchema = {
 	description: "Sign in a user",
 	tags: ["Auth"],
 	body: signInZodSchema,
-	// response: { 200: successResponseSchema },
+	response: { 201: successResponseSchema },
 };
 
 export const signOutSchema = {
 	summary: "Sign Out",
 	description: "Sign out a user",
+	tags: ["Auth"],
+	response: { 200: successResponseSchema },
+};
+
+export const verifyJWTSchema = {
+	summary: "Verify",
+	description: "Verify a user",
 	tags: ["Auth"],
 	response: { 200: successResponseSchema },
 };
