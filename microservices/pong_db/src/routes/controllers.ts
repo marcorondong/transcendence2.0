@@ -12,12 +12,12 @@ export async function createGameHandler(
 	request: FastifyRequest<{ Body: GameInput }>,
 	reply: FastifyReply,
 ) {
-	const { winnerId, loserId } = request.body;
+	const { winnerId, loserId, winnerScore, loserScore, gameId } = request.body;
 	if (winnerId === loserId)
-		throw new httpError.BadRequest(
-			"winnerId and loserId cannot be the same",
-		);
-	await createGame(winnerId, loserId);
+		throw new httpError.BadRequest("winnerId and loserId cannot be the same");
+	if (winnerScore <= loserScore)
+		throw new httpError.BadRequest("winnerScore must be greater than loserScore");
+	await createGame(winnerId, loserId, winnerScore, loserScore, gameId );
 	reply.status(201).send({ success: true });
 }
 

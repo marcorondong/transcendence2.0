@@ -19,7 +19,7 @@ server.setSerializerCompiler(serializerCompiler);
 server.setErrorHandler(globalErrorHandler);
 server.register(fastifySwagger, swaggerOption as SwaggerOptions);
 server.register(fastifySwaggerUi, swaggerUiOption);
-server.register(pongRoutes, { prefix: "/pong" });
+server.register(pongRoutes, { prefix: "/pong-db" });
 
 const start = async () => {
 	try {
