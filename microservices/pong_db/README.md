@@ -1,0 +1,1 @@
+Swagger url: http://localhost:30011/pong-db/documentation
