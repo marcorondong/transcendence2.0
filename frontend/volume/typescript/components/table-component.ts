@@ -1,4 +1,4 @@
-export class TableComponent extends HTMLElement {
+class TableComponent extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -8,7 +8,7 @@ export class TableComponent extends HTMLElement {
 	tbody = document.createElement("tbody");
 
 	connectedCallback() {
-		console.log("TABLE_COMPONENT has been CONNECTED");
+		console.log("TABLE has been CONNECTED");
 
 		this.appendChild(this.table);
 		this.table.appendChild(this.thead);
@@ -16,14 +16,14 @@ export class TableComponent extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("TABLE COMPONENT has been DISCONNECTED");
+		console.log("TABLE  has been DISCONNECTED");
 	}
 
 	setClass(classes: string) {
 		this.table.className = classes;
 	}
 
-	setHeaders(headers) {
+	setHeaders(headers: string[]) {
 		const tr = document.createElement("tr");
 		this.thead.appendChild(tr);
 
@@ -35,7 +35,7 @@ export class TableComponent extends HTMLElement {
 		}
 	}
 
-	setRow(entries) {
+	setRow(entries: string[]) {
 		const tr = document.createElement("tr");
 		this.tbody.appendChild(tr);
 
@@ -47,8 +47,7 @@ export class TableComponent extends HTMLElement {
 	}
 }
 
-export function createTableComponent(): TableComponent {
-	return document.createElement("table-component") as TableComponent;
-}
 
 customElements.define("table-component", TableComponent);
+
+export{TableComponent};

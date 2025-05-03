@@ -56,13 +56,49 @@ services:
     volumes:
       - ./frontend/volume:/usr/share/nginx/html
       - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
-      # - ./src/frontend/docker/certificate/localhost.key:/etc/nginx/localhost.key
-      # - ./src/frontend/docker/certificate/localhost.crt:/etc/nginx/localhost.crt
     ports:
       - "8080:443"
     restart: unless-stopped
     networks:
       - Transcendence2.0
+
+  tictactoe_api:
+    image: tictactoe_api_img 
+    container_name: tictactoe_api_container
+    build: ./tictactoe_api
+    volumes:
+      - ./tictactoe_api/src/:/tictactoe_api/src/ # TODO remove this in production
+      - ./tictactoe_api/public/:/tictactoe_api/public/ # TODO remove this when there is real frontend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+    ports:
+      - 3001:3001 # TODO remove this in production
+    depends_on:
+      - tictactoe_db
+    networks:
+      - Transcendence2.0
+    restart: always
+
+  tictactoe_db:
+    image: tictactoe_db_img 
+    container_name: tictactoe_db_container
+    build: ./tictactoe_db
+    environment:
+      - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
+      - NODE_ENV=development
+      - PORT=3003
+      - HOST=0.0.0.0
+    volumes:
+      - ./tictactoe_db/src/:/tictactoe_db/src/ # TODO remove this in production
+      - ./tictactoe_db/prisma/:/tictactoe_db/prisma/ # TODO remove this in production
+      # - /home/iguliyev/DBs/tictactoe/:/tictactoe_api/DB/ # TODO define path to db and uncomment this line when using the local DB
+    ports:
+      - 3003:3003 # TODO remove this in production
+    networks:
+      - Transcendence2.0
+    restart: always
 
   chat_api:
     image: chat_api_img
@@ -107,6 +143,7 @@ services:
 
 include:
   - ./monitoring/monitoring-docker-compose.yml
+  - ./frontend/docker-compose.yml
 
 networks:
   Transcendence2.0:

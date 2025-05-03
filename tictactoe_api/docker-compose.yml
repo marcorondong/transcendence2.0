@@ -1,9 +1,32 @@
 services:
   tictactoe_api:
-    image: tictactoe_api_img 
-    container_name: tictactoe_api
-    build: ./
+    image: tictactoe_api_img
+    container_name: tictactoe_api_container
+    build: .
     volumes:
       - ./src/:/tictactoe_api/src/
+      - ./public/:/tictactoe_api/public/
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
     ports:
       - 3001:3001
+    restart: always
+
+  tictactoe_db:
+    image: tictactoe_db_img
+    container_name: tictactoe_db_container
+    build: ../tictactoe_db
+    environment:
+      - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
+      - NODE_ENV=development
+      - PORT=3003
+      - HOST=0.0.0.0
+    volumes:
+      - ../tictactoe_db/src/:/tictactoe_db/src/
+      - ../tictactoe_db/prisma/:/tictactoe_db/prisma/
+      - /home/iguliyev/DBs/tictactoe/:/tictactoe_db/DB/ # TODO uncomment this line when using the local DB
+    ports:
+      - 3003:3003
+    restart: always

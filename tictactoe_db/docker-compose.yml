@@ -1,0 +1,17 @@
+services:
+  tictactoe_db:
+    image: tictactoe_db_image
+    container_name: tictactoe_db_container
+    build: .
+    environment:
+      - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
+      - NODE_ENV=development
+      - PORT=3003
+      - HOST=0.0.0.0
+    volumes:
+      - ./src/:/tictactoe_db/src/
+      - ./prisma/:/tictactoe_db/prisma/
+      - /home/iguliyev/DBs/tictactoe/:/tictactoe_db/DB/
+    ports:
+      - 3003:3003
+    restart: always

@@ -23,12 +23,12 @@
     "@types/http-errors": "^2.0.4",
     "@types/node": "^22.13.9",
     "nodemon": "^3.1.9",
-    "prisma": "^6.6.0",
+    "prisma": "^6.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@prisma/client": "^6.7.0",
     "fastify": "^5.3.2",
     "fastify-type-provider-zod": "^4.0.2",
     "pino-pretty": "^13.0.0",

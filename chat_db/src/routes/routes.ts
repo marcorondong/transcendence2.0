@@ -3,14 +3,18 @@ import {
 	createUserOpt,
 	blockUserOpt,
 	unblockUserOpt,
+	toggleBlockOpt,
 	blockStatusOpt,
 	blockListOpt,
+	healthCheckOpt,
 } from "./options";
 
 export async function chatRoutes(server: FastifyInstance) {
 	server.post("/create-user", createUserOpt);
 	server.patch("/block-user", blockUserOpt);
 	server.patch("/unblock-user", unblockUserOpt);
-	server.get("/block-status/:id/:friendId", blockStatusOpt);
-	server.get("/block-list/:id", blockListOpt);
+	server.patch("/toggle-block", toggleBlockOpt);
+	server.get("/block-status/:userId/:friendId", blockStatusOpt);
+	server.get("/block-list/:userId", blockListOpt);
+	server.get("/health-check", healthCheckOpt);
 }
