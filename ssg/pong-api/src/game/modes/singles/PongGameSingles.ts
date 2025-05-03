@@ -3,12 +3,20 @@ import { Ball } from "../../elements/Ball";
 import { Point } from "../../elements/Point";
 import { ScoreBoard } from "../../elements/ScoreBoard";
 import { PongField } from "../../elements/PongField";
-import { EPlayerRole } from "../../PongPlayer";
+import { EPlayerRole, ETeamSideFiltered } from "../../PongPlayer";
 import { APongGame, IPongFrameBase } from "../APongGame";
 
 export interface IPongFrameSingles extends IPongFrameBase {
 	leftPaddle: IPaddleJson;
 	rightPaddle: IPaddleJson;
+}
+
+export interface IPongSinglesDatabase{
+	winnerId: string;
+	loserId: string;
+	winnerScore: number;
+	loserScore: number;
+	gameId: string;
 }
 
 export class PongGameSingles extends APongGame {
@@ -41,6 +49,27 @@ export class PongGameSingles extends APongGame {
 			table,
 		);
 		return game;
+	}
+
+	getJsonDataForDatabase(): IPongSinglesDatabase
+	{
+		//TODO implement proper IDs of winner and loser not just side
+		return{
+			gameId: this.getSessionId(),
+			winnerId: this.score.getWinnerSideString(),
+			loserId: this.score.getLoserSideString(),
+			winnerScore: this.score.getWinnerGoals(),
+			loserScore: this.score.getLoserGoals()
+		}
+	}
+
+	async storeResultInDatabase(): Promise<void> {
+		//TODO: implement properIds
+		const url = process.env.PONG_DB_CREATE_GAME_URL;
+		const data = this.getJsonDataForDatabase();
+		console.log(data);
+		console.log("I am logging url to where i am storing",url);
+
 	}
 
 	getCloserLeftPaddle(): Paddle {

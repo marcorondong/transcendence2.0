@@ -54,6 +54,10 @@ export class PongGameDoubles extends APongGame {
 		return game;
 	}
 
+	async storeResultInDatabase(): Promise<void> {
+		return;
+	}
+
 	resetPaddlePosition(): void {
 		this.leftPaddleOne.resetPosition();
 		this.leftPaddleTwo.resetPosition();

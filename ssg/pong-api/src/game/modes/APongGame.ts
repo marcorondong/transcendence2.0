@@ -26,20 +26,33 @@ export abstract class APongGame extends EventEmitter {
 	protected readonly score: ScoreBoard;
 	protected readonly field: PongField;
 	readonly CRITICAL_DISTANCE;
+	private	sessionId: string;
 	protected gameStatus: EGameStatus;
 
 	abstract getPaddle(role: EPlayerRole): Paddle;
 	abstract resetPaddlePosition(): void;
 	abstract getCloserLeftPaddle(): Paddle;
 	abstract getCloserRightPaddle(): Paddle;
+	abstract storeResultInDatabase(): Promise<void>;
 
 	constructor(ball: Ball, score: ScoreBoard, field: PongField) {
 		super();
+		this.sessionId = "UNKNOWN ID OF SESSION GAME BELONGS TO";
 		this.ball = ball;
 		this.score = score;
 		this.field = field;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.gameStatus = EGameStatus.NOT_STARTED;
+	}
+
+	setSessionId(sessionId:string): void
+	{
+		this.sessionId = sessionId;
+	}
+
+	getSessionId():string
+	{
+		return this.sessionId;
 	}
 
 	getGameStatus(): EGameStatus {
@@ -94,6 +107,7 @@ export abstract class APongGame extends EventEmitter {
 	finishGame(): void {
 		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
+		this.storeResultInDatabase();
 	}
 
 	movePaddle(paddle: Paddle, direction: "up" | "down"): void {
