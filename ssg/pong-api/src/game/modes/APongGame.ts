@@ -99,10 +99,10 @@ export abstract class APongGame extends EventEmitter {
 		this.start();
 	}
 
-	finishGame(): void {
+	async finishGame(): Promise<void> {
 		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
-		this.storeResultInDatabase();
+		await this.storeResultInDatabase();
 	}
 
 	movePaddle(paddle: Paddle, direction: "up" | "down"): void {
@@ -153,7 +153,8 @@ export abstract class APongGame extends EventEmitter {
 	protected renderNextFrame(): void {
 		this.ballMovementMechanics();
 		this.ball.moveBall();
-		if (this.score.isWinnerDecided() === true) this.finishGame();
+		if (this.score.isWinnerDecided() === true)
+			this.finishGame();
 	}
 
 	private gameLoop(timestamp: number): void {
