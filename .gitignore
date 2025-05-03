@@ -11,6 +11,7 @@
 *.p12
 *.p7b
 *.p7c
+ft_crypt.sh
 secrets/
 
 ############################ Binary and Blob Files ############################
