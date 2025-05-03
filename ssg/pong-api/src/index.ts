@@ -59,7 +59,7 @@ fastify.register(async function (fastify) {
 		});
 	});
 
-	fastify.get("/playerRoom/:playerId", async (request, reply) => {
+	fastify.get("/pong-api/player-room/:playerId", async (request, reply) => {
 		const { playerId } = request.params as { playerId: string };
 		reply.send({
 			roomId: manager.getPlayerRoomId(playerId),
