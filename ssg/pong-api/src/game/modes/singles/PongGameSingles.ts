@@ -55,7 +55,7 @@ export class PongGameSingles extends APongGame {
 	{
 		//TODO implement proper IDs of winner and loser not just side
 		return{
-			gameId: this.getSessionId(),
+			gameId: this.getGameId(),
 			winnerId: this.score.getWinnerSideString(),
 			loserId: this.score.getLoserSideString(),
 			winnerScore: this.score.getWinnerGoals(),

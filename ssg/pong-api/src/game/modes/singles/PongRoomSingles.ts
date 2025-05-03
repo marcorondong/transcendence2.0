@@ -16,7 +16,6 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 	constructor(privateRoom: boolean = false) {
 		const match = PongGameSingles.createStandardGame();
 		super(privateRoom, match);
-		match.setSessionId(this.getId());
 		this.setMatchName("single match");
 	}
 

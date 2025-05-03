@@ -26,7 +26,7 @@ export abstract class APongGame extends EventEmitter {
 	protected readonly score: ScoreBoard;
 	protected readonly field: PongField;
 	readonly CRITICAL_DISTANCE;
-	private	sessionId: string;
+	protected readonly gameId: string;
 	protected gameStatus: EGameStatus;
 
 	abstract getPaddle(role: EPlayerRole): Paddle;
@@ -37,7 +37,7 @@ export abstract class APongGame extends EventEmitter {
 
 	constructor(ball: Ball, score: ScoreBoard, field: PongField) {
 		super();
-		this.sessionId = "UNKNOWN ID OF SESSION GAME BELONGS TO";
+		this.gameId = crypto.randomUUID();;
 		this.ball = ball;
 		this.score = score;
 		this.field = field;
@@ -45,14 +45,9 @@ export abstract class APongGame extends EventEmitter {
 		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
-	setSessionId(sessionId:string): void
+	getGameId():string
 	{
-		this.sessionId = sessionId;
-	}
-
-	getSessionId():string
-	{
-		return this.sessionId;
+		return this.gameId;
 	}
 
 	getGameStatus(): EGameStatus {
