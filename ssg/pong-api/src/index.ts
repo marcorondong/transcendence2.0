@@ -52,7 +52,7 @@ fastify.register(async function (fastify) {
 		});
 	});
 
-	fastify.get("/health-check", async (request, reply) => {
+	fastify.get("/pong-api/health-check", async (request, reply) => {
 		reply.code(200).send({
 			message:
 				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
