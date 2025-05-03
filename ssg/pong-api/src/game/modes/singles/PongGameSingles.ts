@@ -65,11 +65,31 @@ export class PongGameSingles extends APongGame {
 
 	async storeResultInDatabase(): Promise<void> {
 		//TODO: implement properIds
-		const url = process.env.PONG_DB_CREATE_GAME_URL;
-		const data = this.getJsonDataForDatabase();
-		console.log(data);
-		console.log("I am logging url to where i am storing",url);
-
+		const url:string = process.env.PONG_DB_CREATE_GAME_URL ?? "INVALID URL";
+		const gameData = this.getJsonDataForDatabase();
+		console.log("Game data");
+		console.log(gameData);
+		console.log(`Storing game to database on url ${url}: `)
+		try{
+			const response = await fetch(url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(gameData),
+				});
+			if(!response.ok)
+				throw new Error(`Game data is not stored in database: ${response.status}`)
+			const status = await response.json();
+			console.log("Server Response:", status)
+		}
+		catch (error)
+		{
+			if(error instanceof Error)
+				console.error(`❌ Failed to stored to database: ${error.message}`);
+			else
+				console.error("Unknown error: ", error);
+		}
 	}
 
 	getCloserLeftPaddle(): Paddle {
