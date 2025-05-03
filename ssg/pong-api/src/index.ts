@@ -92,7 +92,7 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	fastify.get("/pingpong/", async (request, reply) => {
+	fastify.get("/pong-api/ping-pong", async (request, reply) => {
 		const filePath = path.join(process.cwd(), "src/public/pong.html");
 		if (fs.existsSync(filePath)) {
 			return reply.sendFile("pong.html"); // Serve public/index.html
