@@ -53,8 +53,8 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-        - http://ai-bot:6969/healthcheck
-        - http://pong-api:3010/healthcheck
+        - http://ai-bot:6969/health-check
+        - http://pong-api:3010/pong-api/health-check
         - http://pong_db_container:3011/pong/health-check
         - http://tictactoe_db:3003/tictactoe/health-check
         - http://tictactoe_api:3001/tictactoe/health-check

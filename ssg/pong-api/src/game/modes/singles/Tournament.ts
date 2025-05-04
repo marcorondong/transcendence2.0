@@ -48,7 +48,7 @@ export class Tournament extends EventEmitter {
 			PongRoomSingles
 		>(
 			[...this.gamesPool].map(
-				(room) => [room.getId(), room] as [string, PongRoomSingles],
+				(room) => [room.getGame().getGameId(), room] as [string, PongRoomSingles],
 			),
 		);
 		return allRooms;
@@ -109,7 +109,7 @@ export class Tournament extends EventEmitter {
 
 	private sendMatchToQueue(room: PongRoomSingles)
 	{
-		const gameId: string = room.getId();
+		const gameId: string = room.getGame().getGameId();
 		const player1: string = "Left player"; //TODO: replace with actual player Id once authorization is done
 		const player2: string = "Right Player"; //TODO: replace with actual player Id once authorization is done
 		const score1: number = room.getGame().getScoreBoard().getLeftPlayerGoals();

@@ -4,7 +4,7 @@ import curses
 
 HOST = "localhost"
 PORT = "3010"
-ROUTE = "/pong/"
+ROUTE = "/pong-api/pong"
 WS_ROUTE = f"ws://{HOST}:{PORT}{ROUTE}"
 
 TAB_SIZE = 2

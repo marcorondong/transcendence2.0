@@ -26,20 +26,28 @@ export abstract class APongGame extends EventEmitter {
 	protected readonly score: ScoreBoard;
 	protected readonly field: PongField;
 	readonly CRITICAL_DISTANCE;
+	protected readonly gameId: string;
 	protected gameStatus: EGameStatus;
 
 	abstract getPaddle(role: EPlayerRole): Paddle;
 	abstract resetPaddlePosition(): void;
 	abstract getCloserLeftPaddle(): Paddle;
 	abstract getCloserRightPaddle(): Paddle;
+	abstract storeResultInDatabase(): Promise<void>;
 
 	constructor(ball: Ball, score: ScoreBoard, field: PongField) {
 		super();
+		this.gameId = crypto.randomUUID();;
 		this.ball = ball;
 		this.score = score;
 		this.field = field;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.gameStatus = EGameStatus.NOT_STARTED;
+	}
+
+	getGameId():string
+	{
+		return this.gameId;
 	}
 
 	getGameStatus(): EGameStatus {
@@ -91,9 +99,10 @@ export abstract class APongGame extends EventEmitter {
 		this.start();
 	}
 
-	finishGame(): void {
+	async finishGame(): Promise<void> {
 		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
+		await this.storeResultInDatabase();
 	}
 
 	movePaddle(paddle: Paddle, direction: "up" | "down"): void {
@@ -144,7 +153,8 @@ export abstract class APongGame extends EventEmitter {
 	protected renderNextFrame(): void {
 		this.ballMovementMechanics();
 		this.ball.moveBall();
-		if (this.score.isWinnerDecided() === true) this.finishGame();
+		if (this.score.isWinnerDecided() === true)
+			this.finishGame();
 	}
 
 	private gameLoop(timestamp: number): void {
