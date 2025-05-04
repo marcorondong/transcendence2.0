@@ -1,17 +1,19 @@
-export const ballConfig: IBallConfig = {
-	initial_x: -0.1,
-	initial_y: 0.0,
+import { IBallJson } from "./src/game/elements/Ball"
+
+export const ballConfig: IBallJson = {
+	x: -0.1,
+	y: 0.0,
 	radius: 0.075
 }
 
-export const paddleConfig = {
+export const paddleConfig: IPaddleConfig = {
 	height_singles: 1,
 	height_doubles: 0.5,
 	overtime_shrink_factor: 0.2, //20 % aka 5 touches before complete disappearing
 	move_speed: 0.05
 }
 
-export const scoreBoardConfig = {
+export const scoreBoardConfig: IScoreBoardConfig = {
 	match_length: 10, //in seconds
 }
 
@@ -20,16 +22,25 @@ export const blockchainConfig = {
 	fuji_rpc_url: "https://api.avax-test.network/ext/bc/C/rpc"
 }
 
-const base_PongDB_URL= "http://pong_db_container:3011/pong-db"
+const base_Pong_DB_URL= "http://pong_db_container:3011/pong-db"
 
-export const pongDbConfig ={
-	base_PongDB_URL,
-	store_game_endpoint: `${base_PongDB_URL}/create-game` //base url + /create game
+export const pongDbConfig: IPongDbConfig = {
+	base_Pong_DB_URL,
+	store_game_endpoint: `${base_Pong_DB_URL}/create-game` //base url + /create game
 }
 
+interface IPaddleConfig {
+	height_singles: number,
+	height_doubles: number,
+	overtime_shrink_factor: number, //20 % aka 5 touches before complete disappearing
+	move_speed: number
+}
 
-interface IBallConfig {
-	initial_x: number,
-	initial_y: number,
-	radius: number
+interface IScoreBoardConfig {
+	match_length: number
+}
+
+interface IPongDbConfig {
+	base_Pong_DB_URL: string,
+	store_game_endpoint: string
 }

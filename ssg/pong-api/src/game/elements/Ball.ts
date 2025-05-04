@@ -19,7 +19,7 @@ export class Ball {
 
 	constructor(
 		position: Point,
-		vector: Point = new Point(ballConfig.initial_x, ballConfig.initial_y),
+		vector: Point = new Point(ballConfig.x, ballConfig.y),
 		radius = ballConfig.radius,
 	) {
 		this.initialPosition = new Point(position.getX(), position.getY());
