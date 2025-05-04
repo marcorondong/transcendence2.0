@@ -12,3 +12,7 @@ export const paddleConfig = {
 	overtime_shrink_factor: 0.2, //20 % aka 5 touches before complete disappearing
 	move_speed: 0.05
 }
+
+export const scoreBoardConfig = {
+	match_length: 10, //in seconds
+}
