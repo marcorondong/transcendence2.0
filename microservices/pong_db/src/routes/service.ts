@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import type { GameInput, GamesInput, StatsInput } from "./zodSchemas";
+import type { GameInput, GamesInput, StatsInput, GameResponse } from "./zodSchemas";
 import httpError from "http-errors";
 
 const prisma = new PrismaClient();
@@ -12,7 +12,7 @@ async function getGamesByIdAndOpponentId(userId: string, opponentId: string) {
 				{ AND: [{ winnerId: opponentId }, { loserId: userId }] },
 			],
 		},
-		select: { winnerId: true, loserId: true },
+		select: { winnerId: true, loserId: true, winnerScore: true, loserScore: true, gameId: true, createdAt: true },
 	});
 	if (!games || games.length === 0) {
 		throw new httpError.NotFound(
@@ -25,7 +25,7 @@ async function getGamesByIdAndOpponentId(userId: string, opponentId: string) {
 function statsCalculation(games: GamesInput, userId: string) {
 	const initialStats: StatsInput = { total: 0, wins: 0, losses: 0 };
 	const totalStats: StatsInput = games.reduce(
-		(acc: StatsInput, game: GameInput) => {
+		(acc: StatsInput, game: GameResponse) => {
 			if (game.winnerId === userId) {
 				acc.wins++;
 			} else {
@@ -39,14 +39,15 @@ function statsCalculation(games: GamesInput, userId: string) {
 	return totalStats;
 }
 
-export async function createGame(winnerId: string, loserId: string) {
-	await prisma.game.create({ data: { winnerId, loserId } });
+export async function createGame(winnerId: string, loserId: string, winnerScore: number, loserScore: number, gameId: string ) {
+	await prisma.game.create({ data: { winnerId, loserId, winnerScore, loserScore, gameId } });
 }
 
 export async function getGameHistory(userId: string) {
 	const games = await prisma.game.findMany({
 		where: { OR: [{ winnerId: userId }, { loserId: userId }] },
-		select: { winnerId: true, loserId: true },
+		select: { winnerId: true, loserId: true, winnerScore: true, loserScore: true, createdAt: true },
+		orderBy: { createdAt: "desc" },
 	});
 	if (!games || games.length === 0) {
 		throw new httpError.NotFound("No games found for this user");

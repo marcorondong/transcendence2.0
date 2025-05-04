@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  id             String   @id
+  userId         String   @id
   blockList      User[]   @relation("BlockList")
   blockedBy      User[]   @relation("BlockList")
 //   chats          Chat[]
