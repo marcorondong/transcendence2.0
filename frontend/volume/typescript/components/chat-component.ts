@@ -158,18 +158,27 @@ class ChatComponent extends HTMLElement {
 		};
 	}
 
+	findRelevantUser(message: Message) {
+		const user = this.onlineUsers.find((u) => u.id === message.id);
+		if (user) {
+			return user;
+		}
+		return this.selectedUser;
+	}
+
 	addTimestamp(newMessage: Message) {
-		const messages = this.selectedUser?.messages;
-		if (!messages) {
+		const user = this.findRelevantUser(newMessage);
+
+		if (!user) {
 			return;
 		}
 		if (
-			messages.length === 0 ||
-			(!messages[messages.length - 1].dateTime &&
-				messages[messages.length - 1].id !== newMessage.id)
+			user.messages.length === 0 ||
+			(!user.messages[user.messages.length - 1].dateTime &&
+				user.messages[user.messages.length - 1].id !== newMessage.id)
 		) {
 			let sender: string;
-			if (newMessage.id === this.selectedUser?.id) {
+			if (newMessage.id === user.id) {
 				sender = `${newMessage.id} | `;
 			} else {
 				sender = "You | ";
@@ -181,7 +190,7 @@ class ChatComponent extends HTMLElement {
 				content: sender,
 				dateTime: now,
 			};
-			messages.push(timestamp);
+			user.messages.push(timestamp);
 		}
 	}
 
