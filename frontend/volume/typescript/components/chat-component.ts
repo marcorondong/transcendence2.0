@@ -247,12 +247,12 @@ class ChatComponent extends HTMLElement {
 		if (message.id === this.selectedUser?.id) {
 			div.classList.add("self-start", "text-left");
 			if (!message.dateTime) {
-				div.classList.add("dark:bg-slate-700/50");
+				div.classList.add("dark:bg-slate-500/50");
 			}
 		} else {
 			div.classList.add("self-end", "text-right");
 			if (!message.dateTime) {
-				div.classList.add("dark:bg-slate-500/50");
+				div.classList.add("dark:bg-slate-700/50");
 			}
 		}
 		if (message.dateTime) {
