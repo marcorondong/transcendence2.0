@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import * as dotenv from "dotenv";
 import abi from "./TournamentScores.json"; // adjust path as needed
 import path from "path";
+import { blockchainConfig } from "../../config";
 
 const env = dotenv.config({
 	path: path.resolve(__dirname, "../../.env"),
@@ -18,8 +19,8 @@ if (env.error) {
 	);
 }
 
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS!;
-const FUJI_RPC_URL = process.env.FUJI_RPC_URL!;
+const CONTRACT_ADDRESS = blockchainConfig.contract_address;
+const FUJI_RPC_URL = blockchainConfig.fuji_rpc_url;
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY!;
 
 export async function recordGameOnBlockchain(
