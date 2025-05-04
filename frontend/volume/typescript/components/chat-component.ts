@@ -74,14 +74,15 @@ class ChatComponent extends HTMLElement {
 						user.id === chatServiceData.messageResponse?.relatedId,
 				);
 				if (sender) {
+					console.log("this message must come from ", sender.id);
 					const newMessage: Message = {
 						id: sender.id,
 						content: chatServiceData.messageResponse.message ?? "",
 					};
-					this.addTimestamp(newMessage);
+					this.addTimestamp(newMessage, sender);
 					sender.messages.push(newMessage);
+					this.displayCurrentChat();
 				}
-				this.displayCurrentChat();
 			}
 
 			// A USER LEAVES THE CHAT
@@ -166,12 +167,17 @@ class ChatComponent extends HTMLElement {
 		return this.selectedUser;
 	}
 
-	addTimestamp(newMessage: Message) {
-		const user = this.findRelevantUser(newMessage);
-
-		if (!user) {
+	addTimestamp(newMessage: Message, sender?: ChatUser) {
+		let user: ChatUser;
+		if (sender) {
+			user = sender;
+		} else if (!this.selectedUser) {
 			return;
+		} else {
+			user = this.selectedUser;
 		}
+		console.log("will add message to:", user.id);
+
 		if (
 			user.messages.length === 0 ||
 			(!user.messages[user.messages.length - 1].dateTime &&
