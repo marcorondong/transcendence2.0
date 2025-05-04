@@ -1,7 +1,7 @@
 import { Point } from "./Point";
 import { paddleConfig } from "../../../config";
 
-const MOVE_MODIFIER = 0.05;
+const MOVE_MODIFIER = paddleConfig.move_speed;
 
 export interface IPaddleJson {
 	x: number;
@@ -89,7 +89,7 @@ export class Paddle {
 	}
 
 	shrinkPaddle(): void {
-		const shrinkModifier = this.INITIAL_HEIGHT * 0.2;
+		const shrinkModifier = this.INITIAL_HEIGHT * paddleConfig.overtime_shrink_factor;
 		let freshHeight = this.getHeight() - shrinkModifier;
 		if (freshHeight < 0.01) freshHeight = 0;
 		this.setHeight(freshHeight);
