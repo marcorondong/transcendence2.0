@@ -1,0 +1,1 @@
+Swagger url: http://localhost:3004/chat-db/documentation

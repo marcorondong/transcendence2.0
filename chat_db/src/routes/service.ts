@@ -1,51 +1,39 @@
-import { PrismaClient } from "../../node_modules/generated/prisma";
 import httpError from "http-errors";
+import { createUser, getUserIfExists, connectUser, disconnectUser } from "./dbUtils";
 
-const prisma = new PrismaClient();
-
-async function getUserIfExists(userId: string) {
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: { blockList: true },
-	});
-	return user;
-}
-
-export async function createUser(userId: string) {
+export async function createOrGetUser(userId: string) {
 	const existingUser = await getUserIfExists(userId);
 	if (existingUser) return existingUser;
-	const newUser = await prisma.user.create({
-		data: { id: userId },
-		select: { blockList: true },
-	});
-	return newUser;
+	const user = await createUser(userId);
+	return user;
 }
 
 export async function addToBlockList(userId: string, friendId: string) {
 	const isUserInList = await getBlockStatus(userId, friendId);
 	if (isUserInList) throw new httpError.Conflict("User already blocked");
-	await prisma.user.update({
-		where: { id: userId },
-		data: { blockList: { connect: { id: friendId } } },
-	});
+	await connectUser(userId, friendId);
 }
 
-export async function removeFromBlockList(id: string, friendId: string) {
-	const isUserInBlockList = await getBlockStatus(id, friendId);
+export async function removeFromBlockList(userId: string, friendId: string) {
+	const isUserInBlockList = await getBlockStatus(userId, friendId);
 	if (!isUserInBlockList) throw new httpError.Conflict("User not blocked");
-	await prisma.user.update({
-		where: { id: id },
-		data: { blockList: { disconnect: { id: friendId } } },
-	});
+	await disconnectUser(userId, friendId);
+}
+
+export async function toggleBlock(userId: string, friendId: string) {
+	const isUserInBlockList = await getBlockStatus(userId, friendId);
+	if (isUserInBlockList) await disconnectUser(userId, friendId);
+	else await connectUser(userId, friendId);
 }
 
 export async function getBlockStatus(userId: string, friendId: string) {
+	if (userId === friendId) throw new httpError.BadRequest("userId and friendId cannot be the same");
 	const existingUser = await getUserIfExists(userId);
 	if (!existingUser) throw new httpError.NotFound("User not found");
 	const existingFriend = await getUserIfExists(friendId);
-	if (!existingFriend) throw new httpError.NotFound("User not found");
+	if (!existingFriend) throw new httpError.NotFound("Friend user not found");
 	for (const friend of existingUser.blockList)
-		if (friend.id === friendId) return true;
+		if (friend.userId === friendId) return true;
 	return false;
 }
 
