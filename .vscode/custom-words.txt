@@ -17,7 +17,6 @@ gdanis
 getch
 getmaxyx
 grafana
-healthcheck
 highscore
 ie
 HEHE

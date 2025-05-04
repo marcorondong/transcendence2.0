@@ -267,7 +267,7 @@ export class PongComponent extends HTMLElement {
 		this.append(gameDataContainer);
 		const queryParams = window.location.search;
 		this.wss = new WebSocket(
-			`wss://${window.location.hostname}:${window.location.port}/pong/${queryParams}`,
+			`wss://${window.location.hostname}:${window.location.port}/pong-api/pong${queryParams}`,
 		);
 
 		this.wss.onmessage = (event) => {
