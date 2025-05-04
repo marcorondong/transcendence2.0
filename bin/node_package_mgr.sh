@@ -11,6 +11,7 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"  # Adjust if you move this scri
 SILENT=false
 ACTION=""
 INSTALL_CMD="npm install"
+DRY_RUN=true
 
 ########################### GLOBAL SAFE EXIT HANDLER ###########################
 REAL_IFS=$IFS
@@ -46,7 +47,7 @@ timestamp() { date "+%Y-%m-%d %H:%M:%S"; }
 
 log() {
 	[ "$SILENT" = true ] && return
-	printf "$(timestamp) $1"
+	printf "%s\n" "$(timestamp) $1"
 }
 
 ############################### HELPER FUNCTIONS ###############################
@@ -59,23 +60,32 @@ usage() {
 # === INSTALL ===
 install() {
 	local_service_dir="$1"
+	local_basename="$(basename "$local_service_dir")"
 
-	log "Installing in $local_service_dir"
-	# (cd "$local_service_dir" && npm install) || log "❌ Failed in $local_service_dir"
-	(cd "$local_service_dir" && $INSTALL_CMD) || log "❌ Failed in $local_service_dir"
+	log "Installing in $local_basename"
+	if [ "$DRY_RUN" = true ]; then
+		log "🟡  Would run this: cd ${local_basename} && ${INSTALL_CMD}"
+	else
+		(cd "$local_service_dir" && $INSTALL_CMD) || log "❌ Failed in $local_basename"
+	fi
 }
 
 # === UNINSTALL ===
 uninstall() {
 	local_service_dir="$1"
+	local_basename="$(basename "$local_service_dir")"
 
-	log "Uninstalling in $local_service_dir"
-	rm -rf "${local_service_dir}/node_modules" "${local_service_dir}/package-lock.json" || log "❌ Failed in $local_service_dir"
+	log "Uninstalling in $local_basename"
+	if [ "$DRY_RUN" = true ]; then
+		log "🟡  Would run this: rm -rf ${local_basename}/node_modules ${local_basename}/package-lock.json"
+	else
+		rm -rf "${local_service_dir}/node_modules" "${local_service_dir}/package-lock.json" || log "❌ Failed in $local_basename"
+	fi
 }
 
 # === FIND AND PROCESS SERVICES ===
 find_services() {
-	find "$PROJECT_ROOT" -type f -name "package.json" ! -path "${PROJECT_ROOT}/package.json" | while read -r pkgfile; do
+	find "$PROJECT_ROOT" -path '*/node_modules/*' -prune -o -type f -name "package.json" ! -path "${PROJECT_ROOT}/package.json" | while read -r pkgfile; do
 		service_dir=$(dirname "$pkgfile")
 		case "$ACTION" in
 		install)
@@ -113,6 +123,7 @@ for local_main_arg in "$@"; do
 		-u|--uninstall) ACTION="uninstall" ;;
 		-s|--silent) SILENT=true ;;
 		-h|--help) usage ;;
+		--dry-run) DRY_RUN=true ;;
 		*) printf "%s\n" "Unknown option: $1"; usage ;;
 	esac
 done
