@@ -5,7 +5,7 @@ import { ScoreBoard } from "../../elements/ScoreBoard";
 import { PongField } from "../../elements/PongField";
 import { EPlayerRole, ETeamSideFiltered } from "../../PongPlayer";
 import { APongGame, IPongFrameBase } from "../APongGame";
-import { pongDbConfig } from "../../../../config";
+import { pongDbConfig } from "../../../config";
 
 export interface IPongFrameSingles extends IPongFrameBase {
 	leftPaddle: IPaddleJson;

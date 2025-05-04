@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import * as dotenv from "dotenv";
 import abi from "./TournamentScores.json"; // adjust path as needed
 import path from "path";
-import { blockchainConfig } from "../../config";
+import { blockchainConfig } from "../config";
 
 const env = dotenv.config({
 	path: path.resolve(__dirname, "../../.env"),

@@ -1,5 +1,5 @@
 import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
-import { scoreBoardConfig } from "../../../config";
+import { scoreBoardConfig } from "../../config";
 
 export interface IScore {
 	leftGoals: number;

@@ -8,7 +8,6 @@ COPY ./nodemon.json /pong/pong-api/
 COPY ./package.json /pong/pong-api/
 COPY ./tsconfig.json /pong/pong-api/
 COPY ./.env /pong/pong-api/
-COPY ./config.ts  /pong/pong-api/
 
 RUN npm --prefix /pong/pong-api/ install
 

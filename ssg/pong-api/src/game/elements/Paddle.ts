@@ -1,5 +1,5 @@
 import { Point } from "./Point";
-import { paddleConfig } from "../../../config";
+import { paddleConfig } from "../../config";
 
 const MOVE_MODIFIER = paddleConfig.move_speed;
 

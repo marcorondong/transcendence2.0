@@ -1,5 +1,5 @@
 import { Point, VectorDirection } from "./Point";
-import {ballConfig} from "../../../config"
+import {ballConfig} from "../../config"
 
 const MOVE_COEFFICIENT = 5;
 

@@ -1,4 +1,4 @@
-import { IBallJson } from "./src/game/elements/Ball"
+import { IBallJson } from "./game/elements/Ball"
 
 // ==============================
 // 🎮 Game Configuration

@@ -6,7 +6,7 @@ import { ScoreBoard } from "../../elements/ScoreBoard";
 import { Point } from "../../elements/Point";
 import { EPlayerRole } from "../../PongPlayer";
 import { APongGame } from "../APongGame";
-import { paddleConfig } from "../../../../config";
+import { paddleConfig } from "../../../config";
 
 export interface IPongFrameDoubles extends IPongFrameSingles {
 	leftSecondPaddle: IPaddleJson;
