@@ -1,4 +1,5 @@
 import { Point } from "./Point";
+import { paddleConfig } from "../../../config";
 
 const MOVE_MODIFIER = 0.05;
 
@@ -14,7 +15,7 @@ export class Paddle {
 	readonly initialPosition: Point;
 	readonly INITIAL_HEIGHT: number;
 
-	constructor(position: Point, height: number = 1) {
+	constructor(position: Point, height: number = paddleConfig.height_singles) {
 		this.position = position;
 		this.height = height;
 		this.initialPosition = new Point(position.getX(), position.getY());
