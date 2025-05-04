@@ -94,7 +94,6 @@
 					wss.send(
 						JSON.stringify({
 							move: leftPaddleDirection > 0 ? "down" : "up",
-							paddle: "left",
 						}),
 					);
 				}
@@ -102,7 +101,6 @@
 					wss.send(
 						JSON.stringify({
 							move: rightPaddleDirection > 0 ? "down" : "up",
-							paddle: "right",
 						}),
 					);
 				}
