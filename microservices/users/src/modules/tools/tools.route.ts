@@ -48,7 +48,7 @@ export async function setupSwagger(server: FastifyInstance) {
 
 async function toolsRoutes(server: FastifyInstance) {
 	server.get(
-		"/healthcheck",
+		"/health-check",
 		// Remove authentication (this route is public)
 		{ config: { authRequired: false } },
 		async (_, reply) => reply.code(200).send({ status: "ok" }),
