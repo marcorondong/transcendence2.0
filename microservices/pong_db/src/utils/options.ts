@@ -23,7 +23,7 @@ export const swaggerOption = {
 };
 
 export const swaggerUiOption = {
-	routePrefix: "/pong/documentation",
+	routePrefix: "/pong-db/documentation",
 };
 
 export const serverOption = {

@@ -12,7 +12,11 @@ datasource db {
 }
 
 model Game {
-  id       String   @id @default(uuid())
-  winnerId String
-  loserId  String
+  id          String   @id @default(uuid())
+  winnerId    String
+  loserId     String
+  winnerScore Int
+  loserScore  Int
+  gameId      String
+  createdAt   DateTime @default(now())
 }
