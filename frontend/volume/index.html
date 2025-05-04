@@ -31,41 +31,74 @@
 	</head>
 
 	<body
-		class="relative bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-gray-200"
+		class="relative bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-slate-200"
 	>
 		<div class="mx-3 sm:mx-5 md:mx-24 lg:mx-32 xl:mx-64">
 			<header-component
 				class="mb-9 flex content-center justify-between self-stretch py-9"
 			>
 				<ul id="navigation">
-					<a href="/">
-						<li class="pong-button pong-nav-link">home</li></a
+					<li>
+						<a
+							href="/"
+							tabindex="-1"
+						>
+							<button class="pong-button pong-nav-link">
+								home
+							</button></a
+						>
+					</li>
+					<a
+						href="pong-view"
+						tabindex="-1"
 					>
-					<a href="pong-view">
-						<li class="pong-button pong-nav-link">pong</li></a
+						<button class="pong-button pong-nav-link">
+							pong
+						</button></a
 					>
-					<a href="highscore-view">
-						<li class="pong-button pong-nav-link">highscore</li></a
-					>
-					<a href="profile-view">
-						<li class="pong-button pong-nav-link">profile</li></a
-					>
-					<a href="users-view">
-						<li class="pong-button pong-nav-link">users</li>
-					</a>
-					<a href="users-view">
-						<li>
+					<li>
+						<a
+							href="highscore-view"
+							tabindex="-1"
+						>
+							<button class="pong-button pong-nav-link">
+								highscore
+							</button></a
+						>
+					</li>
+					<li>
+						<a
+							href="profile-view"
+							tabindex="-1"
+						>
+							<button class="pong-button pong-nav-link">
+								profile
+							</button></a
+						>
+					</li>
+					<li>
+						<a
+							href="users-view"
+							tabindex="-1"
+						>
+							<button class="pong-button pong-nav-link">
+								users
+							</button>
+						</a>
+					</li>
+					<li>
+						<a
+							href="login-view"
+							tabindex="-1"
+						>
 							<button class="pong-button pong-button-info w-full">
 								login
-							</button>
-						</li></a
-					>
+							</button></a
+						>
+					</li>
 				</ul>
 			</header-component>
-			<div
-				id="content"
-				class=""
-			></div>
+			<div id="content"></div>
 		</div>
 		<chat-component
 			class="fixed bottom-0 right-0 h-auto w-auto rounded-tl-3xl rounded-tr-3xl bg-indigo-900/70 p-2 backdrop-blur-lg lg:right-7"

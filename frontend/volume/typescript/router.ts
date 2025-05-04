@@ -24,7 +24,7 @@ export class Router {
 	setActiveViewInNavigation(link: string) {
 		const navLinks = [...this.navLinks];
 		navLinks.map((l) => {
-			const li = l.querySelector("li");
+			const li = l.querySelector("nav li button");
 			if (li) {
 				li.classList.remove("pong-nav-link-active");
 			}
@@ -34,8 +34,8 @@ export class Router {
 				this.stringAfterSlash(l.href) === this.stringAfterSlash(link),
 		);
 
-		const listItem = linkElement?.querySelector("li");
-		if (listItem) {
+		const listItem = linkElement?.querySelector("nav li button");
+		if (listItem && listItem.classList.contains("pong-nav-link")) {
 			listItem.classList.add("pong-nav-link-active");
 		}
 	}

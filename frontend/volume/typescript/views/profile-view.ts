@@ -17,7 +17,6 @@ export class ProfileView extends HTMLElement {
 
 customElements.define("profile-view", ProfileView);
 
-
 export function createComponent() {
 	return document.createElement("profile-view");
 }
