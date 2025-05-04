@@ -26,7 +26,7 @@ export class Router {
 		navLinks.map((l) => {
 			const li = l.querySelector("li");
 			if (li) {
-				li.classList.remove("dark:bg-indigo-900");
+				li.classList.remove("pong-nav-link-active");
 			}
 		});
 		const linkElement = navLinks.find(
@@ -36,7 +36,7 @@ export class Router {
 
 		const listItem = linkElement?.querySelector("li");
 		if (listItem) {
-			listItem.classList.add("dark:bg-indigo-900");
+			listItem.classList.add("pong-nav-link-active");
 		}
 	}
 

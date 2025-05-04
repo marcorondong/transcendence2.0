@@ -200,10 +200,8 @@ class ChatComponent extends HTMLElement {
 		}
 
 		if (user.blocked) {
-			this.blockButton.classList.remove("pong-button");
 			this.blockButton.classList.add("pong-button-wrong");
 		} else {
-			this.blockButton.classList.add("pong-button");
 			this.blockButton.classList.remove("pong-button-wrong");
 		}
 	}
@@ -231,6 +229,7 @@ class ChatComponent extends HTMLElement {
 			this.mainUsers.append(userRow);
 			const userButton = document.createElement("button");
 			userButton.classList.add(
+				"pong-button",
 				"pong-button-special",
 				"selectUser-group",
 				"grow-1",
@@ -238,7 +237,10 @@ class ChatComponent extends HTMLElement {
 			userButton.id = user.id;
 			userButton.innerText = user.id;
 			if (user.id === this.selectedUser?.id) {
-				userButton.classList.add("pong-button-special-active");
+				userButton.classList.add(
+					"pong-button",
+					"pong-button-special-active",
+				);
 			}
 			userRow.append(userButton);
 		}
@@ -545,7 +547,7 @@ class ChatComponent extends HTMLElement {
 		this.nav.appendChild(this.navUsersContainer);
 
 		this.minusIcon.classList.add("hidden");
-		this.minMaxButton.classList.add("pong-button-secondary");
+		this.minMaxButton.classList.add("pong-button", "pong-button-secondary");
 		this.minMaxButton.id = "min-max-button";
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
 		this.nav.append(this.minMaxButton);
