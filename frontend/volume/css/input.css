@@ -14,7 +14,11 @@
 }
 
 .pong-button-special {
-	@apply cursor-pointer rounded-full border-2 bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-900 dark:border-indigo-500 dark:bg-indigo-950 dark:text-indigo-100 hover:dark:bg-indigo-500/20;
+	@apply cursor-pointer rounded-full border-2 bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-900 dark:border-indigo-500 dark:bg-indigo-950 dark:text-indigo-100 hover:dark:bg-indigo-500/20 active:dark:bg-indigo-900;
+}
+
+.pong-button-special-active {
+	@apply dark:bg-indigo-500/20;
 }
 
 .pong-button-pale {

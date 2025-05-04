@@ -55,9 +55,12 @@ class ChatComponent extends HTMLElement {
 
 			// CHAT SERVICE RETURNS USERS OWN MESSAGE
 			if (chatServiceData.type === "messageResponse") {
+				const now = new Date();
 				this.selectedUser?.messages.push({
 					id: chatServiceData.relatedId || "",
 					content: chatServiceData.message ?? "",
+					meta: false,
+					dateTime: now,
 				});
 				this.displayCurrentChat();
 			}
@@ -87,6 +90,24 @@ class ChatComponent extends HTMLElement {
 				}
 			}
 
+			// INVITATION TO GAME
+			if (chatServiceData.type === "inviteResponse") {
+				const id = chatServiceData.relatedId;
+				if (!id) {
+					return;
+				}
+				const userToInvite = this.onlineUsers.find((u) => u.id === id);
+				if (userToInvite) {
+					userToInvite.messages.push({
+						id: id,
+						content: "Let's play PONG together! ",
+						invitation: chatServiceData.roomId,
+						meta: false,
+					});
+					this.displayCurrentChat();
+				}
+			}
+
 			// RECEIVING MESSAGE
 			if (
 				chatServiceData.messageResponse &&
@@ -97,9 +118,12 @@ class ChatComponent extends HTMLElement {
 						user.id === chatServiceData.messageResponse?.relatedId,
 				);
 				if (sender) {
+					const now = new Date();
 					sender.messages.push({
 						id: sender.id,
 						content: chatServiceData.messageResponse.message ?? "",
+						meta: false,
+						dateTime: now,
 					});
 				}
 				this.displayCurrentChat();
@@ -166,6 +190,9 @@ class ChatComponent extends HTMLElement {
 			this.mainUsers.innerText = "no Users Online";
 			return;
 		}
+		if (this.selectedUser === undefined && this.onlineUsers.length) {
+			this.selectedUser = this.onlineUsers[0];
+		}
 		for (const user of this.onlineUsers) {
 			const userRow = document.createElement("div");
 			userRow.classList.add("flex", "gap-1", "items-center");
@@ -178,6 +205,9 @@ class ChatComponent extends HTMLElement {
 			);
 			userButton.id = user.id;
 			userButton.innerText = user.id;
+			if (user.id === this.selectedUser?.id) {
+				userButton.classList.add("pong-button-special-active");
+			}
 			userRow.append(userButton);
 		}
 	}
@@ -185,21 +215,33 @@ class ChatComponent extends HTMLElement {
 	chatBubble(message: Message) {
 		const div = document.createElement("div");
 		div.innerText = message.content;
-		if (message.id === this.selectedUser?.id) {
-			div.classList.add(
-				"self-start",
-				"text-left",
-				"dark:bg-slate-500/50",
-			);
-		} else {
-			div.classList.add("self-end", "text-right", "dark:bg-slate-700/50");
+		if (message.invitation) {
+			const link = document.createElement("a");
+			link.textContent = "click here";
+			link.href = `https://${window.location.hostname}:${window.location.port}/pong/${message.invitation}`;
+			div.appendChild(link);
 		}
-		div.classList.add("text-slate-300", "rounded-3xl", "px-4", "py-2");
+		if (message.id === this.selectedUser?.id) {
+			div.classList.add("self-start", "text-left");
+			if (!message.meta) {
+				div.classList.add("dark:bg-slate-700/50");
+			}
+		} else {
+			div.classList.add("self-end", "text-right");
+			if (!message.meta) {
+				div.classList.add("dark:bg-slate-500/50");
+			}
+		}
+		if (message.meta) {
+			div.classList.add("text-xs", "text-slate-400");
+		} else {
+			div.classList.add("text-slate-300", "rounded-3xl", "px-4", "py-2");
+		}
 		return div;
 	}
 
-	displayCurrentChat() {
-		if (this.onlineUsers.length === 0) {
+	setStateChatButtons(size: number) {
+		if (size === 0) {
 			this.chatInput.disabled = true;
 			this.sendButton.disabled = true;
 			this.blockButton.disabled = true;
@@ -210,11 +252,16 @@ class ChatComponent extends HTMLElement {
 			this.blockButton.disabled = false;
 			this.inviteButton.disabled = false;
 		}
+	}
+
+	displayCurrentChat() {
+		this.setStateChatButtons(this.onlineUsers.length);
 		this.mainMessages.replaceChildren();
 		if (this.onlineUsers.length === 0) {
 			const chatBubble = this.chatBubble({
 				id: this.selectedUser?.id || "",
 				content: "no Chat History available",
+				meta: false,
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
@@ -228,17 +275,48 @@ class ChatComponent extends HTMLElement {
 			const chatBubble = this.chatBubble({
 				id: this.selectedUser.id || "",
 				content: `no Chat History available with ${this.selectedUser.id}`,
+				meta: false,
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
 		}
 
-		for (const message of this.selectedUser.messages) {
+		const messagesWithMeta: Message[] = [];
+		const length = this.selectedUser.messages.length;
+		const messages = this.selectedUser.messages;
+
+		for (let i = 0; i < length; ++i) {
+			if (
+				i === 0 ||
+				(!messages[i - 1].meta && messages[i - 1].id !== messages[i].id)
+			) {
+				let sender: string;
+				if (messages[i].id === this.selectedUser?.id) {
+					sender = `${messages[i].id} | `;
+				} else {
+					sender = "You | ";
+				}
+				sender = sender + messages[i].dateTime?.toLocaleTimeString();
+				const metaMessage: Message = {
+					meta: true,
+					id: messages[i].id,
+					content: sender,
+				};
+				messagesWithMeta.push(metaMessage);
+				messagesWithMeta.push(messages[i]);
+			} else {
+				messagesWithMeta.push(messages[i]);
+			}
+		}
+
+		for (const message of messagesWithMeta) {
 			const chatBubble = this.chatBubble(message);
 			this.mainMessages.appendChild(chatBubble);
 		}
 
 		this.updateBlockButton(this.selectedUser);
+
+		this.mainMessages.scrollTop = this.mainMessages.scrollHeight;
 	}
 
 	handleEvent(event: Event) {
@@ -374,13 +452,13 @@ class ChatComponent extends HTMLElement {
 			return;
 		}
 		console.log("trying to invite a user");
-		// const chat: Chat = {
-		// 	type: "block",
-		// 	relatedId: this.selectedUser?.id,
-		// };
-		// if (this.ws) {
-		// 	this.ws.send(JSON.stringify(chat));
-		// }
+		const chat: Chat = {
+			type: "invite",
+			relatedId: this.selectedUser?.id,
+		};
+		if (this.ws) {
+			this.ws.send(JSON.stringify(chat));
+		}
 	}
 
 	connectedCallback() {

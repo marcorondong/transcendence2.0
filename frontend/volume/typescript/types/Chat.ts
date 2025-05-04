@@ -13,6 +13,9 @@ export interface Chat {
 export interface Message {
 	id: string;
 	content: string;
+	invitation?: string;
+	meta: boolean;
+	dateTime?: Date;
 }
 
 export interface ChatUser {
