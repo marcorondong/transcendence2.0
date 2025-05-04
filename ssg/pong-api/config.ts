@@ -1,5 +1,8 @@
 import { IBallJson } from "./src/game/elements/Ball"
 
+// ==============================
+// 🎮 Game Configuration
+// ==============================
 export const ballConfig: IBallJson = {
 	x: -0.1,
 	y: 0.0,
@@ -14,7 +17,16 @@ export const paddleConfig: IPaddleConfig = {
 }
 
 export const scoreBoardConfig: IScoreBoardConfig = {
-	match_length: 10, //in seconds
+	match_length: 15, //in seconds
+}
+
+// ==============================
+// 🛢️ Database Configuration
+// ==============================
+const base_Pong_DB_URL= "http://pong_db_container:3011/pong-db"
+export const pongDbConfig: IPongDbConfig = {
+	base_Pong_DB_URL,
+	store_game_endpoint: `${base_Pong_DB_URL}/create-game` //base url + /create game
 }
 
 export const blockchainConfig = {
@@ -22,13 +34,10 @@ export const blockchainConfig = {
 	fuji_rpc_url: "https://api.avax-test.network/ext/bc/C/rpc"
 }
 
-const base_Pong_DB_URL= "http://pong_db_container:3011/pong-db"
 
-export const pongDbConfig: IPongDbConfig = {
-	base_Pong_DB_URL,
-	store_game_endpoint: `${base_Pong_DB_URL}/create-game` //base url + /create game
-}
-
+// ==============================
+// ⚙️ Interfaces
+// ==============================
 interface IPaddleConfig {
 	height_singles: number,
 	height_doubles: number,
