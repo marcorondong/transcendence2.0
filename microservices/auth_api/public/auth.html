@@ -15,7 +15,6 @@
 			<input type="password" id="password" placeholder="Password" class="border border-gray-300 p-2 rounded mb-2 w-full">
 			<button id="login_button" class="bg-blue-500 text-white py-2 px-4 rounded">Login</button>
 			<button id="register_button" class="bg-green-500 text-white py-2 px-4 rounded">Register</button>
-			<button id="test_button" class="bg-yellow-500 text-white py-2 px-4 rounded">Test</button>
 			<button id="open_socket_button" class="bg-purple-500 text-white py-2 px-4 rounded">Open Socket</button>
 			<button id="open_socket_button_pong" class="bg-purple-500 text-white py-2 px-4 rounded">Open Socket Pong</button>
 			<button id="verify_button" class="bg-blue-500 text-white py-2 px-4 rounded">Verify</button>
@@ -46,7 +45,6 @@
 						})
 					}
 				);
-
 				if (!response.ok) {
 					throw new Error('Network response was not ok ' + response.statusText);
 				}
@@ -87,18 +85,20 @@
 				});
 
 				if (!response.ok) {
+					console.error('Network response was not ok', response.statusText);
 					throw new Error('Network response was not ok ' + response.statusText);
 				}
 				const result = await response.json();
 				if (result.error) {
+					console.error('Error from result.error:', result.error);
 					throw new Error(result.error);
 				}
 				document.getElementById('message').innerText = 'Registration successful!';
 				document.getElementById('logged_in_user').innerText = "Registered as: " + name;
 				// document.getElementById('user_info').classList.remove('hidden');
 			} catch (error) {
-				document.getElementById('message').innerText = 'Error: ' + error.message;
-				console.error('Error:', error);
+				document.getElementById('message').innerText = 'Error Catch: ' + error.message;
+				console.error('Error Catch:', error);
 			}
 		});
 
@@ -150,34 +150,6 @@
 			socket.addEventListener('close', function(event) {
 				console.log('WebSocket is closed now.');
 			});
-		});
-
-		document.getElementById('test_button').addEventListener('click', async function() {
-			console.log('Test button clicked');
-			const email = document.getElementById('email').value;
-			const password = document.getElementById('password').value;
-			try {
-				const response = await fetch(
-					'http://localhost:2999/auth-api/test', 
-					{
-						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-					}
-				);
-				if (!response.ok) {
-					throw new Error('Network response was not ok ' + response.statusText);
-				}
-				const result = await response.json();
-				if (result.error) {
-					throw new Error(result.error);
-				}
-				document.getElementById('message').innerText = 'Test successful!';
-			} catch (error) {
-				document.getElementById('message').innerText = 'Error: ' + error.message;
-				console.error('Error:', error);
-			}
 		});
 
 		document.getElementById('verify_button').addEventListener('click', async function() {

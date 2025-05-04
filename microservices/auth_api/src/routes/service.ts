@@ -18,7 +18,7 @@ export async function signInRequest(
 	}
 	const data = await response.json();
 	// if (!data.success) {
-	// 	throw new httpError.Unauthorized("Invalid emailllll or password");
+	// 	throw new httpError.Unauthorized("Invalid email or password");
 	// }
 	const payload = data; //payloadZodSchema.parse(data); // TODO once it works in Marco side, append the payloadZodSchema
 	return payload;

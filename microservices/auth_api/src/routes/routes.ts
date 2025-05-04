@@ -12,8 +12,4 @@ export async function authRoutes(server: FastifyInstance) {
 	server.delete("/sign-out", signOutOpt);
 	server.get("/verify-jwt", verifyJWTOpt);
 	server.get("/health-check", healthCheckOpt);
-	// delete this route when not needed
-	server.get("/test", async (request, reply) => {
-		return reply.send({ success: true });
-	});
 }
