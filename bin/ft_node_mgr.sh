@@ -60,7 +60,6 @@ timestamp() { date "+%Y-%m-%d %H:%M:%S"; }
 log() {
 	[ "$SILENT" = false ] && printf "%s %s\n" "$(timestamp)" "$1"
 	# printf "%s %s\n" "$(timestamp)" "$1" >> "$LOG_FILE"
-	printf "%s %s\n" "$(timestamp) $1"
 }
 
 usage() {
@@ -91,7 +90,8 @@ uninstall() {
 }
 
 find_services() {
-	find "$PROJECT_ROOT" -path '*/node_modules/*' -prune -o -type f -name "package.json" ! -path "$PROJECT_ROOT/package.json" | while IFS= read -r pkgfile; do
+	find "$PROJECT_ROOT" -path '*/node_modules/*' -prune -o -type f -name "package.json" ! -path "$PROJECT_ROOT/package.json" -print |
+	while IFS= read -r pkgfile; do
 		service_dir="$(dirname "$pkgfile")"
 		case "$ACTION" in
 			install) install "$service_dir" ;;
@@ -122,7 +122,8 @@ check_versions() {
 	log "${BLUE}Checking package versions...${NC}"
 	# temp file
 	tmpfile="$(mktemp)"
-	find "$PROJECT_ROOT" -path '*/node_modules/*' -prune -o -type f -name "package.json" | while IFS= read -r json_path; do
+	find "$PROJECT_ROOT" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
+	while IFS= read -r json_path; do
 		service_path="${json_path#$PROJECT_ROOT/}"
 		service_dir="$(dirname "$service_path")"
 
@@ -131,29 +132,24 @@ check_versions() {
 		done
 	done
 
-	sort "$tmpfile" | cut -d' ' -f1 | uniq | while IFS= read -r package; do
+	sort "$tmpfile" | cut -d' ' -f1 | uniq |
+	while IFS= read -r package; do
 		grep "^$package " "$tmpfile" > "$tmpfile.pkg"
-		count="$(cut -d' ' -f2 "$tmpfile.pkg" | sort -u | wc -l | tr -d ' ')"
-		sections="$(cut -d' ' -f4 "$tmpfile.pkg" | sort -u | tr '\n' ',' | sed 's/,$//')"
+		count_versions="$(cut -d' ' -f2 "$tmpfile.pkg" | sort -u | wc -l | tr -d ' ')"
+		has_dual_section="$(cut -d' ' -f4 "$tmpfile.pkg" | sort -u | grep -qE 'dependencies|devDependencies' && echo true || echo false)"
 		log "${GREEN}├── ${package}${NC}"
 
-		while IFS= read -r line; do
-			pkg ver svc sec=$(printf "%s" "$line")
-			pkg="$(echo "$line" | cut -d' ' -f1)"
-			ver="$(echo "$line" | cut -d' ' -f2)"
-			svc="$(echo "$line" | cut -d' ' -f3)"
-			sec="$(echo "$line" | cut -d' ' -f4)"
-
+		while IFS=' ' read -r pkg ver svc sec; do
 			warning=""
-			[ "$count" -gt 1 ] && warning="${RED}${OUTDATED_ICON}${NC} (older!)"
-			echo "$sections" | grep -q "dependencies,devDependencies" && warning="${YELLOW}${INCONSISTENCY_ICON}${NC} (inconsistent section)"
-
+			[ "$count_versions" -gt 1 ] && warning="${RED}${OUTDATED_ICON}${NC} (mismatch!)"
+			[ "$has_dual_section" = true ] && warning="${YELLOW}${INCONSISTENCY_ICON}${NC} (inconsistent section)"
 			log "│   ├── ${svc} → ${ver} ${warning}"
 		done < "$tmpfile.pkg"
 
 		log ""
 		rm -f "$tmpfile.pkg"
 	done
+
 	rm -f "$tmpfile"
 	log "${BLUE}✅ Version check complete.${NC}"
 }
