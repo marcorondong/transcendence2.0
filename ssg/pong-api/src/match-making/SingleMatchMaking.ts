@@ -30,7 +30,7 @@ export class HeadToHeadMatchMaking {
 		//TODO implement proper logic of looking of all rooms for requested player not just first one
 		for (const [key, room] of allMatches.entries()) {
 			console.log(`Key: ${key}, Room:`, room);
-			return room.getId();
+			return room.getGame().getGameId();
 		}
 		return "No Room found";
 	}
@@ -69,23 +69,23 @@ export class HeadToHeadMatchMaking {
 
 	createRoomSingles(privateRoom: boolean): PongRoomSingles {
 		const freshRoom: PongRoomSingles = new PongRoomSingles(privateRoom);
-		this.singleMatches.set(freshRoom.getId(), freshRoom);
+		this.singleMatches.set(freshRoom.getGame().getGameId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
 	}
 
 	createRoomDoubles(privateRoom: boolean): PongRoomDoubles {
 		const freshRoom: PongRoomDoubles = new PongRoomDoubles(privateRoom);
-		this.doubleMatches.set(freshRoom.getId(), freshRoom);
+		this.doubleMatches.set(freshRoom.getGame().getGameId(), freshRoom);
 		this.lobbyMatchMonitor(freshRoom);
 		return freshRoom;
 	}
 
 	removeRoom(room: APongRoom<APongGame>): boolean {
 		if (room instanceof PongRoomSingles)
-			return this.singleMatches.delete(room.getId());
+			return this.singleMatches.delete(room.getGame().getGameId());
 		else if (room instanceof PongRoomDoubles)
-			return this.doubleMatches.delete(room.getId());
+			return this.doubleMatches.delete(room.getGame().getGameId());
 		else throw new Error("Unknown instance of room");
 	}
 
@@ -148,7 +148,7 @@ export class HeadToHeadMatchMaking {
 	private cleanRoom(roomToClean: APongRoom<APongGame>) {
 		if (roomToClean.isRoomCleaned() === true) return;
 		roomToClean.sendCurrentFrame(); //send last frame that notify client of finished game.
-		console.log(`Clean function on room ${roomToClean.getId()}`);
+		console.log(`Clean function on room ${roomToClean.getGame().getGameId()}`);
 		roomToClean.setRoomCleanedStatus(true);
 		roomToClean.closeAllConnectionsFromRoom();
 		this.removeRoom(roomToClean);
@@ -162,12 +162,12 @@ export class HeadToHeadMatchMaking {
 
 	private async lobbyMonitor(room: APongRoom<APongGame>) {
 		room.on(RoomEvents.EMPTY, () => {
-			console.log("Lobby monitor Removing empty room: ", room.getId());
+			console.log("Lobby monitor Removing empty room: ", room.getGame().getGameId());
 			this.cleanRoom(room);
 		});
 
 		room.on(RoomEvents.FULL, () => {
-			console.log(`Room ${room.getId()} is full lets get started`);
+			console.log(`Room ${room.getGame().getGameId()} is full lets get started`);
 			room.getAndSendFramesOnce();
 			room.getGame().startGame();
 		});
@@ -175,7 +175,7 @@ export class HeadToHeadMatchMaking {
 
 	private async matchMonitor(room: APongRoom<APongGame>) {
 		await room.getGame().waitForFinalWhistle();
-		console.log("matchMonitor: Game finished", room.getId());
+		console.log("matchMonitor: Game finished", room.getGame().getGameId());
 		this.cleanRoom(room);
 	}
 }

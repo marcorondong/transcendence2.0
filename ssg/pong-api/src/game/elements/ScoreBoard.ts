@@ -45,6 +45,38 @@ export class ScoreBoard {
 		return ETeamSide.RIGHT;
 	}
 
+	//TODO: remove this once the proper id is implemented
+	getWinnerSideString(): string
+	{
+		const winnerSide:ETeamSideFiltered = this.getWinnerSide();
+		if(winnerSide == ETeamSide.LEFT)
+			return "Left Player ID";
+		return "Right Player ID";
+	}
+
+	//TODO: remove this once the proper id is implemented
+	getLoserSideString(): string
+	{
+		const loserSide:ETeamSideFiltered = this.getLoserSide();
+		if(loserSide == ETeamSide.LEFT)
+			return "Left Player ID";
+		return "Right Player ID";
+	}
+
+	getWinnerGoals(): number
+	{
+		if(this.leftPlayerGoals > this.rightPlayerGoals)
+			return this.leftPlayerGoals;
+		return this.rightPlayerGoals;
+	}
+
+	getLoserGoals(): number
+	{
+		if(this.leftPlayerGoals < this.rightPlayerGoals)
+			return this.leftPlayerGoals;
+		return this.rightPlayerGoals;
+	}
+
 	getLoserSide(): ETeamSideFiltered {
 		if (this.leftPlayerGoals < this.rightPlayerGoals) return ETeamSide.LEFT;
 		if (this.leftPlayerGoals === this.rightPlayerGoals) {
