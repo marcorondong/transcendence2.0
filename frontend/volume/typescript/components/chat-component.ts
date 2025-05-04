@@ -53,15 +53,34 @@ class ChatComponent extends HTMLElement {
 			const chatServiceData: Chat = JSON.parse(event.data);
 			console.log("websocket data", chatServiceData);
 
-			// CHAT SERVICE RETURNS USERS OWN MESSAGE
+			//CHAT SERVICE RETURNS USERS OWN MESSAGE
 			if (chatServiceData.type === "messageResponse") {
-				const now = new Date();
-				this.selectedUser?.messages.push({
+				const newMessage: Message = {
 					id: chatServiceData.relatedId || "",
 					content: chatServiceData.message ?? "",
-					meta: false,
-					dateTime: now,
-				});
+				};
+				this.addTimestamp(newMessage);
+				this.selectedUser?.messages.push(newMessage);
+				this.displayCurrentChat();
+			}
+
+			// RECEIVING MESSAGE
+			if (
+				chatServiceData.messageResponse &&
+				chatServiceData.messageResponse.type === "messageResponse"
+			) {
+				const sender = this.onlineUsers.find(
+					(user) =>
+						user.id === chatServiceData.messageResponse?.relatedId,
+				);
+				if (sender) {
+					const newMessage: Message = {
+						id: sender.id,
+						content: chatServiceData.messageResponse.message ?? "",
+					};
+					this.addTimestamp(newMessage);
+					sender.messages.push(newMessage);
+				}
 				this.displayCurrentChat();
 			}
 
@@ -102,33 +121,10 @@ class ChatComponent extends HTMLElement {
 						id: id,
 						content: "Let's play PONG together! ",
 						invitation: chatServiceData.roomId,
-						meta: false,
 					});
 					this.displayCurrentChat();
 				}
 			}
-
-			// RECEIVING MESSAGE
-			if (
-				chatServiceData.messageResponse &&
-				chatServiceData.messageResponse.type === "messageResponse"
-			) {
-				const sender = this.onlineUsers.find(
-					(user) =>
-						user.id === chatServiceData.messageResponse?.relatedId,
-				);
-				if (sender) {
-					const now = new Date();
-					sender.messages.push({
-						id: sender.id,
-						content: chatServiceData.messageResponse.message ?? "",
-						meta: false,
-						dateTime: now,
-					});
-				}
-				this.displayCurrentChat();
-			}
-
 			// A NEW USER CAME ONLINE
 			if (chatServiceData.type === "newClient") {
 				const user: ChatUser = {
@@ -160,6 +156,33 @@ class ChatComponent extends HTMLElement {
 				});
 			}
 		};
+	}
+
+	addTimestamp(newMessage: Message) {
+		const messages = this.selectedUser?.messages;
+		if (!messages) {
+			return;
+		}
+		if (
+			messages.length === 0 ||
+			(!messages[messages.length - 1].dateTime &&
+				messages[messages.length - 1].id !== newMessage.id)
+		) {
+			let sender: string;
+			if (newMessage.id === this.selectedUser?.id) {
+				sender = `${newMessage.id} | `;
+			} else {
+				sender = "You | ";
+			}
+			const now = new Date();
+			sender = sender + now.toLocaleTimeString();
+			const timestamp: Message = {
+				id: newMessage.id,
+				content: sender,
+				dateTime: now,
+			};
+			messages.push(timestamp);
+		}
 	}
 
 	updateBlockButton(user: ChatUser | undefined) {
@@ -223,16 +246,16 @@ class ChatComponent extends HTMLElement {
 		}
 		if (message.id === this.selectedUser?.id) {
 			div.classList.add("self-start", "text-left");
-			if (!message.meta) {
+			if (!message.dateTime) {
 				div.classList.add("dark:bg-slate-700/50");
 			}
 		} else {
 			div.classList.add("self-end", "text-right");
-			if (!message.meta) {
+			if (!message.dateTime) {
 				div.classList.add("dark:bg-slate-500/50");
 			}
 		}
-		if (message.meta) {
+		if (message.dateTime) {
 			div.classList.add("text-xs", "text-slate-400");
 		} else {
 			div.classList.add("text-slate-300", "rounded-3xl", "px-4", "py-2");
@@ -261,7 +284,6 @@ class ChatComponent extends HTMLElement {
 			const chatBubble = this.chatBubble({
 				id: this.selectedUser?.id || "",
 				content: "no Chat History available",
-				meta: false,
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
@@ -275,41 +297,40 @@ class ChatComponent extends HTMLElement {
 			const chatBubble = this.chatBubble({
 				id: this.selectedUser.id || "",
 				content: `no Chat History available with ${this.selectedUser.id}`,
-				meta: false,
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
 		}
 
-		const messagesWithMeta: Message[] = [];
-		const length = this.selectedUser.messages.length;
-		const messages = this.selectedUser.messages;
+		// const messagesWithMeta: Message[] = [];
+		// const length = this.selectedUser.messages.length;
+		// const messages = this.selectedUser.messages;
 
-		for (let i = 0; i < length; ++i) {
-			if (
-				i === 0 ||
-				(!messages[i - 1].meta && messages[i - 1].id !== messages[i].id)
-			) {
-				let sender: string;
-				if (messages[i].id === this.selectedUser?.id) {
-					sender = `${messages[i].id} | `;
-				} else {
-					sender = "You | ";
-				}
-				sender = sender + messages[i].dateTime?.toLocaleTimeString();
-				const metaMessage: Message = {
-					meta: true,
-					id: messages[i].id,
-					content: sender,
-				};
-				messagesWithMeta.push(metaMessage);
-				messagesWithMeta.push(messages[i]);
-			} else {
-				messagesWithMeta.push(messages[i]);
-			}
-		}
+		// for (let i = 0; i < length; ++i) {
+		// 	if (
+		// 		i === 0 ||
+		// 		(!messages[i - 1].meta && messages[i - 1].id !== messages[i].id)
+		// 	) {
+		// 		let sender: string;
+		// 		if (messages[i].id === this.selectedUser?.id) {
+		// 			sender = `${messages[i].id} | `;
+		// 		} else {
+		// 			sender = "You | ";
+		// 		}
+		// 		sender = sender + messages[i].dateTime?.toLocaleTimeString();
+		// 		const metaMessage: Message = {
+		// 			meta: true,
+		// 			id: messages[i].id,
+		// 			content: sender,
+		// 		};
+		// 		messagesWithMeta.push(metaMessage);
+		// 		messagesWithMeta.push(messages[i]);
+		// 	} else {
+		// 		messagesWithMeta.push(messages[i]);
+		// 	}
+		// }
 
-		for (const message of messagesWithMeta) {
+		for (const message of this.selectedUser.messages) {
 			const chatBubble = this.chatBubble(message);
 			this.mainMessages.appendChild(chatBubble);
 		}
