@@ -20,6 +20,11 @@ export const scoreBoardConfig: IScoreBoardConfig = {
 	match_length: 15, //in seconds
 }
 
+export const tournamentConfig = {
+	default_size: 4,
+	valid_sizes: [4, 8, 16]
+}
+
 // ==============================
 // 🛢️ Database Configuration
 // ==============================
