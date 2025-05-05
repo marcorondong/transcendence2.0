@@ -4,7 +4,7 @@ export class ProfileView extends HTMLElement {
 	}
 
 	frame = document.createElement("div");
-	container = document.createElement("section");
+	container = document.createElement("form");
 
 	// SIGN IN
 	heading = document.createElement("h1");
@@ -32,28 +32,28 @@ export class ProfileView extends HTMLElement {
 			"w-120",
 			"py-12",
 			"px-12",
-			"flex",
-			"flex-col",
-			"bg-indigo-900",
-			"rounded-xl",
+			"pong-card",
 			"items-stretch",
 			"shadow-xl",
+			"gap-6",
 		);
 		this.heading.classList.add("pong-form-heading");
 		this.heading.innerText = "Sign in to your account";
 		this.inputUsername.id = "input-username";
-		this.inputUsername.classList.add("pong-form-input");
+		this.inputUsername.classList.add("pong-form-input", "block", "w-full");
 		this.inputUsername.placeholder = "username";
 		this.labelUsername.innerText = "Your Username";
 		this.labelUsername.classList.add("pong-form-label");
 		this.labelUsername.htmlFor = "input-username";
+		this.labelUsername.append(this.inputUsername);
 		this.inputPassword.placeholder = "••••••••";
 		this.inputPassword.id = "input-password";
 		this.inputPassword.type = "password";
-		this.inputPassword.classList.add("pong-form-input");
+		this.inputPassword.classList.add("pong-form-input", "block", "w-full");
 		this.labelPassword.innerText = "Your Password";
 		this.labelPassword.classList.add("pong-form-label");
 		this.labelPassword.htmlFor = "input-password";
+		this.labelPassword.append(this.inputPassword);
 		this.signUpNote.innerText = "Don’t have an account yet? ";
 		this.signUpLink.innerText = "Sign up";
 		this.signUpLink.href = "#";
@@ -62,13 +62,11 @@ export class ProfileView extends HTMLElement {
 		this.signUpNote.classList.add("text-sm");
 		this.signInButton.innerText = "Sign in";
 		this.signInButton.classList.add("pong-button", "pong-button-info");
-		this.signInButton.classList.add("mb-5");
+		this.signInButton.classList.add("mt-2");
 		this.container.append(
 			this.heading,
 			this.labelUsername,
-			this.inputUsername,
 			this.labelPassword,
-			this.inputPassword,
 			this.signInButton,
 			this.signUpNote,
 		);
@@ -98,41 +96,49 @@ export class ProfileView extends HTMLElement {
 	renderSignUp() {
 		this.heading.innerText = "Create an account";
 
-		this.inputEmail.classList.add("pong-form-input");
+		this.inputEmail.classList.add("pong-form-input", "w-full", "block");
 		this.labelEmail.classList.add("pong-form-label");
 		this.inputEmail.type = "email";
 		this.inputEmail.placeholder = "name@mail.com";
 		this.inputEmail.id = "input-email";
 		this.labelEmail.htmlFor = "input-email";
 		this.labelEmail.innerText = "Your Email";
+		this.labelEmail.append(this.inputEmail);
 
-		this.inputNickname.classList.add("pong-form-input");
+		this.inputNickname.classList.add("pong-form-input", "w-full", "block");
 		this.labelNickname.classList.add("pong-form-label");
-		this.labelNickname.innerText = "Your nickname";
+		this.labelNickname.innerText = "Your Nickname";
 		this.labelNickname.htmlFor = "input-nickname";
 		this.inputNickname.id = "input-nickname";
 		this.inputNickname.placeholder = "nickname";
+		this.labelNickname.append(this.inputNickname);
 
-		this.inputRePassword.classList.add("pong-form-input");
+		this.inputRePassword.classList.add(
+			"pong-form-input",
+			"w-full",
+			"block",
+		);
 		this.labelRePassword.classList.add("pong-form-label");
 		this.inputRePassword.type = "password";
 		this.inputRePassword.id = "input-re-password";
 		this.labelRePassword.htmlFor = "input-re-password";
 		this.inputRePassword.placeholder = "••••••••";
 		this.labelRePassword.innerText = "Repeat Password";
+		this.labelRePassword.append(this.inputRePassword);
 
 		this.signUpButton.innerText = "Register new account";
-		this.signUpButton.classList.add("pong-button", "pong-button-info");
+		this.signUpButton.classList.add(
+			"pong-button",
+			"pong-button-info",
+			"mt-2",
+		);
 		this.signInButton.remove();
 		this.signUpNote.remove();
 
 		this.container.append(
 			this.labelRePassword,
-			this.inputRePassword,
 			this.labelEmail,
-			this.inputEmail,
 			this.labelNickname,
-			this.inputNickname,
 			this.signUpButton,
 		);
 	}

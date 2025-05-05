@@ -41,17 +41,25 @@
 /* input */
 
 .pong-form-input {
-	@apply rounded-xl border-1 border-slate-400 bg-slate-500/50 px-4 py-2 outline-none focus:ring-2  focus:ring-indigo-500 mb-5;
+	@apply rounded-xl border-1 text-lg border-slate-400 bg-slate-500/50 px-4 py-2 outline-none focus:ring-2  focus:ring-indigo-500 mt-1;
 }
 
 .pong-form-label {
-	@apply text-sm font-semibold mb-2 text-slate-200;
+	@apply text-sm font-semibold text-slate-200;
 }
 
 .pong-form-heading {
-	@apply font-bold text-2xl mb-6 text-slate-200;
+	@apply font-bold text-2xl text-slate-200;
 }
+
+/* links  */
 
 a {
 	@apply underline dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold;
+}
+
+/* big elements */
+
+.pong-card {
+	@apply flex flex-col bg-indigo-900/70 rounded-xl border-1 border-indigo-800/50;
 }
