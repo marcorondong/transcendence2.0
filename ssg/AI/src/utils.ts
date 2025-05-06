@@ -25,3 +25,7 @@ export function roundTo(n: number, decimals: number): number {
 	const multiplier = Math.pow(10, decimals);
 	return Math.round(n * multiplier) / multiplier;
 }
+
+export function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}

@@ -5,7 +5,8 @@ import {
 	distanceBetweenPoints,
 	findIntersectionWithVerticalLine,
 	roundTo,
-} from "./geometryUtils";
+	sleep,
+} from "./utils";
 
 export class Bot {
 	//game dimensions
@@ -252,10 +253,6 @@ export class Bot {
 		};
 		console.log(AIState);
 	}
-}
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const field = new PongField();
