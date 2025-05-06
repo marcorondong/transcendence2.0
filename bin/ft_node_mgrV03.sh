@@ -2,9 +2,25 @@
 
 set -u
 
+##################### UTILITY FUNCTIONS FOR CONSTS AND VARS ####################
+resolve_path() {
+	# Returns the canonical absolute path of the given argument
+	# Usage: resolved=$(resolve_path "./some/path")
+	if command -v realpath >/dev/null 2>&1; then
+		realpath "${1}"
+	else
+		# POSIX-safe fallback if realpath is unavailable
+		( cd "${1}" && pwd )
+		# If need to suppress cd error messages, use below version
+		# ( cd "${1}" 2>/dev/null && pwd )
+	fi
+}
+
 ################################## CONSTANTS ###################################
 # === PATHS & BOUNDARIES ===
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)" # Fails if symbolic sink
+# PROJECT_ROOT="$(realpath "$(cd "$(dirname "$0")/.." && pwd)")" # Fails if realpath is not installed
+PROJECT_ROOT="$(resolve_path "$(dirname "$0")/..")"
 TRASH_DIR="/tmp/transcendence"
 LOCK_TRASH_DIR="$TRASH_DIR/package_lock"
 PKG_TRASH_DIR="$TRASH_DIR/package"
@@ -304,14 +320,50 @@ if [ -z "$ACTION" ]; then
 		"I ) Install all node packages" \
 		"U ) Uninstall all node packages" \
 		"C ) Check for version mismatches" \
-		"S ) Sanitize package.json"
-	printf "Enter choice [I/U/C/S]: "
+		"S ) Sanitize package.json files" \
+		"T ) Targeted operation mode"
+	printf "Enter choice [I/U/C/S/T]: "
 	IFS= read -r choice < /dev/tty
 	case "$choice" in
 		I|i) ACTION="install" ;;
 		U|u) ACTION="uninstall" ;;
 		C|c) ACTION="check" ;;
 		S|s) ACTION="sanitize" ;;
+		T|t)
+			printf "Enter target directory (relative to project root or absolute): "
+			IFS= read -r raw_target < /dev/tty
+			if [ -d "${raw_target}" ]; then
+				# TARGET_DIR="$(cd "$raw_target" && pwd)"
+				# TARGET_DIR="$(realpath "${raw_target}")"
+				TARGET_DIR="$(resolve_path "${raw_target}")"
+			elif [ -d "${PROJECT_ROOT}/${raw_target}" ]; then
+				# TARGET_DIR="$(cd "$PROJECT_ROOT/$raw_target" && pwd)"
+				# TARGET_DIR="$(realpath "${PROJECT_ROOT}/${raw_target}")"
+				TARGET_DIR="$(resolve_path "${PROJECT_ROOT}/${raw_target}")"
+			else
+				printf "PROJECT_ROOT: %s\n" "${PROJECT_ROOT}"
+				printf "TARGET_DIR: %s\n" "${TARGET_DIR}"
+				printf "raw_target: %s\n" "${raw_target}"
+				printf "Target directory does not exist: %s\n" "${raw_target}"
+				exit 1
+			fi
+
+			printf "%s\n%s\n%s\n%s\n" \
+				"What do you want to do in target?" \
+				"I ) Install all node packages" \
+				"U ) Uninstall all node packages" \
+				"C ) Check for version mismatches" \
+				"S ) Sanitize package.json files"
+			printf "Enter choice [I/U/C/S]: "
+			IFS= read -r subchoice < /dev/tty
+			case "${subchoice}" in
+				I|i) ACTION="install" ;;
+				U|u) ACTION="uninstall" ;;
+				C|c) ACTION="check" ;;
+				S|s) ACTION="sanitize" ;;
+				*) printf "Invalid action\n"; exit 1 ;;
+			esac
+			;;
 		*) printf "Invalid choice\n"; exit 1 ;;
 	esac
 fi
@@ -331,4 +383,3 @@ case "$ACTION" in
 		log "${GREEN}✅ Done: $ACTION completed.${NC}"
 		;;
 esac
-
