@@ -15,10 +15,9 @@ export async function gameRoutes(fastify: FastifyInstance) {
 				return reply.code(400).send({ error: "Invalid game request" });
 			}
 			const gameRequest = new Object({
-				host: request.body.host,
-				port: request.body.port,
-				side: request.body.side,
 				roomId: request.body.roomId,
+				difficulty: request.body.difficulty,
+				mode: "mandatory",
 			});
 			try {
 				new Bot(gameRequest).playGame();

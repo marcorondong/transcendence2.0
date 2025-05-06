@@ -5,6 +5,15 @@ export const gameRequestSchema = {
 	body: {
 		type: "object",
 		properties: {
+			difficulty: {
+				type: "string",
+				enum: ["normal", "hard", "insane"],
+				default: "normal",
+			},
+			mode: {
+				type: "string",
+				default: "mandatory",
+			},
 			roomId: { type: "string" },
 		},
 	},
@@ -45,8 +54,12 @@ export const extraGameSchema = {
 		properties: {
 			difficulty: {
 				type: "string",
-				enum: ["easy", "medium", "hard", "insane"],
-				default: "medium",
+				enum: ["normal", "hard", "insane"],
+				default: "normal",
+			},
+			mode: {
+				type: "string",
+				default: "extra",
 			},
 			roomId: { type: "string" },
 		},

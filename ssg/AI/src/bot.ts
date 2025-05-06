@@ -6,7 +6,31 @@ import {
 	findIntersectionWithVerticalLine,
 	roundTo,
 	sleep,
+	findGradient,
 } from "./utils";
+
+class Ball extends Point {
+	constructor(x: number, y: number) {
+		super(x, y);
+	}
+
+	public setY(y: number) {
+		console.log("y was: ", super.getY(), " now: ", y);
+		super.setY(y);
+	}
+
+	public setX(x: number) {
+		super.setX(x);
+	}
+
+	public getX() {
+		return super.getX();
+	}
+
+	public getY() {
+		return super.getY();
+	}
+}
 
 export class Bot {
 	//game dimensions
@@ -14,18 +38,20 @@ export class Bot {
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
+	private readonly MANDATORY_SPEED = 1000 / this.FRAME_RATE;
 
 	//room info
-	private readonly difficulty: number;
-	private readonly roomId: string;
-	private readonly port: string;
-	private readonly host: string;
-	private readonly side: number;
+	private readonly difficulty: string;
+	private readonly botSpeed: number;
+	private readonly port = "3010";
+	private readonly host = "pong-api";
+	private side: number;
+	private roomId: "";
 	private ws: WebSocket | null;
 
 	//dynamic game state
 	private paddleTwist: number;
-	private lastBall: Point;
+	private lastBall: Ball;
 	private target: Point;
 	private framesUntilTarget: number;
 	private framesAfterTarget: number;
@@ -34,24 +60,28 @@ export class Bot {
 	private rightScore = 0;
 	private paddleY = 0;
 	private movePaddleTo = 0;
-	private paddleHeight = 0;
-	private countdown = this.FRAME_RATE;
+	private opponentAim = { updates: 0, gradient: 0 };
+	private countdown = this.FRAME_RATE + 2; // to skip the first welcome frame
+	private firstFrame = true;
 
 	constructor(initializers: any) {
 		//room info
-		this.difficulty = difficultySelector.get(initializers.difficulty) ?? 1000 / 60;
-		this.roomId = initializers.roomId;
-		this.port = initializers.port ?? "3010";
-		this.host = initializers.host ?? "pong-api";
+		this.difficulty = initializers.difficulty ?? "normal";
+		this.botSpeed =
+			initializers.mode === "mandatory"
+				? this.MANDATORY_SPEED
+				: (botSpeedSelector.get(this.difficulty) ??
+					this.MANDATORY_SPEED);
+		this.roomId = initializers.roomId ?? "unknown_room_id";
+		const initSide = initializers.side ?? "right";
 		this.side =
-			initializers.side === "left"
-				? field.LEFT_EDGE_X + this.PADDLE_GAP
-				: field.RIGHT_EDGE_X - this.PADDLE_GAP;
+			initSide === "right"
+				? field.RIGHT_EDGE_X - this.PADDLE_GAP
+				: field.LEFT_EDGE_X + this.PADDLE_GAP;
 		this.ws = null;
 
 		//dynamic game state
-		this.paddleTwist =
-			paddleTwistSelector.get(initializers.difficulty) ?? 0;
+		this.paddleTwist = paddleTwistSelector.get(this.difficulty) ?? 0;
 		this.lastBall = new Point(0, 0);
 		this.target = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
 		this.framesUntilTarget = Math.round(
@@ -85,16 +115,18 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				this.handleEvent(event);
+				if (--this.countdown == 0) this.handleEvent(event);
+				else if (this.firstFrame) {
+					this.readFirstFrame(event);
+					this.firstFrame = false;
+				}
 			});
 		} catch (error) {
-			console.error(`WebSocket at ${this.host}:${this.port}:`, error);
+			console.error(`WebSocket at ${this.host}:${this.port}: `, error);
 		}
 	}
 
 	public handleEvent(event: object) {
-		if (--this.countdown) return;
-
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
 
@@ -114,7 +146,7 @@ export class Bot {
 		this.calculateTarget(ballPosition);
 		this.logAIState();
 
-		if (this.paddleY != this.movePaddleTo) this.makeMove(this.difficulty);
+		if (this.paddleY != this.movePaddleTo) this.makeMove(this.botSpeed);
 		else this.twistBall(this.paddleTwist);
 	}
 
@@ -148,14 +180,21 @@ export class Bot {
 
 		do {
 			this.ws.send(JSON.stringify(this.moveCommand));
-			await sleep(this.difficulty);
+			await sleep(this.botSpeed);
 		} while ((twist -= this.STEP) > 0);
 	}
 
 	private resetLastBallAfterGoal(x: number) {
-		let lastBallCorrection =
-			this.framesUntilTarget * this.BALL_SPEED + this.PADDLE_GAP;
-		if (x > 0) lastBallCorrection = -lastBallCorrection;
+		const losingEdgeX =
+			this.target.getX() < 0 ? field.LEFT_EDGE_X : field.RIGHT_EDGE_X;
+		const losingEdgeY = findIntersectionWithVerticalLine(
+			this.lastBall,
+			this.target,
+			losingEdgeX,
+		);
+		const ballLostAt = new Point(losingEdgeX, losingEdgeY);
+		let lastBallCorrection = distanceBetweenPoints(ballLostAt, this.lastBall);
+		if (x > 0) lastBallCorrection *= -1;
 		this.lastBall.setX(lastBallCorrection);
 		this.lastBall.setY(0);
 	}
@@ -207,6 +246,8 @@ export class Bot {
 				this.target.getX(),
 			),
 		);
+		if (this.target.getX() === this.side)
+			this.updateOpponentAim(findGradient(ballPosition, this.target));
 	}
 
 	private calculateFrames(ballPosition: Point) {
@@ -217,8 +258,45 @@ export class Bot {
 	}
 
 	private updateLastBall(ballPosition: Point) {
+		console.log("last ball: ", this.lastBall);
 		this.lastBall.setX(ballPosition.getX());
 		this.lastBall.setY(ballPosition.getY());
+	}
+
+	private readFirstFrame(event: object) {
+		const roomInfo = JSON.parse(event.toString());
+		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
+			this.roomId = roomInfo.roomId;
+		}
+		if (Object.getOwnPropertyNames(roomInfo).includes("matchStatus")) {
+			let status = roomInfo.matchStatus;
+			if (status.includes("Left one") || status.includes("left one"))
+				this.side = field.LEFT_EDGE_X + this.PADDLE_GAP;
+		}
+	}
+
+	private updateOpponentAim(gradient: number) {
+		this.opponentAim.gradient =
+			this.opponentAim.gradient * this.opponentAim.updates++ + gradient;
+		this.opponentAim.gradient /= this.opponentAim.updates;
+	}
+
+	private probableAim(opponentHit: Point): number {
+		if (this.opponentAim.updates < 3) return 0;
+		const direction = this.side > 0 ? 1 : -1;
+		// expected position after opponent hits the ball and ball moves 1 along x axis
+		const expectedPosition = new Point(
+			direction,
+			opponentHit.getY() + this.opponentAim.gradient,
+		);
+		let aimY = findIntersectionWithVerticalLine(
+			opponentHit,
+			expectedPosition,
+			this.side,
+		);
+		while (aimY > field.TOP_EDGE_Y || aimY < field.BOTTOM_EDGE_Y)
+			aimY = this.accountForBounce(aimY);
+		return roundTo(aimY, 2);
 	}
 
 	private calculateTarget(ballPosition: Point) {
@@ -230,7 +308,9 @@ export class Bot {
 		)
 			this.target.setY(this.accountForBounce(this.target.getY()));
 		this.movePaddleTo =
-			this.target.getX() === this.side ? this.target.getY() : 0;
+			this.target.getX() === this.side
+				? this.target.getY()
+				: 0;
 		this.updateLastBall(ballPosition);
 	}
 
@@ -238,18 +318,18 @@ export class Bot {
 		const expectedDistance = this.ballHitPaddle()
 			? this.framesAfterTarget
 			: this.FRAME_RATE;
-		console.log(Math.round(distance / this.BALL_SPEED));
-		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // magic number to account for one or two dropped frames
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // magic number to account for 2 dropped frame
 	}
 
 	private logAIState() {
 		let AIState = {
 			lastBall: { x: this.lastBall.getX(), y: this.lastBall.getY() },
 			target: { x: this.target.getX(), y: this.target.getY() },
+			averageOpponentAim: this.opponentAim.gradient,
 			framesUntilTarget: this.framesUntilTarget,
 			framesAfterTarget: this.framesAfterTarget,
 			ballHitPaddle: this.ballHitPaddle(),
-			paddleTwist: this.paddleHeight,
+			movePaddleTo: this.movePaddleTo,
 		};
 		console.log(AIState);
 	}
@@ -258,17 +338,15 @@ export class Bot {
 const field = new PongField();
 
 //difficulty number = delay between AI moves in ms
-const difficultySelector = new Map<string, number>([
-	["easy", 24],
-	["medium", 1000 / 60],
+const botSpeedSelector = new Map<string, number>([
+	["normal", 1000 / 60],
 	["hard", 8],
 	["insane", 0],
 ]);
 
 //the AI will twist the ball. maximum twist = 0.5 a.k.a. half of paddle height
 const paddleTwistSelector = new Map<string, number>([
-	["easy", 0],
-	["medium", 0.1],
+	["normal", 0],
 	["hard", 0.25],
 	["insane", 0.45],
 ]);

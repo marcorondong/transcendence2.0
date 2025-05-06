@@ -36,12 +36,13 @@ services:
     restart: always
 
   ai-bot:
+    image: ai-bot-img
+    container_name: ai-bot
     build:
       context: ./ssg
       dockerfile: ./AI/Dockerfile
-    container_name: ai-bot
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     ports:
       - 6969:6969 #TODO keep now for swagger documentation, remove later
     networks:

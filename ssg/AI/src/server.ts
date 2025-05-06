@@ -1,7 +1,10 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { gameRoutes, healthRoute } from "./gameRoutes";
+import { 
+	gameRoutes,
+	healthRoute,
+} from "./gameRoutes";
 
 const fastify = Fastify({ logger: true });
 
@@ -20,14 +23,6 @@ fastify.register(swaggerUi, {
 	uiConfig: {
 		docExpansion: "list",
 		deepLinking: false,
-	},
-	uiHooks: {
-		onRequest: function (request, reply, next) {
-			next();
-		},
-		preHandler: function (request, reply, next) {
-			next();
-		},
 	},
 });
 

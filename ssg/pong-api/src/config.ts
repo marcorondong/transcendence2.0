@@ -17,7 +17,7 @@ export const paddleConfig: IPaddleConfig = {
 }
 
 export const scoreBoardConfig: IScoreBoardConfig = {
-	match_length: 15, //in seconds
+	match_length: 60, //in seconds
 }
 
 export const tournamentConfig = {
