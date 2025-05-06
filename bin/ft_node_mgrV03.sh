@@ -22,9 +22,9 @@ resolve_path() {
 # PROJECT_ROOT="$(realpath "$(cd "$(dirname "$0")/.." && pwd)")" # Fails if realpath is not installed
 PROJECT_ROOT="$(resolve_path "$(dirname "$0")/..")"
 TRASH_DIR="/tmp/transcendence"
-LOCK_TRASH_DIR="$TRASH_DIR/package_lock"
-PKG_TRASH_DIR="$TRASH_DIR/package"
-LOG_FILE="$TRASH_DIR/node_package_mgr.log"
+LOCK_TRASH_DIR="${TRASH_DIR}/package_lock"
+PKG_TRASH_DIR="${TRASH_DIR}/package"
+LOG_FILE="${TRASH_DIR}/node_package_mgr.log"
 
 # === DEFAULT BEHAVIORS ===
 SILENT=false                      # Enables/Disables output to the terminal
@@ -80,27 +80,28 @@ trap 'safe_exit_success' EXIT
 
 ### HELPERS
 is_yes() {
-	case "$1" in
+	case "${1}" in
 		[yY] | [yY][eE][sS] | "") return 0 ;;
 		*) return 1 ;;
 	esac
 }
 
 prompt_yes_no() {
-	local_prompt_msg="$1"
-	local_default_ans="$2"
+	local_prompt_msg="${1}"
+	local_default_ans="${2}"
 	local_default_display="y/N"
-	[ "$local_default_ans" = "y" ] && local_default_display="Y/n"
+	[ "${local_default_ans}" = "y" ] && local_default_display="Y/n"
 	while true; do
-		printf "%s [%s]: " "$local_prompt_msg" "$local_default_display"
+		printf "%s [%s]: " "${local_prompt_msg}" "${local_default_display}"
 		if ! IFS= read -r local_prompt_reply < /dev/tty; then
-			local_prompt_reply="$local_default_ans"
+			local_prompt_reply="${local_default_ans}"
 		fi
 		local_prompt_reply="${local_prompt_reply#"${local_prompt_reply%%[![:space:]]*}"}"
 		local_prompt_reply="${local_prompt_reply%"${local_prompt_reply##*[![:space:]]}"}"
+		# local_prompt_reply="${local_prompt_reply:-${local_default_ans}}" # TODO: Try this version
 		local_prompt_reply="${local_prompt_reply:-$local_default_ans}"
-		if is_yes "$local_prompt_reply"; then return 0
-		else case "$local_prompt_reply" in
+		if is_yes "${local_prompt_reply}"; then return 0
+		else case "${local_prompt_reply}" in
 			[nN]|[nN][oO]) return 1 ;;
 			*) printf "Please answer yes or no.\n" ;;
 		esac
@@ -109,18 +110,18 @@ prompt_yes_no() {
 }
 
 sanitize_path() {
-	echo "$1" | sed 's/\//_/g'
+	echo "${1}" | sed 's/\//_/g'
 }
 
 timestamp() { [ "$ENABLE_TIMESTAMP" = true ] && date "+%Y-%m-%d %H:%M:%S"; }
 
 log() {
-	msg="$(printf "%s %s" "$(timestamp)" "$1")"
-	[ "$SILENT" = false ] && printf "%s\n" "$msg"
+	msg="$(printf "%s %s" "$(timestamp)" "${1}")"
+	[ "$SILENT" = false ] && printf "%s\n" "${msg}"
 	if [ "$LOG_ENABLED" = true ]; then
 		# Create folder if not exists
-		mkdir -p "$TRASH_DIR"
-		printf "%s\n" "$(printf "%s" "$msg" | sed 's/\x1B\[[0-9;]*[JKmsu]//g' | sed 's/⚠️//g; s/🟥//g')" >> "$LOG_FILE"
+		mkdir -p "${TRASH_DIR}"
+		printf "%s\n" "$(printf "%s" "${msg}" | sed 's/\x1B\[[0-9;]*[JKmsu]//g' | sed 's/⚠️//g; s/🟥//g')" >> "$LOG_FILE"
 		# printf "%s\n" "$(printf "%s" "$msg" | sed 's/\x1B\[[0-9;]*[JKmsu]//g' | sed 's/[\xf7\xe1]//g')" >> "$LOG_FILE"
 	fi
 }
@@ -129,71 +130,79 @@ log() {
 backup_file() {
 	file="$1"
 	base="$(basename "$file")"
-	rel_path="${file#$PROJECT_ROOT/}"
-	mkdir -p "$PKG_TRASH_DIR"
+	rel_path="${file#$PROJECT_ROOT/}" # TODO: See if I should escape this too
+	mkdir -p "${PKG_TRASH_DIR}"
 	case "$DEFAULT_KEEP_MODE" in
-		overwrite) dest="$PKG_TRASH_DIR/$base" ;;
-		add-path) dest="$PKG_TRASH_DIR/$(sanitize_path "$rel_path")" ;;
-		add-path-timestamp) dest="$PKG_TRASH_DIR/$(sanitize_path "$rel_path")_$(date +%Y%m%d%H%M%S)" ;;
+		overwrite) dest="${PKG_TRASH_DIR}/${base}" ;; # TODO: See if I should escape this too
+		add-path) dest="${PKG_TRASH_DIR}/$(sanitize_path "${rel_path}")" ;; # TODO: See if I should escape this too
+		add-path-timestamp) dest="${PKG_TRASH_DIR}/$(sanitize_path "${rel_path}")_$(date +%Y%m%d%H%M%S)" ;; # TODO: See if I should escape this too
 	esac
-	[ "$DRY_RUN" = true ] && log "🟡  Would back up: $file to $dest" || cp "$file" "$dest"
+	[ "$DRY_RUN" = true ] && log "🟡  Would back up: \"${file}\" to \"${dest}\"" || cp "${file}" "${dest}"
 }
 
 ### CORE OPS
 install() {
 	local_dir="$1"
-	[ -f "$local_dir/package-lock.json" ] && INSTALL_CMD="$INSTALL_CMD_2" || INSTALL_CMD="$INSTALL_CMD_1"
-	rel_path="${local_dir#$PROJECT_ROOT/}"
-	[ "$rel_path" = "$local_dir" ] && rel_path="."
+	[ -f "${local_dir}/package-lock.json" ] && INSTALL_CMD="$INSTALL_CMD_2" || INSTALL_CMD="$INSTALL_CMD_1"
+	rel_path="${local_dir#$PROJECT_ROOT/}" # TODO: See if I should escape this too
+	[ "${rel_path}" = "${local_dir}" ] && rel_path="."
 
-	if prompt_yes_no "Sanitize before install in ${rel_path}?" "n"; then
-		sanitize_versions "$local_dir" -only-this
+	if prompt_yes_no "Sanitize package.json before install in \"${rel_path}\"?" "n"; then
+		sanitize_versions "${local_dir}" -only-this
 	fi
 
-	log "${CYAN}Installing in ${rel_path}${NC}"
+	log "${CYAN}Installing in \"${rel_path}\"${NC}"
 	if [ "$DRY_RUN" = true ]; then
-		log "🟡  Would run this: cd ${rel_path} && ${INSTALL_CMD}"
+		log "🟡  Would run this: cd \"${rel_path}\" && \"${INSTALL_CMD}\""
 	else
-		(cd "$local_dir" && $INSTALL_CMD) || log "${RED}❌ Failed in ${rel_path}${NC}"
+		(cd "${local_dir}" && $INSTALL_CMD) || log "${RED}❌ Failed in \"${rel_path}\"${NC}"
 	fi
 }
 
-# TODO: Change prompt logic to soft uninstall first
+# TODO: Support a --hard or --soft flag later for force mode (automation)
 uninstall() {
 	local_dir="$1"
-	rel_path="${local_dir#$PROJECT_ROOT/}"
-	[ "$rel_path" = "$local_dir" ] && rel_path="."
+	rel_path="${local_dir#$PROJECT_ROOT/}" # TODO: See if I should escape this too
+	[ "${rel_path}" = "{$local_dir}" ] && rel_path="."
 
-	if prompt_yes_no "Hard uninstall for ${rel_path}?" "n"; then
+	# TODO: Change prompt logic to soft uninstall first, or better prompt to uninstall type (soft or hard. default soft)
+	if prompt_yes_no "Hard uninstall for \"${rel_path}\"?" "n"; then
 		mode="h"
 	else
 		mode="s"
 	fi
 
-	log "${CYAN}Uninstalling in ${rel_path}${NC}"
+	log "${CYAN}Uninstalling in \"${rel_path}\"${NC}"
 	if [ "$DRY_RUN" = true ]; then
-		log "🟡  Would run this: rm -rf ${rel_path}/node_modules"
+		log "🟡  Would run this: rm -rf \"${rel_path}/node_modules\""
 		[ "$mode" = h ] && log "🟡  Would also move package-lock.json to trash"
 	else
-		rm -rf "$local_dir/node_modules"
-		if [ "$mode" = h ] && [ -f "$local_dir/package-lock.json" ]; then
-			rel_path_lock="${local_dir#$PROJECT_ROOT/}/package-lock.json"
+		rm -rf "${local_dir}/node_modules"
+		if [ "$mode" = h ] && [ -f "${local_dir}/package-lock.json" ]; then
+			rel_path_lock="${local_dir#$PROJECT_ROOT/}/package-lock.json" # TODO: See if I should escape this too
+			# TODO Maybe use backup_file function?
+			# TODO: Normalize rel_path_lock with sanitize_path only once and reuse.
 			case "$DEFAULT_KEEP_MODE" in
-				overwrite) dest="$LOCK_TRASH_DIR/package-lock.json" ;;
-				add-path) dest="$LOCK_TRASH_DIR/$(sanitize_path "$rel_path_lock")" ;;
-				add-path-timestamp) dest="$LOCK_TRASH_DIR/$(sanitize_path "$rel_path_lock")_$(date +%Y%m%d%H%M%S)" ;;
+				overwrite) dest="${LOCK_TRASH_DIR}/package-lock.json" ;;
+				add-path) dest="${LOCK_TRASH_DIR}/$(sanitize_path "${rel_path_lock}")" ;; # TODO: See if I should escape this too
+				add-path-timestamp) dest="${LOCK_TRASH_DIR}/$(sanitize_path "${rel_path_lock}")_$(date +%Y%m%d%H%M%S)" ;; # TODO: See if I should escape this too
 			esac
-			mkdir -p "$LOCK_TRASH_DIR"
-			mv "$local_dir/package-lock.json" "$dest"
+			mkdir -p "${LOCK_TRASH_DIR}"
+			# TODO: log the backup path (for transparency, esp. in dry-run).
+			mv "${local_dir}/package-lock.json" "${dest}"
 		fi
 	fi
 }
 
 # TODO: Does this have protection against CTRL+C or CTRL+D ?
+# Small improvement: log the action performed, not just "sanitize" (e.g. "replace ^ → ~").
 sanitize_versions() {
+	# dir="${1:-${TARGET_DIR}}" # TODO: Try this version
 	dir="${1:-$TARGET_DIR}"
+	# scope="${2:-""}" # TODO: Try this version
 	scope="${2:-}"
 
+	# TODO: Convert action to lowercase to make input case-insensitive, and support their initial letters too
 	while :; do
 		printf "What do you want to do with version symbols? [replace/remove/lock]: "
 		IFS= read -r action < /dev/tty
@@ -204,56 +213,61 @@ sanitize_versions() {
 		esac
 	done
 
+	# TODO: trim whitespace from input, just in case. Currently not trimmed
 	if [ "$action" != "lock" ]; then
 		while :; do
 			printf "Target symbol to modify (^ or ~): "
 			IFS= read -r symbol < /dev/tty
-			case "$symbol" in
+			case "${symbol}" in
 				'^'|'~') break ;;
 				*) printf "Invalid symbol.\n" ;;
 			esac
 		done
 		if [ "$action" = replace ]; then
-			[ "$symbol" = '^' ] && replacement='~' || replacement='^'
+			[ "${symbol}" = '^' ] && replacement='~' || replacement='^'
 		else
 			replacement=''
 		fi
 	fi
 
-	if [ "$scope" = "-only-this" ]; then
-		pkgfile="$dir/package.json"
-		[ -f "$pkgfile" ] || return
-		backup_file "$pkgfile"
-		[ "$DRY_RUN" = true ] && log "🟡  Would sanitize $pkgfile" || \
-			sed -i "s/\"$symbol/\"$replacement/g" "$pkgfile"
+	# TODO: Log the action performed, not just "sanitize" (e.g. "replace ^ → ~").
+	if [ "${scope}" = "-only-this" ]; then
+		pkgfile="${dir}/package.json"
+		[ -f "${pkgfile}" ] || return
+		backup_file "${pkgfile}"
+		[ "$DRY_RUN" = true ] && log "🟡  Would sanitize ${pkgfile}" || \
+			sed -i "s/\"${symbol}/\"${replacement}/g" "${pkgfile}"
 	else
-		find "$dir" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
+		find "${dir}" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
 		while IFS= read -r pkgfile; do
-			backup_file "$pkgfile"
-			[ "$DRY_RUN" = true ] && log "🟡  Would sanitize $pkgfile" || \
-			sed -i "s/\"$symbol/\"$replacement/g" "$pkgfile"
+			backup_file "${pkgfile}"
+			[ "$DRY_RUN" = true ] && log "🟡  Would sanitize ${pkgfile}" || \
+			sed -i "s/\"${symbol}/\"${replacement}/g" "${pkgfile}"
 		done
 	fi
 }
 
+# TODO: Add fallback for invalid option
+# TODO: Handle symlinks
 find_services() {
 	log "${CYAN}🔧 Microservice Dependencies${NC}"
-	find "$TARGET_DIR" -path '*/node_modules/*' -prune -o -type f -name "package.json" ! -path "$PROJECT_ROOT/package.json" -print |
+	find "${TARGET_DIR}" -path '*/node_modules/*' -prune -o -type f -name "package.json" ! -path "${PROJECT_ROOT}/package.json" -print |
 	while IFS= read -r pkgfile; do
-		service_dir="$(dirname "$pkgfile")"
+		service_dir="$(dirname "${pkgfile}")"
 		case "$ACTION" in
-			install) install "$service_dir" ;;
-			uninstall) uninstall "$service_dir" ;;
+			install) install "${service_dir}" ;;
+			uninstall) uninstall "${service_dir}" ;;
 		esac
 	done
 }
 
+# TODO: Handle symlinks
 handle_root() {
-	if [ -f "$TARGET_DIR/package.json" ]; then
+	if [ -f "${TARGET_DIR}/package.json" ]; then
 		log "${CYAN}🔧 Root Dependencies${NC}"
 		case "$ACTION" in
-			install) install "$TARGET_DIR" ;;
-			uninstall) uninstall "$TARGET_DIR" ;;
+			install) install "${TARGET_DIR}" ;;
+			uninstall) uninstall "${TARGET_DIR}" ;;
 		esac
 	else
 		log "${YELLOW}No package.json found in project root${NC}"
@@ -263,43 +277,44 @@ handle_root() {
 check_versions() {
 	log "${BLUE}Checking package versions...${NC}"
 	tmpfile="$(mktemp)"
-	find "$TARGET_DIR" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
+	find "${TARGET_DIR}" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
 	while IFS= read -r json_path; do
-		service_path="${json_path#$PROJECT_ROOT/}"
-		service_dir="$(dirname "$service_path")"
+		# TODO: Protect this against foldername with spaces
+		service_path="${json_path#$PROJECT_ROOT/}" # TODO: See if I should escape this too
+		service_dir="$(dirname "${service_path}")"
 		for section in dependencies devDependencies; do
-			jq -r "try .$section // empty | to_entries[] | \"\(.key) \(.value) $service_dir $section\"" "$json_path" >> "$tmpfile"
+			jq -r "try .${section} // empty | to_entries[] | \"\(.key) \(.value) ${service_dir} ${section}\"" "${json_path}" >> "${tmpfile}"
 		done
 	done
 
 	for section in dependencies devDependencies; do
 		log ""
 		log "${PURPLE}### ${section} ###${NC}"
-		cut -d' ' -f1,4 "$tmpfile" | grep " $section\$" | cut -d' ' -f1 | sort -u |
+		cut -d' ' -f1,4 "${tmpfile}" | grep " ${section}\$" | cut -d' ' -f1 | sort -u |
 		while IFS= read -r package; do
-			grep "^$package " "$tmpfile" | grep " $section\$" > "$tmpfile.pkg"
-			all_versions="$(cut -d' ' -f2 "$tmpfile.pkg" | sort -u)"
-			newest_ver="$(echo "$all_versions" | sort -Vr | head -n1)"
-			dual_section=$(grep "^$package " "$tmpfile" | cut -d' ' -f4 | sort -u | wc -l)
+			grep "^${package} " "${tmpfile}" | grep " ${section}\$" > "${tmpfile}.pkg"
+			all_versions="$(cut -d' ' -f2 "${tmpfile}.pkg" | sort -u)"
+			newest_ver="$(echo "${all_versions}" | sort -Vr | head -n1)"
+			dual_section=$(grep "^${package} " "${tmpfile}" | cut -d' ' -f4 | sort -u | wc -l)
 
 			log "${GREEN}├── ${package}${NC}"
 			while IFS=' ' read -r pkg ver svc sec; do
 				warning=""
-				[ "$dual_section" -gt 1 ] && warning="${YELLOW}${INCONSISTENCY_ICON}${NC} (mismatch!)"
-				[ "$ver" != "$newest_ver" ] && warning="$warning ${RED}${OUTDATED_ICON}${NC} (older!)"
+				[ "${dual_section}" -gt 1 ] && warning="${YELLOW}${INCONSISTENCY_ICON}${NC} (mismatch!)"
+				[ "${ver}" != "${newest_ver}" ] && warning="$warning ${RED}${OUTDATED_ICON}${NC} (older!)"
 				log "│   ├── ${svc} → ${ver} ${warning}"
-			done < "$tmpfile.pkg"
+			done < "${tmpfile}.pkg"
 			log ""
-			rm -f "$tmpfile.pkg"
+			rm -f "${tmpfile}.pkg"
 		done
 	done
-	rm -f "$tmpfile"
+	rm -f "${tmpfile}"
 	log "${BLUE}✅ Version check complete.${NC}"
 }
 
 ### ARG PARSING
 for arg in "$@"; do
-	case "$arg" in
+	case "${arg}" in
 		-i|--install) ACTION="install" ;;
 		-u|--uninstall) ACTION="uninstall" ;;
 		-c|--check) ACTION="check" ;;
@@ -308,14 +323,14 @@ for arg in "$@"; do
 		--silent) SILENT=true ;;
 		--log) LOG_ENABLED=true ;;
 		--dry-run) DRY_RUN=true ;;
-		*) printf "Unknown option: %s\n" "$arg"; exit 1 ;;
+		*) printf "Unknown option: %s\n" "${arg}"; exit 1 ;;
 	esac
 	shift
 done
 
 # TODO: Create a choose_action function
 if [ -z "$ACTION" ]; then
-	printf "%s\n%s\n%s\n%s\n%s\n" \
+	printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
 		"What do you want to do?" \
 		"I ) Install all node packages" \
 		"U ) Uninstall all node packages" \
@@ -324,7 +339,7 @@ if [ -z "$ACTION" ]; then
 		"T ) Targeted operation mode"
 	printf "Enter choice [I/U/C/S/T]: "
 	IFS= read -r choice < /dev/tty
-	case "$choice" in
+	case "${choice}" in
 		I|i) ACTION="install" ;;
 		U|u) ACTION="uninstall" ;;
 		C|c) ACTION="check" ;;
