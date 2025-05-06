@@ -131,7 +131,7 @@ install() {
 	[ "$rel_path" = "$local_dir" ] && rel_path="."
 
 	if prompt_yes_no "Sanitize before install in ${rel_path}?" "n"; then
-		sanitize_versions "$local_dir"
+		sanitize_versions "$local_dir" -only-this
 	fi
 
 	log "${CYAN}Installing in ${rel_path}${NC}"
@@ -173,9 +173,11 @@ uninstall() {
 	fi
 }
 
-# TODO: Does this have protection agains CTRL+C or CTRL+D ?
+# TODO: Does this have protection against CTRL+C or CTRL+D ?
 sanitize_versions() {
 	dir="${1:-$TARGET_DIR}"
+	scope="${2:-}"
+
 	while :; do
 		printf "What do you want to do with version symbols? [replace/remove/lock]: "
 		IFS= read -r action < /dev/tty
@@ -202,12 +204,20 @@ sanitize_versions() {
 		fi
 	fi
 
-	find "$dir" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
-	while IFS= read -r pkgfile; do
+	if [ "$scope" = "-only-this" ]; then
+		pkgfile="$dir/package.json"
+		[ -f "$pkgfile" ] || return
 		backup_file "$pkgfile"
 		[ "$DRY_RUN" = true ] && log "🟡  Would sanitize $pkgfile" || \
-		sed -i "s/\"$symbol/\"$replacement/g" "$pkgfile"
-	done
+			sed -i "s/\"$symbol/\"$replacement/g" "$pkgfile"
+	else
+		find "$dir" -path '*/node_modules/*' -prune -o -type f -name "package.json" -print |
+		while IFS= read -r pkgfile; do
+			backup_file "$pkgfile"
+			[ "$DRY_RUN" = true ] && log "🟡  Would sanitize $pkgfile" || \
+			sed -i "s/\"$symbol/\"$replacement/g" "$pkgfile"
+		done
+	fi
 }
 
 find_services() {
