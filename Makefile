@@ -35,4 +35,7 @@ $(SECRET_DIRECTORIES):
 $(GRAFANA_PW):
 	./monitoring/grafana/create_password.sh
 
+$(PONG_ENV):
+	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
+
 .PHONY: all re clean
