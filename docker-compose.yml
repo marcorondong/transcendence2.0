@@ -142,9 +142,29 @@ services:
       - Transcendence2.0
     restart: always
 
+  auth_api:
+    image: auth_api_img
+    container_name: auth_api_container
+    build:
+      context: ./microservices/auth_api
+      dockerfile: Dockerfile
+    volumes:
+      - ./microservices/auth_api/src/:/auth_api/src/
+      - ./microservices/auth_api/public/:/auth_api/public/
+    environment:
+      - NODE_ENV=development
+      - PORT=2999
+      - HOST=0.0.0.0
+    ports:
+      - 2999:2999
+    networks:
+      - Transcendence2.0
+    restart: always
+
 include:
   - ./monitoring/monitoring-docker-compose.yml
   - ./frontend/docker-compose.yml
+  - ./microservices/users/docker-compose.yml
 
 networks:
   Transcendence2.0:
