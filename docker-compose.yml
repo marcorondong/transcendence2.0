@@ -43,8 +43,6 @@ services:
       dockerfile: ./AI/Dockerfile
     environment:
       - NODE_ENV=development
-    ports:
-      - 6969:6969 #TODO keep now for swagger documentation, remove later
     networks:
       - Transcendence2.0
 
