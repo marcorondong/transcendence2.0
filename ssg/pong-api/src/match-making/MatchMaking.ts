@@ -25,7 +25,7 @@ export class MatchMaking {
 			this.playerJoiner(
 				connection,
 				query.matchType,
-				query.tournamentSize,
+				parseInt(query.tournamentSize, 10),
 				query.roomId,
 			);
 		else if (query.clientType === "spectator")
@@ -69,6 +69,7 @@ export class MatchMaking {
 
 	private tournamentJoiner(player: PongPlayer, tournamentSize: number) {
 		if (Tournament.isSizeValid(tournamentSize) === false) {
+			console.warn(`Tournament size ${tournamentSize} is not valid`);
 			player.sendNotification(
 				`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamentSize()}`,
 			);
