@@ -308,7 +308,7 @@ export class Bot {
 			? this.framesAfterTarget
 			: this.FRAME_RATE;
 		this.logBounce(distance, expectedDistance);
-		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1; // to account for 1 dropped frame or bad rounding
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // to account for 2 dropped frame or bad rounding
 	}
 
 	private logAIState() {
