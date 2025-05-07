@@ -19,14 +19,14 @@ fastify.register(swagger, {
 });
 
 fastify.register(swaggerUi, {
-	routePrefix: "/documentation",
+	routePrefix: "/ai-api/documentation",
 	uiConfig: {
 		docExpansion: "list",
 		deepLinking: false,
 	},
 });
 
-fastify.register(gameRoutes);
+fastify.register(gameRoutes, { prefix: "/ai-api" });
 fastify.register(healthRoute);
 
 fastify.ready().then(() => {
