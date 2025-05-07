@@ -12,7 +12,7 @@ export const ballConfig: IBallConfig = {
 export const paddleConfig: IPaddleConfig = {
 	height_singles: 1, //size of paddle in 1 v 1
 	height_doubles: 0.5, //size of paddle in 2 v 2
-	overtime_shrink_factor: 0.2, //20 % aka 5 touches before complete disappearing
+	overtime_shrink_factor: 0.2, //20 % aka 5 touches in overtime before complete disappearing
 	move_speed: 0.05,
 };
 
