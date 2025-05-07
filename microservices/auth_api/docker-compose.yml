@@ -16,5 +16,3 @@ services:
 
 include:
   - ../users/docker-compose.yml
-  - ../../chat_api/docker-compose.yml
-  - ../../ssg/pong-api/docker-compose.yml

@@ -58,11 +58,9 @@ class ThemeToggleComponent extends HTMLElement {
 		this.iconSize = size;
 	}
 
-	switchTheme() {}
-
 	connectedCallback() {
 		console.log("TOGGLE has been CONNECTED");
-		this.button.classList.add("cursor-pointer", "pong-button");
+		this.button.classList.add("pong-button");
 		this.append(this.button);
 		this.darkIcon.setIcon(this.darkIconName);
 		this.lightIcon.setIcon(this.lightIconName);
