@@ -256,6 +256,7 @@ export class PongComponent extends HTMLElement {
 			"absolute",
 			"opacity-60",
 			"group-hover:visible",
+			"pong-button",
 			"pong-button-pale",
 			"touch-visible",
 		);

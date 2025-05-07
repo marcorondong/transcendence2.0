@@ -1,16 +1,65 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* BUTTONS */
 .pong-button {
-	@apply cursor-pointer rounded-full bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700;
+	@apply cursor-pointer rounded-full bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-indigo-900 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700 font-medium no-underline;
 }
+
+.pong-button-wrong {
+	@apply bg-pink-300 p-2 text-pink-900 hover:bg-pink-600 disabled:hover:bg-pink-900 dark:bg-pink-900 dark:text-pink-300 hover:dark:bg-pink-700;
+}
+
+.pong-button-secondary {
+	@apply transition-colors hover:bg-indigo-900 dark:border-indigo-500 dark:bg-indigo-700 hover:dark:bg-indigo-600;
+}
+
+.pong-button-special {
+	@apply border-2 bg-indigo-300 p-2 text-indigo-900 hover:bg-indigo-900 dark:border-indigo-500 dark:bg-indigo-950 dark:text-indigo-200 dark:hover:bg-indigo-400/30;
+}
+
+.pong-button-special-active {
+	@apply dark:bg-indigo-400/20;
+}
+
 .pong-button-pale {
-	@apply cursor-pointer rounded-full bg-neutral-900 p-2 text-neutral-50 opacity-70 transition-colors duration-300 hover:bg-neutral-700;
+	@apply bg-neutral-900 text-neutral-50 opacity-70 hover:bg-neutral-700;
 }
 
 .pong-button-info {
-	@apply cursor-pointer rounded-full bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-cyan-600 dark:bg-cyan-700 dark:text-amber-50 hover:dark:bg-cyan-600;
+	@apply bg-indigo-300 hover:bg-cyan-600 dark:bg-cyan-600 hover:dark:bg-cyan-500;
 }
+
 .pong-nav-link {
-	@apply rounded-full p-2 text-center transition-colors duration-300 hover:bg-indigo-100 hover:text-black dark:text-amber-100 hover:dark:bg-indigo-900 hover:dark:text-amber-100 active:dark:bg-indigo-500;
+	@apply dark:bg-transparent;
+}
+
+.pong-nav-link-active {
+	@apply dark:bg-indigo-900;
+}
+
+/* input */
+
+.pong-form-input {
+	@apply rounded-xl border-1 text-lg border-slate-400 bg-slate-500/50 px-4 py-2 outline-none focus:ring-2  focus:ring-indigo-500 mt-1;
+}
+
+.pong-form-label {
+	@apply text-sm font-semibold text-slate-200;
+}
+
+.pong-form-heading {
+	@apply font-bold text-2xl text-slate-200;
+}
+
+/* links  */
+
+a {
+	@apply underline dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold;
+}
+
+/* big elements */
+
+.pong-card {
+	@apply flex flex-col bg-indigo-900/70 rounded-xl border-1 border-indigo-800/50;
 }
