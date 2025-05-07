@@ -338,14 +338,14 @@ const field = new PongField();
 
 //difficulty number = delay between AI moves in ms
 const botSpeedSelector = new Map<string, number>([
-	["normal", 1000 / 60],
-	["hard", 8],
-	["insane", 0],
+	["easy", 1000 / 60],
+	["normal", 8],
+	["hard", 0],
 ]);
 
 //the AI will twist the ball. maximum twist = 0.5 a.k.a. half of paddle height
 const paddleTwistSelector = new Map<string, number>([
-	["normal", 0],
-	["hard", 0.25],
-	["insane", 0.4],
+	["easy", 0],
+	["normal", 0.25],
+	["hard", 0.4],
 ]);

@@ -7,7 +7,7 @@ export const gameRequestSchema = {
 		properties: {
 			difficulty: {
 				type: "string",
-				enum: ["normal", "hard", "insane"],
+				enum: ["easy", "normal", "hard",],
 				default: "normal",
 			},
 			mode: {
@@ -54,8 +54,8 @@ export const extraGameSchema = {
 		properties: {
 			difficulty: {
 				type: "string",
-				enum: ["normal", "hard", "insane"],
-				default: "normal",
+				enum: ["easy", "normal", "hard",],
+				default: "hard",
 			},
 			mode: {
 				type: "string",

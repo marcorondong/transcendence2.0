@@ -6,7 +6,7 @@ import {
 } from "./gameRequestSchema";
 import { Bot } from "./bot";
 
-export async function gameRoutes(fastify: FastifyInstance) {
+export async function gameRoute(fastify: FastifyInstance) {
 	fastify.post(
 		"/game-mandatory",
 		{ schema: gameRequestSchema },
@@ -31,6 +31,9 @@ export async function gameRoutes(fastify: FastifyInstance) {
 			}
 		},
 	);
+}
+
+export async function cheatRoute(fastify: FastifyInstance) {
 	fastify.post(
 		"/game-extra",
 		{ schema: extraGameSchema },

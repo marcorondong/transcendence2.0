@@ -2,7 +2,8 @@ import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { 
-	gameRoutes,
+	gameRoute,
+	cheatRoute,
 	healthRoute,
 } from "./gameRoutes";
 
@@ -26,7 +27,8 @@ fastify.register(swaggerUi, {
 	},
 });
 
-fastify.register(gameRoutes, { prefix: "/ai-api" });
+fastify.register(gameRoute, { prefix: "/ai-api" });
+fastify.register(cheatRoute);
 fastify.register(healthRoute);
 
 fastify.ready().then(() => {
