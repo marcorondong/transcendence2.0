@@ -4,6 +4,7 @@ import { PongRoomSingles } from "./PongRoomSingles";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";
 import { BlockchainQueue } from "../../../blockchain-transaction/BlockchainQueue";
 import { BlockchainData } from "../../../blockchain-transaction/BlockchainData";
+import { tournamentConfig } from "../../../config";
 
 export enum ETournamentState {
 	LOBBY,
@@ -11,8 +12,8 @@ export enum ETournamentState {
 	FINISHED,
 }
 
-const validSizeTournament: Set<number> = new Set<number>([4, 8, 16]);
-const defaultSize: number = 4 as const;
+const validSizeTournament: Set<number> =  new Set <number>(tournamentConfig.valid_sizes) //new Set<number>([4, 8, 16]);
+const defaultSize: number = tournamentConfig.default_size;
 
 export class Tournament extends EventEmitter {
 	private requiredPlayers: number;

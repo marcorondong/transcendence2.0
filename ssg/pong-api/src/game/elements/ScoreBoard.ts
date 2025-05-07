@@ -1,4 +1,5 @@
 import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
+import { scoreBoardConfig } from "../../config";
 
 export interface IScore {
 	leftGoals: number;
@@ -17,7 +18,7 @@ export class ScoreBoard {
 	constructor() {
 		this.leftPlayerGoals = 0;
 		this.rightPlayerGoals = 0;
-		this.secondsLeft = 15;
+		this.secondsLeft = scoreBoardConfig.match_length;
 		this.paused = false;
 		this.overtime = false;
 		this.lastScoredSide = "left";

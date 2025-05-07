@@ -5,6 +5,7 @@ import { ScoreBoard } from "../../elements/ScoreBoard";
 import { PongField } from "../../elements/PongField";
 import { EPlayerRole, ETeamSideFiltered } from "../../PongPlayer";
 import { APongGame, IPongFrameBase } from "../APongGame";
+import { pongDbConfig } from "../../../config";
 
 export interface IPongFrameSingles extends IPongFrameBase {
 	leftPaddle: IPaddleJson;
@@ -65,7 +66,7 @@ export class PongGameSingles extends APongGame {
 
 	async storeResultInDatabase(): Promise<void> {
 		//TODO: implement properIds
-		const url:string = process.env.PONG_DB_CREATE_GAME_URL ?? "INVALID URL";
+		const url:string = pongDbConfig.store_game_endpoint;
 		const gameData = this.getJsonDataForDatabase();
 		console.log("Game data");
 		console.log(gameData);
