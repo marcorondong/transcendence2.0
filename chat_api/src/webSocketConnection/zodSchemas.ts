@@ -1,123 +1,90 @@
 import { z } from "zod";
 
-export const terminateSchema = z
-	.object({
-		type: z.literal("terminate"),
-	})
-	.strict();
+const userSchema = z.object({
+	id: z.string().min(1), // TODO .uuid(),
+	nickname: z.string().min(1),
+}).strict();
 
 export const messageSchema = z
 	.object({
 		type: z.literal("message"),
+		id: z.string().min(1), // TODO .uuid(),
 		message: z.string(),
-		relatedId: z.string(),
 	})
 	.strict();
 
 export const messageResponseSchema = z
 	.object({
-		type: z.literal("messageResponse"),
+		type: z.literal("message"),
+		sender: userSchema, // TODO .uuid(),
+		receiver: userSchema, // TODO .uuid(),
 		message: z.string(),
-		relatedId: z.string(),
+	})
+	.strict()
+	.refine((data) => data.sender.id !== data.receiver.id)
+	.refine((data) => data.sender.nickname !== data.receiver.nickname);
+
+export const inviteSchema = z
+	.object({
+		type: z.literal("invite"),
+		id: z.string().min(1), // TODO .uuid(),
 	})
 	.strict();
 
-export const blockSchema = z
+export const inviteResponseSchema = z
 	.object({
-		type: z.literal("block"),
-		relatedId: z.string(),
+		type: z.literal("invite"),
+		user: userSchema,
+		roomId: z.string().min(1), // TODO .uuid(),
 	})
 	.strict();
 
-export const blockResponseSchema = z
+export const onlineUsersResponseSchema = z
 	.object({
-		type: z.literal("blockResponse"),
-		relatedId: z.string().optional(),
-		notification: z.string().optional(),
+		type: z.literal("onlineUsers"),
+		users: z.array(userSchema),
 	})
 	.strict();
 
-export const blockStatusSchema = z
-	.object({
-		type: z.literal("blockStatus"),
-		relatedId: z.string(),
-	})
-	.strict();
 
-export const blockStatusResponseSchema = z
+export const newUserResponseSchema = z
 	.object({
-		type: z.literal("blockStatusResponse"),
-		blockStatus: z.boolean(),
-		relatedId: z.string(),
-		notification: z.string().optional(),
-	})
-	.strict();
-
-export const blockListSchema = z
-	.object({
-		blockList: z.array(z.string()),
-	})
-	.strict();
-
-export const newClientResponseSchema = z
-	.object({
-		type: z.literal("newClient"),
-		relatedId: z.string(),
-		notification: z.string().optional(),
+		type: z.literal("newUser"),
+		user: userSchema,
 	})
 	.strict();
 
 export const disconnectedResponseSchema = z
 	.object({
 		type: z.literal("disconnected"),
-		relatedId: z.string(),
-		notification: z.string().optional(),
+		user: userSchema,
 	})
 	.strict();
 
 export const errorResponseSchema = z
 	.object({
 		type: z.literal("error"),
-		relatedId: z.string(),
-		error: z.string(),
+		errorMessage: z.string(),
 	})
 	.strict();
 
-export const peopleOnlineResponseSchema = z
+export const blockStatusSchema= z
 	.object({
-		type: z.literal("peopleOnline"),
-		peopleOnline: z.array(z.string()),
-		notification: z.string().optional(),
+		blockStatus: z.boolean(),
 	})
 	.strict();
 
-export const inviteSchema = z
+export const roomIdSchema = z
 	.object({
-		type: z.literal("invite"),
-		relatedId: z.string(),
-	})
-	.strict();
-
-export const inviteResponseSchema = z
-	.object({
-		type: z.literal("inviteResponse"),
-		relatedId: z.string(),
-		roomId: z.string(),
-		notification: z.string().optional(),
+		roomId: z.string().uuid(),
 	})
 	.strict();
 
 export const DataSchema = z.discriminatedUnion("type", [
-	terminateSchema,
 	messageSchema,
-	blockSchema,
-	blockStatusSchema,
 	inviteSchema,
 ]);
 
 export type DataInput = z.infer<typeof DataSchema>;
 export type MessageInput = z.infer<typeof messageSchema>;
-export type BlockInput = z.infer<typeof blockSchema>;
-export type BlockStatusInput = z.infer<typeof blockStatusSchema>;
 export type InviteInput = z.infer<typeof inviteSchema>;
-export type TerminateInput = z.infer<typeof terminateSchema>;
