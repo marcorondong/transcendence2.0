@@ -9,29 +9,6 @@ import {
 	findGradient,
 } from "./utils";
 
-class Ball extends Point {
-	constructor(x: number, y: number) {
-		super(x, y);
-	}
-
-	public setY(y: number) {
-		console.log("y was: ", super.getY(), " now: ", y);
-		super.setY(y);
-	}
-
-	public setX(x: number) {
-		super.setX(x);
-	}
-
-	public getX() {
-		return super.getX();
-	}
-
-	public getY() {
-		return super.getY();
-	}
-}
-
 export class Bot {
 	//game dimensions
 	private readonly FRAME_RATE = 60;
@@ -51,7 +28,7 @@ export class Bot {
 
 	//dynamic game state
 	private paddleTwist: number;
-	private lastBall: Ball;
+	private lastBall: Point;
 	private target: Point;
 	private framesUntilTarget: number;
 	private framesAfterTarget: number;
@@ -60,7 +37,7 @@ export class Bot {
 	private rightScore = 0;
 	private paddleY = 0;
 	private movePaddleTo = 0;
-	private opponentAim = { updates: 0, gradient: 0 };
+	private opponentAim = { updates: 0, gradient: 0, direction: 0 };
 	private countdown = this.FRAME_RATE + 2; // to skip the first welcome frame
 	private firstFrame = true;
 
@@ -126,6 +103,7 @@ export class Bot {
 		}
 	}
 
+	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
@@ -150,6 +128,8 @@ export class Bot {
 		else this.twistBall(this.paddleTwist);
 	}
 
+	// send the necessary amount of moves to ws to get to the calculated target
+	// taking into account the paddle twist and the user movement speed
 	private async makeMove(delay: number) {
 		if (!this.ws) return;
 		this.moveCommand.move =
@@ -184,6 +164,7 @@ export class Bot {
 		} while ((twist -= this.STEP) > 0);
 	}
 
+	// if someone scored, the ball starts in the middle -> update the last ball position
 	private resetLastBallAfterGoal(x: number) {
 		const losingEdgeX =
 			this.target.getX() < 0 ? field.LEFT_EDGE_X : field.RIGHT_EDGE_X;
@@ -193,7 +174,10 @@ export class Bot {
 			losingEdgeX,
 		);
 		const ballLostAt = new Point(losingEdgeX, losingEdgeY);
-		let lastBallCorrection = distanceBetweenPoints(ballLostAt, this.lastBall);
+		let lastBallCorrection = distanceBetweenPoints(
+			ballLostAt,
+			this.lastBall,
+		);
 		if (x > 0) lastBallCorrection *= -1;
 		this.lastBall.setX(lastBallCorrection);
 		this.lastBall.setY(0);
@@ -233,11 +217,15 @@ export class Bot {
 		return new Point(this.lastBall.getX(), this.lastBall.getY());
 	}
 
+	// calculate the intersection of the ball vector and either paddle line
+	// based on the current ball position, the last known target and the last known ball position
+	// disregard the table top and bottom for now
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
 		const distance = distanceBetweenPoints(origin, ballPosition);
-		if (this.ballBounced(distance))
+		if (this.ballBounced(distance)) {
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
+		}
 		if (this.ballHitPaddle()) this.target.setX(-this.target.getX());
 		this.target.setY(
 			findIntersectionWithVerticalLine(
@@ -258,7 +246,6 @@ export class Bot {
 	}
 
 	private updateLastBall(ballPosition: Point) {
-		console.log("last ball: ", this.lastBall);
 		this.lastBall.setX(ballPosition.getX());
 		this.lastBall.setY(ballPosition.getY());
 	}
@@ -277,17 +264,21 @@ export class Bot {
 
 	private updateOpponentAim(gradient: number) {
 		this.opponentAim.gradient =
-			this.opponentAim.gradient * this.opponentAim.updates++ + gradient;
+			this.opponentAim.gradient * this.opponentAim.updates++ +
+			Math.abs(gradient);
 		this.opponentAim.gradient /= this.opponentAim.updates;
+		this.opponentAim.direction += gradient > 0 ? 1 : -1;
 	}
 
 	private probableAim(opponentHit: Point): number {
 		if (this.opponentAim.updates < 3) return 0;
 		const direction = this.side > 0 ? 1 : -1;
 		// expected position after opponent hits the ball and ball moves 1 along x axis
+		// based on average gradient and direction
 		const expectedPosition = new Point(
 			direction,
-			opponentHit.getY() + this.opponentAim.gradient,
+			(opponentHit.getY() + this.opponentAim.gradient) *
+				(this.opponentAim.direction > 0 ? 1 : -1),
 		);
 		let aimY = findIntersectionWithVerticalLine(
 			opponentHit,
@@ -308,9 +299,7 @@ export class Bot {
 		)
 			this.target.setY(this.accountForBounce(this.target.getY()));
 		this.movePaddleTo =
-			this.target.getX() === this.side
-				? this.target.getY()
-				: 0;
+			this.target.getX() === this.side ? this.target.getY() : 0;
 		this.updateLastBall(ballPosition);
 	}
 
@@ -318,7 +307,8 @@ export class Bot {
 		const expectedDistance = this.ballHitPaddle()
 			? this.framesAfterTarget
 			: this.FRAME_RATE;
-		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // magic number to account for 2 dropped frame
+		this.logBounce(distance, expectedDistance);
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 1; // to account for 1 dropped frame or bad rounding
 	}
 
 	private logAIState() {
@@ -332,6 +322,15 @@ export class Bot {
 			movePaddleTo: this.movePaddleTo,
 		};
 		console.log(AIState);
+	}
+
+	private logBounce(distance: number, expectedDistance: number) {
+		console.log(
+			"expected distance: ",
+			expectedDistance,
+			" distance: ",
+			Math.round(distance / this.BALL_SPEED),
+		);
 	}
 }
 
@@ -348,5 +347,5 @@ const botSpeedSelector = new Map<string, number>([
 const paddleTwistSelector = new Map<string, number>([
 	["normal", 0],
 	["hard", 0.25],
-	["insane", 0.45],
+	["insane", 0.4],
 ]);
