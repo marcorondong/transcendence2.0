@@ -62,7 +62,7 @@ services:
       - Transcendence2.0
 
   tictactoe_api:
-    image: tictactoe_api_img 
+    image: tictactoe_api_img
     container_name: tictactoe_api_container
     build: ./tictactoe_api
     volumes:
@@ -81,7 +81,7 @@ services:
     restart: always
 
   tictactoe_db:
-    image: tictactoe_db_img 
+    image: tictactoe_db_img
     container_name: tictactoe_db_container
     build: ./tictactoe_db
     environment:
@@ -116,7 +116,7 @@ services:
     networks:
       - Transcendence2.0
     depends_on:
-    - chat_db
+      - chat_db
     restart: always
 
   chat_db:
