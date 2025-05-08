@@ -166,18 +166,8 @@ export class Bot {
 
 	// if someone scored, the ball starts in the middle -> update the last ball position
 	private resetLastBallAfterGoal(x: number) {
-		const losingEdgeX =
-			this.target.getX() < 0 ? field.LEFT_EDGE_X : field.RIGHT_EDGE_X;
-		const losingEdgeY = findIntersectionWithVerticalLine(
-			this.lastBall,
-			this.target,
-			losingEdgeX,
-		);
-		const ballLostAt = new Point(losingEdgeX, losingEdgeY);
-		let lastBallCorrection = distanceBetweenPoints(
-			ballLostAt,
-			this.lastBall,
-		);
+		let lastBallCorrection =
+		this.framesUntilTarget * this.BALL_SPEED + this.PADDLE_GAP * 2;
 		if (x > 0) lastBallCorrection *= -1;
 		this.lastBall.setX(lastBallCorrection);
 		this.lastBall.setY(0);
@@ -298,9 +288,10 @@ export class Bot {
 			this.target.getY() < field.BOTTOM_EDGE_Y
 		)
 			this.target.setY(this.accountForBounce(this.target.getY()));
+		this.updateLastBall(ballPosition);
 		this.movePaddleTo =
 			this.target.getX() === this.side ? this.target.getY() : 0;
-		this.updateLastBall(ballPosition);
+		this.
 	}
 
 	private ballBounced(distance: number): boolean {
