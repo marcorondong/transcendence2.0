@@ -41,7 +41,7 @@ export interface IGameRoomQuery {
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
 	matchType: "singles" | "tournament" | "doubles";
-	tournamentSize: number;
+	tournamentSize: string;
 }
 
 fastify.register(websocket);
@@ -77,7 +77,7 @@ fastify.register(async function (fastify) {
 				privateRoom = false,
 				clientType = "player",
 				matchType = "singles",
-				tournamentSize = Tournament.getDefaultTournamentSize(),
+				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
 			} = req.query as IGameRoomQuery;
 
 			const gameQuery: IGameRoomQuery = {
