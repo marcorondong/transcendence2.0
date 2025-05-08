@@ -9,6 +9,8 @@ import {
 	findGradient,
 } from "./utils";
 
+const field = new PongField();
+
 export class Bot {
 	//game dimensions
 	private readonly FRAME_RATE = 60;
@@ -16,6 +18,7 @@ export class Bot {
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
 	private readonly MANDATORY_SPEED = 1000 / this.FRAME_RATE;
+	private readonly BALL_RADIUS = 0.075;
 
 	//room info
 	private readonly difficulty: string;
@@ -38,6 +41,7 @@ export class Bot {
 	private paddleY = 0;
 	private movePaddleTo = 0;
 	private opponentAim = { updates: 0, gradient: 0, direction: 0 };
+	private paddleHeight = 1;
 	private countdown = this.FRAME_RATE + 2; // to skip the first welcome frame
 	private firstFrame = true;
 
@@ -105,6 +109,8 @@ export class Bot {
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
+		this.countdown = this.FRAME_RATE;
+
 		const gameState = JSON.parse(event.toString());
 		console.log(gameState);
 
@@ -112,13 +118,19 @@ export class Bot {
 			roundTo(gameState.ball.x, 2),
 			roundTo(gameState.ball.y, 2),
 		);
+
 		this.paddleY =
 			this.side < 0
 				? roundTo(gameState.leftPaddle.y, 2)
 				: roundTo(gameState.rightPaddle.y, 2);
-		if (this.paddleTwist >= gameState.leftPaddle.height / 2)
-			this.paddleTwist *= gameState.leftPaddle.height;
-		this.countdown = this.FRAME_RATE;
+
+		this.paddleHeight =
+			this.side < 0
+				? gameState.leftPaddle.height
+				: gameState.rightPaddle.height;
+
+		if (this.paddleTwist >= this.paddleHeight / 2)
+			this.paddleTwist *= this.paddleHeight;
 
 		this.handleScore(gameState.score);
 		this.calculateTarget(ballPosition);
@@ -167,7 +179,7 @@ export class Bot {
 	// if someone scored, the ball starts in the middle -> update the last ball position
 	private resetLastBallAfterGoal(x: number) {
 		let lastBallCorrection =
-		this.framesUntilTarget * this.BALL_SPEED + this.PADDLE_GAP * 2;
+			this.framesUntilTarget * this.BALL_SPEED + this.PADDLE_GAP * 2;
 		if (x > 0) lastBallCorrection *= -1;
 		this.lastBall.setX(lastBallCorrection);
 		this.lastBall.setY(0);
@@ -291,7 +303,26 @@ export class Bot {
 		this.updateLastBall(ballPosition);
 		this.movePaddleTo =
 			this.target.getX() === this.side ? this.target.getY() : 0;
-		this.
+		if (this.canReachTarget() === false) this.movePaddleTo = 0;
+	}
+
+	private canReachTarget(): boolean {
+		if (this.target.getX() !== this.side) return true;
+
+		let reachable = true;
+		if (Math.abs(this.side) < Math.abs(this.lastBall.getX())) {
+			reachable = false;
+		} else if (
+			this.framesUntilTarget <
+			(this.movePaddleTo -
+				this.paddleY -
+				this.paddleHeight -
+				this.BALL_RADIUS) /
+				this.STEP // the number of frames to reach our target
+		) {
+			reachable = false;
+		}
+		return reachable;
 	}
 
 	private ballBounced(distance: number): boolean {
@@ -324,8 +355,6 @@ export class Bot {
 		);
 	}
 }
-
-const field = new PongField();
 
 //difficulty number = delay between AI moves in ms
 const botSpeedSelector = new Map<string, number>([
