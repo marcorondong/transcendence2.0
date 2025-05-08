@@ -316,7 +316,7 @@ export class Bot {
 			this.framesUntilTarget <
 			(this.movePaddleTo -
 				this.paddleY -
-				this.paddleHeight -
+				(this.paddleHeight) / 2 -
 				this.BALL_RADIUS) /
 				this.STEP // the number of frames to reach our target
 		) {
