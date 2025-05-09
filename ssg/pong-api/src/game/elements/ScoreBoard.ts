@@ -1,4 +1,5 @@
 import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
+import { scoreBoardConfig } from "../../config";
 
 export interface IScore {
 	leftGoals: number;
@@ -17,7 +18,7 @@ export class ScoreBoard {
 	constructor() {
 		this.leftPlayerGoals = 0;
 		this.rightPlayerGoals = 0;
-		this.secondsLeft = 15;
+		this.secondsLeft = scoreBoardConfig.match_length;
 		this.paused = false;
 		this.overtime = false;
 		this.lastScoredSide = "left";
@@ -43,6 +44,38 @@ export class ScoreBoard {
 			throw Error("Not really winner, goals are same");
 		}
 		return ETeamSide.RIGHT;
+	}
+
+	//TODO: remove this once the proper id is implemented
+	getWinnerSideString(): string
+	{
+		const winnerSide:ETeamSideFiltered = this.getWinnerSide();
+		if(winnerSide == ETeamSide.LEFT)
+			return "Left Player ID";
+		return "Right Player ID";
+	}
+
+	//TODO: remove this once the proper id is implemented
+	getLoserSideString(): string
+	{
+		const loserSide:ETeamSideFiltered = this.getLoserSide();
+		if(loserSide == ETeamSide.LEFT)
+			return "Left Player ID";
+		return "Right Player ID";
+	}
+
+	getWinnerGoals(): number
+	{
+		if(this.leftPlayerGoals > this.rightPlayerGoals)
+			return this.leftPlayerGoals;
+		return this.rightPlayerGoals;
+	}
+
+	getLoserGoals(): number
+	{
+		if(this.leftPlayerGoals < this.rightPlayerGoals)
+			return this.leftPlayerGoals;
+		return this.rightPlayerGoals;
 	}
 
 	getLoserSide(): ETeamSideFiltered {

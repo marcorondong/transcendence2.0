@@ -59,7 +59,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 
 	getRoomIdJSON() {
 		return {
-			roomId: this.getId(),
+			roomId: this.game.getGameId(),
 		};
 	}
 
@@ -136,7 +136,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 			this.getGameFrame();
 		const frameWithRoomId = {
 			...frame,
-			roomId: this.getId(),
+			roomId: this.game.getGameId(),
 			knockoutName: this.matchName,
 		};
 		const frameJson = JSON.stringify(frameWithRoomId);
