@@ -158,9 +158,15 @@ export const loginSchema = z
 	.strict(); // Rejects unknown fields
 
 // Schema for login response
+// export const loginResponseSchema = z.object({
+// 	accessToken: z.string(),
+// });
+
+// Schema for login response
 export const loginResponseSchema = z.object({
-	accessToken: z.string(),
-});
+	id: z.string().uuid("Invalid UUID format"),
+	nickname: nameField,
+}).strict(); // Rejects unknown fields
 
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
