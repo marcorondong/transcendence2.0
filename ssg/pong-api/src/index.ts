@@ -11,6 +11,8 @@ dotenv.config();
 
 const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
+const BASE_API_NAME = "pong-api";
+const BASE_GAME_PATH = "pong";
 
 const fastify = Fastify({
 	logger:
@@ -24,7 +26,7 @@ const fastify = Fastify({
 							ignore: "pid,hostname", //Hide fields
 						},
 					},
-			  }
+				}
 			: true,
 });
 
@@ -52,23 +54,26 @@ fastify.register(async function (fastify) {
 		});
 	});
 
-	fastify.get("/pong-api/health-check", async (request, reply) => {
+	fastify.get(`/${BASE_API_NAME}/health-check`, async (request, reply) => {
 		reply.code(200).send({
 			message:
 				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
 		});
 	});
 
-	fastify.get("/pong-api/player-room/:playerId", async (request, reply) => {
-		const { playerId } = request.params as { playerId: string };
-		reply.send({
-			roomId: manager.getPlayerRoomId(playerId),
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/player-room/:playerId`,
+		async (request, reply) => {
+			const { playerId } = request.params as { playerId: string };
+			reply.send({
+				roomId: manager.getPlayerRoomId(playerId),
+			});
+		},
+	);
 
 	//Partial makes all field optional.
 	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-		"/pong-api/pong",
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
 		{ websocket: true },
 		(connection, req) => {
 			const {
@@ -89,6 +94,30 @@ fastify.register(async function (fastify) {
 				tournamentSize,
 			};
 			manager.matchJoiner(connection, gameQuery);
+		},
+	);
+
+	fastify.get(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
+		{ websocket: true },
+		(connection, req) => {
+			console.log("Singles pong game");
+		},
+	);
+
+	fastify.get(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
+		{ websocket: true },
+		(connection, req) => {
+			console.log("Doubles pong game");
+		},
+	);
+
+	fastify.get(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
+		{ websocket: true },
+		(connection, req) => {
+			console.log("Tournament pong game");
 		},
 	);
 
