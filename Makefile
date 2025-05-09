@@ -18,6 +18,11 @@ re: clean
 clean:
 	docker compose down
 
+remove:
+	docker compose down --volumes
+	docker system prune -a -f --volumes
+	docker builder prune -a -f
+
 dev:
 	docker compose build --no-cache
 	docker compose up

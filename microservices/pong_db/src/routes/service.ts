@@ -39,8 +39,8 @@ function statsCalculation(games: GamesInput, userId: string) {
 	return totalStats;
 }
 
-export async function createGame(winnerId: string, loserId: string, winnerScore: number, loserScore: number, gameId: string ) {
-	await prisma.game.create({ data: { winnerId, loserId, winnerScore, loserScore, gameId } });
+export async function createGame(game: GameInput) {
+	await prisma.game.create({ data: game });
 }
 
 export async function getGameHistory(userId: string) {
@@ -49,9 +49,7 @@ export async function getGameHistory(userId: string) {
 		select: { winnerId: true, loserId: true, winnerScore: true, loserScore: true, createdAt: true },
 		orderBy: { createdAt: "desc" },
 	});
-	if (!games || games.length === 0) {
-		throw new httpError.NotFound("No games found for this user");
-	}
+	if (!games || games.length === 0) throw new httpError.NotFound("No games found for this user");
 	return games;
 }
 
@@ -65,4 +63,8 @@ export async function getHeadToHeadStats(userId: string, opponentId: string) {
 	const games = await getGamesByIdAndOpponentId(userId, opponentId);
 	const totalStats = statsCalculation(games, userId);
 	return totalStats;
+}
+
+export async function healthCheck() {
+	await prisma.$queryRaw`SELECT 1`;
 }
