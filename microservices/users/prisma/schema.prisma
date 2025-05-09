@@ -12,7 +12,7 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @unique @default(autoincrement()) // TODO: Change this to uuid
+  id           String    @id @default(uuid())
   email        String    @unique
   name         String    @unique
   passwordHash String
@@ -21,12 +21,12 @@ model User {
 }
 
 model Product {
-  id        Int      @id @default(autoincrement()) // TODO: Change this to uuid
+  id        String    @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   title     String //@db.VarChar(255)
   content   String?
   price     Float
-  ownerId   Int
+  ownerId   String
   owner     User     @relation(fields: [ownerId], references: [id])
 }

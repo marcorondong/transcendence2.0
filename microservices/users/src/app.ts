@@ -80,16 +80,16 @@ const publicPaths: string[] = [
 ];
 
 // Hook to check route config (authentication required by default)
-server.addHook("onRequest", async (request, reply) => {
-	if (request.routeOptions?.handler?.name === "basic404") return; // Skip auth for non-existent routes (Detect fallback 404 route by handler name)
-	const isPublic = publicPaths.some((path) =>
-		request.raw.url?.startsWith(path),
-	);
-	const requiresAuth =
-		!isPublic && request.routeOptions?.config?.authRequired !== false;
-	if (!requiresAuth) return;
-	await server.authenticate(request, reply);
-});
+// server.addHook("onRequest", async (request, reply) => {
+// 	if (request.routeOptions?.handler?.name === "basic404") return; // Skip auth for non-existent routes (Detect fallback 404 route by handler name)
+// 	const isPublic = publicPaths.some((path) =>
+// 		request.raw.url?.startsWith(path),
+// 	);
+// 	const requiresAuth =
+// 		!isPublic && request.routeOptions?.config?.authRequired !== false;
+// 	if (!requiresAuth) return;
+// 	await server.authenticate(request, reply);
+// });
 
 async function main() {
 	// Register swagger/openAPI plugins

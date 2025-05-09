@@ -40,7 +40,7 @@ async function userRoutes(server: FastifyInstance) {
 				},
 				security: [], // Remove Swagger auth
 			},
-			config: { authRequired: false }, // Remove authentication (this route is public)
+			// config: { authRequired: false }, // Remove authentication (this route is public)
 		},
 		errorHandler(registerUserHandler),
 	);
@@ -50,12 +50,12 @@ async function userRoutes(server: FastifyInstance) {
 		{
 			schema: {
 				body: loginSchema,
-				response: {
-					200: loginResponseSchema,
-				},
+				// response: {
+				// 	200: loginResponseSchema,
+				// },
 				security: [], // Remove Swagger auth
 			},
-			config: { authRequired: false }, // Remove authentication (this route is public)
+			// config: { authRequired: false }, // Remove authentication (this route is public)
 		},
 		errorHandler(loginHandler),
 	);
