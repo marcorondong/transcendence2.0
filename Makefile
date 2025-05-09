@@ -18,6 +18,11 @@ re: clean
 clean:
 	docker compose down
 
+remove:
+	docker compose down --volumes
+	docker system prune -a -f --volumes
+	docker builder prune -a -f
+
 dev:
 	docker compose build --no-cache
 	docker compose up
@@ -34,5 +39,8 @@ $(SECRET_DIRECTORIES):
 #simple script since i can automate password protection in entrypoint of grafana
 $(GRAFANA_PW):
 	./monitoring/grafana/create_password.sh
+
+$(PONG_ENV):
+	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
 
 .PHONY: all re clean

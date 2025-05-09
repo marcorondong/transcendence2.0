@@ -2,7 +2,7 @@ const socket = new WebSocket(`ws://${window.location.hostname}:${window.location
 const tic_socket = new WebSocket(`ws://${window.location.hostname}:3001/ws`);
 const chat_socket = new WebSocket(`ws://${window.location.hostname}:3002/ws`);
 
-window.onload = () => 
+window.onload = () =>
 {
 
 	const board = ["", "", "", "", "", "", "", "", ""];
@@ -17,13 +17,13 @@ window.onload = () =>
 
 	// const changeToChatButton = document.getElementById('changeToChatButton') as HTMLButtonElement;
 	// const changeToGameButton = document.getElementById('changeToGameButton') as HTMLButtonElement;
-	
+
 	// Nickname page
 	const nickname_page = document.getElementById('nickname_page') as HTMLDivElement;
 	const nickname_input = document.getElementById('nickname_input') as HTMLInputElement;
 	const nickname_button = document.getElementById('nickname_button') as HTMLButtonElement;
 	const me = document.getElementById('me') as HTMLDivElement;
-	
+
 	// Game page
 	const gamePage = document.getElementById('gamePage') as HTMLDivElement;
 	const cells = document.querySelectorAll('.cell');
@@ -43,7 +43,7 @@ window.onload = () =>
 	// Loading page
 	const loadingPage_tic = document.getElementById('loadingPage_tic') as HTMLDivElement;
 	const cancelButton = document.getElementById('cancelButton') as HTMLButtonElement;
-	
+
 	// Customise page
 	const customisePage = document.getElementById('customisePage') as HTMLDivElement;
 	const playOnlineButton = document .getElementById('playOnlineButton') as HTMLButtonElement;
@@ -165,7 +165,7 @@ window.onload = () =>
 		peopleOnlineList.scrollTop = peopleOnlineList.scrollHeight;
 	}
 
-	function deletePerson(text: string): void 
+	function deletePerson(text: string): void
 	{
 		const personElement = peopleOnlineList.querySelector(`[data-person="${text}"]`);
 		if (personElement) {
@@ -370,7 +370,7 @@ window.onload = () =>
 		}
 		info.textContent = 'Your turn';
 	}
-	
+
 	function ft_playWithAI()
 	{
 		aiFlag = true;
@@ -392,8 +392,8 @@ window.onload = () =>
 			ft_aiMove();
 		}
 	}
-	
-	function handleCellClick(event: Event) 
+
+	function handleCellClick(event: Event)
 	{
 		const cell = event.target as HTMLElement;
 		const index = Number(cell.dataset.index);
@@ -412,7 +412,7 @@ window.onload = () =>
 			player1_score.textContent = (++player1Score).toString();
 			return;
 		}
-		
+
 		if (board.every(cell => cell !== "")) {
 			gameActive = false;
 			if(!aiFlag)
@@ -429,10 +429,10 @@ window.onload = () =>
 		}
 		gameActive = false;
 		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', yourTurn: true, index: index }));
-		
+
 	}
-	
-	function checkWinner(): boolean 
+
+	function checkWinner(): boolean
 	{
 		const winPatterns: number[][] = [
 			[0, 1, 2],
@@ -444,30 +444,30 @@ window.onload = () =>
 			[0, 4, 8],
 			[2, 4, 6],
 		];
-	
+
 		for (let pattern of winPatterns) {
 			const [a, b, c] = pattern;
 			if (board[a] && board[a] === board[b] && board[a] === board[c]) {
 				return true;
 			}
 		}
-	
+
 		return false;
 	}
-	
+
 	function ft_cancelLookingForGame()
 	{
 		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', cancelLookingForGame: true }));
 		showPage(customisePage);
 	}
-	
+
 	function ft_lookingForGame()
 	{
 		aiFlag = false;
 		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', lookingForGame: true }));
 		showPage(loadingPage_tic);
 	}
-	
+
 	function ft_leaveRoom()
 	{
 		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', leftRoom: true }));
@@ -480,7 +480,7 @@ window.onload = () =>
 		gameActive = true;
 		showPage(customisePage);
 	}
-	
+
 	function ft_rematchRequest()
 	{
 		if(aiFlag)
@@ -503,7 +503,7 @@ window.onload = () =>
 		rematchRequestReceiver.style.display = 'none';
 		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', rematchRequest: true }));
 	}
-	
+
 	function ft_rematchRequestAccepted()
 	{
 		board.fill("");
@@ -520,32 +520,32 @@ window.onload = () =>
 		showPage(gamePage);
 		showPageChat(peopleOnlineDiv);
 	}
-	
+
 	function ft_cancelRematchRequest()
 	{
 		rematchRequestSender.style.display = 'none';
 		rematchRequestReceiver.style.display = 'none';
 		tic_socket.send(JSON.stringify({ microservice: 'tictactoe', rematchRequestCanceled: true }));
 	}
-	
+
 	cells.forEach(cell => {
 		cell.addEventListener('mouseenter', (event) => {
 			const target = event.target as HTMLElement;
 			const index = Number(target.dataset.index);
-			
+
 			if (board[index]) {
 				target.classList.add('hover:bg-red-100');
 			}
 		});
-		
+
 		cell.addEventListener('mouseleave', (event) => {
 			const target = event.target as HTMLElement;
 			target.classList.remove('hover:bg-red-100');
 		});
-		
+
 		cell.addEventListener('click', handleCellClick);
 	});
-	
+
 	nickname_button.addEventListener('click', () =>  //DONE
 	{
 		if(nickname_input.value.trim() !== "")
@@ -559,8 +559,8 @@ window.onload = () =>
 			alert('Enter your nickname');
 		}
 	});
-	
-	
+
+
 	playOnlineButton.addEventListener('click', () => ft_lookingForGame());
 	cancelButton.addEventListener('click', () => ft_cancelLookingForGame());
 	leaveButton.addEventListener('click', () => ft_leaveRoom());
@@ -575,7 +575,7 @@ window.onload = () =>
 	// changeToChatButton.addEventListener('click', () => showPage(peopleOnlineDiv));
 	// changeToGameButton.addEventListener('click', () => showPage(gamePage));
 
-	
+
 	showPage(nickname_page);
 
 	socket.onmessage = (event) =>
@@ -596,7 +596,7 @@ window.onload = () =>
 			}
 		}
 	}
-	
+
 	tic_socket.onmessage = (event) =>
 	{
 		const data = JSON.parse(event.data);
@@ -685,10 +685,10 @@ window.onload = () =>
 	}
 
 
-	chat_socket.onmessage = (event) => 
+	chat_socket.onmessage = (event) =>
 		{
 			const data = JSON.parse(event.data);
-	
+
 			if(data.microservice)
 			{
 				if(data.microservice === 'chat')
@@ -829,25 +829,25 @@ window.onload = () =>
 		//pingpong
 		let wss: WebSocket | null = null;
 		let leftPaddleDirection: number = 0;
-	
+
 		interface Paddle {
 			x: number;
 			y: number;
 			height: number;
 		}
-	
+
 		interface Ball {
 			x: number;
 			y: number;
 			radius: number;
 		}
-	
+
 		interface Score {
 			leftGoals: number;
 			rightGoals: number;
 			time: number | false;
 		}
-	
+
 		interface GameState {
 			leftPaddle: Paddle;
 			rightPaddle: Paddle;
@@ -857,7 +857,7 @@ window.onload = () =>
 			knockoutName?: string;
 			matchStatus?: string;
 		}
-	
+
 		let gameState: GameState = {
 			leftPaddle: { x: -4, y: 0, height: 1 },
 			rightPaddle: { x: 4, y: 0, height: 1 },
@@ -865,49 +865,49 @@ window.onload = () =>
 			score: { leftGoals: 0, rightGoals: 0, time: false },
 			roomId: "N/A",
 		};
-	
+
 		const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-	
+
 		function startGame(): void {
 			const queryParams = window.location.search;
-			wss = new WebSocket(`wss://${window.location.hostname}:3010/pong/${queryParams}`);
-	
+			wss = new WebSocket(`wss://${window.location.hostname}:3010/pong-api/pong${queryParams}`);
+
 			wss.onopen = () => {
 				console.log("WebSocket Connection Established");
 			};
-	
+
 			wss.onmessage = (event: MessageEvent) => {
 				gameState = JSON.parse(event.data);
 				updateGameUI();
 				drawGame();
 			};
-	
+
 			setInterval(() => {
 				if (wss && wss.readyState === WebSocket.OPEN && leftPaddleDirection !== 0) {
 					wss.send(JSON.stringify({ move: leftPaddleDirection > 0 ? "down" : "up", paddle: "left" }));
 				}
 			}, 1000 / 60);
 		}
-	
+
 		function updateGameUI(): void {
 			(document.getElementById("roomId") as HTMLElement).innerText = gameState.roomId || "N/A";
 			(document.getElementById("knockoutName") as HTMLElement).innerText = gameState.knockoutName || "N/A";
 			(document.getElementById("matchStatus") as HTMLElement).innerText = gameState.matchStatus || "N/A";
 		}
-	
+
 		function drawGame(): void {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			let scaleX = canvas.width / 9;
 			let scaleY = canvas.height / 5;
-	
+
 			drawFieldBorders(scaleX, scaleY);
 			drawPaddle(gameState.leftPaddle.x * scaleX, gameState.leftPaddle.y * scaleY, gameState.leftPaddle.height * scaleY);
 			drawPaddle(gameState.rightPaddle.x * scaleX, gameState.rightPaddle.y * scaleY, gameState.rightPaddle.height * scaleY);
 			drawBall(gameState.ball.x * scaleX, gameState.ball.y * scaleY, gameState.ball.radius * scaleX);
 			drawScore();
 		}
-	
+
 		function drawFieldBorders(scaleX: number, scaleY: number): void {
 			ctx.strokeStyle = "white";
 			ctx.lineWidth = 3;
@@ -918,19 +918,19 @@ window.onload = () =>
 			ctx.lineTo(4.5 * scaleX + canvas.width / 2, 2.5 * scaleY + canvas.height / 2);
 			ctx.stroke();
 		}
-	
+
 		function drawPaddle(x: number, y: number, height: number): void {
 			ctx.fillStyle = "white";
 			ctx.fillRect(x + canvas.width / 2 - 5, -y + canvas.height / 2 - height / 2, 10, height);
 		}
-	
+
 		function drawBall(x: number, y: number, radius: number): void {
 			ctx.fillStyle = "white";
 			ctx.beginPath();
 			ctx.arc(x + canvas.width / 2, -y + canvas.height / 2, radius, 0, Math.PI * 2);
 			ctx.fill();
 		}
-	
+
 		function drawScore(): void {
 			ctx.fillStyle = "white";
 			ctx.font = "24px Arial";
@@ -940,16 +940,16 @@ window.onload = () =>
 				ctx.fillText(`Time: ${gameState.score.time}s`, canvas.width / 2 - 40, 30);
 			}
 		}
-	
+
 		document.addEventListener("keydown", (event: KeyboardEvent) => {
 			if (event.key === "ArrowUp") leftPaddleDirection = -1;
 			if (event.key === "ArrowDown") leftPaddleDirection = 1;
 		});
-	
+
 		document.addEventListener("keyup", (event: KeyboardEvent) => {
 			if (event.key === "ArrowUp" || event.key === "ArrowDown") leftPaddleDirection = 0;
 		});
-	
+
 		function copyRoomId(): void {
 			const roomId = (document.getElementById("roomId") as HTMLElement).innerText;
 			navigator.clipboard.writeText(roomId).then(() => {
@@ -958,7 +958,7 @@ window.onload = () =>
 				console.error("Failed to copy Room ID", err);
 			});
 		}
-	
+
 		function stopGame(): void {
 			if (wss && wss.readyState === WebSocket.OPEN) {
 				wss.close(1000, "Closing connection");
@@ -967,7 +967,7 @@ window.onload = () =>
 				console.log("WebSocket is already closed or not open.");
 			}
 		}
-	
+
 		(document.getElementById("playPongButton") as HTMLElement).addEventListener("click", startGame);
 		(document.getElementById("backPongButton") as HTMLElement)?.addEventListener("click", stopGame);
 		(document.getElementById("copyRoomButton") as HTMLElement).addEventListener("click", copyRoomId);

@@ -2,15 +2,19 @@ import {
 	createUserSchema,
 	blockUserSchema,
 	unblockUserSchema,
+	toggleBlockSchema,
 	blockStatusSchema,
 	blockListSchema,
+	healthCheckSchema,
 } from "./routeSchemas";
 import {
 	createUserHandler,
 	blockUserHandler,
 	unblockUserHandler,
+	toggleBlockHandler,
 	blockStatusHandler,
 	blockListHandler,
+	healthCheckHandler,
 } from "./controllers";
 
 export const createUserOpt = {
@@ -28,6 +32,11 @@ export const unblockUserOpt = {
 	handler: unblockUserHandler,
 };
 
+export const toggleBlockOpt = {
+	schema: toggleBlockSchema,
+	handler: toggleBlockHandler,
+};
+
 export const blockStatusOpt = {
 	schema: blockStatusSchema,
 	handler: blockStatusHandler,
@@ -36,4 +45,9 @@ export const blockStatusOpt = {
 export const blockListOpt = {
 	schema: blockListSchema,
 	handler: blockListHandler,
+};
+
+export const healthCheckOpt = {
+	schema: healthCheckSchema,
+	handler: healthCheckHandler,
 };

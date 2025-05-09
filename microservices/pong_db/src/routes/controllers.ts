@@ -1,23 +1,19 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { IdInput, IdsInput, GameInput } from "./zodSchemas";
-import httpError from "http-errors";
 import {
 	createGame,
 	getGameHistory,
 	getTotalStats,
 	getHeadToHeadStats,
+	healthCheck,
 } from "./service";
 
 export async function createGameHandler(
 	request: FastifyRequest<{ Body: GameInput }>,
 	reply: FastifyReply,
 ) {
-	const { winnerId, loserId } = request.body;
-	if (winnerId === loserId)
-		throw new httpError.BadRequest(
-			"winnerId and loserId cannot be the same",
-		);
-	await createGame(winnerId, loserId);
+	const game = request.body;
+	await createGame( game );
 	reply.status(201).send({ success: true });
 }
 
@@ -44,10 +40,6 @@ export async function headToHeadHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, opponentId } = request.params;
-	if (userId === opponentId)
-		throw new httpError.BadRequest(
-			"userId and opponentId cannot be the same",
-		);
 	const stats = await getHeadToHeadStats(userId, opponentId);
 	reply.status(200).send(stats);
 }
@@ -56,5 +48,6 @@ export async function healthCheckHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
+	await healthCheck();
 	reply.status(200).send({ success: true });
 }

@@ -41,7 +41,7 @@ export interface IGameRoomQuery {
 	privateRoom: boolean;
 	clientType: "player" | "spectator";
 	matchType: "singles" | "tournament" | "doubles";
-	tournamentSize: number;
+	tournamentSize: string;
 }
 
 fastify.register(websocket);
@@ -52,14 +52,14 @@ fastify.register(async function (fastify) {
 		});
 	});
 
-	fastify.get("/healthcheck", async (request, reply) => {
+	fastify.get("/pong-api/health-check", async (request, reply) => {
 		reply.code(200).send({
 			message:
 				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
 		});
 	});
 
-	fastify.get("/playerRoom/:playerId", async (request, reply) => {
+	fastify.get("/pong-api/player-room/:playerId", async (request, reply) => {
 		const { playerId } = request.params as { playerId: string };
 		reply.send({
 			roomId: manager.getPlayerRoomId(playerId),
@@ -68,7 +68,7 @@ fastify.register(async function (fastify) {
 
 	//Partial makes all field optional.
 	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-		"/pong/",
+		"/pong-api/pong",
 		{ websocket: true },
 		(connection, req) => {
 			const {
@@ -77,7 +77,7 @@ fastify.register(async function (fastify) {
 				privateRoom = false,
 				clientType = "player",
 				matchType = "singles",
-				tournamentSize = Tournament.getDefaultTournamentSize(),
+				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
 			} = req.query as IGameRoomQuery;
 
 			const gameQuery: IGameRoomQuery = {
@@ -92,7 +92,7 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	fastify.get("/pingpong/", async (request, reply) => {
+	fastify.get("/pong-api/ping-pong", async (request, reply) => {
 		const filePath = path.join(process.cwd(), "src/public/pong.html");
 		if (fs.existsSync(filePath)) {
 			return reply.sendFile("pong.html"); // Serve public/index.html

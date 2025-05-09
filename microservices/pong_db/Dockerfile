@@ -1,6 +1,6 @@
 FROM node:23-bullseye-slim
 
-RUN apt-get update -y && apt-get install -y sqlite3
+RUN apt-get update -y && apt-get install -y sqlite3 openssl
 
 WORKDIR /pong_db
 
