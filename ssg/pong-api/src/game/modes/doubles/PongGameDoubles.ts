@@ -6,6 +6,7 @@ import { ScoreBoard } from "../../elements/ScoreBoard";
 import { Point } from "../../elements/Point";
 import { EPlayerRole } from "../../PongPlayer";
 import { APongGame } from "../APongGame";
+import { paddleConfig } from "../../../config";
 
 export interface IPongFrameDoubles extends IPongFrameSingles {
 	leftSecondPaddle: IPaddleJson;
@@ -35,10 +36,10 @@ export class PongGameDoubles extends APongGame {
 	}
 
 	static createStandardGameDoubles(): PongGameDoubles {
-		const leftPaddle: Paddle = new Paddle(new Point(-3.5, 1.25), 0.5);
-		const leftPaddleTwo: Paddle = new Paddle(new Point(-4, -1.25), 0.5);
-		const rightPaddle: Paddle = new Paddle(new Point(3.5, 1.25), 0.5);
-		const rightPaddleTwo: Paddle = new Paddle(new Point(4, -1.25), 0.5);
+		const leftPaddle: Paddle = new Paddle(new Point(-3.5, 1.25), paddleConfig.height_doubles);
+		const leftPaddleTwo: Paddle = new Paddle(new Point(-4, -1.25), paddleConfig.height_doubles);
+		const rightPaddle: Paddle = new Paddle(new Point(3.5, 1.25), paddleConfig.height_doubles);
+		const rightPaddleTwo: Paddle = new Paddle(new Point(4, -1.25), paddleConfig.height_doubles);
 		const ball: Ball = new Ball(new Point(0, 1.25));
 		const table: PongField = new PongField();
 		const score: ScoreBoard = new ScoreBoard();
@@ -52,6 +53,11 @@ export class PongGameDoubles extends APongGame {
 			table,
 		);
 		return game;
+	}
+
+	//TODO implement version of double mode to database
+	async storeResultInDatabase(): Promise<void> {
+		return;
 	}
 
 	resetPaddlePosition(): void {

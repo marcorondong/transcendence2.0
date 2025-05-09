@@ -27,4 +27,7 @@
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2
 	},
+	"[solidity]": {
+		"editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
+	},
 }

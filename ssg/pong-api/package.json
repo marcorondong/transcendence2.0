@@ -22,7 +22,7 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
-    "dev": "nodemon --watch src src/index.ts",
+    "pong-api": "nodemon --watch src src/index.ts",
     "build": "tsc -p tsconfig.json",
     "test": "jest"
   },

@@ -31,7 +31,7 @@ export async function getRequestBlockStatus(userId: string, friendId: string) {
 }
 
 export async function getRequestRoomId(userId: string) {
-	const url = `http://pong-api:3010/playerRoom/${userId}`;
+	const url = `http://pong-api:3010/pong-api/player-room/${userId}`;
 	const response = await fetch(url, {
 		method: "GET",
 		headers: {

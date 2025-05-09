@@ -1,8 +1,17 @@
 ########################## Security & Sensitive Files #########################
 # env
 *.env
+*.txt
 *.sensitive_env
 *.pem
+*.cer
+*.cert
+*.crt
+*.pfx
+*.p12
+*.p7b
+*.p7c
+ft_crypt.sh
 secrets/
 
 ############################ Binary and Blob Files ############################

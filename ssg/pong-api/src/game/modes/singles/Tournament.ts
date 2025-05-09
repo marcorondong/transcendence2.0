@@ -4,6 +4,7 @@ import { PongRoomSingles } from "./PongRoomSingles";
 import { TournamentEvents, ClientEvents } from "../../../customEvents";
 import { BlockchainQueue } from "../../../blockchain-transaction/BlockchainQueue";
 import { BlockchainData } from "../../../blockchain-transaction/BlockchainData";
+import { tournamentConfig } from "../../../config";
 
 export enum ETournamentState {
 	LOBBY,
@@ -11,8 +12,8 @@ export enum ETournamentState {
 	FINISHED,
 }
 
-const validSizeTournament: Set<number> = new Set<number>([4, 8, 16]);
-const defaultSize: number = 4 as const;
+const validSizeTournament: Set<number> =  new Set <number>(tournamentConfig.valid_sizes) //new Set<number>([4, 8, 16]);
+const defaultSize: number = tournamentConfig.default_size;
 
 export class Tournament extends EventEmitter {
 	private requiredPlayers: number;
@@ -48,7 +49,7 @@ export class Tournament extends EventEmitter {
 			PongRoomSingles
 		>(
 			[...this.gamesPool].map(
-				(room) => [room.getId(), room] as [string, PongRoomSingles],
+				(room) => [room.getGame().getGameId(), room] as [string, PongRoomSingles],
 			),
 		);
 		return allRooms;
@@ -109,7 +110,7 @@ export class Tournament extends EventEmitter {
 
 	private sendMatchToQueue(room: PongRoomSingles)
 	{
-		const gameId: string = room.getId();
+		const gameId: string = room.getGame().getGameId();
 		const player1: string = "Left player"; //TODO: replace with actual player Id once authorization is done
 		const player2: string = "Right Player"; //TODO: replace with actual player Id once authorization is done
 		const score1: number = room.getGame().getScoreBoard().getLeftPlayerGoals();
