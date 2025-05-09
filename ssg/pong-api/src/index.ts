@@ -71,6 +71,15 @@ fastify.register(async function (fastify) {
 		},
 	);
 
+	fastify.get(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/spectate/:roomId`,
+		{ websocket: true },
+		(connection, req) => {
+			const { roomId } = req.params as { roomId: string };
+			console.log("Spectate game: ", roomId);
+		},
+	);
+
 	//Partial makes all field optional.
 	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
