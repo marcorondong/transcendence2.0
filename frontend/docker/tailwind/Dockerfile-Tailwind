@@ -1,9 +1,13 @@
-FROM alpine
+FROM node:22-slim
 
 WORKDIR /app
 
 # Install necessary packages
-RUN apk add --no-cache supervisor nodejs npm
+RUN apt-get update && apt-get install -y \
+  supervisor \
+  nodejs \
+  npm \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir volume
 
@@ -12,12 +16,8 @@ COPY ./docker/tailwind/config/package*.json .
 COPY ./docker/tailwind/config/supervisord.conf /etc/supervisord.conf
 
 
-
 RUN npm install
 
 
-# CMD ["npx @tailwindcss/cli -i /app/volume/css/input.css -o /app/volume/css/output.css --watch", "--poll"]
-# CMD ["npx", "@tailwindcss/cli", "-i", "./volume/css/input.css", "-o", "./volume/css/output.css", "--watch", "--poll"]
-# CMD ["node", "-e", "setInterval(() => {}, 1000)"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
