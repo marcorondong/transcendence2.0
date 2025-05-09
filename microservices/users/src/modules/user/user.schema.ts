@@ -6,7 +6,7 @@ const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
 // Type definition for sorting by field (from User fields)
-const userPublicFields = ["id", "email", "username"] as const;
+const userPublicFields = ["id", "email", "username", "nickname"] as const;
 const userSortByEnum = z.enum(userPublicFields);
 export type UserPublicField = (typeof userPublicFields)[number];
 
@@ -14,7 +14,8 @@ export type UserPublicField = (typeof userPublicFields)[number];
 export type UniqueUserField =
 	| { id: number }
 	| { email: string }
-	| { username: string };
+	| { username: string }
+	| { nickname: string };
 
 // Type definition to allowing multiple User fields per query
 export type UserField = Partial<Record<UserPublicField, string | number>>;
@@ -81,6 +82,23 @@ export const usernameField = z
 		message: "Username must contain at least one letter",
 	});
 
+// Nickname field schema
+export const nicknameField = z
+	.string({
+		required_error: "Nickname is required",
+		invalid_type_error: "Nickname must be a string",
+	})
+	.min(3, "Nickname must be at least 3 characters long")
+	.refine((val) => val.trim().length > 0, {
+		message: "Nickname must not be empty or whitespace only",
+	})
+	.refine((val) => !/^\d+$/.test(val), {
+		message: "Nickname must not be numbers only",
+	})
+	.refine((val) => /[a-zA-Z]/.test(val), {
+		message: "Nickname must contain at least one letter",
+	});
+
 // Email field schema
 export const emailField = z
 	.string({
@@ -115,6 +133,7 @@ export const passwordField = z
 const userCore = {
 	email: emailField,
 	username: usernameField,
+	nickname: nicknameField,
 };
 
 // Schema for createUser
@@ -170,6 +189,7 @@ const baseGetUsersQuerySchema = z.object({
 	id: z.coerce.number().min(1),
 	email: z.string().email(),
 	username: z.string(),
+	nickname: z.string(),
 	useFuzzy: z.coerce.boolean(),
 	useOr: z.coerce.boolean(),
 	skip: z.coerce.number().min(0),

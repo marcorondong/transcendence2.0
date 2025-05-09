@@ -22,7 +22,10 @@ function checkPasswordConstraints(
 	userData: { username: string; email: string },
 ) {
 	const lowerPassword = password.toLowerCase();
-	if (userData.username && lowerPassword.includes(userData.username.toLowerCase())) {
+	if (
+		userData.username &&
+		lowerPassword.includes(userData.username.toLowerCase())
+	) {
 		throw new Error("Password cannot contain the username");
 	}
 	if (userData.email && lowerPassword === userData.email.toLowerCase()) {
