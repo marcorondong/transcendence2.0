@@ -23,7 +23,7 @@ export const swaggerOption = {
 };
 
 export const swaggerUiOption = {
-	routePrefix: "/tictactoe/documentation",
+	routePrefix: "/tictactoe-db/documentation",
 };
 
 export const serverOption = {
