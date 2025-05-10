@@ -16,10 +16,10 @@ function capitalize(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Helper function to check password constraints (no username/email)
+// Helper function to check password constraints (no email/username/nickname)
 function checkPasswordConstraints(
 	password: string,
-	userData: { username: string; email: string },
+	userData: { email: string; username: string; nickname: string },
 ) {
 	const lowerPassword = password.toLowerCase();
 	if (
@@ -27,6 +27,12 @@ function checkPasswordConstraints(
 		lowerPassword.includes(userData.username.toLowerCase())
 	) {
 		throw new Error("Password cannot contain the username");
+	}
+	if (
+		userData.nickname &&
+		lowerPassword.includes(userData.nickname.toLowerCase())
+	) {
+		throw new Error("Password cannot contain the nickname");
 	}
 	if (userData.email && lowerPassword === userData.email.toLowerCase()) {
 		throw new Error("Password cannot be same as the email");
@@ -37,8 +43,9 @@ export async function createUser(input: createUserInput) {
 	const { password, ...rest } = input;
 	try {
 		checkPasswordConstraints(password, {
-			username: rest.username,
 			email: rest.email,
+			username: rest.username,
+			nickname: rest.nickname,
 		});
 	} catch (err) {
 		throw new AppError({
@@ -210,8 +217,9 @@ export async function updateUser(id: number, data: UpdateUserData) {
 			// Check password constraints
 			try {
 				checkPasswordConstraints(data.password, {
-					username: data.username ?? currentUser.username,
 					email: data.email ?? currentUser.email,
+					username: data.username ?? currentUser.username,
+					nickname: data.nickname ?? currentUser.nickname,
 				});
 			} catch (err) {
 				throw new AppError({
