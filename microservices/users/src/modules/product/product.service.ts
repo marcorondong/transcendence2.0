@@ -9,7 +9,8 @@ function capitalize(str: string) {
 }
 
 export async function createProduct(
-	data: createProductInput & { ownerId: number },
+	// data: createProductInput & { ownerId: number },
+	data: createProductInput & { ownerId: string },
 ) {
 	try {
 		const product = await prisma.product.create({
