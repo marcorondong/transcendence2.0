@@ -1,11 +1,13 @@
 import Fastify from "fastify";
-import websocket from "@fastify/websocket";
+import websocket, { WebSocket } from "@fastify/websocket";
 import fs from "fs";
 import path from "path";
 import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
 import { Tournament } from "./game/modes/singles/Tournament";
+import { HeadToHeadQuery, HeadToHeadQuerySchema } from "./utils/zodSchema";
+import { ZodError } from "zod";
 
 dotenv.config();
 
@@ -46,12 +48,21 @@ export interface IGameRoomQuery {
 	tournamentSize: string;
 }
 
-interface IHeadToHeadQuery {
-	roomId: string; //it should be either "private" for host of private room or "uuid" of room to join
-}
-
 interface ITournamentQuery {
 	tournamentSize: string; // string as query that should be number
+}
+
+function sendError(
+	connection: WebSocket,
+	errorZod: ZodError,
+	shortDescription: string = "ERROR",
+): void {
+	console.error(`${shortDescription}: ${errorZod}`);
+	const jsonError = JSON.stringify({
+		error: shortDescription,
+		zodDetails: errorZod,
+	});
+	connection.send(jsonError);
 }
 
 fastify.register(websocket);
@@ -89,27 +100,29 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
+	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
 		(connection, req) => {
-			const { roomId = "public" } = req.query as IHeadToHeadQuery;
-
-			const singlesQuery: IHeadToHeadQuery = {
-				roomId,
-			};
-			console.log("Singles pong game, query", singlesQuery.roomId);
+			const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
+			if (!parseQuery.success) {
+				sendError(connection, parseQuery.error,"Invalid query sent");
+				connection.close();
+				return;
+			}
+			const { roomId } = parseQuery.data;
+			console.log("Singles pong game, query", roomId);
 			manager.playerJoinSingles(connection, roomId);
 		},
 	);
 
-	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
+	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
 		{ websocket: true },
 		(connection, req) => {
-			const { roomId = "public" } = req.query as IHeadToHeadQuery;
+			const { roomId = "public" } = req.query as HeadToHeadQuery;
 
-			const singlesQuery: IHeadToHeadQuery = {
+			const singlesQuery: HeadToHeadQuery = {
 				roomId,
 			};
 			console.log("doubles pong game, query", singlesQuery.roomId);
