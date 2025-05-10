@@ -6,11 +6,12 @@ import {
 	headToHeadOpt,
 	healthCheckOpt,
 } from "./options";
+import { env } from "../utils/env";
 
 export async function pongRoutes(server: FastifyInstance) {
-	server.post("/create-game", createGameOpt);
-	server.get("/game-history/:userId", gameHistoryOpt);
-	server.get("/total-stats/:userId", totalStatsOpt);
-	server.get("/head-to-head/:userId/:opponentId", headToHeadOpt);
-	server.get("/health-check", healthCheckOpt);
+	server.post(env.CREATE_GAME, createGameOpt);
+	server.get(env.GAME_HISTORY, gameHistoryOpt);
+	server.get(env.TOTAL_STATS, totalStatsOpt);
+	server.get(env.HEAD_TO_HEAD, headToHeadOpt);
+	server.get(env.HEALTH_CHECK, healthCheckOpt);
 }

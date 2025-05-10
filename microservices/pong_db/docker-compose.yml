@@ -3,11 +3,10 @@ services:
     image: pong_db_image
     container_name: pong_db_container
     build: .
+    env_file:
+      - ../../.env
     environment:
       - DATABASE_URL=file:/pong_db/DB/pongDB.db
-      - NODE_ENV=development
-      - PORT=3011
-      - HOST=0.0.0.0
     volumes:
       - ./src/:/pong_db/src/
       - ./prisma/:/pong_db/prisma/
