@@ -10,6 +10,8 @@ import {
 	HeadToHeadQuery,
 	HeadToHeadQuerySchema,
 	RoomIdType,
+	TournamentSize,
+	TournamentSizeQuerySchema,
 } from "./utils/zodSchema";
 import { ZodError } from "zod";
 import { FastifyRequest } from "fastify/types/request";
@@ -85,6 +87,24 @@ function parseRoomId(
 	return roomId;
 }
 
+function parseTournamentSize(
+	req: FastifyRequest,
+	connection: WebSocket,
+): TournamentSize | false {
+	const parseQuery = TournamentSizeQuerySchema.safeParse(req.query);
+	if (!parseQuery.success) {
+		sendError(
+			connection,
+			parseQuery.error,
+			"Invalid query sent [Tournament]",
+		);
+		connection.close();
+		return false;
+	}
+	const { tournamentSize } = parseQuery.data;
+	return tournamentSize;
+}
+
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
@@ -144,21 +164,9 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
 		{ websocket: true },
 		(connection, req) => {
-			const {
-				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
-			} = req.query as ITournamentQuery;
-
-			const singlesQuery: ITournamentQuery = {
-				tournamentSize,
-			};
-			console.log(
-				"tournament pong game, query",
-				singlesQuery.tournamentSize,
-			);
-			manager.playerJoinTournament(
-				connection,
-				parseInt(singlesQuery.tournamentSize, 10),
-			);
+			const tournamentSize = parseTournamentSize(req, connection);
+			if (tournamentSize === false) return;
+			manager.playerJoinTournament(connection, tournamentSize);
 		},
 	);
 
