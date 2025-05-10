@@ -5,16 +5,7 @@ import path from "path";
 import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
-
-import {
-	HeadToHeadQuery,
-	HeadToHeadQuerySchema,
-	RoomIdType,
-	TournamentSize,
-	TournamentSizeQuerySchema,
-} from "./utils/zodSchema";
-import { ZodError } from "zod";
-import { FastifyRequest } from "fastify/types/request";
+import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
 import { Parsing } from "./utils/Parsing";
 
 dotenv.config();
@@ -46,65 +37,6 @@ fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
 	prefix: "/", // Optional: Sets the URL prefix
 });
-
-//TODO: remove this. It is old big query approach
-// export interface IGameRoomQuery {
-// 	roomId: string | 0;
-// 	playerId: string;
-// 	privateRoom: boolean;
-// 	clientType: "player" | "spectator";
-// 	matchType: "singles" | "tournament" | "doubles";
-// 	tournamentSize: string;
-// }
-
-interface ITournamentQuery {
-	tournamentSize: string; // string as query that should be number
-}
-
-// function sendError(
-// 	connection: WebSocket,
-// 	errorZod: ZodError,
-// 	shortDescription: string = "ERROR",
-// ): void {
-// 	console.error(`${shortDescription}: ${errorZod}`);
-// 	const jsonError = JSON.stringify({
-// 		error: shortDescription,
-// 		zodDetails: errorZod,
-// 	});
-// 	connection.send(jsonError);
-// }
-
-// function parseRoomId(
-// 	req: FastifyRequest,
-// 	connection: WebSocket,
-// ): RoomIdType | false {
-// 	const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
-// 	if (!parseQuery.success) {
-// 		sendError(connection, parseQuery.error, "Invalid query sent");
-// 		connection.close();
-// 		return false;
-// 	}
-// 	const { roomId } = parseQuery.data;
-// 	return roomId;
-// }
-
-// function parseTournamentSize(
-// 	req: FastifyRequest,
-// 	connection: WebSocket,
-// ): TournamentSize | false {
-// 	const parseQuery = TournamentSizeQuerySchema.safeParse(req.query);
-// 	if (!parseQuery.success) {
-// 		sendError(
-// 			connection,
-// 			parseQuery.error,
-// 			"Invalid query sent [Tournament]",
-// 		);
-// 		connection.close();
-// 		return false;
-// 	}
-// 	const { tournamentSize } = parseQuery.data;
-// 	return tournamentSize;
-// }
 
 fastify.register(websocket);
 fastify.register(async function (fastify) {
@@ -161,7 +93,7 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	fastify.get<{ Querystring: Partial<ITournamentQuery> }>(
+	fastify.get<{ Querystring: Partial<TournamentSizeQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
 		{ websocket: true },
 		(connection, req) => {
@@ -192,30 +124,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-//TODO remove this is Old match joiner with big ass string
-//Partial makes all field optional.
-// fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-// 	`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
-// 	{ websocket: true },
-// 	(connection, req) => {
-// 		const {
-// 			roomId = 0,
-// 			playerId = "Player whatever",
-// 			privateRoom = false,
-// 			clientType = "player",
-// 			matchType = "singles",
-// 			tournamentSize = Tournament.getDefaultTournamentSize().toString(),
-// 		} = req.query as IGameRoomQuery;
-
-// 		const gameQuery: IGameRoomQuery = {
-// 			roomId,
-// 			playerId,
-// 			privateRoom,
-// 			clientType,
-// 			matchType,
-// 			tournamentSize,
-// 		};
-// 		manager.matchJoiner(connection, gameQuery);
-// 	},
-// );
