@@ -19,7 +19,7 @@ server.setSerializerCompiler(serializerCompiler);
 server.setErrorHandler(globalErrorHandler);
 server.register(fastifySwagger, swaggerOption as SwaggerOptions);
 server.register(fastifySwaggerUi, swaggerUiOption);
-server.register(tictactoeRoutes, { prefix: "/tictactoe" });
+server.register(tictactoeRoutes, { prefix: "/tictactoe-db" });
 
 const start = async () => {
 	try {
