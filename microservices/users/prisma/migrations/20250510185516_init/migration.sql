@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "nickname" TEXT NOT NULL,
@@ -16,12 +16,9 @@ CREATE TABLE "Product" (
     "title" TEXT NOT NULL,
     "content" TEXT,
     "price" REAL NOT NULL,
-    "ownerId" INTEGER NOT NULL,
+    "ownerId" TEXT NOT NULL,
     CONSTRAINT "Product_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
