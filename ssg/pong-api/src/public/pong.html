@@ -165,7 +165,12 @@
 					query += `&tournamentSize=${encodeURIComponent(tournamentSize)}`;
 				}
 
-				const url = `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/${matchType}${query}`;
+				let url;
+				if (matchType === "spectate") {
+					url = `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/spectate/${encodeURIComponent(roomId)}`;
+				} else {
+					url = `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/${matchType}${query}`;
+				}
 
 				if (wss) {
 					wss.close();
