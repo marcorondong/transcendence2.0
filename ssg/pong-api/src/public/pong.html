@@ -79,6 +79,7 @@
 			>
 				<option value="singles">Singles</option>
 				<option value="doubles">Doubles</option>
+				<option value="spectate">Spectator</option>
 				<option value="tournament">Tournament</option>
 			</select>
 
@@ -113,7 +114,6 @@
 		<script>
 			const canvas = document.getElementById("gameCanvas");
 			const ctx = canvas.getContext("2d");
-			const queryParams = window.location.search;
 			let wss = null;
 
 			let gameState = {
@@ -131,7 +131,7 @@
 
 			setInterval(() => {
 				if (leftPaddleDirection !== 0) {
-					wss.send(
+					wss?.send(
 						JSON.stringify({
 							move: leftPaddleDirection > 0 ? "down" : "up",
 							paddle: "left",
@@ -139,7 +139,7 @@
 					);
 				}
 				if (rightPaddleDirection !== 0) {
-					wss.send(
+					wss?.send(
 						JSON.stringify({
 							move: rightPaddleDirection > 0 ? "down" : "up",
 							paddle: "right",
@@ -147,18 +147,6 @@
 					);
 				}
 			}, 1000 / 60);
-
-			wss.onmessage = (event) => {
-				gameState = JSON.parse(event.data);
-
-				document.getElementById("roomId").innerText =
-					gameState.roomId || "N/A";
-				document.getElementById("knockoutName").innerText =
-					gameState.knockoutName || "N/A";
-				document.getElementById("matchStatus").innerText =
-					gameState.matchStatus || "N/A";
-				drawGame();
-			};
 
 			function toggleTournamentSize() {
 				const matchType = document.getElementById("matchType").value;
@@ -199,9 +187,8 @@
 
 			function drawGame() {
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-				let scaleX = canvas.width / 9;
-				let scaleY = canvas.height / 5;
+				const scaleX = canvas.width / 9;
+				const scaleY = canvas.height / 5;
 
 				drawFieldBorders(scaleX, scaleY);
 				drawPaddle(
@@ -215,7 +202,6 @@
 					gameState.rightPaddle.height * scaleY,
 				);
 
-				// Only draw second paddles if they exist
 				if (gameState.leftSecondPaddle) {
 					drawPaddle(
 						gameState.leftSecondPaddle.x * scaleX,
@@ -308,25 +294,36 @@
 			}
 
 			document.addEventListener("keydown", (event) => {
-				if (event.key === "ArrowUp") leftPaddleDirection = -1;
-				if (event.key === "ArrowDown") leftPaddleDirection = 1;
+				if (event.key === "ArrowUp") {
+					rightPaddleDirection = -1;
+				} else if (event.key === "ArrowDown") {
+					rightPaddleDirection = 1;
+				} else if (event.key === "w" || event.key === "W") {
+					leftPaddleDirection = -1;
+				} else if (event.key === "s" || event.key === "S") {
+					leftPaddleDirection = 1;
+				}
 			});
 
 			document.addEventListener("keyup", (event) => {
-				if (event.key === "ArrowUp" || event.key === "ArrowDown")
+				if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+					rightPaddleDirection = 0;
+				}
+				if (
+					event.key === "w" ||
+					event.key === "W" ||
+					event.key === "s" ||
+					event.key === "S"
+				) {
 					leftPaddleDirection = 0;
+				}
 			});
 
 			function copyRoomId() {
-				const roomId = document.getElementById("roomId").innerText;
-				navigator.clipboard
-					.writeText(roomId)
-					.then(() => {
-						alert("Room ID copied to clipboard!");
-					})
-					.catch((err) => {
-						console.error("Failed to copy Room ID", err);
-					});
+				const roomIdText = document.getElementById("roomId").innerText;
+				navigator.clipboard.writeText(roomIdText).then(() => {
+					alert("Room ID copied to clipboard!");
+				});
 			}
 		</script>
 	</body>

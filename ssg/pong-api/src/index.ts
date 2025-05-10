@@ -46,6 +46,14 @@ export interface IGameRoomQuery {
 	tournamentSize: string;
 }
 
+interface IHeadToHeadQuery {
+	roomId: string; //it should be either "private" for host of private room or "uuid" of room to join
+}
+
+interface ITournamentQuery {
+	tournamentSize: string; // string as query that should be number
+}
+
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
@@ -77,56 +85,57 @@ fastify.register(async function (fastify) {
 		(connection, req) => {
 			const { roomId } = req.params as { roomId: string };
 			console.log("Spectate game: ", roomId);
+			manager.spectatorJoiner(connection, roomId);
 		},
 	);
 
-	//Partial makes all field optional.
-	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
-		{ websocket: true },
-		(connection, req) => {
-			const {
-				roomId = 0,
-				playerId = "Player whatever",
-				privateRoom = false,
-				clientType = "player",
-				matchType = "singles",
-				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
-			} = req.query as IGameRoomQuery;
-
-			const gameQuery: IGameRoomQuery = {
-				roomId,
-				playerId,
-				privateRoom,
-				clientType,
-				matchType,
-				tournamentSize,
-			};
-			manager.matchJoiner(connection, gameQuery);
-		},
-	);
-
-	fastify.get(
+	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
 		(connection, req) => {
-			console.log("Singles pong game");
+			const { roomId = "public" } = req.query as IHeadToHeadQuery;
+
+			const singlesQuery: IHeadToHeadQuery = {
+				roomId,
+			};
+			console.log("Singles pong game, query", singlesQuery.roomId);
+			manager.playerJoinSingles(connection, roomId);
 		},
 	);
 
-	fastify.get(
+	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
 		{ websocket: true },
 		(connection, req) => {
-			console.log("Doubles pong game");
+			const { roomId = "public" } = req.query as IHeadToHeadQuery;
+
+			const singlesQuery: IHeadToHeadQuery = {
+				roomId,
+			};
+			console.log("doubles pong game, query", singlesQuery.roomId);
+			manager.playerJoinDoubles(connection, roomId);
 		},
 	);
 
-	fastify.get(
+	fastify.get<{ Querystring: Partial<ITournamentQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
 		{ websocket: true },
 		(connection, req) => {
-			console.log("Tournament pong game");
+			const {
+				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
+			} = req.query as ITournamentQuery;
+
+			const singlesQuery: ITournamentQuery = {
+				tournamentSize,
+			};
+			console.log(
+				"tournament pong game, query",
+				singlesQuery.tournamentSize,
+			);
+			manager.playerJoinTournament(
+				connection,
+				parseInt(singlesQuery.tournamentSize, 10),
+			);
 		},
 	);
 
@@ -151,3 +160,30 @@ const startServer = async () => {
 };
 
 startServer();
+
+//TODO remove this is Old match joiner with big ass string
+//Partial makes all field optional.
+// fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
+// 	`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
+// 	{ websocket: true },
+// 	(connection, req) => {
+// 		const {
+// 			roomId = 0,
+// 			playerId = "Player whatever",
+// 			privateRoom = false,
+// 			clientType = "player",
+// 			matchType = "singles",
+// 			tournamentSize = Tournament.getDefaultTournamentSize().toString(),
+// 		} = req.query as IGameRoomQuery;
+
+// 		const gameQuery: IGameRoomQuery = {
+// 			roomId,
+// 			playerId,
+// 			privateRoom,
+// 			clientType,
+// 			matchType,
+// 			tournamentSize,
+// 		};
+// 		manager.matchJoiner(connection, gameQuery);
+// 	},
+// );
