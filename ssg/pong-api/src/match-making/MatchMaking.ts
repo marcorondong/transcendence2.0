@@ -19,54 +19,24 @@ export class MatchMaking {
 		return this.headToHeadManager.getRoomIdOfPlayer(playerId);
 	}
 
-	//TODO: remove it is old matchJoiner with big string
-	// matchJoiner(connection: WebSocket, query: IGameRoomQuery) {
-	// 	if (query.clientType === "player")
-	// 		this.playerJoiner(
-	// 			connection,
-	// 			query.matchType,
-	// 			parseInt(query.tournamentSize, 10),
-	// 			query.roomId,
-	// 		);
-	// 	else if (query.clientType === "spectator")
-	// 		this.spectatorJoiner(connection, query.roomId);
-	// }
-
-	public playerJoinSingles(connection: WebSocket,roomId: string)
-	{
+	public playerJoinSingles(connection: WebSocket, roomId: string) {
 		const player: PongPlayer = new PongPlayer(connection);
 		this.singlesRoomJoiner(player, roomId);
 	}
 
-	public playerJoinDoubles(connection: WebSocket,roomId: string)
-	{
+	public playerJoinDoubles(connection: WebSocket, roomId: string) {
 		const player: PongPlayer = new PongPlayer(connection);
 		this.doublesRoomJoiner(player, roomId);
 	}
 
-	public playerJoinTournament(connection: WebSocket, tournamentSize:number)
-	{
+	public playerJoinTournament(connection: WebSocket, tournamentSize: number) {
 		const player: PongPlayer = new PongPlayer(connection);
-		this.tournamentJoiner(player, tournamentSize )
+		this.tournamentJoiner(player, tournamentSize);
 	}
 
-	//TODO remove old Player joiner with big ass query
-	// private playerJoiner(
-	// 	connection: WebSocket,
-	// 	matchType: "singles" | "tournament" | "doubles",
-	// 	tournamentSize: number,
-	// 	roomId: string | 0,
-	// ) {
-	// 	const player: PongPlayer = new PongPlayer(connection);
-	// 	// if (matchType === "singles") this.singlesRoomJoiner(player, roomId);
-	// 	// else if (matchType === "doubles")
-	// 	// 	this.doublesRoomJoiner(player, roomId);
-	// 	// else if (matchType === "tournament")
-	// 	// 	this.tournamentJoiner(player, tournamentSize);
-	// }
-
 	private singlesRoomJoiner(player: PongPlayer, roomId: string) {
-		if (roomId === "public") this.headToHeadManager.putPlayerInRandomRoom(player);
+		if (roomId === "public")
+			this.headToHeadManager.putPlayerInRandomRoom(player);
 		else
 			this.headToHeadManager.putPlayerInPrivateRoom(
 				player,
