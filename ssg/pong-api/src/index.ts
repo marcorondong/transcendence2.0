@@ -5,7 +5,6 @@ import path from "path";
 import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
-import { Tournament } from "./game/modes/singles/Tournament";
 import {
 	HeadToHeadQuery,
 	HeadToHeadQuerySchema,
