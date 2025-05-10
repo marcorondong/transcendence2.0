@@ -43,6 +43,7 @@ export const onlineUsersResponseSchema = z
 	.object({
 		type: z.literal("onlineUsers"),
 		users: z.array(userSchema),
+		me: userSchema,
 	})
 	.strict();
 

@@ -32,6 +32,7 @@ function connectionHandler(
 	client: Client,
 ) {
 	const currentId = client.getId();
+	const currentNickname = client.getNickname();
 	const onlineUsers = Array.from(onlineClients.values()).map((client) =>
 		({
 			id: client.getId(),
@@ -41,12 +42,16 @@ function connectionHandler(
 	const onlineUsersResponse = onlineUsersResponseSchema.parse({
 		type: "onlineUsers",
 		users: onlineUsers,
+		me: {
+			id: currentId,
+			nickname: currentNickname,
+		},
 	});	
 	const newUserResponse = newUserResponseSchema.parse({
 		type: "newUser",
 		user: {
 			id: currentId,
-			nickname: client.getNickname(),
+			nickname: currentNickname,
 		},
 	});
 	console.log(onlineUsersResponse);
@@ -56,7 +61,7 @@ function connectionHandler(
 		person.getSocket().send(JSON.stringify(newUserResponse));
 	});
 	onlineClients.set(currentId, client);
-	console.log(`Client ${client.getNickname()} connected`);
+	console.log(`Client ${currentNickname} connected`);
 }
 
 function setPingInterval(
