@@ -1,7 +1,6 @@
 import {
 	messageResponseSchema,
 	inviteResponseSchema,
-	errorResponseSchema,
 } from "./zodSchemas";
 import type {
 	MessageInput,

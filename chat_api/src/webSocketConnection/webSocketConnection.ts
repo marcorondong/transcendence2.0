@@ -11,7 +11,7 @@ import {
 	errorResponseSchema,
 	disconnectedResponseSchema,
 } from "./zodSchemas";
-import { on } from "events";
+
 export const onlineClients: Map<string, Client> = new Map<string, Client>();
 
 function errorHandler(
@@ -68,7 +68,7 @@ function setPingInterval(
 	socket: WebSocket,
 ) {
 	const pingInterval = setInterval(() => {
-		if (socket.readyState === socket.OPEN) {
+		if (socket.readyState === WebSocket.OPEN) {
 			socket.ping();
 		} else {
 			clearInterval(pingInterval);
