@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -68,13 +68,53 @@
 			<button onclick="copyRoomId()">Copy Room ID</button>
 		</div>
 
+		<div
+			id="menu-container"
+			style="margin-top: 20px"
+		>
+			<label for="matchType">Match Type:</label>
+			<select
+				id="matchType"
+				onchange="toggleTournamentSize()"
+			>
+				<option value="singles">Singles</option>
+				<option value="doubles">Doubles</option>
+				<option value="tournament">Tournament</option>
+			</select>
+
+			<label
+				for="roomIdInput"
+				style="margin-left: 20px"
+				>Room ID:</label
+			>
+			<input
+				type="text"
+				id="roomIdInput"
+				placeholder="Enter Room ID"
+				value="public"
+			/>
+
+			<span
+				id="tournamentSizeWrapper"
+				style="display: none; margin-left: 20px"
+			>
+				<label for="tournamentSize">Tournament Size:</label>
+				<input
+					type="number"
+					id="tournamentSize"
+					min="2"
+					placeholder="Optional"
+				/>
+			</span>
+
+			<button onclick="joinGame()">Join Game</button>
+		</div>
+
 		<script>
 			const canvas = document.getElementById("gameCanvas");
 			const ctx = canvas.getContext("2d");
 			const queryParams = window.location.search;
-			const wss = new WebSocket(
-				`ws://${window.location.hostname}:${window.location.port}/pong-api/pong${queryParams}`,
-			);
+			let wss = null;
 
 			let gameState = {
 				leftPaddle: { x: -4, y: 0, height: 1 },
@@ -119,6 +159,43 @@
 					gameState.matchStatus || "N/A";
 				drawGame();
 			};
+
+			function toggleTournamentSize() {
+				const matchType = document.getElementById("matchType").value;
+				document.getElementById("tournamentSizeWrapper").style.display =
+					matchType === "tournament" ? "inline" : "none";
+			}
+
+			function joinGame() {
+				const matchType = document.getElementById("matchType").value;
+				const roomId = document.getElementById("roomIdInput").value;
+				const tournamentSize =
+					document.getElementById("tournamentSize").value;
+
+				let query = `?roomId=${encodeURIComponent(roomId)}`;
+				if (matchType === "tournament" && tournamentSize) {
+					query += `&tournamentSize=${encodeURIComponent(tournamentSize)}`;
+				}
+
+				const url = `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/${matchType}${query}`;
+
+				if (wss) {
+					wss.close();
+				}
+
+				wss = new WebSocket(url);
+
+				wss.onmessage = (event) => {
+					gameState = JSON.parse(event.data);
+					document.getElementById("roomId").innerText =
+						gameState.roomId || "N/A";
+					document.getElementById("knockoutName").innerText =
+						gameState.knockoutName || "N/A";
+					document.getElementById("matchStatus").innerText =
+						gameState.matchStatus || "N/A";
+					drawGame();
+				};
+			}
 
 			function drawGame() {
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
