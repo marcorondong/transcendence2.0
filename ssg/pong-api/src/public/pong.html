@@ -160,7 +160,7 @@
 
 				let query = `?roomId=${encodeURIComponent(roomId)}`;
 				if (matchType === "tournament" && tournamentSize) {
-					query += `&tournamentSize=${encodeURIComponent(tournamentSize)}`;
+					query = `?tournamentSize=${encodeURIComponent(tournamentSize)}`;
 				}
 
 				let url;
