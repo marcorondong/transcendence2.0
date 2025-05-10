@@ -12,7 +12,8 @@ export type UserPublicField = (typeof userPublicFields)[number];
 
 // Type definition to allow one field per query (used in )
 export type UniqueUserField =
-	| { id: number }
+	// | { id: number }
+	| { id: string }
 	| { email: string }
 	| { username: string }
 	| { nickname: string };
@@ -146,14 +147,16 @@ export const createUserSchema = z
 
 // Schema for single user
 export const userResponseSchema = z.object({
-	id: z.number(),
+	// id: z.number(),
+	id: z.string().uuid(),
 	...userCore,
 });
 
 // Schema to get a user by ID
 export const userIdParamSchema = z
 	.object({
-		id: blankToUndefined(z.coerce.number().min(1)),
+		// id: blankToUndefined(z.coerce.number().min(1)),
+		id: blankToUndefined(z.string().uuid()),
 	})
 	.strict(); // Rejects unknown fields
 
@@ -186,7 +189,8 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // Base schema for query parameters
 const baseGetUsersQuerySchema = z.object({
-	id: z.coerce.number().min(1),
+	// id: z.coerce.number().min(1),
+	id: z.string().uuid(),
 	email: z.string().email(),
 	username: z.string(),
 	nickname: z.string(),

@@ -78,7 +78,8 @@ export async function loginHandler(
 }
 
 export async function getUserHandler(
-	request: FastifyRequest<{ Params: { id: number } }>,
+	// request: FastifyRequest<{ Params: { id: number } }>,
+	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
 	const user = await findUserByUnique({ id: request.params.id });
@@ -116,7 +117,8 @@ export async function getUsersHandler(
 }
 
 export async function deleteUserHandler(
-	request: FastifyRequest<{ Params: { id: number } }>,
+	// request: FastifyRequest<{ Params: { id: number } }>,
+	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
 	await deleteUser(request.params.id);
@@ -125,7 +127,8 @@ export async function deleteUserHandler(
 
 export async function putUserHandler(
 	request: FastifyRequest<{
-		Params: { id: number };
+		// Params: { id: number };
+		Params: { id: string };
 		Body: updateUserPutInput;
 	}>,
 	reply: FastifyReply,
@@ -137,7 +140,8 @@ export async function putUserHandler(
 
 export async function patchUserHandler(
 	request: FastifyRequest<{
-		Params: { id: number };
+		// Params: { id: number };
+		Params: { id: string };
 		Body: updateUserPatchInput;
 	}>,
 	reply: FastifyReply,

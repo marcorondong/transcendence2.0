@@ -183,7 +183,8 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	}
 }
 
-export async function deleteUser(id: number): Promise<void> {
+// export async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(id: string): Promise<void> {
 	try {
 		await prisma.user.delete({ where: { id } });
 	} catch (err) {
@@ -201,7 +202,8 @@ export async function deleteUser(id: number): Promise<void> {
 	}
 }
 
-export async function updateUser(id: number, data: UpdateUserData) {
+// export async function updateUser(id: number, data: UpdateUserData) {
+export async function updateUser(id: string, data: UpdateUserData) {
 	try {
 		const updatePayload: Record<string, any> = { ...data };
 		if (data.password) {

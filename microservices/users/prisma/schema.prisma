@@ -11,8 +11,9 @@ datasource db {
   url      = "file:./database/dev.db"
 }
 
+// id           Int       @id @unique @default(autoincrement())
 model User {
-  id           Int       @id @unique @default(autoincrement()) // TODO: Change this to uuid
+  id           String    @id @default(uuid())
   email        String    @unique
   username     String    @unique
   nickname     String    @unique
@@ -28,6 +29,6 @@ model Product {
   title     String //@db.VarChar(255)
   content   String?
   price     Float
-  ownerId   Int
+  ownerId   String
   owner     User     @relation(fields: [ownerId], references: [id])
 }
