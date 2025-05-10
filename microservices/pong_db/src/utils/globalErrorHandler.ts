@@ -1,4 +1,5 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
+import { env } from "./env";
 
 export function globalErrorHandler(
 	error: FastifyError,
@@ -7,7 +8,7 @@ export function globalErrorHandler(
 ) {
 	reply.log.error(error);
 
-	if (process.env.NODE_ENV === "production") {
+	if (env.NODE_ENV === "production") {
 		reply.status(503).send({
 			error: "Service Unavailable",
 			message:

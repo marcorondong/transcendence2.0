@@ -11,6 +11,8 @@ dotenv.config();
 
 const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
+const BASE_API_NAME = "pong-api";
+const BASE_GAME_PATH = "pong";
 
 const fastify = Fastify({
 	logger:
@@ -24,7 +26,7 @@ const fastify = Fastify({
 							ignore: "pid,hostname", //Hide fields
 						},
 					},
-			  }
+				}
 			: true,
 });
 
@@ -44,6 +46,14 @@ export interface IGameRoomQuery {
 	tournamentSize: string;
 }
 
+interface IHeadToHeadQuery {
+	roomId: string; //it should be either "private" for host of private room or "uuid" of room to join
+}
+
+interface ITournamentQuery {
+	tournamentSize: string; // string as query that should be number
+}
+
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
@@ -52,43 +62,80 @@ fastify.register(async function (fastify) {
 		});
 	});
 
-	fastify.get("/pong-api/health-check", async (request, reply) => {
+	fastify.get(`/${BASE_API_NAME}/health-check`, async (request, reply) => {
 		reply.code(200).send({
 			message:
 				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
 		});
 	});
 
-	fastify.get("/pong-api/player-room/:playerId", async (request, reply) => {
-		const { playerId } = request.params as { playerId: string };
-		reply.send({
-			roomId: manager.getPlayerRoomId(playerId),
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/player-room/:playerId`,
+		async (request, reply) => {
+			const { playerId } = request.params as { playerId: string };
+			reply.send({
+				roomId: manager.getPlayerRoomId(playerId),
+			});
+		},
+	);
 
-	//Partial makes all field optional.
-	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-		"/pong-api/pong",
+	fastify.get(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/spectate/:roomId`,
+		{ websocket: true },
+		(connection, req) => {
+			const { roomId } = req.params as { roomId: string };
+			console.log("Spectate game: ", roomId);
+			manager.spectatorJoiner(connection, roomId);
+		},
+	);
+
+	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
+		{ websocket: true },
+		(connection, req) => {
+			const { roomId = "public" } = req.query as IHeadToHeadQuery;
+
+			const singlesQuery: IHeadToHeadQuery = {
+				roomId,
+			};
+			console.log("Singles pong game, query", singlesQuery.roomId);
+			manager.playerJoinSingles(connection, roomId);
+		},
+	);
+
+	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
+		{ websocket: true },
+		(connection, req) => {
+			const { roomId = "public" } = req.query as IHeadToHeadQuery;
+
+			const singlesQuery: IHeadToHeadQuery = {
+				roomId,
+			};
+			console.log("doubles pong game, query", singlesQuery.roomId);
+			manager.playerJoinDoubles(connection, roomId);
+		},
+	);
+
+	fastify.get<{ Querystring: Partial<ITournamentQuery> }>(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
 		{ websocket: true },
 		(connection, req) => {
 			const {
-				roomId = 0,
-				playerId = "Player whatever",
-				privateRoom = false,
-				clientType = "player",
-				matchType = "singles",
 				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
-			} = req.query as IGameRoomQuery;
+			} = req.query as ITournamentQuery;
 
-			const gameQuery: IGameRoomQuery = {
-				roomId,
-				playerId,
-				privateRoom,
-				clientType,
-				matchType,
+			const singlesQuery: ITournamentQuery = {
 				tournamentSize,
 			};
-			manager.matchJoiner(connection, gameQuery);
+			console.log(
+				"tournament pong game, query",
+				singlesQuery.tournamentSize,
+			);
+			manager.playerJoinTournament(
+				connection,
+				parseInt(singlesQuery.tournamentSize, 10),
+			);
 		},
 	);
 
@@ -113,3 +160,30 @@ const startServer = async () => {
 };
 
 startServer();
+
+//TODO remove this is Old match joiner with big ass string
+//Partial makes all field optional.
+// fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
+// 	`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
+// 	{ websocket: true },
+// 	(connection, req) => {
+// 		const {
+// 			roomId = 0,
+// 			playerId = "Player whatever",
+// 			privateRoom = false,
+// 			clientType = "player",
+// 			matchType = "singles",
+// 			tournamentSize = Tournament.getDefaultTournamentSize().toString(),
+// 		} = req.query as IGameRoomQuery;
+
+// 		const gameQuery: IGameRoomQuery = {
+// 			roomId,
+// 			playerId,
+// 			privateRoom,
+// 			clientType,
+// 			matchType,
+// 			tournamentSize,
+// 		};
+// 		manager.matchJoiner(connection, gameQuery);
+// 	},
+// );
