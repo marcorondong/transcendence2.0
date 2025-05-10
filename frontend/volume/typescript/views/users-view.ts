@@ -1,7 +1,13 @@
 import { TableComponent } from "../components/table-component.js";
+import { IconComponent } from "../components/icon-component.js";
 
 const users = [
-	{ nickname: "ShadowHunter", wins: 34, losses: 12, online: true },
+	{
+		nickname: "ShadowHunter whaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat",
+		wins: 34,
+		losses: 12,
+		online: true,
+	},
 	{ nickname: "PixelPirate", wins: 21, losses: 19, online: false },
 	{ nickname: "NoScopeKing", wins: 48, losses: 5, online: true },
 	{ nickname: "LavaWizard", wins: 17, losses: 22, online: false },
@@ -18,6 +24,8 @@ export class UsersView extends HTMLElement {
 		super();
 	}
 
+	users = users;
+
 	connectedCallback() {
 		console.log("users View has been connected");
 
@@ -33,11 +41,13 @@ export class UsersView extends HTMLElement {
 			card.classList.add(
 				"pong-card",
 				"pong-card-hover",
-				"p-4",
+				"px-4",
+				"py-2",
 				"grid",
-				"grid-cols-[auto_20rem_6rem_1fr]",
+				"grid-cols-[5rem_20rem_1fr_1fr_1fr]",
 				"items-center",
 				"gap-8",
+				"relative",
 			);
 			const avatar = document.createElement("img");
 			avatar.classList.add(
@@ -50,26 +60,116 @@ export class UsersView extends HTMLElement {
 
 			const name = document.createElement("h2");
 			name.innerText = user.nickname;
-			name.classList.add("text-xl", "font-bold");
-			const stats = document.createElement("div");
-			stats.classList.add("flex", "flex-col", "text-sm", "gap-2");
+			name.classList.add(
+				"text-xl",
+				"font-bold",
+				"text-nowrap",
+				"text-ellipsis",
+				"overflow-hidden",
+			);
 			const wins = document.createElement("div");
-			wins.innerText = `wins ${String(user.wins)}`;
+			wins.innerText = "wins";
+			wins.classList.add(
+				"text-slate-500",
+				"text-xs",
+				"absolute",
+				"bottom-3",
+			);
+			const winsNumber = document.createElement("div");
+			winsNumber.innerText = String(user.wins);
+			winsNumber.classList.add(
+				"text-4xl",
+				"text-emerald-500",
+				"font-bold",
+			);
+			const winsContainer = document.createElement("div");
+			winsContainer.classList.add(
+				"flex",
+				"flex-col",
+				"gap-1",
+				"items-center",
+			);
+			winsContainer.append(winsNumber, wins);
+
 			const losses = document.createElement("div");
-			losses.innerText = `losses ${String(user.losses)}`;
-			stats.append(wins, losses);
+			losses.innerText = "losses";
+			losses.classList.add(
+				"text-sm",
+				"absolute",
+				"text-xs",
+				"text-slate-500",
+				"bottom-3",
+			);
+			const lossesNumber = document.createElement("div");
+			lossesNumber.innerText = String(user.losses);
+			lossesNumber.classList.add(
+				"text-4xl",
+				"text-rose-400",
+				"font-bold",
+			);
+			const lossesContainer = document.createElement("div");
+			lossesContainer.classList.add(
+				"flex",
+				"flex-col",
+				"gap-1",
+				"items-center",
+			);
+			lossesContainer.append(lossesNumber, losses);
+
 			const status = document.createElement("div");
+			status.classList.add(
+				"justify-self-end",
+				"px-5",
+				"flex",
+				"flex-col",
+				"items-center",
+				"gap-2",
+			);
+			const statusIcon = new IconComponent("online", 6);
+			statusIcon.classList.add("rounded-full", "border-0", "status-icon");
+			statusIcon.id = user.nickname;
 			const statusText = document.createElement("div");
 			statusText.innerText = user.online ? "online" : "offline";
-			statusText.classList.add("text-sm", "text-slate-500");
-			status.append(statusText);
-			card.append(avatar, name, stats, status);
+			statusText.classList.add(
+				"text-xs",
+				"text-slate-500",
+				"absolute",
+				"bottom-3",
+			);
+			status.append(statusIcon, statusText);
+			card.append(avatar, name, winsContainer, lossesContainer, status);
 			container.append(card);
+			this.applyOnlineStatus();
 		}
 	}
 
 	disconnectedCallback() {
 		console.log("USERS VIEW has been DISCONNECTED");
+	}
+
+	applyOnlineStatus() {
+		const icons = [...this.getElementsByClassName("status-icon")];
+		console.log("icons:", icons);
+		icons.map((icon) => {
+			const status = this.users.find(
+				(user) => user.nickname === icon.id,
+			)?.online;
+			if (status) {
+				icon.classList.remove("text-slate-500");
+				icon.classList.add(
+					"text-cyan-500",
+					"glow-small",
+					"bg-cyan-500/30",
+				);
+			} else {
+				icon.classList.remove(
+					"text-cyan-500",
+					"glow-small",
+					"bg-cyan-500/30",
+				);
+				icon.classList.add("text-slate-500");
+			}
+		});
 	}
 }
 
