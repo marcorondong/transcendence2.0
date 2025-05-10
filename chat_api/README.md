@@ -100,7 +100,11 @@ Note: No reply is sent to User1. Can be add upon request.
             "id": "id of User100",
             "nickname": "nickname of User100"
         }
-    ]
+    ],
+    "me": {
+        "id": "id of current user",
+        "nickname": "nickname of current user"
+    }
 }
 ```
 ### Reply (to all other Users)
