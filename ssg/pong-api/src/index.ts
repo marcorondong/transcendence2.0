@@ -5,6 +5,7 @@ import path from "path";
 import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
+
 import {
 	HeadToHeadQuery,
 	HeadToHeadQuerySchema,
@@ -14,6 +15,7 @@ import {
 } from "./utils/zodSchema";
 import { ZodError } from "zod";
 import { FastifyRequest } from "fastify/types/request";
+import { Parsing } from "./utils/Parsing";
 
 dotenv.config();
 
@@ -59,50 +61,50 @@ interface ITournamentQuery {
 	tournamentSize: string; // string as query that should be number
 }
 
-function sendError(
-	connection: WebSocket,
-	errorZod: ZodError,
-	shortDescription: string = "ERROR",
-): void {
-	console.error(`${shortDescription}: ${errorZod}`);
-	const jsonError = JSON.stringify({
-		error: shortDescription,
-		zodDetails: errorZod,
-	});
-	connection.send(jsonError);
-}
+// function sendError(
+// 	connection: WebSocket,
+// 	errorZod: ZodError,
+// 	shortDescription: string = "ERROR",
+// ): void {
+// 	console.error(`${shortDescription}: ${errorZod}`);
+// 	const jsonError = JSON.stringify({
+// 		error: shortDescription,
+// 		zodDetails: errorZod,
+// 	});
+// 	connection.send(jsonError);
+// }
 
-function parseRoomId(
-	req: FastifyRequest,
-	connection: WebSocket,
-): RoomIdType | false {
-	const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
-	if (!parseQuery.success) {
-		sendError(connection, parseQuery.error, "Invalid query sent");
-		connection.close();
-		return false;
-	}
-	const { roomId } = parseQuery.data;
-	return roomId;
-}
+// function parseRoomId(
+// 	req: FastifyRequest,
+// 	connection: WebSocket,
+// ): RoomIdType | false {
+// 	const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
+// 	if (!parseQuery.success) {
+// 		sendError(connection, parseQuery.error, "Invalid query sent");
+// 		connection.close();
+// 		return false;
+// 	}
+// 	const { roomId } = parseQuery.data;
+// 	return roomId;
+// }
 
-function parseTournamentSize(
-	req: FastifyRequest,
-	connection: WebSocket,
-): TournamentSize | false {
-	const parseQuery = TournamentSizeQuerySchema.safeParse(req.query);
-	if (!parseQuery.success) {
-		sendError(
-			connection,
-			parseQuery.error,
-			"Invalid query sent [Tournament]",
-		);
-		connection.close();
-		return false;
-	}
-	const { tournamentSize } = parseQuery.data;
-	return tournamentSize;
-}
+// function parseTournamentSize(
+// 	req: FastifyRequest,
+// 	connection: WebSocket,
+// ): TournamentSize | false {
+// 	const parseQuery = TournamentSizeQuerySchema.safeParse(req.query);
+// 	if (!parseQuery.success) {
+// 		sendError(
+// 			connection,
+// 			parseQuery.error,
+// 			"Invalid query sent [Tournament]",
+// 		);
+// 		connection.close();
+// 		return false;
+// 	}
+// 	const { tournamentSize } = parseQuery.data;
+// 	return tournamentSize;
+// }
 
 fastify.register(websocket);
 fastify.register(async function (fastify) {
@@ -143,7 +145,7 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
 		(connection, req) => {
-			const roomId = parseRoomId(req, connection);
+			const roomId = Parsing.parseRoomId(req, connection);
 			if (roomId === false) return;
 			manager.playerJoinSingles(connection, roomId);
 		},
@@ -153,7 +155,7 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
 		{ websocket: true },
 		(connection, req) => {
-			const roomId = parseRoomId(req, connection);
+			const roomId = Parsing.parseRoomId(req, connection);
 			if (roomId === false) return;
 			manager.playerJoinDoubles(connection, roomId);
 		},
@@ -163,7 +165,7 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
 		{ websocket: true },
 		(connection, req) => {
-			const tournamentSize = parseTournamentSize(req, connection);
+			const tournamentSize = Parsing.parseTournamentSize(req, connection);
 			if (tournamentSize === false) return;
 			manager.playerJoinTournament(connection, tournamentSize);
 		},
