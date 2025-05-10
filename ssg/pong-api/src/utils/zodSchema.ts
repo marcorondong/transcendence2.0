@@ -37,6 +37,8 @@ const RoomIdSchema = z.union([
 	z.literal("public"),
 ]);
 
+export type RoomIdType = z.infer<typeof RoomIdSchema>;
+
 export const HeadToHeadQuerySchema = z
 	.object({
 		roomId: RoomIdSchema.default("public"),

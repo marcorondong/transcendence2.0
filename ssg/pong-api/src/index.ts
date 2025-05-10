@@ -6,8 +6,13 @@ import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
 import { Tournament } from "./game/modes/singles/Tournament";
-import { HeadToHeadQuery, HeadToHeadQuerySchema } from "./utils/zodSchema";
+import {
+	HeadToHeadQuery,
+	HeadToHeadQuerySchema,
+	RoomIdType,
+} from "./utils/zodSchema";
 import { ZodError } from "zod";
+import { FastifyRequest } from "fastify/types/request";
 
 dotenv.config();
 
@@ -39,14 +44,15 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
 });
 
-export interface IGameRoomQuery {
-	roomId: string | 0;
-	playerId: string;
-	privateRoom: boolean;
-	clientType: "player" | "spectator";
-	matchType: "singles" | "tournament" | "doubles";
-	tournamentSize: string;
-}
+//TODO: remove this. It is old big query approach
+// export interface IGameRoomQuery {
+// 	roomId: string | 0;
+// 	playerId: string;
+// 	privateRoom: boolean;
+// 	clientType: "player" | "spectator";
+// 	matchType: "singles" | "tournament" | "doubles";
+// 	tournamentSize: string;
+// }
 
 interface ITournamentQuery {
 	tournamentSize: string; // string as query that should be number
@@ -63,6 +69,20 @@ function sendError(
 		zodDetails: errorZod,
 	});
 	connection.send(jsonError);
+}
+
+function parseRoomId(
+	req: FastifyRequest,
+	connection: WebSocket,
+): RoomIdType | false {
+	const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
+	if (!parseQuery.success) {
+		sendError(connection, parseQuery.error, "Invalid query sent");
+		connection.close();
+		return false;
+	}
+	const { roomId } = parseQuery.data;
+	return roomId;
 }
 
 fastify.register(websocket);
@@ -104,14 +124,8 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
 		(connection, req) => {
-			const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
-			if (!parseQuery.success) {
-				sendError(connection, parseQuery.error,"Invalid query sent");
-				connection.close();
-				return;
-			}
-			const { roomId } = parseQuery.data;
-			console.log("Singles pong game, query", roomId);
+			const roomId = parseRoomId(req, connection);
+			if (roomId === false) return;
 			manager.playerJoinSingles(connection, roomId);
 		},
 	);
@@ -120,12 +134,8 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
 		{ websocket: true },
 		(connection, req) => {
-			const { roomId = "public" } = req.query as HeadToHeadQuery;
-
-			const singlesQuery: HeadToHeadQuery = {
-				roomId,
-			};
-			console.log("doubles pong game, query", singlesQuery.roomId);
+			const roomId = parseRoomId(req, connection);
+			if (roomId === false) return;
 			manager.playerJoinDoubles(connection, roomId);
 		},
 	);
