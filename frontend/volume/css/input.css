@@ -61,5 +61,9 @@ a {
 /* big elements */
 
 .pong-card {
-	@apply flex flex-col bg-indigo-900/70 rounded-xl border-1 border-indigo-800/50;
+	@apply bg-indigo-900/50 rounded-xl border-1 border-indigo-800/50;
+}
+
+.pong-card-hover {
+	@apply hover:bg-indigo-800/70;
 }

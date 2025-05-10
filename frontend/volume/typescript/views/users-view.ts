@@ -30,17 +30,40 @@ export class UsersView extends HTMLElement {
 		this.append(container);
 		for (const user of users) {
 			const card = document.createElement("div");
-			card.classList.add("pong-card", "p-4");
+			card.classList.add(
+				"pong-card",
+				"pong-card-hover",
+				"p-4",
+				"grid",
+				"grid-cols-[auto_20rem_6rem_1fr]",
+				"items-center",
+				"gap-8",
+			);
+			const avatar = document.createElement("img");
+			avatar.classList.add(
+				"rounded-full",
+				"border-6",
+				"border-indigo-800",
+			);
+			avatar.src = "/static-files/images/avatar_placeholder.png";
+			avatar.width = 80;
+
 			const name = document.createElement("h2");
 			name.innerText = user.nickname;
 			name.classList.add("text-xl", "font-bold");
+			const stats = document.createElement("div");
+			stats.classList.add("flex", "flex-col", "text-sm", "gap-2");
 			const wins = document.createElement("div");
-			wins.innerText = String(user.wins);
+			wins.innerText = `wins ${String(user.wins)}`;
 			const losses = document.createElement("div");
-			losses.innerText = String(user.losses);
-			const online = document.createElement("div");
-			online.innerText = user.online ? "online" : "offline";
-			card.append(name, wins, losses, online);
+			losses.innerText = `losses ${String(user.losses)}`;
+			stats.append(wins, losses);
+			const status = document.createElement("div");
+			const statusText = document.createElement("div");
+			statusText.innerText = user.online ? "online" : "offline";
+			statusText.classList.add("text-sm", "text-slate-500");
+			status.append(statusText);
+			card.append(avatar, name, stats, status);
 			container.append(card);
 		}
 	}

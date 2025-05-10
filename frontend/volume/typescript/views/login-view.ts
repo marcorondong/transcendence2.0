@@ -29,6 +29,9 @@ export class ProfileView extends HTMLElement {
 		console.log("LOGIN VIEW has been CONNECTED");
 		this.classList.add("flex", "w-full", "items-center", "justify-center");
 		this.container.classList.add(
+			"flex",
+			"flex-col",
+			"items-center",
 			"w-120",
 			"py-12",
 			"px-12",
