@@ -1,4 +1,5 @@
 import { Ball, Paddle, Pong } from "../types/Pong";
+import { ChatComponent } from "./chat-component.js";
 import { IconComponent } from "./icon-component.js";
 import { printMessage } from "./pong-utils.js";
 
@@ -7,6 +8,7 @@ export class PongComponent extends HTMLElement {
 	wss: WebSocket | undefined = undefined;
 	canvas = document.createElement("canvas");
 	ctx = this.canvas.getContext("2d");
+	chat: ChatComponent;
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -188,9 +190,10 @@ export class PongComponent extends HTMLElement {
 		requestAnimationFrame(this.gameLoop);
 	};
 
-	constructor() {
+	constructor(chat: ChatComponent) {
 		super();
 		this.adjustCanvasToWindow();
+		this.chat = chat;
 	}
 
 	connectedCallback() {
@@ -326,6 +329,7 @@ export class PongComponent extends HTMLElement {
 	}
 
 	onKeyup(event: KeyboardEvent) {
+		console.log("roomId", this.chat.roomId);
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
 		}

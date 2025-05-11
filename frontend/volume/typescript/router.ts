@@ -1,7 +1,10 @@
+import { ChatComponent } from "./components/chat-component.js";
+
 export class Router {
 	containerDiv = document.getElementById("content");
 	navLinks = document.querySelectorAll<HTMLAnchorElement>("#navigation a");
 	component: Node | null = null;
+	chat: ChatComponent;
 
 	navComponents: string[] = this.createComponentNames();
 
@@ -40,19 +43,26 @@ export class Router {
 		}
 	}
 
+	handleRouterLink(event: Event) {
+		event.preventDefault();
+		let link: string = "";
+		if (
+			event instanceof MouseEvent &&
+			event.currentTarget instanceof HTMLAnchorElement
+		) {
+			link = event.currentTarget.href;
+		} else if (event instanceof CustomEvent) {
+			link = event.detail;
+		} else {
+			return;
+		}
+		window.history.pushState({ path: link }, "", link);
+		this.loadComponent();
+	}
+
 	addEventListenerNavLinks() {
 		for (const link of this.navLinks) {
-			link.addEventListener("click", (event: Event) => {
-				event.preventDefault();
-				if (event.currentTarget instanceof HTMLAnchorElement) {
-					window.history.pushState(
-						{ path: event.currentTarget.href },
-						"",
-						event.currentTarget.href,
-					);
-					this.loadComponent();
-				}
-			});
+			link.addEventListener("click", this.handleRouterLink);
 		}
 	}
 
@@ -63,8 +73,11 @@ export class Router {
 		this.appendComponent();
 	}
 
-	constructor() {
+	constructor(chat: ChatComponent) {
+		this.chat = chat;
+		this.handleRouterLink = this.handleRouterLink.bind(this);
 		this.addEventListenerNavLinks();
+		document.addEventListener("pong-link", this.handleRouterLink);
 		window.addEventListener("popstate", () => {
 			this.loadComponent();
 		});
@@ -89,7 +102,7 @@ export class Router {
 		try {
 			const js = await this.importComponent(componentName);
 			if (js && this.containerDiv) {
-				this.component = js.createComponent();
+				this.component = js.createComponent(this.chat);
 				if (this.component) {
 					this.containerDiv.appendChild(this.component);
 				}

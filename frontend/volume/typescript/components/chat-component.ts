@@ -6,6 +6,7 @@ class ChatComponent extends HTMLElement {
 	ws: WebSocket | undefined = undefined;
 	onlineUsers: ChatUser[] = [];
 	selectedUser: ChatUser | undefined = undefined;
+	roomId: string | undefined = undefined;
 
 	//ICONS
 	plusIcon = new IconComponent("plus", 4);
@@ -123,6 +124,7 @@ class ChatComponent extends HTMLElement {
 						content: "Let's play PONG together! ",
 						invitation: chatServiceData.roomId,
 					});
+					this.roomId = chatServiceData.roomId;
 					this.displayCurrentChat();
 				}
 			}
@@ -490,6 +492,7 @@ class ChatComponent extends HTMLElement {
 			return;
 		}
 		console.log("trying to invite a user");
+
 		const chat: Chat = {
 			type: "invite",
 			relatedId: this.selectedUser?.id,
@@ -497,6 +500,13 @@ class ChatComponent extends HTMLElement {
 		if (this.ws) {
 			this.ws.send(JSON.stringify(chat));
 		}
+		this.dispatchEvent(
+			new CustomEvent("pong-link", {
+				detail: { source: "pong-view" },
+				bubbles: true,
+				composed: true,
+			}),
+		);
 	}
 
 	connectedCallback() {
@@ -599,10 +609,14 @@ class ChatComponent extends HTMLElement {
 		this.inviteButton.id = "invite-button";
 		const inviteIcon = new IconComponent("game", 5);
 		this.inviteButton.append(inviteIcon);
+		const inviteLink = document.createElement("a");
+		inviteLink.href = "/pong-view";
+		inviteLink.classList.add("pong-link");
+		inviteLink.append(this.inviteButton);
 		this.chatContainer.append(
 			this.chatInput,
 			this.sendButton,
-			this.inviteButton,
+			inviteLink,
 			this.blockButton,
 		);
 	}

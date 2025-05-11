@@ -1,9 +1,13 @@
 import "../components/pong-component.js";
 import "../components/container-for-view.js";
+import { PongComponent } from "../components/pong-component.js";
+import { ChatComponent } from "../components/chat-component.js";
 
-class HomeView extends HTMLElement {
-	constructor() {
+class PongView extends HTMLElement {
+	chat: ChatComponent;
+	constructor(chat: ChatComponent) {
 		super();
+		this.chat = chat;
 	}
 
 	connectedCallback() {
@@ -11,7 +15,7 @@ class HomeView extends HTMLElement {
 
 		const container = document.createElement("container-for-view");
 		this.append(container);
-		const pongComponent = document.createElement("pong-component");
+		const pongComponent = new PongComponent(this.chat);
 		container.appendChild(pongComponent);
 		pongComponent.classList.add("self-center");
 	}
@@ -21,8 +25,8 @@ class HomeView extends HTMLElement {
 	}
 }
 
-customElements.define("pong-view", HomeView);
+customElements.define("pong-view", PongView);
 
-export function createComponent() {
-	return document.createElement("pong-view");
+export function createComponent(chat: ChatComponent) {
+	return new PongView(chat);
 }
