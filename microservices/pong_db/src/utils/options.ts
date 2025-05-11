@@ -24,7 +24,7 @@ export const swaggerOption = {
 };
 
 export const swaggerUiOption = {
-	routePrefix: env.DOCUMENTATION,
+	routePrefix: env.PONG_DB_DOCUMENTATION_STATIC,
 };
 
 export const serverOption = {

@@ -1,91 +1,63 @@
 import {
-	messageSchema,
 	messageResponseSchema,
-	blockSchema,
-	blockResponseSchema,
-	blockStatusSchema,
-	blockStatusResponseSchema,
-	inviteSchema,
 	inviteResponseSchema,
 } from "./zodSchemas";
 import type {
 	MessageInput,
-	BlockInput,
-	BlockStatusInput,
 	InviteInput,
-	TerminateInput,
 } from "./zodSchemas";
 import type { Client } from "../utils/Client";
 import { onlineClients } from "./webSocketConnection";
 import {
-	patchRequestBlockUser,
-	patchRequestUnblockUser,
+	getRequestBlockStatus,
 	getRequestRoomId,
 } from "./service";
 
-export function messageHandler(data: MessageInput, client: Client) {
-	const { message, relatedId } = messageSchema.parse(data);
-	const friendClient = onlineClients.get(relatedId);
-	if (!friendClient) throw new Error("Server: related UUID not found");
-	if (client.isBlocked(relatedId)) throw new Error("Server: user is blocked");
+export async function messageHandler(data: MessageInput, client: Client) {
+	const { id, message } = data;
+	const currentId = client.getId();
+	if (id === currentId) throw new Error("Server: You cannot send a message to yourself");
+	const friendClient = onlineClients.get(id);
+	if (!friendClient) throw new Error("Server: friend UUID not found");
+	const blockStatus = await getRequestBlockStatus(currentId, id);
+	if (blockStatus) throw new Error("Server: user is blocked");
+	const friendBlockStatus = await getRequestBlockStatus(id, currentId);
 	const messageResponse = messageResponseSchema.parse({
-		type: "messageResponse",
+		type: "message",
+		sender: {
+			id: currentId,
+			nickname: client.getNickname(),
+		},
+		receiver: {
+			id: id,
+			nickname: friendClient.getNickname(),
+		},
 		message: message,
-		relatedId: client.getId(),
 	});
+	console.log(messageResponse);
 	client.getSocket().send(JSON.stringify(messageResponse));
-	if (!friendClient.isBlocked(client.getId()))
+	if (!friendBlockStatus)
 		friendClient.getSocket().send(JSON.stringify(messageResponse));
 }
 
-export async function blockHandler(data: BlockInput, client: Client) {
-	const { relatedId } = blockSchema.parse(data);
-	const friendClient = onlineClients.get(relatedId);
-	if (!friendClient) throw new Error("Server: related UUID not found");
-	if (client.isBlocked(relatedId)) {
-		await patchRequestUnblockUser(client.getId(), relatedId);
-		client.removeBlockedUser(relatedId);
-	} else {
-		await patchRequestBlockUser(client.getId(), relatedId);
-		client.addBlockedUser(relatedId);
-	}
-	const blockResponse = blockResponseSchema.parse({
-		type: "blockResponse",
-		relatedId: relatedId,
-		notification: `Block status changed for user ${relatedId}`, // TODO for debugging purposes
-	});
-	client.getSocket().send(JSON.stringify(blockResponse));
-}
-
-export function blockStatusHandler(data: BlockStatusInput, client: Client) {
-	const { relatedId } = blockStatusSchema.parse(data);
-	const blockStatus = client.isBlocked(relatedId);
-	const blockStatusResponse = blockStatusResponseSchema.parse({
-		type: "blockStatusResponse",
-		blockStatus: blockStatus,
-		relatedId: relatedId,
-		notification: `Block status for user ${relatedId}`, // TODO for debugging purposes
-	});
-	client.getSocket().send(JSON.stringify(blockStatusResponse));
-}
-
 export async function inviteHandler(data: InviteInput, client: Client) {
-	const { relatedId } = inviteSchema.parse(data);
-	const friendClient = onlineClients.get(relatedId);
-	if (!friendClient) throw new Error("Server: related UUID not found");
-	if (client.isBlocked(relatedId)) throw new Error("Server: user is blocked");
-	if (!friendClient.isBlocked(client.getId())) {
-		// const roomId = await getRequestRoomId(client.getId());
+	const { id } = data;
+	const currentId = client.getId();
+	const friendClient = onlineClients.get(id);
+	if (!friendClient) throw new Error("Server: friend UUID not found");
+	const blockStatus = await getRequestBlockStatus(currentId, id);
+	if (blockStatus) throw new Error("Server: user is blocked");
+	const friendBlockStatus = await getRequestBlockStatus(id, currentId);
+	if (!friendBlockStatus) {
+		const roomId = await getRequestRoomId(client.getId());
 		const inviteResponse = inviteResponseSchema.parse({
-			type: "inviteResponse",
-			relatedId: client.getId(),
-			roomId: crypto.randomUUID(), // TODO change to roomId from getRequestRoomId
-			notification: `${client.getId()} wants to play Ping Pong with you!`, // TODO for debugging purposes
+			type: "invite",
+			user: {
+				id: currentId,
+				nickname: client.getNickname(),
+			},
+			roomId: roomId,
 		});
 		friendClient.getSocket().send(JSON.stringify(inviteResponse));
 	}
-}
-
-export function terminateHandler(data: TerminateInput, client: Client) {
-	client.getSocket().close();
 }

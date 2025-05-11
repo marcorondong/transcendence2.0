@@ -42,6 +42,6 @@ export const headToHeadSchema = {
 export const healthCheckSchema = {
 	summary: "Health Check",
 	description: "Check the health of the service",
-	tags: ["Health"],
+	tags: ["Game"],
 	response: { 200: successResponseSchema },
 };

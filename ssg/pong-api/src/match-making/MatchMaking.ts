@@ -1,6 +1,5 @@
 import { HeadToHeadMatchMaking } from "./SingleMatchMaking";
 import { TournamentMatchMaking } from "./TournamentMatchMaking";
-import { IGameRoomQuery } from "..";
 import { WebSocket } from "ws";
 import { PongPlayer } from "../game/PongPlayer";
 import { Tournament } from "../game/modes/singles/Tournament";
@@ -20,34 +19,54 @@ export class MatchMaking {
 		return this.headToHeadManager.getRoomIdOfPlayer(playerId);
 	}
 
-	matchJoiner(connection: WebSocket, query: IGameRoomQuery) {
-		if (query.clientType === "player")
-			this.playerJoiner(
-				connection,
-				query.matchType,
-				parseInt(query.tournamentSize, 10),
-				query.roomId,
-			);
-		else if (query.clientType === "spectator")
-			this.spectatorJoiner(connection, query.roomId);
-	}
+	//TODO: remove it is old matchJoiner with big string
+	// matchJoiner(connection: WebSocket, query: IGameRoomQuery) {
+	// 	if (query.clientType === "player")
+	// 		this.playerJoiner(
+	// 			connection,
+	// 			query.matchType,
+	// 			parseInt(query.tournamentSize, 10),
+	// 			query.roomId,
+	// 		);
+	// 	else if (query.clientType === "spectator")
+	// 		this.spectatorJoiner(connection, query.roomId);
+	// }
 
-	private playerJoiner(
-		connection: WebSocket,
-		matchType: "singles" | "tournament" | "doubles",
-		tournamentSize: number,
-		roomId: string | 0,
-	) {
+	public playerJoinSingles(connection: WebSocket,roomId: string)
+	{
 		const player: PongPlayer = new PongPlayer(connection);
-		if (matchType === "singles") this.singlesRoomJoiner(player, roomId);
-		else if (matchType === "doubles")
-			this.doublesRoomJoiner(player, roomId);
-		else if (matchType === "tournament")
-			this.tournamentJoiner(player, tournamentSize);
+		this.singlesRoomJoiner(player, roomId);
 	}
 
-	private singlesRoomJoiner(player: PongPlayer, roomId: string | 0) {
-		if (roomId === 0) this.headToHeadManager.putPlayerInRandomRoom(player);
+	public playerJoinDoubles(connection: WebSocket,roomId: string)
+	{
+		const player: PongPlayer = new PongPlayer(connection);
+		this.doublesRoomJoiner(player, roomId);
+	}
+
+	public playerJoinTournament(connection: WebSocket, tournamentSize:number)
+	{
+		const player: PongPlayer = new PongPlayer(connection);
+		this.tournamentJoiner(player, tournamentSize )
+	}
+
+	//TODO remove old Player joiner with big ass query
+	// private playerJoiner(
+	// 	connection: WebSocket,
+	// 	matchType: "singles" | "tournament" | "doubles",
+	// 	tournamentSize: number,
+	// 	roomId: string | 0,
+	// ) {
+	// 	const player: PongPlayer = new PongPlayer(connection);
+	// 	// if (matchType === "singles") this.singlesRoomJoiner(player, roomId);
+	// 	// else if (matchType === "doubles")
+	// 	// 	this.doublesRoomJoiner(player, roomId);
+	// 	// else if (matchType === "tournament")
+	// 	// 	this.tournamentJoiner(player, tournamentSize);
+	// }
+
+	private singlesRoomJoiner(player: PongPlayer, roomId: string) {
+		if (roomId === "public") this.headToHeadManager.putPlayerInRandomRoom(player);
 		else
 			this.headToHeadManager.putPlayerInPrivateRoom(
 				player,
@@ -56,8 +75,8 @@ export class MatchMaking {
 			);
 	}
 
-	private doublesRoomJoiner(player: PongPlayer, roomId: string | 0) {
-		if (roomId === 0)
+	private doublesRoomJoiner(player: PongPlayer, roomId: string) {
+		if (roomId === "public")
 			this.headToHeadManager.putPlayerInRandomRoomDoubles(player);
 		else
 			this.headToHeadManager.putPlayerInPrivateRoom(
@@ -78,8 +97,8 @@ export class MatchMaking {
 		this.tournamentManager.putPlayerInTournament(player, tournamentSize);
 	}
 
-	private spectatorJoiner(connection: WebSocket, roomId: string | 0): void {
-		if (roomId === 0) {
+	public spectatorJoiner(connection: WebSocket, roomId: string): void {
+		if (roomId === "") {
 			connection.send("roomId is required query if you are spectator");
 			connection.close();
 			return;
