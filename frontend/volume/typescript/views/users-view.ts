@@ -55,13 +55,14 @@ export class UsersView extends HTMLElement {
 				"flex",
 				"sm:grid",
 				"sm:grid-rows-0",
-				"sm:grid-cols-[1fr_18rem_1fr_1fr_1fr]",
-				"lg:grid-cols-[1fr_24rem_1fr_1fr_1fr]",
+				"sm:grid-cols-[1fr_18rem_1fr_1fr_1fr_1fr]",
+				"lg:grid-cols-[1fr_24rem_1fr_1fr_1fr_1fr]",
 				"items-center",
 				"gap-x-8",
 				"gap-y-5",
 				"sm:gap-2",
 			);
+			// AVATAR PICTURE
 			const avatarContainer = document.createElement("div");
 			avatarContainer.classList.add("flex", "justify-center");
 			const avatar = document.createElement("img");
@@ -76,6 +77,7 @@ export class UsersView extends HTMLElement {
 			);
 			avatar.src = "/static-files/images/avatar_placeholder.png";
 
+			// NICKNAME
 			const name = document.createElement("h2");
 			name.innerText = user.nickname;
 			name.classList.add(
@@ -92,13 +94,37 @@ export class UsersView extends HTMLElement {
 				"text-ellipsis",
 				"overflow-hidden",
 			);
+
+			// FRIENDREQUEST
+			const friendIcon = new IconComponent("friend", 4);
+			const friendButton = document.createElement("button");
+			friendButton.classList.add(
+				"pong-button",
+				"pong-button-special",
+				"justify-self-center",
+			);
+			friendButton.append(friendIcon);
+			const friendLabel = document.createElement("div");
+			friendLabel.innerText = "friend";
+			friendLabel.classList.add(
+				"text-xs",
+				"text-slate-500",
+				"absolute",
+				"-bottom-5",
+			);
+
+			const friendContainer = document.createElement("div");
+			friendContainer.classList.add("relative", "flex", "justify-center");
+			friendContainer.append(friendButton, friendLabel);
+
+			// WINS LOSSES STATS
 			const wins = document.createElement("div");
 			wins.innerText = "wins";
 			wins.classList.add(
 				"text-slate-500",
 				"text-xs",
 				"absolute",
-				"-bottom-3",
+				"-bottom-4",
 			);
 			const winsNumber = document.createElement("div");
 			winsNumber.innerText = String(user.wins);
@@ -124,7 +150,7 @@ export class UsersView extends HTMLElement {
 				"absolute",
 				"text-xs",
 				"text-slate-500",
-				"-bottom-3",
+				"-bottom-4",
 			);
 			const lossesNumber = document.createElement("div");
 			lossesNumber.innerText = String(user.losses);
@@ -143,6 +169,7 @@ export class UsersView extends HTMLElement {
 			);
 			lossesContainer.append(lossesNumber, losses);
 
+			// ONLINE STATUS
 			const status = document.createElement("div");
 			status.classList.add(
 				"flex",
@@ -151,6 +178,7 @@ export class UsersView extends HTMLElement {
 				"gap-2",
 				"relative",
 			);
+
 			const statusIcon = new IconComponent("online", 6);
 			statusIcon.classList.add("rounded-full", "border-0", "status-icon");
 			statusIcon.id = user.nickname;
@@ -160,12 +188,13 @@ export class UsersView extends HTMLElement {
 				"text-xs",
 				"text-slate-500",
 				"absolute",
-				"-bottom-5",
+				"-bottom-6",
 			);
 			status.append(statusIcon, statusText);
 			card.append(
 				avatarContainer,
 				name,
+				friendContainer,
 				winsContainer,
 				lossesContainer,
 				status,
