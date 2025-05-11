@@ -15,5 +15,9 @@
     "url": "https://github.com/marcorondong/transcendence2.0/issues"
   },
   "homepage": "https://github.com/marcorondong/transcendence2.0#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11"
+  }
 }
