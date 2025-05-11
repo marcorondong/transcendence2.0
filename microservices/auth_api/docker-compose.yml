@@ -4,15 +4,13 @@ services:
     container_name: auth_api_container
     build: .
     volumes:
-      - ./src/:/auth_api/src/
-      - ./public/:/auth_api/public/
-    environment:
+      - ./src/:/auth_api/src/ # TODO remove this in production
+    environment: # receive env variables from .env file
       - NODE_ENV=development
       - PORT=2999
       - HOST=0.0.0.0
-    ports:
+    ports: # TODO remove this in production
       - 2999:2999
+    networks:
+      - Transcendence2.0
     restart: always
-
-include:
-  - ../users/docker-compose.yml

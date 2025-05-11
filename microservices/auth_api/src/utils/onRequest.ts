@@ -6,11 +6,10 @@ export async function onRequest(
 ) {
 	if (
 		request.url === "/auth-api/sign-in" ||
-		request.url === "/auth-api/health-check" ||
-		request.url === "/"
-	) {
+		request.url === "/auth-api/health-check"
+	)
 		return;
-	}
+	if (request.url.startsWith('/auth-api/documentation'))
+		return;
 	await request.jwtVerify();
-	console.log("JWT Token:", request.user);
 }

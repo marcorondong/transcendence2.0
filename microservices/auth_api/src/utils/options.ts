@@ -41,16 +41,16 @@ export const serverOption = {
 };
 
 export const jwtOption = {
-	secret: 'jwt_secret_key', // process.env.JWT_SECRET' // or JWT_SECRET over docker secrets
+	secret: 'jwt_secret_key', // TODO JWT_SECRET over docker secrets
 	cookie: {
-		cookieName: 'access_token', // Name of the cookie to be used
-		signed: true, // Ensures the cookie is signed
+		cookieName: 'access_token', // TODO JWT_COOKIE_NAME over environment variable
+		signed: true,
 	},
 }
 
 export const cookieOption = {
-	secret: "cookie_secret_key", // process.env.COOKIE_SECRET,  // adds additional layer of protection. Prevents modify its contents and ensuring the integrity of the cookie’s data. However, adds a bit of overhead
+	secret: "cookie_secret_key", // TODO COOKIE_SECRET over docker secrets
 	parseOptions: {
-		signed: true, // Ensures the cookie is signed
+		signed: true,
 	},
 }

@@ -1,7 +1,7 @@
 import httpError from "http-errors";
 import { payloadZodSchema } from "./zodSchemas";
 
-export async function signInRequest(
+export async function signInRequest(  // TODO update signInRequest to use username instead of email when users service is updated
 	email: string,
 	password: string,
 ) {
@@ -13,13 +13,9 @@ export async function signInRequest(
 		body: JSON.stringify({ email, password }),
 	});
 	if (!response.ok) {
-		console.log("Response not ok", response.status);
 		throw new httpError.Unauthorized("Invalid email or password");
 	}
 	const data = await response.json();
-	// if (!data.success) {
-	// 	throw new httpError.Unauthorized("Invalid email or password");
-	// }
-	const payload = data; //payloadZodSchema.parse(data); // TODO once it works in Marco side, append the payloadZodSchema
+	const payload = payloadZodSchema.parse(data);
 	return payload;
 }

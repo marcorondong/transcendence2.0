@@ -35,7 +35,7 @@ export class Bot {
 	private target: Point;
 	private framesUntilTarget: number;
 	private framesAfterTarget: number;
-	private moveCommand = { move: "", paddle: "" };
+	private moveCommand = { move: ""};
 	private leftScore = 0;
 	private rightScore = 0;
 	private paddleY = 0;
@@ -69,12 +69,10 @@ export class Bot {
 			Math.abs(this.target.getX()) / this.BALL_SPEED,
 		);
 		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
-		this.moveCommand.paddle = this.side < 0 ? "left" : "right";
 	}
 
 	public playGame() {
-		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong-api/pong`);
-
+		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong-api/pong/singles`);
 		try {
 			this.ws.on("open", () => {
 				console.log(

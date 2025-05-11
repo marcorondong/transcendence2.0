@@ -8,8 +8,8 @@ import {
 
 export async function authRoutes(server: FastifyInstance) {
 
-	server.post("/sign-in", signInOpt);
-	server.delete("/sign-out", signOutOpt);
-	server.get("/verify-jwt", verifyJWTOpt);
-	server.get("/health-check", healthCheckOpt);
+	server.post("/auth-api/sign-in", signInOpt);
+	server.delete("/auth-api/sign-out", signOutOpt);
+	server.get("/auth-api/verify-jwt", verifyJWTOpt);
+	server.get("/auth-api/health-check", healthCheckOpt);
 }

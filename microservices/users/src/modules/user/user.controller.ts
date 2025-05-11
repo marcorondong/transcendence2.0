@@ -62,7 +62,8 @@ export async function loginHandler(
 		// // Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
 		// const parsedToken = loginResponseSchema.parse({ accessToken });
 		// return reply.code(200).send(parsedToken);
-		return reply.code(200).send({ id: user.id, name: user.name });
+		const id = crypto.randomUUID();
+		return reply.code(200).send({ id: id, nickname: user.name });
 	} catch (err) {
 		// If user not found or password invalid, always send same generic 401
 		if (err instanceof AppError && err.statusCode === 404) {

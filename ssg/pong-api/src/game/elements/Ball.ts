@@ -1,5 +1,5 @@
 import { Point, VectorDirection } from "./Point";
-import {ballConfig} from "../../config"
+import { ballConfig } from "../../config";
 
 const MOVE_COEFFICIENT = 5;
 
@@ -19,7 +19,10 @@ export class Ball {
 
 	constructor(
 		position: Point,
-		vector: Point = new Point(ballConfig.x, ballConfig.y),
+		vector: Point = new Point(
+			ballConfig.initial_direction.x,
+			ballConfig.initial_direction.y,
+		),
 		radius = ballConfig.radius,
 	) {
 		this.initialPosition = new Point(position.getX(), position.getY());

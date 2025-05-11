@@ -1,16 +1,19 @@
 import Fastify from "fastify";
-import websocket from "@fastify/websocket";
+import websocket, { WebSocket } from "@fastify/websocket";
 import fs from "fs";
 import path from "path";
 import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
-import { Tournament } from "./game/modes/singles/Tournament";
+import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
+import { Parsing } from "./utils/Parsing";
 
 dotenv.config();
 
 const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
+const BASE_API_NAME = "pong-api";
+const BASE_GAME_PATH = "pong";
 
 const fastify = Fastify({
 	logger:
@@ -24,7 +27,7 @@ const fastify = Fastify({
 							ignore: "pid,hostname", //Hide fields
 						},
 					},
-			  }
+				}
 			: true,
 });
 
@@ -35,15 +38,6 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
 });
 
-export interface IGameRoomQuery {
-	roomId: string | 0;
-	playerId: string;
-	privateRoom: boolean;
-	clientType: "player" | "spectator";
-	matchType: "singles" | "tournament" | "doubles";
-	tournamentSize: number;
-}
-
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
@@ -52,43 +46,60 @@ fastify.register(async function (fastify) {
 		});
 	});
 
-	fastify.get("/pong-api/health-check", async (request, reply) => {
+	fastify.get(`/${BASE_API_NAME}/health-check`, async (request, reply) => {
 		reply.code(200).send({
 			message:
 				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
 		});
 	});
 
-	fastify.get("/pong-api/player-room/:playerId", async (request, reply) => {
-		const { playerId } = request.params as { playerId: string };
-		reply.send({
-			roomId: manager.getPlayerRoomId(playerId),
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/player-room/:playerId`,
+		async (request, reply) => {
+			const { playerId } = request.params as { playerId: string };
+			reply.send({
+				roomId: manager.getPlayerRoomId(playerId),
+			});
+		},
+	);
 
-	//Partial makes all field optional.
-	fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-		"/pong-api/pong",
+	fastify.get(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/spectate/:roomId`,
 		{ websocket: true },
 		(connection, req) => {
-			const {
-				roomId = 0,
-				playerId = "Player whatever",
-				privateRoom = false,
-				clientType = "player",
-				matchType = "singles",
-				tournamentSize = Tournament.getDefaultTournamentSize(),
-			} = req.query as IGameRoomQuery;
+			const { roomId } = req.params as { roomId: string };
+			console.log("Spectate game: ", roomId);
+			manager.spectatorJoiner(connection, roomId);
+		},
+	);
 
-			const gameQuery: IGameRoomQuery = {
-				roomId,
-				playerId,
-				privateRoom,
-				clientType,
-				matchType,
-				tournamentSize,
-			};
-			manager.matchJoiner(connection, gameQuery);
+	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
+		{ websocket: true },
+		(connection, req) => {
+			const roomId = Parsing.parseRoomId(req, connection);
+			if (roomId === false) return;
+			manager.playerJoinSingles(connection, roomId);
+		},
+	);
+
+	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
+		{ websocket: true },
+		(connection, req) => {
+			const roomId = Parsing.parseRoomId(req, connection);
+			if (roomId === false) return;
+			manager.playerJoinDoubles(connection, roomId);
+		},
+	);
+
+	fastify.get<{ Querystring: Partial<TournamentSizeQuery> }>(
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
+		{ websocket: true },
+		(connection, req) => {
+			const tournamentSize = Parsing.parseTournamentSize(req, connection);
+			if (tournamentSize === false) return;
+			manager.playerJoinTournament(connection, tournamentSize);
 		},
 	);
 

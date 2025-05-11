@@ -9,83 +9,51 @@ Each interaction follows this pattern:
 
 ---
 
-## 📩 1. Message Someone
+## 📩 Message Someone
 
 **User1 sends a message to User2**
 
 ### Request (from User1)
 ```json
 {
-  "type": "message",
-  "message": "any message",
-  "relatedId": "UUID of user2"
-} 
+    "type": "message",
+    "id": "id of User2",
+    "message": "any message"
+}
 ```
 
 ### Reply (to User1)
 ```json
 {
-  "type": "messageResponse",
-  "message": "any message",
-  "relatedId": "UUID of user1"
+    "type": "message",
+    "sender": {
+        "id": "id of User1",
+        "nickname": "nickname of User1"
+    },
+    "receiver": {
+        "id": "id of User2",
+        "nickname": "nickname of User2"
+    },
+    "message": "new message"
 }
 ```
 ### Reply (to User2)
 ```json
 {
-  "type": "messageResponse",
-  "message": "any message",
-  "relatedId": "UUID of user1"
+    "type": "message",
+    "sender": {
+        "id": "id of User1",
+        "nickname": "nickname of User1"
+    },
+    "receiver": {
+        "id": "id of User2",
+        "nickname": "nickname of User2"
+    },
+    "message": "new message"
 }
 ```
 
-## 🚫 2. Block / Unblock a User
-
-** User1 blocks or unblocks User2 **
-
-### Request (from User1)
-```json
-{
-  "type": "block",
-  "relatedId": "UUID of user2"
-}
-```
-
-### Reply (to User1)
-```json
-{
-  "type": "blockResponse",
-  "relatedId": "UUID of user2",
-  "notification": "optional for debugging",
-}
-```
-Note: No reply is sent to User2 by default. Can be add upon request.
-
-
-## 🚫 3. Block Status Check
-
-** User1 checks User2 block status **
-
-### Request (from User1)
-```json
-{
-  "type": "blockStatus",
-  "relatedId": "UUID of user2"
-}
-```
-
-### Reply (to User1)
-```json
-{
-  "type": "blockStatusResponse",
-  "blockStatus": true or false,
-  "relatedId": "UUID of user2",
-  "notification": "optional for debugging",
-}
-```
-Note: No reply is sent to User2 by default. Can be add upon request.
-
-## 📨 4. Invite Someone
+## 📨 Invite Someone
 
 **User1 sends an invitation to User2**
 
@@ -93,109 +61,78 @@ Note: No reply is sent to User2 by default. Can be add upon request.
 ```json
 {
   "type": "invite",
-  "relatedId": "UUID of user2"
+  "id": "id of user2"
 }
 ```
 
 ### Reply (to User2)
 ``` json
 {
-  "type": "inviteResponse",
-  "relatedId": "UUID of user1",
-  "roomId": "Room id to open socket",
-  "notification": "optional for debugging",
+    "type": "invite",
+    "user": {
+        "id": "id of User1",
+        "nickname": "nickname of User1"
+    },
+    "roomId": "Room id to open socket",
 }
 ```
 Note: No reply is sent to User1. Can be add upon request.
 
-## ❌ 5. Terminate user
+## 👤 New User Joined
 
-**If you want to close websocket connection of client**
+**A new User (e.g., User101) joins the server**
 
-### Request (from User)
+### Reply (to User101)
 ```json
 {
-  "type": "terminate",
-}
-``` 
-
-<!-- No need this step as process is simpler now -->
-<!-- ## ✅ Accept Invitation
-
-**User2 accepts User1's invitation**
-
-### Request (from User2)
-```json
-{
-  "inviteAccepted": true,
-  "relatedId": "UUID of user1"
+    "type": "onlineUsers",
+    "users": 
+	[
+        {
+            "id": "id of User1",
+            "nickname": "nickname of User1"
+        },
+        {
+            "id": "id of other Users",
+            "nickname": "nickname of other Users"
+        },
+        {
+            "id": "id of User100",
+            "nickname": "nickname of User100"
+        }
+    ],
+    "me": {
+        "id": "id of current user",
+        "nickname": "nickname of current user"
+    }
 }
 ```
-
-### Reply (to User1)
+### Reply (to all other Users)
 ``` json
 {
-  "openSocket": true,
-  "relatedId": "UUID of user2"
-}
-``` -->
-
-<!-- No need this step as process is simpler now -->
-<!-- ### 🔌 Socket Initialization
-
-**Once the socket is established, User1 must notify the backend**
-
-### Request (from User1)
-```json
-{
-  "socketOpened": true,
-  "relatedId": "UUID of user2"
-}
-```
-
-### Reply (to User2)
-``` json
-{
-  "joinRoom": true,
-  "roomId": "room id to build connection with"
-}
-``` -->
-
-## 👤 New Client Joined
-
-**A new client (e.g., user101) joins the app**
-
-### Reply (to user101)
-```json
-{
-  "type": "peopleOnline",
-  "peopleOnline": ["array", "of", "all", "online", "people"],
-  "notification": "optional for debugging",
-} 
-```
-### Reply (to all other users)
-``` json
-{
-  "type": "newClient",
-  "relatedId": "UUID of user101",
-  "notification": "optional for debugging",
+    "type": "newUser",
+    "user": {
+        "id": "id of User101",
+        "nickname": "nickname of User101"
+    }
 }
 ```
 
 ## 🔌 Disconnection Event
 
-**When a client disconnects, the backend sends a disconnection event.**
+**When a User disconnects, the backend sends a disconnection event.**
 
-### Reply (to other clients)
+### Reply (to all other Users)
 ```json
 {
-  "type": "disconnected",
-  "relatedId": "UUID of the disconnected client",
-  "notification": "optional for debugging",
+    "type": "disconnected",
+    "user": {
+        "id": "id of disconnected User",
+        "nickname": "nickname of disconnected User"
+    }
 }
 ```
 Note: This event informs all other clients about the disconnection, and they can update their UI accordingly (e.g., removing the user from the online list).
-
 
 ## ❌ Error Handling
 
@@ -204,9 +141,8 @@ Note: This event informs all other clients about the disconnection, and they can
 ### Reply (to client)
 ```json
 {
-  "type": "error",
-  "relatedId": "UUID of the client",
-  "error": "Description of the error"
+    "type": "error",
+    "errorMessage": "Error Message"
 }
 ``` 
 
