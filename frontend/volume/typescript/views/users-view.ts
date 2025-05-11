@@ -1,9 +1,8 @@
-import { TableComponent } from "../components/table-component.js";
 import { IconComponent } from "../components/icon-component.js";
 
 const users = [
 	{
-		nickname: "ShadowHunter whaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat",
+		nickname: "ShadowHunter",
 		wins: 34,
 		losses: 12,
 		online: true,
@@ -29,40 +28,66 @@ export class UsersView extends HTMLElement {
 	connectedCallback() {
 		console.log("users View has been connected");
 
-		const h1 = document.createElement("h1");
-		h1.textContent = "Users";
-		this.appendChild(h1);
+		// const h1 = document.createElement("h1");
+		// h1.textContent = "Users";
+		// this.appendChild(h1);
 
 		const container = document.createElement("div");
-		container.classList.add("flex", "flex-col", "gap-3");
+		container.classList.add(
+			"flex",
+			"flex-col",
+			"gap-3",
+			"sm:max-w-240",
+			"sm:justify-self-center",
+		);
 		this.append(container);
 		for (const user of users) {
 			const card = document.createElement("div");
 			card.classList.add(
 				"pong-card",
+				"flex-wrap",
 				"pong-card-hover",
+				"justify-center",
 				"px-4",
-				"py-2",
-				"grid",
-				"grid-cols-[5rem_20rem_1fr_1fr_1fr]",
+				"pb-10",
+				"pt-8",
+				"sm:py-2",
+				"flex",
+				"sm:grid",
+				"sm:grid-rows-0",
+				"sm:grid-cols-[1fr_18rem_1fr_1fr_1fr]",
+				"lg:grid-cols-[1fr_24rem_1fr_1fr_1fr]",
 				"items-center",
-				"gap-8",
-				"relative",
+				"gap-x-8",
+				"gap-y-5",
+				"sm:gap-2",
 			);
+			const avatarContainer = document.createElement("div");
+			avatarContainer.classList.add("flex", "justify-center");
 			const avatar = document.createElement("img");
+			avatarContainer.append(avatar);
 			avatar.classList.add(
 				"rounded-full",
-				"border-6",
+				"sm:border-6",
+				"border-8",
 				"border-indigo-800",
+				"w-30",
+				"sm:w-20",
 			);
 			avatar.src = "/static-files/images/avatar_placeholder.png";
-			avatar.width = 80;
 
 			const name = document.createElement("h2");
 			name.innerText = user.nickname;
 			name.classList.add(
-				"text-xl",
+				"flex-grow",
+				"basis-full",
+				"sm:flex-none",
+				"px-4",
+				"sm:text-xl",
+				"text-2xl",
 				"font-bold",
+				"text-center",
+				"sm:text-left",
 				"text-nowrap",
 				"text-ellipsis",
 				"overflow-hidden",
@@ -73,7 +98,7 @@ export class UsersView extends HTMLElement {
 				"text-slate-500",
 				"text-xs",
 				"absolute",
-				"bottom-3",
+				"-bottom-3",
 			);
 			const winsNumber = document.createElement("div");
 			winsNumber.innerText = String(user.wins);
@@ -88,6 +113,7 @@ export class UsersView extends HTMLElement {
 				"flex-col",
 				"gap-1",
 				"items-center",
+				"relative",
 			);
 			winsContainer.append(winsNumber, wins);
 
@@ -98,7 +124,7 @@ export class UsersView extends HTMLElement {
 				"absolute",
 				"text-xs",
 				"text-slate-500",
-				"bottom-3",
+				"-bottom-3",
 			);
 			const lossesNumber = document.createElement("div");
 			lossesNumber.innerText = String(user.losses);
@@ -113,17 +139,17 @@ export class UsersView extends HTMLElement {
 				"flex-col",
 				"gap-1",
 				"items-center",
+				"relative",
 			);
 			lossesContainer.append(lossesNumber, losses);
 
 			const status = document.createElement("div");
 			status.classList.add(
-				"justify-self-end",
-				"px-5",
 				"flex",
 				"flex-col",
 				"items-center",
 				"gap-2",
+				"relative",
 			);
 			const statusIcon = new IconComponent("online", 6);
 			statusIcon.classList.add("rounded-full", "border-0", "status-icon");
@@ -134,10 +160,16 @@ export class UsersView extends HTMLElement {
 				"text-xs",
 				"text-slate-500",
 				"absolute",
-				"bottom-3",
+				"-bottom-5",
 			);
 			status.append(statusIcon, statusText);
-			card.append(avatar, name, winsContainer, lossesContainer, status);
+			card.append(
+				avatarContainer,
+				name,
+				winsContainer,
+				lossesContainer,
+				status,
+			);
 			container.append(card);
 			this.applyOnlineStatus();
 		}
@@ -149,7 +181,6 @@ export class UsersView extends HTMLElement {
 
 	applyOnlineStatus() {
 		const icons = [...this.getElementsByClassName("status-icon")];
-		console.log("icons:", icons);
 		icons.map((icon) => {
 			const status = this.users.find(
 				(user) => user.nickname === icon.id,
