@@ -3,6 +3,16 @@ pragma solidity ^0.8.0;
 
 contract TournamentScores {
 	uint256 gamesCount = 0;
+	address public contractOwner;
+
+	constructor() {
+		contractOwner = msg.sender; //deployer of contract is owner
+	}
+
+	modifier onlyOwner() {
+		require(msg.sender == contractOwner, "Not the owner of contract");
+		_; //this means insert the code of the function here after the check. So in record game owner is checked and then the rest of logic is applied
+	}
 
 	struct Game {
 		string gameId;
@@ -19,7 +29,7 @@ contract TournamentScores {
 		uint8 player1Score,
 		string player2Id,
 		uint player2Score,
-        uint timestamp
+		uint timestamp
 	);
 
 	mapping(string => Game) private games;
@@ -32,7 +42,7 @@ contract TournamentScores {
 		string memory _player2,
 		uint8 _player1Score,
 		uint8 _player2Score
-	) public {
+	) public onlyOwner {
 		require(!games[_gameId].exist, "Game already exist");
 		require(
 			_player1Score != _player2Score,
@@ -48,7 +58,14 @@ contract TournamentScores {
 		);
 		games[_gameId] = oneGame;
 		gamesCount++;
-		emit GameLog(_gameId, _player1, _player1Score, _player2, _player2Score, block.timestamp);
+		emit GameLog(
+			_gameId,
+			_player1,
+			_player1Score,
+			_player2,
+			_player2Score,
+			block.timestamp
+		);
 	}
 
 	function getGamesCount() external view returns (uint256) {

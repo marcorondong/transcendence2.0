@@ -4,7 +4,7 @@
 ```
 docker-compose up
 ```
-### 2. open the [game](http://localhost:3010/pingpong) in your browser 
+### 2. open the [game](http://localhost:3010/pong-api/ping-pong) in your browser 
   
 ### 3. send a POST request from [Swagger docs](http://localhost:6969/documentation) or directly to http://localhost:6969/game-mandatory. 
 

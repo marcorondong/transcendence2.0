@@ -1,13 +1,15 @@
 import { z } from "zod";
 
 export const idZodSchema = z.object({
-	userId: z.string().min(1, "User ID cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
+	userId: z.string().min(1), // TODO .uuid(),
 }).strict();
 
 export const idsZodSchema = z.object({
-	userId: z.string().min(1, "User ID cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
-	friendId: z.string().min(1, "User ID cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
-}).strict();
+	userId: z.string().min(1), // TODO .uuid(),
+	friendId: z.string().min(1), // TODO .uuid(),
+})
+.strict()
+.refine((data) => data.userId !== data.friendId);
 
 export const blockStatusResponseSchema = z.object({
 	blockStatus: z.boolean(),
