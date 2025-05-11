@@ -61,8 +61,7 @@ export class Bot {
 	}
 
 	public playGame() {
-		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong-api/pong`);
-
+		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong-api/pong/singles`);
 		try {
 			this.ws.on("open", () => {
 				console.log(

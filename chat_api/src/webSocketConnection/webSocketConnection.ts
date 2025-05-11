@@ -4,78 +4,131 @@ import { postRequestCreateUser } from "./service";
 import { Client } from "../utils/Client";
 import type { WebSocket } from "@fastify/websocket";
 import type { FastifyRequest } from "fastify";
-import { webSocketRequests } from "./requests";
+import { requests } from "./requests";
 import {
-	blockListSchema,
-	peopleOnlineResponseSchema,
-	newClientResponseSchema,
+	onlineUsersResponseSchema,
+	newUserResponseSchema,
 	errorResponseSchema,
 	disconnectedResponseSchema,
 } from "./zodSchemas";
+
 export const onlineClients: Map<string, Client> = new Map<string, Client>();
 
-function handleConnection(
+function errorHandler(
+	socket: WebSocket,
+	error: any,
+) {
+	const errorResponse = errorResponseSchema.parse({
+		type: "error",
+		errorMessage: `${error}`,
+	});
+	socket.send(JSON.stringify(errorResponse));
+	console.error(error);
+}
+
+function connectionHandler(
 	socket: WebSocket,
 	request: FastifyRequest,
 	client: Client,
 ) {
-	const peopleOnline = Array.from(onlineClients.values()).map((client) =>
-		client.getId(),
+	const currentId = client.getId();
+	const currentNickname = client.getNickname();
+	const onlineUsers = Array.from(onlineClients.values()).map((client) =>
+		({
+			id: client.getId(),
+			nickname: client.getNickname(),
+		}),
 	);
-	const peopleOnlineResponse = peopleOnlineResponseSchema.parse({
-		type: "peopleOnline",
-		peopleOnline: peopleOnline,
-		notification: `Welcome to the chat server!`,
+	const onlineUsersResponse = onlineUsersResponseSchema.parse({
+		type: "onlineUsers",
+		users: onlineUsers,
+		me: {
+			id: currentId,
+			nickname: currentNickname,
+		},
+	});	
+	const newUserResponse = newUserResponseSchema.parse({
+		type: "newUser",
+		user: {
+			id: currentId,
+			nickname: currentNickname,
+		},
 	});
-	const newClientResponse = newClientResponseSchema.parse({
-		type: "newClient",
-		relatedId: client.getId(),
-		notification: `${client.getId()} joined server!`,
-	});
-	socket.send(JSON.stringify(peopleOnlineResponse));
+	console.log(onlineUsersResponse);
+	console.log(newUserResponse);
+	socket.send(JSON.stringify(onlineUsersResponse));
 	onlineClients.forEach((person) => {
-		person.getSocket().send(JSON.stringify(newClientResponse));
+		person.getSocket().send(JSON.stringify(newUserResponse));
 	});
-	onlineClients.set(client.getId(), client);
-	console.log(`Client ${client.getId()} connected`);
+	onlineClients.set(currentId, client);
+	console.log(`Client ${currentNickname} connected`);
+}
+
+function setPingInterval(
+	socket: WebSocket,
+) {
+	const pingInterval = setInterval(() => {
+		if (socket.readyState === WebSocket.OPEN) {
+			socket.ping();
+		} else {
+			clearInterval(pingInterval);
+			console.log("Ping interval cleared");
+		}
+	}, 30000);
 }
 
 export async function webSocketConnection(server: FastifyInstance) {
 	server.get("", { websocket: true }, async (socket, request) => {
-		const userId = faker.person.firstName(); // TODO change once I can get the userId from JWT
-		const user = await postRequestCreateUser(userId);
-		const blockList = new Set<string>(
-			blockListSchema.parse(user).blockList,
-		);
-		const client = new Client(userId, socket, blockList);
+		try {
+			const id = faker.person.firstName(); // TODO change once I can get the id from JWT
+			const nickname = id; // TODO change once I can get the nickname from JWT
+			await postRequestCreateUser(id);
+			const client = new Client(id, nickname, socket);
+			
+			connectionHandler(socket, request, client);
+			
+			setPingInterval(socket);
 
-		handleConnection(socket, request, client);
-
-		socket.on("message", async (message: string) => {
-			try {
-				await webSocketRequests(message, client);
-			} catch (error) {
-				server.log.error(error);
-				const errorResponse = errorResponseSchema.parse({
-					type: "error",
-					relatedId: client.getId(),
-					error: `${error}`,
-				});
-				socket.send(JSON.stringify(errorResponse));
-			}
-		});
-
-		socket.on("close", async () => {
-			console.log(`Client ${client.getId()} disconnected`); // TODO for debugging purposes
-			onlineClients.delete(client.getId());
-			const disconnectedResponse = disconnectedResponseSchema.parse({
-				type: "disconnected",
-				relatedId: client.getId(),
-				notification: `${client.getId()} left the server!`,
+			socket.on("message", async (message: string) => {
+				try {
+					await requests(message, client);
+				} catch (error) {
+					errorHandler(socket, error);
+				}
 			});
-			onlineClients.forEach((person) => {
-				person.getSocket().send(JSON.stringify(disconnectedResponse));
+
+			socket.on("error", (error: any) => {
+				errorHandler(socket, error);
 			});
-		});
+
+			socket.on("ping", () => {
+				socket.pong();
+			});
+
+			socket.on("pong", () => {
+				console.log("Pong received");
+			});
+
+			socket.on("close", async () => {
+				try {
+					console.log(`Client ${client.getId()} disconnected`); // TODO for debugging purposes
+					onlineClients.delete(client.getId());
+					const disconnectedResponse = disconnectedResponseSchema.parse({
+						type: "disconnected",
+						user: {
+							id: client.getId(),
+							nickname: client.getNickname(),
+						},
+					});
+					onlineClients.forEach((person) => {
+						person.getSocket().send(JSON.stringify(disconnectedResponse));
+					});
+				} catch (error) {
+					errorHandler(socket, error);
+				}
+			});
+		} catch (error) {
+			errorHandler(socket, error);
+		}
 	});
 }
