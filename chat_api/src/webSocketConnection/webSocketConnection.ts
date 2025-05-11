@@ -14,10 +14,7 @@ import {
 
 export const onlineClients: Map<string, Client> = new Map<string, Client>();
 
-function errorHandler(
-	socket: WebSocket,
-	error: any,
-) {
+function errorHandler(socket: WebSocket, error: any) {
 	const errorResponse = errorResponseSchema.parse({
 		type: "error",
 		errorMessage: `${error}`,
@@ -33,12 +30,10 @@ function connectionHandler(
 ) {
 	const currentId = client.getId();
 	const currentNickname = client.getNickname();
-	const onlineUsers = Array.from(onlineClients.values()).map((client) =>
-		({
-			id: client.getId(),
-			nickname: client.getNickname(),
-		}),
-	);
+	const onlineUsers = Array.from(onlineClients.values()).map((client) => ({
+		id: client.getId(),
+		nickname: client.getNickname(),
+	}));
 	const onlineUsersResponse = onlineUsersResponseSchema.parse({
 		type: "onlineUsers",
 		users: onlineUsers,
@@ -46,7 +41,7 @@ function connectionHandler(
 			id: currentId,
 			nickname: currentNickname,
 		},
-	});	
+	});
 	const newUserResponse = newUserResponseSchema.parse({
 		type: "newUser",
 		user: {
@@ -64,19 +59,6 @@ function connectionHandler(
 	console.log(`Client ${currentNickname} connected`);
 }
 
-function setPingInterval(
-	socket: WebSocket,
-) {
-	const pingInterval = setInterval(() => {
-		if (socket.readyState === WebSocket.OPEN) {
-			socket.ping();
-		} else {
-			clearInterval(pingInterval);
-			console.log("Ping interval cleared");
-		}
-	}, 30000);
-}
-
 export async function webSocketConnection(server: FastifyInstance) {
 	server.get("", { websocket: true }, async (socket, request) => {
 		try {
@@ -84,10 +66,11 @@ export async function webSocketConnection(server: FastifyInstance) {
 			const nickname = id; // TODO change once I can get the nickname from JWT
 			await postRequestCreateUser(id);
 			const client = new Client(id, nickname, socket);
-			
+			const pingInterval = setInterval(() => {
+				socket.ping();
+			}, 30000);
+
 			connectionHandler(socket, request, client);
-			
-			setPingInterval(socket);
 
 			socket.on("message", async (message: string) => {
 				try {
@@ -111,17 +94,21 @@ export async function webSocketConnection(server: FastifyInstance) {
 
 			socket.on("close", async () => {
 				try {
+					clearInterval(pingInterval);
 					console.log(`Client ${client.getId()} disconnected`); // TODO for debugging purposes
 					onlineClients.delete(client.getId());
-					const disconnectedResponse = disconnectedResponseSchema.parse({
-						type: "disconnected",
-						user: {
-							id: client.getId(),
-							nickname: client.getNickname(),
-						},
-					});
+					const disconnectedResponse =
+						disconnectedResponseSchema.parse({
+							type: "disconnected",
+							user: {
+								id: client.getId(),
+								nickname: client.getNickname(),
+							},
+						});
 					onlineClients.forEach((person) => {
-						person.getSocket().send(JSON.stringify(disconnectedResponse));
+						person
+							.getSocket()
+							.send(JSON.stringify(disconnectedResponse));
 					});
 				} catch (error) {
 					errorHandler(socket, error);

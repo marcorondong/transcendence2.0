@@ -142,6 +142,7 @@ services:
 include:
   - ./monitoring/monitoring-docker-compose.yml
   - ./frontend/docker-compose.yml
+  - ./microservices/auth_api/docker-compose.yml
 
 networks:
   Transcendence2.0:
