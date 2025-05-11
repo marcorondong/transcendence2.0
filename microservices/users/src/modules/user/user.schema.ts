@@ -6,15 +6,17 @@ const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
 // Type definition for sorting by field (from User fields)
-const userPublicFields = ["id", "email", "name"] as const;
+const userPublicFields = ["id", "email", "username", "nickname"] as const;
 const userSortByEnum = z.enum(userPublicFields);
 export type UserPublicField = (typeof userPublicFields)[number];
 
 // Type definition to allow one field per query (used in )
 export type UniqueUserField =
-	| { id: number }
+	// | { id: number }
+	| { id: string }
 	| { email: string }
-	| { name: string };
+	| { username: string }
+	| { nickname: string };
 
 // Type definition to allowing multiple User fields per query
 export type UserField = Partial<Record<UserPublicField, string | number>>;
@@ -64,21 +66,38 @@ export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
 	return z.object(newShape) as T;
 };
 
-// Name field schema
-export const nameField = z
+// Username field schema
+export const usernameField = z
 	.string({
-		required_error: "Name is required",
-		invalid_type_error: "Name must be a string",
+		required_error: "Username is required",
+		invalid_type_error: "Username must be a string",
 	})
-	.min(3, "Name must be at least 3 characters long")
+	.min(3, "Username must be at least 3 characters long")
 	.refine((val) => val.trim().length > 0, {
-		message: "Name must not be empty or whitespace only",
+		message: "Username must not be empty or whitespace only",
 	})
 	.refine((val) => !/^\d+$/.test(val), {
-		message: "Name must not be numbers only",
+		message: "Username must not be numbers only",
 	})
 	.refine((val) => /[a-zA-Z]/.test(val), {
-		message: "Name must contain at least one letter",
+		message: "Username must contain at least one letter",
+	});
+
+// Nickname field schema
+export const nicknameField = z
+	.string({
+		required_error: "Nickname is required",
+		invalid_type_error: "Nickname must be a string",
+	})
+	.min(3, "Nickname must be at least 3 characters long")
+	.refine((val) => val.trim().length > 0, {
+		message: "Nickname must not be empty or whitespace only",
+	})
+	.refine((val) => !/^\d+$/.test(val), {
+		message: "Nickname must not be numbers only",
+	})
+	.refine((val) => /[a-zA-Z]/.test(val), {
+		message: "Nickname must contain at least one letter",
 	});
 
 // Email field schema
@@ -114,7 +133,8 @@ export const passwordField = z
 // Core user schema
 const userCore = {
 	email: emailField,
-	name: nameField,
+	username: usernameField,
+	nickname: nicknameField,
 };
 
 // Schema for createUser
@@ -127,14 +147,16 @@ export const createUserSchema = z
 
 // Schema for single user
 export const userResponseSchema = z.object({
-	id: z.number(),
+	// id: z.number(),
+	id: z.string().uuid(),
 	...userCore,
 });
 
 // Schema to get a user by ID
 export const userIdParamSchema = z
 	.object({
-		id: blankToUndefined(z.coerce.number().min(1)),
+		// id: blankToUndefined(z.coerce.number().min(1)),
+		id: blankToUndefined(z.string().uuid()),
 	})
 	.strict(); // Rejects unknown fields
 
@@ -159,7 +181,9 @@ export const loginSchema = z
 
 // Schema for login response
 export const loginResponseSchema = z.object({
-	accessToken: z.string(),
+	// accessToken: z.string(),
+	id: z.string().uuid(),
+	nickname: nicknameField,
 });
 
 // Schema for array of users (for list responses)
@@ -167,9 +191,11 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // Base schema for query parameters
 const baseGetUsersQuerySchema = z.object({
-	id: z.coerce.number().min(1),
+	// id: z.coerce.number().min(1),
+	id: z.string().uuid(),
 	email: z.string().email(),
-	name: z.string(),
+	username: z.string(),
+	nickname: z.string(),
 	useFuzzy: z.coerce.boolean(),
 	useOr: z.coerce.boolean(),
 	skip: z.coerce.number().min(0),

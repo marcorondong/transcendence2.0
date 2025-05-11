@@ -16,14 +16,23 @@ function capitalize(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Helper function to check password constraints (no username/email)
+// Helper function to check password constraints (no email/username/nickname)
 function checkPasswordConstraints(
 	password: string,
-	userData: { name: string; email: string },
+	userData: { email: string; username: string; nickname: string },
 ) {
 	const lowerPassword = password.toLowerCase();
-	if (userData.name && lowerPassword.includes(userData.name.toLowerCase())) {
+	if (
+		userData.username &&
+		lowerPassword.includes(userData.username.toLowerCase())
+	) {
 		throw new Error("Password cannot contain the username");
+	}
+	if (
+		userData.nickname &&
+		lowerPassword.includes(userData.nickname.toLowerCase())
+	) {
+		throw new Error("Password cannot contain the nickname");
 	}
 	if (userData.email && lowerPassword === userData.email.toLowerCase()) {
 		throw new Error("Password cannot be same as the email");
@@ -34,8 +43,9 @@ export async function createUser(input: createUserInput) {
 	const { password, ...rest } = input;
 	try {
 		checkPasswordConstraints(password, {
-			name: rest.name,
 			email: rest.email,
+			username: rest.username,
+			nickname: rest.nickname,
 		});
 	} catch (err) {
 		throw new AppError({
@@ -104,7 +114,7 @@ type UserQueryOptions = {
 	useOr?: boolean; // To allow OR logic
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: UserPublicField; // To sort by id, email, name
+	sortBy?: UserPublicField; // To sort by id, email, username
 	order?: SortDirection; // to order asc/desc
 };
 
@@ -173,7 +183,8 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	}
 }
 
-export async function deleteUser(id: number): Promise<void> {
+// export async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(id: string): Promise<void> {
 	try {
 		await prisma.user.delete({ where: { id } });
 	} catch (err) {
@@ -191,7 +202,8 @@ export async function deleteUser(id: number): Promise<void> {
 	}
 }
 
-export async function updateUser(id: number, data: UpdateUserData) {
+// export async function updateUser(id: number, data: UpdateUserData) {
+export async function updateUser(id: string, data: UpdateUserData) {
 	try {
 		const updatePayload: Record<string, any> = { ...data };
 		if (data.password) {
@@ -207,8 +219,9 @@ export async function updateUser(id: number, data: UpdateUserData) {
 			// Check password constraints
 			try {
 				checkPasswordConstraints(data.password, {
-					name: data.name ?? currentUser.name,
 					email: data.email ?? currentUser.email,
+					username: data.username ?? currentUser.username,
+					nickname: data.nickname ?? currentUser.nickname,
 				});
 			} catch (err) {
 				throw new AppError({
