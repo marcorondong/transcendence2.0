@@ -126,8 +126,8 @@ export class PongComponent extends HTMLElement {
 		if (this.paddleDirection !== 0 && this.wss) {
 			this.wss.send(
 				JSON.stringify({
-					move: this.paddleDirection > 0 ? "down" : "up",
-					paddle: "left",
+					move: this.paddleDirection > 0 ? "down" : "up"
+					//paddle: "left",
 				}),
 			);
 		}

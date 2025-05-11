@@ -1,11 +1,12 @@
 import Fastify from "fastify";
-import websocket from "@fastify/websocket";
+import websocket, { WebSocket } from "@fastify/websocket";
 import fs from "fs";
 import path from "path";
 import fastifyStatic from "@fastify/static";
 import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
-import { Tournament } from "./game/modes/singles/Tournament";
+import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
+import { Parsing } from "./utils/Parsing";
 
 dotenv.config();
 
@@ -36,23 +37,6 @@ fastify.register(fastifyStatic, {
 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
 	prefix: "/", // Optional: Sets the URL prefix
 });
-
-export interface IGameRoomQuery {
-	roomId: string | 0;
-	playerId: string;
-	privateRoom: boolean;
-	clientType: "player" | "spectator";
-	matchType: "singles" | "tournament" | "doubles";
-	tournamentSize: string;
-}
-
-interface IHeadToHeadQuery {
-	roomId: string; //it should be either "private" for host of private room or "uuid" of room to join
-}
-
-interface ITournamentQuery {
-	tournamentSize: string; // string as query that should be number
-}
 
 fastify.register(websocket);
 fastify.register(async function (fastify) {
@@ -89,53 +73,33 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
+	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
 		(connection, req) => {
-			const { roomId = "public" } = req.query as IHeadToHeadQuery;
-
-			const singlesQuery: IHeadToHeadQuery = {
-				roomId,
-			};
-			console.log("Singles pong game, query", singlesQuery.roomId);
+			const roomId = Parsing.parseRoomId(req, connection);
+			if (roomId === false) return;
 			manager.playerJoinSingles(connection, roomId);
 		},
 	);
 
-	fastify.get<{ Querystring: Partial<IHeadToHeadQuery> }>(
+	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
 		{ websocket: true },
 		(connection, req) => {
-			const { roomId = "public" } = req.query as IHeadToHeadQuery;
-
-			const singlesQuery: IHeadToHeadQuery = {
-				roomId,
-			};
-			console.log("doubles pong game, query", singlesQuery.roomId);
+			const roomId = Parsing.parseRoomId(req, connection);
+			if (roomId === false) return;
 			manager.playerJoinDoubles(connection, roomId);
 		},
 	);
 
-	fastify.get<{ Querystring: Partial<ITournamentQuery> }>(
+	fastify.get<{ Querystring: Partial<TournamentSizeQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
 		{ websocket: true },
 		(connection, req) => {
-			const {
-				tournamentSize = Tournament.getDefaultTournamentSize().toString(),
-			} = req.query as ITournamentQuery;
-
-			const singlesQuery: ITournamentQuery = {
-				tournamentSize,
-			};
-			console.log(
-				"tournament pong game, query",
-				singlesQuery.tournamentSize,
-			);
-			manager.playerJoinTournament(
-				connection,
-				parseInt(singlesQuery.tournamentSize, 10),
-			);
+			const tournamentSize = Parsing.parseTournamentSize(req, connection);
+			if (tournamentSize === false) return;
+			manager.playerJoinTournament(connection, tournamentSize);
 		},
 	);
 
@@ -160,30 +124,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-//TODO remove this is Old match joiner with big ass string
-//Partial makes all field optional.
-// fastify.get<{ Querystring: Partial<IGameRoomQuery> }>(
-// 	`/${BASE_API_NAME}/${BASE_GAME_PATH}`,
-// 	{ websocket: true },
-// 	(connection, req) => {
-// 		const {
-// 			roomId = 0,
-// 			playerId = "Player whatever",
-// 			privateRoom = false,
-// 			clientType = "player",
-// 			matchType = "singles",
-// 			tournamentSize = Tournament.getDefaultTournamentSize().toString(),
-// 		} = req.query as IGameRoomQuery;
-
-// 		const gameQuery: IGameRoomQuery = {
-// 			roomId,
-// 			playerId,
-// 			privateRoom,
-// 			clientType,
-// 			matchType,
-// 			tournamentSize,
-// 		};
-// 		manager.matchJoiner(connection, gameQuery);
-// 	},
-// );
