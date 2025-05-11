@@ -181,7 +181,9 @@ export const loginSchema = z
 
 // Schema for login response
 export const loginResponseSchema = z.object({
-	accessToken: z.string(),
+	// accessToken: z.string(),
+	id: z.string().uuid(),
+	nickname: nicknameField,
 });
 
 // Schema for array of users (for list responses)

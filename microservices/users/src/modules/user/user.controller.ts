@@ -57,11 +57,17 @@ export async function loginHandler(
 			});
 		}
 		const { passwordHash, salt, ...rest } = user;
-		// Generate access token
-		const accessToken = server.jwt.sign(rest);
-		// Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
-		const parsedToken = loginResponseSchema.parse({ accessToken });
-		return reply.code(200).send(parsedToken);
+		// TODO: Without AUTH service (token generation logic)
+		// // Generate access token
+		// const accessToken = server.jwt.sign(rest);
+		// // Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
+		// const parsedToken = loginResponseSchema.parse({ accessToken });
+		// return reply.code(200).send(parsedToken);
+		//
+		// TODO: With AUTH service (just reply with data to include in JWT token)
+		const parsedResponse = loginResponseSchema.parse(rest);
+		// return reply.code(200).send({ id: user.id, nickname: user.nickname });
+		return reply.code(200).send(parsedResponse);
 	} catch (err) {
 		// If user not found or password invalid, always send same generic 401
 		if (err instanceof AppError && err.statusCode === 404) {
