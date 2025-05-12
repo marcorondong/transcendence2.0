@@ -14,6 +14,8 @@ const friendRequests = [
 	{ nickname: "SilentStorm", wins: 13, losses: 27, online: false },
 ];
 
+//yooo
+
 export class ProfileView extends HTMLElement {
 	constructor() {
 		super();
