@@ -25,6 +25,13 @@ export const verifyJWTSchema = {
 	response: { 200: successResponseSchema },
 };
 
+export const refreshJWTSchema = {
+	summary: "Refresh",
+	description: "Refresh a user. This will refresh the token for the user.",
+	tags: ["Auth"],
+	response: { 200: successResponseSchema },
+};
+
 export const healthCheckSchema = {
 	summary: "Health Check",
 	description: "Check the health of the service",

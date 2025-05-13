@@ -2,12 +2,14 @@ import {
 	signInSchema,
 	signOutSchema,
 	verifyJWTSchema,
+	refreshJWTSchema,
 	healthCheckSchema,
 } from "./routeSchemas";
 import {
 	signInHandler,
 	signOutHandler,
 	verifyJWTHandler,
+	refreshJWTHandler,
 	healthCheckHandler,
 } from "./controllers";
 
@@ -25,6 +27,11 @@ export const verifyJWTOpt = {
 	schema: verifyJWTSchema,
 	handler: verifyJWTHandler,
 };
+
+export const refreshJWTOpt = {
+	schema: refreshJWTSchema,
+	handler: refreshJWTHandler,
+}
 
 export const healthCheckOpt = {
 	schema: healthCheckSchema,
