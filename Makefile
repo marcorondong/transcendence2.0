@@ -28,9 +28,6 @@ dev:
 	docker compose build --no-cache
 	docker compose up
 
-nuke: clean
-	docker system prune -a --volumes
-
 cli: all
 	make -C cli-client
 

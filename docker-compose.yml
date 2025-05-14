@@ -11,7 +11,7 @@ services:
       - 3010:3010 #TODO remove it will not be exposed at final version
     environment:
       - NODE_ENV=production
-    command: ["npm", "--prefix", "/pong/pong-api/", "run", "dev"]
+    command: ["npm", "--prefix", "/pong/pong-api/", "run", "pong-api"]
     networks:
       - Transcendence2.0
 
@@ -34,6 +34,7 @@ services:
     restart: ${RESTART_POLICY}
 
   ai-bot:
+    image: ai-bot
     build:
       context: ./ssg
       dockerfile: ./AI/Dockerfile
