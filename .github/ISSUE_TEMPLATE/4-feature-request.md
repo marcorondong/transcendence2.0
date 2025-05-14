@@ -1,6 +1,6 @@
 ---
 name: '🚀 Feature Request  (md)'
-about: 'Feature request  in from format'
+about: 'Feature request in form format'
 title: '[FEAT] Write here a short but meaningful title'
 assignees: []
 labels: ['feature']
