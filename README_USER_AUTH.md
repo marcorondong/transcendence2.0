@@ -53,4 +53,9 @@ The following endpoints are routed through nginx with authentication subrequest:
 
 ### User Management
 - `GET/PUT/PATCH https://{frontend:port}/api/users/{uuid}`
+
+# Problem
 - `GET https://{frontend:port}/api/users/`
+is not protected by auth subrequest because its the same URI as user registration. 
+and if conditions in nginx locations dont work well with auth.
+maybe there is a way but i didnt find it yet
