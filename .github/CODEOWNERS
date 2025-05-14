@@ -9,12 +9,12 @@
 # === MICROSERVICES === #
 # /microservices/ai/               @benszilas @ismayilguliyev28
 # /microservices/auth/             @ismayilguliyev28
-# /microservices/blockchain/       @@sekula34
+# /microservices/blockchain/       @sekula34
 # /microservices/frontend/         @gabrieldanis
 # /microservices/chat/             @ismayilguliyev28
-# /microservices/cli-client/       @@sekula34 @benszilas
+# /microservices/cli-client/       @sekula34 @benszilas
 # /microservices/monitoring/       @benszilas
-# /microservices/pong/             @@sekula34
+# /microservices/pong/             @sekula34
 # /microservices/tictactoe/        @ismayilguliyev28
 /microservices/users/            @marcorondong
 
