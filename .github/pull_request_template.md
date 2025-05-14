@@ -10,7 +10,7 @@
 
 ---
 
-> ![TIP]
+> [!TIP]
 >
 > * **Accidentally picked the wrong one?**  
 >   * Click your browser’s 🔙 **Back button** then choose the correct template again.
