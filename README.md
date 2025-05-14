@@ -82,7 +82,7 @@ Paste here a short info/list of service's notes.
 E.g:
 
 - Uses Zod for validation.
-- Uses Prisma Client for DAtabase management.
+- Uses Prisma Client for database management.
 - Follows route -> controller → service → schema pattern.
 
 ---
