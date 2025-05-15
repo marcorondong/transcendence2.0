@@ -6,7 +6,14 @@ const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
 // Type definition for sorting by field (from User fields)
-const userPublicFields = ["id", "email", "username", "nickname"] as const;
+const userPublicFields = [
+	"id",
+	"email",
+	"username",
+	"nickname",
+	"createdAt",
+	"updatedAt",
+] as const;
 const userSortByEnum = z.enum(userPublicFields);
 export type UserPublicField = (typeof userPublicFields)[number];
 
@@ -19,7 +26,9 @@ export type UniqueUserField =
 	| { nickname: string };
 
 // Type definition to allowing multiple User fields per query
-export type UserField = Partial<Record<UserPublicField, string | number>>;
+export type UserField = Partial<
+	Record<UserPublicField, string | number | Date>
+>;
 
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
 export const blankToUndefined = <T extends z.ZodTypeAny>(
@@ -131,25 +140,47 @@ export const passwordField = z
 	);
 
 // Core user schema
-const userCore = {
+// const userCore = {
+const userCoreFields = {
 	email: emailField,
-	username: usernameField,
+	// username: usernameField,
 	nickname: nicknameField,
+};
+
+// User authentication fields schema
+const userAuthFields = {
+	password: passwordField,
+};
+
+// User immutable fields schema
+const userImmutableFields = {
+	username: usernameField,
+};
+
+// User metadata response fields schema
+const userMetaFields = {
+	id: z.string().uuid(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 };
 
 // Schema for createUser
 export const createUserSchema = z
 	.object({
-		...userCore,
-		password: passwordField,
+		...userCoreFields,
+		...userImmutableFields,
+		...userAuthFields,
+		// password: passwordField,
 	})
 	.strict();
 
 // Schema for single user
 export const userResponseSchema = z.object({
 	// id: z.number(),
-	id: z.string().uuid(),
-	...userCore,
+	// id: z.string().uuid(),
+	...userMetaFields,
+	...userImmutableFields,
+	...userCoreFields,
 });
 
 // Schema to get a user by ID
@@ -161,7 +192,13 @@ export const userIdParamSchema = z
 	.strict(); // Rejects unknown fields
 
 // Schema to update ALL user fields
-export const putUserSchema = createUserSchema;
+// export const putUserSchema = createUserSchema;
+export const putUserSchema = z
+	.object({
+		...userCoreFields,
+		...userAuthFields,
+	})
+	.strict();
 
 // Schema to update SOME user fields
 export const patchUserSchema = putUserSchema.partial().strict(); // Rejects unknown fields
@@ -196,6 +233,10 @@ const baseGetUsersQuerySchema = z.object({
 	email: z.string().email(),
 	username: z.string(),
 	nickname: z.string(),
+	// createdAt: z.date(),
+	// updatedAt: z.date(),
+	createdAt: z.preprocess((val) => new Date(val as string), z.date()),
+	updatedAt: z.preprocess((val) => new Date(val as string), z.date()),
 	useFuzzy: z.coerce.boolean(),
 	useOr: z.coerce.boolean(),
 	skip: z.coerce.number().min(0),

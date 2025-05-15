@@ -19,7 +19,7 @@ function capitalize(str: string) {
 // Helper function to check password constraints (no email/username/nickname)
 function checkPasswordConstraints(
 	password: string,
-	userData: { email: string; username: string; nickname: string },
+	userData: { email?: string; username?: string; nickname?: string },
 ) {
 	const lowerPassword = password.toLowerCase();
 	if (
@@ -114,7 +114,7 @@ type UserQueryOptions = {
 	useOr?: boolean; // To allow OR logic
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: UserPublicField; // To sort by id, email, username
+	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
 	order?: SortDirection; // to order asc/desc
 };
 
@@ -220,7 +220,7 @@ export async function updateUser(id: string, data: UpdateUserData) {
 			try {
 				checkPasswordConstraints(data.password, {
 					email: data.email ?? currentUser.email,
-					username: data.username ?? currentUser.username,
+					// username: data.username ?? currentUser.username,
 					nickname: data.nickname ?? currentUser.nickname,
 				});
 			} catch (err) {

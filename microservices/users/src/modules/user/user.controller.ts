@@ -102,6 +102,8 @@ export async function getUsersHandler(
 		email,
 		username,
 		nickname,
+		createdAt,
+		updatedAt,
 		useFuzzy,
 		useOr,
 		skip,
@@ -109,8 +111,20 @@ export async function getUsersHandler(
 		sortBy,
 		order,
 	} = request.query;
+
+	// Convert dateStrings to Date objects
+	const createdAtDate = createdAt ? new Date(createdAt) : undefined;
+	const updatedAtDate = updatedAt ? new Date(updatedAt) : undefined;
+
 	const users = await findUsers({
-		where: { id, email, username, nickname },
+		where: {
+			id,
+			email,
+			username,
+			nickname,
+			createdAt: createdAtDate,
+			updatedAt: updatedAtDate,
+		},
 		useFuzzy,
 		useOr,
 		skip,
