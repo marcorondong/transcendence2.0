@@ -1,4 +1,18 @@
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
+import fs from 'fs';
+
+let jwtSecret: string;
+let cookieSecret: string;
+
+try {
+	const jwtSecretFile = process.env.JWT_SECRET_FILE || "/run/secrets/jwtSecret.key";
+	const cookieSecretFile = process.env.COOKIE_SECRET_FILE || "/run/secrets/cookieSecret.key";
+	jwtSecret = fs.readFileSync(jwtSecretFile, "utf8");
+	cookieSecret = fs.readFileSync(cookieSecretFile, "utf8");
+} catch (error) {
+	console.error("Error reading secret files:", error);
+	process.exit(1);
+}
 
 export const swaggerOption = {
 	exposeRoute: true,
@@ -41,15 +55,15 @@ export const serverOption = {
 };
 
 export const jwtOption = {
-	secret: 'jwt_secret_key', // TODO JWT_SECRET over docker secrets
+	secret: jwtSecret,
 	cookie: {
-		cookieName: 'access_token', // TODO JWT_COOKIE_NAME over environment variable
+		cookieName: 'access_token',
 		signed: true,
 	},
 }
 
 export const cookieOption = {
-	secret: "cookie_secret_key", // TODO COOKIE_SECRET over docker secrets
+	secret: cookieSecret, // TODO COOKIE_SECRET over docker secrets
 	parseOptions: {
 		signed: true,
 	},
