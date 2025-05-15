@@ -52,6 +52,14 @@ export async function refreshJWTHandler(
 	reply.status(200).send({ success: true });
 }
 
+export async function verifyConnectionHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const { id, nickname } = request.user;
+	reply.status(200).send({ id, nickname });
+}
+
 export async function healthCheckHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,

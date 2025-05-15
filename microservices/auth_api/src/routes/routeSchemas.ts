@@ -1,6 +1,7 @@
 import {
 	signInZodSchema,
 	successResponseSchema,
+	payloadZodSchema,
 } from "./zodSchemas";
 
 export const signInSchema = {
@@ -30,6 +31,13 @@ export const refreshJWTSchema = {
 	description: "Refresh a user. This will refresh the token for the user.",
 	tags: ["Auth"],
 	response: { 200: successResponseSchema },
+};
+
+export const verifyConnectionSchema = {
+	summary: "Verify Cookies and JWT for internal services",
+	description: "Verify Cookies and JWT for internal services",
+	tags: ["Auth"],
+	response: { 200: payloadZodSchema },
 };
 
 export const healthCheckSchema = {
