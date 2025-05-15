@@ -237,6 +237,29 @@ const baseGetUsersQuerySchema = z.object({
 	// updatedAt: z.date(),
 	createdAt: z.preprocess((val) => new Date(val as string), z.date()),
 	updatedAt: z.preprocess((val) => new Date(val as string), z.date()),
+	// TODO: Make this as a type, and same for before, after and between
+	dateTarget: z
+		.enum(["createdAt", "updatedAt", "both"])
+		.default("createdAt")
+		.describe("Choose which date field to apply filters to"),
+	before: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe("Find users created/updated before this date"),
+	after: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe("Find users created/updated after this date"),
+	between: z
+		.preprocess(
+			(val) =>
+				Array.isArray(val)
+					? val.map((d) => new Date(d as string))
+					: undefined,
+			z.tuple([
+				z.date().describe("Start date (inclusive)"),
+				z.date().describe("End date (inclusive)"),
+			]),
+		)
+		.describe("Find users between two dates (inclusive)"),
 	useFuzzy: z.coerce.boolean(),
 	useOr: z.coerce.boolean(),
 	skip: z.coerce.number().min(0),

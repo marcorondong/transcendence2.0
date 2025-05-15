@@ -104,6 +104,10 @@ export async function getUsersHandler(
 		nickname,
 		createdAt,
 		updatedAt,
+		dateTarget,
+		before,
+		after,
+		between,
 		useFuzzy,
 		useOr,
 		skip,
@@ -112,9 +116,16 @@ export async function getUsersHandler(
 		order,
 	} = request.query;
 
-	// Convert dateStrings to Date objects
+	// Convert exact dateStrings to Date objects
 	const createdAtDate = createdAt ? new Date(createdAt) : undefined;
 	const updatedAtDate = updatedAt ? new Date(updatedAt) : undefined;
+
+	// Convert range filters
+	const beforeDate = before ? new Date(before) : undefined;
+	const afterDate = after ? new Date(after) : undefined;
+	const betweenDates = between
+		? ([new Date(between[0]), new Date(between[1])] as [Date, Date])
+		: undefined;
 
 	const users = await findUsers({
 		where: {
@@ -127,6 +138,10 @@ export async function getUsersHandler(
 		},
 		useFuzzy,
 		useOr,
+		dateTarget,
+		before: beforeDate,
+		after: afterDate,
+		between: betweenDates,
 		skip,
 		take,
 		sortBy,

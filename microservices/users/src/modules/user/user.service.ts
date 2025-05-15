@@ -112,6 +112,10 @@ type UserQueryOptions = {
 	where?: UserField; // To filter by UserField
 	useFuzzy?: boolean; // To allow partial matches
 	useOr?: boolean; // To allow OR logic
+	dateTarget?: "createdAt" | "updatedAt" | "both";
+	before?: Date;
+	after?: Date;
+	between?: [Date, Date];
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
 	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
@@ -126,6 +130,10 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		where = {},
 		useFuzzy = false,
 		useOr = false,
+		dateTarget,
+		before,
+		after,
+		between,
 		skip,
 		take,
 		sortBy = "id",
@@ -145,6 +153,35 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			},
 			{} as Record<string, any>,
 		);
+		// Apply date filters to 'createdAt'
+		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
+			if (before) {
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					lt: before,
+				};
+			}
+			if (after) {
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					gte: after,
+				};
+			}
+			if (between) {
+				const [start, end] = between;
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					gte: start,
+					lte: end,
+				};
+			}
+		};
+		if (dateTarget === "both") {
+			applyDateFilter("createdAt");
+			applyDateFilter("updatedAt");
+		} else {
+			applyDateFilter(dateTarget ?? "createdAt");
+		}
 		// console.log("✅ Step 2: Transformed 'where'", transformed);
 		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
