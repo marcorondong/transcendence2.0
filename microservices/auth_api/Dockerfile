@@ -8,7 +8,7 @@ COPY ./package.json ./
 COPY ./package-lock.json ./
 COPY ./tsconfig.json ./
 COPY ./src ./
-RUN npm install
+RUN npm clean-install
 
 # TODO uncomment below line in production
 # CMD ["npm run start"]
