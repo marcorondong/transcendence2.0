@@ -7,8 +7,47 @@ import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
 import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
 import { Parsing } from "./utils/Parsing";
+import fCookie from "@fastify/cookie";
+import { FastifyRequest } from "fastify/types/request";
 
 dotenv.config();
+
+async function isUserAuthorized(req: FastifyRequest) {
+	const cookie = req.headers.cookie;
+	console.log(cookie);
+	if (!cookie) {
+		console.log("Cookie don't exits");
+		return false;
+
+	}
+	//make it await probably in try catch
+	try {
+		const response = await fetch(
+			"http://auth_api_container:2999/auth-api/verify-connection",
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					"Cookie": cookie,
+				},
+			},
+		);
+		if (!response.ok) {
+			console.log("Faild check", response);
+			return false;
+		}
+		console.log("NICCCE", response);
+		const data:any = await response.json();
+		console.log("haha",data);
+		console.log(data.id);
+		console.log("nickname",data.nickname);
+
+		return true;
+	} catch (err) {
+		console.error("Fetch failed", err);
+		return false;
+	}
+}
 
 const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
@@ -38,6 +77,7 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
 });
 
+fastify.register(fCookie);
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
@@ -77,6 +117,10 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
 		(connection, req) => {
+			if (!isUserAuthorized(req)) {
+				//TODO inform user
+				connection.close();
+			}
 			const roomId = Parsing.parseRoomId(req, connection);
 			if (roomId === false) return;
 			manager.playerJoinSingles(connection, roomId);
