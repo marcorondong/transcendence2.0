@@ -229,7 +229,6 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 // TODO: Maybe remove the "export" keyword
 // Base strict schema for query parameters (strict: uuid, email, date fields)
 const baseGetUsersQuerySchema = z.object({
-	// export const strictGetUsersQuerySchema = z.object({
 	// id: z.string().uuid().describe("Exact match for user ID (UUID)"),
 	id: z.string().describe("Exact match for user ID (UUID)"),
 	// email: z.string().email().describe("Exact match for user email"),
@@ -277,61 +276,10 @@ const baseGetUsersQuerySchema = z.object({
 	order: sortDirectionEnum,
 });
 
-// // TODO: Maybe remove the "export" keyword
-// // Base fuzzy schema for query parameters (relaxed: all string/date fields)
-// export const fuzzyGetUsersQuerySchema = z.object({
-// 	id: z.string().describe("Fuzzy match for ID (partial, case-insensitive)"),
-// 	email: z
-// 		.string()
-// 		.describe("Fuzzy match for email (partial, case-insensitive)"),
-// 	username: z.string().describe("Fuzzy match for username"),
-// 	nickname: z.string().describe("Fuzzy match for nickname"),
-// 	createdAt: z.string().describe("Exact or partial created date string"),
-// 	updatedAt: z.string().describe("Exact or partial updated date string"),
-// 	// TODO: Make this as a type, and same for before, after and between
-// 	dateTarget: z
-// 		.enum(["createdAt", "updatedAt", "both"])
-// 		.default("createdAt")
-// 		.describe("Choose which date field to apply filters to"),
-// 	before: z
-// 		.string()
-// 		.describe("Users created/updated before this date (string)"),
-// 	after: z
-// 		.string()
-// 		.describe("Users created/updated after this date (string)"),
-// 	between: z
-// 		.array(z.string())
-// 		.length(2)
-// 		.describe("Two date strings for inclusive range filtering"),
-// 	// useFuzzy: z.coerce
-// 	// 		.boolean()
-// 	// 		.describe("Enable fuzzy search (case-insensitive partial matches)"),
-// 	useOr: z.coerce
-// 		.boolean()
-// 		.describe("Use OR instead of AND for combining filters"),
-// 	skip: z.coerce.number().min(0).describe("Number of records to skip"),
-// 	take: z.coerce
-// 		.number()
-// 		.min(1)
-// 		.max(100)
-// 		.describe("Number of records to return"),
-// 	sortBy: userSortByEnum,
-// 	order: sortDirectionEnum,
-// });
-
 // Refined schema for query parameters to find users
 export const getUsersQuerySchema = sanitizeQuerySchema(
 	baseGetUsersQuerySchema,
 ).strict(); // Rejects unknown fields
-
-// // Refined schema for query parameters to find users (Unified schema used in route (strict superset of both))
-// export const getUsersQuerySchema = sanitizeQuerySchema(
-// 	strictGetUsersQuerySchema.merge(fuzzyGetUsersQuerySchema).extend({
-// 		useFuzzy: z.coerce
-// 			.boolean()
-// 			.describe("Enable fuzzy search (case-insensitive partial matches)"),
-// 	}),
-// ).strict(); // Rejects unknown fields
 
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;

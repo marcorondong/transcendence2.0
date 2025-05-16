@@ -34,7 +34,6 @@ export async function registerUserHandler(
 	return reply.code(201).send(parsedUser);
 }
 
-// TODO: Maybe this JWT part should be handled by Authentication Service
 // TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
 
 export async function loginHandler(
@@ -97,6 +96,7 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
+	// Destructure request query into respective fields
 	const {
 		id,
 		email,
@@ -141,7 +141,6 @@ export async function getUsersHandler(
 }
 
 export async function deleteUserHandler(
-	// request: FastifyRequest<{ Params: { id: number } }>,
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
@@ -151,7 +150,6 @@ export async function deleteUserHandler(
 
 export async function putUserHandler(
 	request: FastifyRequest<{
-		// Params: { id: number };
 		Params: { id: string };
 		Body: updateUserPutInput;
 	}>,
@@ -164,7 +162,6 @@ export async function putUserHandler(
 
 export async function patchUserHandler(
 	request: FastifyRequest<{
-		// Params: { id: number };
 		Params: { id: string };
 		Body: updateUserPatchInput;
 	}>,
@@ -174,63 +171,3 @@ export async function patchUserHandler(
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
 }
-
-// =============================================================================
-// OLD getUsersHandler() THAT MANUALLY PARSED DATES
-// export async function getUsersHandler(
-// 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
-// 	reply: FastifyReply,
-// ) {
-// 	const {
-// 		id,
-// 		email,
-// 		username,
-// 		nickname,
-// 		createdAt,
-// 		updatedAt,
-// 		dateTarget,
-// 		before,
-// 		after,
-// 		between,
-// 		useFuzzy,
-// 		useOr,
-// 		skip,
-// 		take,
-// 		sortBy,
-// 		order,
-// 	} = request.query;
-
-// 	// Convert exact dateStrings to Date objects
-// 	const createdAtDate = createdAt ? new Date(createdAt) : undefined;
-// 	const updatedAtDate = updatedAt ? new Date(updatedAt) : undefined;
-
-// 	// Convert range filters
-// 	const beforeDate = before ? new Date(before) : undefined;
-// 	const afterDate = after ? new Date(after) : undefined;
-// 	const betweenDates = between
-// 		? ([new Date(between[0]), new Date(between[1])] as [Date, Date])
-// 		: undefined;
-
-// 	const users = await findUsers({
-// 		where: {
-// 			id,
-// 			email,
-// 			username,
-// 			nickname,
-// 			createdAt: createdAtDate,
-// 			updatedAt: updatedAtDate,
-// 		},
-// 		useFuzzy,
-// 		useOr,
-// 		dateTarget,
-// 		before: beforeDate,
-// 		after: afterDate,
-// 		between: betweenDates,
-// 		skip,
-// 		take,
-// 		sortBy,
-// 		order,
-// 	});
-// 	const parsedUsers = userArrayResponseSchema.parse(users);
-// 	return reply.code(200).send(parsedUsers);
-// }

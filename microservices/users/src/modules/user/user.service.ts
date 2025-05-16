@@ -48,6 +48,7 @@ export async function createUser(input: createUserInput) {
 			nickname: rest.nickname,
 		});
 	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		throw new AppError({
 			statusCode: 400,
 			code: USER_ERRORS.USER_CREATE,
@@ -85,7 +86,7 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
-// This function returns all user fields (no filtering)
+// This function returns all user fields (no filtering). It only accepts unique fields, so it returns ONLY ONE user
 export async function findUserByUnique(where: UniqueUserField) {
 	try {
 		const user = await prisma.user.findUnique({ where });
@@ -124,230 +125,13 @@ type UserQueryOptions = {
 
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
-// export async function findUsers(options: UserQueryOptions = {}) {
-// 	const {
-// 		where = {},
-// 		useFuzzy = false,
-// 		useOr = false,
-// 		dateTarget = "createdAt",
-// 		before,
-// 		after,
-// 		between,
-// 		skip,
-// 		take,
-// 		sortBy = "id",
-// 		order = "asc",
-// 	} = options;
-// 	// console.log("✅ Step 1: Received Options", options);
-
-// 	// Helper function to transform string dates to Date objects
-// 	const parseValidDate = (input: string | unknown): Date => {
-// 		const date = new Date(input as string);
-// 		if (isNaN(date.getTime())) {
-// 			// return undefined; // Uncomment this line AND Toggle error below if preferred to silently skip bad dates
-// 			throw new AppError({
-// 				statusCode: 400,
-// 				code: USER_ERRORS.INVALID_DATE,
-// 				message: `Invalid date format: "${input}"`,
-// 			});
-// 		}
-// 		return date;
-// 	};
-
-// 	try {
-// 		const transformed = Object.entries(where).reduce(
-// 			(acc, [key, value]) => {
-// 				// Enable fuzzy search (transform string fields to `contains` filters)
-// 				if (typeof value === "string" && useFuzzy) {
-// 					acc[key] = { contains: value };
-// 				} else {
-// 					acc[key] = value;
-// 				}
-// 				return acc;
-// 			},
-// 			{} as Record<string, any>,
-// 		);
-// 		// Apply date filters to 'createdAt' or 'updatedAt'
-// 		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
-// 			if (before) {
-// 				const parsed = useFuzzy
-// 					? parseValidDate(before)
-// 					: (before as Date);
-// 				if (parsed) {
-// 					transformed[field] = {
-// 						...(transformed[field] ?? {}),
-// 						lt: parsed,
-// 					};
-// 				}
-// 			}
-// 			if (after) {
-// 				const parsed = useFuzzy
-// 					? parseValidDate(after)
-// 					: (after as Date);
-// 				if (parsed) {
-// 					transformed[field] = {
-// 						...(transformed[field] ?? {}),
-// 						gte: parsed,
-// 					};
-// 				}
-// 			}
-// 			if (between) {
-// 				if (Array.isArray(between) && between.length === 2) {
-// 					const [start, end] = useFuzzy
-// 						? between.map(parseValidDate)
-// 						: (between as [Date, Date]);
-// 					if (start && end) {
-// 						transformed[field] = {
-// 							...(transformed[field] ?? {}),
-// 							gte: start,
-// 							lte: end,
-// 						};
-// 					}
-// 				}
-// 			}
-// 		};
-
-// 		if (dateTarget === "both") {
-// 			applyDateFilter("createdAt");
-// 			applyDateFilter("updatedAt");
-// 		} else {
-// 			applyDateFilter(dateTarget);
-// 		}
-// 		// console.log("✅ Step 2: Transformed 'where'", transformed);
-// 		// Enable OR queries (map provided fields to build individual queries)
-// 		const query = useOr
-// 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
-// 			: transformed;
-// 		// console.log("✅ Step 3: Final Query Shape", query);
-// 		const prismaSortBy = { [sortBy]: order };
-// 		// console.log("✅ Step 4: Final Prisma Query", { where: query, orderBy: prismaSortBy, skip, take, });
-// 		const users = await prisma.user.findMany({
-// 			where: query,
-// 			orderBy: prismaSortBy,
-// 			skip,
-// 			take,
-// 		});
-// 		// console.log("✅ Step 5: Result", users);
-// 		if (!users.length) {
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: USER_ERRORS.NOT_FOUND,
-// 				message: "No users found",
-// 			});
-// 		}
-
-// 		return users;
-// 	} catch (err) {
-// 		// console.log("❌ Step 6: Error Caught", err);
-// 		if (err instanceof Prisma.PrismaClientValidationError) {
-// 			throw new AppError({
-// 				statusCode: 400,
-// 				code: USER_ERRORS.INVALID_SORT,
-// 				message: `Invalid sortBy field: ${sortBy}`,
-// 			});
-// 		}
-// 		if (err instanceof AppError) throw err;
-// 		// console.error("❌ Step 6.2: Unknown error", err);
-// 		throw err;
-// 	}
-// }
-
-// export async function deleteUser(id: number): Promise<void> {
-export async function deleteUser(id: string): Promise<void> {
-	try {
-		await prisma.user.delete({ where: { id } });
-	} catch (err) {
-		if (
-			err instanceof Prisma.PrismaClientKnownRequestError &&
-			err.code === "P2025"
-		) {
-			throw new AppError({
-				statusCode: 404,
-				code: USER_ERRORS.USER_DELETE,
-				message: "User not found",
-			});
-		}
-		throw err;
-	}
-}
-
-// export async function updateUser(id: number, data: UpdateUserData) {
-export async function updateUser(id: string, data: UpdateUserData) {
-	try {
-		const updatePayload: Record<string, any> = { ...data };
-		if (data.password) {
-			// Find user for password constrains check
-			const currentUser = await prisma.user.findUnique({ where: { id } });
-			if (!currentUser) {
-				throw new AppError({
-					statusCode: 404,
-					code: USER_ERRORS.USER_UPDATE,
-					message: "User not found",
-				});
-			}
-			// Check password constraints
-			try {
-				checkPasswordConstraints(data.password, {
-					email: data.email ?? currentUser.email,
-					// username: data.username ?? currentUser.username,
-					nickname: data.nickname ?? currentUser.nickname,
-				});
-			} catch (err) {
-				throw new AppError({
-					statusCode: 400,
-					code: USER_ERRORS.USER_UPDATE,
-					message: (err as Error).message,
-				});
-			}
-			// Hash password if provided
-			const { salt, hash } = hashPassword(data.password);
-			updatePayload.passwordHash = hash;
-			updatePayload.salt = salt;
-			delete updatePayload.password; // remove plain password
-		}
-		const updatedUser = await prisma.user.update({
-			where: { id },
-			data: updatePayload,
-		});
-		return updatedUser;
-	} catch (err) {
-		if (err instanceof Prisma.PrismaClientKnownRequestError) {
-			switch (err.code) {
-				case "P2002":
-					const field =
-						(err.meta?.target as string[])?.[0] ?? "Field";
-					throw new AppError({
-						statusCode: 409,
-						code: USER_ERRORS.USER_UPDATE,
-						message: `${capitalize(field)} already exists`,
-					});
-				case "P2003":
-					throw new AppError({
-						statusCode: 400,
-						code: USER_ERRORS.USER_UPDATE,
-						message: "Invalid foreign key",
-					});
-				case "P2025":
-					throw new AppError({
-						statusCode: 404,
-						code: USER_ERRORS.USER_UPDATE,
-						message: "User not found",
-					});
-			}
-		}
-		throw err;
-	}
-}
-
-// =============================================================================
-// OLD findUsers() FUNCTION
 export async function findUsers(options: UserQueryOptions = {}) {
 	// let {
 	const {
 		where = {},
 		useFuzzy = false,
 		useOr = false,
-		dateTarget,
+		dateTarget = "createdAt",
 		before,
 		after,
 		between,
@@ -358,9 +142,9 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	} = options;
 	// console.log("✅ Step 1: Received Options", options);
 	try {
-		// Enable fuzzy search (transform string fields to `contains` filters)
 		const transformed = Object.entries(where).reduce(
 			(acc, [key, value]) => {
+				// Enable fuzzy search (transform string fields to `contains` filters)
 				if (typeof value === "string" && useFuzzy) {
 					acc[key] = { contains: value };
 				} else {
@@ -424,6 +208,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		return users;
 	} catch (err) {
 		// console.log("❌ Step 6: Error Caught", err);
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
 				statusCode: 400,
@@ -433,123 +218,98 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		}
 		if (err instanceof AppError) throw err;
 		// console.error("❌ Step 6.2: Unknown error", err);
+		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
-// =============================================================================
-// PROTOTYPE FUNCTION FOR FUZZYFIND
-// export async function fuzzyFindUsers(options: UserQueryOptions = {}) {
-// 	const {
-// 		where = {},
-// 		useOr = false,
-// 		dateTarget = "createdAt",
-// 		before,
-// 		after,
-// 		between,
-// 		skip,
-// 		take,
-// 		sortBy = "id",
-// 		order = "asc",
-// 	} = options;
 
-// 	const parseValidDate = (input: string): Date => {
-// 		const date = new Date(input);
-// 		if (isNaN(date.getTime())) {
-// 			// return undefined; // ← Uncomment this line AND toggle error below if you prefer to skip silently
-// 			throw new AppError({
-// 				statusCode: 400,
-// 				code: USER_ERRORS.INVALID_DATE,
-// 				message: `Invalid date format: "${input}"`,
-// 			});
-// 		}
-// 		return date;
-// 	};
+// export async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(id: string): Promise<void> {
+	try {
+		await prisma.user.delete({ where: { id } });
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (
+			err instanceof Prisma.PrismaClientKnownRequestError &&
+			err.code === "P2025"
+		) {
+			throw new AppError({
+				statusCode: 404,
+				code: USER_ERRORS.USER_DELETE,
+				message: "User not found",
+			});
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
 
-// 	try {
-// 		const transformed = Object.entries(where).reduce(
-// 			(acc, [key, value]) => {
-// 				if (typeof value === "string") {
-// 					acc[key] = { contains: value };
-// 				} else {
-// 					acc[key] = value;
-// 				}
-// 				return acc;
-// 			},
-// 			{} as Record<string, any>,
-// 		);
-
-// 		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
-// 			if (before) {
-// 				const parsed = parseValidDate(before as string);
-// 				if (parsed) {
-// 					transformed[field] = {
-// 						...(transformed[field] ?? {}),
-// 						lt: parsed,
-// 					};
-// 				}
-// 			}
-// 			if (after) {
-// 				const parsed = parseValidDate(after as string);
-// 				if (parsed) {
-// 					transformed[field] = {
-// 						...(transformed[field] ?? {}),
-// 						gte: parsed,
-// 					};
-// 				}
-// 			}
-// 			if (between) {
-// 				if (
-// 					Array.isArray(between) &&
-// 					between.length === 2
-// 				) {
-// 					const [start, end] = between.map(parseValidDate);
-// 					if (start && end) {
-// 						transformed[field] = {
-// 							...(transformed[field] ?? {}),
-// 							gte: start,
-// 							lte: end,
-// 						};
-// 					}
-// 				}
-// 			}
-// 		};
-
-// 		if (dateTarget === "both") {
-// 			applyDateFilter("createdAt");
-// 			applyDateFilter("updatedAt");
-// 		} else {
-// 			applyDateFilter(dateTarget);
-// 		}
-
-// 		const query = useOr
-// 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
-// 			: transformed;
-
-// 		const users = await prisma.user.findMany({
-// 			where: query,
-// 			orderBy: { [sortBy]: order },
-// 			skip,
-// 			take,
-// 		});
-
-// 		if (!users.length) {
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: USER_ERRORS.NOT_FOUND,
-// 				message: "No users found",
-// 			});
-// 		}
-
-// 		return users;
-// 	} catch (err) {
-// 		if (err instanceof Prisma.PrismaClientValidationError) {
-// 			throw new AppError({
-// 				statusCode: 400,
-// 				code: USER_ERRORS.INVALID_SORT,
-// 				message: `Invalid sortBy field: ${sortBy}`,
-// 			});
-// 		}
-// 		if (err instanceof AppError) throw err;
-// 		throw err;
-// 	}
-// }
+// export async function updateUser(id: number, data: UpdateUserData) {
+export async function updateUser(id: string, data: UpdateUserData) {
+	try {
+		const updatePayload: Record<string, any> = { ...data };
+		if (data.password) {
+			// Find user for password constrains check
+			const currentUser = await prisma.user.findUnique({ where: { id } });
+			if (!currentUser) {
+				throw new AppError({
+					statusCode: 404,
+					code: USER_ERRORS.USER_UPDATE,
+					message: "User not found",
+				});
+			}
+			// Check password constraints
+			try {
+				checkPasswordConstraints(data.password, {
+					email: data.email ?? currentUser.email,
+					// username: data.username ?? currentUser.username,
+					nickname: data.nickname ?? currentUser.nickname,
+				});
+			} catch (err) {
+				throw new AppError({
+					statusCode: 400,
+					code: USER_ERRORS.USER_UPDATE,
+					message: (err as Error).message,
+				});
+			}
+			// Hash password if provided
+			const { salt, hash } = hashPassword(data.password);
+			updatePayload.passwordHash = hash;
+			updatePayload.salt = salt;
+			delete updatePayload.password; // remove plain password
+		}
+		const updatedUser = await prisma.user.update({
+			where: { id },
+			data: updatePayload,
+		});
+		return updatedUser;
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			switch (err.code) {
+				case "P2002":
+					const field =
+						(err.meta?.target as string[])?.[0] ?? "Field";
+					throw new AppError({
+						statusCode: 409,
+						code: USER_ERRORS.USER_UPDATE,
+						message: `${capitalize(field)} already exists`,
+					});
+				case "P2003":
+					throw new AppError({
+						statusCode: 400,
+						code: USER_ERRORS.USER_UPDATE,
+						message: "Invalid foreign key",
+					});
+				case "P2025":
+					throw new AppError({
+						statusCode: 404,
+						code: USER_ERRORS.USER_UPDATE,
+						message: "User not found",
+					});
+			}
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
