@@ -93,31 +93,52 @@ export async function getUserHandler(
 	return reply.code(200).send(parsedUser);
 }
 
-// pagination helper inside controller file
+// Helper function for pagination
 function applyPagination(params: {
 	all?: boolean;
 	skip?: number;
 	take?: number;
+	page?: number;
 }) {
+	console.log("[applyPagination] Raw params:", params);
+
 	// Get config from utils function getConfig() (utils/config.ts)
 	const config = getConfig();
 	const paginationEnabled = config.PAGINATION_ENABLED === "true";
 	const defaultPageSize = parseInt(config.DEFAULT_PAGE_SIZE || "10", 10);
 
 	// If query string has "?all=true" then all results will be provided (no pagination)
-	if (params.all === true) return { skip: undefined, take: undefined };
-	if (!paginationEnabled) return { skip: undefined, take: undefined };
+	if (params.all === true || !paginationEnabled) {
+		return { skip: undefined, take: undefined };
+	}
 
-	return {
-		skip: typeof params.skip === "number" ? params.skip : 0,
-		take: typeof params.take === "number" ? params.take : defaultPageSize,
-	};
+	const take =
+		typeof params.take === "number" ? params.take : defaultPageSize;
+
+	// ❗ Optional: Enforce that both `page` and `skip` are not allowed together
+	if (typeof params.page === "number" && typeof params.skip === "number") {
+		// TODO: Use AppError here
+		throw new Error("Cannot use both 'page' and 'skip' in the same query");
+		// Comment out the line above to disable this validation
+	}
+
+	const skip =
+		typeof params.page === "number"
+			? (params.page - 1) * take
+			: typeof params.skip === "number"
+			? params.skip
+			: 0;
+
+	return { skip, take };
 }
 
 export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
+	// TODO: Log full query for debugging purposes
+	console.log("[Request Query]", request.query);
+
 	// Destructure request query into respective fields
 	const {
 		id,
@@ -134,17 +155,25 @@ export async function getUsersHandler(
 		useOr,
 		skip: querySkip,
 		take: queryTake,
+		page,
+		all,
 		sortBy,
 		order,
-		all,
 	} = request.query;
 
 	const { skip, take } = applyPagination({
 		all,
 		skip: querySkip,
 		take: queryTake,
+		page,
 	});
+	// TODO: Log pagination results for debugging purposes
+	console.log(
+		`[Pagination] page: ${page}, skip: ${skip}, take: ${take}, all: ${all}`,
+	);
 
+	// MR_NOTE: 'page' nor 'all' field are not handled by service `findUsers()`;
+	// since pagination is an abstraction for 'skip' and 'take'
 	const users = await findUsers({
 		where: {
 			id,
@@ -202,6 +231,90 @@ export async function patchUserHandler(
 	return reply.code(200).send(parsed);
 }
 
+// =============================================================================
+// OLD applyPagination() THAT DIDN'T HANDLE 'page' FIELD
+// function applyPagination(params: {
+// 	all?: boolean;
+// 	skip?: number;
+// 	take?: number;
+// }) {
+// 	// Get config from utils function getConfig() (utils/config.ts)
+// 	const config = getConfig();
+// 	const paginationEnabled = config.PAGINATION_ENABLED === "true";
+// 	const defaultPageSize = parseInt(config.DEFAULT_PAGE_SIZE || "10", 10);
+
+// 	// If query string has "?all=true" then all results will be provided (no pagination)
+// 	if (params.all === true) return { skip: undefined, take: undefined };
+// 	if (!paginationEnabled) return { skip: undefined, take: undefined };
+
+// 	return {
+// 		skip: typeof params.skip === "number" ? params.skip : 0,
+// 		take: typeof params.take === "number" ? params.take : defaultPageSize,
+// 	};
+// }
+// =============================================================================
+// OLD getUsersHandler() WHICH DIDN'T HANDLED 'page'
+// export async function getUsersHandler(
+// 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
+// 	reply: FastifyReply,
+// ) {
+// 	// TODO: Log full query for debugging purposes
+// 	console.log("[Request Query]", request.query);
+
+// 	// Destructure request query into respective fields
+// 	const {
+// 		id,
+// 		email,
+// 		username,
+// 		nickname,
+// 		createdAt,
+// 		updatedAt,
+// 		dateTarget,
+// 		before,
+// 		after,
+// 		between,
+// 		useFuzzy,
+// 		useOr,
+// 		skip: querySkip,
+// 		take: queryTake,
+// 		sortBy,
+// 		order,
+// 		all,
+// 	} = request.query;
+
+// 	const { skip, take } = applyPagination({
+// 		all,
+// 		skip: querySkip,
+// 		take: queryTake,
+// 	});
+
+// 	// TODO: Log pagination results for debugging purposes
+// 	console.log(`[Pagination] skip: ${skip}, take: ${take}, all: ${all}`);
+
+// 	const users = await findUsers({
+// 		where: {
+// 			id,
+// 			email,
+// 			username,
+// 			nickname,
+// 			createdAt,
+// 			updatedAt,
+// 		},
+// 		useFuzzy,
+// 		useOr,
+// 		dateTarget,
+// 		before,
+// 		after,
+// 		between,
+// 		skip,
+// 		take,
+// 		sortBy,
+// 		order,
+// 	});
+
+// 	const parsedUsers = userArrayResponseSchema.parse(users);
+// 	return reply.code(200).send(parsedUsers);
+// }
 // =============================================================================
 // OLD getUsersHandler() WHICH DIDN'T HANDLED PAGINATION
 // export async function getUsersHandler(

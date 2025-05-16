@@ -226,8 +226,8 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
-// TODO: Maybe remove the "export" keyword
-// Base strict schema for query parameters (strict: uuid, email, date fields)
+// Base schema for query parameters
+// Note that all fields will be marked with '.optional()' by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	// id: z.string().uuid().describe("Exact match for user ID (UUID)"),
 	id: z.string().describe("Exact match for user ID (UUID)"),
@@ -272,11 +272,15 @@ const baseGetUsersQuerySchema = z.object({
 		.min(1)
 		.max(100)
 		.describe("Number of records to return"),
-	sortBy: userSortByEnum,
-	order: sortDirectionEnum,
+	page: z
+		.number()
+		.min(1)
+		.describe("Page number to use for pagination (starts at 1)"),
 	all: z.coerce
 		.boolean()
 		.describe("If true, return all results without pagination"),
+	sortBy: userSortByEnum,
+	order: sortDirectionEnum,
 });
 
 // Refined schema for query parameters to find users
