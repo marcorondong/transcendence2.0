@@ -1,10 +1,12 @@
 - [User Authentication Endpoints](#user-authentication-endpoints)
-	- [1. Register User](#1-register-user)
-	- [2. Login User](#2-login-user)
+  - [1. Register User](#1-register-user)
+  - [2. Login User](#2-login-user)
+  - [3. Logout](#3-logout)
 - [Protected Routes](#protected-routes)
-	- [Game Statistics](#game-statistics)
-	- [Chat Management](#chat-management)
-	- [User Management](#user-management)
+  - [Game Statistics](#game-statistics)
+  - [Chat Management](#chat-management)
+  - [User Management](#user-management)
+  - [Further Token Management](#further-token-management)
 - [Problem](#problem)
 
 # User Authentication Endpoints
@@ -47,6 +49,17 @@
 - `401 Unauthorized` - Invalid credentials
 - `201 Created` - Login successful (access token saved in client cookies)
 
+## 3. Logout
+
+**Endpoint** `DELETE https://{frontend:port}/auth-api/sign-out`
+
+**Request Body:**
+
+None
+
+**Response Codes:**
+- `200 OK` - cookie deleted from client
+
 # Protected Routes
 
 The following endpoints are routed through nginx with authentication subrequest:
@@ -69,6 +82,11 @@ The following endpoints are routed through nginx with authentication subrequest:
 ## User Management
 
 - `GET/PUT/PATCH https://{frontend:port}/api/users/{uuid}`
+
+## Further Token Management
+
+- `GET https://{frontend:port}/auth-api/verify-jwt`
+- `GET https://{frontend:port}/auth-api/refresh-jwt`
 
 # Problem
 
