@@ -10,6 +10,7 @@
 # User Authentication Endpoints
 
 ## 1. Register User
+
 **Endpoint:** `POST https://{frontend:port}/api/users/`  
 *Note: Keep the trailing "/"*
 
@@ -30,6 +31,7 @@
 - `201 Created` - Registration successful
 
 ## 2. Login User
+
 **Endpoint:** `POST https://{frontend:port}/auth-api/sign-in`
 
 **Request Body:**
@@ -46,9 +48,11 @@
 - `201 Created` - Login successful (access token saved in client cookies)
 
 # Protected Routes
+
 The following endpoints are routed through nginx with authentication subrequest:
 
 ## Game Statistics
+
 - `GET https://{frontend:port}/tictactoe-db/game-history`
 - `GET https://{frontend:port}/tictactoe-db/total-stats`
 - `GET https://{frontend:port}/tictactoe-db/head-to-head`
@@ -57,14 +61,17 @@ The following endpoints are routed through nginx with authentication subrequest:
 - `GET https://{frontend:port}/pong-db/head-to-head`
 
 ## Chat Management
+
 - `GET https://{frontend:port}/chat-db/block-status`
 - `POST https://{frontend:port}/chat-db/block-user`
 - `POST https://{frontend:port}/chat-db/unblock-user`
 
 ## User Management
+
 - `GET/PUT/PATCH https://{frontend:port}/api/users/{uuid}`
 
 # Problem
+
 - `GET https://{frontend:port}/api/users/`
 - `POST https://{frontend:port}/api/users/`
 
