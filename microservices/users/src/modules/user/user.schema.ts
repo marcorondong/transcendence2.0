@@ -226,15 +226,14 @@ export const loginResponseSchema = z.object({
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
-// Base schema for query parameters
-const baseGetUsersQuerySchema = z.object({
-	// id: z.coerce.number().min(1),
-	id: z.string().uuid(),
-	email: z.string().email(),
-	username: z.string(),
-	nickname: z.string(),
-	// createdAt: z.date(),
-	// updatedAt: z.date(),
+// TODO: Maybe remove the "export" keyword
+// Base strict schema for query parameters (strict: uuid, email, date fields)
+// const baseGetUsersQuerySchema = z.object({
+export const strictGetUsersQuerySchema = z.object({
+	id: z.string().uuid().describe("Exact match for user ID (UUID)"),
+	email: z.string().email().describe("Exact match for user email"),
+	username: z.string().describe("Exact match for username"),
+	nickname: z.string().describe("Exact match for nickname"),
 	createdAt: z.preprocess((val) => new Date(val as string), z.date()),
 	updatedAt: z.preprocess((val) => new Date(val as string), z.date()),
 	// TODO: Make this as a type, and same for before, after and between
@@ -260,17 +259,76 @@ const baseGetUsersQuerySchema = z.object({
 			]),
 		)
 		.describe("Find users between two dates (inclusive)"),
-	useFuzzy: z.coerce.boolean(),
-	useOr: z.coerce.boolean(),
-	skip: z.coerce.number().min(0),
-	take: z.coerce.number().min(1).max(100),
+	// useFuzzy: z.coerce
+	// 		.boolean()
+	// 		.describe("Enable fuzzy search (case-insensitive partial matches)"),
+	useOr: z.coerce
+		.boolean()
+		.describe("Use OR instead of AND for combining filters"),
+	skip: z.coerce.number().min(0).describe("Number of records to skip"),
+	take: z.coerce
+		.number()
+		.min(1)
+		.max(100)
+		.describe("Number of records to return"),
 	sortBy: userSortByEnum,
 	order: sortDirectionEnum,
 });
 
-// Refined schema for query parameters to find users
+// TODO: Maybe remove the "export" keyword
+// Base fuzzy schema for query parameters (relaxed: all string/date fields)
+export const fuzzyGetUsersQuerySchema = z.object({
+	id: z.string().describe("Fuzzy match for ID (partial, case-insensitive)"),
+	email: z
+		.string()
+		.describe("Fuzzy match for email (partial, case-insensitive)"),
+	username: z.string().describe("Fuzzy match for username"),
+	nickname: z.string().describe("Fuzzy match for nickname"),
+	createdAt: z.string().describe("Exact or partial created date string"),
+	updatedAt: z.string().describe("Exact or partial updated date string"),
+	// TODO: Make this as a type, and same for before, after and between
+	dateTarget: z
+		.enum(["createdAt", "updatedAt", "both"])
+		.default("createdAt")
+		.describe("Choose which date field to apply filters to"),
+	before: z
+		.string()
+		.describe("Users created/updated before this date (string)"),
+	after: z
+		.string()
+		.describe("Users created/updated after this date (string)"),
+	between: z
+		.array(z.string())
+		.length(2)
+		.describe("Two date strings for inclusive range filtering"),
+	// useFuzzy: z.coerce
+	// 		.boolean()
+	// 		.describe("Enable fuzzy search (case-insensitive partial matches)"),
+	useOr: z.coerce
+		.boolean()
+		.describe("Use OR instead of AND for combining filters"),
+	skip: z.coerce.number().min(0).describe("Number of records to skip"),
+	take: z.coerce
+		.number()
+		.min(1)
+		.max(100)
+		.describe("Number of records to return"),
+	sortBy: userSortByEnum,
+	order: sortDirectionEnum,
+});
+
+// // Refined schema for query parameters to find users
+// export const getUsersQuerySchema = sanitizeQuerySchema(
+// 	baseGetUsersQuerySchema,
+// ).strict(); // Rejects unknown fields
+
+// Refined schema for query parameters to find users (Unified schema used in route (strict superset of both))
 export const getUsersQuerySchema = sanitizeQuerySchema(
-	baseGetUsersQuerySchema,
+	strictGetUsersQuerySchema.merge(fuzzyGetUsersQuerySchema).extend({
+		useFuzzy: z.coerce
+			.boolean()
+			.describe("Enable fuzzy search (case-insensitive partial matches)"),
+	}),
 ).strict(); // Rejects unknown fields
 
 // TypeScript types inferred from schemas
