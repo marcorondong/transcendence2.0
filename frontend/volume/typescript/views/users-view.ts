@@ -73,6 +73,8 @@ export class UsersView extends HTMLElement {
 				"border-8",
 				"border-indigo-800",
 				"w-30",
+				"object-cover",
+				"aspect-square",
 				"sm:w-20",
 			);
 			avatar.src = "/static-files/images/avatar_placeholder.png";

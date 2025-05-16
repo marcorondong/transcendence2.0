@@ -58,10 +58,18 @@ a {
 	@apply underline dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold;
 }
 
+.pong-label {
+	@apply text-sm text-slate-400;
+}
+
 /* big elements */
 
 .pong-card {
 	@apply bg-indigo-900/50 rounded-xl border-1 border-indigo-800/50;
+}
+
+.pong-card-dark {
+	@apply bg-slate-950;
 }
 
 .pong-card-hover {

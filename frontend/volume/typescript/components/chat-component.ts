@@ -623,6 +623,7 @@ class ChatComponent extends HTMLElement {
 
 	disconnectedCallback() {
 		console.log("Chat DISCONNECTED");
+		this.ws?.close();
 	}
 }
 

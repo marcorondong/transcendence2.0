@@ -344,6 +344,7 @@ export class PongComponent extends HTMLElement {
 
 	disconnectedCallback() {
 		console.log("Pong DISCONNECTED");
+		this.wss?.close();
 		document.removeEventListener("keydown", this, false);
 		document.removeEventListener("keyup", this, false);
 		document.removeEventListener("click", this, false);
