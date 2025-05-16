@@ -126,7 +126,11 @@ type UserQueryOptions = {
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function findUsers(options: UserQueryOptions = {}) {
-	// let {
+	// Remove undefined fields from the full options object
+	const cleanedOptions = Object.fromEntries(
+		Object.entries(options).filter(([_, v]) => v !== undefined),
+	) as UserQueryOptions;
+
 	const {
 		where = {},
 		useFuzzy = false,
@@ -139,10 +143,17 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		take,
 		sortBy = "id",
 		order = "asc",
-	} = options;
-	console.log("✅ Step 1: Received Options", options);
+	} = cleanedOptions;
+
+	console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
+
 	try {
-		const transformed = Object.entries(where).reduce(
+		// Remove undefined fields from 'where'
+		const cleanedWhere = Object.fromEntries(
+			Object.entries(where).filter(([_, v]) => v !== undefined),
+		);
+
+		const transformed = Object.entries(cleanedWhere).reduce(
 			(acc, [key, value]) => {
 				// Enable fuzzy search (transform string fields to `contains` filters)
 				if (typeof value === "string" && useFuzzy) {
@@ -168,8 +179,8 @@ export async function findUsers(options: UserQueryOptions = {}) {
 					gte: after,
 				};
 			}
+			// if (Array.isArray(between) && between.length === 2) {
 			if (between) {
-				// if (Array.isArray(between) && between.length === 2) {
 				const [start, end] = between;
 				transformed[field] = {
 					...(transformed[field] ?? {}),
@@ -178,32 +189,46 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				};
 			}
 		};
+
 		if (dateTarget === "both") {
 			applyDateFilter("createdAt");
 			applyDateFilter("updatedAt");
 		} else {
-			applyDateFilter(dateTarget ?? "createdAt");
+			//applyDateFilter(dateTarget ?? "createdAt");
+			applyDateFilter(dateTarget);
 		}
+
 		console.log("✅ Step 2: Transformed 'where'", transformed);
 		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
-			: transformed;
+			: // : transformed;
+			  Object.fromEntries(
+					Object.entries(transformed).filter(
+						([_, v]) => v !== undefined,
+					),
+			  );
+
 		console.log("✅ Step 3: Final Query Shape", query);
+
 		const prismaSortBy = { [sortBy]: order };
+
 		console.log("✅ Step 4: Final Prisma Query", {
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
+
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
+
 		console.log("✅ Step 5: Result", users);
+
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -211,6 +236,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: "No users found",
 			});
 		}
+
 		return users;
 	} catch (err) {
 		console.log("❌ Step 6: Error Caught", err);
@@ -222,7 +248,9 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: `Invalid sortBy field: ${sortBy}`,
 			});
 		}
+
 		if (err instanceof AppError) throw err;
+
 		console.error("❌ Step 6.2: Unknown error", err);
 		// Unknown errors bubble up to global error handler.
 		throw err;
@@ -319,3 +347,109 @@ export async function updateUser(id: string, data: UpdateUserData) {
 		throw err;
 	}
 }
+
+// =============================================================================
+// OLD FUNCTION findUsers() THAT DIDN'T cleaned the parameter options
+// export async function findUsers(options: UserQueryOptions = {}) {
+// 	// let {
+// 	const {
+// 		where = {},
+// 		useFuzzy = false,
+// 		useOr = false,
+// 		dateTarget = "createdAt",
+// 		before,
+// 		after,
+// 		between,
+// 		skip,
+// 		take,
+// 		sortBy = "id",
+// 		order = "asc",
+// 	} = options;
+// 	console.log("✅ Step 1: Received Options", options);
+// 	try {
+// 		const transformed = Object.entries(where).reduce(
+// 			(acc, [key, value]) => {
+// 				// Enable fuzzy search (transform string fields to `contains` filters)
+// 				if (typeof value === "string" && useFuzzy) {
+// 					acc[key] = { contains: value };
+// 				} else {
+// 					acc[key] = value;
+// 				}
+// 				return acc;
+// 			},
+// 			{} as Record<string, any>,
+// 		);
+// 		// Apply date filters to 'createdAt'
+// 		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
+// 			if (before) {
+// 				transformed[field] = {
+// 					...(transformed[field] ?? {}),
+// 					lt: before,
+// 				};
+// 			}
+// 			if (after) {
+// 				transformed[field] = {
+// 					...(transformed[field] ?? {}),
+// 					gte: after,
+// 				};
+// 			}
+// 			if (between) {
+// 				// if (Array.isArray(between) && between.length === 2) {
+// 				const [start, end] = between;
+// 				transformed[field] = {
+// 					...(transformed[field] ?? {}),
+// 					gte: start,
+// 					lte: end,
+// 				};
+// 			}
+// 		};
+// 		if (dateTarget === "both") {
+// 			applyDateFilter("createdAt");
+// 			applyDateFilter("updatedAt");
+// 		} else {
+// 			applyDateFilter(dateTarget ?? "createdAt");
+// 		}
+// 		console.log("✅ Step 2: Transformed 'where'", transformed);
+// 		// Enable OR queries (map provided fields to build individual queries)
+// 		const query = useOr
+// 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
+// 			: transformed;
+// 		console.log("✅ Step 3: Final Query Shape", query);
+// 		const prismaSortBy = { [sortBy]: order };
+// 		console.log("✅ Step 4: Final Prisma Query", {
+// 			where: query,
+// 			orderBy: prismaSortBy,
+// 			skip,
+// 			take,
+// 		});
+// 		const users = await prisma.user.findMany({
+// 			where: query,
+// 			orderBy: prismaSortBy,
+// 			skip,
+// 			take,
+// 		});
+// 		console.log("✅ Step 5: Result", users);
+// 		if (!users.length) {
+// 			throw new AppError({
+// 				statusCode: 404,
+// 				code: USER_ERRORS.NOT_FOUND,
+// 				message: "No users found",
+// 			});
+// 		}
+// 		return users;
+// 	} catch (err) {
+// 		console.log("❌ Step 6: Error Caught", err);
+// 		// Known/Expected errors bubble up to controller as AppError (custom error)
+// 		if (err instanceof Prisma.PrismaClientValidationError) {
+// 			throw new AppError({
+// 				statusCode: 400,
+// 				code: USER_ERRORS.INVALID_SORT,
+// 				message: `Invalid sortBy field: ${sortBy}`,
+// 			});
+// 		}
+// 		if (err instanceof AppError) throw err;
+// 		console.error("❌ Step 6.2: Unknown error", err);
+// 		// Unknown errors bubble up to global error handler.
+// 		throw err;
+// 	}
+// }
