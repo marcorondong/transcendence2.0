@@ -116,32 +116,21 @@ export async function getUsersHandler(
 		order,
 	} = request.query;
 
-	// Convert exact dateStrings to Date objects
-	const createdAtDate = createdAt ? new Date(createdAt) : undefined;
-	const updatedAtDate = updatedAt ? new Date(updatedAt) : undefined;
-
-	// Convert range filters
-	const beforeDate = before ? new Date(before) : undefined;
-	const afterDate = after ? new Date(after) : undefined;
-	const betweenDates = between
-		? ([new Date(between[0]), new Date(between[1])] as [Date, Date])
-		: undefined;
-
 	const users = await findUsers({
 		where: {
 			id,
 			email,
 			username,
 			nickname,
-			createdAt: createdAtDate,
-			updatedAt: updatedAtDate,
+			createdAt,
+			updatedAt,
 		},
 		useFuzzy,
 		useOr,
 		dateTarget,
-		before: beforeDate,
-		after: afterDate,
-		between: betweenDates,
+		before,
+		after,
+		between,
 		skip,
 		take,
 		sortBy,
@@ -185,3 +174,63 @@ export async function patchUserHandler(
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
 }
+
+// =============================================================================
+// OLD getUsersHandler() THAT MANUALLY PARSED DATES
+// export async function getUsersHandler(
+// 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
+// 	reply: FastifyReply,
+// ) {
+// 	const {
+// 		id,
+// 		email,
+// 		username,
+// 		nickname,
+// 		createdAt,
+// 		updatedAt,
+// 		dateTarget,
+// 		before,
+// 		after,
+// 		between,
+// 		useFuzzy,
+// 		useOr,
+// 		skip,
+// 		take,
+// 		sortBy,
+// 		order,
+// 	} = request.query;
+
+// 	// Convert exact dateStrings to Date objects
+// 	const createdAtDate = createdAt ? new Date(createdAt) : undefined;
+// 	const updatedAtDate = updatedAt ? new Date(updatedAt) : undefined;
+
+// 	// Convert range filters
+// 	const beforeDate = before ? new Date(before) : undefined;
+// 	const afterDate = after ? new Date(after) : undefined;
+// 	const betweenDates = between
+// 		? ([new Date(between[0]), new Date(between[1])] as [Date, Date])
+// 		: undefined;
+
+// 	const users = await findUsers({
+// 		where: {
+// 			id,
+// 			email,
+// 			username,
+// 			nickname,
+// 			createdAt: createdAtDate,
+// 			updatedAt: updatedAtDate,
+// 		},
+// 		useFuzzy,
+// 		useOr,
+// 		dateTarget,
+// 		before: beforeDate,
+// 		after: afterDate,
+// 		between: betweenDates,
+// 		skip,
+// 		take,
+// 		sortBy,
+// 		order,
+// 	});
+// 	const parsedUsers = userArrayResponseSchema.parse(users);
+// 	return reply.code(200).send(parsedUsers);
+// }
