@@ -1,0 +1,16 @@
+services:
+  auth_api:
+    image: auth_api_img
+    container_name: auth_api_container
+    build: .
+    volumes:
+      - ./src/:/auth_api/src/ # TODO remove this in production
+    environment: # receive env variables from .env file
+      - NODE_ENV=development
+      - PORT=2999
+      - HOST=0.0.0.0
+    ports: # TODO remove this in production
+      - 2999:2999
+    networks:
+      - Transcendence2.0
+    restart: always

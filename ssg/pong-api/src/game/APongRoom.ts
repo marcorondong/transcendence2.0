@@ -10,11 +10,12 @@ import {
 } from "./PongPlayer";
 import { WebSocket, RawData } from "ws";
 import { Paddle } from "./elements/Paddle";
-import { Parser } from "../utils/Parser";
 import { RoomEvents } from "../customEvents";
 import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
+import { IncomingMove, UserMoveSchema } from "../utils/zodSchema";
+import { z } from "zod"
 
 enum EPongRoomState {
 	LOBBY,
@@ -172,13 +173,23 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		playerPaddle: Paddle,
 	): void {
 		player.connection.on("message", (data: RawData, isBinary: boolean) => {
-			const json = Parser.rawDataToJson(data);
-			if (!json) {
-				player.connection.send("Invalid json");
-				return;
+
+			try{
+				const incomingJson: IncomingMove = JSON.parse(data.toString());
+				const validatedDirection = UserMoveSchema.parse(incomingJson).move;
+				const direction: "up" | "down" = validatedDirection;
+				this.getGame().movePaddle(playerPaddle, direction);
 			}
-			const direction = json.move;
-			this.getGame().movePaddle(playerPaddle, direction);
+			catch(err)
+			{
+				if(err instanceof z.ZodError)
+				{
+					console.error("Zod validation failed:", err.errors);
+					player.connection.send(`Invalid move ${err.message}`);
+				}
+				else
+					console.error("Not zod error but some kind of error", err);
+			}
 		});
 	}
 

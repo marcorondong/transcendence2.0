@@ -97,7 +97,7 @@ services:
     networks:
       - Transcendence2.0
     depends_on:
-    - chat_db
+      - chat_db
     restart: always
 
   chat_db:
@@ -122,8 +122,10 @@ services:
     restart: always
 
 include:
-  - ./monitoring/monitoring-docker-compose.yml
+  - ./microservices/auth_api/docker-compose.yml
   - ./frontend/docker-compose.yml
+  - ./monitoring/monitoring-docker-compose.yml
+  - ./microservices/users/docker-compose.yml
   - ./microservices/pong_db/docker-compose.yml
 
 networks:
