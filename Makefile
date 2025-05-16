@@ -28,6 +28,9 @@ dev:
 	docker compose build --no-cache
 	docker compose up
 
+nuke: clean
+	docker system prune -a --volumes
+
 cli: all
 	make -C cli-client
 
@@ -46,6 +49,6 @@ $(GLOBAL_ENV):
 
 $(SLACK_WEBHOOK):
 	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
-	mv /monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
+	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
 .PHONY: all re clean
