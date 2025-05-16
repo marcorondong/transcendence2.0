@@ -230,13 +230,17 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 // Note that all fields will be marked with '.optional()' by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	// id: z.string().uuid().describe("Exact match for user ID (UUID)"),
-	id: z.string().describe("Exact match for user ID (UUID)"),
+	id: z.string().describe("Find users by user ID (UUID)"),
 	// email: z.string().email().describe("Exact match for user email"),
-	email: z.string().describe("Exact match for user email"),
-	username: z.string().describe("Exact match for username"),
-	nickname: z.string().describe("Exact match for nickname"),
-	createdAt: z.preprocess((val) => new Date(val as string), z.date()),
-	updatedAt: z.preprocess((val) => new Date(val as string), z.date()),
+	email: z.string().describe("Find users by email"),
+	username: z.string().describe("Find users by username"),
+	nickname: z.string().describe("Find users by nickname"),
+	createdAt: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe("Find users by createdAt"),
+	updatedAt: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe("Find users by updatedAt"),
 	// TODO: Make this as a type, and same for before, after and between
 	dateTarget: z
 		.enum(["createdAt", "updatedAt", "both"])
