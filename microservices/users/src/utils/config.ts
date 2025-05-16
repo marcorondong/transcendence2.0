@@ -16,7 +16,10 @@ let cachedConfig: AppConfig | null = null;
 export function getConfig(): AppConfig {
 	if (cachedConfig) return cachedConfig;
 
+	console.log("[Config] Loading config...");
+
 	const secretsPath = "/run/secrets"; // Docker-style secrets path
+	const hasSecretsFolder = fs.existsSync(secretsPath); // For checking if folder exists
 	// Define hardcoded values here
 	const hardcodedDefaults = {
 		PAGINATION_ENABLED: "true",
@@ -24,10 +27,17 @@ export function getConfig(): AppConfig {
 	};
 
 	// Helper function to load from Docker-style secrets
-	const loadSecret = (key: string): string | undefined => {
+	const loadSecret = (key: string | undefined): string | undefined => {
+		console.log("[Config] loadSecret() called for key:", key);
+		if (!key || !hasSecretsFolder) return undefined;
 		const filePath = path.join(secretsPath, key.toLowerCase());
-		if (fs.existsSync(filePath)) {
-			return fs.readFileSync(filePath, "utf-8").trim();
+		try {
+			if (fs.existsSync(filePath)) {
+				return fs.readFileSync(filePath, "utf-8").trim();
+			}
+		} catch (err) {
+			// Optional:
+			console.warn(`[Config] Failed to read secret ${key}:`, err);
 		}
 		return undefined;
 	};
@@ -45,6 +55,50 @@ export function getConfig(): AppConfig {
 			hardcodedDefaults.DEFAULT_PAGE_SIZE,
 	};
 
+	console.log("[Config] Final config object:", config);
+
 	cachedConfig = config; // Cache the config
 	return config;
 }
+
+// =============================================================================
+// OLD FUNCTION CODE THAT DIDN'T HAVE CONSOLE LOG PRINTS NOR CHECKED IF loadSecrets EXISTS
+// Function to read and assign config values from Docker secrets, environment or hardcoded values
+// export function getConfig(): AppConfig {
+// 	console.log("[Config] Loading config keys...");
+
+// 	if (cachedConfig) return cachedConfig;
+
+// 	const secretsPath = "/run/secrets"; // Docker-style secrets path
+// 	// Define hardcoded values here
+// 	const hardcodedDefaults = {
+// 		PAGINATION_ENABLED: "true",
+// 		DEFAULT_PAGE_SIZE: "10",
+// 	};
+
+// 	// Helper function to load from Docker-style secrets
+// 	const loadSecret = (key: string): string | undefined => {
+// 		const filePath = path.join(secretsPath, key.toLowerCase());
+// 		if (fs.existsSync(filePath)) {
+// 			return fs.readFileSync(filePath, "utf-8").trim();
+// 		}
+// 		return undefined;
+// 	};
+
+// 	// Loads config in this order (conditional): 1st Docker secret | 2nd environment | 3rd hardcoded values
+// 	const config: AppConfig = {
+// 		PAGINATION_ENABLED:
+// 			loadSecret("PAGINATION_ENABLED") ??
+// 			process.env.PAGINATION_ENABLED ??
+// 			hardcodedDefaults.PAGINATION_ENABLED,
+
+// 		DEFAULT_PAGE_SIZE:
+// 			loadSecret("DEFAULT_PAGE_SIZE") ??
+// 			process.env.DEFAULT_PAGE_SIZE ??
+// 			hardcodedDefaults.DEFAULT_PAGE_SIZE,
+// 	};
+
+// 	cachedConfig = config; // Cache the config
+// 	console.log("[Config] Final config object:", config);
+// 	return config;
+// }

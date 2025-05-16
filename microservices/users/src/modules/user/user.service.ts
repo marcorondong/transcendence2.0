@@ -140,7 +140,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		sortBy = "id",
 		order = "asc",
 	} = options;
-	// console.log("✅ Step 1: Received Options", options);
+	console.log("✅ Step 1: Received Options", options);
 	try {
 		const transformed = Object.entries(where).reduce(
 			(acc, [key, value]) => {
@@ -169,6 +169,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				};
 			}
 			if (between) {
+				// if (Array.isArray(between) && between.length === 2) {
 				const [start, end] = between;
 				transformed[field] = {
 					...(transformed[field] ?? {}),
@@ -183,21 +184,26 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		} else {
 			applyDateFilter(dateTarget ?? "createdAt");
 		}
-		// console.log("✅ Step 2: Transformed 'where'", transformed);
+		console.log("✅ Step 2: Transformed 'where'", transformed);
 		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
 			: transformed;
-		// console.log("✅ Step 3: Final Query Shape", query);
+		console.log("✅ Step 3: Final Query Shape", query);
 		const prismaSortBy = { [sortBy]: order };
-		// console.log("✅ Step 4: Final Prisma Query", { where: query, orderBy: prismaSortBy, skip, take, });
+		console.log("✅ Step 4: Final Prisma Query", {
+			where: query,
+			orderBy: prismaSortBy,
+			skip,
+			take,
+		});
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
-		// console.log("✅ Step 5: Result", users);
+		console.log("✅ Step 5: Result", users);
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -207,7 +213,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		}
 		return users;
 	} catch (err) {
-		// console.log("❌ Step 6: Error Caught", err);
+		console.log("❌ Step 6: Error Caught", err);
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
@@ -217,7 +223,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			});
 		}
 		if (err instanceof AppError) throw err;
-		// console.error("❌ Step 6.2: Unknown error", err);
+		console.error("❌ Step 6.2: Unknown error", err);
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}

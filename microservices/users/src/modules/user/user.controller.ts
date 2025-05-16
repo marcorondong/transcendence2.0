@@ -167,6 +167,25 @@ export async function getUsersHandler(
 		take: queryTake,
 		page,
 	});
+	// // ======= START DEBUGGING =========
+	// let skip: number | undefined;
+	// let take: number | undefined;
+	// try {
+	// 	({ skip, take } = applyPagination({
+	// 		all,
+	// 		skip: querySkip,
+	// 		take: queryTake,
+	// 		page,
+	// 	}));
+	// } catch (err) {
+	// 	console.error("Pagination error:", err);
+	// 	throw new AppError({
+	// 		statusCode: 400,
+	// 		code: "PAGINATION_PARSE_ERROR",
+	// 		message: (err as Error).message,
+	// 	});
+	// }
+	// // ======= END DEBUGGING =========
 	// TODO: Log pagination results for debugging purposes
 	console.log(
 		`[Pagination] page: ${page}, skip: ${skip}, take: ${take}, all: ${all}`,
