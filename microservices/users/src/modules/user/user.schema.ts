@@ -274,6 +274,9 @@ const baseGetUsersQuerySchema = z.object({
 		.describe("Number of records to return"),
 	sortBy: userSortByEnum,
 	order: sortDirectionEnum,
+	all: z.coerce
+		.boolean()
+		.describe("If true, return all results without pagination"),
 });
 
 // Refined schema for query parameters to find users

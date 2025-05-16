@@ -18,7 +18,8 @@ import {
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
-import { server } from "../../app";
+// import { server } from "../../app";
+import { getConfig } from "../../utils/config";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -92,6 +93,27 @@ export async function getUserHandler(
 	return reply.code(200).send(parsedUser);
 }
 
+// pagination helper inside controller file
+function applyPagination(params: {
+	all?: boolean;
+	skip?: number;
+	take?: number;
+}) {
+	// Get config from utils function getConfig() (utils/config.ts)
+	const config = getConfig();
+	const paginationEnabled = config.PAGINATION_ENABLED === "true";
+	const defaultPageSize = parseInt(config.DEFAULT_PAGE_SIZE || "10", 10);
+
+	// If query string has "?all=true" then all results will be provided (no pagination)
+	if (params.all === true) return { skip: undefined, take: undefined };
+	if (!paginationEnabled) return { skip: undefined, take: undefined };
+
+	return {
+		skip: typeof params.skip === "number" ? params.skip : 0,
+		take: typeof params.take === "number" ? params.take : defaultPageSize,
+	};
+}
+
 export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
@@ -110,11 +132,18 @@ export async function getUsersHandler(
 		between,
 		useFuzzy,
 		useOr,
-		skip,
-		take,
+		skip: querySkip,
+		take: queryTake,
 		sortBy,
 		order,
+		all,
 	} = request.query;
+
+	const { skip, take } = applyPagination({
+		all,
+		skip: querySkip,
+		take: queryTake,
+	});
 
 	const users = await findUsers({
 		where: {
@@ -136,6 +165,7 @@ export async function getUsersHandler(
 		sortBy,
 		order,
 	});
+
 	const parsedUsers = userArrayResponseSchema.parse(users);
 	return reply.code(200).send(parsedUsers);
 }
@@ -171,3 +201,53 @@ export async function patchUserHandler(
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
 }
+
+// =============================================================================
+// OLD getUsersHandler() WHICH DIDN'T HANDLED PAGINATION
+// export async function getUsersHandler(
+// 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
+// 	reply: FastifyReply,
+// ) {
+// 	// Destructure request query into respective fields
+// 	const {
+// 		id,
+// 		email,
+// 		username,
+// 		nickname,
+// 		createdAt,
+// 		updatedAt,
+// 		dateTarget,
+// 		before,
+// 		after,
+// 		between,
+// 		useFuzzy,
+// 		useOr,
+// 		skip,
+// 		take,
+// 		sortBy,
+// 		order,
+// 	} = request.query;
+
+// 	const users = await findUsers({
+// 		where: {
+// 			id,
+// 			email,
+// 			username,
+// 			nickname,
+// 			createdAt,
+// 			updatedAt,
+// 		},
+// 		useFuzzy,
+// 		useOr,
+// 		dateTarget,
+// 		before,
+// 		after,
+// 		between,
+// 		skip,
+// 		take,
+// 		sortBy,
+// 		order,
+// 	});
+// 	const parsedUsers = userArrayResponseSchema.parse(users);
+// 	return reply.code(200).send(parsedUsers);
+// }
