@@ -5,18 +5,19 @@ import { jsonSchemaTransform } from "fastify-type-provider-zod";
 import { SwaggerOptions } from "@fastify/swagger";
 
 export async function setupSwagger(server: FastifyInstance) {
-	// Remove authentication from Swagger-related routes
-	server.addHook("onRoute", (routeOptions) => {
-		if (
-			routeOptions.url.startsWith("/api/documentation") ||
-			routeOptions.url === "/api/documentation/json"
-		) {
-			routeOptions.config = {
-				...(routeOptions.config ?? {}),
-				authRequired: false,
-			};
-		}
-	});
+	// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
+	// // Remove authentication from Swagger-related routes
+	// server.addHook("onRoute", (routeOptions) => {
+	// 	if (
+	// 		routeOptions.url.startsWith("/api/documentation") ||
+	// 		routeOptions.url === "/api/documentation/json"
+	// 	) {
+	// 		routeOptions.config = {
+	// 			...(routeOptions.config ?? {}),
+	// 			authRequired: false,
+	// 		};
+	// 	}
+	// });
 	// Register Swagger + Swagger UI
 	server.register(fastifySwagger, {
 		exposeRoute: true,
@@ -26,17 +27,18 @@ export async function setupSwagger(server: FastifyInstance) {
 				description: "Swagger docs for ft_transcendence project",
 				version: "1.0.0",
 			},
-			// Enable Auth option in Swagger (to reach authenticated routes)
-			components: {
-				securitySchemes: {
-					bearerAuth: {
-						type: "http",
-						scheme: "bearer",
-						bearerFormat: "JWT",
-					},
-				},
-			},
-			security: [{ bearerAuth: [] }], // Apply Auth option globally to all routes
+			// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
+			// // Enable Auth option in Swagger (to reach authenticated routes)
+			// components: {
+			// 	securitySchemes: {
+			// 		bearerAuth: {
+			// 			type: "http",
+			// 			scheme: "bearer",
+			// 			bearerFormat: "JWT",
+			// 		},
+			// 	},
+			// },
+			// security: [{ bearerAuth: [] }], // Apply Auth option globally to all routes
 		},
 		transform: jsonSchemaTransform,
 	} as SwaggerOptions);
@@ -49,8 +51,8 @@ export async function setupSwagger(server: FastifyInstance) {
 async function toolsRoutes(server: FastifyInstance) {
 	server.get(
 		"/health-check",
-		// Remove authentication (this route is public)
-		{ config: { authRequired: false } },
+		// TODO: This route is public. But commenting out since AUTH is doing the authentication check
+		// { config: { authRequired: false } }, // Remove authentication (this route is public)
 		async (_, reply) => reply.code(200).send({ status: "ok" }),
 	);
 }

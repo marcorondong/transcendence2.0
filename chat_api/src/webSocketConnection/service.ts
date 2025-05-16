@@ -1,3 +1,5 @@
+import { blockStatusSchema, roomIdSchema } from "./zodSchemas";
+
 export async function postRequestCreateUser(userId: string) {
 	const url = `http://chat_db_container:3004/chat-db/create-user`;
 	const response = await fetch(url, {
@@ -10,49 +12,28 @@ export async function postRequestCreateUser(userId: string) {
 	if (!response.ok) {
 		throw new Error(`Request failed with status ${response.status}`);
 	}
-	const data = await response.json();
-	return data;
 }
 
-export async function patchRequestBlockUser(userId: string, friendId: string) {
-	const url = `http://chat_db_container:3004/chat-db/block-user`;
+export async function getRequestBlockStatus(userId: string, friendId: string) {
+	const url = `http://chat_db_container:3004/chat-db/block-status/${userId}/${friendId}`;
 	const response = await fetch(url, {
-		method: "PATCH",
+		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ userId, friendId }),
 	});
 	if (!response.ok) {
 		throw new Error(`Request failed with status ${response.status}`);
 	}
 	const data = await response.json();
-	return data;
-}
-
-export async function patchRequestUnblockUser(
-	userId: string,
-	friendId: string,
-) {
-	const url = `http://chat_db_container:3004/chat-db/unblock-user`;
-	const response = await fetch(url, {
-		method: "PATCH",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({ userId, friendId }),
-	});
-	if (!response.ok) {
-		throw new Error(`Request failed with status ${response.status}`);
-	}
-	const data = await response.json();
-	return data;
+	const { blockStatus } = blockStatusSchema.parse(data);
+	return blockStatus;
 }
 
 export async function getRequestRoomId(userId: string) {
 	const url = `http://pong-api:3010/pong-api/player-room/${userId}`;
 	const response = await fetch(url, {
-		method: "POST",
+		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
 		},
@@ -61,5 +42,10 @@ export async function getRequestRoomId(userId: string) {
 		throw new Error(`Request failed with status ${response.status}`);
 	}
 	const data = await response.json();
-	return data;
+	try {
+		const { roomId } = roomIdSchema.parse(data); // TODO Filip should fix his endpoint
+		return roomId;
+	} catch (error) {
+		throw new Error(`No roomId found for user ${userId}`);
+	}
 }
