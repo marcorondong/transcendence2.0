@@ -4,17 +4,11 @@ import httpError from "http-errors";
 const prisma = new PrismaClient();
 
 export async function createUser(userId: string) {
-	const user = await prisma.user.create({
-		data: { userId: userId },
-		select: { blockList: true },
-	});
-	return user;
+	await prisma.user.create({ data: { userId: userId } });
 }
 
 export async function isUserExists(userId: string): Promise<boolean> {
-	const user = await prisma.user.findUnique({
-		where: { userId },
-	});
+	const user = await prisma.user.findUnique({ where: { userId } });
 	return !!user;
 }
 

@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export const idZodSchema = z
 	.object({
-		userId: z.string().min(1), // TODO .uuid(),
+		userId: z.string().uuid(),
 	})
 	.strict();
 
 export const idsZodSchema = z
 	.object({
-		userId: z.string().min(1), // TODO .uuid(),
-		friendId: z.string().min(1), // TODO .uuid(),
+		userId: z.string().uuid(),
+		friendId: z.string().uuid(),
 	})
 	.strict()
 	.refine((data) => data.userId !== data.friendId);
