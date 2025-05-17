@@ -16,6 +16,7 @@ services:
       - Transcendence2.0
 
   ai-bot:
+    image: ai-bot
     build:
       context: ./ssg
       dockerfile: ./AI/Dockerfile
