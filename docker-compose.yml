@@ -15,24 +15,6 @@ services:
     networks:
       - Transcendence2.0
 
-  pong_db:
-    image: ${PONG_DB_IMAGE_NAME}
-    container_name: ${PONG_DB_CONTAINER_NAME}
-    build: ${PONG_DB_BUILD_FOLDER}
-    env_file:
-      - ${ENV_FILE}
-    environment:
-      - DATABASE_URL=${PONG_DB_DATABASE_URL_DOCKER}
-    volumes:
-      - ${PONG_DB_SRC_FOLDER_LOCAL}:${PONG_DB_SRC_FOLDER_CONTAINER} #TODO remove in production
-      - ${PONG_DB_PRISMA_FOLDER_LOCAL}:${PONG_DB_PRISMA_FOLDER_CONTAINER} #TODO remove in production
-      # - ${PONG_DB_DATABASE_FOLDER_LOCAL}:${PONG_DB_DATABASE_FOLDER_CONTAINER} #TODO adjust local path and uncomment in production
-    ports:
-      - ${PONG_DB_PORT}:${PONG_DB_PORT} #TODO remove it in production
-    networks:
-      - ${NETWORK_NAME}
-    restart: ${RESTART_POLICY}
-
   ai-bot:
     image: ai-bot
     build:
@@ -145,6 +127,7 @@ include:
   - ./frontend/docker-compose.yml
   - ./monitoring/monitoring-docker-compose.yml
   - ./microservices/users/docker-compose.yml
+  - ./microservices/pong_db/docker-compose.yml
 
 networks:
   Transcendence2.0:
