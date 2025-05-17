@@ -1,5 +1,5 @@
 import { IconComponent } from "./icon-component.js";
-import { Chat, ChatUser, Message } from "../types/Chat.js";
+import { User, Chat, ChatUser, Message } from "../types/Chat.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -7,6 +7,7 @@ class ChatComponent extends HTMLElement {
 	onlineUsers: ChatUser[] = [];
 	selectedUser: ChatUser | undefined = undefined;
 	roomId: string | undefined = undefined;
+	me: User | undefined;
 
 	//ICONS
 	plusIcon = new IconComponent("plus", 4);
@@ -26,6 +27,7 @@ class ChatComponent extends HTMLElement {
 	mainUsers = document.createElement("div");
 	navUsersContainer = document.createElement("div");
 	navUsersCount = document.createElement("span");
+	navMe = document.createElement("div");
 	chatInput = document.createElement("textarea");
 	chatContainer = document.createElement("div");
 
@@ -34,7 +36,8 @@ class ChatComponent extends HTMLElement {
 
 		// OPEN NEW WEBSOCKET
 		this.ws = new WebSocket(
-			`wss://${window.location.hostname}:${window.location.port}/ws`,
+			`wss://${window.location.hostname}:${window.location.port}/chat-api`,
+			// `ws://${window.location.hostname}:3002/chat-api`,
 		);
 
 		// WEBSOCKET CONNECTION CLOSED
@@ -54,45 +57,45 @@ class ChatComponent extends HTMLElement {
 			const chatServiceData: Chat = JSON.parse(event.data);
 			console.log("websocket data", chatServiceData);
 
-			//CHAT SERVICE RETURNS USERS OWN MESSAGE
-			if (chatServiceData.type === "messageResponse") {
-				const newMessage: Message = {
-					id: chatServiceData.relatedId || "",
-					content: chatServiceData.message ?? "",
-				};
-				this.addTimestamp(newMessage);
-				this.selectedUser?.messages.push(newMessage);
-				this.displayCurrentChat();
-			}
-
-			// RECEIVING MESSAGE
-			if (
-				chatServiceData.messageResponse &&
-				chatServiceData.messageResponse.type === "messageResponse"
-			) {
-				const sender = this.onlineUsers.find(
-					(user) =>
-						user.id === chatServiceData.messageResponse?.relatedId,
-				);
-				if (sender) {
-					console.log("this message must come from ", sender.id);
-					const newMessage: Message = {
-						id: sender.id,
-						content: chatServiceData.messageResponse.message ?? "",
-					};
-					this.addTimestamp(newMessage, sender);
-					sender.messages.push(newMessage);
-					this.displayCurrentChat();
-				}
-			}
-
+			// //CHAT SERVICE RETURNS USERS OWN MESSAGE
+			// if (chatServiceData.type === "messageResponse") {
+			// 	const newMessage: Message = {
+			// 		id: chatServiceData.relatedId || "",
+			// 		content: chatServiceData.message ?? "",
+			// 	};
+			// 	this.addTimestamp(newMessage);
+			// 	this.selectedUser?.messages.push(newMessage);
+			// 	this.displayCurrentChat();
+			// }
+			//
+			// // RECEIVING MESSAGE
+			// if (
+			// 	chatServiceData.messageResponse &&
+			// 	chatServiceData.messageResponse.type === "messageResponse"
+			// ) {
+			// 	const sender = this.onlineUsers.find(
+			// 		(user) =>
+			// 			user.id === chatServiceData.messageResponse?.relatedId,
+			// 	);
+			// 	if (sender) {
+			// 		console.log("this message must come from ", sender.id);
+			// 		const newMessage: Message = {
+			// 			id: sender.id,
+			// 			content: chatServiceData.messageResponse.message ?? "",
+			// 		};
+			// 		this.addTimestamp(newMessage, sender);
+			// 		sender.messages.push(newMessage);
+			// 		this.displayCurrentChat();
+			// 	}
+			// }
+			//
 			// A USER LEAVES THE CHAT
 			if (chatServiceData.type === "disconnected") {
-				if (this.selectedUser?.id === chatServiceData.relatedId) {
+				if (this.selectedUser?.id === chatServiceData.user?.id) {
 					this.selectedUser = undefined;
 				}
 				const userToRemove = this.onlineUsers.findIndex(
-					(u) => u.id === chatServiceData.relatedId,
+					(u) => u.id === chatServiceData.user?.id,
 				);
 				if (userToRemove !== undefined) {
 					this.onlineUsers.splice(userToRemove, 1);
@@ -101,38 +104,39 @@ class ChatComponent extends HTMLElement {
 				this.updateUsers();
 			}
 
-			// CHAT SERVICE CONFIRMS BLOCKED USER
-			if (chatServiceData.type === "blockResponse") {
-				const id = chatServiceData.relatedId;
-				const userToBlock = this.onlineUsers.find((u) => u.id === id);
-				if (userToBlock) {
-					userToBlock.blocked = !userToBlock.blocked;
-					this.updateBlockButton(userToBlock);
-				}
-			}
-
-			// INVITATION TO GAME
-			if (chatServiceData.type === "inviteResponse") {
-				const id = chatServiceData.relatedId;
-				if (!id) {
-					return;
-				}
-				const userToInvite = this.onlineUsers.find((u) => u.id === id);
-				if (userToInvite) {
-					userToInvite.messages.push({
-						id: id,
-						content: "Let's play PONG together! ",
-						invitation: chatServiceData.roomId,
-					});
-					this.roomId = chatServiceData.roomId;
-					this.displayCurrentChat();
-				}
-			}
+			// // CHAT SERVICE CONFIRMS BLOCKED USER
+			// if (chatServiceData.type === "blockResponse") {
+			// 	const id = chatServiceData.relatedId;
+			// 	const userToBlock = this.onlineUsers.find((u) => u.id === id);
+			// 	if (userToBlock) {
+			// 		userToBlock.blocked = !userToBlock.blocked;
+			// 		this.updateBlockButton(userToBlock);
+			// 	}
+			// }
+			//
+			// // INVITATION TO GAME
+			// if (chatServiceData.type === "inviteResponse") {
+			// 	const id = chatServiceData.relatedId;
+			// 	if (!id) {
+			// 		return;
+			// 	}
+			// 	const userToInvite = this.onlineUsers.find((u) => u.id === id);
+			// 	if (userToInvite) {
+			// 		userToInvite.messages.push({
+			// 			id: id,
+			// 			content: "Let's play PONG together! ",
+			// 			invitation: chatServiceData.roomId,
+			// 		});
+			// 		this.roomId = chatServiceData.roomId;
+			// 		this.displayCurrentChat();
+			// 	}
+			// }
 			// A NEW USER CAME ONLINE
-			if (chatServiceData.type === "newClient") {
+			if (chatServiceData.type === "newUser" && chatServiceData.user) {
 				const user: ChatUser = {
-					id: chatServiceData.relatedId ?? "",
+					id: chatServiceData.user.id,
 					messages: [],
+					nickname: chatServiceData.user.nickname,
 					blocked: false,
 				};
 				this.onlineUsers.push(user);
@@ -141,15 +145,20 @@ class ChatComponent extends HTMLElement {
 
 			// WHEN USER LOGS IN, SETTING UP PEOPLE THAT ARE ONLINE
 			if (
-				chatServiceData.type === "peopleOnline" &&
-				chatServiceData.peopleOnline
+				chatServiceData.type === "onlineUsers" &&
+				chatServiceData.users
 			) {
-				chatServiceData.peopleOnline.map((person) => {
+				this.me = chatServiceData.me;
+				this.navMe.innerText =
+					chatServiceData.me?.nickname ?? "unknown";
+				chatServiceData.users.map((user) => {
 					if (
-						!this.onlineUsers.some((myUser) => myUser.id === person)
+						!this.onlineUsers.some(
+							(onlineUser) => onlineUser.id === user.id,
+						)
 					) {
 						const newUser: ChatUser = {
-							id: person,
+							id: user.id,
 							messages: [],
 							blocked: false,
 						};
@@ -157,6 +166,8 @@ class ChatComponent extends HTMLElement {
 						this.updateUsers();
 					}
 				});
+				console.log("me is", this.me);
+				console.log("users is", this.onlineUsers);
 			}
 		};
 	}
@@ -400,6 +411,7 @@ class ChatComponent extends HTMLElement {
 		}
 		if (this.minusIcon.classList.contains("hidden")) {
 			// CLICKED TO MAXIMIZE
+			this.navMe.classList.remove("hidden");
 			this.minusIcon.classList.remove("hidden");
 			this.minusIcon.classList.add("block");
 			this.plusIcon.classList.remove("block");
@@ -423,6 +435,7 @@ class ChatComponent extends HTMLElement {
 			this.chatContainer.classList.remove("hidden");
 		} else {
 			// CLICKED TO MINIMIZE
+			this.navMe.classList.add("hidden");
 			this.plusIcon.classList.remove("hidden");
 			this.plusIcon.classList.add("block");
 			this.minusIcon.classList.remove("block");
@@ -465,7 +478,7 @@ class ChatComponent extends HTMLElement {
 		const chat: Chat = {
 			type: "message",
 			message: this.chatInput.value,
-			relatedId: this.selectedUser?.id,
+			id: this.selectedUser?.id,
 		};
 		if (this.ws) {
 			this.ws.send(JSON.stringify(chat));
@@ -560,13 +573,14 @@ class ChatComponent extends HTMLElement {
 		);
 		this.navUsersContainer.appendChild(this.navUsersCount);
 		this.navUsersCount.innerText = "0";
-		this.nav.appendChild(this.navUsersContainer);
+
+		this.navMe.classList.add("hidden");
 
 		this.minusIcon.classList.add("hidden");
 		this.minMaxButton.classList.add("pong-button", "pong-button-secondary");
 		this.minMaxButton.id = "min-max-button";
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
-		this.nav.append(this.minMaxButton);
+		this.nav.append(this.navUsersContainer, this.navMe, this.minMaxButton);
 
 		this.displayCurrentChat();
 		this.displayOnlineUsers();

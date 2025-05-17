@@ -1,6 +1,9 @@
 export interface Chat {
+	id?: string;
 	type: string;
-	relatedId?: string;
+	users?: User[];
+	me?: User;
+	user?: User;
 	roomId?: string;
 	notification?: string;
 	blockStatus?: boolean;
@@ -17,8 +20,15 @@ export interface Message {
 	dateTime?: Date;
 }
 
+export interface User {
+	id: string;
+	nickname: string;
+}
+
 export interface ChatUser {
 	id: string;
+	// TODO: make this mandatory
+	nickname?: string;
 	messages: Message[];
 	blocked: boolean;
 }

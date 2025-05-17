@@ -33,7 +33,10 @@
 	<body
 		class="relative bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-slate-200"
 	>
-		<div class="min-h-screen flex flex-col justify-between">
+		<div
+			class="min-h-screen flex flex-col justify-between"
+			id="container"
+		>
 			<div class="mx-3 sm:mx-5 md:mx-24 lg:mx-32 xl:mx-64">
 				<header-component
 					class="mb-9 flex content-center justify-between self-stretch py-9"
@@ -103,9 +106,6 @@
 				</header-component>
 				<div id="content"></div>
 			</div>
-			<chat-component
-				class="fixed bottom-0 right-0 h-auto w-auto rounded-tl-3xl rounded-tr-3xl bg-indigo-900/70 p-2 backdrop-blur-lg lg:right-7"
-			></chat-component>
 			<footer-component
 				class="bg-indigo-500/5 py-2 mt-18 border-t-indigo-500/20 border-t-1"
 			></footer-component>
