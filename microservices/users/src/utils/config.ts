@@ -5,6 +5,10 @@ import path from "path";
 type AppConfig = {
 	PAGINATION_ENABLED: string;
 	DEFAULT_PAGE_SIZE: string;
+	APP_VERSION: string;
+	APP_NAME: string;
+	APP_DESCRIPTION: string;
+	NODE_ENV: string;
 };
 
 // For caching the result of reading files/envs.
@@ -19,12 +23,29 @@ export function getConfig(): AppConfig {
 	console.log("[Config] Loading config...");
 
 	const secretsPath = "/run/secrets"; // Docker-style secrets path
+	const fixPackageJsonPath = "../../package.json";
 	const hasSecretsFolder = fs.existsSync(secretsPath); // For checking if folder exists
 	// Define hardcoded values here
 	const hardcodedDefaults = {
 		PAGINATION_ENABLED: "true",
 		DEFAULT_PAGE_SIZE: "10",
+		APP_VERSION: "1.0.0",
+		APP_NAME: "ft_transcendence",
+		APP_DESCRIPTION: "User service API",
+		NODE_ENV: "development",
 	};
+
+	// TODO: Later make it more versatile (define a constant for the path).
+	// or code a function that loads from files (different from loadSecret)
+	const pkg = (() => {
+		try {
+			const pkgPath = path.resolve(__dirname, fixPackageJsonPath);
+			return JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+		} catch (err) {
+			console.warn("[Config] Could not load package.json:", err);
+			return {};
+		}
+	})();
 
 	// Helper function to load from Docker-style secrets
 	const loadSecret = (key: string | undefined): string | undefined => {
@@ -53,6 +74,29 @@ export function getConfig(): AppConfig {
 			loadSecret("DEFAULT_PAGE_SIZE") ??
 			process.env.DEFAULT_PAGE_SIZE ??
 			hardcodedDefaults.DEFAULT_PAGE_SIZE,
+
+		APP_VERSION:
+			loadSecret("APP_VERSION") ??
+			process.env.APP_VERSION ??
+			pkg.version ??
+			hardcodedDefaults.APP_VERSION,
+
+		APP_NAME:
+			loadSecret("APP_NAME") ??
+			process.env.APP_NAME ??
+			pkg.name ??
+			hardcodedDefaults.APP_NAME,
+
+		APP_DESCRIPTION:
+			loadSecret("APP_DESCRIPTION") ??
+			process.env.APP_DESCRIPTION ??
+			pkg.description ??
+			hardcodedDefaults.APP_DESCRIPTION,
+
+		NODE_ENV:
+			loadSecret("NODE_ENV") ??
+			process.env.NODE_ENV ??
+			hardcodedDefaults.NODE_ENV,
 	};
 
 	console.log("[Config] Final config object:", config);
