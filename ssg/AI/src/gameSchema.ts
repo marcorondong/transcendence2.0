@@ -16,18 +16,13 @@ export const gameRequestSchema = {
 			},
 			roomId: { type: "string" },
 		},
+		required: ["roomId"]
 	},
 	response: {
 		200: {
 			type: "object",
 			properties: {
-				description: { type: "string" },
-				gameRequest: {
-					type: "object",
-					properties: {
-						roomId: { type: "string" },
-					},
-				},
+				description: { type: "string" }
 			},
 		},
 		400: {
@@ -63,19 +58,13 @@ export const extraGameSchema = {
 			},
 			roomId: { type: "string" },
 		},
+		required: ["roomId"]
 	},
 	response: {
 		200: {
 			type: "object",
 			properties: {
-				description: { type: "string" },
-				gameRequest: {
-					type: "object",
-					properties: {
-						difficulty: { type: "string" },
-						roomId: { type: "string" },
-					},
-				},
+				description: { type: "string" }
 			},
 		},
 		400: {

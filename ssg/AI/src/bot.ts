@@ -72,7 +72,7 @@ export class Bot {
 	}
 
 	public playGame() {
-		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong-api/pong/singles`);
+		this.ws = new WebSocket(`ws://${this.host}:${this.port}/${this.host}/pong/singles?roomId=${this.roomId}`);
 		try {
 			this.ws.on("open", () => {
 				console.log(
@@ -102,6 +102,7 @@ export class Bot {
 			});
 		} catch (error) {
 			console.error(`WebSocket at ${this.host}:${this.port}: `, error);
+			throw error;
 		}
 	}
 
