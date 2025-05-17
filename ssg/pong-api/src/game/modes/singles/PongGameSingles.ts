@@ -12,7 +12,7 @@ export interface IPongFrameSingles extends IPongFrameBase {
 	rightPaddle: IPaddleJson;
 }
 
-export interface IPongSinglesDatabase{
+export interface IPongSinglesDatabase {
 	winnerId: string;
 	loserId: string;
 	winnerScore: number;
@@ -52,40 +52,39 @@ export class PongGameSingles extends APongGame {
 		return game;
 	}
 
-	getJsonDataForDatabase(): IPongSinglesDatabase
-	{
+	getJsonDataForDatabase(): IPongSinglesDatabase {
 		//TODO implement proper IDs of winner and loser not just side
-		return{
+		return {
 			gameId: this.getGameId(),
 			winnerId: this.score.getWinnerSideString(),
 			loserId: this.score.getLoserSideString(),
 			winnerScore: this.score.getWinnerGoals(),
-			loserScore: this.score.getLoserGoals()
-		}
+			loserScore: this.score.getLoserGoals(),
+		};
 	}
 
 	async storeResultInDatabase(): Promise<void> {
 		//TODO: implement properIds
-		const url:string = pongDbConfig.store_game_endpoint;
+		const url: string = pongDbConfig.store_game_endpoint;
 		const gameData = this.getJsonDataForDatabase();
 		console.log("Game data");
 		console.log(gameData);
-		console.log(`Storing game to database on url ${url}: `)
-		try{
+		console.log(`Storing game to database on url ${url}: `);
+		try {
 			const response = await fetch(url, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(gameData),
-				});
-			if(!response.ok)
-				throw new Error(`Game data is not stored in database: ${response.status}`)
+			});
+			if (!response.ok)
+				throw new Error(
+					`Game data is not stored in database: ${response.status}`,
+				);
 			const status = await response.json();
-			console.log("Server Response:", status)
-		}
-		catch (error)
-		{
+			console.log("Server Response:", status);
+		} catch (error) {
 			console.error(`❌ Failed to store to database: ${error}`);
 		}
 	}
@@ -118,8 +117,7 @@ export class PongGameSingles extends APongGame {
 		};
 	}
 
-	getScoreBoard(): ScoreBoard
-	{
+	getScoreBoard(): ScoreBoard {
 		return this.score;
 	}
 }
