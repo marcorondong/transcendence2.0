@@ -8,7 +8,6 @@ import { MatchMaking } from "./match-making/MatchMaking";
 import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
 import { Parsing } from "./utils/Parsing";
 import fCookie from "@fastify/cookie";
-import { FastifyRequest } from "fastify/types/request";
 
 dotenv.config();
 
@@ -49,42 +48,12 @@ async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
 	}
 }
 
-async function isUserAuthorized(req: FastifyRequest) {
-	const cookie = req.headers.cookie;
-	console.log(cookie);
+async function authorizePlayer(cookie: string | undefined) {
 	if (!cookie) {
 		console.log("Cookie don't exits");
 		return false;
 	}
-	//make it await probably in try catch
-	try {
-		//TODO read this container path somehow smarter in file or so
-		const response = await fetch(
-			"http://auth_api_container:2999/auth-api/verify-connection",
-			{
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					"Cookie": cookie,
-				},
-			},
-		);
-		if (!response.ok) {
-			console.warn("Failed check", response);
-			return false;
-		}
-		console.log("User is authorized", response);
-		const data = await response.json();
-		const { id, nickname } = data;
-		console.log("User full:", data);
-		console.log("id", id);
-		console.log("nickname", nickname);
-
-		return true;
-	} catch (err) {
-		console.error("Fetch failed", err);
-		return false;
-	}
+	return getPlayerInfo(cookie);
 }
 
 const PORT: number = 3010;
@@ -154,10 +123,11 @@ fastify.register(async function (fastify) {
 	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
 		{ websocket: true },
-		(connection, req) => {
-			if (!isUserAuthorized(req)) {
-				//TODO inform user
-				connection.close();
+		async (connection, req) => {
+			const playerInfo = await authorizePlayer(req.headers.cookie);
+			if (playerInfo === false) {
+				connection.send("Request JWT Token aka LOGIN before playing");
+				connection.close(1008, "Unauthorized");
 			}
 			const roomId = Parsing.parseRoomId(req, connection);
 			if (roomId === false) return;
