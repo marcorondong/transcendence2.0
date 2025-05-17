@@ -40,7 +40,8 @@ async function userRoutes(server: FastifyInstance) {
 				},
 				security: [], // Remove Swagger auth
 			},
-			config: { authRequired: false }, // Remove authentication (this route is public)
+			// TODO: This route is public. But commenting out since AUTH is doing the authentication check
+			// config: { authRequired: false }, // Remove authentication (this route is public)
 		},
 		errorHandler(registerUserHandler),
 	);
@@ -55,7 +56,8 @@ async function userRoutes(server: FastifyInstance) {
 				// },
 				security: [], // Remove Swagger auth
 			},
-			config: { authRequired: false }, // Remove authentication (this route is public)
+			// TODO: This route is public. But commenting out since AUTH is doing the authentication check
+			// config: { authRequired: false }, // Remove authentication (this route is public)
 		},
 		errorHandler(loginHandler),
 	);

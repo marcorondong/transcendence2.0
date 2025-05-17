@@ -56,14 +56,18 @@ export async function loginHandler(
 				message: "Invalid email or password",
 			});
 		}
-		// const { passwordHash, salt, ...rest } = user;
+		const { passwordHash, salt, ...rest } = user;
+		// TODO: Without AUTH service (token generation logic)
 		// // Generate access token
 		// const accessToken = server.jwt.sign(rest);
 		// // Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
 		// const parsedToken = loginResponseSchema.parse({ accessToken });
 		// return reply.code(200).send(parsedToken);
-		const id = crypto.randomUUID();
-		return reply.code(200).send({ id: id, nickname: user.name });
+		//
+		// TODO: With AUTH service (just reply with data to include in JWT token)
+		const parsedResponse = loginResponseSchema.parse(rest);
+		// return reply.code(200).send({ id: user.id, nickname: user.nickname });
+		return reply.code(200).send(parsedResponse);
 	} catch (err) {
 		// If user not found or password invalid, always send same generic 401
 		if (err instanceof AppError && err.statusCode === 404) {
@@ -80,7 +84,8 @@ export async function loginHandler(
 }
 
 export async function getUserHandler(
-	request: FastifyRequest<{ Params: { id: number } }>,
+	// request: FastifyRequest<{ Params: { id: number } }>,
+	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
 	const user = await findUserByUnique({ id: request.params.id });
@@ -92,10 +97,20 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
-	const { id, email, name, useFuzzy, useOr, skip, take, sortBy, order } =
-		request.query;
+	const {
+		id,
+		email,
+		username,
+		nickname,
+		useFuzzy,
+		useOr,
+		skip,
+		take,
+		sortBy,
+		order,
+	} = request.query;
 	const users = await findUsers({
-		where: { id, email, name },
+		where: { id, email, username, nickname },
 		useFuzzy,
 		useOr,
 		skip,
@@ -108,7 +123,8 @@ export async function getUsersHandler(
 }
 
 export async function deleteUserHandler(
-	request: FastifyRequest<{ Params: { id: number } }>,
+	// request: FastifyRequest<{ Params: { id: number } }>,
+	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
 	await deleteUser(request.params.id);
@@ -117,7 +133,8 @@ export async function deleteUserHandler(
 
 export async function putUserHandler(
 	request: FastifyRequest<{
-		Params: { id: number };
+		// Params: { id: number };
+		Params: { id: string };
 		Body: updateUserPutInput;
 	}>,
 	reply: FastifyReply,
@@ -129,7 +146,8 @@ export async function putUserHandler(
 
 export async function patchUserHandler(
 	request: FastifyRequest<{
-		Params: { id: number };
+		// Params: { id: number };
+		Params: { id: string };
 		Body: updateUserPatchInput;
 	}>,
 	reply: FastifyReply,

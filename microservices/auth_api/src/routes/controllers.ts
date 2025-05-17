@@ -36,6 +36,30 @@ export async function verifyJWTHandler(
 	reply.status(200).send({ success: true });
 }
 
+export async function refreshJWTHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const payload = request.user;
+	const accessToken = await reply.jwtSign(payload, {expiresIn: "1h"});
+	reply.setCookie("access_token", accessToken, {
+		path: "/",
+		httpOnly: true,
+		// secure: true,
+		sameSite: "strict",
+		maxAge: 60 * 60,
+	});
+	reply.status(200).send({ success: true });
+}
+
+export async function verifyConnectionHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const { id, nickname } = request.user;
+	reply.status(200).send({ id, nickname });
+}
+
 export async function healthCheckHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,

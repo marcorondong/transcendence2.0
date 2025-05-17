@@ -139,9 +139,9 @@ services:
     restart: always
 
 include:
-  - ./monitoring/monitoring-docker-compose.yml
-  - ./frontend/docker-compose.yml
   - ./microservices/auth_api/docker-compose.yml
+  - ./frontend/docker-compose.yml
+  - ./monitoring/monitoring-docker-compose.yml
   - ./microservices/users/docker-compose.yml
 
 networks:
