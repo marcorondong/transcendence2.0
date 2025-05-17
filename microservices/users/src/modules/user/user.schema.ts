@@ -142,26 +142,26 @@ export const passwordField = z
 // Core user schema
 // const userCore = {
 const userCoreFields = {
-	email: emailField,
+	email: emailField.describe("User's email address"),
 	// username: usernameField,
-	nickname: nicknameField,
+	nickname: nicknameField.describe("User's unique display nickname"),
 };
 
 // User authentication fields schema
 const userAuthFields = {
-	password: passwordField,
+	password: passwordField.describe("Password used for authentication"),
 };
 
 // User immutable fields schema
 const userImmutableFields = {
-	username: usernameField,
+	username: usernameField.describe("Permanent, unique username"),
 };
 
 // User metadata response fields schema
 const userMetaFields = {
-	id: z.string().uuid(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
+	id: z.string().uuid().describe("User ID (UUID format)"),
+	createdAt: z.date().describe("Timestamp of user creation"),
+	updatedAt: z.date().describe("Timestamp of last update"),
 };
 
 // Schema for createUser
@@ -187,7 +187,9 @@ export const userResponseSchema = z.object({
 export const userIdParamSchema = z
 	.object({
 		// id: blankToUndefined(z.coerce.number().min(1)),
-		id: blankToUndefined(z.string().uuid()),
+		id: blankToUndefined(
+			z.string().uuid().describe("User ID (UUID format)"),
+		),
 	})
 	.strict(); // Rejects unknown fields
 
@@ -227,7 +229,8 @@ export const loginResponseSchema = z.object({
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // Base schema for query parameters
-// Note that all fields will be marked with '.optional()' by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
+// Note that all fields will be marked with '.optional()' and "coerced"
+// by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	// id: z.string().uuid().describe("Exact match for user ID (UUID)"),
 	id: z.string().describe("Find users by user ID (UUID)"),
@@ -237,10 +240,14 @@ const baseGetUsersQuerySchema = z.object({
 	nickname: z.string().describe("Find users by nickname"),
 	createdAt: z
 		.preprocess((val) => new Date(val as string), z.date())
-		.describe("Find users by createdAt"),
+		.describe(
+			"Find users by createdAt (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
 	updatedAt: z
 		.preprocess((val) => new Date(val as string), z.date())
-		.describe("Find users by updatedAt"),
+		.describe(
+			"Find users by updatedAt (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
 	// TODO: Make this as a type, and same for before, after and between
 	dateTarget: z
 		.enum(["createdAt", "updatedAt", "both"])
@@ -248,10 +255,14 @@ const baseGetUsersQuerySchema = z.object({
 		.describe("Choose which date field to apply filters to"),
 	before: z
 		.preprocess((val) => new Date(val as string), z.date())
-		.describe("Find users created/updated before this date"),
+		.describe(
+			"Find users created/updated before this date (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
 	after: z
 		.preprocess((val) => new Date(val as string), z.date())
-		.describe("Find users created/updated after this date"),
+		.describe(
+			"Find users created/updated after this date (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
 	between: z
 		.preprocess(
 			(val) =>
@@ -259,30 +270,32 @@ const baseGetUsersQuerySchema = z.object({
 					? val.map((d) => new Date(d as string))
 					: undefined,
 			z.tuple([
-				z.date().describe("Start date (inclusive)"),
-				z.date().describe("End date (inclusive)"),
+				z
+					.date()
+					.describe(
+						"Start date (inclusive) (Remember to append 'Z' for UTC in fuzzy searches)",
+					),
+				z
+					.date()
+					.describe(
+						"End date (inclusive) (Remember to append 'Z' for UTC in fuzzy searches)",
+					),
 			]),
 		)
-		.describe("Find users between two dates (inclusive)"),
-	useFuzzy: z.coerce
+		.describe(
+			"Find users between two dates (inclusive) (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
+	useFuzzy: z
 		.boolean()
 		.describe("Enable fuzzy search (case-insensitive partial matches)"),
-	useOr: z.coerce
-		.boolean()
-		.describe("Use OR instead of AND for combining filters"),
-	skip: z.coerce.number().min(0).describe("Number of records to skip"),
-	take: z.coerce
-		.number()
-		.min(1)
-		.max(100)
-		.describe("Number of records to return"),
+	useOr: z.boolean().describe("Use OR instead of AND for combining filters"),
+	skip: z.number().min(0).describe("Number of records to skip"),
+	take: z.number().min(1).max(100).describe("Number of records to return"),
 	page: z
 		.number()
 		.min(1)
 		.describe("Page number to use for pagination (starts at 1)"),
-	all: z.coerce
-		.boolean()
-		.describe("If true, return all results without pagination"),
+	all: z.boolean().describe("If true, return all results without pagination"),
 	sortBy: userSortByEnum,
 	order: sortDirectionEnum,
 });
