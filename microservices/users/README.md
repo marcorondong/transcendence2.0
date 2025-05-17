@@ -10,7 +10,7 @@ It's basically a **database API**.
 ## How to configure it
 
 🤔💭👨‍🔧
-It can be configured via docker secrets, environmental variables, `package.json` and hardcoded values.
+It can be configured via docker secrets, environment variables, `package.json` and hardcoded values.
 Check the file `./microservices/users/src/utils/config.ts` to check it's logic and to add values.
 
 ## Supported methods
