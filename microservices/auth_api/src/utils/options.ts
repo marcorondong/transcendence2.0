@@ -57,13 +57,13 @@ export const serverOption = {
 export const jwtOption = {
 	secret: jwtSecret,
 	cookie: {
-		cookieName: 'access_token',
+		cookieName: 'access_token', // TODO : use env variable
 		signed: true,
 	},
 }
 
 export const cookieOption = {
-	secret: cookieSecret, // TODO COOKIE_SECRET over docker secrets
+	secret: cookieSecret,
 	parseOptions: {
 		signed: true,
 	},
