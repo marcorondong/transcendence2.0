@@ -37,7 +37,7 @@ export abstract class APongGame extends EventEmitter {
 
 	constructor(ball: Ball, score: ScoreBoard, field: PongField) {
 		super();
-		this.gameId = crypto.randomUUID();;
+		this.gameId = crypto.randomUUID();
 		this.ball = ball;
 		this.score = score;
 		this.field = field;
@@ -45,8 +45,7 @@ export abstract class APongGame extends EventEmitter {
 		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
-	getGameId():string
-	{
+	getGameId(): string {
 		return this.gameId;
 	}
 
@@ -69,6 +68,10 @@ export abstract class APongGame extends EventEmitter {
 
 	setGameStatus(newStatus: EGameStatus): void {
 		this.gameStatus = newStatus;
+	}
+
+	getScoreBoard(): ScoreBoard {
+		return this.score;
 	}
 
 	getPongWinnerSide(): ETeamSideFiltered {
@@ -153,8 +156,7 @@ export abstract class APongGame extends EventEmitter {
 	protected renderNextFrame(): void {
 		this.ballMovementMechanics();
 		this.ball.moveBall();
-		if (this.score.isWinnerDecided() === true)
-			this.finishGame();
+		if (this.score.isWinnerDecided() === true) this.finishGame();
 	}
 
 	private gameLoop(timestamp: number): void {
