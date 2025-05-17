@@ -4,6 +4,7 @@
 *.txt
 *.sensitive_env
 *.pem
+*.key
 *.cer
 *.cert
 *.crt
