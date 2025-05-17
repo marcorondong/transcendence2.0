@@ -31,7 +31,7 @@ export type UserField = Partial<
 >;
 
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
-export const blankToUndefined = <T extends z.ZodTypeAny>(
+const blankToUndefined = <T extends z.ZodTypeAny>(
 	schema: T,
 ): z.ZodEffects<z.ZodOptional<T>, z.infer<T> | undefined, unknown> =>
 	z.preprocess((val) => {
@@ -50,7 +50,7 @@ export const blankToUndefined = <T extends z.ZodTypeAny>(
 	}, schema.optional());
 
 // Helper function to recursively wrap all fields in an object schema with blankToUndefined()
-export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
+const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
 	const shape = schema.shape;
 	const newShape = Object.fromEntries(
 		Object.entries(shape).map(([key, value]) => {
@@ -76,7 +76,7 @@ export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
 };
 
 // Username field schema
-export const usernameField = z
+const usernameField = z
 	.string({
 		required_error: "Username is required",
 		invalid_type_error: "Username must be a string",
@@ -93,7 +93,7 @@ export const usernameField = z
 	});
 
 // Nickname field schema
-export const nicknameField = z
+const nicknameField = z
 	.string({
 		required_error: "Nickname is required",
 		invalid_type_error: "Nickname must be a string",
@@ -110,7 +110,7 @@ export const nicknameField = z
 	});
 
 // Email field schema
-export const emailField = z
+const emailField = z
 	.string({
 		required_error: "Email is required",
 		invalid_type_error: "Email must be a string",
@@ -121,7 +121,7 @@ export const emailField = z
 	});
 
 // Password field schema
-export const passwordField = z
+const passwordField = z
 	.string({
 		required_error: "Password is required",
 		invalid_type_error: "Password must be a string",
