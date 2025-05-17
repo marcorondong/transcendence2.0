@@ -73,6 +73,10 @@ export class PongPlayer extends EventEmitter {
 		return false;
 	}
 
+	getPlayerNickname(): string {
+		return this.nickname;
+	}
+
 	getTeamSide(): ETeamSide {
 		return this.side;
 	}
