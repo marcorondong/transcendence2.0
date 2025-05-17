@@ -31,7 +31,7 @@ It also supports query strings:
 - DateFields: before | after | between.
 - useOr: Change queries to use OR logical operator (this OR that OR those).
 - useFuzzy: Change queries to allow partial matches (fuzzy search).
-- sortBy: Order by an specific field.
+- sortBy: Order by a specific field.
 - Order: Ascending or descending order.
 
 It supports pagination (_by default_) and modifiable via query string:
