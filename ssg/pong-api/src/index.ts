@@ -12,16 +12,53 @@ import { FastifyRequest } from "fastify/types/request";
 
 dotenv.config();
 
+interface IPlayerInfo {
+	id: string;
+	nickname: string;
+}
+
+function contactAuthService(cookie: string) {
+	//TODO read this container path somehow smarter in file or so
+	return fetch("http://auth_api_container:2999/auth-api/verify-connection", {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"Cookie": cookie,
+		},
+	});
+}
+
+async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
+	//: Promise<false> | Promise<string, string>
+	try {
+		const response = await contactAuthService(cookie);
+		if (!response.ok) {
+			console.warn("Failed check. JWT token is not valid", response);
+			return false;
+		}
+		console.log("User is authorized", response);
+		const playerInfo = await response.json();
+		const { id, nickname } = playerInfo;
+		console.log("User full:", playerInfo);
+		console.log("id", id);
+		console.log("nickname", nickname);
+		return { id, nickname };
+	} catch (err) {
+		console.error("Fetch failed, maybe auth microservice is down", err);
+		return false;
+	}
+}
+
 async function isUserAuthorized(req: FastifyRequest) {
 	const cookie = req.headers.cookie;
 	console.log(cookie);
 	if (!cookie) {
 		console.log("Cookie don't exits");
 		return false;
-
 	}
 	//make it await probably in try catch
 	try {
+		//TODO read this container path somehow smarter in file or so
 		const response = await fetch(
 			"http://auth_api_container:2999/auth-api/verify-connection",
 			{
@@ -33,15 +70,15 @@ async function isUserAuthorized(req: FastifyRequest) {
 			},
 		);
 		if (!response.ok) {
-			console.log("Faild check", response);
+			console.warn("Failed check", response);
 			return false;
 		}
-		console.log("NICCCE", response);
+		console.log("User is authorized", response);
 		const data = await response.json();
-		const {id, nickname} = data;
-		console.log("haha",data);
+		const { id, nickname } = data;
+		console.log("User full:", data);
 		console.log("id", id);
-		console.log("nickname",nickname);
+		console.log("nickname", nickname);
 
 		return true;
 	} catch (err) {
