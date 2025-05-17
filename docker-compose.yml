@@ -34,11 +34,15 @@ services:
     restart: ${RESTART_POLICY}
 
   ai-bot:
-    image: ai-bot-img
+    image: ai-bot
     container_name: ai-bot
     build:
       context: ./ssg
       dockerfile: ./AI/Dockerfile
+    volumes:
+      - ./ssg/AI/src:/app/src:ro
+    ports:
+      - 6969:6969 #TODO remove it in production
     environment:
       - NODE_ENV=development
     networks:

@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance } from "fastify";
 import { gameRequestSchema, extraGameSchema, healthSchema } from "./gameSchema";
 import { Bot } from "./bot";
 
@@ -7,15 +7,15 @@ export async function gameRoute(fastify: FastifyInstance) {
 		"/game-mandatory",
 		{ schema: gameRequestSchema },
 		async (request: any, reply: any) => {
-			const gameRequest = new Object({
+			const gameRequest = {
 				roomId: request.body.roomId,
 				difficulty: request.body.difficulty,
 				mode: "mandatory",
-			});
+			};
 			try {
 				new Bot(gameRequest).playGame();
 				reply.code(200).send({
-					description: `Game id ${request.roomId} successfully started`,
+					description: `Game id ${gameRequest.roomId} successfully started`,
 				});
 			} catch (error) {
 				console.error(error);
@@ -30,11 +30,11 @@ export async function cheatRoute(fastify: FastifyInstance) {
 		"/game-extra",
 		{ schema: extraGameSchema },
 		async (request: any, reply: any) => {
-			const gameRequest = request.body as object;
+			const gameRequest = request.body;
 			try {
 				new Bot(gameRequest).playGame();
 				reply.code(200).send({
-					description: `Game id ${request.roomId} successfully started`,
+					description: `Game id ${gameRequest.roomId} successfully started`,
 				});
 			} catch (error) {
 				console.error(error);

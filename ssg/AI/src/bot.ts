@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
-import { PongField } from "./PongField";
-import { Point } from "./Point";
+import { PongField } from "../imports/PongField";
+import { Point } from "../imports/Point";
 import {
 	distanceBetweenPoints,
 	findIntersectionWithVerticalLine,
@@ -35,7 +35,7 @@ export class Bot {
 	private target: Point;
 	private framesUntilTarget: number;
 	private framesAfterTarget: number;
-	private moveCommand = { move: ""};
+	private moveCommand = { move: "" };
 	private leftScore = 0;
 	private rightScore = 0;
 	private paddleY = 0;
@@ -44,8 +44,10 @@ export class Bot {
 	private paddleHeight = 1;
 	private countdown = this.FRAME_RATE + 2; // to skip the first welcome frame
 	private firstFrame = true;
+	private timer = 5000;
 
 	constructor(initializers: any) {
+		console.log(initializers);
 		//room info
 		this.difficulty = initializers.difficulty ?? "normal";
 		this.botSpeed =
@@ -71,13 +73,29 @@ export class Bot {
 		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
 	}
 
+	//timeout increments if we receive a message from websocket
+	private async checkTimeout() {
+		if (!this.ws) return;
+		while (this.timer > 0) {
+			await sleep(this.timer);
+			this.timer -= 1000;
+		}
+		console.log("Game hasn't started, disconnecting...");
+		this.ws.terminate();
+	}
+
 	public playGame() {
-		this.ws = new WebSocket(`ws://${this.host}:${this.port}/${this.host}/pong/singles?roomId=${this.roomId}`);
+		this.ws = new WebSocket(
+			`ws://${this.host}:${this.port}/${this.host}/pong/singles?roomId=${this.roomId}`,
+		);
 		try {
 			this.ws.on("open", () => {
 				console.log(
 					`Connected to Pong WebSocket at ${this.host}:${this.port} for room ${this.roomId}`,
+					"time left until disconnect = ",
+					this.timer / 1000,
 				);
+				this.checkTimeout();
 			});
 
 			this.ws.on("error", (event: any) => {
@@ -100,6 +118,7 @@ export class Bot {
 					this.firstFrame = false;
 				}
 			});
+
 		} catch (error) {
 			console.error(`WebSocket at ${this.host}:${this.port}: `, error);
 			throw error;
@@ -108,6 +127,7 @@ export class Bot {
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
+		this.timer += 1000;
 		this.countdown = this.FRAME_RATE;
 
 		const gameState = JSON.parse(event.toString());
@@ -315,7 +335,7 @@ export class Bot {
 			this.framesUntilTarget <
 			(this.movePaddleTo -
 				this.paddleY -
-				(this.paddleHeight) / 2 -
+				this.paddleHeight / 2 -
 				this.BALL_RADIUS) /
 				this.STEP // the number of frames to reach our target
 		) {

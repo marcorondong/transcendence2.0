@@ -1,4 +1,4 @@
-import { Point } from "./Point";
+import { Point } from "../imports/Point";
 
 export function findGradient(p1: Point, p2: Point): number {
 	const m =
