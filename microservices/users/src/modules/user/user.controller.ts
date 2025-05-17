@@ -56,7 +56,10 @@ export async function loginHandler(
 				message: "Invalid email or password",
 			});
 		}
+		// Explicitly exclude 'passwordHash' and 'salt' since we don't want to retrieve that info
 		const { passwordHash, salt, ...rest } = user;
+		// For testing purposes: Comment out line above and comment in line below to have full user info
+		// const { ...rest } = user;
 		// TODO: Without AUTH service (token generation logic)
 		// // Generate access token
 		// const accessToken = server.jwt.sign(rest);

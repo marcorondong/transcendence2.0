@@ -218,12 +218,55 @@ export const loginSchema = z
 	})
 	.strict(); // Rejects unknown fields
 
-// Schema for login response
-export const loginResponseSchema = z.object({
-	// accessToken: z.string(),
-	id: z.string().uuid(),
-	nickname: nicknameField,
+// Schema for token payload
+const tokenPayloadSchema = z.object({
+	// === userMetaFields === //
+	id: z.string().uuid().describe("User ID included in the token payload"),
+	// createdAt: z
+	// 	.date()
+	// 	.describe("User creation timestamp included in the token payload"),
+	// updatedAt: z
+	// 	.date()
+	// 	.describe("User last update timestamp included in the token payload"),
+	// === userImmutableFields === //
+	// username: usernameField.describe(
+	// 	"User username included in the token payload",
+	// ),
+	// === userCoreFields === //
+	// email: emailField.describe("User email included in the token payload"),
+	nickname: nicknameField.describe(
+		"User nickname included in the token payload",
+	),
+	// // ONLY FOR TESTING PURPOSES
+	// // === userAuthFields === //
+	// // (note that is 'passwordHash' and not 'password' (as is NOT a 'passwordField'), and 'salt' is not included in userAuthFields)
+	// // passwordHash: z.string().describe("Hashed password (for testing only)"),
+	// // salt: z.string().describe("Password salt (for testing only)"),
+	// // role: z.enum(["admin", "user"]).describe("Optional: user role for authorization"),
 });
+
+// Schema for login response
+// If the token contains more than what you send in the login response, we could do:
+// export const loginResponseSchema = tokenPayloadSchema.pick({ id: true, nickname: true });
+export const loginResponseSchema = tokenPayloadSchema.describe(
+	"Response body after successful login, used by Auth service to generate the JWT payload",
+);
+
+// // Schema for login response
+// export const loginResponseSchema = z
+// 	.object({
+// 		// accessToken: z.string(),
+// 		id: z
+// 			.string()
+// 			.uuid()
+// 			.describe("User ID (UUID) included in the access token"),
+// 		nickname: nicknameField.describe(
+// 			"Nickname displayed in the client and included in the token",
+// 		),
+// 	})
+// 	.describe(
+// 		"Response body after successful login, used by the Auth service to build the JWT payload",
+// 	);
 
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
