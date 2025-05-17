@@ -34,6 +34,7 @@ services:
     restart: ${RESTART_POLICY}
 
   ai-bot:
+    image: ai-bot
     build:
       context: ./ssg
       dockerfile: ./AI/Dockerfile
