@@ -19,19 +19,19 @@ export class MatchMaking {
 		return this.headToHeadManager.getRoomIdOfPlayer(playerId);
 	}
 
-	public playerJoinSingles(connection: WebSocket, roomId: string) {
-		const player: PongPlayer = new PongPlayer(connection);
-		this.singlesRoomJoiner(player, roomId);
+	public playerJoinSingles(connectedPlayer: PongPlayer, roomId: string) {
+		this.singlesRoomJoiner(connectedPlayer, roomId);
 	}
 
-	public playerJoinDoubles(connection: WebSocket, roomId: string) {
-		const player: PongPlayer = new PongPlayer(connection);
-		this.doublesRoomJoiner(player, roomId);
+	public playerJoinDoubles(connectedPlayer: PongPlayer, roomId: string) {
+		this.doublesRoomJoiner(connectedPlayer, roomId);
 	}
 
-	public playerJoinTournament(connection: WebSocket, tournamentSize: number) {
-		const player: PongPlayer = new PongPlayer(connection);
-		this.tournamentJoiner(player, tournamentSize);
+	public playerJoinTournament(
+		connectedPlayer: PongPlayer,
+		tournamentSize: number,
+	) {
+		this.tournamentJoiner(connectedPlayer, tournamentSize);
 	}
 
 	private singlesRoomJoiner(player: PongPlayer, roomId: string) {

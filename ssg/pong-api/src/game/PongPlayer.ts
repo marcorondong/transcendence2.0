@@ -28,12 +28,16 @@ export type EPlayerRoleFiltered = Exclude<EPlayerRole, EPlayerRole.TBD>;
 
 export class PongPlayer extends EventEmitter {
 	readonly connection: WebSocket;
+	readonly id: string;
+	readonly nickname: string;
 	private side: ETeamSide;
 	private status: EPlayerStatus;
 	private role: EPlayerRole;
 
-	constructor(socket: WebSocket) {
+	constructor(socket: WebSocket, playerId: string, playerNickname: string) {
 		super();
+		this.id = playerId;
+		this.nickname = playerNickname;
 		this.connection = socket;
 		this.side = ETeamSide.TBD;
 		this.status = EPlayerStatus.ONLINE;
