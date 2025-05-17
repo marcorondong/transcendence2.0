@@ -100,7 +100,7 @@ function applyPagination(params: {
 	take?: number;
 	page?: number;
 }) {
-	console.log("[applyPagination] Raw params:", params);
+	// console.log("[applyPagination] Raw params:", params);
 
 	// Get config from utils function getConfig() (utils/config.ts)
 	const config = getConfig();
@@ -137,7 +137,7 @@ export async function getUsersHandler(
 	reply: FastifyReply,
 ) {
 	// TODO: Log full query for debugging purposes
-	console.log("[Request Query]", request.query);
+	// console.log("[Request Query]", request.query);
 
 	// Destructure request query into respective fields
 	const {
@@ -187,9 +187,9 @@ export async function getUsersHandler(
 	// }
 	// // ======= END DEBUGGING =========
 	// TODO: Log pagination results for debugging purposes
-	console.log(
-		`[Pagination] page: ${page}, skip: ${skip}, take: ${take}, all: ${all}`,
-	);
+	// console.log(
+	// 	`[Pagination] page: ${page}, skip: ${skip}, take: ${take}, all: ${all}`,
+	// );
 
 	// MR_NOTE: 'page' nor 'all' field are not handled by service `findUsers()`;
 	// since pagination is an abstraction for 'skip' and 'take'

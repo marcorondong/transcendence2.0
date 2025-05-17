@@ -145,7 +145,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		order = "asc",
 	} = cleanedOptions;
 
-	console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
+	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
 
 	try {
 		// Remove undefined fields from 'where'
@@ -198,7 +198,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			applyDateFilter(dateTarget);
 		}
 
-		console.log("✅ Step 2: Transformed 'where'", transformed);
+		// console.log("✅ Step 2: Transformed 'where'", transformed);
 		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
@@ -209,16 +209,16 @@ export async function findUsers(options: UserQueryOptions = {}) {
 					),
 			  );
 
-		console.log("✅ Step 3: Final Query Shape", query);
+		// console.log("✅ Step 3: Final Query Shape", query);
 
 		const prismaSortBy = { [sortBy]: order };
 
-		console.log("✅ Step 4: Final Prisma Query", {
-			where: query,
-			orderBy: prismaSortBy,
-			skip,
-			take,
-		});
+		// console.log("✅ Step 4: Final Prisma Query", {
+		// 	where: query,
+		// 	orderBy: prismaSortBy,
+		// 	skip,
+		// 	take,
+		// });
 
 		const users = await prisma.user.findMany({
 			where: query,
@@ -227,7 +227,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			take,
 		});
 
-		console.log("✅ Step 5: Result", users);
+		// console.log("✅ Step 5: Result", users);
 
 		if (!users.length) {
 			throw new AppError({
@@ -239,7 +239,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 
 		return users;
 	} catch (err) {
-		console.log("❌ Step 6: Error Caught", err);
+		// console.log("❌ Step 6: Error Caught", err);
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
@@ -251,7 +251,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 
 		if (err instanceof AppError) throw err;
 
-		console.error("❌ Step 6.2: Unknown error", err);
+		// console.error("❌ Step 6.2: Unknown error", err);
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
