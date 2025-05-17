@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { FastifyRequest } from "fastify";
 import websocket, { WebSocket } from "@fastify/websocket";
 import fs from "fs";
 import path from "path";
@@ -28,8 +28,28 @@ function contactAuthService(cookie: string) {
 	});
 }
 
+function processPlayerJoin(
+	matchType: string,
+	req: FastifyRequest,
+	connection: WebSocket,
+	player: PongPlayer,
+) {
+	if (matchType === "singles" || matchType === "doubles") {
+		const roomId = Parsing.parseRoomId(req, connection);
+		if (roomId === false) return;
+		if (matchType === "singles") manager.playerJoinSingles(player, roomId);
+		else if (matchType === "doubles")
+			manager.playerJoinDoubles(player, roomId);
+	} else if (matchType === "tournament") {
+		const tournamentSize = Parsing.parseTournamentSize(req, connection);
+		if (tournamentSize === false) return;
+		manager.playerJoinTournament(player, tournamentSize);
+	} else {
+		connection.close(1008, "Unknown match type");
+	}
+}
+
 async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
-	//: Promise<false> | Promise<string, string>
 	try {
 		const response = await contactAuthService(cookie);
 		if (!response.ok) {
@@ -140,47 +160,16 @@ fastify.register(async function (fastify) {
 	);
 
 	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/:matchType`,
 		{ websocket: true },
 		async (connection, req) => {
+			const { matchType } = req.params as { matchType: string };
 			const player = await createPlayerInstance(
 				req.headers.cookie,
 				connection,
 			);
 			if (player === false) return;
-			const roomId = Parsing.parseRoomId(req, connection);
-			if (roomId === false) return;
-			manager.playerJoinSingles(player, roomId);
-		},
-	);
-
-	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
-		{ websocket: true },
-		async (connection, req) => {
-			const player = await createPlayerInstance(
-				req.headers.cookie,
-				connection,
-			);
-			if (player === false) return;
-			const roomId = Parsing.parseRoomId(req, connection);
-			if (roomId === false) return;
-			manager.playerJoinDoubles(player, roomId);
-		},
-	);
-
-	fastify.get<{ Querystring: Partial<TournamentSizeQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
-		{ websocket: true },
-		async (connection, req) => {
-			const player = await createPlayerInstance(
-				req.headers.cookie,
-				connection,
-			);
-			if (player === false) return;
-			const tournamentSize = Parsing.parseTournamentSize(req, connection);
-			if (tournamentSize === false) return;
-			manager.playerJoinTournament(player, tournamentSize);
+			processPlayerJoin(matchType, req, connection, player);
 		},
 	);
 
