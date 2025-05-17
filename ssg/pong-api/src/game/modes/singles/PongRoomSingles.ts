@@ -19,6 +19,18 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 		this.setMatchName("single match");
 	}
 
+	putTeamNameOnScoreBoard(player: PongPlayer): void {
+		const teamSide = player.getTeamSideLR();
+		if (teamSide === ETeamSide.LEFT)
+			this.getGame()
+				.getScoreBoard()
+				.setLeftTeamNickname(player.getPlayerNickname());
+		else if (teamSide === ETeamSide.RIGHT)
+			this.getGame()
+				.getScoreBoard()
+				.setRightTeamNickname(player.getPlayerNickname());
+	}
+
 	updateOthers(message: string): void {
 		return;
 	}

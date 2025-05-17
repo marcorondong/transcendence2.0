@@ -15,7 +15,7 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 import { IncomingMove, UserMoveSchema } from "../utils/zodSchema";
-import { z } from "zod"
+import { z } from "zod";
 
 enum EPongRoomState {
 	LOBBY,
@@ -41,6 +41,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 	abstract getRightCaptain(): PongPlayer;
 	abstract getGameFrame(): any;
 	abstract calculateMissingPlayers(): number;
+	abstract putTeamNameOnScoreBoard(player: PongPlayer): void;
 
 	constructor(privateRoom: boolean, match: T) {
 		super();
@@ -124,6 +125,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		this.assignControlsToPlayer(player, player.getPlayerPaddle(this.game));
 		this.disconnectBehavior(player);
 		this.broadcastLobbyUpdate("Another player joined");
+		this.putTeamNameOnScoreBoard(player);
 		if (this.isFull()) {
 			this.setPongRoomState(EPongRoomState.GAME);
 			this.emit(RoomEvents.FULL, this);
@@ -173,21 +175,17 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		playerPaddle: Paddle,
 	): void {
 		player.connection.on("message", (data: RawData, isBinary: boolean) => {
-
-			try{
+			try {
 				const incomingJson: IncomingMove = JSON.parse(data.toString());
-				const validatedDirection = UserMoveSchema.parse(incomingJson).move;
+				const validatedDirection =
+					UserMoveSchema.parse(incomingJson).move;
 				const direction: "up" | "down" = validatedDirection;
 				this.getGame().movePaddle(playerPaddle, direction);
-			}
-			catch(err)
-			{
-				if(err instanceof z.ZodError)
-				{
+			} catch (err) {
+				if (err instanceof z.ZodError) {
 					console.error("Zod validation failed:", err.errors);
 					player.connection.send(`Invalid move ${err.message}`);
-				}
-				else
+				} else
 					console.error("Not zod error but some kind of error", err);
 			}
 		});

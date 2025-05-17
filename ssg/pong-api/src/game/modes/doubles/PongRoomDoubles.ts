@@ -1,5 +1,5 @@
 import { APongRoom } from "../../APongRoom";
-import { PongPlayer } from "../../PongPlayer";
+import { ETeamSide, PongPlayer } from "../../PongPlayer";
 import { IPongFrameDoubles, PongGameDoubles } from "./PongGameDoubles";
 import { EPlayerRoleFiltered, EPlayerRole } from "../../PongPlayer";
 
@@ -28,6 +28,33 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 			this.sendLobbyUpdate(this.leftPlayerTwo, extraInfo);
 		if (this.rightPlayerTwo !== undefined)
 			this.sendLobbyUpdate(this.rightPlayerTwo, extraInfo);
+	}
+
+	putTeamNameOnScoreBoard(player: PongPlayer): void {
+		const teamSide = player.getTeamSideLR();
+		if (teamSide === ETeamSide.LEFT) {
+			if (this.leftPlayerOne && this.leftPlayerTwo) {
+				this.getGame()
+					.getScoreBoard()
+					.setLeftTeamNickname(
+						this.makeTeamName(
+							this.leftPlayerOne.getPlayerNickname(),
+							this.leftPlayerTwo.getPlayerNickname(),
+						),
+					);
+			}
+		} else if (teamSide === ETeamSide.RIGHT) {
+			if (this.rightPlayerOne && this.rightPlayerTwo) {
+				this.getGame()
+					.getScoreBoard()
+					.setRightTeamNickname(
+						this.makeTeamName(
+							this.rightPlayerOne.getPlayerNickname(),
+							this.rightPlayerTwo.getPlayerNickname(),
+						),
+					);
+			}
+		}
 	}
 
 	isEmpty(): boolean {
@@ -155,5 +182,12 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 		if (this.rightPlayerTwo !== undefined)
 			throw new Error("Trying to overwrite right player two");
 		this.rightPlayerTwo = player;
+	}
+
+	private makeTeamName(
+		firstNickname: string,
+		secondNickname: string,
+	): string {
+		return firstNickname + "-" + secondNickname + "-TEAM";
 	}
 }
