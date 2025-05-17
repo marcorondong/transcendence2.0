@@ -1,0 +1,1 @@
+Swagger url: http://localhost:2999/auth-api/documentation
