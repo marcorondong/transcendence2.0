@@ -348,6 +348,20 @@ export const getUsersQuerySchema = sanitizeQuerySchema(
 	baseGetUsersQuerySchema,
 ).strict(); // Rejects unknown fields
 
+// Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
+export const emptyResponseSchema = z
+	.void()
+	.describe("User deleted successfully");
+
+// // NEW: Standardized error response schema
+export const errorResponseSchema = z.object({
+	statusCode: z.number().describe("HTTP status code"),
+	error: z
+		.string()
+		.describe("Short title describing the error (e.g., 'Not Found')"),
+	message: z.string().describe("Detailed message about the error"),
+});
+
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
 export type loginInput = z.infer<typeof loginSchema>;
