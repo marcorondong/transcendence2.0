@@ -37,10 +37,11 @@ async function isUserAuthorized(req: FastifyRequest) {
 			return false;
 		}
 		console.log("NICCCE", response);
-		const data:any = await response.json();
+		const data = await response.json();
+		const {id, nickname} = data;
 		console.log("haha",data);
-		console.log(data.id);
-		console.log("nickname",data.nickname);
+		console.log("id", id);
+		console.log("nickname",nickname);
 
 		return true;
 	} catch (err) {
