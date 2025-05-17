@@ -1,23 +1,32 @@
 import { ETeamSide, ETeamSideFiltered } from "../PongPlayer";
 import { scoreBoardConfig } from "../../config";
 
+interface ITeamScore {
+	goals: number;
+	teamNickname: string;
+}
+
 export interface IScore {
-	leftGoals: number;
-	rightGoals: number;
+	leftTeam: ITeamScore;
+	rightTeam: ITeamScore;
 	time: number;
 }
 
 export class ScoreBoard {
-	private leftPlayerGoals: number;
-	private rightPlayerGoals: number;
+	private leftTeamNickname: string;
+	private leftTeamGoals: number;
+	private rightTeamGoals: number;
+	private rightTeamNickname: string;
 	private secondsLeft: number;
 	private paused: boolean;
 	private overtime: boolean;
 	private lastScoredSide: "left" | "right";
 
 	constructor() {
-		this.leftPlayerGoals = 0;
-		this.rightPlayerGoals = 0;
+		this.leftTeamNickname = "Left Default Team Name";
+		this.leftTeamGoals = 0;
+		this.rightTeamGoals = 0;
+		this.rightTeamNickname = "Right Default Team Name";
 		this.secondsLeft = scoreBoardConfig.match_length;
 		this.paused = false;
 		this.overtime = false;
@@ -28,73 +37,79 @@ export class ScoreBoard {
 		return this.overtime;
 	}
 
+	setLeftTeamNickname(leftTeamName: string) {
+		this.leftTeamNickname = leftTeamName;
+	}
+
+	setRightTeamNickname(rightTeamName: string) {
+		this.rightTeamNickname = rightTeamName;
+	}
+
 	score(side: "left" | "right") {
 		if (side === "left") {
-			this.leftPlayerGoals++;
+			this.leftTeamGoals++;
 			this.lastScoredSide = "left";
 		} else {
-			this.rightPlayerGoals++;
+			this.rightTeamGoals++;
 			this.lastScoredSide = "right";
 		}
 	}
 
 	getWinnerSide(): ETeamSideFiltered {
-		if (this.leftPlayerGoals > this.rightPlayerGoals) return ETeamSide.LEFT;
-		if (this.leftPlayerGoals === this.rightPlayerGoals) {
+		if (this.leftTeamGoals > this.rightTeamGoals) return ETeamSide.LEFT;
+		if (this.leftTeamGoals === this.rightTeamGoals) {
 			throw Error("Not really winner, goals are same");
 		}
 		return ETeamSide.RIGHT;
 	}
 
 	//TODO: remove this once the proper id is implemented
-	getWinnerSideString(): string
-	{
-		const winnerSide:ETeamSideFiltered = this.getWinnerSide();
-		if(winnerSide == ETeamSide.LEFT)
-			return "Left Player ID";
+	getWinnerSideString(): string {
+		const winnerSide: ETeamSideFiltered = this.getWinnerSide();
+		if (winnerSide == ETeamSide.LEFT) return "Left Player ID";
 		return "Right Player ID";
 	}
 
 	//TODO: remove this once the proper id is implemented
-	getLoserSideString(): string
-	{
-		const loserSide:ETeamSideFiltered = this.getLoserSide();
-		if(loserSide == ETeamSide.LEFT)
-			return "Left Player ID";
+	getLoserSideString(): string {
+		const loserSide: ETeamSideFiltered = this.getLoserSide();
+		if (loserSide == ETeamSide.LEFT) return "Left Player ID";
 		return "Right Player ID";
 	}
 
-	getWinnerGoals(): number
-	{
-		if(this.leftPlayerGoals > this.rightPlayerGoals)
-			return this.leftPlayerGoals;
-		return this.rightPlayerGoals;
+	getWinnerGoals(): number {
+		if (this.leftTeamGoals > this.rightTeamGoals) return this.leftTeamGoals;
+		return this.rightTeamGoals;
 	}
 
-	getLoserGoals(): number
-	{
-		if(this.leftPlayerGoals < this.rightPlayerGoals)
-			return this.leftPlayerGoals;
-		return this.rightPlayerGoals;
+	getLoserGoals(): number {
+		if (this.leftTeamGoals < this.rightTeamGoals) return this.leftTeamGoals;
+		return this.rightTeamGoals;
 	}
 
 	getLoserSide(): ETeamSideFiltered {
-		if (this.leftPlayerGoals < this.rightPlayerGoals) return ETeamSide.LEFT;
-		if (this.leftPlayerGoals === this.rightPlayerGoals) {
+		if (this.leftTeamGoals < this.rightTeamGoals) return ETeamSide.LEFT;
+		if (this.leftTeamGoals === this.rightTeamGoals) {
 			throw Error("Not really loser, goals are same");
 		}
 		return ETeamSide.RIGHT;
 	}
 
 	setScore(leftGoals: number, rightGoals: number) {
-		this.leftPlayerGoals = leftGoals;
-		this.rightPlayerGoals = rightGoals;
+		this.leftTeamGoals = leftGoals;
+		this.rightTeamGoals = rightGoals;
 	}
 
 	getScoreJson(): IScore {
 		return {
-			leftGoals: this.leftPlayerGoals,
-			rightGoals: this.rightPlayerGoals,
+			leftTeam: {
+				goals: this.leftTeamGoals,
+				teamNickname: this.leftTeamNickname,
+			},
+			rightTeam: {
+				goals: this.rightTeamGoals,
+				teamNickname: this.rightTeamNickname,
+			},
 			time: this.secondsLeft,
 		};
 	}
@@ -120,16 +135,16 @@ export class ScoreBoard {
 
 	isWinnerDecided(): boolean {
 		if (this.secondsLeft <= 0) {
-			if (this.leftPlayerGoals !== this.rightPlayerGoals) return true;
+			if (this.leftTeamGoals !== this.rightTeamGoals) return true;
 		}
 		return false;
 	}
 
 	getLeftPlayerGoals(): number {
-		return this.leftPlayerGoals;
+		return this.leftTeamGoals;
 	}
 
 	getRightPlayerGoals(): number {
-		return this.rightPlayerGoals;
+		return this.rightTeamGoals;
 	}
 }
