@@ -19,3 +19,23 @@ export async function signInRequest(  // TODO update signInRequest to use userna
 	const payload = payloadZodSchema.parse(data);
 	return payload;
 }
+
+export const setCookieOpt = {
+	path: "/",
+	httpOnly: true,
+	secure: true,
+	sameSite: "strict" as const,
+	maxAge: 60 * 60,
+	signed: true,
+};
+
+export const jwtSignOpt = {
+	expiresIn: "1h",
+	// issuer: "auth_api",
+	// audience: "users",
+	// algorithm: "HS256",
+	// subject: "auth_api",
+	// jwtid: "auth_api",
+	// notBefore: '10s',
+	// customClaim: "customClaim",
+};

@@ -2,38 +2,40 @@ import { z } from "zod";
 
 export const idZodSchema = z
 	.object({
-		userId: z.string().min(1), // TODO .uuid(),
+		userId: z.string().uuid(),
 	})
-	.strict()
+	.strict();
 
 export const idsZodSchema = z
 	.object({
-		userId: z.string().min(1), // TODO .uuid(),
-		opponentId: z.string().min(1), // TODO .uuid(),
+		userId: z.string().uuid(),
+		opponentId: z.string().uuid(),
 	})
 	.strict()
 	.refine((data) => data.userId !== data.opponentId);
 
 const baseSchema = z.object({
-	winnerId: z.string().min(1), // TODO .uuid(),
-	loserId: z.string().min(1), // TODO .uuid(),
+	winnerId: z.string().uuid(),
+	loserId: z.string().uuid(),
 	winnerScore: z.number().int().nonnegative(),
 	loserScore: z.number().int().nonnegative(),
 });
 
 export const gameSchema = baseSchema
-		.extend({
-			gameId: z.string().uuid("Invalid game ID format"),
-		})
-		.strict()
-		.refine((data) => data.winnerId !== data.loserId)
-		.refine((data) => data.winnerScore > data.loserScore);
-	
+	.extend({
+		gameId: z.string().uuid(),
+	})
+	.strict()
+	.refine((data) => data.winnerId !== data.loserId)
+	.refine((data) => data.winnerScore > data.loserScore);
+
 const gameResponseSchema = baseSchema
-		.extend({
-			createdAt: z.date(),
-		})
-		.strict();
+	.extend({
+		createdAt: z.date(),
+	})
+	.strict()
+	.refine((data) => data.winnerId !== data.loserId)
+	.refine((data) => data.winnerScore > data.loserScore);
 
 export const gameHistoryResponseSchema = z.array(gameResponseSchema);
 
@@ -43,7 +45,8 @@ export const statsResponseSchema = z
 		wins: z.number().int().nonnegative(),
 		losses: z.number().int().nonnegative(),
 	})
-	.strict();
+	.strict()
+	.refine((data) => data.total === data.wins + data.losses);
 
 export const successResponseSchema = z
 	.object({
