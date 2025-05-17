@@ -23,6 +23,11 @@ export enum EPlayerRole {
 	TBD, //TBD to be decided
 }
 
+interface IPlayerInfo {
+	id: string;
+	nickname: string;
+}
+
 export type ETeamSideFiltered = Exclude<ETeamSide, ETeamSide.TBD>;
 export type EPlayerRoleFiltered = Exclude<EPlayerRole, EPlayerRole.TBD>;
 
@@ -43,6 +48,24 @@ export class PongPlayer extends EventEmitter {
 		this.status = EPlayerStatus.ONLINE;
 		this.role = EPlayerRole.TBD;
 		this.connectionMonitor();
+	}
+
+	static async createAuthorizedPlayer(
+		cookie: string | undefined,
+		connection: WebSocket,
+	): Promise<PongPlayer | false> {
+		const playerInfo = await authorizePlayer(cookie);
+		if (playerInfo === false) {
+			connection.send("Request JWT Token aka LOG IN before playing");
+			connection.close(1008, "Unauthorized");
+			return false;
+		}
+		const connectedPlayer: PongPlayer = new PongPlayer(
+			connection,
+			playerInfo.id,
+			playerInfo.nickname,
+		);
+		return connectedPlayer;
 	}
 
 	equals(otherPlayer: PongPlayer): boolean {
@@ -122,4 +145,43 @@ export class PongPlayer extends EventEmitter {
 	private setTeamSide(side: ETeamSideFiltered): void {
 		this.side = side;
 	}
+}
+
+function contactAuthService(cookie: string) {
+	//TODO read this container path somehow smarter in file or so
+	return fetch("http://auth_api_container:2999/auth-api/verify-connection", {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"Cookie": cookie,
+		},
+	});
+}
+
+async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
+	try {
+		const response = await contactAuthService(cookie);
+		if (!response.ok) {
+			console.warn("Failed check. JWT token is not valid", response);
+			return false;
+		}
+		console.log("User is authorized", response);
+		const playerInfo = await response.json();
+		const { id, nickname } = playerInfo;
+		console.log("User full:", playerInfo);
+		console.log("id", id);
+		console.log("nickname", nickname);
+		return { id, nickname };
+	} catch (err) {
+		console.error("Fetch failed, maybe auth microservice is down", err);
+		return false;
+	}
+}
+
+async function authorizePlayer(cookie: string | undefined) {
+	if (!cookie) {
+		console.log("Cookie don't exits");
+		return false;
+	}
+	return getPlayerInfo(cookie);
 }

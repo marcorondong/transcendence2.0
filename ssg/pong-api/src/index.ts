@@ -12,22 +12,6 @@ import { PongPlayer } from "./game/PongPlayer";
 
 dotenv.config();
 
-interface IPlayerInfo {
-	id: string;
-	nickname: string;
-}
-
-function contactAuthService(cookie: string) {
-	//TODO read this container path somehow smarter in file or so
-	return fetch("http://auth_api_container:2999/auth-api/verify-connection", {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-			"Cookie": cookie,
-		},
-	});
-}
-
 function processPlayerJoin(
 	matchType: string,
 	req: FastifyRequest,
@@ -47,52 +31,6 @@ function processPlayerJoin(
 	} else {
 		connection.close(1008, "Unknown match type");
 	}
-}
-
-async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
-	try {
-		const response = await contactAuthService(cookie);
-		if (!response.ok) {
-			console.warn("Failed check. JWT token is not valid", response);
-			return false;
-		}
-		console.log("User is authorized", response);
-		const playerInfo = await response.json();
-		const { id, nickname } = playerInfo;
-		console.log("User full:", playerInfo);
-		console.log("id", id);
-		console.log("nickname", nickname);
-		return { id, nickname };
-	} catch (err) {
-		console.error("Fetch failed, maybe auth microservice is down", err);
-		return false;
-	}
-}
-
-async function createPlayerInstance(
-	cookie: string | undefined,
-	connection: WebSocket,
-): Promise<PongPlayer | false> {
-	const playerInfo = await authorizePlayer(cookie);
-	if (playerInfo === false) {
-		connection.send("Request JWT Token aka LOGIN before playing");
-		connection.close(1008, "Unauthorized");
-		return false;
-	}
-	const connectedPlayer: PongPlayer = new PongPlayer(
-		connection,
-		playerInfo.id,
-		playerInfo.nickname,
-	);
-	return connectedPlayer;
-}
-
-async function authorizePlayer(cookie: string | undefined) {
-	if (!cookie) {
-		console.log("Cookie don't exits");
-		return false;
-	}
-	return getPlayerInfo(cookie);
 }
 
 const PORT: number = 3010;
@@ -164,7 +102,7 @@ fastify.register(async function (fastify) {
 		{ websocket: true },
 		async (connection, req) => {
 			const { matchType } = req.params as { matchType: string };
-			const player = await createPlayerInstance(
+			const player = await PongPlayer.createAuthorizedPlayer(
 				req.headers.cookie,
 				connection,
 			);
