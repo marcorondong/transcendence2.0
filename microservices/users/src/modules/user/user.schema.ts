@@ -339,8 +339,8 @@ const baseGetUsersQuerySchema = z.object({
 		.min(1)
 		.describe("Page number to use for pagination (starts at 1)"),
 	all: z.boolean().describe("If true, return all results without pagination"),
-	sortBy: userSortByEnum,
-	order: sortDirectionEnum,
+	sortBy: userSortByEnum.default("createdAt"),
+	order: sortDirectionEnum.default("asc"),
 });
 
 // Refined schema for query parameters to find users

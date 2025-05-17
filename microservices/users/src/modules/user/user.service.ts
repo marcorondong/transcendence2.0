@@ -141,7 +141,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		between,
 		skip,
 		take,
-		sortBy = "id",
+		sortBy = "createdAt",
 		order = "asc",
 	} = cleanedOptions;
 
