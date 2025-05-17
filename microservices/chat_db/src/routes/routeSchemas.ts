@@ -8,10 +8,10 @@ import {
 
 export const createUserSchema = {
 	summary: "Create User",
-	description: "Create a new user. If the user already exists, it will be ignored.",
+	description: "Create a new user if not exist.",
 	tags: ["Chat-DB"],
 	body: idZodSchema,
-	response: { 201: blockListResponseSchema },
+	response: { 201: successResponseSchema },
 };
 
 export const blockUserSchema = {

@@ -1,4 +1,5 @@
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
+import { env } from "./env";
 
 export const swaggerOption = {
 	exposeRoute: true,
@@ -23,7 +24,7 @@ export const swaggerOption = {
 };
 
 export const swaggerUiOption = {
-	routePrefix: "/chat-db/documentation",
+	routePrefix: env.CHAT_DB_DOCUMENTATION_STATIC,
 };
 
 export const serverOption = {

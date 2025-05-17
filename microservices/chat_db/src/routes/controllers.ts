@@ -1,22 +1,24 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { IdInput, IdsInput } from "./zodSchemas";
 import {
-	createOrGetUser,
-	addToBlockList,
-	removeFromBlockList,
-	toggleBlock,
+	createUser,
+	isUserExists,
 	getBlockStatus,
-	getBlockList,
+	ft_blockList,
+	connectUser,
+	disconnectUser,
+	healthCheck,
 } from "./service";
-import { healthCheck } from "./dbUtils";
+import httpError from "http-errors";
 
 export async function createUserHandler(
 	request: FastifyRequest<{ Body: IdInput }>,
 	reply: FastifyReply,
 ) {
 	const { userId } = request.body;
-	const user = await createOrGetUser(userId);
-	reply.status(201).send(user);
+	const existingUser = await isUserExists(userId);
+	if (!existingUser) await createUser(userId);
+	reply.status(201).send({ success: true });
 }
 
 export async function blockUserHandler(
@@ -24,7 +26,9 @@ export async function blockUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	await addToBlockList(userId, friendId);
+	const isUserInList = await getBlockStatus(userId, friendId);
+	if (isUserInList) throw new httpError.Conflict("User already blocked");
+	await connectUser(userId, friendId);
 	reply.status(200).send({ success: true });
 }
 
@@ -33,7 +37,9 @@ export async function unblockUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	await removeFromBlockList(userId, friendId);
+	const isUserInBlockList = await getBlockStatus(userId, friendId);
+	if (!isUserInBlockList) throw new httpError.Conflict("User not blocked");
+	await disconnectUser(userId, friendId);
 	reply.status(200).send({ success: true });
 }
 
@@ -42,7 +48,9 @@ export async function toggleBlockHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	await toggleBlock(userId, friendId);
+	const isUserInBlockList = await getBlockStatus(userId, friendId);
+	if (isUserInBlockList) await disconnectUser(userId, friendId);
+	else await connectUser(userId, friendId);
 	reply.status(200).send({ success: true });
 }
 
@@ -60,7 +68,7 @@ export async function blockListHandler(
 	reply: FastifyReply,
 ) {
 	const { userId } = request.params;
-	const blockList = await getBlockList(userId);
+	const blockList = await ft_blockList(userId);
 	reply.status(200).send({ blockList });
 }
 

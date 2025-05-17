@@ -10,12 +10,11 @@ export async function createUser(userId: string) {
 	return user;
 }
 
-export async function getUserIfExists(userId: string) {
+export async function isUserExists(userId: string): Promise<boolean> {
 	const user = await prisma.user.findUnique({
-		where: { userId: userId },
-		select: { blockList: true },
+		where: { userId },
 	});
-	return user;
+	return !!user;
 }
 
 export async function connectUser(userId: string, friendId: string) {
