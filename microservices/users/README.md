@@ -122,11 +122,11 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 
 ## ⚙️ Configuration
 
-Currently **no configuration is needed** to run the service.
+By default, **no additional configuration is required** to run the service. However, you can customize the service using docker secrets, environmental variables, `package.json`, or hardcoded values as described in the "How to configure it" section.
 
 > [!NOTE]
 >
-> In next version, it'll have these:
+> In the next version, additional configuration options will be available:
 >
 > ### ☁️ Environment variables
 >
