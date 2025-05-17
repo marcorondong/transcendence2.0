@@ -128,6 +128,7 @@ fastify.register(async function (fastify) {
 			if (playerInfo === false) {
 				connection.send("Request JWT Token aka LOGIN before playing");
 				connection.close(1008, "Unauthorized");
+				return;
 			}
 			const roomId = Parsing.parseRoomId(req, connection);
 			if (roomId === false) return;
