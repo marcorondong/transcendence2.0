@@ -3,6 +3,8 @@ export interface Chat {
 	type: string;
 	users?: User[];
 	me?: User;
+	sender?: User;
+	receiver?: User;
 	user?: User;
 	roomId?: string;
 	notification?: string;
@@ -10,12 +12,13 @@ export interface Chat {
 	peopleOnline?: string[];
 	error?: string;
 	message?: string;
-	messageResponse?: MessageResponse;
 }
 
 export interface Message {
-	id: string;
-	content: string;
+	type?: string;
+	sender?: User;
+	receiver?: User;
+	message: string;
 	invitation?: string;
 	dateTime?: Date;
 }
@@ -27,14 +30,8 @@ export interface User {
 
 export interface ChatUser {
 	id: string;
-	// TODO: make this mandatory
-	nickname?: string;
+	nickname: string;
 	messages: Message[];
 	blocked: boolean;
-}
-
-export interface MessageResponse {
-	message: string;
-	relatedId: string;
-	type: string;
+	blockStatusChecked: boolean;
 }

@@ -1,5 +1,6 @@
 import { IconComponent } from "./icon-component.js";
 import { User, Chat, ChatUser, Message } from "../types/Chat.js";
+import { fetchChatDb } from "../services/fetch-chat.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -57,37 +58,39 @@ class ChatComponent extends HTMLElement {
 			const chatServiceData: Chat = JSON.parse(event.data);
 			console.log("websocket data", chatServiceData);
 
-			// //CHAT SERVICE RETURNS USERS OWN MESSAGE
-			// if (chatServiceData.type === "messageResponse") {
-			// 	const newMessage: Message = {
-			// 		id: chatServiceData.relatedId || "",
-			// 		content: chatServiceData.message ?? "",
-			// 	};
-			// 	this.addTimestamp(newMessage);
-			// 	this.selectedUser?.messages.push(newMessage);
-			// 	this.displayCurrentChat();
-			// }
-			//
-			// // RECEIVING MESSAGE
-			// if (
-			// 	chatServiceData.messageResponse &&
-			// 	chatServiceData.messageResponse.type === "messageResponse"
-			// ) {
-			// 	const sender = this.onlineUsers.find(
-			// 		(user) =>
-			// 			user.id === chatServiceData.messageResponse?.relatedId,
-			// 	);
-			// 	if (sender) {
-			// 		console.log("this message must come from ", sender.id);
-			// 		const newMessage: Message = {
-			// 			id: sender.id,
-			// 			content: chatServiceData.messageResponse.message ?? "",
-			// 		};
-			// 		this.addTimestamp(newMessage, sender);
-			// 		sender.messages.push(newMessage);
-			// 		this.displayCurrentChat();
-			// 	}
-			// }
+			// RECEIVING MESSAGE
+			if (chatServiceData.type === "message") {
+				if (
+					chatServiceData.sender === undefined ||
+					chatServiceData.receiver === undefined
+				) {
+					return;
+				}
+				let chatPartner: User;
+				if (chatServiceData.sender.id === this.me?.id) {
+					chatPartner = chatServiceData.receiver;
+				} else {
+					chatPartner = chatServiceData.sender;
+				}
+				const relevantChat = this.onlineUsers.find(
+					(user) => user.id === chatPartner.id,
+				);
+				if (relevantChat) {
+					console.log(
+						"this message belongs to chat with ",
+						relevantChat.id,
+					);
+					const newMessage: Message = {
+						type: chatServiceData.type,
+						sender: chatServiceData.sender,
+						receiver: chatServiceData.receiver,
+						message: chatServiceData.message ?? "",
+					};
+					this.addTimestamp(newMessage, relevantChat);
+					relevantChat.messages.push(newMessage);
+					this.displayCurrentChat();
+				}
+			}
 			//
 			// A USER LEAVES THE CHAT
 			if (chatServiceData.type === "disconnected") {
@@ -138,6 +141,7 @@ class ChatComponent extends HTMLElement {
 					messages: [],
 					nickname: chatServiceData.user.nickname,
 					blocked: false,
+					blockStatusChecked: false,
 				};
 				this.onlineUsers.push(user);
 				this.updateUsers();
@@ -159,8 +163,10 @@ class ChatComponent extends HTMLElement {
 					) {
 						const newUser: ChatUser = {
 							id: user.id,
+							nickname: user.nickname,
 							messages: [],
 							blocked: false,
+							blockStatusChecked: false,
 						};
 						this.onlineUsers.push(newUser);
 						this.updateUsers();
@@ -172,44 +178,32 @@ class ChatComponent extends HTMLElement {
 		};
 	}
 
-	findRelevantUser(message: Message) {
-		const user = this.onlineUsers.find((u) => u.id === message.id);
-		if (user) {
-			return user;
-		}
-		return this.selectedUser;
-	}
-
-	addTimestamp(newMessage: Message, sender?: ChatUser) {
-		let user: ChatUser;
-		if (sender) {
-			user = sender;
-		} else if (!this.selectedUser) {
-			return;
-		} else {
-			user = this.selectedUser;
-		}
-		console.log("will add message to:", user.id);
+	addTimestamp(newMessage: Message, chat: ChatUser) {
+		console.log("will add message to:", chat.id);
 
 		if (
-			user.messages.length === 0 ||
-			(!user.messages[user.messages.length - 1].dateTime &&
-				user.messages[user.messages.length - 1].id !== newMessage.id)
+			chat.messages.length === 0 ||
+			(!chat.messages[chat.messages.length - 1].dateTime &&
+				chat.messages[chat.messages.length - 1].sender?.id !==
+					newMessage.sender?.id)
 		) {
 			let sender: string;
-			if (newMessage.id === user.id) {
-				sender = `${newMessage.id} | `;
+			if (newMessage.sender?.id === chat.id) {
+				sender = `${newMessage.sender?.nickname} | `;
 			} else {
 				sender = "You | ";
 			}
 			const now = new Date();
 			sender = sender + now.toLocaleTimeString();
 			const timestamp: Message = {
-				id: newMessage.id,
-				content: sender,
+				sender: {
+					id: newMessage.sender!.id,
+					nickname: newMessage.sender!.nickname,
+				},
+				message: sender,
 				dateTime: now,
 			};
-			user.messages.push(timestamp);
+			chat.messages.push(timestamp);
 		}
 	}
 
@@ -267,14 +261,14 @@ class ChatComponent extends HTMLElement {
 
 	chatBubble(message: Message) {
 		const div = document.createElement("div");
-		div.innerText = message.content;
+		div.innerText = message.message;
 		if (message.invitation) {
 			const link = document.createElement("a");
 			link.textContent = "click here";
 			link.href = `https://${window.location.hostname}:${window.location.port}/pong/${message.invitation}`;
 			div.appendChild(link);
 		}
-		if (message.id === this.selectedUser?.id) {
+		if (message.sender?.id === this.selectedUser?.id) {
 			div.classList.add("self-start", "text-left");
 			if (!message.dateTime) {
 				div.classList.add("dark:bg-slate-500/50");
@@ -293,7 +287,20 @@ class ChatComponent extends HTMLElement {
 		return div;
 	}
 
-	setStateChatButtons(size: number) {
+	async setStateChatButtons(size: number) {
+		if (!this.selectedUser) {
+			return;
+		}
+		if (this.selectedUser.blockStatusChecked === false) {
+			const data = await fetchChatDb(
+				this.me?.id,
+				this.selectedUser?.id,
+				"block-status",
+			);
+			this.selectedUser.blockStatusChecked = true;
+			this.selectedUser.blocked = data.blockStatus;
+			console.log("SETTING BLOCKED STATUS");
+		}
 		if (size === 0) {
 			this.chatInput.disabled = true;
 			this.sendButton.disabled = true;
@@ -312,8 +319,7 @@ class ChatComponent extends HTMLElement {
 		this.mainMessages.replaceChildren();
 		if (this.onlineUsers.length === 0) {
 			const chatBubble = this.chatBubble({
-				id: this.selectedUser?.id || "",
-				content: "no Chat History available",
+				message: "no Chat History available",
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
@@ -325,8 +331,7 @@ class ChatComponent extends HTMLElement {
 
 		if (this.selectedUser.messages.length === 0) {
 			const chatBubble = this.chatBubble({
-				id: this.selectedUser.id || "",
-				content: `no Chat History available with ${this.selectedUser.id}`,
+				message: `no Chat History available with ${this.selectedUser.nickname}`,
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
@@ -486,17 +491,19 @@ class ChatComponent extends HTMLElement {
 		this.chatInput.value = "";
 	}
 
-	handleBlockButton(button: HTMLButtonElement) {
+	async handleBlockButton(button: HTMLButtonElement) {
 		if (button.id !== "block-button") {
 			return;
 		}
 		console.log("trying to block a user");
-		const chat: Chat = {
-			type: "block",
-			relatedId: this.selectedUser?.id,
-		};
-		if (this.ws) {
-			this.ws.send(JSON.stringify(chat));
+		const data = await fetchChatDb(
+			this.me?.id,
+			this.selectedUser?.id,
+			"toggle-block",
+		);
+		if (data.success === true && this.selectedUser) {
+			this.selectedUser.blocked = !this.selectedUser.blocked;
+			this.updateBlockButton(this.selectedUser);
 		}
 	}
 
