@@ -35,6 +35,7 @@ nuke: clean
 cli: all
 	make -C cli-client
 
+# e.g. "make users-re" to rebuild users image and container
 %$(REBUILD_SERVICE):
 	@echo "rebuilding $(@:$(REBUILD_SERVICE)=)"
 	docker container rm -f $(shell docker ps | awk '{print $$NF}' | grep $(@:$(REBUILD_SERVICE)=))
