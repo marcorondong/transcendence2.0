@@ -1,14 +1,19 @@
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
-import fs from 'fs';
+import { env } from "./env";
+import fs from "fs";
 
 let jwtSecret: string;
 let cookieSecret: string;
 
 try {
-	const jwtSecretFile = process.env.JWT_SECRET_FILE || "/run/secrets/jwtSecret.key";
-	const cookieSecretFile = process.env.COOKIE_SECRET_FILE || "/run/secrets/cookieSecret.key";
-	jwtSecret = fs.readFileSync(jwtSecretFile, "utf8");
-	cookieSecret = fs.readFileSync(cookieSecretFile, "utf8");
+	jwtSecret = fs.readFileSync(
+		env.AUTH_API_JWT_SECRET_FILE_LOCATION_CONTAINER,
+		"utf8",
+	);
+	cookieSecret = fs.readFileSync(
+		env.AUTH_API_COOKIE_SECRET_FILE_LOCATION_CONTAINER,
+		"utf8",
+	);
 } catch (error) {
 	console.error("Error reading secret files:", error);
 	process.exit(1);
@@ -37,7 +42,7 @@ export const swaggerOption = {
 };
 
 export const swaggerUiOption = {
-	routePrefix: "/auth-api/documentation",
+	routePrefix: env.AUTH_API_DOCUMENTATION_STATIC,
 };
 
 export const serverOption = {
@@ -57,14 +62,14 @@ export const serverOption = {
 export const jwtOption = {
 	secret: jwtSecret,
 	cookie: {
-		cookieName: 'access_token', // TODO : use env variable
+		cookieName: env.JWT_TOKEN_NAME,
 		signed: true,
 	},
-}
+};
 
 export const cookieOption = {
 	secret: cookieSecret,
 	parseOptions: {
 		signed: true,
 	},
-}
+};

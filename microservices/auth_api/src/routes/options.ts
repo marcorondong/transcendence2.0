@@ -33,7 +33,7 @@ export const verifyJWTOpt = {
 export const refreshJWTOpt = {
 	schema: refreshJWTSchema,
 	handler: refreshJWTHandler,
-}
+};
 
 export const verifyConnectionOpt = {
 	schema: verifyConnectionSchema,
