@@ -5,10 +5,11 @@ SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
 PONG_ENV = ssg/pong-api/.env
 GLOBAL_ENV = .env
 
-#we can add more to this list if needed
 SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
 SECRETS = $(SECRET_DIRECTORIES) $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) $(GLOBAL_ENV)
+
+REBUILD_SERVICE = -re
 
 all: $(SECRETS)
 	docker compose up -d
@@ -34,10 +35,15 @@ nuke: clean
 cli: all
 	make -C cli-client
 
+%$(REBUILD_SERVICE):
+	@echo "rebuilding $(@:$(REBUILD_SERVICE)=)"
+	docker container rm -f $(shell docker ps | awk '{print $$NF}' | grep $(@:$(REBUILD_SERVICE)=))
+	docker image rm -f $(shell docker images | awk '{print $$1}' | grep $(@:$(REBUILD_SERVICE)=))
+	make
+
 $(SECRET_DIRECTORIES):
 	mkdir -p $(SECRET_DIRECTORIES)
 
-#simple script since i can automate password protection in entrypoint of grafana
 $(GRAFANA_PW):
 	./monitoring/grafana/create_password.sh
 
@@ -51,4 +57,4 @@ $(SLACK_WEBHOOK):
 	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
-.PHONY: all re clean
+.PHONY: all re clean %$(REBUILD_SERVICE) 

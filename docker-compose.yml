@@ -25,8 +25,8 @@ services:
       - ./ssg/AI/src:/app/src:ro
     ports:
       - 6969:6969 #TODO remove it in production
-    environment:
-      - NODE_ENV=development
+    env_file:
+      - .env
     networks:
       - Transcendence2.0
 
@@ -129,7 +129,6 @@ include:
   - ./frontend/docker-compose.yml
   - ./monitoring/monitoring-docker-compose.yml
   - ./microservices/users/docker-compose.yml
-  - ./microservices/pong_db/docker-compose.yml
 
 networks:
   Transcendence2.0:
