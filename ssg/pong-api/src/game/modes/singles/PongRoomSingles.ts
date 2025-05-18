@@ -8,6 +8,7 @@ import {
 } from "../../PongPlayer";
 import { error } from "console";
 import { APongRoom } from "../../APongRoom";
+import { GameEvents } from "../../../customEvents";
 
 export class PongRoomSingles extends APongRoom<PongGameSingles> {
 	private leftPlayer?: PongPlayer;
@@ -29,6 +30,16 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 			this.getGame()
 				.getScoreBoard()
 				.setRightTeamNickname(player.getPlayerNickname());
+	}
+
+	//FIXME: something is not working with this an tournament
+	gameFinishListener(): void {
+		this.getGame().once(GameEvents.FINISHED, async () => {
+			console.log("Game is about to be stored in database");
+			const winnerId = this.getWinnerCaptain().getPlayerId();
+			const loserId = this.getLoserCaptain().getPlayerId();
+			this.getGame().storeResultInDatabase(winnerId, loserId);
+		});
 	}
 
 	updateOthers(message: string): void {

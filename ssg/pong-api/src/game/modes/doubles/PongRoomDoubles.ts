@@ -2,6 +2,7 @@ import { APongRoom } from "../../APongRoom";
 import { ETeamSide, PongPlayer } from "../../PongPlayer";
 import { IPongFrameDoubles, PongGameDoubles } from "./PongGameDoubles";
 import { EPlayerRoleFiltered, EPlayerRole } from "../../PongPlayer";
+import { GameEvents } from "../../../customEvents";
 
 export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 	private leftPlayerOne?: PongPlayer;
@@ -17,6 +18,12 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 
 	updateOthers(message: string): void {
 		this.broadcastLobbyUpdate(message);
+	}
+
+	async gameFinishListener() {
+		this.getGame().once(GameEvents.FINISHED, () => {
+			console.log("Doubles done");
+		});
 	}
 
 	broadcastLobbyUpdate(extraInfo: string): void {

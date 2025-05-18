@@ -52,21 +52,26 @@ export class PongGameSingles extends APongGame {
 		return game;
 	}
 
-	getJsonDataForDatabase(): IPongSinglesDatabase {
+	getJsonDataForDatabase(
+		winnerCaptainId: string,
+		loserCaptainId: string,
+	): IPongSinglesDatabase {
 		//TODO implement proper IDs of winner and loser not just side
 		return {
 			gameId: this.getGameId(),
-			winnerId: this.score.getWinnerSideString(),
-			loserId: this.score.getLoserSideString(),
+			winnerId: winnerCaptainId,
+			loserId: loserCaptainId,
 			winnerScore: this.score.getWinnerGoals(),
 			loserScore: this.score.getLoserGoals(),
 		};
 	}
 
-	async storeResultInDatabase(): Promise<void> {
-		//TODO: implement properIds
+	async storeResultInDatabase(
+		winnerId: string,
+		loserId: string,
+	): Promise<void> {
 		const url: string = pongDbConfig.store_game_endpoint;
-		const gameData = this.getJsonDataForDatabase();
+		const gameData = this.getJsonDataForDatabase(winnerId, loserId);
 		console.log("Game data");
 		console.log(gameData);
 		console.log(`Storing game to database on url ${url}: `);

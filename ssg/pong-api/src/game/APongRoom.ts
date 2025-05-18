@@ -16,6 +16,7 @@ import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 import { IncomingMove, UserMoveSchema } from "../utils/zodSchema";
 import { z } from "zod";
+import { error } from "console";
 
 enum EPongRoomState {
 	LOBBY,
@@ -42,6 +43,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 	abstract getGameFrame(): any;
 	abstract calculateMissingPlayers(): number;
 	abstract putTeamNameOnScoreBoard(player: PongPlayer): void;
+	abstract gameFinishListener(): void;
 
 	constructor(privateRoom: boolean, match: T) {
 		super();
@@ -63,6 +65,31 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		return {
 			roomId: this.game.getGameId(),
 		};
+	}
+
+	//TODO check if this approach is better. Be careful with crashing /-> it was mistake of recursive call before i changed it to this more simpler version
+	// async getWinnerCaptain(): Promise<PongPlayer> {
+	// await this.getGame().waitForFinalWhistle();
+	getWinnerCaptain(): PongPlayer {
+		if (this.game.getGameStatus() !== EGameStatus.FINISHED)
+			throw error("Game is not finished");
+		const winnerSide = this.getGame().getScoreBoard().getWinnerSide();
+		if (winnerSide === ETeamSide.LEFT) {
+			return this.getLeftCaptain();
+		} else {
+			return this.getRightCaptain();
+		}
+	}
+
+	getLoserCaptain(): PongPlayer {
+		if (this.game.getGameStatus() !== EGameStatus.FINISHED)
+			throw error("Game is not finished");
+		const winnerSide = this.getGame().getScoreBoard().getWinnerSide();
+		if (winnerSide === ETeamSide.LEFT) {
+			return this.getRightCaptain();
+		} else {
+			return this.getLeftCaptain();
+		}
 	}
 
 	async getRoomWinner(): Promise<PongPlayer> {
@@ -129,6 +156,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		if (this.isFull()) {
 			this.setPongRoomState(EPongRoomState.GAME);
 			this.emit(RoomEvents.FULL, this);
+			this.gameFinishListener();
 		} else {
 			this.sendLobbyUpdate(player, "Welcome!");
 		}

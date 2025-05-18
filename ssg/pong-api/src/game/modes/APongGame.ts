@@ -33,7 +33,10 @@ export abstract class APongGame extends EventEmitter {
 	abstract resetPaddlePosition(): void;
 	abstract getCloserLeftPaddle(): Paddle;
 	abstract getCloserRightPaddle(): Paddle;
-	abstract storeResultInDatabase(): Promise<void>;
+	abstract storeResultInDatabase(
+		winnerId: string,
+		loserId: string,
+	): Promise<void>;
 
 	constructor(ball: Ball, score: ScoreBoard, field: PongField) {
 		super();
@@ -85,7 +88,7 @@ export abstract class APongGame extends EventEmitter {
 	async waitForFinalWhistle(): Promise<APongGame> {
 		if (this.gameStatus === EGameStatus.FINISHED) return this;
 		return new Promise((resolve, reject) => {
-			this.on(GameEvents.FINISHED, () => {
+			this.once(GameEvents.FINISHED, () => {
 				resolve(this);
 			});
 		});
@@ -102,10 +105,9 @@ export abstract class APongGame extends EventEmitter {
 		this.start();
 	}
 
-	async finishGame(): Promise<void> {
+	finishGame() {
 		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
-		await this.storeResultInDatabase();
 	}
 
 	movePaddle(paddle: Paddle, direction: "up" | "down"): void {
