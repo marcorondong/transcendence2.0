@@ -3,3 +3,9 @@ export const pongLinkEvent = new CustomEvent("pong-link", {
 	bubbles: true,
 	composed: true,
 });
+
+export const signUpLinkEvent = new CustomEvent("pong-link", {
+	detail: { source: "sign-up-view" },
+	bubbles: true,
+	composed: true,
+});

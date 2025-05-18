@@ -1,4 +1,6 @@
-export class LoginView extends HTMLElement {
+import { fetchSignUp } from "../services/fetch-signup.js";
+
+export class SignUpView extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -57,46 +59,6 @@ export class LoginView extends HTMLElement {
 		this.labelPassword.classList.add("pong-form-label");
 		this.labelPassword.htmlFor = "input-password";
 		this.labelPassword.append(this.inputPassword);
-		this.signUpNote.innerText = "Don’t have an account yet? ";
-		this.signUpLink.innerText = "Sign up";
-		this.signUpLink.href = "#";
-		this.signUpLink.id = "sign-up-link";
-		this.signUpNote.append(this.signUpLink);
-		this.signUpNote.classList.add("text-sm");
-		this.signInButton.innerText = "Sign in";
-		this.signInButton.classList.add("pong-button", "pong-button-info");
-		this.signInButton.classList.add("mt-2");
-		this.container.append(
-			this.heading,
-			this.labelUsername,
-			this.labelPassword,
-			this.signInButton,
-			this.signUpNote,
-		);
-		this.append(this.container);
-		document.addEventListener("click", this);
-	}
-	handleEvent(event: Event) {
-		const handlerName =
-			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
-		const handler = this[handlerName as keyof this];
-		if (typeof handler === "function") {
-			handler.call(this, event);
-		}
-	}
-
-	onClick(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (!target) {
-			return;
-		}
-		if (target.id === "sign-up-link") {
-			event.preventDefault();
-			this.renderSignUp();
-		}
-	}
-
-	renderSignUp() {
 		this.heading.innerText = "Create an account";
 
 		this.inputEmail.classList.add("pong-form-input", "w-full", "block");
@@ -139,11 +101,25 @@ export class LoginView extends HTMLElement {
 		this.signUpNote.remove();
 
 		this.container.append(
+			this.heading,
+			this.labelUsername,
+			this.labelPassword,
 			this.labelRePassword,
 			this.labelEmail,
 			this.labelNickname,
 			this.signUpButton,
 		);
+		this.append(this.container);
+		this.signUpButton.addEventListener("click", () => {
+			const data = {
+				email: this.inputEmail.value,
+				username: this.inputUsername.value,
+				nickname: this.inputNickname.value,
+				password: this.inputPassword.value,
+			};
+			console.log("data:", data);
+			fetchSignUp(data);
+		});
 	}
 
 	disconnectedCallback() {
@@ -151,8 +127,8 @@ export class LoginView extends HTMLElement {
 	}
 }
 
-customElements.define("login-view", LoginView);
+customElements.define("sign-up-view", SignUpView);
 
 export function createComponent() {
-	return document.createElement("login-view");
+	return document.createElement("sign-up-view");
 }

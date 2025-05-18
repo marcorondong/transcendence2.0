@@ -1,4 +1,7 @@
-export class LoginView extends HTMLElement {
+import { signUpLinkEvent } from "../services/events.js";
+import { fetchAuth, UserAuth } from "../services/fetch-auth.js";
+
+export class SignInView extends HTMLElement {
 	constructor() {
 		super();
 	}
@@ -66,6 +69,7 @@ export class LoginView extends HTMLElement {
 		this.signInButton.innerText = "Sign in";
 		this.signInButton.classList.add("pong-button", "pong-button-info");
 		this.signInButton.classList.add("mt-2");
+		this.signInButton.id = "sign-in-button";
 		this.container.append(
 			this.heading,
 			this.labelUsername,
@@ -85,65 +89,25 @@ export class LoginView extends HTMLElement {
 		}
 	}
 
-	onClick(event: MouseEvent) {
+	async onClick(event: MouseEvent) {
 		const target = event.target as HTMLElement;
 		if (!target) {
 			return;
 		}
 		if (target.id === "sign-up-link") {
 			event.preventDefault();
-			this.renderSignUp();
+			this.dispatchEvent(signUpLinkEvent);
 		}
-	}
-
-	renderSignUp() {
-		this.heading.innerText = "Create an account";
-
-		this.inputEmail.classList.add("pong-form-input", "w-full", "block");
-		this.labelEmail.classList.add("pong-form-label");
-		this.inputEmail.type = "email";
-		this.inputEmail.placeholder = "name@mail.com";
-		this.inputEmail.id = "input-email";
-		this.labelEmail.htmlFor = "input-email";
-		this.labelEmail.innerText = "Your Email";
-		this.labelEmail.append(this.inputEmail);
-
-		this.inputNickname.classList.add("pong-form-input", "w-full", "block");
-		this.labelNickname.classList.add("pong-form-label");
-		this.labelNickname.innerText = "Your Nickname";
-		this.labelNickname.htmlFor = "input-nickname";
-		this.inputNickname.id = "input-nickname";
-		this.inputNickname.placeholder = "nickname";
-		this.labelNickname.append(this.inputNickname);
-
-		this.inputRePassword.classList.add(
-			"pong-form-input",
-			"w-full",
-			"block",
-		);
-		this.labelRePassword.classList.add("pong-form-label");
-		this.inputRePassword.type = "password";
-		this.inputRePassword.id = "input-re-password";
-		this.labelRePassword.htmlFor = "input-re-password";
-		this.inputRePassword.placeholder = "••••••••";
-		this.labelRePassword.innerText = "Repeat Password";
-		this.labelRePassword.append(this.inputRePassword);
-
-		this.signUpButton.innerText = "Register new account";
-		this.signUpButton.classList.add(
-			"pong-button",
-			"pong-button-info",
-			"mt-2",
-		);
-		this.signInButton.remove();
-		this.signUpNote.remove();
-
-		this.container.append(
-			this.labelRePassword,
-			this.labelEmail,
-			this.labelNickname,
-			this.signUpButton,
-		);
+		if (target.id === "sign-in-button") {
+			event.preventDefault();
+			const data: UserAuth = {
+				email: this.inputUsername.value,
+				password: this.inputPassword.value,
+			};
+			console.log("data: ", data);
+			const response = await fetchAuth(data);
+			console.log("response of auth service:", response);
+		}
 	}
 
 	disconnectedCallback() {
@@ -151,8 +115,8 @@ export class LoginView extends HTMLElement {
 	}
 }
 
-customElements.define("login-view", LoginView);
+customElements.define("sign-in-view", SignInView);
 
 export function createComponent() {
-	return document.createElement("login-view");
+	return document.createElement("sign-in-view");
 }

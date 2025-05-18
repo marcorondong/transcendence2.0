@@ -93,6 +93,7 @@ export class Router {
 		} else {
 			scriptName = `./views/error-view.js`;
 		}
+		console.log("scriptname name: ", scriptName);
 		const js = await import(scriptName);
 		return js;
 	}
@@ -102,6 +103,7 @@ export class Router {
 		this.setActiveViewInNavigation(componentName);
 		try {
 			const js = await this.importComponent(componentName);
+			console.log("js:", js);
 			if (js && this.containerDiv) {
 				this.component = js.createComponent(this.chat);
 				if (this.component) {
