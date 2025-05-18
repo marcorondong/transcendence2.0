@@ -32,7 +32,6 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 				.setRightTeamNickname(player.getPlayerNickname());
 	}
 
-	//FIXME: something is not working with this an tournament
 	gameFinishListener(): void {
 		this.getGame().once(GameEvents.FINISHED, async () => {
 			console.log("Game is about to be stored in database");
