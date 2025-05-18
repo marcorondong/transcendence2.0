@@ -147,6 +147,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 	}
 
 	addPlayer(player: PongPlayer): void {
+		player.setPlayerRoom(this.getGame().getGameId());
 		this.setMissingPlayer(player);
 		this.addConnectionToRoom(player.connection);
 		this.assignControlsToPlayer(player, player.getPlayerPaddle(this.game));

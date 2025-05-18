@@ -58,8 +58,11 @@ export class MatchMaking {
 		});
 	}
 
-	public getPlayerRoomId(playerId: string): string {
-		return this.headToHeadManager.getRoomIdOfPlayer(playerId);
+	public getPlayerRoomId(playerId: string): string | false {
+		const player = this.activePlayers.get(playerId);
+		if (!player) return false;
+		if (player.getRoomOfPlayer() === "UNKNOWN") return false;
+		return player.getRoomOfPlayer();
 	}
 
 	public playerJoinSingles(connectedPlayer: PongPlayer, roomId: string) {

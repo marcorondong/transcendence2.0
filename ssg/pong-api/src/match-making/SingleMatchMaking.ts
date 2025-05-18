@@ -23,18 +23,6 @@ export class HeadToHeadMatchMaking {
 		return joinedMap;
 	}
 
-	//TODO: Improve it after authorization is done to work with JWT stuff
-	getRoomIdOfPlayer(playerId: string): string
-	{
-		const allMatches: Map<string, APongRoom<APongGame>> = this.getAllMatches();
-		//TODO implement proper logic of looking of all rooms for requested player not just first one
-		for (const [key, room] of allMatches.entries()) {
-			console.log(`Key: ${key}, Room:`, room);
-			return room.getGame().getGameId();
-		}
-		return "No Room found";
-	}
-
 	putPlayerInPrivateRoom(
 		player: PongPlayer,
 		roomId: string,
@@ -143,13 +131,14 @@ export class HeadToHeadMatchMaking {
 		const playerRole: EPlayerRole = room.getMissingPlayerRole();
 		player.setPlayerRole(playerRole);
 		room.addPlayer(player);
-		//TODO add RoomIdToPlayer
 	}
 
 	private cleanRoom(roomToClean: APongRoom<APongGame>) {
 		if (roomToClean.isRoomCleaned() === true) return;
 		roomToClean.sendCurrentFrame(); //send last frame that notify client of finished game.
-		console.log(`Clean function on room ${roomToClean.getGame().getGameId()}`);
+		console.log(
+			`Clean function on room ${roomToClean.getGame().getGameId()}`,
+		);
 		roomToClean.setRoomCleanedStatus(true);
 		roomToClean.closeAllConnectionsFromRoom();
 		this.removeRoom(roomToClean);
@@ -163,12 +152,17 @@ export class HeadToHeadMatchMaking {
 
 	private async lobbyMonitor(room: APongRoom<APongGame>) {
 		room.on(RoomEvents.EMPTY, () => {
-			console.log("Lobby monitor Removing empty room: ", room.getGame().getGameId());
+			console.log(
+				"Lobby monitor Removing empty room: ",
+				room.getGame().getGameId(),
+			);
 			this.cleanRoom(room);
 		});
 
 		room.on(RoomEvents.FULL, () => {
-			console.log(`Room ${room.getGame().getGameId()} is full lets get started`);
+			console.log(
+				`Room ${room.getGame().getGameId()} is full lets get started`,
+			);
 			room.getAndSendFramesOnce();
 			room.getGame().startGame();
 		});

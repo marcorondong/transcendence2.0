@@ -38,6 +38,7 @@ export class PongPlayer extends EventEmitter {
 	private side: ETeamSide;
 	private status: EPlayerStatus;
 	private role: EPlayerRole;
+	private roomId: string;
 
 	constructor(socket: WebSocket, playerId: string, playerNickname: string) {
 		super();
@@ -47,6 +48,7 @@ export class PongPlayer extends EventEmitter {
 		this.side = ETeamSide.TBD;
 		this.status = EPlayerStatus.ONLINE;
 		this.role = EPlayerRole.TBD;
+		this.roomId = "UNKNOWN";
 		this.connectionMonitor();
 	}
 
@@ -123,6 +125,14 @@ export class PongPlayer extends EventEmitter {
 		)
 			this.setTeamSide(ETeamSide.RIGHT);
 		else throw Error("Unexpected player role set");
+	}
+
+	setPlayerRoom(idOfRoom: string) {
+		this.roomId = idOfRoom;
+	}
+
+	getRoomOfPlayer(): string {
+		return this.roomId;
 	}
 
 	getPlayerOnlineStatus(): EPlayerStatus {

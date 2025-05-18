@@ -81,9 +81,14 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/player-room/:playerId`,
 		async (request, reply) => {
 			const { playerId } = request.params as { playerId: string };
-			reply.send({
-				roomId: manager.getPlayerRoomId(playerId),
-			});
+			const playerRoomId = manager.getPlayerRoomId(playerId);
+			if (playerRoomId === false) {
+				console.warn("Request room of player id that is not found");
+				reply.code(404).send({ success: false });
+			} else
+				reply.send({
+					roomId: playerRoomId,
+				});
 		},
 	);
 
