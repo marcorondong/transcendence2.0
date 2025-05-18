@@ -144,7 +144,10 @@ export class PongPlayer extends EventEmitter {
 	private connectionMonitor(): void {
 		this.connection.on("close", () => {
 			this.connection.close();
-			console.log("connection lost");
+			console.log(
+				"connection close event with player",
+				this.getPlayerNickname(),
+			);
 			this.setPlayerStatus(EPlayerStatus.OFFLINE);
 			this.emit(ClientEvents.GONE_OFFLINE, this);
 		});

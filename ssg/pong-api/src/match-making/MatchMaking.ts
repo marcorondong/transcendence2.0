@@ -5,14 +5,57 @@ import { PongPlayer } from "../game/PongPlayer";
 import { Tournament } from "../game/modes/singles/Tournament";
 import { APongRoom } from "../game/APongRoom";
 import { APongGame } from "../game/modes/APongGame";
+import { BOT_NICKNAME } from "../config";
+import { ClientEvents } from "../customEvents";
 
 export class MatchMaking {
 	headToHeadManager: HeadToHeadMatchMaking;
 	tournamentManager: TournamentMatchMaking;
+	activePlayers: Map<string, PongPlayer>;
 
 	constructor() {
 		this.headToHeadManager = new HeadToHeadMatchMaking();
 		this.tournamentManager = new TournamentMatchMaking();
+		this.activePlayers = new Map<string, PongPlayer>();
+	}
+
+	public addPlayerToActiveList(freshPlayer: PongPlayer): boolean {
+		if (freshPlayer.getPlayerNickname() === BOT_NICKNAME) {
+			console.log("I am not adding bot to active players");
+			return true;
+		}
+		console.log(
+			`Adding player ${freshPlayer.getPlayerNickname()} to active player list`,
+		);
+		if (this.activePlayers.has(freshPlayer.getPlayerId())) {
+			console.warn(
+				`Player ${freshPlayer.getPlayerNickname()} already has connection with pong-api`,
+			);
+			return false;
+		}
+		this.activePlayers.set(freshPlayer.getPlayerId(), freshPlayer);
+		this.goneOfflineMonitor(freshPlayer);
+		return true;
+	}
+
+	public removePlayerFromActiveList(playerToRemove: PongPlayer): void {
+		const key: string = playerToRemove.getPlayerId();
+		if (this.activePlayers.delete(key)) {
+			console.log(
+				`Player ${playerToRemove.getPlayerNickname()} successfully removed from active players list`,
+			);
+		} else {
+			console.warn(
+				`Player ${playerToRemove.getPlayerNickname()} IS NOT REMOVED from active list.\n
+				It is fine if it is bot since it was never on active list !!!!!!`,
+			);
+		}
+	}
+
+	private goneOfflineMonitor(player: PongPlayer): void {
+		player.once(ClientEvents.GONE_OFFLINE, (offline: PongPlayer) => {
+			this.removePlayerFromActiveList(offline);
+		});
 	}
 
 	public getPlayerRoomId(playerId: string): string {

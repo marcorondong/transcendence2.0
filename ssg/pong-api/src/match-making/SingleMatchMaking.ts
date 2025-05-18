@@ -143,6 +143,7 @@ export class HeadToHeadMatchMaking {
 		const playerRole: EPlayerRole = room.getMissingPlayerRole();
 		player.setPlayerRole(playerRole);
 		room.addPlayer(player);
+		//TODO add RoomIdToPlayer
 	}
 
 	private cleanRoom(roomToClean: APongRoom<APongGame>) {
