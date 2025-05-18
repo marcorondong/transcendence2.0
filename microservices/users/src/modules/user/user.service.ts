@@ -19,7 +19,7 @@ function capitalize(str: string) {
 // Helper function to check password constraints (no email/username/nickname)
 function checkPasswordConstraints(
 	password: string,
-	userData: { email: string; username: string; nickname: string },
+	userData: { email?: string; username?: string; nickname?: string },
 ) {
 	const lowerPassword = password.toLowerCase();
 	if (
@@ -48,6 +48,7 @@ export async function createUser(input: createUserInput) {
 			nickname: rest.nickname,
 		});
 	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		throw new AppError({
 			statusCode: 400,
 			code: USER_ERRORS.USER_CREATE,
@@ -85,7 +86,7 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
-// This function returns all user fields (no filtering)
+// This function returns all user fields (no filtering). It only accepts unique fields, so it returns ONLY ONE user
 export async function findUserByUnique(where: UniqueUserField) {
 	try {
 		const user = await prisma.user.findUnique({ where });
@@ -112,30 +113,49 @@ type UserQueryOptions = {
 	where?: UserField; // To filter by UserField
 	useFuzzy?: boolean; // To allow partial matches
 	useOr?: boolean; // To allow OR logic
+	dateTarget?: "createdAt" | "updatedAt" | "both";
+	before?: Date;
+	after?: Date;
+	between?: [Date, Date];
 	skip?: number; // To skip the first n entries
 	take?: number; // To limit the number of returned entries
-	sortBy?: UserPublicField; // To sort by id, email, username
+	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
 	order?: SortDirection; // to order asc/desc
 };
 
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function findUsers(options: UserQueryOptions = {}) {
-	// let {
+	// Remove undefined fields from the full options object
+	const cleanedOptions = Object.fromEntries(
+		Object.entries(options).filter(([_, v]) => v !== undefined),
+	) as UserQueryOptions;
+
 	const {
 		where = {},
 		useFuzzy = false,
 		useOr = false,
+		dateTarget = "createdAt",
+		before,
+		after,
+		between,
 		skip,
 		take,
-		sortBy = "id",
+		sortBy = "createdAt",
 		order = "asc",
-	} = options;
-	// console.log("✅ Step 1: Received Options", options);
+	} = cleanedOptions;
+
+	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
+
 	try {
-		// Enable fuzzy search (transform string fields to `contains` filters)
-		const transformed = Object.entries(where).reduce(
+		// Remove undefined fields from 'where'
+		const cleanedWhere = Object.fromEntries(
+			Object.entries(where).filter(([_, v]) => v !== undefined),
+		);
+
+		const transformed = Object.entries(cleanedWhere).reduce(
 			(acc, [key, value]) => {
+				// Enable fuzzy search (transform string fields to `contains` filters)
 				if (typeof value === "string" && useFuzzy) {
 					acc[key] = { contains: value };
 				} else {
@@ -145,21 +165,70 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			},
 			{} as Record<string, any>,
 		);
+		// Apply date filters to 'createdAt'
+		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
+			if (before) {
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					lt: before,
+				};
+			}
+			if (after) {
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					gte: after,
+				};
+			}
+			// if (Array.isArray(between) && between.length === 2) {
+			if (between) {
+				const [start, end] = between;
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					gte: start,
+					lte: end,
+				};
+			}
+		};
+
+		if (dateTarget === "both") {
+			applyDateFilter("createdAt");
+			applyDateFilter("updatedAt");
+		} else {
+			//applyDateFilter(dateTarget ?? "createdAt");
+			applyDateFilter(dateTarget);
+		}
+
 		// console.log("✅ Step 2: Transformed 'where'", transformed);
 		// Enable OR queries (map provided fields to build individual queries)
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
-			: transformed;
+			: // : transformed;
+			  Object.fromEntries(
+					Object.entries(transformed).filter(
+						([_, v]) => v !== undefined,
+					),
+			  );
+
 		// console.log("✅ Step 3: Final Query Shape", query);
+
 		const prismaSortBy = { [sortBy]: order };
-		// console.log("✅ Step 4: Final Prisma Query", { where: query, orderBy: prismaSortBy, skip, take, });
+
+		// console.log("✅ Step 4: Final Prisma Query", {
+		// 	where: query,
+		// 	orderBy: prismaSortBy,
+		// 	skip,
+		// 	take,
+		// });
+
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
+
 		// console.log("✅ Step 5: Result", users);
+
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -167,9 +236,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: "No users found",
 			});
 		}
+
 		return users;
 	} catch (err) {
 		// console.log("❌ Step 6: Error Caught", err);
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
 				statusCode: 400,
@@ -177,8 +248,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: `Invalid sortBy field: ${sortBy}`,
 			});
 		}
+
 		if (err instanceof AppError) throw err;
+
 		// console.error("❌ Step 6.2: Unknown error", err);
+		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
@@ -188,6 +262,7 @@ export async function deleteUser(id: string): Promise<void> {
 	try {
 		await prisma.user.delete({ where: { id } });
 	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (
 			err instanceof Prisma.PrismaClientKnownRequestError &&
 			err.code === "P2025"
@@ -198,6 +273,7 @@ export async function deleteUser(id: string): Promise<void> {
 				message: "User not found",
 			});
 		}
+		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
@@ -220,7 +296,7 @@ export async function updateUser(id: string, data: UpdateUserData) {
 			try {
 				checkPasswordConstraints(data.password, {
 					email: data.email ?? currentUser.email,
-					username: data.username ?? currentUser.username,
+					// username: data.username ?? currentUser.username,
 					nickname: data.nickname ?? currentUser.nickname,
 				});
 			} catch (err) {
@@ -242,6 +318,7 @@ export async function updateUser(id: string, data: UpdateUserData) {
 		});
 		return updatedUser;
 	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
 			switch (err.code) {
 				case "P2002":
@@ -266,6 +343,113 @@ export async function updateUser(id: string, data: UpdateUserData) {
 					});
 			}
 		}
+		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
+
+// =============================================================================
+// OLD FUNCTION findUsers() THAT DIDN'T cleaned the parameter options
+// export async function findUsers(options: UserQueryOptions = {}) {
+// 	// let {
+// 	const {
+// 		where = {},
+// 		useFuzzy = false,
+// 		useOr = false,
+// 		dateTarget = "createdAt",
+// 		before,
+// 		after,
+// 		between,
+// 		skip,
+// 		take,
+// 		sortBy = "id",
+// 		order = "asc",
+// 	} = options;
+// 	console.log("✅ Step 1: Received Options", options);
+// 	try {
+// 		const transformed = Object.entries(where).reduce(
+// 			(acc, [key, value]) => {
+// 				// Enable fuzzy search (transform string fields to `contains` filters)
+// 				if (typeof value === "string" && useFuzzy) {
+// 					acc[key] = { contains: value };
+// 				} else {
+// 					acc[key] = value;
+// 				}
+// 				return acc;
+// 			},
+// 			{} as Record<string, any>,
+// 		);
+// 		// Apply date filters to 'createdAt'
+// 		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
+// 			if (before) {
+// 				transformed[field] = {
+// 					...(transformed[field] ?? {}),
+// 					lt: before,
+// 				};
+// 			}
+// 			if (after) {
+// 				transformed[field] = {
+// 					...(transformed[field] ?? {}),
+// 					gte: after,
+// 				};
+// 			}
+// 			if (between) {
+// 				// if (Array.isArray(between) && between.length === 2) {
+// 				const [start, end] = between;
+// 				transformed[field] = {
+// 					...(transformed[field] ?? {}),
+// 					gte: start,
+// 					lte: end,
+// 				};
+// 			}
+// 		};
+// 		if (dateTarget === "both") {
+// 			applyDateFilter("createdAt");
+// 			applyDateFilter("updatedAt");
+// 		} else {
+// 			applyDateFilter(dateTarget ?? "createdAt");
+// 		}
+// 		console.log("✅ Step 2: Transformed 'where'", transformed);
+// 		// Enable OR queries (map provided fields to build individual queries)
+// 		const query = useOr
+// 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
+// 			: transformed;
+// 		console.log("✅ Step 3: Final Query Shape", query);
+// 		const prismaSortBy = { [sortBy]: order };
+// 		console.log("✅ Step 4: Final Prisma Query", {
+// 			where: query,
+// 			orderBy: prismaSortBy,
+// 			skip,
+// 			take,
+// 		});
+// 		const users = await prisma.user.findMany({
+// 			where: query,
+// 			orderBy: prismaSortBy,
+// 			skip,
+// 			take,
+// 		});
+// 		console.log("✅ Step 5: Result", users);
+// 		if (!users.length) {
+// 			throw new AppError({
+// 				statusCode: 404,
+// 				code: USER_ERRORS.NOT_FOUND,
+// 				message: "No users found",
+// 			});
+// 		}
+// 		return users;
+// 	} catch (err) {
+// 		console.log("❌ Step 6: Error Caught", err);
+// 		// Known/Expected errors bubble up to controller as AppError (custom error)
+// 		if (err instanceof Prisma.PrismaClientValidationError) {
+// 			throw new AppError({
+// 				statusCode: 400,
+// 				code: USER_ERRORS.INVALID_SORT,
+// 				message: `Invalid sortBy field: ${sortBy}`,
+// 			});
+// 		}
+// 		if (err instanceof AppError) throw err;
+// 		console.error("❌ Step 6.2: Unknown error", err);
+// 		// Unknown errors bubble up to global error handler.
+// 		throw err;
+// 	}
+// }
