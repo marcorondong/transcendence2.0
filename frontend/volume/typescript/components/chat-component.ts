@@ -1,6 +1,7 @@
 import { IconComponent } from "./icon-component.js";
 import { User, Chat, ChatUser, Message } from "../types/Chat.js";
 import { fetchChatDb } from "../services/fetch-chat.js";
+import { pongLinkEvent } from "../services/events.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -9,28 +10,6 @@ class ChatComponent extends HTMLElement {
 	selectedUser: ChatUser | undefined = undefined;
 	roomId: string | undefined = undefined;
 	me: User | undefined;
-	// 	roomPromise = new Promise((resolve) => {
-	// 		resolve(id: string){
-	// 			return id;
-	// 		}
-	// 	})
-	// 	type Deferred<T> = {
-	//   promise: Promise<T>;
-	//   resolve: (value: T | PromiseLike<T>) => void;
-	//   reject: (reason?: any) => void;
-	// };
-	//
-	// function createDeferred<T>(): Deferred<T> {
-	//   let resolve!: (value: T | PromiseLike<T>) => void;
-	//   let reject!: (reason?: any) => void;
-	//
-	//   const promise = new Promise<T>((res, rej) => {
-	//     resolve = res;
-	//     reject = rej;
-	//   });
-	//
-	//   return { promise, resolve, reject };
-	// }
 
 	//ICONS
 	plusIcon = new IconComponent("plus", 4);
@@ -112,7 +91,7 @@ class ChatComponent extends HTMLElement {
 					this.displayCurrentChat();
 				}
 			}
-			//
+
 			// A USER LEAVES THE CHAT
 			if (chatServiceData.type === "disconnected") {
 				if (this.selectedUser?.id === chatServiceData.user?.id) {
@@ -129,17 +108,17 @@ class ChatComponent extends HTMLElement {
 			}
 
 			// INVITATION TO GAME
-			if (chatServiceData.type === "inviteResponse") {
-				const id = chatServiceData.relatedId;
-				if (!id) {
+			if (chatServiceData.type === "invite") {
+				const id = chatServiceData.user?.id;
+				if (!id || this.me?.id === id) {
 					return;
 				}
 				const userToInvite = this.onlineUsers.find((u) => u.id === id);
 				if (userToInvite) {
 					userToInvite.messages.push({
-						id: id,
-						content: "Let's play PONG together! ",
-						invitation: chatServiceData.roomId,
+						receiver: userToInvite,
+						message: "Let's play PONG together! ",
+						invitation: true,
 					});
 					this.roomId = chatServiceData.roomId;
 					this.displayCurrentChat();
@@ -273,6 +252,9 @@ class ChatComponent extends HTMLElement {
 		console.log(message);
 		const div = document.createElement("div");
 		div.innerText = message.message;
+		if (message.invitation) {
+			div.append(this.createInvitationLink());
+		}
 		if (message.sender?.id === this.selectedUser?.id) {
 			div.classList.add("self-start", "text-left");
 			if (!message.dateTime) {
@@ -504,13 +486,7 @@ class ChatComponent extends HTMLElement {
 		}
 		console.log("trying to invite a user");
 
-		const chat: Chat = {
-			type: "invite",
-			id: this.selectedUser?.id,
-		};
-		if (this.ws) {
-			this.ws.send(JSON.stringify(chat));
-		}
+		this.roomId = "private";
 
 		const message: Message = {
 			type: "message",
@@ -520,13 +496,33 @@ class ChatComponent extends HTMLElement {
 		};
 		this.selectedUser?.messages.push(message);
 		this.displayCurrentChat();
-		this.dispatchEvent(
-			new CustomEvent("pong-link", {
-				detail: { source: "pong-view" },
-				bubbles: true,
-				composed: true,
-			}),
-		);
+		this.minMaxButton.click();
+		this.dispatchEvent(pongLinkEvent);
+	}
+
+	createInvitationLink() {
+		const link = document.createElement("a");
+		link.href = "#";
+		link.textContent = "Click to join game";
+		link.addEventListener("click", (e: MouseEvent) => {
+			e.preventDefault();
+			this.minMaxButton.click();
+			link.dispatchEvent(pongLinkEvent);
+		});
+		return link;
+	}
+
+	sendInvitation() {
+		// TODO: THIS IS A BIT SUBOPTIMAL. WE ARE INVITING THE USER WHO'S CHAT IS OPEN. NOT GUARANTEED THAT THIS IS THE CORRECT USER
+		// COULD BE SOLVED WITH DEFERRED PROMISE WHICH WOULD ALLOW TO WAIT FOR PONG GAME TO RESOLVE THE PROMISE AND TELL US THAT WE ARE READY
+		// TO SEND THE INVITATION. SO WE CEN SEND THE INVITATION FROM CHAT COMPONENT AND THEN WE KNOW TO WHOM WE HAVE TO SEND IT
+		const chat: Chat = {
+			type: "invite",
+			id: this.selectedUser?.id,
+		};
+		if (this.ws) {
+			this.ws.send(JSON.stringify(chat));
+		}
 	}
 
 	connectedCallback() {

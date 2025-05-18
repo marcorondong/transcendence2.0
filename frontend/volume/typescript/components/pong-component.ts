@@ -25,6 +25,25 @@ export class PongComponent extends HTMLElement {
 	// Buttons
 	fullscreenButton = document.createElement("button");
 
+	createNewWebsocket() {
+		// const queryParams = window.location.search;
+		let queryParams: undefined | string = undefined;
+		let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/singles`;
+
+		this.wss?.close();
+
+		if (this.chat.roomId) {
+			queryParams = "?roomId=" + this.chat.roomId;
+			url += queryParams;
+			if (this.chat.roomId !== "private") {
+				this.chat.roomId = undefined;
+			}
+		}
+
+		console.log("ws to: ", url);
+		this.wss = new WebSocket(url);
+	}
+
 	adjustCanvasToWindow() {
 		const windowWidth = window.innerWidth;
 		if (windowWidth < 640) {
@@ -269,15 +288,20 @@ export class PongComponent extends HTMLElement {
 		canvasContainer.appendChild(this.fullscreenButton);
 
 		this.append(gameDataContainer);
-		// const queryParams = window.location.search;
-		const queryParams = "?roomId=private";
-		this.wss = new WebSocket(
-			`wss://${window.location.hostname}:${window.location.port}/pong-api/pong/singles${queryParams}`,
-		);
+
+		this.createNewWebsocket();
+
+		if (!this.wss) {
+			return;
+		}
 
 		this.wss.onmessage = (event) => {
-			console.log("game data from pong", event.data);
 			this.gameState = JSON.parse(event.data);
+			// console.log("game data from pong", event.data);
+			if (this.chat.roomId) {
+				this.chat.roomId = undefined;
+				this.chat.sendInvitation();
+			}
 			if (this.gameState) {
 				matchStatus.innerText =
 					"Match Status: " + this.gameState?.matchStatus;
@@ -331,7 +355,6 @@ export class PongComponent extends HTMLElement {
 	}
 
 	onKeyup(event: KeyboardEvent) {
-		console.log("roomId", this.chat.roomId);
 		if (event.key === "ArrowUp" || event.key === "ArrowDown") {
 			event.preventDefault();
 		}

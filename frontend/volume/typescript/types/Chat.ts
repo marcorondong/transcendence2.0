@@ -20,6 +20,7 @@ export interface Message {
 	receiver?: User;
 	message: string;
 	dateTime?: Date;
+	invitation?: boolean;
 }
 
 export interface User {
