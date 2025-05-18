@@ -7,13 +7,13 @@ import {
 	verifyConnectionOpt,
 	healthCheckOpt,
 } from "./options";
+import { env } from "../utils/env";
 
 export async function authRoutes(server: FastifyInstance) {
-
-	server.post("/auth-api/sign-in", signInOpt);
-	server.delete("/auth-api/sign-out", signOutOpt);
-	server.get("/auth-api/verify-jwt", verifyJWTOpt);
-	server.get("/auth-api/refresh-jwt", refreshJWTOpt);
-	server.get("/auth-api/verify-connection", verifyConnectionOpt);
-	server.get("/auth-api/health-check", healthCheckOpt);
+	server.post(env.AUTH_API_SIGN_IN_STATIC, signInOpt);
+	server.delete(env.AUTH_API_SIGN_OUT_STATIC, signOutOpt);
+	server.get(env.AUTH_API_VERIFY_JWT_STATIC, verifyJWTOpt);
+	server.get(env.AUTH_API_REFRESH_JWT_STATIC, refreshJWTOpt);
+	server.get(env.AUTH_API_VERIFY_CONNECTION_STATIC, verifyConnectionOpt);
+	server.get(env.AUTH_API_HEALTH_CHECK_STATIC, healthCheckOpt);
 }

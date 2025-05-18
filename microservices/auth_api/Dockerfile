@@ -1,6 +1,7 @@
 FROM node:23-bullseye-slim
 
-RUN apt-get update -y && apt-get install -y sqlite3
+# No need for now
+# RUN apt-get update -y && apt-get install -y
 
 WORKDIR /auth_api
 

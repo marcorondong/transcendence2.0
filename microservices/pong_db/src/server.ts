@@ -22,7 +22,6 @@ server.register(pongRoutes);
 const start = async () => {
 	try {
 		await server.listen({ port: env.PONG_DB_PORT, host: env.HOST });
-		console.log(`Server is running at ${env.PONG_DB_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);
