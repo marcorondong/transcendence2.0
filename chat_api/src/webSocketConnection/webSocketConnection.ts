@@ -62,10 +62,33 @@ function connectionHandler(
 export async function webSocketConnection(server: FastifyInstance) {
 	server.get("", { websocket: true }, async (socket, request) => {
 		try {
-			const id = faker.person.firstName(); // TODO change once I can get the id from JWT
-			const nickname = id; // TODO change once I can get the nickname from JWT
-			await postRequestCreateUser(id);
-			const client = new Client(id, nickname, socket);
+			const cookie = request.headers.cookie;
+			const token = request.cookies.access_token;
+			if(!cookie) {
+				errorHandler(socket, "Missing cookie");
+				socket.close();
+				return;
+			}
+			if(!token) {
+				errorHandler(socket, "Missing access token");
+				socket.close();
+				return;
+			}
+			const response = await fetch("http://auth_api_container:2999/auth-api/verify-connection", {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					"Cookie": cookie,
+				},
+			});
+			if (!response.ok) {
+				errorHandler(socket, "Invalid access token");
+				socket.close();
+				return;
+			}
+			const data = await response.json();
+			await postRequestCreateUser(data.id);
+			const client = new Client(data.id, data.nickname, socket);
 			const pingInterval = setInterval(() => {
 				socket.ping();
 			}, 30000);

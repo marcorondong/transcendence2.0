@@ -7,6 +7,7 @@ import {
 } from "fastify-type-provider-zod";
 import fastifyWebsocket from "@fastify/websocket";
 import { webSocketConnection } from "./webSocketConnection/webSocketConnection";
+import fCookie from "@fastify/cookie";
 
 const PORT = parseInt(process.env.PORT || "3002", 10);
 const HOST = process.env.HOST || "0.0.0.0";
@@ -16,6 +17,7 @@ server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 server.register(fastifyWebsocket);
 server.register(webSocketConnection, { prefix: "/chat-api" });
+server.register(fCookie);
 
 const start = async () => {
 	try {
