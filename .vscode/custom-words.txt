@@ -17,6 +17,7 @@ gdanis
 getch
 getmaxyx
 grafana
+gte
 HEHE
 highscore
 ie
@@ -24,6 +25,7 @@ iguliyev
 Ismayil
 ismayilguliyev28
 keyout
+lte
 Marco
 marcorondong
 nginx

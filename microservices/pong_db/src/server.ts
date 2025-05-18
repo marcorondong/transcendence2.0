@@ -11,9 +11,6 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { pongRoutes } from "./routes/routes";
 import { env } from "./utils/env";
 
-// console.log("process.env keys:", Object.keys(process.env));
-
-
 const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
@@ -25,7 +22,6 @@ server.register(pongRoutes);
 const start = async () => {
 	try {
 		await server.listen({ port: env.PONG_DB_PORT, host: env.HOST });
-		console.log(`Server is running at ${env.PONG_DB_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

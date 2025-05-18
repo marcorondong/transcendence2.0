@@ -1,15 +1,12 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
+import { env } from "./env";
 
-export async function onRequest(
-	request: FastifyRequest,
-	reply: FastifyReply,
-) {
+export async function onRequest(request: FastifyRequest, reply: FastifyReply) {
 	if (
-		request.url === "/auth-api/sign-in" ||
-		request.url === "/auth-api/health-check"
+		request.url === env.AUTH_API_SIGN_IN_STATIC ||
+		request.url === env.AUTH_API_HEALTH_CHECK_STATIC
 	)
 		return;
-	if (request.url.startsWith('/auth-api/documentation'))
-		return;
+	if (request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC)) return;
 	await request.jwtVerify();
 }

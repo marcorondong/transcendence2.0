@@ -1,6 +1,6 @@
 {
   "name": "users",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --exit-child src/app.ts",
@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "USERS service API",
   "dependencies": {
     "@fastify/jwt": "^9.0.4",
     "@fastify/swagger": "^9.4.2",

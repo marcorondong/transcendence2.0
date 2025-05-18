@@ -1,8 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { SignInInput } from "./zodSchemas";
-import {
-	signInRequest,
-} from "./service";
+import { signInRequest, setCookieOpt, jwtSignOpt, clearCookieOpt } from "./service";
+import { env } from "../utils/env";
 
 export async function signInHandler(
 	request: FastifyRequest<{ Body: SignInInput }>,
@@ -10,14 +9,8 @@ export async function signInHandler(
 ) {
 	const { email, password } = request.body;
 	const payload = await signInRequest(email, password);
-	const accessToken = await reply.jwtSign(payload, {expiresIn: "1h"});
-	reply.setCookie("access_token", accessToken, {
-		path: "/",
-		httpOnly: true,
-		// secure: true,
-		sameSite: "strict",
-		maxAge: 60 * 60,
-	});
+	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
+	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(201).send({ success: true });
 }
 
@@ -25,7 +18,7 @@ export async function signOutHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	reply.clearCookie("access_token", { path: "/" });
+	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
 	return reply.status(200).send({ success: true });
 }
 
@@ -41,14 +34,8 @@ export async function refreshJWTHandler(
 	reply: FastifyReply,
 ) {
 	const payload = request.user;
-	const accessToken = await reply.jwtSign(payload, {expiresIn: "1h"});
-	reply.setCookie("access_token", accessToken, {
-		path: "/",
-		httpOnly: true,
-		// secure: true,
-		sameSite: "strict",
-		maxAge: 60 * 60,
-	});
+	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
+	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send({ success: true });
 }
 
