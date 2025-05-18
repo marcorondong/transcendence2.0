@@ -6,7 +6,14 @@ const sortDirectionEnum = z.enum(sortDirections);
 export type SortDirection = (typeof sortDirections)[number];
 
 // Type definition for sorting by field (from User fields)
-const userPublicFields = ["id", "email", "username", "nickname"] as const;
+const userPublicFields = [
+	"id",
+	"email",
+	"username",
+	"nickname",
+	"createdAt",
+	"updatedAt",
+] as const;
 const userSortByEnum = z.enum(userPublicFields);
 export type UserPublicField = (typeof userPublicFields)[number];
 
@@ -19,10 +26,12 @@ export type UniqueUserField =
 	| { nickname: string };
 
 // Type definition to allowing multiple User fields per query
-export type UserField = Partial<Record<UserPublicField, string | number>>;
+export type UserField = Partial<
+	Record<UserPublicField, string | number | Date>
+>;
 
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
-export const blankToUndefined = <T extends z.ZodTypeAny>(
+const blankToUndefined = <T extends z.ZodTypeAny>(
 	schema: T,
 ): z.ZodEffects<z.ZodOptional<T>, z.infer<T> | undefined, unknown> =>
 	z.preprocess((val) => {
@@ -41,7 +50,7 @@ export const blankToUndefined = <T extends z.ZodTypeAny>(
 	}, schema.optional());
 
 // Helper function to recursively wrap all fields in an object schema with blankToUndefined()
-export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
+const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
 	const shape = schema.shape;
 	const newShape = Object.fromEntries(
 		Object.entries(shape).map(([key, value]) => {
@@ -67,7 +76,7 @@ export const sanitizeQuerySchema = <T extends ZodObject<any>>(schema: T): T => {
 };
 
 // Username field schema
-export const usernameField = z
+const usernameField = z
 	.string({
 		required_error: "Username is required",
 		invalid_type_error: "Username must be a string",
@@ -84,7 +93,7 @@ export const usernameField = z
 	});
 
 // Nickname field schema
-export const nicknameField = z
+const nicknameField = z
 	.string({
 		required_error: "Nickname is required",
 		invalid_type_error: "Nickname must be a string",
@@ -101,7 +110,7 @@ export const nicknameField = z
 	});
 
 // Email field schema
-export const emailField = z
+const emailField = z
 	.string({
 		required_error: "Email is required",
 		invalid_type_error: "Email must be a string",
@@ -112,7 +121,7 @@ export const emailField = z
 	});
 
 // Password field schema
-export const passwordField = z
+const passwordField = z
 	.string({
 		required_error: "Password is required",
 		invalid_type_error: "Password must be a string",
@@ -131,37 +140,67 @@ export const passwordField = z
 	);
 
 // Core user schema
-const userCore = {
-	email: emailField,
-	username: usernameField,
-	nickname: nicknameField,
+// const userCore = {
+const userCoreFields = {
+	email: emailField.describe("User's email address"),
+	// username: usernameField,
+	nickname: nicknameField.describe("User's unique display nickname"),
+};
+
+// User authentication fields schema
+const userAuthFields = {
+	password: passwordField.describe("Password used for authentication"),
+};
+
+// User immutable fields schema
+const userImmutableFields = {
+	username: usernameField.describe("Permanent, unique username"),
+};
+
+// User metadata response fields schema
+const userMetaFields = {
+	id: z.string().uuid().describe("User ID (UUID format)"),
+	createdAt: z.date().describe("Timestamp of user creation"),
+	updatedAt: z.date().describe("Timestamp of last update"),
 };
 
 // Schema for createUser
 export const createUserSchema = z
 	.object({
-		...userCore,
-		password: passwordField,
+		...userCoreFields,
+		...userImmutableFields,
+		...userAuthFields,
+		// password: passwordField,
 	})
 	.strict();
 
 // Schema for single user
 export const userResponseSchema = z.object({
 	// id: z.number(),
-	id: z.string().uuid(),
-	...userCore,
+	// id: z.string().uuid(),
+	...userMetaFields,
+	...userImmutableFields,
+	...userCoreFields,
 });
 
 // Schema to get a user by ID
 export const userIdParamSchema = z
 	.object({
 		// id: blankToUndefined(z.coerce.number().min(1)),
-		id: blankToUndefined(z.string().uuid()),
+		id: blankToUndefined(
+			z.string().uuid().describe("User ID (UUID format)"),
+		),
 	})
 	.strict(); // Rejects unknown fields
 
 // Schema to update ALL user fields
-export const putUserSchema = createUserSchema;
+// export const putUserSchema = createUserSchema;
+export const putUserSchema = z
+	.object({
+		...userCoreFields,
+		...userAuthFields,
+	})
+	.strict();
 
 // Schema to update SOME user fields
 export const patchUserSchema = putUserSchema.partial().strict(); // Rejects unknown fields
@@ -179,35 +218,149 @@ export const loginSchema = z
 	})
 	.strict(); // Rejects unknown fields
 
-// Schema for login response
-export const loginResponseSchema = z.object({
-	// accessToken: z.string(),
-	id: z.string().uuid(),
-	nickname: nicknameField,
+// Schema for token payload
+const tokenPayloadSchema = z.object({
+	// === userMetaFields === //
+	id: z.string().uuid().describe("User ID included in the token payload"),
+	// createdAt: z
+	// 	.date()
+	// 	.describe("User creation timestamp included in the token payload"),
+	// updatedAt: z
+	// 	.date()
+	// 	.describe("User last update timestamp included in the token payload"),
+	// === userImmutableFields === //
+	// username: usernameField.describe(
+	// 	"User username included in the token payload",
+	// ),
+	// === userCoreFields === //
+	// email: emailField.describe("User email included in the token payload"),
+	nickname: nicknameField.describe(
+		"User nickname included in the token payload",
+	),
+	// // ONLY FOR TESTING PURPOSES
+	// // === userAuthFields === //
+	// // (note that is 'passwordHash' and not 'password' (as is NOT a 'passwordField'), and 'salt' is not included in userAuthFields)
+	// // passwordHash: z.string().describe("Hashed password (for testing only)"),
+	// // salt: z.string().describe("Password salt (for testing only)"),
+	// // role: z.enum(["admin", "user"]).describe("Optional: user role for authorization"),
 });
+
+// Schema for login response
+// If the token contains more than what you send in the login response, we could do:
+// export const loginResponseSchema = tokenPayloadSchema.pick({ id: true, nickname: true });
+export const loginResponseSchema = tokenPayloadSchema.describe(
+	"Response body after successful login, used by Auth service to generate the JWT payload",
+);
+
+// // Schema for login response
+// export const loginResponseSchema = z
+// 	.object({
+// 		// accessToken: z.string(),
+// 		id: z
+// 			.string()
+// 			.uuid()
+// 			.describe("User ID (UUID) included in the access token"),
+// 		nickname: nicknameField.describe(
+// 			"Nickname displayed in the client and included in the token",
+// 		),
+// 	})
+// 	.describe(
+// 		"Response body after successful login, used by the Auth service to build the JWT payload",
+// 	);
 
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
 // Base schema for query parameters
+// Note that all fields will be marked with '.optional()' and "coerced"
+// by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
-	// id: z.coerce.number().min(1),
-	id: z.string().uuid(),
-	email: z.string().email(),
-	username: z.string(),
-	nickname: z.string(),
-	useFuzzy: z.coerce.boolean(),
-	useOr: z.coerce.boolean(),
-	skip: z.coerce.number().min(0),
-	take: z.coerce.number().min(1).max(100),
-	sortBy: userSortByEnum,
-	order: sortDirectionEnum,
+	// id: z.string().uuid().describe("Exact match for user ID (UUID)"),
+	id: z.string().describe("Find users by user ID (UUID)"),
+	// email: z.string().email().describe("Exact match for user email"),
+	email: z.string().describe("Find users by email"),
+	username: z.string().describe("Find users by username"),
+	nickname: z.string().describe("Find users by nickname"),
+	createdAt: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe(
+			"Find users by createdAt (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
+	updatedAt: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe(
+			"Find users by updatedAt (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
+	// TODO: Make this as a type, and same for before, after and between
+	dateTarget: z
+		.enum(["createdAt", "updatedAt", "both"])
+		.default("createdAt")
+		.describe("Choose which date field to apply filters to"),
+	before: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe(
+			"Find users created/updated before this date (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
+	after: z
+		.preprocess((val) => new Date(val as string), z.date())
+		.describe(
+			"Find users created/updated after this date (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
+	between: z
+		.preprocess(
+			(val) =>
+				Array.isArray(val)
+					? val.map((d) => new Date(d as string))
+					: undefined,
+			z.tuple([
+				z
+					.date()
+					.describe(
+						"Start date (inclusive) (Remember to append 'Z' for UTC in fuzzy searches)",
+					),
+				z
+					.date()
+					.describe(
+						"End date (inclusive) (Remember to append 'Z' for UTC in fuzzy searches)",
+					),
+			]),
+		)
+		.describe(
+			"Find users between two dates (inclusive) (Remember to append 'Z' for UTC in fuzzy searches)",
+		),
+	useFuzzy: z
+		.boolean()
+		.describe("Enable fuzzy search (case-insensitive partial matches)"),
+	useOr: z.boolean().describe("Use OR instead of AND for combining filters"),
+	skip: z.number().min(0).describe("Number of records to skip"),
+	take: z.number().min(1).max(100).describe("Number of records to return"),
+	page: z
+		.number()
+		.min(1)
+		.describe("Page number to use for pagination (starts at 1)"),
+	all: z.boolean().describe("If true, return all results without pagination"),
+	sortBy: userSortByEnum.default("createdAt"),
+	order: sortDirectionEnum.default("asc"),
 });
 
 // Refined schema for query parameters to find users
 export const getUsersQuerySchema = sanitizeQuerySchema(
 	baseGetUsersQuerySchema,
 ).strict(); // Rejects unknown fields
+
+// Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
+export const emptyResponseSchema = z
+	.void()
+	.describe("User deleted successfully");
+
+// // NEW: Standardized error response schema
+export const errorResponseSchema = z.object({
+	statusCode: z.number().describe("HTTP status code"),
+	error: z
+		.string()
+		.describe("Short title describing the error (e.g., 'Not Found')"),
+	message: z.string().describe("Detailed message about the error"),
+});
 
 // TypeScript types inferred from schemas
 export type createUserInput = z.infer<typeof createUserSchema>;
