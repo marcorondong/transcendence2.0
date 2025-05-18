@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
-import type { GameInput, GamesInput, StatsInput, GameResponse } from "./zodSchemas";
+import type {
+	GameInput,
+	GamesInput,
+	StatsInput,
+	GameResponse,
+} from "./zodSchemas";
 import httpError from "http-errors";
 
 const prisma = new PrismaClient();
@@ -12,7 +17,14 @@ async function getGamesByIdAndOpponentId(userId: string, opponentId: string) {
 				{ AND: [{ winnerId: opponentId }, { loserId: userId }] },
 			],
 		},
-		select: { winnerId: true, loserId: true, winnerScore: true, loserScore: true, gameId: true, createdAt: true },
+		select: {
+			winnerId: true,
+			loserId: true,
+			winnerScore: true,
+			loserScore: true,
+			gameId: true,
+			createdAt: true,
+		},
 	});
 	if (!games || games.length === 0) {
 		throw new httpError.NotFound(
@@ -46,10 +58,17 @@ export async function createGame(game: GameInput) {
 export async function getGameHistory(userId: string) {
 	const games = await prisma.game.findMany({
 		where: { OR: [{ winnerId: userId }, { loserId: userId }] },
-		select: { winnerId: true, loserId: true, winnerScore: true, loserScore: true, createdAt: true },
+		select: {
+			winnerId: true,
+			loserId: true,
+			winnerScore: true,
+			loserScore: true,
+			createdAt: true,
+		},
 		orderBy: { createdAt: "desc" },
 	});
-	if (!games || games.length === 0) throw new httpError.NotFound("No games found for this user");
+	if (!games || games.length === 0)
+		throw new httpError.NotFound("No games found for this user");
 	return games;
 }
 
