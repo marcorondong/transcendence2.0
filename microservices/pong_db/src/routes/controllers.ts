@@ -13,7 +13,7 @@ export async function createGameHandler(
 	reply: FastifyReply,
 ) {
 	const game = request.body;
-	await createGame( game );
+	await createGame(game);
 	reply.status(201).send({ success: true });
 }
 
