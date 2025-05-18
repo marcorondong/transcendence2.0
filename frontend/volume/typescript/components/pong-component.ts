@@ -128,7 +128,7 @@ export class PongComponent extends HTMLElement {
 		if (this.paddleDirection !== 0 && this.wss) {
 			this.wss.send(
 				JSON.stringify({
-					move: this.paddleDirection > 0 ? "down" : "up"
+					move: this.paddleDirection > 0 ? "down" : "up",
 					//paddle: "left",
 				}),
 			);
@@ -269,12 +269,14 @@ export class PongComponent extends HTMLElement {
 		canvasContainer.appendChild(this.fullscreenButton);
 
 		this.append(gameDataContainer);
-		const queryParams = window.location.search;
+		// const queryParams = window.location.search;
+		const queryParams = "?roomId=private";
 		this.wss = new WebSocket(
 			`wss://${window.location.hostname}:${window.location.port}/pong-api/pong/singles${queryParams}`,
 		);
 
 		this.wss.onmessage = (event) => {
+			console.log("game data from pong", event.data);
 			this.gameState = JSON.parse(event.data);
 			if (this.gameState) {
 				matchStatus.innerText =

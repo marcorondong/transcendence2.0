@@ -7,6 +7,7 @@ import { ChatComponent } from "./components/chat-component.js";
 const chat = new ChatComponent();
 const router = new Router(chat);
 
+// PUTTING CHAT INTO DOM TREE
 const container = document.getElementById("container");
 container?.appendChild(chat);
 chat.classList.add(
@@ -23,4 +24,5 @@ chat.classList.add(
 	"lg:right-7",
 );
 
+// STARTING ROUTER
 router.loadComponent();

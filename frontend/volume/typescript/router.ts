@@ -52,7 +52,8 @@ export class Router {
 		) {
 			link = event.currentTarget.href;
 		} else if (event instanceof CustomEvent) {
-			link = event.detail;
+			link = event.detail.source;
+			console.log("LINK!!!!!!!!", link);
 		} else {
 			return;
 		}

@@ -19,7 +19,6 @@ export interface Message {
 	sender?: User;
 	receiver?: User;
 	message: string;
-	invitation?: string;
 	dateTime?: Date;
 }
 
