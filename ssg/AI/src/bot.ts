@@ -42,7 +42,7 @@ export class Bot {
 	private movePaddleTo = 0;
 	private opponentAim = { updates: 0, gradient: 0, direction: 0 };
 	private paddleHeight = 1;
-	private countdown = this.FRAME_RATE + 2; // to skip the first welcome frame
+	private countdown = this.FRAME_RATE + 2; // to skip the first 2 welcome frames
 	private firstFrame = true;
 	private timer = 5000;
 
@@ -73,27 +73,23 @@ export class Bot {
 		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
 	}
 
-	//timeout increments if we receive a message from websocket
+	//ping server after 1 sec to see if the room is successfully created
 	private async checkTimeout() {
 		if (!this.ws) return;
-		while (this.timer > 0) {
-			await sleep(this.timer);
-			this.timer -= 1000;
-		}
-		console.log("Game hasn't started, disconnecting...");
-		this.ws.terminate();
+		await sleep(1000);
+		this.ws.ping("starting game");
 	}
 
-	public playGame() {
+	public playGame(cookie: string) {
+		// TODO: test once pong service parses the cookie
 		this.ws = new WebSocket(
 			`ws://${this.host}:${this.port}/${this.host}/pong/singles?roomId=${this.roomId}`,
+			{ headers: { Cookie: cookie } },
 		);
 		try {
 			this.ws.on("open", () => {
 				console.log(
 					`Connected to Pong WebSocket at ${this.host}:${this.port} for room ${this.roomId}`,
-					"time left until disconnect = ",
-					this.timer / 1000,
 				);
 				this.checkTimeout();
 			});
@@ -127,7 +123,6 @@ export class Bot {
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
-		this.timer += 1000;
 		this.countdown = this.FRAME_RATE;
 
 		const gameState = JSON.parse(event.toString());
@@ -273,6 +268,7 @@ export class Bot {
 
 	private readFirstFrame(event: object) {
 		const roomInfo = JSON.parse(event.toString());
+		console.log("first frame: ", roomInfo);
 		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
 			this.roomId = roomInfo.roomId;
 		}
