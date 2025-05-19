@@ -58,7 +58,7 @@ export class ScoreBoard {
 	getWinnerSide(): ETeamSideFiltered {
 		if (this.leftTeamGoals > this.rightTeamGoals) return ETeamSide.LEFT;
 		if (this.leftTeamGoals === this.rightTeamGoals) {
-			throw Error("Not really winner, goals are same");
+			throw new Error("Not really winner, goals are same");
 		}
 		return ETeamSide.RIGHT;
 	}
@@ -90,7 +90,7 @@ export class ScoreBoard {
 	getLoserSide(): ETeamSideFiltered {
 		if (this.leftTeamGoals < this.rightTeamGoals) return ETeamSide.LEFT;
 		if (this.leftTeamGoals === this.rightTeamGoals) {
-			throw Error("Not really loser, goals are same");
+			throw new Error("Not really loser, goals are same");
 		}
 		return ETeamSide.RIGHT;
 	}

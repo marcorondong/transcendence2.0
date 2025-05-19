@@ -72,7 +72,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 	// await this.getGame().waitForFinalWhistle();
 	getWinnerCaptain(): PongPlayer {
 		if (this.game.getGameStatus() !== EGameStatus.FINISHED)
-			throw error("Game is not finished");
+			throw new Error("Game is not finished");
 		const winnerSide = this.getGame().getScoreBoard().getWinnerSide();
 		if (winnerSide === ETeamSide.LEFT) {
 			return this.getLeftCaptain();
@@ -83,7 +83,7 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 
 	getLoserCaptain(): PongPlayer {
 		if (this.game.getGameStatus() !== EGameStatus.FINISHED)
-			throw error("Game is not finished");
+			throw new Error("Game is not finished");
 		const winnerSide = this.getGame().getScoreBoard().getWinnerSide();
 		if (winnerSide === ETeamSide.LEFT) {
 			return this.getRightCaptain();

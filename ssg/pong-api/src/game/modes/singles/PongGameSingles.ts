@@ -105,7 +105,7 @@ export class PongGameSingles extends APongGame {
 	getPaddle(role: EPlayerRole): Paddle {
 		if (role === EPlayerRole.LEFT_ONE) return this.leftPaddle;
 		else if (role === EPlayerRole.RIGHT_ONE) return this.rightPaddle;
-		throw Error("paddle not found");
+		throw new Error("paddle not found");
 	}
 
 	resetPaddlePosition(): void {

@@ -89,7 +89,7 @@ export class PongPlayer extends EventEmitter {
 
 	getPlayerRole(): EPlayerRoleFiltered {
 		if (this.role === EPlayerRole.TBD)
-			throw Error("Fetching player role but it is not decided yet");
+			throw new Error("Fetching player role but it is not decided yet");
 		return this.role;
 	}
 
@@ -111,7 +111,7 @@ export class PongPlayer extends EventEmitter {
 	getTeamSideLR(): ETeamSideFiltered {
 		const LRside = this.side;
 		if (LRside === ETeamSide.TBD)
-			throw Error("Calling function without deciding player side");
+			throw new Error("Calling function without deciding player side");
 		return LRside;
 	}
 
@@ -124,7 +124,7 @@ export class PongPlayer extends EventEmitter {
 			role === EPlayerRole.RIGHT_TWO
 		)
 			this.setTeamSide(ETeamSide.RIGHT);
-		else throw Error("Unexpected player role set");
+		else throw new Error("Unexpected player role set");
 	}
 
 	setPlayerRoom(idOfRoom: string) {

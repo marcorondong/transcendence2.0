@@ -65,18 +65,18 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 	getMissingPlayerRole(): EPlayerRoleFiltered {
 		if (this.leftPlayer === undefined) return EPlayerRole.LEFT_ONE;
 		else if (this.rightPlayer === undefined) return EPlayerRole.RIGHT_ONE;
-		throw Error("Room is full, no player is missing");
+		throw new Error("Room is full, no player is missing");
 	}
 
 	getLeftCaptain(): PongPlayer {
 		if (this.leftPlayer === undefined)
-			throw Error("Left player don`t exist");
+			throw new Error("Left player don`t exist");
 		return this.leftPlayer;
 	}
 
 	getRightCaptain(): PongPlayer {
 		if (this.rightPlayer === undefined)
-			throw Error("Right player don`t exist");
+			throw new Error("Right player don`t exist");
 		return this.rightPlayer;
 	}
 
@@ -129,6 +129,6 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 		if (player === this.leftPlayer) return (this.leftPlayer = undefined);
 		else if (player === this.rightPlayer)
 			return (this.rightPlayer = undefined);
-		throw error("Player was never added in this room");
+		throw new Error("Player was never added in this room");
 	}
 }
