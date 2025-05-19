@@ -3,13 +3,16 @@
 import axios from "axios";
 import { faker } from "@faker-js/faker";
 import inquirer from "inquirer";
-import { writeFile } from "fs/promises";
+import { writeFile, appendFile, readFile } from "fs/promises";
 
 // === CONFIGURABLE CONSTANTS ===
 const USE_SAME_PASSWORD = true;
 const FIXED_PASSWORD = "P@ssword123!";
 const REQUEST_DELAY_MS = 500;
 const API_URL = "http://localhost:3000/api/users"; // adjust if needed
+const OUTPUT_FILE_PATH = "users_seeded.json"; // configurable file path
+const HEADER_TEMPLATE = (timestamp: string) =>
+	`\n//========= ${timestamp} UTC =========\n`;
 
 // === UTILITY ===
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -73,8 +76,29 @@ async function main() {
 		await delay(REQUEST_DELAY_MS);
 	}
 
-	await writeFile("users_seeded.json", JSON.stringify(seededUsers, null, 2));
-	console.log(`\n📝 Saved ${seededUsers.length} users to users_seeded.json`);
+	// === FILE OUTPUT WITH HEADER ===
+	const timestamp = new Date()
+		.toISOString()
+		.replace("T", " ")
+		.replace("Z", "");
+	const header = HEADER_TEMPLATE(timestamp);
+
+	// Read previous content if file exists
+	let existingContent = "";
+	try {
+		existingContent = await readFile(OUTPUT_FILE_PATH, "utf-8");
+	} catch {}
+
+	// Append new content
+	const newContent = `${header}${JSON.stringify(seededUsers, null, 2)}\n`;
+	await appendFile(OUTPUT_FILE_PATH, newContent);
+
+	console.log(
+		`\n📝 Saved ${seededUsers.length} users to ${OUTPUT_FILE_PATH}`,
+	);
+
+	// await writeFile("users_seeded.json", JSON.stringify(seededUsers, null, 2));
+	// console.log(`\n📝 Saved ${seededUsers.length} users to users_seeded.json`);
 }
 
 main();
