@@ -20,7 +20,7 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 		this.broadcastLobbyUpdate(message);
 	}
 
-	async gameFinishListener() {
+	gameFinishListener() {
 		this.getGame().once(GameEvents.FINISHED, () => {
 			console.log("Doubles done");
 		});
