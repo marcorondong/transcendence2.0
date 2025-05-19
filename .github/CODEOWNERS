@@ -24,10 +24,6 @@
 /tools/show-schema.ts            @marcorondong
 /tools/microservices_readme.md   @marcorondong
 
-# === DICTIONARIES === #
-/.vscode/custom-words.txt
-/.vscode/forbidden-words.txt
-
 # === CONFIGURATION & TOOLING === #
 /.vscode/                        @marcorondong
 /.github/                        @marcorondong
@@ -37,6 +33,14 @@
 /.gitignore                      @marcorondong
 /.prettierignore                 @marcorondong
 /.github/CODEOWNERS              @marcorondong
+
+# === DICTIONARIES === #
+/.vscode/custom-words.txt
+/.vscode/forbidden-words.txt
+
+# === CI/CD Workflows and Actions === #
+/.github/workflows/              @marcorondong
+/.github/actions/                @marcorondong
 
 # === Protects against unwanted npm installs === #
 /package.json                    @marcorondong
@@ -54,10 +58,6 @@
 /README.md                       @marcorondong
 /README_DEV.md                   @marcorondong
 /CONTRIBUTING.md                 @marcorondong
-
-# === CI/CD Workflows and Actions === #
-/.github/workflows/              @marcorondong
-/.github/actions/                @marcorondong
 
 # === EXAMPLES OF VALID PATTERNS === #
 
