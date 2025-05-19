@@ -3,14 +3,16 @@
 import axios from "axios";
 import { faker } from "@faker-js/faker";
 import inquirer from "inquirer";
-import { writeFile, appendFile, readFile } from "fs/promises";
+import { writeFile, appendFile, readFile, access } from "fs/promises";
+import { constants as fsConstants } from "fs";
 
 // === CONFIGURABLE CONSTANTS ===
 const USE_SAME_PASSWORD = true;
 const FIXED_PASSWORD = "P@ssword123!";
 const REQUEST_DELAY_MS = 500;
 const API_URL = "http://localhost:3000/api/users"; // adjust if needed
-const OUTPUT_FILE_PATH = "users_seeded.json"; // configurable file path
+const OUTPUT_BASE_NAME = "users_seeded"; // configurable file path (no extension)
+const DEFAULT_FORMAT = "json"; // default format used in prompt
 const HEADER_TEMPLATE = (timestamp: string) =>
 	`\n//========= ${timestamp} UTC =========\n`;
 
@@ -32,7 +34,7 @@ function generateUnique(generator: () => string, used: Set<string>): string {
 }
 
 async function main() {
-	const { count } = await inquirer.prompt([
+	const { count, format } = await inquirer.prompt([
 		{
 			type: "number",
 			name: "count",
@@ -40,6 +42,13 @@ async function main() {
 			default: 5,
 			validate: (v: number | undefined) =>
 				typeof v === "number" && v > 0 ? true : "Must be at least 1",
+		},
+		{
+			type: "list",
+			name: "format",
+			message: "Select output format:",
+			choices: ["json", "csv"],
+			default: DEFAULT_FORMAT,
 		},
 	]);
 
@@ -76,29 +85,38 @@ async function main() {
 		await delay(REQUEST_DELAY_MS);
 	}
 
-	// === FILE OUTPUT WITH HEADER ===
+	// === FILE OUTPUT ===
 	const timestamp = new Date()
 		.toISOString()
 		.replace("T", " ")
 		.replace("Z", "");
 	const header = HEADER_TEMPLATE(timestamp);
+	const filePath = `${OUTPUT_BASE_NAME}.${format}`;
 
-	// Read previous content if file exists
-	let existingContent = "";
-	try {
-		existingContent = await readFile(OUTPUT_FILE_PATH, "utf-8");
-	} catch {}
+	if (format === "json") {
+		// Read previous content if file exists
+		let existingContent = "";
+		try {
+			existingContent = await readFile(filePath, "utf-8");
+		} catch {}
 
-	// Append new content
-	const newContent = `${header}${JSON.stringify(seededUsers, null, 2)}\n`;
-	await appendFile(OUTPUT_FILE_PATH, newContent);
-
-	console.log(
-		`\n📝 Saved ${seededUsers.length} users to ${OUTPUT_FILE_PATH}`,
-	);
-
-	// await writeFile("users_seeded.json", JSON.stringify(seededUsers, null, 2));
-	// console.log(`\n📝 Saved ${seededUsers.length} users to users_seeded.json`);
+		const newContent = `${header}${JSON.stringify(seededUsers, null, 2)}\n`;
+		await appendFile(filePath, newContent);
+		console.log(`\n📝 Saved ${seededUsers.length} users to ${filePath}`);
+	} else if (format === "csv") {
+		const csvRows = seededUsers.map((u) =>
+			[u.username, u.nickname, u.email, u.password].join(","),
+		);
+		// Read previous content if file exists
+		let csvHeader = "";
+		try {
+			await access(filePath, fsConstants.F_OK);
+		} catch {
+			csvHeader = "username,nickname,email,password\n";
+		}
+		await appendFile(filePath, `${csvHeader}${csvRows.join("\n")}\n`);
+		console.log(`\n📝 Saved ${seededUsers.length} users to ${filePath}`);
+	}
 }
 
 main();
