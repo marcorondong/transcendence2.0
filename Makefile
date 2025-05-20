@@ -2,7 +2,7 @@
 MONITORING_SECRETS = ./monitoring/secrets
 GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
-PONG_ENV = ssg/pong-api/.env
+PONG_ENV = ./microservices/ssg/pong-api/.env
 GLOBAL_ENV = .env
 
 #we can add more to this list if needed
