@@ -1,3 +1,4 @@
+import { fetchSignOut } from "../services/fetch-sign-out.js";
 import { IconComponent } from "./icon-component.js";
 import { ThemeToggleComponent } from "./theme-toggle-component.js";
 
@@ -28,7 +29,8 @@ export class HeaderComponent extends HTMLElement {
 		this.menuIcon.setSize(6);
 		this.menuIcon.setIcon("menu");
 		menuButton.appendChild(this.menuIcon);
-		navigation.appendChild(menuButton);
+		navigation.append(menuButton);
+
 		this.appendChild(navigation);
 
 		// CLOSE BUTTON
@@ -78,6 +80,14 @@ export class HeaderComponent extends HTMLElement {
 			navigation.appendChild(list);
 		}
 
+		// SIGN OUT BUTTON
+		const logoutButton = document.createElement("button");
+		logoutButton.classList.add("pong-button", "pong-button-info");
+		logoutButton.innerText = "Sign Out";
+		const listElement = document.createElement("li");
+		listElement.append(logoutButton);
+		list?.append(listElement);
+
 		// THEME TOGGLE
 		const themeToggle = new ThemeToggleComponent();
 		themeToggle.setSize(6);
@@ -97,6 +107,9 @@ export class HeaderComponent extends HTMLElement {
 		list?.addEventListener("click", () => {
 			list?.classList.add("hidden");
 			closeButton.classList.add("hidden");
+		});
+		logoutButton.addEventListener("click", async () => {
+			await fetchSignOut();
 		});
 	}
 

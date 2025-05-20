@@ -1,4 +1,4 @@
-import { fetchSignUp } from "../services/fetch-signup.js";
+import { fetchSignUp } from "../services/fetch-sign-up.js";
 
 export class SignUpView extends HTMLElement {
 	constructor() {
@@ -110,7 +110,8 @@ export class SignUpView extends HTMLElement {
 			this.signUpButton,
 		);
 		this.append(this.container);
-		this.signUpButton.addEventListener("click", () => {
+		this.signUpButton.addEventListener("click", (e: MouseEvent) => {
+			e.preventDefault();
 			const data = {
 				email: this.inputEmail.value,
 				username: this.inputUsername.value,

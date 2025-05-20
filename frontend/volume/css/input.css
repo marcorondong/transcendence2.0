@@ -1,11 +1,20 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* BUTTONS */
-.pong-button {
-	@apply cursor-pointer rounded-full bg-indigo-300 p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-indigo-900 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700 font-medium no-underline;
+@theme {
+	--animate-fadein: fadein 0.5s ease-out 1 forwards;
+	@keyframes fadein {
+		0%,
+		100% {
+			opacity: 1;
+		}
+	}
 }
 
+/* BUTTONS */
+.pong-button {
+	@apply cursor-pointer rounded-full bg-indigo-300  text-lg p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-indigo-900 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700 font-medium no-underline whitespace-nowrap;
+}
 .pong-button-wrong {
 	@apply bg-pink-300 p-2 text-pink-900 hover:bg-pink-600 disabled:hover:bg-pink-900 dark:bg-pink-900 dark:text-pink-300 hover:dark:bg-pink-700;
 }
@@ -55,7 +64,7 @@
 /* links  */
 
 a {
-	@apply underline dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold;
+	@apply underline dark:text-indigo-400;
 }
 
 .pong-label {
@@ -64,6 +73,29 @@ a {
 
 .pong-badge {
 	@apply bg-indigo-600/50 text-base text-slate-400 rounded-full;
+}
+
+/* notification */
+.pong-notification {
+	@apply rounded-sm border-1 text-center mb-2 px-4 py-2 z-50 animate-fadein;
+}
+.pong-notification-invisible {
+	@apply opacity-0;
+}
+.pong-notification-visible {
+	@apply opacity-100;
+}
+
+.pong-notification-info {
+	@apply bg-cyan-600/30 border-cyan-400 text-cyan-200 hover:bg-cyan-500;
+}
+
+.pong-notification-error {
+	@apply bg-rose-500/30 border-rose-700 text-rose-200/90 hover:bg-rose-400/30;
+}
+
+.pong-notification-success {
+	@apply bg-emerald-600/80 border-emerald-400 text-emerald-200 hover:bg-emerald-500;
 }
 
 /* big elements */

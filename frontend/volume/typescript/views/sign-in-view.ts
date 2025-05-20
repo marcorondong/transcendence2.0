@@ -1,5 +1,5 @@
 import { signUpLinkEvent } from "../services/events.js";
-import { fetchAuth, UserAuth } from "../services/fetch-auth.js";
+import { fetchAuth, UserAuth } from "../services/fetch-sign-in.js";
 
 export class SignInView extends HTMLElement {
 	constructor() {
