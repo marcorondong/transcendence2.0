@@ -89,19 +89,37 @@ async function main() {
 				}
 			}
 		} else if (filePath.endsWith(".csv")) {
-			const stream = createReadStream(filePath);
-			const rl = readline.createInterface({
-				input: stream,
-				crlfDelay: Infinity,
-			});
+			const raw = await readFile(filePath, "utf-8");
+			const lines = raw
+				.split("\n")
+				.map((l) => l.trim())
+				.filter(Boolean);
 
 			let headers: string[] = [];
-			for await (const line of rl) {
-				if (!headers.length) {
-					headers = line.split(",");
+			for (const line of lines) {
+				if (line.startsWith("//")) continue;
+
+				const values = line.split(",");
+				if (
+					values.length === 4 &&
+					values[0] === "username" &&
+					values[1] === "nickname" &&
+					values[2] === "email" &&
+					values[3] === "password"
+				) {
+					// Detected a new header block
+					if (headers.length === 0) headers = values;
+					continue; // skip repeated headers
+				}
+
+				if (headers.length === 0) {
+					console.warn(
+						"⚠️ CSV file missing header line. Skipping line:",
+						line,
+					);
 					continue;
 				}
-				const values = line.split(",");
+
 				const user: any = {};
 				headers.forEach((h, i) => (user[h] = values[i]));
 				users.push(user);
