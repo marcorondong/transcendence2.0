@@ -19,7 +19,7 @@ services:
     image: ai-bot
     build:
       context: ./microservices/ssg
-      dockerfile: ./AI/Dockerfile
+      dockerfile: ./ai/Dockerfile
     container_name: ai-bot
     environment:
       - NODE_ENV=production
