@@ -47,7 +47,7 @@ export class Parsing {
 		const parseQuery = HeadToHeadQuerySchema.safeParse(req.query);
 		if (!parseQuery.success) {
 			sendError(connection, parseQuery.error, "Invalid query sent");
-			connection.close();
+			connection.close(1008, "Room id violation");
 			return false;
 		}
 		const { roomId } = parseQuery.data;

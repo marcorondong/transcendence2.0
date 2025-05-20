@@ -33,11 +33,14 @@ export abstract class APongGame extends EventEmitter {
 	abstract resetPaddlePosition(): void;
 	abstract getCloserLeftPaddle(): Paddle;
 	abstract getCloserRightPaddle(): Paddle;
-	abstract storeResultInDatabase(): Promise<void>;
+	abstract storeResultInDatabase(
+		winnerId: string,
+		loserId: string,
+	): Promise<void>;
 
 	constructor(ball: Ball, score: ScoreBoard, field: PongField) {
 		super();
-		this.gameId = crypto.randomUUID();;
+		this.gameId = crypto.randomUUID();
 		this.ball = ball;
 		this.score = score;
 		this.field = field;
@@ -45,8 +48,7 @@ export abstract class APongGame extends EventEmitter {
 		this.gameStatus = EGameStatus.NOT_STARTED;
 	}
 
-	getGameId():string
-	{
+	getGameId(): string {
 		return this.gameId;
 	}
 
@@ -71,6 +73,10 @@ export abstract class APongGame extends EventEmitter {
 		this.gameStatus = newStatus;
 	}
 
+	getScoreBoard(): ScoreBoard {
+		return this.score;
+	}
+
 	getPongWinnerSide(): ETeamSideFiltered {
 		return this.score.getWinnerSide();
 	}
@@ -82,7 +88,7 @@ export abstract class APongGame extends EventEmitter {
 	async waitForFinalWhistle(): Promise<APongGame> {
 		if (this.gameStatus === EGameStatus.FINISHED) return this;
 		return new Promise((resolve, reject) => {
-			this.on(GameEvents.FINISHED, () => {
+			this.once(GameEvents.FINISHED, () => {
 				resolve(this);
 			});
 		});
@@ -99,10 +105,9 @@ export abstract class APongGame extends EventEmitter {
 		this.start();
 	}
 
-	async finishGame(): Promise<void> {
+	finishGame() {
 		this.setGameStatus(EGameStatus.FINISHED);
 		this.emit(GameEvents.FINISHED, this);
-		await this.storeResultInDatabase();
 	}
 
 	movePaddle(paddle: Paddle, direction: "up" | "down"): void {
@@ -153,8 +158,7 @@ export abstract class APongGame extends EventEmitter {
 	protected renderNextFrame(): void {
 		this.ballMovementMechanics();
 		this.ball.moveBall();
-		if (this.score.isWinnerDecided() === true)
-			this.finishGame();
+		if (this.score.isWinnerDecided() === true) this.finishGame();
 	}
 
 	private gameLoop(timestamp: number): void {
