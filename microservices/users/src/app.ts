@@ -81,7 +81,7 @@ server.setSerializerCompiler(serializerCompiler);
 // TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
 // // Public paths to NOT enforce authentication (ONLY for development. Each route must define its own authentication needs)
 // const publicPaths: string[] = [
-// 	// "/api/tools/healthcheck",
+// 	// "/api/tools/health-check",
 // 	// "/api/tools/swagger",
 // 	// "/api/tools/swagger",
 // ];

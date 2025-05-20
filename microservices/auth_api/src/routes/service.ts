@@ -1,10 +1,8 @@
 import httpError from "http-errors";
 import { payloadZodSchema } from "./zodSchemas";
 
-export async function signInRequest(  // TODO update signInRequest to use username instead of email when users service is updated
-	email: string,
-	password: string,
-) {
+export async function signInRequest(email: string, password: string) {
+	// TODO update signInRequest to use username instead of email when users service is updated
 	const response = await fetch("http://users:3000/api/users/login", {
 		method: "POST",
 		headers: {
@@ -38,4 +36,8 @@ export const jwtSignOpt = {
 	// jwtid: "auth_api",
 	// notBefore: '10s',
 	// customClaim: "customClaim",
+};
+
+export const clearCookieOpt = {
+	path: "/",
 };

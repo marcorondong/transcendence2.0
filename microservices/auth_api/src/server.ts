@@ -1,5 +1,11 @@
 import Fastify from "fastify";
-import { serverOption, swaggerOption, swaggerUiOption, jwtOption, cookieOption } from "./utils/options";
+import {
+	serverOption,
+	swaggerOption,
+	swaggerUiOption,
+	jwtOption,
+	cookieOption,
+} from "./utils/options";
 import {
 	ZodTypeProvider,
 	validatorCompiler,
@@ -9,12 +15,10 @@ import { globalErrorHandler } from "./utils/globalErrorHandler";
 import fastifySwagger, { SwaggerOptions } from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { authRoutes } from "./routes/routes";
-import fCookie from '@fastify/cookie';
-import fastifyJWT from '@fastify/jwt';
+import fCookie from "@fastify/cookie";
+import fastifyJWT from "@fastify/jwt";
 import { onRequest } from "./utils/onRequest";
-
-const PORT = parseInt(process.env.PORT || "2999", 10);
-const HOST = process.env.HOST || "0.0.0.0";
+import { env } from "./utils/env";
 
 const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
@@ -27,7 +31,7 @@ server.register(fastifyJWT, jwtOption);
 server.register(fCookie, cookieOption);
 server.addHook("onRequest", onRequest);
 
-declare module '@fastify/jwt' {
+declare module "@fastify/jwt" {
 	interface FastifyJWT {
 		user: {
 			id: string;
@@ -38,7 +42,7 @@ declare module '@fastify/jwt' {
 
 const start = async () => {
 	try {
-		await server.listen({ port: PORT, host: HOST });
+		await server.listen({ port: env.AUTH_API_PORT, host: env.HOST });
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

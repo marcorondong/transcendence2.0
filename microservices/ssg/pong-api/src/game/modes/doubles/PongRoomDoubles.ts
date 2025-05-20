@@ -1,7 +1,8 @@
 import { APongRoom } from "../../APongRoom";
-import { PongPlayer } from "../../PongPlayer";
+import { ETeamSide, PongPlayer } from "../../PongPlayer";
 import { IPongFrameDoubles, PongGameDoubles } from "./PongGameDoubles";
 import { EPlayerRoleFiltered, EPlayerRole } from "../../PongPlayer";
+import { GameEvents } from "../../../customEvents";
 
 export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 	private leftPlayerOne?: PongPlayer;
@@ -19,6 +20,12 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 		this.broadcastLobbyUpdate(message);
 	}
 
+	gameFinishListener() {
+		this.getGame().once(GameEvents.FINISHED, () => {
+			console.log("Doubles done");
+		});
+	}
+
 	broadcastLobbyUpdate(extraInfo: string): void {
 		if (this.leftPlayerOne !== undefined)
 			this.sendLobbyUpdate(this.leftPlayerOne, extraInfo);
@@ -28,6 +35,33 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 			this.sendLobbyUpdate(this.leftPlayerTwo, extraInfo);
 		if (this.rightPlayerTwo !== undefined)
 			this.sendLobbyUpdate(this.rightPlayerTwo, extraInfo);
+	}
+
+	putTeamNameOnScoreBoard(player: PongPlayer): void {
+		const teamSide = player.getTeamSideLR();
+		if (teamSide === ETeamSide.LEFT) {
+			if (this.leftPlayerOne && this.leftPlayerTwo) {
+				this.getGame()
+					.getScoreBoard()
+					.setLeftTeamNickname(
+						this.makeTeamName(
+							this.leftPlayerOne.getPlayerNickname(),
+							this.leftPlayerTwo.getPlayerNickname(),
+						),
+					);
+			}
+		} else if (teamSide === ETeamSide.RIGHT) {
+			if (this.rightPlayerOne && this.rightPlayerTwo) {
+				this.getGame()
+					.getScoreBoard()
+					.setRightTeamNickname(
+						this.makeTeamName(
+							this.rightPlayerOne.getPlayerNickname(),
+							this.rightPlayerTwo.getPlayerNickname(),
+						),
+					);
+			}
+		}
 	}
 
 	isEmpty(): boolean {
@@ -52,13 +86,13 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 
 	getLeftCaptain(): PongPlayer {
 		if (this.leftPlayerOne === undefined)
-			throw Error("Left player don`t exist");
+			throw new Error("Left player don`t exist");
 		return this.leftPlayerOne;
 	}
 
 	getRightCaptain(): PongPlayer {
 		if (this.rightPlayerOne === undefined)
-			throw Error("Right player don`t exist");
+			throw new Error("Right player don`t exist");
 		return this.rightPlayerOne;
 	}
 
@@ -155,5 +189,12 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 		if (this.rightPlayerTwo !== undefined)
 			throw new Error("Trying to overwrite right player two");
 		this.rightPlayerTwo = player;
+	}
+
+	private makeTeamName(
+		firstNickname: string,
+		secondNickname: string,
+	): string {
+		return firstNickname + "-" + secondNickname + "-TEAM";
 	}
 }

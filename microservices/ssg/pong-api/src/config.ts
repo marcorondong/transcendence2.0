@@ -40,6 +40,11 @@ export const blockchainConfig = {
 };
 
 // ==============================
+// BOT Configuration
+// ==============================
+export const BOT_NICKNAME = "NovakBotkovic";
+
+// ==============================
 // ⚙️ Interfaces
 // ==============================
 interface IPaddleConfig {

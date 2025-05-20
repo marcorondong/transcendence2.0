@@ -9,17 +9,37 @@ import {
 	deleteUserHandler,
 } from "./user.controller";
 import {
-	createUserSchema, // TODO: Rename this to postUserSchema?
+	createUserSchema,
 	userResponseSchema,
 	loginSchema,
 	loginResponseSchema,
 	userArrayResponseSchema,
 	userIdParamSchema,
-	getUsersQuerySchema, // TODO: Rename this to userQuerySchema
+	getUsersQuerySchema,
 	putUserSchema,
 	patchUserSchema,
+	emptyResponseSchema,
+	errorResponseSchema,
 } from "./user.schema";
 import { errorHandler } from "../../utils/errors";
+// import { z } from "zod";
+
+// Helper function for SWagger to define common errors messages and assign them to Swagger UI examples
+// Redefinition of error messages in the caller is possible
+// TODO: Implement zod-to-openapi later. But for the moment, examples would need to be set manually
+// export function withCommonErrors(schema: Record<number, z.ZodTypeAny>) {
+// 	return {
+// 		...schema,
+// 		400: errorResponseSchema.describe("Bad request due to invalid input"),
+// 		401: errorResponseSchema.describe(
+// 			"Unauthorized or invalid credentials",
+// 		),
+// 		404: errorResponseSchema.describe("Resource not found"),
+// 		409: errorResponseSchema.describe(
+// 			"Conflict due to possible value uniqueness violation",
+// 		),
+// 	};
+// }
 
 // MR_NOTE:
 // The functions definition is this: server.get(path, options, handler); (3 arguments)
@@ -27,6 +47,7 @@ import { errorHandler } from "../../utils/errors";
 // To validate request/response structure must match schema (Fastify/Zod enforcement).
 
 // TODO: Add explanation to routes and that authentication is enabled by default?
+// TODO: Add examples for the error responses (maybe easier when implementing zod-to-openapi)
 
 async function userRoutes(server: FastifyInstance) {
 	// 1. Create a new user
@@ -34,10 +55,19 @@ async function userRoutes(server: FastifyInstance) {
 		"/",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Register a new user",
+				description:
+					"Creates a new user and returns the created user object.",
 				body: createUserSchema,
 				response: {
 					201: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					409: errorResponseSchema.describe("Conflict"),
 				},
+				// response: withCommonErrors({
+				// 	201: userResponseSchema,
+				// }),
 				security: [], // Remove Swagger auth
 			},
 			// TODO: This route is public. But commenting out since AUTH is doing the authentication check
@@ -50,10 +80,19 @@ async function userRoutes(server: FastifyInstance) {
 		"/login",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Authenticate a user and return token payload",
+				description:
+					"Verifies credentials and returns token payload used by the Auth service.",
 				body: loginSchema,
-				// response: {
+				response: {
+					200: loginResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					401: errorResponseSchema.describe("Unauthorized"),
+				},
+				// response: withCommonErrors({
 				// 	200: loginResponseSchema,
-				// },
+				// }),
 				security: [], // Remove Swagger auth
 			},
 			// TODO: This route is public. But commenting out since AUTH is doing the authentication check
@@ -61,71 +100,123 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(loginHandler),
 	);
+
 	// 3. Get a single user by ID
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.get(
 		"/:id",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Get a user by ID",
+				description: "Returns a single user matching the given UUID.",
 				params: userIdParamSchema,
 				response: {
 					200: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
 				},
+				// response: withCommonErrors({
+				// 	200: userResponseSchema,
+				// }),
 			},
 		},
 		errorHandler(getUserHandler),
 	);
-	// 4. Get all users (with filters/sorting/ordering/pagination)
+
+	// 4. Get all users (filter/sort/paginate)
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.get(
 		"/",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Get all users",
+				description:
+					"Supports filtering, sorting, and pagination via query params.",
 				querystring: getUsersQuerySchema,
 				response: {
 					200: userArrayResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
 				},
+				// response: withCommonErrors({
+				// 	200: userArrayResponseSchema,
+				// }),
 			},
 		},
 		errorHandler(getUsersHandler),
 	);
+
 	// 5. Update ALL user fields (PUT)
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.put(
 		"/:id",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Update all user fields",
+				description: "Replaces the entire user object by ID.",
 				params: userIdParamSchema,
 				body: putUserSchema,
 				response: {
 					200: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+					409: errorResponseSchema.describe("Conflict"),
 				},
+				// response: withCommonErrors({
+				// 	200: userResponseSchema,
+				// }),
 			},
 		},
 		errorHandler(putUserHandler),
 	);
+
 	// 6. Update SOME user fields (PATCH)
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.patch(
 		"/:id",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Update partial user fields",
+				description: "Updates one or more fields of a user by ID.",
 				params: userIdParamSchema,
 				body: patchUserSchema,
 				response: {
 					200: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+					409: errorResponseSchema.describe("Conflict"),
 				},
+				// response: withCommonErrors({
+				// 	200: userResponseSchema,
+				// }),
 			},
 		},
 		errorHandler(patchUserHandler),
 	);
+
 	// 7. Delete a user by ID
 	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.delete(
 		"/:id",
 		{
 			schema: {
+				tags: ["Users"],
+				summary: "Delete a user by ID",
+				description:
+					"Deletes the specified user and returns no content.",
 				params: userIdParamSchema,
+				response: {
+					204: emptyResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+				// response: withCommonErrors({
+				// 	204: emptyResponseSchema,
+				// }),
 			},
 		},
 		errorHandler(deleteUserHandler),
