@@ -1,245 +1,131 @@
 #!/usr/bin/env ts-node
 
-import axios from "axios";
-import { faker } from "@faker-js/faker";
 import inquirer from "inquirer";
-import { writeFile, appendFile, readFile, access } from "fs/promises";
-import { createReadStream } from "fs";
-import { constants as fsConstants } from "fs";
-import readline from "readline";
+import { generateMockData } from "./lib/generator";
+import { readDataFile, writeDataFile } from "./lib/io";
+import { sendDataToApi } from "./lib/api";
+import { SchemaDescriptor } from "./lib/model";
 
 // === CONFIGURABLE CONSTANTS ===
-const USE_SAME_PASSWORD = true;
-const FIXED_PASSWORD = "P@ssword123!";
-const REQUEST_DELAY_MS = 500;
-const API_URL = "http://localhost:3000/api/users"; // adjust if needed
-const OUTPUT_BASE_NAME = "users_seeded"; // configurable file path (no extension)
-const DEFAULT_FORMAT = "json"; // default format used in prompt
-const HEADER_TEMPLATE = (timestamp: string) =>
-	`\n//========= ${timestamp} UTC =========\n`;
-const DEFAULT_SOURCE = "generate"; // or "from file"
-const DEFAULT_SAVE = false; // false = do not save
-const DEFAULT_FILEPATH = "./users_data.json";
+const DEFAULT_BASENAME = "seeded";
+const DEFAULT_OUTPUT_PATH = "./seed_data/";
 
-// === UTILITY ===
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const MODEL_PRESETS = [
+	{
+		label: "Users",
+		value: "user",
+		schemaLoader: async (): Promise<SchemaDescriptor> =>
+			(await import("./lib/schemas/userSchemaDescriptor"))
+				.userSchemaDescriptor,
+		url: "http://localhost:3000/api/users",
+		filePrefix: "users",
+	},
+	// Add more model presets here
+];
 
-// === UNIQUE TRACKERS ===
-const usernames = new Set<string>();
-const nicknames = new Set<string>();
-const emails = new Set<string>();
-
-function generateUnique(generator: () => string, used: Set<string>): string {
-	let value;
-	do {
-		value = generator();
-	} while (used.has(value));
-	used.add(value);
-	return value;
-}
-
+// === MAIN ===
 async function main() {
-	const { dataSource } = await inquirer.prompt([
+	const { selectedModel } = await inquirer.prompt([
 		{
 			type: "list",
-			name: "dataSource",
-			message: "Do you want to generate data or read from a file?",
-			choices: ["generate", "from file"],
-			default: DEFAULT_SOURCE,
+			name: "selectedModel",
+			message: "Which model do you want to work with?",
+			choices: MODEL_PRESETS.map((m) => ({
+				name: m.label,
+				value: m.value,
+			})),
 		},
 	]);
 
-	let users: any[] = [];
+	const preset = MODEL_PRESETS.find((m) => m.value === selectedModel)!;
+	const schema = await preset.schemaLoader();
 
-	if (dataSource === "from file") {
-		const { filePath } = await inquirer.prompt([
-			{
-				type: "input",
-				name: "filePath",
-				message: "Enter path to JSON or CSV file:",
-				default: DEFAULT_FILEPATH,
-			},
-		]);
+	const { mode } = await inquirer.prompt([
+		{
+			type: "list",
+			name: "mode",
+			message: "Do you want to generate data or read from a file?",
+			choices: ["generate", "from file"],
+		},
+	]);
 
-		if (filePath.endsWith(".json")) {
-			const raw = await readFile(filePath, "utf-8");
-			const blocks = raw.split("\n").reduce<string[]>(
-				(acc, line) => {
-					if (line.trim().startsWith("//")) {
-						acc.push(""); // start a new block
-					} else {
-						acc[acc.length - 1] += line + "\n";
-					}
-					return acc;
-				},
-				[""],
-			);
-			for (const block of blocks) {
-				const trimmed = block.trim();
-				if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-					try {
-						const parsed = JSON.parse(trimmed);
-						users.push(...parsed);
-					} catch (err) {
-						console.warn(
-							"⚠️ Skipping invalid JSON block:",
-							(err as Error).message,
-						);
-					}
-				}
-			}
-		} else if (filePath.endsWith(".csv")) {
-			const raw = await readFile(filePath, "utf-8");
-			const lines = raw
-				.split("\n")
-				.map((l) => l.trim())
-				.filter(Boolean);
+	let data: Record<string, any>[] = [];
 
-			let headers: string[] = [];
-			for (const line of lines) {
-				if (line.startsWith("//")) continue;
-
-				const values = line.split(",");
-				if (
-					values.length === 4 &&
-					values[0] === "username" &&
-					values[1] === "nickname" &&
-					values[2] === "email" &&
-					values[3] === "password"
-				) {
-					// Detected a new header block
-					if (headers.length === 0) headers = values;
-					continue; // skip repeated headers
-				}
-
-				if (headers.length === 0) {
-					console.warn(
-						"⚠️ CSV file missing header line. Skipping line:",
-						line,
-					);
-					continue;
-				}
-
-				const user: any = {};
-				headers.forEach((h, i) => (user[h] = values[i]));
-				users.push(user);
-			}
-		} else {
-			console.error("Unsupported file format.");
-			return;
-		}
-	} else {
+	if (mode === "generate") {
 		const { count } = await inquirer.prompt([
 			{
 				type: "number",
 				name: "count",
-				message: "How many users do you want to generate?",
-				default: 5,
-				validate: (v: number | undefined) =>
-					typeof v === "number" && v > 0
+				message: "How many records do you want to generate?",
+				default: 10,
+				validate: (val) =>
+					val != null && Number.isInteger(val) && val > 0
 						? true
-						: "Must be at least 1",
+						: "Enter a positive integer",
 			},
 		]);
 
-		for (let i = 0; i < count; i++) {
-			const user = {
-				username: generateUnique(
-					() => faker.internet.userName(),
-					usernames,
-				),
-				nickname: generateUnique(
-					() => faker.person.firstName(),
-					nicknames,
-				),
-				email: generateUnique(
-					() => faker.internet.email(),
-					emails,
-				).toLowerCase(),
-				password: USE_SAME_PASSWORD
-					? FIXED_PASSWORD
-					: faker.internet.password(),
-			};
-			users.push(user);
-		}
+		data = generateMockData(schema, count);
+	} else {
+		const { filePath } = await inquirer.prompt([
+			{
+				type: "input",
+				name: "filePath",
+				message: "Enter the path to the JSON or CSV file:",
+				default: `${DEFAULT_OUTPUT_PATH}${preset.filePrefix}_${DEFAULT_BASENAME}.json`,
+			},
+		]);
+
+		data = await readDataFile(filePath, schema);
 	}
 
-	const seededUsers: any[] = [];
+	// Send to API
+	console.log(`\n🌍 Sending data to: ${preset.url}`);
+	await sendDataToApi(data, preset.url, 500);
 
-	for (const user of users) {
-		try {
-			console.log("📦 Sending user:", user);
-			await axios.post(API_URL, user);
-			console.log(`✅ Created: ${user.username}`);
-			seededUsers.push(user);
-		} catch (err: any) {
-			console.error(
-				`❌ Failed to create user ${user.username}:`,
-				err?.response?.data || err.message,
-			);
-		}
-		await delay(REQUEST_DELAY_MS);
-	}
-
-	const { saveToFile } = await inquirer.prompt([
+	// Ask to save data
+	const { save } = await inquirer.prompt([
 		{
 			type: "confirm",
-			name: "saveToFile",
-			message:
-				"Do you want to save the successfully registered users to a file?",
-			default: DEFAULT_SAVE,
+			name: "save",
+			message: "Do you want to save this data to a file?",
+			default: true,
 		},
 	]);
 
-	let saveFormat = DEFAULT_FORMAT;
-	if (saveToFile) {
-		const { chosenFormat } = await inquirer.prompt([
+	if (save) {
+		const { format, fileName, outputPath } = await inquirer.prompt([
 			{
 				type: "list",
-				name: "chosenFormat",
-				message: "Select file format to save:",
+				name: "format",
+				message: "Choose the output format:",
 				choices: ["json", "csv"],
-				default: DEFAULT_FORMAT,
+				default: "json",
+			},
+			{
+				type: "input",
+				name: "fileName",
+				message: "Enter the output filename (without extension):",
+				default: `${preset.filePrefix}_${DEFAULT_BASENAME}`,
+			},
+			{
+				type: "input",
+				name: "outputPath",
+				message: "Enter the output folder path:",
+				default: DEFAULT_OUTPUT_PATH,
 			},
 		]);
-		saveFormat = chosenFormat;
-	}
 
-	// === FILE OUTPUT ===
-	if (saveToFile) {
-		const timestamp = new Date()
-			.toISOString()
-			.replace("T", " ")
-			.replace("Z", "");
-		const header = HEADER_TEMPLATE(timestamp);
-		const filePath = `${OUTPUT_BASE_NAME}.${saveFormat}`;
-
-		if (saveFormat === "json") {
-			let existingContent = "";
-			try {
-				existingContent = await readFile(filePath, "utf-8");
-			} catch {}
-			const newContent = `${header}${JSON.stringify(
-				seededUsers,
-				null,
-				2,
-			)}\n`;
-			await appendFile(filePath, newContent);
-		} else if (saveFormat === "csv") {
-			const csvRows = seededUsers.map((u) =>
-				[u.username, u.nickname, u.email, u.password].join(","),
-			);
-			let csvHeader = "";
-			try {
-				await access(filePath, fsConstants.F_OK);
-			} catch {
-				csvHeader = "username,nickname,email,password\n";
-			}
-			await appendFile(filePath, `${csvHeader}${csvRows.join("\n")}\n`);
-		}
-
-		console.log(`\n📝 Saved ${seededUsers.length} users to ${filePath}`);
+		const fullPath = `${outputPath.replace(
+			/\/$/,
+			"",
+		)}/${fileName}.${format}`;
+		await writeDataFile(data, fullPath, schema);
+		console.log(`📁 Data saved to: ${fullPath}`);
 	}
 }
 
-main();
+main().catch((err) => {
+	console.error("❌ Script failed:", err.message);
+	process.exit(1);
+});
