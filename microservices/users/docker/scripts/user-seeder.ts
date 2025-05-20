@@ -19,6 +19,7 @@ const HEADER_TEMPLATE = (timestamp: string) =>
 	`\n//========= ${timestamp} UTC =========\n`;
 const DEFAULT_SOURCE = "generate"; // or "from file"
 const DEFAULT_SAVE = false; // false = do not save
+const DEFAULT_FILEPATH = "./users_data.json";
 
 // === UTILITY ===
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -56,7 +57,7 @@ async function main() {
 				type: "input",
 				name: "filePath",
 				message: "Enter path to JSON or CSV file:",
-				default: "./users_data.json",
+				default: DEFAULT_FILEPATH,
 			},
 		]);
 
