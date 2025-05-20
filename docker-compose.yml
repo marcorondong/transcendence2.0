@@ -3,10 +3,10 @@ services:
     image: pong-api-img
     container_name: pong-api
     build:
-      context: ./ssg/pong-api
+      context: ./microservices/ssg/pong-api
       dockerfile: Dockerfile
     volumes:
-      - ./ssg/pong-api/src/:/pong/pong-api/src/
+      - ./microservices/ssg/pong-api/src/:/pong/pong-api/src/
     ports:
       - 3010:3010 #TODO remove it will not be exposed at final version
     environment:
@@ -19,10 +19,10 @@ services:
     image: ai-bot
     container_name: ai-bot
     build:
-      context: ./ssg
-      dockerfile: ./AI/Dockerfile
+      context: ./microservices/ssg
+      dockerfile: ./ai/Dockerfile
     volumes:
-      - ./ssg/AI/src:/app/src:ro
+      - ./microservices/ssg/ai/src:/app/src:ro
     ports:
       - 6969:6969 #TODO remove it in production
     env_file:

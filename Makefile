@@ -2,7 +2,7 @@
 MONITORING_SECRETS = ./monitoring/secrets
 GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
-PONG_ENV = ssg/pong-api/.env
+PONG_ENV = ./microservices/ssg/pong-api/.env
 GLOBAL_ENV = .env
 
 SECRET_DIRECTORIES = $(MONITORING_SECRETS)
@@ -58,4 +58,4 @@ $(SLACK_WEBHOOK):
 	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
-.PHONY: all re clean %$(REBUILD_SERVICE) 
+.PHONY: all re clean remove dev nuke cli %$(REBUILD_SERVICE) 

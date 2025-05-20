@@ -8,6 +8,12 @@ import {
 	sleep,
 	findGradient,
 } from "./utils";
+import {
+	botSpeedSelector,
+	paddleTwistSelector,
+	GameState,
+	Score,
+} from "./config";
 
 const field = new PongField();
 
@@ -53,8 +59,7 @@ export class Bot {
 		this.botSpeed =
 			initializers.mode === "mandatory"
 				? this.MANDATORY_SPEED
-				: (botSpeedSelector.get(this.difficulty) ??
-					this.MANDATORY_SPEED);
+				: botSpeedSelector[this.difficulty] ?? this.MANDATORY_SPEED;
 		this.roomId = initializers.roomId ?? "unknown_room_id";
 		const initSide = initializers.side ?? "right";
 		this.side =
@@ -64,7 +69,7 @@ export class Bot {
 		this.ws = null;
 
 		//dynamic game state
-		this.paddleTwist = paddleTwistSelector.get(this.difficulty) ?? 0;
+		this.paddleTwist = paddleTwistSelector[this.difficulty] ?? 0;
 		this.lastBall = new Point(0, 0);
 		this.target = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
 		this.framesUntilTarget = Math.round(
@@ -108,13 +113,12 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				if (--this.countdown == 0) this.handleEvent(event);
+				if (--this.countdown <= this.FRAME_RATE) this.handleEvent(event);
 				else if (this.firstFrame) {
 					this.readFirstFrame(event);
 					this.firstFrame = false;
 				}
 			});
-
 		} catch (error) {
 			console.error(`WebSocket at ${this.host}:${this.port}: `, error);
 			throw error;
@@ -123,16 +127,24 @@ export class Bot {
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
-		this.countdown = this.FRAME_RATE;
-
-		const gameState = JSON.parse(event.toString());
-		console.log(gameState);
-
+		
+		const gameState = JSON.parse(event.toString()) as GameState;
+		
 		const ballPosition = new Point(
 			roundTo(gameState.ball.x, 2),
 			roundTo(gameState.ball.y, 2),
 		);
 
+		if (Math.abs(ballPosition.getX()) > 3.90) {
+			console.log("ball position: x ", ballPosition.getX(), " y ", ballPosition.getY());
+		}
+		if (this.countdown)
+			return;
+
+		this.countdown = this.FRAME_RATE;
+		
+		console.log(gameState.score);
+		console.log(gameState.ball);
 		this.paddleY =
 			this.side < 0
 				? roundTo(gameState.leftPaddle.y, 2)
@@ -206,12 +218,12 @@ export class Bot {
 		this.calculateFrames(this.lastBall);
 	}
 
-	private handleScore(score: any) {
-		while (score.leftGoals !== this.leftScore) {
+	private handleScore(score: Score) {
+		while (score.leftTeam.goals !== this.leftScore) {
 			this.leftScore++;
 			this.resetAfterGoal(field.RIGHT_EDGE_X - this.PADDLE_GAP); //if left side scored, ball will go to the right
 		}
-		while (score.rightGoals !== this.rightScore) {
+		while (score.rightTeam.goals !== this.rightScore) {
 			this.rightScore++;
 			this.resetAfterGoal(field.LEFT_EDGE_X + this.PADDLE_GAP);
 		}
@@ -238,6 +250,9 @@ export class Bot {
 	// disregard the table top and bottom for now
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
+
+		console.log("origin x :", origin.getX(), " y ", origin.getY());
+
 		const distance = distanceBetweenPoints(origin, ballPosition);
 		if (this.ballBounced(distance)) {
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
@@ -333,6 +348,7 @@ export class Bot {
 				this.paddleY -
 				this.paddleHeight / 2 -
 				this.BALL_RADIUS) /
+				(this.botSpeed / botSpeedSelector["easy"]) /
 				this.STEP // the number of frames to reach our target
 		) {
 			reachable = false;
@@ -350,9 +366,8 @@ export class Bot {
 
 	private logAIState() {
 		let AIState = {
-			lastBall: { x: this.lastBall.getX(), y: this.lastBall.getY() },
+			// lastBall: { x: this.lastBall.getX(), y: this.lastBall.getY() },
 			target: { x: this.target.getX(), y: this.target.getY() },
-			averageOpponentAim: this.opponentAim.gradient,
 			framesUntilTarget: this.framesUntilTarget,
 			framesAfterTarget: this.framesAfterTarget,
 			ballHitPaddle: this.ballHitPaddle(),
@@ -370,17 +385,3 @@ export class Bot {
 		);
 	}
 }
-
-//difficulty number = delay between AI moves in ms
-const botSpeedSelector = new Map<string, number>([
-	["easy", 1000 / 60],
-	["normal", 8],
-	["hard", 0],
-]);
-
-//the AI will twist the ball. maximum twist = 0.5 a.k.a. half of paddle height
-const paddleTwistSelector = new Map<string, number>([
-	["easy", 0],
-	["normal", 0.25],
-	["hard", 0.4],
-]);
