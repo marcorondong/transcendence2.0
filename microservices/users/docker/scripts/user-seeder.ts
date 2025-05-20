@@ -62,11 +62,31 @@ async function main() {
 
 		if (filePath.endsWith(".json")) {
 			const raw = await readFile(filePath, "utf-8");
-			const cleaned = raw
-				.split("\n")
-				.filter((line) => !line.trim().startsWith("//"))
-				.join("\n");
-			users = JSON.parse(cleaned);
+			const blocks = raw.split("\n").reduce<string[]>(
+				(acc, line) => {
+					if (line.trim().startsWith("//")) {
+						acc.push(""); // start a new block
+					} else {
+						acc[acc.length - 1] += line + "\n";
+					}
+					return acc;
+				},
+				[""],
+			);
+			for (const block of blocks) {
+				const trimmed = block.trim();
+				if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+					try {
+						const parsed = JSON.parse(trimmed);
+						users.push(...parsed);
+					} catch (err) {
+						console.warn(
+							"⚠️ Skipping invalid JSON block:",
+							(err as Error).message,
+						);
+					}
+				}
+			}
 		} else if (filePath.endsWith(".csv")) {
 			const stream = createReadStream(filePath);
 			const rl = readline.createInterface({
