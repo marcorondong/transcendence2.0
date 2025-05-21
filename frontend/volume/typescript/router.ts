@@ -77,6 +77,7 @@ export class Router {
 		this.handleRouterLink = this.handleRouterLink.bind(this);
 		this.addEventListenerNavLinks();
 		document.addEventListener("pong-link", this.handleRouterLink);
+		document.addEventListener("home-link", this.handleRouterLink);
 		window.addEventListener("popstate", () => {
 			this.loadComponent();
 		});
@@ -84,6 +85,7 @@ export class Router {
 
 	async importComponent(componentName: string) {
 		let scriptName: string;
+		console.log("component name", componentName);
 		if (componentName === "/" || componentName === "/index.html") {
 			scriptName = "./views/home-view.js";
 		} else if (this.navComponents.indexOf(componentName) > -1) {

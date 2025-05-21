@@ -13,7 +13,7 @@
 
 /* BUTTONS */
 .pong-button {
-	@apply cursor-pointer rounded-full bg-indigo-300  text-lg p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-indigo-900 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700 font-medium no-underline whitespace-nowrap;
+	@apply cursor-pointer rounded-full text-center bg-indigo-300  text-lg p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-indigo-900 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700 font-medium no-underline whitespace-nowrap;
 }
 .pong-button-wrong {
 	@apply bg-pink-300 p-2 text-pink-900 hover:bg-pink-600 disabled:hover:bg-pink-900 dark:bg-pink-900 dark:text-pink-300 hover:dark:bg-pink-700;
@@ -40,7 +40,7 @@
 }
 
 .pong-nav-link {
-	@apply dark:bg-transparent;
+	@apply dark:bg-transparent w-full;
 }
 
 .pong-nav-link-active {

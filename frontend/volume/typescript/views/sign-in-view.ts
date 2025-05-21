@@ -1,4 +1,4 @@
-import { signUpLinkEvent } from "../services/events.js";
+import { homeLinkEvent, signUpLinkEvent } from "../services/events.js";
 import { fetchAuth, UserAuth } from "../services/fetch-sign-in.js";
 
 export class SignInView extends HTMLElement {
@@ -19,17 +19,8 @@ export class SignInView extends HTMLElement {
 	signUpLink = document.createElement("a");
 	signInButton = document.createElement("button");
 
-	//SIGN UP
-	labelEmail = document.createElement("label");
-	inputEmail = document.createElement("input");
-	labelNickname = document.createElement("label");
-	inputNickname = document.createElement("input");
-	labelRePassword = document.createElement("label");
-	inputRePassword = document.createElement("input");
-	signUpButton = document.createElement("button");
-
 	connectedCallback() {
-		console.log("LOGIN VIEW has been CONNECTED");
+		console.log("SIGN-IN VIEW has been CONNECTED");
 		this.classList.add("flex", "w-full", "items-center", "justify-center");
 		this.container.classList.add(
 			"flex",
@@ -107,6 +98,11 @@ export class SignInView extends HTMLElement {
 			console.log("data: ", data);
 			const response = await fetchAuth(data);
 			console.log("response of auth service:", response);
+			console.log("response.success:", response.success);
+			if (response.success === true) {
+				console.log("got into success");
+				this.dispatchEvent(homeLinkEvent);
+			}
 		}
 	}
 

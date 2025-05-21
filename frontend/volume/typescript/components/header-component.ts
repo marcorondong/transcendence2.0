@@ -57,19 +57,19 @@ export class HeaderComponent extends HTMLElement {
 				"left-0",
 				"bottom-0",
 				"flex",
+				"flex-col",
 				"hidden",
 				"w-full",
-				"flex-col",
 				"items-stretch",
 				"justify-center",
 				"gap-4",
 				"p-6",
 				"sm:static",
-				"sm:flex",
 				"sm:w-auto",
+				"sm:flex",
 				"sm:flex-row",
 				"sm:content-center",
-				"sm:items-center",
+				"sm:items-stretch",
 				"sm:p-0",
 				"bg-gray-200",
 				"sm:bg-transparent",
@@ -80,12 +80,28 @@ export class HeaderComponent extends HTMLElement {
 			navigation.appendChild(list);
 		}
 
+		// list elements in navigation
+		const listElements = list?.querySelectorAll("li");
+		console.log("LIIIIIIIIIIIIST", listElements);
+		if (listElements) {
+			const listElementsArray = [...listElements];
+			listElementsArray.map((lE) =>
+				lE.classList.add(
+					"flex",
+					"justify-center",
+					"h-auto",
+					"sm:h-full",
+				),
+			);
+		}
+
 		// SIGN OUT BUTTON
 		const logoutButton = document.createElement("button");
-		logoutButton.classList.add("pong-button", "pong-button-info");
+		logoutButton.classList.add("pong-button", "pong-button-info", "w-full");
 		logoutButton.innerText = "Sign Out";
 		const listElement = document.createElement("li");
 		listElement.append(logoutButton);
+		listElement.classList.add("flex", "justify-center");
 		list?.append(listElement);
 
 		// THEME TOGGLE
@@ -94,7 +110,7 @@ export class HeaderComponent extends HTMLElement {
 		navigation.appendChild(themeToggle);
 
 		// EVENT LISTENERS
-		this.menuIcon.addEventListener("click", () => {
+		menuButton.addEventListener("click", () => {
 			list?.classList.remove("hidden");
 			closeButton.classList.remove("hidden");
 		});
