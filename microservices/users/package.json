@@ -4,6 +4,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --exit-child src/app.ts",
+    "rebuild": "npm run -s delete-db && npm run -s apply-schema && npm run -s prisma-client",
+    "migrate": "npm run -s delete-migrations && npm run -s delete-db && npm run -s migrate-schema && npm run -s prisma-client",
+    "delete-db": "echo '🧹 Deleting database...' && rm -rf prisma/database",
+    "delete-migrations": "echo '🧹 Deleting migrations...' && rm -rf prisma/migrations",
+    "apply-schema": "echo '🔁 Applying existing schema...' && npx prisma migrate dev",
+    "migrate-schema": "echo '📦 Migrating new schema...' && npx prisma migrate dev --name init",
+    "prisma-client": "echo '⚙️ Generating Prisma client...' && npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
