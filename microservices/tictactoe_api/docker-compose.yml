@@ -1,0 +1,20 @@
+services:
+  tictactoe_api:
+    image: tictactoe_api_img
+    container_name: tictactoe_api_container
+    build: ./
+    volumes:
+      - ./src/:/tictactoe_api/src/ # TODO remove this in production
+      - ./public/:/tictactoe_api/public/ # TODO remove this when there is real frontend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+    ports:
+      - 3001:3001 # TODO remove this in production
+    depends_on:
+      - tictactoe_db
+    networks:
+      - Transcendence2.0
+    restart: always
+

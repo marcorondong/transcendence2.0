@@ -1,0 +1,19 @@
+services:
+  tictactoe_db:
+    image: tictactoe_db_img
+    container_name: tictactoe_db_container
+    build: ./
+    environment:
+      - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
+      - NODE_ENV=development
+      - PORT=3003
+      - HOST=0.0.0.0
+    volumes:
+      - ./src/:/tictactoe_db/src/ # TODO remove this in production
+      - ./prisma/:/tictactoe_db/prisma/ # TODO remove this in production
+      # - /home/iguliyev/DBs/tictactoe/:/tictactoe_api/DB/ # TODO define path to db and uncomment this line when using the local DB
+    ports:
+      - 3003:3003 # TODO remove this in production
+    networks:
+      - Transcendence2.0
+    restart: always

@@ -1,0 +1,26 @@
+import type { FastifyRequest } from "fastify";
+import type { Client } from "../utils/Client";
+import { onlineClients } from "./webSocketConnection";
+import { getRequestBlockStatus } from "./httpRequests";
+
+export function checkCookie(request: FastifyRequest, socket: WebSocket) {
+	const cookie = request.headers.cookie;
+	const token = request.cookies.access_token;
+	if (!cookie || !token) {
+		socket.close(1008, "Missing cookie or access token");
+		throw new Error("Missing cookie or access token");
+	}
+	return cookie;
+}
+
+export async function checkUser(id: string, client: Client) {
+	const currentId = client.getId();
+	if (id === currentId)
+		throw new Error("Server: You cannot send a message to yourself");
+	const friendClient = onlineClients.get(id);
+	if (!friendClient) throw new Error("Server: friend UUID not found");
+	const blockStatus = await getRequestBlockStatus(currentId, id);
+	if (blockStatus) throw new Error("Server: user is blocked");
+	const friendBlockStatus = await getRequestBlockStatus(id, currentId);
+	return { friendClient, friendBlockStatus };
+}

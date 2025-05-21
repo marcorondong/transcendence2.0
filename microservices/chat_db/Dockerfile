@@ -1,6 +1,6 @@
 FROM node:23-bullseye-slim
 
-# No need for now
+# TODO No need for now
 # RUN apt-get update -y && apt-get install -y sqlite3
 
 WORKDIR /chat_db

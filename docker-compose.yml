@@ -43,64 +43,6 @@ services:
     networks:
       - Transcendence2.0
 
-  tictactoe_api:
-    image: tictactoe_api_img
-    container_name: tictactoe_api_container
-    build: ./tictactoe_api
-    volumes:
-      - ./tictactoe_api/src/:/tictactoe_api/src/ # TODO remove this in production
-      - ./tictactoe_api/public/:/tictactoe_api/public/ # TODO remove this when there is real frontend
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - HOST=0.0.0.0
-    ports:
-      - 3001:3001 # TODO remove this in production
-    depends_on:
-      - tictactoe_db
-    networks:
-      - Transcendence2.0
-    restart: always
-
-  tictactoe_db:
-    image: tictactoe_db_img
-    container_name: tictactoe_db_container
-    build: ./tictactoe_db
-    environment:
-      - DATABASE_URL=file:/tictactoe_db/DB/tictactoeDB.db
-      - NODE_ENV=development
-      - PORT=3003
-      - HOST=0.0.0.0
-    volumes:
-      - ./tictactoe_db/src/:/tictactoe_db/src/ # TODO remove this in production
-      - ./tictactoe_db/prisma/:/tictactoe_db/prisma/ # TODO remove this in production
-      # - /home/iguliyev/DBs/tictactoe/:/tictactoe_api/DB/ # TODO define path to db and uncomment this line when using the local DB
-    ports:
-      - 3003:3003 # TODO remove this in production
-    networks:
-      - Transcendence2.0
-    restart: always
-
-  chat_api:
-    image: chat_api_img
-    container_name: chat_api_container
-    build:
-      context: ./chat_api
-      dockerfile: Dockerfile
-    volumes:
-      - ./chat_api/src:/chat_api/src
-    environment:
-      - NODE_ENV=production
-      - PORT=3002
-      - HOST=0.0.0.0
-    ports:
-      - "3002:3002"
-    networks:
-      - Transcendence2.0
-    depends_on:
-      - chat_db
-    restart: always
-
 include:
   - ./microservices/auth_api/docker-compose.yml
   - ./frontend/docker-compose.yml
@@ -108,6 +50,9 @@ include:
   - ./microservices/users/docker-compose.yml
   - ./microservices/pong_db/docker-compose.yml
   - ./microservices/chat_db/docker-compose.yml
+  - ./microservices/chat_api/docker-compose.yml
+  - ./microservices/tictactoe_db/docker-compose.yml
+  - ./microservices/tictactoe_api/docker-compose.yml
 
 networks:
   Transcendence2.0:

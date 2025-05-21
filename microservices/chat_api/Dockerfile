@@ -1,13 +1,15 @@
-FROM node:iron-slim
+FROM node:23-bullseye-slim
 
-RUN apt-get update -y && apt-get install -y openssl
+# TODO No need for now
+# RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /chat_api
 
 COPY ./package.json ./
+COPY ./package-lock.json ./
 COPY ./tsconfig.json ./
 COPY ./src ./
-RUN npm install
+RUN npm clean-install
 
 # TODO uncomment below line in production
 # CMD ["npm run start"]

@@ -16,7 +16,7 @@ const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 server.register(fastifyWebsocket);
-server.register(webSocketConnection, { prefix: "/chat-api" });
+server.register(webSocketConnection);
 server.register(fCookie);
 
 const start = async () => {

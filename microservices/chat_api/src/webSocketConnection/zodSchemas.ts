@@ -1,14 +1,16 @@
 import { z } from "zod";
 
-const userSchema = z.object({
-	id: z.string().min(1), // TODO .uuid(),
-	nickname: z.string().min(1),
-}).strict();
+export const userZodSchema = z
+	.object({
+		id: z.string().uuid(),
+		nickname: z.string().min(1),
+	})
+	.strict();
 
 export const messageSchema = z
 	.object({
 		type: z.literal("message"),
-		id: z.string().min(1), // TODO .uuid(),
+		id: z.string().uuid(),
 		message: z.string(),
 	})
 	.strict();
@@ -16,8 +18,8 @@ export const messageSchema = z
 export const messageResponseSchema = z
 	.object({
 		type: z.literal("message"),
-		sender: userSchema, // TODO .uuid(),
-		receiver: userSchema, // TODO .uuid(),
+		sender: userZodSchema,
+		receiver: userZodSchema,
 		message: z.string(),
 	})
 	.strict()
@@ -27,38 +29,37 @@ export const messageResponseSchema = z
 export const inviteSchema = z
 	.object({
 		type: z.literal("invite"),
-		id: z.string().min(1), // TODO .uuid(),
+		id: z.string().uuid(),
 	})
 	.strict();
 
 export const inviteResponseSchema = z
 	.object({
 		type: z.literal("invite"),
-		user: userSchema,
-		roomId: z.string().min(1), // TODO .uuid(),
+		user: userZodSchema,
+		roomId: z.string().uuid(),
 	})
 	.strict();
 
 export const onlineUsersResponseSchema = z
 	.object({
 		type: z.literal("onlineUsers"),
-		users: z.array(userSchema),
-		me: userSchema,
+		users: z.array(userZodSchema),
+		me: userZodSchema,
 	})
 	.strict();
-
 
 export const newUserResponseSchema = z
 	.object({
 		type: z.literal("newUser"),
-		user: userSchema,
+		user: userZodSchema,
 	})
 	.strict();
 
 export const disconnectedResponseSchema = z
 	.object({
 		type: z.literal("disconnected"),
-		user: userSchema,
+		user: userZodSchema,
 	})
 	.strict();
 
@@ -69,7 +70,7 @@ export const errorResponseSchema = z
 	})
 	.strict();
 
-export const blockStatusSchema= z
+export const blockStatusSchema = z
 	.object({
 		blockStatus: z.boolean(),
 	})

@@ -1,0 +1,19 @@
+services:
+  chat_api:
+    image: chat_api_img
+    container_name: chat_api_container
+    build: ./
+    volumes:
+      - ./src:/chat_api/src
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - HOST=0.0.0.0
+    ports:
+      - "3002:3002"
+    networks:
+      - Transcendence2.0
+    depends_on:
+      - chat_db
+    restart: always
+
