@@ -20,8 +20,8 @@
 
 | Method | Path                                           | Description                            |
 | ------ | ---------------------------------------------- | -------------------------------------- |
-| POST   | `https://{frontend:port}/auth-api/sign-in/`    | Login user                             |
-| DELETE | `https://{frontend:port}/auth-api/sign-out/`   | Logout user                            |
+| POST   | `https://{frontend:port}/auth-api/sign-in`     | Login user                             |
+| DELETE | `https://{frontend:port}/auth-api/sign-out`    | Logout user                            |
 | GET    | `https://{frontend:port}auth-api/verify-jwt`   | Verify JWT Token                       |
 | GET    | `https://{frontend:port}/auth-api/refresh-jwt` | Refresh JWT Token                      |
 | GET    | `http://localhost:2999/auth-api/documentation` | Swagger (Good for testing all options) |
