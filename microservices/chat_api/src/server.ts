@@ -8,9 +8,7 @@ import {
 import fastifyWebsocket from "@fastify/websocket";
 import { webSocketConnection } from "./webSocketConnection/webSocketConnection";
 import fCookie from "@fastify/cookie";
-
-const PORT = parseInt(process.env.PORT || "3002", 10);
-const HOST = process.env.HOST || "0.0.0.0";
+import { env } from "./utils/env";
 
 const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
@@ -21,7 +19,7 @@ server.register(fCookie);
 
 const start = async () => {
 	try {
-		await server.listen({ port: PORT, host: HOST });
+		await server.listen({ port: env.CHAT_API_PORT, host: env.HOST });
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

@@ -11,6 +11,7 @@ import type { Client } from "../utils/Client";
 import { onlineClients } from "./webSocketConnection";
 import { getRequestRoomId } from "./httpRequests";
 import { checkUser } from "./service";
+import { env } from "../utils/env";
 
 export function connectionHandler(
 	socket: WebSocket,
@@ -87,7 +88,8 @@ export function disconnectionHandler(client: Client, socket: WebSocket) {
 
 export function errorHandler(socket: WebSocket, error: any) {
 	let errorMessage = "Something went wrong. Please try again later.";
-	if (process.env.NODE_ENV === "development") {
+	if (env.NODE_ENV === "development") {
+		// TODO create warning for better frontend information
 		errorMessage = `${error}`;
 	}
 	const errorResponse = errorResponseSchema.parse({

@@ -1,19 +1,17 @@
 services:
   chat_api:
-    image: chat_api_img
-    container_name: chat_api_container
-    build: ./
+    image: ${CHAT_API_IMAGE_NAME}
+    container_name: ${CHAT_API_CONTAINER_NAME}
+    build: ${CHAT_API_BUILD_FOLDER}
+    env_file:
+      - ${CHAT_API_ENV_FILE_PATH}
     volumes:
-      - ./src:/chat_api/src
-    environment:
-      - NODE_ENV=development
-      - PORT=3002
-      - HOST=0.0.0.0
+      - ${CHAT_API_SRC_FOLDER_LOCAL}:${CHAT_API_SRC_FOLDER_CONTAINER} #TODO remove in production
     ports:
-      - "3002:3002"
+      - ${CHAT_API_PORT}:${CHAT_API_PORT}
     networks:
-      - Transcendence2.0
+      - ${NETWORK_NAME}
     depends_on:
-      - chat_db
-    restart: always
+      - ${CHAT_DB_MICRO_SERVICE_NAME}
+    restart: ${RESTART_POLICY}
 
