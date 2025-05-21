@@ -277,16 +277,21 @@
 			function drawScore() {
 				ctx.fillStyle = "white";
 				ctx.font = "24px Arial";
+
+				const leftTeam = gameState.score.leftTeam;
+				const rightTeam = gameState.score.rightTeam;
+
 				ctx.fillText(
-					`Left: ${gameState.score.leftGoals}`,
+					`${leftTeam.teamNickname}: ${leftTeam.goals}`,
 					canvas.width / 4,
 					30,
 				);
 				ctx.fillText(
-					`Right: ${gameState.score.rightGoals}`,
+					`${rightTeam.teamNickname}: ${rightTeam.goals}`,
 					(canvas.width * 3) / 4,
 					30,
 				);
+
 				if (gameState.score.time !== false) {
 					ctx.fillText(
 						`Time: ${gameState.score.time}s`,

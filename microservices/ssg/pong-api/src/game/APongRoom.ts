@@ -15,7 +15,8 @@ import { ClientEvents } from "../customEvents";
 import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 import { IncomingMove, UserMoveSchema } from "../utils/zodSchema";
-import { z } from "zod"
+import { z } from "zod";
+import { error } from "console";
 
 enum EPongRoomState {
 	LOBBY,
@@ -41,6 +42,8 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 	abstract getRightCaptain(): PongPlayer;
 	abstract getGameFrame(): any;
 	abstract calculateMissingPlayers(): number;
+	abstract putTeamNameOnScoreBoard(player: PongPlayer): void;
+	abstract gameFinishListener(): void;
 
 	constructor(privateRoom: boolean, match: T) {
 		super();
@@ -62,6 +65,31 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		return {
 			roomId: this.game.getGameId(),
 		};
+	}
+
+	//TODO check if this approach is better. Be careful with crashing /-> it was mistake of recursive call before i changed it to this more simpler version
+	// async getWinnerCaptain(): Promise<PongPlayer> {
+	// await this.getGame().waitForFinalWhistle();
+	getWinnerCaptain(): PongPlayer {
+		if (this.game.getGameStatus() !== EGameStatus.FINISHED)
+			throw new Error("Game is not finished");
+		const winnerSide = this.getGame().getScoreBoard().getWinnerSide();
+		if (winnerSide === ETeamSide.LEFT) {
+			return this.getLeftCaptain();
+		} else {
+			return this.getRightCaptain();
+		}
+	}
+
+	getLoserCaptain(): PongPlayer {
+		if (this.game.getGameStatus() !== EGameStatus.FINISHED)
+			throw new Error("Game is not finished");
+		const winnerSide = this.getGame().getScoreBoard().getWinnerSide();
+		if (winnerSide === ETeamSide.LEFT) {
+			return this.getRightCaptain();
+		} else {
+			return this.getLeftCaptain();
+		}
 	}
 
 	async getRoomWinner(): Promise<PongPlayer> {
@@ -119,14 +147,17 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 	}
 
 	addPlayer(player: PongPlayer): void {
+		player.setPlayerRoom(this.getGame().getGameId());
 		this.setMissingPlayer(player);
 		this.addConnectionToRoom(player.connection);
 		this.assignControlsToPlayer(player, player.getPlayerPaddle(this.game));
 		this.disconnectBehavior(player);
 		this.broadcastLobbyUpdate("Another player joined");
+		this.putTeamNameOnScoreBoard(player);
 		if (this.isFull()) {
 			this.setPongRoomState(EPongRoomState.GAME);
 			this.emit(RoomEvents.FULL, this);
+			this.gameFinishListener();
 		} else {
 			this.sendLobbyUpdate(player, "Welcome!");
 		}
@@ -173,21 +204,17 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		playerPaddle: Paddle,
 	): void {
 		player.connection.on("message", (data: RawData, isBinary: boolean) => {
-
-			try{
+			try {
 				const incomingJson: IncomingMove = JSON.parse(data.toString());
-				const validatedDirection = UserMoveSchema.parse(incomingJson).move;
+				const validatedDirection =
+					UserMoveSchema.parse(incomingJson).move;
 				const direction: "up" | "down" = validatedDirection;
 				this.getGame().movePaddle(playerPaddle, direction);
-			}
-			catch(err)
-			{
-				if(err instanceof z.ZodError)
-				{
+			} catch (err) {
+				if (err instanceof z.ZodError) {
 					console.error("Zod validation failed:", err.errors);
 					player.connection.send(`Invalid move ${err.message}`);
-				}
-				else
+				} else
 					console.error("Not zod error but some kind of error", err);
 			}
 		});

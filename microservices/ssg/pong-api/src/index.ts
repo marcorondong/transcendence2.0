@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { FastifyRequest } from "fastify";
 import websocket, { WebSocket } from "@fastify/websocket";
 import fs from "fs";
 import path from "path";
@@ -7,8 +7,31 @@ import dotenv from "dotenv";
 import { MatchMaking } from "./match-making/MatchMaking";
 import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
 import { Parsing } from "./utils/Parsing";
+import fCookie from "@fastify/cookie";
+import { PongPlayer } from "./game/PongPlayer";
 
 dotenv.config();
+
+function processPlayerJoin(
+	matchType: string,
+	req: FastifyRequest,
+	connection: WebSocket,
+	player: PongPlayer,
+) {
+	if (matchType === "singles" || matchType === "doubles") {
+		const roomId = Parsing.parseRoomId(req, connection);
+		if (roomId === false) return;
+		if (matchType === "singles") manager.playerJoinSingles(player, roomId);
+		else if (matchType === "doubles")
+			manager.playerJoinDoubles(player, roomId);
+	} else if (matchType === "tournament") {
+		const tournamentSize = Parsing.parseTournamentSize(req, connection);
+		if (tournamentSize === false) return;
+		manager.playerJoinTournament(player, tournamentSize);
+	} else {
+		connection.close(1008, "Unknown match type");
+	}
+}
 
 const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
@@ -38,6 +61,7 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
 });
 
+fastify.register(fCookie);
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get("/", (request, reply) => {
@@ -57,9 +81,14 @@ fastify.register(async function (fastify) {
 		`/${BASE_API_NAME}/player-room/:playerId`,
 		async (request, reply) => {
 			const { playerId } = request.params as { playerId: string };
-			reply.send({
-				roomId: manager.getPlayerRoomId(playerId),
-			});
+			const playerRoomId = manager.getPlayerRoomId(playerId);
+			if (playerRoomId === false) {
+				console.warn("Request room of player id that is not found");
+				reply.code(404).send({ success: false });
+			} else
+				reply.send({
+					roomId: playerRoomId,
+				});
 		},
 	);
 
@@ -74,32 +103,21 @@ fastify.register(async function (fastify) {
 	);
 
 	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/singles`,
+		`/${BASE_API_NAME}/${BASE_GAME_PATH}/:matchType`,
 		{ websocket: true },
-		(connection, req) => {
-			const roomId = Parsing.parseRoomId(req, connection);
-			if (roomId === false) return;
-			manager.playerJoinSingles(connection, roomId);
-		},
-	);
-
-	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/doubles`,
-		{ websocket: true },
-		(connection, req) => {
-			const roomId = Parsing.parseRoomId(req, connection);
-			if (roomId === false) return;
-			manager.playerJoinDoubles(connection, roomId);
-		},
-	);
-
-	fastify.get<{ Querystring: Partial<TournamentSizeQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/tournament`,
-		{ websocket: true },
-		(connection, req) => {
-			const tournamentSize = Parsing.parseTournamentSize(req, connection);
-			if (tournamentSize === false) return;
-			manager.playerJoinTournament(connection, tournamentSize);
+		async (connection, req) => {
+			const { matchType } = req.params as { matchType: string };
+			const player = await PongPlayer.createAuthorizedPlayer(
+				req.headers.cookie,
+				connection,
+			);
+			if (player === false) return;
+			if (manager.addPlayerToActiveList(player) == false) {
+				player.sendNotification("You are already in a game Room");
+				player.connection.close(1008, "Already in pong-api");
+				return;
+			}
+			processPlayerJoin(matchType, req, connection, player);
 		},
 	);
 
