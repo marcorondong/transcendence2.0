@@ -49,7 +49,7 @@ export class Bot {
 	private paddleHeight = 1;
 	private countdown = this.FRAME_RATE + 2; // to skip the first 2 welcome frames
 	private firstFrame = true;
-	private log = "";
+	private disconnectTimeout = 10000; // 30 seconds
 
 	constructor(initializers: any) {
 		console.log(initializers);
@@ -73,11 +73,19 @@ export class Bot {
 		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
 	}
 
+	private resetTimeout() {
+		this.disconnectTimeout = 10000; // reset the timeout to 30 seconds
+	}
+
 	//ping server after 1 sec to see if the room is successfully created
 	private async checkTimeout() {
 		if (!this.ws) return;
-		await sleep(1000);
-		this.ws.ping("starting game");
+		while (this.disconnectTimeout > 0) {
+			this.disconnectTimeout -= 10000;
+			await sleep(10000);
+		}
+		console.log("Game did not start on time, closing WebSocket connection");
+		this.ws.close();
 	}
 
 	public playGame(cookie: string) {
@@ -107,6 +115,7 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
+
 				if (--this.countdown == 0)
 					this.handleEvent(event);
 				else if (this.firstFrame) {
@@ -122,6 +131,7 @@ export class Bot {
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
+		this.resetTimeout();
 		this.countdown = this.FRAME_RATE;
 
 		const gameState = JSON.parse(event.toString()) as GameState;
