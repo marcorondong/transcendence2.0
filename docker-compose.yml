@@ -129,6 +129,7 @@ include:
   - ./frontend/docker-compose.yml
   - ./monitoring/monitoring-docker-compose.yml
   - ./microservices/users/docker-compose.yml
+  - ./microservices/pong_db/docker-compose.yml
 
 networks:
   Transcendence2.0:

@@ -46,11 +46,10 @@ export class Bot {
 	private rightScore = 0;
 	private paddleY = 0;
 	private movePaddleTo = 0;
-	private opponentAim = { updates: 0, gradient: 0, direction: 0 };
 	private paddleHeight = 1;
 	private countdown = this.FRAME_RATE + 2; // to skip the first 2 welcome frames
 	private firstFrame = true;
-	private timer = 5000;
+	private log = "";
 
 	constructor(initializers: any) {
 		console.log(initializers);
@@ -61,17 +60,13 @@ export class Bot {
 				? this.MANDATORY_SPEED
 				: botSpeedSelector[this.difficulty] ?? this.MANDATORY_SPEED;
 		this.roomId = initializers.roomId ?? "unknown_room_id";
-		const initSide = initializers.side ?? "right";
-		this.side =
-			initSide === "right"
-				? field.RIGHT_EDGE_X - this.PADDLE_GAP
-				: field.LEFT_EDGE_X + this.PADDLE_GAP;
+		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP;
 		this.ws = null;
 
 		//dynamic game state
 		this.paddleTwist = paddleTwistSelector[this.difficulty] ?? 0;
 		this.lastBall = new Point(0, 0);
-		this.target = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
+		this.target = new Point(field.RIGHT_EDGE_X - this.PADDLE_GAP, 0);
 		this.framesUntilTarget = Math.round(
 			Math.abs(this.target.getX()) / this.BALL_SPEED,
 		);
@@ -86,7 +81,6 @@ export class Bot {
 	}
 
 	public playGame(cookie: string) {
-		// TODO: test once pong service parses the cookie
 		this.ws = new WebSocket(
 			`ws://${this.host}:${this.port}/${this.host}/pong/singles?roomId=${this.roomId}`,
 			{ headers: { Cookie: cookie } },
@@ -113,7 +107,8 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				if (--this.countdown <= this.FRAME_RATE) this.handleEvent(event);
+				if (--this.countdown == 0)
+					this.handleEvent(event);
 				else if (this.firstFrame) {
 					this.readFirstFrame(event);
 					this.firstFrame = false;
@@ -127,37 +122,16 @@ export class Bot {
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
-		
-		const gameState = JSON.parse(event.toString()) as GameState;
-		
-		const ballPosition = new Point(
-			roundTo(gameState.ball.x, 2),
-			roundTo(gameState.ball.y, 2),
-		);
-
-		if (Math.abs(ballPosition.getX()) > 3.90) {
-			console.log("ball position: x ", ballPosition.getX(), " y ", ballPosition.getY());
-		}
-		if (this.countdown)
-			return;
-
 		this.countdown = this.FRAME_RATE;
-		
+
+		const gameState = JSON.parse(event.toString()) as GameState;
+
+		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
+
 		console.log(gameState.score);
 		console.log(gameState.ball);
-		this.paddleY =
-			this.side < 0
-				? roundTo(gameState.leftPaddle.y, 2)
-				: roundTo(gameState.rightPaddle.y, 2);
 
-		this.paddleHeight =
-			this.side < 0
-				? gameState.leftPaddle.height
-				: gameState.rightPaddle.height;
-
-		if (this.paddleTwist >= this.paddleHeight / 2)
-			this.paddleTwist *= this.paddleHeight;
-
+		this.updatePaddle(gameState);
 		this.handleScore(gameState.score);
 		this.calculateTarget(ballPosition);
 		this.logAIState();
@@ -200,6 +174,21 @@ export class Bot {
 			this.ws.send(JSON.stringify(this.moveCommand));
 			await sleep(this.botSpeed);
 		} while ((twist -= this.STEP) > 0);
+	}
+
+	private updatePaddle(gameState: GameState) {
+		this.paddleY =
+			this.side < 0
+				? roundTo(gameState.leftPaddle.y, 2)
+				: roundTo(gameState.rightPaddle.y, 2);
+
+		this.paddleHeight =
+			this.side < 0
+				? gameState.leftPaddle.height
+				: gameState.rightPaddle.height;
+
+		if (this.paddleTwist >= this.paddleHeight / 2)
+			this.paddleTwist *= this.paddleHeight;
 	}
 
 	// if someone scored, the ball starts in the middle -> update the last ball position
@@ -265,8 +254,6 @@ export class Bot {
 				this.target.getX(),
 			),
 		);
-		if (this.target.getX() === this.side)
-			this.updateOpponentAim(findGradient(ballPosition, this.target));
 	}
 
 	private calculateFrames(ballPosition: Point) {
@@ -289,37 +276,15 @@ export class Bot {
 		}
 		if (Object.getOwnPropertyNames(roomInfo).includes("matchStatus")) {
 			let status = roomInfo.matchStatus;
-			if (status.includes("Left one") || status.includes("left one"))
+			if (status.includes("Left") || status.includes("left"))
 				this.side = field.LEFT_EDGE_X + this.PADDLE_GAP;
 		}
 	}
 
-	private updateOpponentAim(gradient: number) {
-		this.opponentAim.gradient =
-			this.opponentAim.gradient * this.opponentAim.updates++ +
-			Math.abs(gradient);
-		this.opponentAim.gradient /= this.opponentAim.updates;
-		this.opponentAim.direction += gradient > 0 ? 1 : -1;
-	}
-
-	private probableAim(opponentHit: Point): number {
-		if (this.opponentAim.updates < 3) return 0;
-		const direction = this.side > 0 ? 1 : -1;
-		// expected position after opponent hits the ball and ball moves 1 along x axis
-		// based on average gradient and direction
-		const expectedPosition = new Point(
-			direction,
-			(opponentHit.getY() + this.opponentAim.gradient) *
-				(this.opponentAim.direction > 0 ? 1 : -1),
-		);
-		let aimY = findIntersectionWithVerticalLine(
-			opponentHit,
-			expectedPosition,
-			this.side,
-		);
-		while (aimY > field.TOP_EDGE_Y || aimY < field.BOTTOM_EDGE_Y)
-			aimY = this.accountForBounce(aimY);
-		return roundTo(aimY, 2);
+	private actualTarget() {
+		this.movePaddleTo =
+			this.target.getX() === this.side ? this.target.getY() : 0;
+		if (this.canReachTarget() === false) this.movePaddleTo = 0;
 	}
 
 	private calculateTarget(ballPosition: Point) {
@@ -331,9 +296,7 @@ export class Bot {
 		)
 			this.target.setY(this.accountForBounce(this.target.getY()));
 		this.updateLastBall(ballPosition);
-		this.movePaddleTo =
-			this.target.getX() === this.side ? this.target.getY() : 0;
-		if (this.canReachTarget() === false) this.movePaddleTo = 0;
+		this.actualTarget();
 	}
 
 	private canReachTarget(): boolean {
@@ -343,13 +306,13 @@ export class Bot {
 		if (Math.abs(this.side) < Math.abs(this.lastBall.getX())) {
 			reachable = false;
 		} else if (
+			this.botSpeed !== botSpeedSelector["hard"] &&
 			this.framesUntilTarget <
-			(this.movePaddleTo -
-				this.paddleY -
-				this.paddleHeight / 2 -
-				this.BALL_RADIUS) /
-				(this.botSpeed / botSpeedSelector["easy"]) /
-				this.STEP // the number of frames to reach our target
+				(this.movePaddleTo -
+					this.paddleY -
+					this.paddleHeight / 2 -
+					this.BALL_RADIUS / 2) /
+					this.STEP // the number of frames to reach our target
 		) {
 			reachable = false;
 		}
@@ -366,12 +329,14 @@ export class Bot {
 
 	private logAIState() {
 		let AIState = {
-			// lastBall: { x: this.lastBall.getX(), y: this.lastBall.getY() },
-			target: { x: this.target.getX(), y: this.target.getY() },
+			target: {
+				x: roundTo(this.target.getX(), 2),
+				y: roundTo(this.target.getY(), 2),
+			},
 			framesUntilTarget: this.framesUntilTarget,
 			framesAfterTarget: this.framesAfterTarget,
 			ballHitPaddle: this.ballHitPaddle(),
-			movePaddleTo: this.movePaddleTo,
+			movePaddleTo: roundTo(this.movePaddleTo, 2),
 		};
 		console.log(AIState);
 	}
