@@ -1,10 +1,10 @@
 #!/usr/bin/env ts-node
 
 import inquirer from "inquirer";
-import { generateMockData } from "./lib/generator";
-import { readDataFile, writeDataFile } from "./lib/io";
-import { sendDataToApi } from "./lib/api";
-import { SchemaDescriptor } from "./lib/model";
+import { generateMockData } from "./modules/generator";
+import { readDataFile, writeDataFile } from "./modules/io";
+import { sendDataToApi } from "./modules/api";
+import { SchemaDescriptor } from "./modules/model";
 
 // === CONFIGURABLE CONSTANTS ===
 const DEFAULT_BASENAME = "seeded";
@@ -15,7 +15,7 @@ const MODEL_PRESETS = [
 		label: "Users",
 		value: "user",
 		schemaLoader: async (): Promise<SchemaDescriptor> =>
-			(await import("./lib/schemas/userSchemaDescriptor"))
+			(await import("./modules/schemas/userSchemaDescriptor"))
 				.userSchemaDescriptor,
 		url: "http://localhost:3000/api/users",
 		filePrefix: "users",

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-	"seed": "ts-node user-seeder.ts",
+    "seed": "ts-node user-seeder.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
