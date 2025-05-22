@@ -22,6 +22,7 @@ server.register(chatRoutes);
 const start = async () => {
 	try {
 		await server.listen({ port: env.CHAT_DB_PORT, host: env.HOST });
+		console.log(`chat_db is running on port ${env.CHAT_DB_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

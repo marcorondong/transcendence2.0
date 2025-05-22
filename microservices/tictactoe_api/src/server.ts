@@ -1,7 +1,4 @@
-import Fastify, {
-	FastifyReply,
-	FastifyRequest,
-} from "fastify";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { serverOption } from "./utils/options";
 import {
 	ZodTypeProvider,
@@ -37,6 +34,7 @@ server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
 const start = async () => {
 	try {
 		await server.listen({ port: env.TICTACTOE_API_PORT, host: env.HOST });
+		console.log(`server is running on port ${env.TICTACTOE_API_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

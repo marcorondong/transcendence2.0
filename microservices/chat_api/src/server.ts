@@ -20,6 +20,7 @@ server.register(fCookie);
 const start = async () => {
 	try {
 		await server.listen({ port: env.CHAT_API_PORT, host: env.HOST });
+		console.log(`chat_api is running on port ${env.CHAT_API_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

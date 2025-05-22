@@ -56,22 +56,27 @@ export async function getRequestVerifyConnection(
 	cookie: string,
 	socket: WebSocket,
 ) {
-	const response = await fetch(
-		env.AUTH_API_VERIFY_CONNECTION_REQUEST_DOCKER,
-		{
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-				"Cookie": cookie,
+	try {
+		const response = await fetch(
+			env.AUTH_API_VERIFY_CONNECTION_REQUEST_DOCKER,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					"Cookie": cookie,
+				},
 			},
-		},
-	);
-	if (!response.ok) {
-		socket.close(1008, "Authentication failed");
-		const errorMessage = await response.text();
-		throw new Error(`Verify request failed: ${errorMessage}`);
+		);
+		if (!response.ok) {
+			socket.close(1008, "Authentication failed");
+			const errorMessage = await response.text();
+			throw new Error(`Verify request failed: ${errorMessage}`);
+		}
+		const data = await response.json();
+		const { id, nickname } = userZodSchema.parse(data);
+		return { id, nickname };
+	} catch (error) {
+		// socket.close(1008, "Authentication failed. AUTH_API is down");
+		throw new Error(`Verify request failed: ${error}`);
 	}
-	const data = await response.json();
-	const { id, nickname } = userZodSchema.parse(data);
-	return { id, nickname };
 }

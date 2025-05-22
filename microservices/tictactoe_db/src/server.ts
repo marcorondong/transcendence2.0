@@ -24,6 +24,7 @@ server.register(tictactoeRoutes, { prefix: "/tictactoe-db" });
 const start = async () => {
 	try {
 		await server.listen({ port: PORT, host: HOST });
+		console.log(`tictactoe_db is running on port ${PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);
