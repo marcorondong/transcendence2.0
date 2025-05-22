@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { SchemaDescriptor, FieldDescriptor } from "./model";
 
-const MAX_RETRIES = 20;
+const MAX_RETRIES = 40;
 
 type GeneratorOptions = {
 	overrides?: Record<string, () => any>;

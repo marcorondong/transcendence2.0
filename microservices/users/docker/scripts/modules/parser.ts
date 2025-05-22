@@ -11,7 +11,8 @@ function filterEntryFields(
 	entry: Record<string, any>,
 	fields: string[],
 	index: number,
-): Record<string, any> | null {
+	summary: { extra: number; missing: number },
+): Record<string, any> {
 	const filtered: Record<string, any> = {};
 	const extraKeys = Object.keys(entry).filter((key) => !fields.includes(key));
 	const missingKeys = fields.filter((key) => !(key in entry));
@@ -22,6 +23,7 @@ function filterEntryFields(
 				", ",
 			)}`,
 		);
+		summary.extra++;
 	}
 	if (missingKeys.length > 0) {
 		console.warn(
@@ -29,6 +31,7 @@ function filterEntryFields(
 				", ",
 			)}`,
 		);
+		summary.missing++;
 	}
 
 	fields.forEach((key) => {
@@ -46,41 +49,38 @@ export async function parseJsonFile(
 ): Promise<Record<string, any>[]> {
 	const raw = await readFile(filePath, "utf-8");
 	const fields = getFieldNames(schema);
-
-	const blocks = raw.split("\n").reduce<string[]>(
-		(acc, line) => {
-			if (line.trim().startsWith("//")) {
-				acc.push("");
-			} else {
-				acc[acc.length - 1] += line + "\n";
-			}
-			return acc;
-		},
-		[""],
-	);
-
 	const data: Record<string, any>[] = [];
+	const summary = { extra: 0, missing: 0, invalid: 0 };
 
-	for (const block of blocks) {
-		const trimmed = block.trim();
-		if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-			try {
-				const parsed = JSON.parse(trimmed);
-				if (Array.isArray(parsed)) {
-					parsed.forEach((entry, i) => {
-						const filtered = filterEntryFields(entry, fields, i);
-						if (filtered) data.push(filtered);
-					});
-				}
-			} catch (err: unknown) {
-				console.warn(
-					"⚠️ Skipping invalid JSON block:",
-					(err as Error).message,
-				);
+	// Match all JSON arrays (even across lines), non-greedy
+	const blocks = raw.match(/\[\s*{[\s\S]*?}\s*\]/g) || [];
+
+	blocks.forEach((block, blockIndex) => {
+		try {
+			const parsed = JSON.parse(block);
+			if (Array.isArray(parsed)) {
+				parsed.forEach((entry, i) => {
+					const filtered = filterEntryFields(
+						entry,
+						fields,
+						i,
+						summary,
+					);
+					data.push(filtered); // We keep even invalid
+				});
 			}
+		} catch (err: unknown) {
+			console.warn(
+				`⚠️ Skipping invalid JSON block ${blockIndex}:`,
+				(err as Error).message,
+			);
+			summary.invalid++;
 		}
-	}
+	});
 
+	console.log(
+		`📄 JSON parse summary: ${data.length} entries. ${summary.extra} extra fields, ${summary.missing} missing fields, ${summary.invalid} invalid blocks.`,
+	);
 	return data;
 }
 
@@ -88,7 +88,9 @@ export async function parseJsonFile(
 function detectSeparator(line: string, fields: string[]): string | null {
 	const candidates = [",", "\t", ";", "|"];
 	for (const sep of candidates) {
-		const parts = line.split(sep);
+		const parts = line
+			.split(sep)
+			.map((p) => p.trim().replace(/^"+|"+$/g, ""));
 		if (
 			parts.length >= fields.length &&
 			fields.every((field) => parts.includes(field))
@@ -97,6 +99,18 @@ function detectSeparator(line: string, fields: string[]): string | null {
 		}
 	}
 	return null;
+}
+
+// Parses and unquotes a single CSV value
+function cleanCsvValue(value: string): string {
+	let trimmed = value.trim();
+	if (
+		(trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+		(trimmed.startsWith("'") && trimmed.endsWith("'"))
+	) {
+		trimmed = trimmed.slice(1, -1);
+	}
+	return trimmed.replace(/""/g, '"');
 }
 
 export async function parseCsvFile(
@@ -113,15 +127,16 @@ export async function parseCsvFile(
 	let headers: string[] = [];
 	let separator: string | null = null;
 	const records: Record<string, any>[] = [];
+	const summary = { extra: 0, missing: 0, lines: 0 };
 
 	for (let index = 0; index < lines.length; index++) {
 		const line = lines[index];
-		if (line.startsWith("//")) continue;
+		if (/^\s*(\/\/|#)/.test(line)) continue;
 
 		if (!separator) {
 			separator = detectSeparator(line, fields);
 			if (separator) {
-				headers = line.split(separator);
+				headers = line.split(separator).map((h) => cleanCsvValue(h));
 				continue;
 			} else {
 				console.warn(
@@ -133,12 +148,14 @@ export async function parseCsvFile(
 			}
 		}
 
-		const values = line.split(separator);
+		const values = line.split(separator).map(cleanCsvValue);
 		const record: Record<string, any> = {};
 
 		fields.forEach((field) => {
 			const i = headers.indexOf(field);
-			if (i !== -1) record[field] = values[i];
+			if (i !== -1) {
+				record[field] = values[i];
+			}
 		});
 
 		const extraCols = values.length > headers.length;
@@ -146,16 +163,22 @@ export async function parseCsvFile(
 
 		if (extraCols) {
 			console.warn(`⚠️ Line ${index + 1}: Extra column(s) detected`);
+			summary.extra++;
 		}
 		if (missingCols) {
 			const missing = fields.filter((key) => !(key in record));
 			console.warn(
 				`⚠️ Line ${index + 1}: Missing field(s): ${missing.join(", ")}`,
 			);
+			summary.missing++;
 		}
 
 		records.push(record);
+		summary.lines++;
 	}
 
+	console.log(
+		`📄 CSV parse summary: ${summary.lines} lines parsed. ${summary.extra} with extra columns, ${summary.missing} with missing fields.`,
+	);
 	return records;
 }
