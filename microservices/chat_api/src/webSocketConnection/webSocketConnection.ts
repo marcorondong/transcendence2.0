@@ -21,11 +21,18 @@ export async function webSocketConnection(server: FastifyInstance) {
 		{ websocket: true },
 		async (socket, request) => {
 			try {
-				const cookie = checkCookie(request, socket);
-				const { id, nickname } = await getRequestVerifyConnection(
-					cookie,
-					socket,
-				);
+				let id, nickname;
+				try {
+					const cookie = checkCookie(request, socket);
+					({ id, nickname } = await getRequestVerifyConnection(
+						cookie,
+						socket,
+					));
+				} catch (error) {
+					errorHandler(socket, error);
+					socket.close(1008, "Authentication failed");
+					return;
+				}
 				let client: Client;
 				const isClientOnline = onlineClients.get(id);
 				if (!isClientOnline) {

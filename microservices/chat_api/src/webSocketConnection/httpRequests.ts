@@ -36,12 +36,15 @@ export async function getRequestBlockStatus(userId: string, friendId: string) {
 }
 
 export async function getRequestRoomId(userId: string) {
-	const response = await fetch(`${env.PONG_API_PLAYER_ROOM_REQUEST_DOCKER}/${userId}`, {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
+	const response = await fetch(
+		`${env.PONG_API_PLAYER_ROOM_REQUEST_DOCKER}/${userId}`,
+		{
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
 		},
-	});
+	);
 	if (!response.ok) {
 		const errorMessage = await response.text();
 		throw new Error(`RoomId Request failed with status ${errorMessage}`);
@@ -56,27 +59,21 @@ export async function getRequestVerifyConnection(
 	cookie: string,
 	socket: WebSocket,
 ) {
-	try {
-		const response = await fetch(
-			env.AUTH_API_VERIFY_CONNECTION_REQUEST_DOCKER,
-			{
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					"Cookie": cookie,
-				},
+	const response = await fetch(
+		env.AUTH_API_VERIFY_CONNECTION_REQUEST_DOCKER,
+		{
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				"Cookie": cookie,
 			},
-		);
-		if (!response.ok) {
-			socket.close(1008, "Authentication failed");
-			const errorMessage = await response.text();
-			throw new Error(`Verify request failed: ${errorMessage}`);
-		}
-		const data = await response.json();
-		const { id, nickname } = userZodSchema.parse(data);
-		return { id, nickname };
-	} catch (error) {
-		// socket.close(1008, "Authentication failed. AUTH_API is down");
-		throw new Error(`Verify request failed: ${error}`);
+		},
+	);
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(`Verify request failed: ${errorMessage}`);
 	}
+	const data = await response.json();
+	const { id, nickname } = userZodSchema.parse(data);
+	return { id, nickname };
 }

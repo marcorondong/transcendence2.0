@@ -89,7 +89,7 @@ export function disconnectionHandler(client: Client, socket: WebSocket) {
 export function errorHandler(socket: WebSocket, error: any) {
 	let errorMessage = "Something went wrong. Please try again later.";
 	if (env.NODE_ENV === "development") {
-		// TODO create warning for better frontend information
+		// TODO create warning for better frontend information or no need 
 		errorMessage = `${error}`;
 	}
 	const errorResponse = errorResponseSchema.parse({
