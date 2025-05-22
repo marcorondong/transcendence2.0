@@ -10,6 +10,9 @@ import { SchemaDescriptor } from "./modules/model";
 // === CONFIGURABLE CONSTANTS ===
 const DEFAULT_BASENAME = "seeded";
 const DEFAULT_OUTPUT_PATH = "./seed_data/";
+const SAVE_FAILED = true;
+const DEFAULT_FAILED_BASENAME = "failed_requests";
+const DEFAULT_FAILED_OUTPUT_PATH = "./seed_data/failed/";
 
 const MODEL_PRESETS = [
 	{
@@ -99,7 +102,63 @@ async function main() {
 
 	// Send to API
 	console.log(`\n🌍 Sending data to: ${preset.url}`);
-	await sendDataToApi(data, preset.url, 500);
+	const resultSummary = await sendDataToApi(data, preset.url, 500);
+
+	if (SAVE_FAILED && resultSummary.failureCount > 0) {
+		const { save: saveFailed } = await inquirer.prompt([
+			{
+				type: "confirm",
+				name: "save",
+				message: "Do you want to save failed records to a file?",
+				default: true,
+			},
+		]);
+
+		if (saveFailed) {
+			const {
+				format: failedFormat,
+				fileName: failedName,
+				outputPath: failedPath,
+			} = await inquirer.prompt([
+				{
+					type: "list",
+					name: "format",
+					message: "Choose the output format for failed records:",
+					choices: ["json", "csv"],
+					default: "json",
+				},
+				{
+					type: "input",
+					name: "fileName",
+					message: "Enter the output filename (without extension):",
+					default: DEFAULT_FAILED_BASENAME,
+				},
+				{
+					type: "input",
+					name: "outputPath",
+					message: "Enter the output folder path:",
+					default: DEFAULT_FAILED_OUTPUT_PATH,
+				},
+			]);
+
+			const failedFullPath = `${failedPath.replace(
+				/\/$/,
+				"",
+			)}/${failedName}.${failedFormat}`;
+
+			// Ensure folder exists
+			const { mkdir } = await import("fs/promises");
+			await mkdir(failedPath, { recursive: true });
+
+			await writeDataFile(
+				resultSummary.failedRecords,
+				failedFullPath,
+				schema,
+				seed,
+			);
+			console.log(`📁 Failed records saved to: ${failedFullPath}`);
+		}
+	}
 
 	// Ask to save data
 	const { save } = await inquirer.prompt([
