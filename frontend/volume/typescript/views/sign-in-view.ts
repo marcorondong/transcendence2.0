@@ -1,9 +1,13 @@
+import { ChatComponent } from "../components/chat-component.js";
 import { homeLinkEvent, signUpLinkEvent } from "../services/events.js";
 import { fetchAuth, UserAuth } from "../services/fetch-sign-in.js";
 
 export class SignInView extends HTMLElement {
-	constructor() {
+	chat: ChatComponent;
+
+	constructor(chat: ChatComponent) {
 		super();
+		this.chat = chat;
 	}
 
 	frame = document.createElement("div");
@@ -98,9 +102,9 @@ export class SignInView extends HTMLElement {
 			console.log("data: ", data);
 			const response = await fetchAuth(data);
 			console.log("response of auth service:", response);
-			console.log("response.success:", response.success);
 			if (response.success === true) {
 				console.log("got into success");
+				this.chat.openWebsocket();
 				this.dispatchEvent(homeLinkEvent);
 			}
 		}
@@ -113,6 +117,6 @@ export class SignInView extends HTMLElement {
 
 customElements.define("sign-in-view", SignInView);
 
-export function createComponent() {
-	return document.createElement("sign-in-view");
+export function createComponent(chat: ChatComponent) {
+	return new SignInView(chat);
 }

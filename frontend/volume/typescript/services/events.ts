@@ -4,7 +4,7 @@ export const pongLinkEvent = new CustomEvent("pong-link", {
 	composed: true,
 });
 
-export const homeLinkEvent = new CustomEvent("home-link", {
+export const homeLinkEvent = new CustomEvent("pong-link", {
 	detail: { source: "/" },
 	bubbles: true,
 	composed: true,
@@ -12,6 +12,12 @@ export const homeLinkEvent = new CustomEvent("home-link", {
 
 export const signUpLinkEvent = new CustomEvent("pong-link", {
 	detail: { source: "sign-up-view" },
+	bubbles: true,
+	composed: true,
+});
+
+export const signInLinkEvent = new CustomEvent("pong-link", {
+	detail: { source: "sign-in-view" },
 	bubbles: true,
 	composed: true,
 });

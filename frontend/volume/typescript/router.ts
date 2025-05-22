@@ -51,7 +51,6 @@ export class Router {
 			link = event.currentTarget.href;
 		} else if (event instanceof CustomEvent) {
 			link = event.detail.source;
-			console.log("LINK!!!!!!!!", link);
 		} else {
 			return;
 		}
@@ -77,7 +76,6 @@ export class Router {
 		this.handleRouterLink = this.handleRouterLink.bind(this);
 		this.addEventListenerNavLinks();
 		document.addEventListener("pong-link", this.handleRouterLink);
-		document.addEventListener("home-link", this.handleRouterLink);
 		window.addEventListener("popstate", () => {
 			this.loadComponent();
 		});

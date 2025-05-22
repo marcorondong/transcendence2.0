@@ -1,3 +1,5 @@
+import { signInLinkEvent } from "./events.js";
+
 interface User {
 	id?: string;
 	email?: string;
@@ -9,7 +11,6 @@ interface User {
 export async function fetchSignUp(user: User) {
 	let method: string = "POST";
 	let url = `https://${window.location.hostname}:${window.location.port}/api/users/`;
-	// let url = `http://${window.location.hostname}:3000/api/users/`;
 
 	try {
 		const ret = await fetch(url, {
@@ -21,11 +22,11 @@ export async function fetchSignUp(user: User) {
 		});
 
 		if (!ret.ok) {
+			// TODO: make failing of sign up visible in frontend
 			throw new Error(`Response status: ${ret.status}`);
+		} else {
+			document.dispatchEvent(signInLinkEvent);
 		}
-
-		const data = await ret.json();
-		return data;
 	} catch (e) {
 		console.error(e.message);
 	}

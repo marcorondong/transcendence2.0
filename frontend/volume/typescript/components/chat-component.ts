@@ -33,9 +33,7 @@ class ChatComponent extends HTMLElement {
 	chatInput = document.createElement("textarea");
 	chatContainer = document.createElement("div");
 
-	constructor() {
-		super();
-
+	openWebsocket() {
 		// OPEN NEW WEBSOCKET
 		this.ws = new WebSocket(
 			`wss://${window.location.hostname}:${window.location.port}/chat-api`,
@@ -165,6 +163,10 @@ class ChatComponent extends HTMLElement {
 				});
 			}
 		};
+	}
+
+	constructor() {
+		super();
 	}
 
 	addTimestamp(newMessage: Message, chat: ChatUser) {

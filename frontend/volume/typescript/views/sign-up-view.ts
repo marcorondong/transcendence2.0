@@ -1,3 +1,4 @@
+import { signInLinkEvent } from "../services/events.js";
 import { fetchSignUp } from "../services/fetch-sign-up.js";
 
 export class SignUpView extends HTMLElement {
@@ -28,7 +29,7 @@ export class SignUpView extends HTMLElement {
 	signUpButton = document.createElement("button");
 
 	connectedCallback() {
-		console.log("LOGIN VIEW has been CONNECTED");
+		console.log("SIGNUP VIEW has been CONNECTED");
 		this.classList.add("flex", "w-full", "items-center", "justify-center");
 		this.container.classList.add(
 			"flex",
@@ -110,7 +111,7 @@ export class SignUpView extends HTMLElement {
 			this.signUpButton,
 		);
 		this.append(this.container);
-		this.signUpButton.addEventListener("click", (e: MouseEvent) => {
+		this.signUpButton.addEventListener("click", async (e: MouseEvent) => {
 			e.preventDefault();
 			const data = {
 				email: this.inputEmail.value,
@@ -118,13 +119,12 @@ export class SignUpView extends HTMLElement {
 				nickname: this.inputNickname.value,
 				password: this.inputPassword.value,
 			};
-			console.log("data:", data);
-			fetchSignUp(data);
+			await fetchSignUp(data);
 		});
 	}
 
 	disconnectedCallback() {
-		console.log("LOGIN VIEW has been DISCONNECTED");
+		console.log("SIGNUP VIEW has been DISCONNECTED");
 	}
 }
 
