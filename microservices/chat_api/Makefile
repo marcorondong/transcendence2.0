@@ -1,14 +1,13 @@
 all: up
 
 up:
-	docker compose up --build
+	cd ../.. && docker compose up --no-deps chat_api
 
 dev:
-	docker compose build --no-cache
-	docker compose up
+	cd ../.. && docker compose build --no-cache chat_api && docker compose up --no-deps chat_api
 
 down:
-	docker compose down --volumes
+	cd ../.. && docker compose down
 
 clear:
 	clear
