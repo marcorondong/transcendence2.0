@@ -26,6 +26,18 @@ export function validateSchemaDescriptor(schema: SchemaDescriptor): string[] {
 		if (desc.pattern && !(desc.pattern instanceof RegExp)) {
 			errors.push(`Field "${key}" has invalid RegExp pattern`);
 		}
+
+		if (desc.fixed !== undefined && desc.fakerMethod) {
+			errors.push(
+				`Field "${key}" has both "fixed" and "fakerMethod" defined — only one should be used.`,
+			);
+		}
+
+		if (desc.args && !Array.isArray(desc.args)) {
+			errors.push(
+				`Field "${key}" has "args" defined but it is not an array.`,
+			);
+		}
 	}
 
 	return errors;

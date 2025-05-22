@@ -16,7 +16,15 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	nickname: {
 		type: "string",
 		minLength: 3,
-		fakerMethod: "person.firstName",
+		// fakerMethod: "person.firstName",
+		// validator: (value: string) =>
+		// 	typeof value === "string" &&
+		// 	value.length >= 3 &&
+		// 	/\S/.test(value) &&
+		// 	/\D/.test(value) &&
+		// 	/[a-zA-Z]/.test(value),
+		// TODO: TESTING
+		fixed: () => `user_${Math.floor(Math.random() * 1000)}`,
 		validator: (value: string) =>
 			typeof value === "string" &&
 			value.length >= 3 &&
@@ -28,6 +36,7 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	email: {
 		type: "email",
 		fakerMethod: "internet.email",
+		args: ["testuser", "example.com"], // TODO: TESTING
 		postProcess: (value: string) => value.toLowerCase(),
 		validator: (value: string) =>
 			/^[\x00-\x7F]+$/.test(value) && // ASCII only
@@ -37,7 +46,8 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	password: {
 		type: "string",
 		minLength: 6,
-		fakerMethod: "internet.password",
+		// fakerMethod: "internet.password",
+		fixed: "P@ssword123!", // TODO: TESTING
 		notContains: ["username", "nickname", "email"],
 		validator: (value: string) =>
 			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/.test(value),

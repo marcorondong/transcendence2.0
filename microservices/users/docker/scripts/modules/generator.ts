@@ -27,6 +27,14 @@ export function generateMockData(
 				value = overrides[field]!();
 			}
 
+			// Use fixed value if specified in schema
+			if (value === undefined && desc.fixed !== undefined) {
+				value =
+					typeof desc.fixed === "function"
+						? desc.fixed(record)
+						: desc.fixed;
+			}
+
 			// Retry loop to generate valid value
 			let retries = 0;
 			while (retries < maxRetries) {
@@ -76,6 +84,9 @@ function generateField(
 				faker,
 			);
 		if (typeof fakerFn === "function") {
+			if (desc.args && Array.isArray(desc.args)) {
+				return fakerFn(...desc.args);
+			}
 			return fakerFn();
 		}
 	}

@@ -18,6 +18,8 @@ export interface FieldDescriptor {
 	matchesField?: string;
 	enum?: string[];
 	default?: any;
+	fixed?: any | (() => any); // Fixed value or function for generation
+	args?: any[]; // Optional args for fakerMethod
 	fakerMethod?: string;
 	postProcess?: (value: any, currentRecord?: Record<string, any>) => any;
 	validator?: (value: any, currentRecord?: Record<string, any>) => boolean;
