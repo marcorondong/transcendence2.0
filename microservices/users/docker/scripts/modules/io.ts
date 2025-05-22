@@ -55,7 +55,7 @@ export async function writeDataFile(
 				`# ${HEADER_TEMPLATE(new Date().toISOString(), seed).trim()}`,
 			);
 		}
-		if (APPEND_CSV_HEADER && !fileExists) {
+		if (APPEND_CSV_HEADER || (!APPEND_CSV_HEADER && !fileExists)) {
 			rows.push(fields.join(","));
 		}
 
