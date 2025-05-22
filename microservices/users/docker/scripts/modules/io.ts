@@ -4,8 +4,10 @@ import { extname } from "path";
 import { parseJsonFile, parseCsvFile } from "./parser";
 import { SchemaDescriptor } from "./model";
 
-const HEADER_TEMPLATE = (timestamp: string) =>
-	`\n//========= ${timestamp} UTC =========\n`;
+const HEADER_TEMPLATE = (timestamp: string, seed?: number) =>
+	`\n//========= ${timestamp} UTC${
+		seed != null ? ` | seed: ${seed}` : ""
+	} =========\n`;
 const APPEND_JSON_SEPARATOR = true;
 const APPEND_CSV_SEPARATOR = true;
 const APPEND_CSV_HEADER = true; // only adds "username,email,..." if file is new
@@ -29,6 +31,7 @@ export async function writeDataFile(
 	data: Record<string, any>[],
 	filePath: string,
 	schema: SchemaDescriptor,
+	seed?: number,
 ): Promise<void> {
 	const ext = extname(filePath).toLowerCase();
 	const fields = Object.keys(schema);
@@ -39,7 +42,7 @@ export async function writeDataFile(
 
 	if (ext === ".json") {
 		const header = APPEND_JSON_SEPARATOR
-			? HEADER_TEMPLATE(new Date().toISOString())
+			? HEADER_TEMPLATE(new Date().toISOString(), seed)
 			: "";
 		const json = JSON.stringify(data, null, 2);
 		await appendFile(filePath, `${header}${json},\n`, "utf-8");
@@ -48,7 +51,9 @@ export async function writeDataFile(
 
 		// Add header if allowed and file is new
 		if (APPEND_CSV_SEPARATOR) {
-			rows.push(`# ${HEADER_TEMPLATE(new Date().toISOString()).trim()}`);
+			rows.push(
+				`# ${HEADER_TEMPLATE(new Date().toISOString(), seed).trim()}`,
+			);
 		}
 		if (APPEND_CSV_HEADER && !fileExists) {
 			rows.push(fields.join(","));

@@ -1,6 +1,7 @@
 #!/usr/bin/env ts-node
 
 import inquirer from "inquirer";
+import { faker } from "@faker-js/faker";
 import { generateMockData } from "./modules/generator";
 import { readDataFile, writeDataFile } from "./modules/io";
 import { sendDataToApi } from "./modules/api";
@@ -39,6 +40,23 @@ async function main() {
 
 	const preset = MODEL_PRESETS.find((m) => m.value === selectedModel)!;
 	const schema = await preset.schemaLoader();
+
+	const { seedInput } = await inquirer.prompt([
+		{
+			type: "input",
+			name: "seedInput",
+			message: "Enter seed for data generation (leave blank for random):",
+		},
+	]);
+
+	const seed = seedInput
+		? parseInt(seedInput, 10)
+		: Math.floor(Math.random() * 1_000_000);
+	if (!seedInput) {
+		console.log(` 🌱 No seed provided, using random seed: ${seed}`);
+	}
+
+	faker.seed(seed);
 
 	const { mode } = await inquirer.prompt([
 		{
@@ -120,7 +138,7 @@ async function main() {
 			/\/$/,
 			"",
 		)}/${fileName}.${format}`;
-		await writeDataFile(data, fullPath, schema);
+		await writeDataFile(data, fullPath, schema, seed);
 		console.log(`📁 Data saved to: ${fullPath}`);
 	}
 }
