@@ -42,6 +42,11 @@ export function generateMockData(
 					value = generateField(field, desc, record);
 				}
 
+				// 4. Post-process if defined
+				if (desc.postProcess) {
+					value = desc.postProcess(value, record);
+				}
+
 				const isValid = validateGeneratedField(
 					field,
 					value,
@@ -53,11 +58,6 @@ export function generateMockData(
 				value =
 					overrides[field]?.() ?? generateField(field, desc, record);
 				retries++;
-			}
-
-			// Post-process if defined
-			if (desc.postProcess) {
-				value = desc.postProcess(value, record);
 			}
 
 			record[field] = value;
