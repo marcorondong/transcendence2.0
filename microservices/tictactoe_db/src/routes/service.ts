@@ -75,3 +75,7 @@ export async function getHeadToHeadStats(userId: string, opponentId: string) {
 	const totalStats = statsCalculation(games, userId);
 	return totalStats;
 }
+
+export async function healthCheck() {
+	await prisma.$queryRaw`SELECT 1`;
+}

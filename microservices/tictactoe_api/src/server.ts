@@ -34,7 +34,7 @@ server.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
 const start = async () => {
 	try {
 		await server.listen({ port: env.TICTACTOE_API_PORT, host: env.HOST });
-		console.log(`server is running on port ${env.TICTACTOE_API_PORT}`);
+		console.log(`tictactoe_api running on port ${env.TICTACTOE_API_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);

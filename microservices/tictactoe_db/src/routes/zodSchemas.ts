@@ -2,26 +2,28 @@ import { z } from "zod";
 
 export const idZodSchema = z
 	.object({
-		userId: z.string().min(1, "User ID cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
+		userId: z.string().uuid(),
 	})
 	.strict();
 
 export const idsZodSchema = z
 	.object({
-		userId: z.string().min(1, "User ID cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
-		opponentId: z.string().min(1, "User ID cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
+		userId: z.string().uuid(),
+		opponentId: z.string().uuid(),
 	})
-	.strict();
+	.strict()
+	.refine((data) => data.userId !== data.opponentId);
 
 const resultZodSchema = z.enum(["X", "O", "DRAW"]);
 
 export const gameSchema = z
 	.object({
-		playerXId: z.string().min(1, "playerXId cannot be empty"), // TODO merge this line when id is provided in JWT: .uuid("Invalid player ID format"),
-		playerOId: z.string().min(1, "playerOId ID cannot be empty"),
+		playerXId: z.string().uuid(),
+		playerOId: z.string().uuid(),
 		result: resultZodSchema,
 	})
-	.strict();
+	.strict()
+	.refine((data) => data.playerXId !== data.playerOId);
 
 export const gameHistoryResponseSchema = z.array(gameSchema);
 
@@ -32,7 +34,8 @@ export const statsResponseSchema = z
 		losses: z.number().int().nonnegative(),
 		draws: z.number().int().nonnegative(),
 	})
-	.strict();
+	.strict()
+	.refine((data) => data.total === data.wins + data.losses + data.draws);
 
 export const successResponseSchema = z
 	.object({
