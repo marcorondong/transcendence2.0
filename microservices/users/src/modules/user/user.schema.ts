@@ -1,5 +1,13 @@
 import { z, ZodTypeAny, ZodObject } from "zod";
 
+// MR_NOTE:
+// '.regex()' is for pattern matching, and '.refine()' is for complex or cross-field logic.
+// Also, '.refine()' is opaque to external consumers (e.g: database seeder script) so they
+// CANNOT "import" them. but `.regex()` is NOT opaque, so they CAN import it.
+// I could use `.refine()` for password constraint check logic (it cannot contain username, nickname, cannot be equal to email)
+// But for that, the payload must have the fields to check.
+// So for PATCH, it's not suitable since I could only PATCH password (and the other fields won't be present)
+
 // Type definition for ordering (ascending/descending)
 const sortDirections = ["asc", "desc"] as const;
 const sortDirectionEnum = z.enum(sortDirections);
@@ -81,16 +89,20 @@ const usernameField = z
 		required_error: "Username is required",
 		invalid_type_error: "Username must be a string",
 	})
+	// .min(3, "Username must be at least 3 characters long")
+	// .refine((val) => val.trim().length > 0, {
+	// 	message: "Username must not be empty or whitespace only",
+	// })
+	// .refine((val) => !/^\d+$/.test(val), {
+	// 	message: "Username must not be numbers only",
+	// })
+	// .refine((val) => /[a-zA-Z]/.test(val), {
+	// 	message: "Username must contain at least one letter",
+	// });
 	.min(3, "Username must be at least 3 characters long")
-	.refine((val) => val.trim().length > 0, {
-		message: "Username must not be empty or whitespace only",
-	})
-	.refine((val) => !/^\d+$/.test(val), {
-		message: "Username must not be numbers only",
-	})
-	.refine((val) => /[a-zA-Z]/.test(val), {
-		message: "Username must contain at least one letter",
-	});
+	.regex(/\S/, "Username must not be empty or whitespace only")
+	.regex(/\D/, "Username must not be numbers only")
+	.regex(/[a-zA-Z]/, "Username must contain at least one letter");
 
 // Nickname field schema
 const nicknameField = z
@@ -98,16 +110,20 @@ const nicknameField = z
 		required_error: "Nickname is required",
 		invalid_type_error: "Nickname must be a string",
 	})
+	// .min(3, "Nickname must be at least 3 characters long")
+	// .refine((val) => val.trim().length > 0, {
+	// 	message: "Nickname must not be empty or whitespace only",
+	// })
+	// .refine((val) => !/^\d+$/.test(val), {
+	// 	message: "Nickname must not be numbers only",
+	// })
+	// .refine((val) => /[a-zA-Z]/.test(val), {
+	// 	message: "Nickname must contain at least one letter",
+	// });
 	.min(3, "Nickname must be at least 3 characters long")
-	.refine((val) => val.trim().length > 0, {
-		message: "Nickname must not be empty or whitespace only",
-	})
-	.refine((val) => !/^\d+$/.test(val), {
-		message: "Nickname must not be numbers only",
-	})
-	.refine((val) => /[a-zA-Z]/.test(val), {
-		message: "Nickname must contain at least one letter",
-	});
+	.regex(/\S/, "Nickname must not be empty or whitespace only")
+	.regex(/\D/, "Nickname must not be numbers only")
+	.regex(/[a-zA-Z]/, "Nickname must contain at least one letter");
 
 // Email field schema
 const emailField = z
@@ -116,9 +132,11 @@ const emailField = z
 		invalid_type_error: "Email must be a string",
 	})
 	.email()
-	.refine((val) => val === val.toLowerCase(), {
-		message: "Invalid email format",
-	});
+	// .refine((val) => val === val.toLowerCase(), {
+	// 	message: "Invalid email format",
+	// });
+	.regex(/^[\x00-\x7F]+$/, "Email must contain only ASCII characters")
+	.regex(/^[^A-Z]+$/, "Email must not contain uppercase letters");
 
 // Password field schema
 const passwordField = z
@@ -127,16 +145,20 @@ const passwordField = z
 		invalid_type_error: "Password must be a string",
 	})
 	.min(6, "Password must be at least 6 characters long")
-	.refine(
-		(val) =>
-			/[a-z]/.test(val) && // lowercase
-			/[A-Z]/.test(val) && // uppercase
-			/\d/.test(val) && // digit
-			/[^a-zA-Z0-9]/.test(val), // symbol
-		{
-			message:
-				"Password must include at least one uppercase, one lowercase, one number, and one symbol",
-		},
+	// .refine(
+	// 	(val) =>
+	// 		/[a-z]/.test(val) && // lowercase
+	// 		/[A-Z]/.test(val) && // uppercase
+	// 		/\d/.test(val) && // digit
+	// 		/[^a-zA-Z0-9]/.test(val), // symbol
+	// 	{
+	// 		message:
+	// 			"Password must include at least one uppercase, one lowercase, one number, and one symbol",
+	// 	},
+	// );
+	.regex(
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/,
+		"Password must include at least one uppercase, one lowercase, one number, and one symbol",
 	);
 
 // Core user schema
