@@ -36,8 +36,7 @@ export async function getRequestBlockStatus(userId: string, friendId: string) {
 }
 
 export async function getRequestRoomId(userId: string) {
-	const url = `http://pong-api:3010/pong-api/player-room/${userId}`; // TODO: change to env variable
-	const response = await fetch(url, {
+	const response = await fetch(`${env.PONG_API_PLAYER_ROOM_REQUEST_DOCKER}/${userId}`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",

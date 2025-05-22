@@ -8,7 +8,7 @@ services:
     volumes:
       - ${CHAT_API_SRC_FOLDER_LOCAL}:${CHAT_API_SRC_FOLDER_CONTAINER} #TODO remove in production
     ports:
-      - ${CHAT_API_PORT}:${CHAT_API_PORT}
+      - ${CHAT_API_PORT}:${CHAT_API_PORT} # TODO remove this in production
     networks:
       - ${NETWORK_NAME}
     depends_on:

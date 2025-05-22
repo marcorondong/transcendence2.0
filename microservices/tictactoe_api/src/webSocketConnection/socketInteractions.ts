@@ -38,8 +38,9 @@ export async function onMessage(message: string, player: Player) {
 }
 
 
-export async function onClose(player: Player) {
+export async function onClose(player: Player, pingInterval: any) {
 	try {
+		clearInterval(pingInterval);
 		console.log("player disconnected: playerId:", player.getId()); // TODO remove this in production
 		if(player.getDisconnected() === false) return;
 		const opponent = player.getOpponentPlayer();

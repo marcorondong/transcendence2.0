@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = env("TICTACTOE_DB_DATABASE_URL_CONTAINER")
 }
 
 model Game {

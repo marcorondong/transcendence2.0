@@ -9,19 +9,29 @@ import { getHeadToHeadStats, postResult } from "./httpRequests";
 
 export class Player {
 	private readonly id: string;
+	private nickname: string;
 	private readonly socket: WebSocket;
 	private opponentPlayer: Player | null = null;
 	private sign: string = "";
 	private disconnected: boolean = true;
 	private game: Game | null = null;
 
-	constructor(id: string, socket: WebSocket) {
+	constructor(id: string, nickname: string, socket: WebSocket) {
 		this.id = id;
+		this.nickname = nickname;
 		this.socket = socket;
 	}
 
 	getId(): string {
 		return this.id;
+	}
+
+	getNickname(): string {
+		return this.nickname;
+	}
+
+	setNickname(nickname: string): void {
+		this.nickname = nickname;
 	}
 
 	getSocket(): WebSocket {

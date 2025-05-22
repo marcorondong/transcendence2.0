@@ -74,4 +74,8 @@ export async function webSocketConnection(server: FastifyInstance) {
 			}
 		},
 	);
+
+	server.get(env.CHAT_API_HEALTH_CHECK_STATIC, async (request, reply) => {
+		reply.status(200).send({ success: true });
+	});
 }
