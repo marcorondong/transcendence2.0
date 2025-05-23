@@ -151,6 +151,11 @@ export class PongPlayer extends EventEmitter {
 		return game.getPaddle(this.role);
 	}
 
+	static sendErrorMessage(errorMsg: string, connection: WebSocket) {
+		const jsonMsg = { error: errorMsg };
+		connection.send(JSON.stringify(jsonMsg));
+	}
+
 	private connectionMonitor(): void {
 		this.connection.on("close", () => {
 			this.connection.close();
