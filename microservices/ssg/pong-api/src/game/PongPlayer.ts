@@ -58,7 +58,10 @@ export class PongPlayer extends EventEmitter {
 	): Promise<PongPlayer | false> {
 		const playerInfo = await authorizePlayer(cookie);
 		if (playerInfo === false) {
-			connection.send("Request JWT Token aka LOG IN before playing");
+			PongPlayer.sendErrorMessage(
+				"Request JWT Token aka LOG IN before trying to play pong",
+				connection,
+			);
 			connection.close(1008, "Unauthorized");
 			return false;
 		}
@@ -149,6 +152,10 @@ export class PongPlayer extends EventEmitter {
 
 	getPlayerPaddle<T extends APongGame>(game: T): Paddle {
 		return game.getPaddle(this.role);
+	}
+
+	sendError(errorMsg: string) {
+		PongPlayer.sendErrorMessage(errorMsg, this.connection);
 	}
 
 	static sendErrorMessage(errorMsg: string, connection: WebSocket) {

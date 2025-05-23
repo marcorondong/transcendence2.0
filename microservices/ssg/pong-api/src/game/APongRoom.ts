@@ -16,7 +16,6 @@ import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 import { IncomingMove, UserMoveSchema } from "../utils/zodSchema";
 import { z } from "zod";
-import { error } from "console";
 
 enum EPongRoomState {
 	LOBBY,
@@ -213,9 +212,16 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 			} catch (err) {
 				if (err instanceof z.ZodError) {
 					console.error("Zod validation failed:", err.errors);
-					player.connection.send(`Invalid move ${err.message}`);
-				} else
+					PongPlayer.sendErrorMessage(
+						`Invalid move ${err.message}`,
+						player.connection,
+					);
+				} else {
 					console.error("Not zod error but some kind of error", err);
+					player.sendError(
+						`It is not zod Error, but probably empty move sent: ${err}`,
+					);
+				}
 			}
 		});
 	}

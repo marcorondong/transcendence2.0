@@ -35,7 +35,7 @@ export class HeadToHeadMatchMaking {
 		else {
 			if (privateRoom.isFull() === false)
 				this.addPlayerToRoom(player, privateRoom);
-			else player.sendNotification("Private room is full");
+			else player.sendError("Private room is full");
 		}
 	}
 
