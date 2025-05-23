@@ -8,7 +8,7 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	username: {
 		type: "string",
 		minLength: 3,
-		fakerMethod: "internet.userName",
+		fakerMethod: "internet.username",
 		validator: (value: string) =>
 			typeof value === "string" &&
 			value.length >= 3 &&
