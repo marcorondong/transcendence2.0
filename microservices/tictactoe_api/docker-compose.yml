@@ -12,7 +12,7 @@ services:
       - ${TICTACTOE_API_PORT}:${TICTACTOE_API_PORT} # TODO remove this in production
     networks:
       - ${NETWORK_NAME}
-    # depends_on:
-    #   - ${TICTACTOE_DB_MICRO_SERVICE_NAME}
+    depends_on:
+      - ${TICTACTOE_DB_MICRO_SERVICE_NAME}
     restart: ${RESTART_POLICY}
 
