@@ -1,5 +1,6 @@
 import { readFile } from "fs/promises";
 import { SchemaDescriptor } from "./model";
+import { logPlain, logWarn } from "./logger";
 
 // Helper function to extract valid field names from the schema
 function getFieldNames(schema: SchemaDescriptor): string[] {
@@ -18,7 +19,7 @@ function filterEntryFields(
 	const missingKeys = fields.filter((key) => !(key in entry));
 
 	if (extraKeys.length > 0) {
-		console.warn(
+		logWarn(
 			`⚠️ JSON entry [${index}] has extra field(s): ${extraKeys.join(
 				", ",
 			)}`,
@@ -26,7 +27,7 @@ function filterEntryFields(
 		summary.extra++;
 	}
 	if (missingKeys.length > 0) {
-		console.warn(
+		logWarn(
 			`⚠️ JSON entry [${index}] is missing field(s): ${missingKeys.join(
 				", ",
 			)}`,
@@ -71,15 +72,16 @@ export async function parseJsonFile(
 				});
 			}
 		} catch (err: unknown) {
-			console.warn(
-				`⚠️ Skipping invalid JSON block ${blockIndex}:`,
-				(err as Error).message,
+			logWarn(
+				`⚠️ Skipping invalid JSON block ${blockIndex}: ${
+					(err as Error).message
+				}`,
 			);
 			summary.invalid++;
 		}
 	});
 
-	console.log(
+	logPlain(
 		`📄 JSON parse summary: ${data.length} entries. ${summary.extra} extra fields, ${summary.missing} missing fields, ${summary.invalid} invalid blocks.`,
 	);
 	return data;
@@ -140,10 +142,12 @@ export async function parseCsvFile(
 				headers = line.split(separator).map((h) => cleanCsvValue(h));
 				continue;
 			} else {
-				console.warn(
+				logWarn(
 					`⚠️ Line ${
 						index + 1
-					}: Unable to detect separator — skipping`,
+					}: Unable to detect separator — expected a header with fields like [${fields.join(
+						", ",
+					)}] — skipping line.`,
 				);
 				continue;
 			}
@@ -163,12 +167,12 @@ export async function parseCsvFile(
 		const missingCols = fields.some((field) => !(field in record));
 
 		if (extraCols) {
-			console.warn(`⚠️ Line ${index + 1}: Extra column(s) detected`);
+			logWarn(`⚠️ Line ${index + 1}: Extra column(s) detected`);
 			summary.extra++;
 		}
 		if (missingCols) {
 			const missing = fields.filter((key) => !(key in record));
-			console.warn(
+			logWarn(
 				`⚠️ Line ${index + 1}: Missing field(s): ${missing.join(", ")}`,
 			);
 			summary.missing++;
@@ -178,7 +182,7 @@ export async function parseCsvFile(
 		summary.lines++;
 	}
 
-	console.log(
+	logPlain(
 		`📄 CSV parse summary: ${summary.lines} lines parsed. ${summary.extra} with extra columns, ${summary.missing} with missing fields.`,
 	);
 	return records;

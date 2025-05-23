@@ -1,6 +1,6 @@
 import axios from "axios";
 import { setTimeout as delay } from "timers/promises";
-import { logSuccess, logError } from "./logger";
+import { logPlain, logSuccess, logError, logObject } from "./logger";
 
 const DETAILED_SUMMARY = true; // For printing detailed summary (simple + failed objects)
 
@@ -32,8 +32,8 @@ export async function sendDataToApi(
 
 	for (let i = 0; i < data.length; i++) {
 		const record = data[i];
-		console.log(`\n📤 Sending record [${i + 1}/${data.length}] to ${url}`);
-		console.dir(record, { depth: null, colors: true });
+		logPlain(`\n📤 Sending record [${i + 1}/${data.length}] to ${url}`);
+		logObject(record, { depth: null, colors: true });
 
 		try {
 			const response = await axios.post(url, record);
@@ -52,16 +52,16 @@ export async function sendDataToApi(
 			await delay(delayMs);
 		}
 	}
-	console.log("\n📊 Summary:");
-	console.log(`   ✔️  ${successCount} succeeded`);
-	console.log(`   ❌  ${failureCount} failed`);
+	logPlain("\n📊 Summary:");
+	logPlain(`   ✔️  ${successCount} succeeded`);
+	logPlain(`   ❌  ${failureCount} failed`);
 
 	if (failureCount > 0) {
-		console.log(`   🔢 Failed indices: ${failedIndices.join(", ")}`);
+		logError(`   🔢 Failed indices: ${failedIndices.join(", ")}`);
 		if (DETAILED_SUMMARY) {
-			console.log(`\n🧾 Failed Records:`);
+			logError(`\n🧾 Failed Records:`);
 			for (const r of failedRecords) {
-				console.dir(r, { depth: null, colors: true });
+				logObject(r, { depth: null, colors: true });
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { SchemaDescriptor, FieldDescriptor } from "./model";
-import { logInfo, logWarn } from "./logger";
+import { logInfo, logPlain, logWarn } from "./logger";
 
 // === CONFIGURABLE CONSTANTS === //
 const MAX_RETRIES = 40; // To increase the chances of getting valid data
@@ -30,7 +30,7 @@ export function generateMockData(
 	for (let i = 0; i < count; i++) {
 		if (LOG_OVERRIDE || LOG_SOURCE || LOG_FAILED_VALIDATION) {
 			logInfo(`record [${i + 1}/${count}]`);
-			console.log("{");
+			logPlain("{");
 		}
 
 		const record: Record<string, any> = {}; // Whole "data object" (fields : values) E.g: user
@@ -115,7 +115,7 @@ export function generateMockData(
 		}
 
 		if (LOG_OVERRIDE || LOG_SOURCE || LOG_FAILED_VALIDATION) {
-			console.log("}");
+			logPlain("}");
 		}
 
 		result.push(record);

@@ -6,6 +6,7 @@ import { generateMockData } from "./modules/generator";
 import { readDataFile, writeDataFile } from "./modules/io";
 import { sendDataToApi } from "./modules/api";
 import { SchemaDescriptor } from "./modules/model";
+import { logPlain, logError } from "./modules/logger";
 
 // === CONFIGURABLE CONSTANTS === //
 const DEFAULT_BASENAME = "seeded"; // Default filename of generated data
@@ -60,7 +61,7 @@ async function main() {
 		? parseInt(seedInput, 10)
 		: Math.floor(Math.random() * 1_000_000);
 	if (!seedInput) {
-		console.log(` 🌱 No seed provided, using random seed: ${seed}`);
+		logPlain(` 🌱 No seed provided, using random seed: ${seed}`);
 	}
 
 	// Seed faker
@@ -113,7 +114,7 @@ async function main() {
 	}
 
 	// Send to API
-	console.log(`\n🌍 Sending data to: ${preset.url}`);
+	logPlain(`\n🌍 Sending data to: ${preset.url}`);
 	const resultSummary = await sendDataToApi(data, preset.url, 500);
 
 	// Prompt to save rejected API requests
@@ -169,7 +170,7 @@ async function main() {
 				schema,
 				seed,
 			);
-			console.log(`📁 Failed records saved to: ${failedFullPath}`);
+			logPlain(`📁 Failed records saved to: ${failedFullPath}`);
 		}
 	}
 
@@ -211,11 +212,11 @@ async function main() {
 			"",
 		)}/${fileName}.${format}`;
 		await writeDataFile(data, fullPath, schema, seed);
-		console.log(`📁 Data saved to: ${fullPath}`);
+		logPlain(`📁 Data saved to: ${fullPath}`);
 	}
 }
 
 main().catch((err) => {
-	console.error("❌ Script failed:", err.message);
+	logError(`❌ Script failed: ${err.message}`);
 	process.exit(1);
 });
