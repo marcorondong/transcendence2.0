@@ -86,7 +86,9 @@ async function main() {
 			},
 		]);
 
-		data = generateMockData(schema, count);
+		data = generateMockData(schema, count, {
+			overrides: { username: "fixedValue" },
+		});
 	} else {
 		const { filePath } = await inquirer.prompt([
 			{
