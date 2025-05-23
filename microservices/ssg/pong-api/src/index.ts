@@ -9,6 +9,9 @@ import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
 import { Parsing } from "./utils/Parsing";
 import fCookie from "@fastify/cookie";
 import { PongPlayer } from "./game/PongPlayer";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+import { PongSwagger } from "./utils/swagger";
 
 dotenv.config();
 
@@ -61,24 +64,31 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
 });
 
+fastify.register(swagger, PongSwagger.getSwaggerOptions());
+
+fastify.register(swaggerUi, {
+	routePrefix: "/docs",
+});
+
 fastify.register(fCookie);
 fastify.register(websocket);
 fastify.register(async function (fastify) {
-	fastify.get("/", (request, reply) => {
-		reply.send({
-			hello: "ssl",
-		});
-	});
-
-	fastify.get(`/${BASE_API_NAME}/health-check`, async (request, reply) => {
-		reply.code(200).send({
-			message:
-				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/health-check`,
+		{ schema: PongSwagger.getHealthCheckSchema() },
+		async (request, reply) => {
+			reply.code(200).send({
+				message:
+					"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
+			});
+		},
+	);
 
 	fastify.get(
 		`/${BASE_API_NAME}/player-room/:playerId`,
+		{
+			schema: PongSwagger.getPlayerRoomSchema(),
+		},
 		async (request, reply) => {
 			const { playerId } = request.params as { playerId: string };
 			const playerRoomId = manager.getPlayerRoomId(playerId);
@@ -94,7 +104,7 @@ fastify.register(async function (fastify) {
 
 	fastify.get(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/spectate/:roomId`,
-		{ websocket: true },
+		{ websocket: true, schema: PongSwagger.getWebsocketSchema() },
 		(connection, req) => {
 			const { roomId } = req.params as { roomId: string };
 			console.log("Spectate game: ", roomId);
@@ -104,7 +114,7 @@ fastify.register(async function (fastify) {
 
 	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/:matchType`,
-		{ websocket: true },
+		{ websocket: true, schema: PongSwagger.getWebsocketSchema() },
 		async (connection, req) => {
 			const { matchType } = req.params as { matchType: string };
 			const player = await PongPlayer.createAuthorizedPlayer(
@@ -121,6 +131,7 @@ fastify.register(async function (fastify) {
 		},
 	);
 
+	//TODO: remove this on final version
 	fastify.get("/pong-api/ping-pong", async (request, reply) => {
 		const filePath = path.join(process.cwd(), "src/public/pong.html");
 		if (fs.existsSync(filePath)) {
