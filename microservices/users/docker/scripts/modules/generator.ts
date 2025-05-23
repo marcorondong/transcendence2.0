@@ -191,8 +191,57 @@ function validateGeneratedField(
 		return false;
 	}
 
-	// 3. Optional pattern fallback
+	// 3. pattern check (e.g., regex for format)
 	if (desc.pattern && !desc.pattern.test(value)) return false;
+
+	// 4. minLength check for strings
+	if (
+		typeof value === "string" &&
+		typeof desc.minLength === "number" &&
+		value.length < desc.minLength
+	) {
+		return false;
+	}
+
+	// 5. maxLength check for strings
+	if (
+		typeof value === "string" &&
+		typeof desc.maxLength === "number" &&
+		value.length > desc.maxLength
+	) {
+		return false;
+	}
+
+	// 6. matchesField check (must equal another field's value)
+	if (desc.matchesField && value !== currentRecord[desc.matchesField]) {
+		return false;
+	}
+
+	// 7. enum check (only for enum type)
+	if (desc.type === "enum" && desc.enum && !desc.enum.includes(value)) {
+		return false;
+	}
+
+	// 8. basic type check
+	switch (desc.type) {
+		case "string":
+			if (typeof value !== "string") return false;
+			break;
+		case "number":
+			if (typeof value !== "number") return false;
+			break;
+		case "boolean":
+			if (typeof value !== "boolean") return false;
+			break;
+		case "email":
+		case "uuid":
+		case "date":
+			if (typeof value !== "string") return false;
+			break;
+		case "enum":
+			if (typeof value !== "string") return false;
+			break;
+	}
 
 	return true;
 }
