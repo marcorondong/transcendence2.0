@@ -136,6 +136,7 @@ export async function parseCsvFile(
 		const line = lines[index];
 		if (/^\s*(\/\/|#)/.test(line)) continue;
 
+		// Attempt separator detection on the first data-like line
 		if (!separator) {
 			separator = detectSeparator(line, fields);
 			if (separator) {
@@ -153,7 +154,17 @@ export async function parseCsvFile(
 			}
 		}
 
-		const values = line.split(separator).map(cleanCsvValue);
+		const maybeHeader = line.split(separator).map(cleanCsvValue);
+		const isRepeatedHeader =
+			maybeHeader.length === headers.length &&
+			maybeHeader.every((v, i) => v === headers[i]);
+
+		if (isRepeatedHeader) {
+			logWarn(`🔁 Line ${index + 1}: Repeated header detected — skipped`);
+			continue;
+		}
+
+		const values = maybeHeader;
 		const record: Record<string, any> = {};
 
 		fields.forEach((field) => {
