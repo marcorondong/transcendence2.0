@@ -21,7 +21,7 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 		type: "string",
 		minLength: 3,
 		fakerMethod: "person.firstName",
-		// fixed: () => `user_${Math.floor(Math.random() * 1000)}`, // TODO: Testing
+		// fixed: () => `user_${Math.floor(Math.random() * 1000)}`, // Example
 		validator: (value: string) =>
 			typeof value === "string" &&
 			value.length >= 3 &&
@@ -33,7 +33,7 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	email: {
 		type: "email",
 		fakerMethod: "internet.email",
-		// args: [{ firstName: "testuser", provider: "example.com" }], // TODO: TESTING
+		// args: [{ firstName: "testuser", provider: "example.com" }], // Example
 		postProcess: (value: string) => value.toLowerCase(), // My USERS service doesn't allow uppercase emails
 		validator: (value: string) =>
 			/^[\x00-\x7F]+$/.test(value) && // ASCII only
@@ -43,14 +43,15 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	password: {
 		type: "string",
 		minLength: 6,
-		// fakerMethod: "internet.password",
-		fixed: "P@ssword123!", // TODO: TESTING
+		// fakerMethod: "internet.password", // Example
+		fixed: "P@ssword123!",
 		notContains: ["username", "nickname", "email"],
 		validator: (value: string) =>
 			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/.test(value),
 	},
 };
 
+// =============================================================================
 // FieldDescriptor values, meanings and usage examples
 //
 // | Property       | Purpose                                             | Example usage                                   | Effect on generation                 |

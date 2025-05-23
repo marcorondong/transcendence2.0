@@ -20,7 +20,7 @@ export function initLogger(config: {
 }
 
 function formatTimestamp(): string {
-	return new Date().toISOString(); // e.g. 2025-05-23T17:40:12.123Z
+	return new Date().toISOString(); // E.g. 2025-05-23T17:40:12.123Z
 }
 
 function writeToSummary(level: string, message: string) {
@@ -48,7 +48,7 @@ export function logSuccess(message: string): void {
 
 export function logError(message: string): void {
 	const formatted = `${FG_RED}${message}${RESET}`;
-	console.error(formatted); // always show errors
+	console.error(formatted); // Always show errors
 	writeToSummary("error", message);
 }
 

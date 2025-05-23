@@ -4,7 +4,7 @@ import { logPlain, logSuccess, logError, logObject } from "./logger";
 
 const DETAILED_SUMMARY = true; // For printing detailed summary (simple + failed objects)
 
-// TODO: Check how can I implement this notation for functions;
+// TODO: Check how can I implement (and automate) this notation for functions;
 // without cluttering too much not inhering code reading for others
 
 /**

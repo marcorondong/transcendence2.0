@@ -49,10 +49,10 @@ export async function writeDataFile(
 			: "";
 		const json = JSON.stringify(data, null, 2);
 		await appendFile(filePath, `${header}${json},\n`, "utf-8");
+
 		// For csv files
 	} else if (ext === ".csv") {
 		const rows: string[] = [];
-
 		// Add separator if allowed
 		if (APPEND_CSV_SEPARATOR) {
 			rows.push(
