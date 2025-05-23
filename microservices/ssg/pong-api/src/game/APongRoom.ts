@@ -16,7 +16,6 @@ import raf from "raf";
 import { IPongFrameDoubles } from "./modes/doubles/PongGameDoubles";
 import { IncomingMove, UserMoveSchema } from "../utils/zodSchema";
 import { z } from "zod";
-import { error } from "console";
 
 enum EPongRoomState {
 	LOBBY,
