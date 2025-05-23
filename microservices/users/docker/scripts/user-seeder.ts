@@ -7,13 +7,14 @@ import { readDataFile, writeDataFile } from "./modules/io";
 import { sendDataToApi } from "./modules/api";
 import { SchemaDescriptor } from "./modules/model";
 
-// === CONFIGURABLE CONSTANTS ===
-const DEFAULT_BASENAME = "seeded";
-const DEFAULT_OUTPUT_PATH = "./seed_data/";
-const SAVE_FAILED = true;
-const DEFAULT_FAILED_BASENAME = "failed_requests";
-const DEFAULT_FAILED_OUTPUT_PATH = "./seed_data/failed/";
+// === CONFIGURABLE CONSTANTS === //
+const DEFAULT_BASENAME = "seeded"; // Default filename of generated data
+const DEFAULT_OUTPUT_PATH = "./seed_data/"; // Default folder of generated data
+const SAVE_FAILED = true; // Save data of failed API request
+const DEFAULT_FAILED_BASENAME = "failed_requests"; // Default filename of failed data
+const DEFAULT_FAILED_OUTPUT_PATH = "./seed_data/failed/"; // Default folder of failed data
 
+// === MODELS DEFAULTS (api route, schema, etc) === //
 const MODEL_PRESETS = [
 	{
 		label: "Users",
@@ -27,8 +28,9 @@ const MODEL_PRESETS = [
 	// Add more model presets here
 ];
 
-// === MAIN ===
+// === MAIN === //
 async function main() {
+	// Prompt for model/schema to use
 	const { selectedModel } = await inquirer.prompt([
 		{
 			type: "list",
@@ -41,9 +43,11 @@ async function main() {
 		},
 	]);
 
+	// Load model/schema
 	const preset = MODEL_PRESETS.find((m) => m.value === selectedModel)!;
 	const schema = await preset.schemaLoader();
 
+	// Prompt to use a seed (generate same data) or random (generate new data)
 	const { seedInput } = await inquirer.prompt([
 		{
 			type: "input",
@@ -59,8 +63,10 @@ async function main() {
 		console.log(` 🌱 No seed provided, using random seed: ${seed}`);
 	}
 
+	// Seed faker
 	faker.seed(seed);
 
+	// Prompt for generate data or extract it from a file
 	const { mode } = await inquirer.prompt([
 		{
 			type: "list",
@@ -72,6 +78,7 @@ async function main() {
 
 	let data: Record<string, any>[] = [];
 
+	// If generate data
 	if (mode === "generate") {
 		const { count } = await inquirer.prompt([
 			{
@@ -86,16 +93,19 @@ async function main() {
 			},
 		]);
 
+		// Generate data
 		data = generateMockData(schema, count, {
-			overrides: { username: "fixedValue" },
+			// Override a field (use this value/function instead of faker)
+			// overrides: { username: "fixedValue" }, // TODO: Testing
 		});
+		// If extract data from a file
 	} else {
 		const { filePath } = await inquirer.prompt([
 			{
 				type: "input",
 				name: "filePath",
-				message: "Enter the path to the JSON or CSV file:",
-				default: `${DEFAULT_OUTPUT_PATH}${preset.filePrefix}_${DEFAULT_BASENAME}.json`,
+				message: "Enter the path to the CSV or JSON file:",
+				default: `${DEFAULT_OUTPUT_PATH}${preset.filePrefix}_${DEFAULT_BASENAME}.csv`,
 			},
 		]);
 
@@ -106,6 +116,7 @@ async function main() {
 	console.log(`\n🌍 Sending data to: ${preset.url}`);
 	const resultSummary = await sendDataToApi(data, preset.url, 500);
 
+	// Prompt to save rejected API requests
 	if (SAVE_FAILED && resultSummary.failureCount > 0) {
 		const { save: saveFailed } = await inquirer.prompt([
 			{
@@ -126,8 +137,8 @@ async function main() {
 					type: "list",
 					name: "format",
 					message: "Choose the output format for failed records:",
-					choices: ["json", "csv"],
-					default: "json",
+					choices: ["csv", "json"],
+					default: "csv",
 				},
 				{
 					type: "input",
@@ -162,7 +173,7 @@ async function main() {
 		}
 	}
 
-	// Ask to save data
+	// Prompt to save generated data
 	const { save } = await inquirer.prompt([
 		{
 			type: "confirm",
@@ -178,8 +189,8 @@ async function main() {
 				type: "list",
 				name: "format",
 				message: "Choose the output format:",
-				choices: ["json", "csv"],
-				default: "json",
+				choices: ["csv", "json"],
+				default: "csv",
 			},
 			{
 				type: "input",

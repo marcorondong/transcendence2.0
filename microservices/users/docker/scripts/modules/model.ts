@@ -1,3 +1,4 @@
+// For declaring which fields the data belongs to
 export type FieldType =
 	| "string"
 	| "number"
@@ -30,6 +31,7 @@ export interface FieldDescriptor {
 
 export type SchemaDescriptor = Record<string, FieldDescriptor>;
 
+// Function for loading schema descriptors
 export async function getSchemaDescriptor(
 	modelName: string,
 ): Promise<SchemaDescriptor> {
@@ -37,6 +39,10 @@ export async function getSchemaDescriptor(
 		case "user":
 			return (await import("./schemas/userSchemaDescriptor"))
 				.userSchemaDescriptor;
+		// Add more schemas descriptors here (Remember to add their presets in main script logic)
+		// case "matches":
+		// 	return (await import("./schemas/matchesSchemaDescriptor"))
+		// 		.matchesSchemaDescriptor;
 		// future: load Zod and convert
 		// case "user":
 		//   return extractDescriptorFromZod(userZodSchema);

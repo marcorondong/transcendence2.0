@@ -2,13 +2,13 @@ import { faker } from "@faker-js/faker";
 import { SchemaDescriptor, FieldDescriptor } from "./model";
 import { logInfo, logWarn } from "./logger";
 
-// To increase the chances of getting valid data
-const MAX_RETRIES = 40;
+// === CONFIGURABLE CONSTANTS === //
+const MAX_RETRIES = 40; // To increase the chances of getting valid data
 // Logging flags
-const LOG_OVERRIDE = true;
-const LOG_SOURCE = true;
-const LOG_FAILED_VALIDATION = true;
-const LOG_UNUSED_OVERRIDES = true;
+const LOG_OVERRIDE = true; // Logs if overrides were used
+const LOG_SOURCE = true; // Logs data source (override, fixed, faker)
+const LOG_FAILED_VALIDATION = true; // Logs data that failed validation
+const LOG_UNUSED_OVERRIDES = true; // Logs unused overrides
 
 // For using fixed values or functions (Overriding via main script/logic the random value generation)
 // It accepts strings, numbers, booleans or functions (`() =>`)
@@ -17,14 +17,15 @@ type GeneratorOptions = {
 	maxRetries?: number;
 };
 
+// Main function to generate data
 export function generateMockData(
-	schema: SchemaDescriptor,
-	count: number,
+	schema: SchemaDescriptor, // Schema to use
+	count: number, // number of records to generate
 	options: GeneratorOptions = {},
 ): Record<string, any>[] {
-	const { overrides = {}, maxRetries = MAX_RETRIES } = options;
+	const { overrides = {}, maxRetries = MAX_RETRIES } = options; // GeneratorOptions
 	const result: Record<string, any>[] = [];
-	const usedOverrideKeys = new Set<string>();
+	const usedOverrideKeys = new Set<string>(); // For counting unused overrides
 
 	for (let i = 0; i < count; i++) {
 		if (LOG_OVERRIDE || LOG_SOURCE || LOG_FAILED_VALIDATION) {
@@ -32,7 +33,7 @@ export function generateMockData(
 			console.log("{");
 		}
 
-		const record: Record<string, any> = {};
+		const record: Record<string, any> = {}; // Whole "data object" (fields : values) E.g: user
 
 		for (const [field, desc] of Object.entries(schema)) {
 			let value: any;
@@ -48,19 +49,21 @@ export function generateMockData(
 				source = "override";
 				usedOverrideKeys.add(field);
 
+				// Log overrides if any
 				if (LOG_OVERRIDE) {
 					logInfo(`[override] ${field} = ${JSON.stringify(value)}`);
 				}
 
 				// Skip validation for overrides
 				record[field] = value;
+				// Log data source
 				if (LOG_SOURCE) {
 					logInfo(`[source] ${field} ← ${source}`);
 				}
 				continue;
 			}
 
-			// 2. Use fixed value if provided
+			// 2. Use fixed value if provided (and no override was provided)
 			if (desc.fixed !== undefined) {
 				value =
 					typeof desc.fixed === "function"
@@ -69,7 +72,7 @@ export function generateMockData(
 				source = "fixed";
 			}
 
-			// 3. Retry loop for faker + validation
+			// 3. Retry loop for faker + validation (for fixed and faker generated data)
 			let retries = 0;
 			while (retries < maxRetries) {
 				if (value === undefined) {
@@ -77,11 +80,12 @@ export function generateMockData(
 					source = "faker";
 				}
 
-				// 4. Post-process if defined
+				// 4. Post-process if defined (to clean/adapt data. E.g: lowercase emails)
 				if (desc.postProcess) {
 					value = desc.postProcess(value, record);
 				}
 
+				// Check if data is valid (uses schema descriptor validator, schemas constrains or default validation)
 				const isValid = validateGeneratedField(
 					field,
 					value,
@@ -90,6 +94,7 @@ export function generateMockData(
 				);
 				if (isValid) break;
 
+				// Log data that failed validation if any
 				if (LOG_FAILED_VALIDATION) {
 					logWarn(
 						`[invalid] ${field} failed validation: ${JSON.stringify(
@@ -103,6 +108,7 @@ export function generateMockData(
 			}
 
 			record[field] = value;
+			// Log data source
 			if (LOG_SOURCE) {
 				logInfo(`[source] ${field} ← ${source}`);
 			}
@@ -129,12 +135,13 @@ export function generateMockData(
 	return result;
 }
 
+// Helper function to generate data per field
 function generateField(
 	fieldName: string,
-	desc: FieldDescriptor,
+	desc: FieldDescriptor, // Field of schema descriptor
 	currentRecord: Record<string, any>,
 ): any {
-	// Use fakerMethod if defined
+	// Use fakerMethod if defined in schema descriptor (fakerMethod)
 	if (desc.fakerMethod) {
 		const fakerFn = desc.fakerMethod
 			.split(".")
@@ -173,11 +180,12 @@ function generateField(
 	return desc.default ?? null;
 }
 
+// Helper function to validate generated data
 function validateGeneratedField(
 	fieldName: string,
-	value: any,
-	desc: FieldDescriptor,
-	currentRecord: Record<string, any>,
+	value: any, // value to be validated
+	desc: FieldDescriptor, // Field of schema descriptor
+	currentRecord: Record<string, any>, // Whole "data object" (fields : values) E.g: user
 ): boolean {
 	// 1. Custom validator takes priority
 	if (desc.validator && !desc.validator(value, currentRecord)) return false;

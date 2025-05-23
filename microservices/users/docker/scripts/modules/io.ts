@@ -4,13 +4,14 @@ import { extname } from "path";
 import { parseJsonFile, parseCsvFile } from "./parser";
 import { SchemaDescriptor } from "./model";
 
+// === CONFIGURABLE CONSTANTS === //
 const HEADER_TEMPLATE = (timestamp: string, seed?: number) =>
 	`\n//========= ${timestamp} UTC${
 		seed != null ? ` | seed: ${seed}` : ""
 	} =========\n`;
-const APPEND_JSON_SEPARATOR = true;
-const APPEND_CSV_SEPARATOR = true;
-const APPEND_CSV_HEADER = true; // only adds "username,email,..." if file is new
+const APPEND_JSON_SEPARATOR = true; // Appends the separator in json files for each run
+const APPEND_CSV_SEPARATOR = true; // Appends the separator in csv files for each run
+const APPEND_CSV_HEADER = true; // Adds "username,email,..."  for each run (if false, then adds it only when file is created)
 
 export async function readDataFile(
 	filePath: string,
@@ -40,21 +41,25 @@ export async function writeDataFile(
 		.then(() => true)
 		.catch(() => false);
 
+	// For json files
 	if (ext === ".json") {
+		// Add separator if allowed
 		const header = APPEND_JSON_SEPARATOR
 			? HEADER_TEMPLATE(new Date().toISOString(), seed)
 			: "";
 		const json = JSON.stringify(data, null, 2);
 		await appendFile(filePath, `${header}${json},\n`, "utf-8");
+		// For csv files
 	} else if (ext === ".csv") {
 		const rows: string[] = [];
 
-		// Add header if allowed and file is new
+		// Add separator if allowed
 		if (APPEND_CSV_SEPARATOR) {
 			rows.push(
 				`# ${HEADER_TEMPLATE(new Date().toISOString(), seed).trim()}`,
 			);
 		}
+		// Add header if allowed or file is new
 		if (APPEND_CSV_HEADER || (!APPEND_CSV_HEADER && !fileExists)) {
 			rows.push(fields.join(","));
 		}

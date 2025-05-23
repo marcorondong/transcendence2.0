@@ -18,8 +18,8 @@ export async function sendDataToApi(
 	data: Record<string, any>[],
 	url: string,
 	delayMs = 0,
-	// ): Promise<void> {
 ): Promise<{
+	// Summary variables
 	successCount: number;
 	failureCount: number;
 	failedIndices: number[];

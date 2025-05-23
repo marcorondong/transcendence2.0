@@ -3,6 +3,7 @@ import { SchemaDescriptor } from "../model";
 // MR_NOTE: For checking how to correctly pass faker args;
 // check the functions in `generator.ts` (in fallback by type section)
 
+// Define the fields and their properties of the schema / model (Check the available properties in 'model.ts')
 export const userSchemaDescriptor: SchemaDescriptor = {
 	username: {
 		type: "string",
@@ -19,15 +20,8 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	nickname: {
 		type: "string",
 		minLength: 3,
-		// fakerMethod: "person.firstName",
-		// validator: (value: string) =>
-		// 	typeof value === "string" &&
-		// 	value.length >= 3 &&
-		// 	/\S/.test(value) &&
-		// 	/\D/.test(value) &&
-		// 	/[a-zA-Z]/.test(value),
-		// TODO: TESTING
-		fixed: () => `user_${Math.floor(Math.random() * 1000)}`,
+		fakerMethod: "person.firstName",
+		// fixed: () => `user_${Math.floor(Math.random() * 1000)}`, // TODO: Testing
 		validator: (value: string) =>
 			typeof value === "string" &&
 			value.length >= 3 &&
@@ -39,8 +33,8 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	email: {
 		type: "email",
 		fakerMethod: "internet.email",
-		args: [{ firstName: "testuser", provider: "example.com" }], // TODO: TESTING
-		postProcess: (value: string) => value.toLowerCase(),
+		// args: [{ firstName: "testuser", provider: "example.com" }], // TODO: TESTING
+		postProcess: (value: string) => value.toLowerCase(), // My USERS service doesn't allow uppercase emails
 		validator: (value: string) =>
 			/^[\x00-\x7F]+$/.test(value) && // ASCII only
 			/^[^A-Z]+$/.test(value), // no uppercase

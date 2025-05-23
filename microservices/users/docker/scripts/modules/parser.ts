@@ -1,12 +1,12 @@
 import { readFile } from "fs/promises";
 import { SchemaDescriptor } from "./model";
 
-// Extracts valid field names from the schema
+// Helper function to extract valid field names from the schema
 function getFieldNames(schema: SchemaDescriptor): string[] {
 	return Object.keys(schema);
 }
 
-// Filters and normalizes a single JSON entry
+// Helper function to filter and normalize a single JSON entry
 function filterEntryFields(
 	entry: Record<string, any>,
 	fields: string[],
@@ -43,9 +43,10 @@ function filterEntryFields(
 	return filtered;
 }
 
+// Main function to parse JSON files
 export async function parseJsonFile(
 	filePath: string,
-	schema: SchemaDescriptor,
+	schema: SchemaDescriptor, // schema descriptor to auto detect its fields
 ): Promise<Record<string, any>[]> {
 	const raw = await readFile(filePath, "utf-8");
 	const fields = getFieldNames(schema);
@@ -84,7 +85,7 @@ export async function parseJsonFile(
 	return data;
 }
 
-// Tries to detect the CSV separator based on the header line
+// Helper function to detect the CSV separator based on the header line (to support tabs, pipes, etc)
 function detectSeparator(line: string, fields: string[]): string | null {
 	const candidates = [",", "\t", ";", "|"];
 	for (const sep of candidates) {
@@ -101,7 +102,7 @@ function detectSeparator(line: string, fields: string[]): string | null {
 	return null;
 }
 
-// Parses and unquotes a single CSV value
+// Helper function to parse and unquote a single CSV value
 function cleanCsvValue(value: string): string {
 	let trimmed = value.trim();
 	if (
@@ -113,16 +114,16 @@ function cleanCsvValue(value: string): string {
 	return trimmed.replace(/""/g, '"');
 }
 
+// Main function to parse CSV files
 export async function parseCsvFile(
 	filePath: string,
-	schema: SchemaDescriptor,
+	schema: SchemaDescriptor, // schema descriptor to auto detect its fields
 ): Promise<Record<string, any>[]> {
 	const raw = await readFile(filePath, "utf-8");
 	const lines = raw
 		.split("\n")
 		.map((l) => l.trim())
 		.filter(Boolean);
-
 	const fields = getFieldNames(schema);
 	let headers: string[] = [];
 	let separator: string | null = null;
