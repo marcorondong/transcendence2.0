@@ -11,6 +11,7 @@ const validTypes = new Set([
 	"custom",
 ]);
 
+// TODO: This function is not being used yet
 export function validateSchemaDescriptor(schema: SchemaDescriptor): string[] {
 	const errors: string[] = [];
 
