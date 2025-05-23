@@ -12,6 +12,7 @@ import { PongPlayer } from "./game/PongPlayer";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { PongSwagger } from "./utils/swagger";
+import { gameLog, interpretGame } from "./blockchain-transaction/recordGame";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
 const BASE_API_NAME = "pong-api";
 const BASE_GAME_PATH = "pong";
+const BLOCKCHAIN_PATH = "blockchain";
 
 const fastify = Fastify({
 	logger:
@@ -83,6 +85,14 @@ fastify.register(async function (fastify) {
 			});
 		},
 	);
+
+	fastify.get(`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}`, async (req, reply) => {
+		reply.send({
+			message: "Route for blockchain stuff",
+			interpret: await gameLog("24b49bb0-c8fc-4d02-b93f-4cb4313187d0"),
+			log: await interpretGame("24b49bb0-c8fc-4d02-b93f-4cb4313187d0"),
+		});
+	});
 
 	fastify.get(
 		`/${BASE_API_NAME}/player-room/:playerId`,
