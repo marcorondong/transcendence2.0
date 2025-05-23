@@ -55,9 +55,13 @@ scrape_configs:
       - targets:
         - http://ai-bot:6969/health-check
         - http://pong-api:3010/pong-api/health-check
-        - http://pong_db_container:3011/pong/health-check
-        - http://tictactoe_db:3003/tictactoe-db/health-check
-        - http://tictactoe_api:3001/tictactoe-api/health-check
+        - http://pong_db_container:3011/pong-db/health-check
+        - http://tictactoe_api_container:3001/tictactoe-api/health-check
+        - http://tictactoe_db_container:3003/tictactoe-db/health-check
+        - http://chat_api_container:3002/chat-api/health-check
+        - http://chat_db_container:3004/chat-db/health-check
+        - http://auth_api_container:2999/auth-api/health-check
+        - http://users:3000/api/health-check
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
