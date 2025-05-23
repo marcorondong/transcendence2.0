@@ -1,5 +1,5 @@
 services:
-  TICTACTOE_db:
+  tictactoe_db:
     image: ${TICTACTOE_DB_IMAGE_NAME}
     container_name: ${TICTACTOE_DB_CONTAINER_NAME}
     build: ${TICTACTOE_DB_BUILD_FOLDER}
