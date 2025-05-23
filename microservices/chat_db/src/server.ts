@@ -8,7 +8,7 @@ import {
 import { globalErrorHandler } from "./utils/globalErrorHandler";
 import fastifySwagger, { SwaggerOptions } from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
-import { pongRoutes } from "./routes/routes";
+import { chatRoutes } from "./routes/routes";
 import { env } from "./utils/env";
 
 const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
@@ -17,12 +17,12 @@ server.setSerializerCompiler(serializerCompiler);
 server.setErrorHandler(globalErrorHandler);
 server.register(fastifySwagger, swaggerOption as SwaggerOptions);
 server.register(fastifySwaggerUi, swaggerUiOption);
-server.register(pongRoutes);
+server.register(chatRoutes);
 
 const start = async () => {
 	try {
-		await server.listen({ port: env.PONG_DB_PORT, host: env.HOST });
-		console.log(`pong_db is running on port ${env.PONG_DB_PORT}`);
+		await server.listen({ port: env.CHAT_DB_PORT, host: env.HOST });
+		console.log(`chat_db is running on port ${env.CHAT_DB_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);
