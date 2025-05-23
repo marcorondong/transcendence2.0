@@ -1,11 +1,24 @@
 ## subject conform AI
 
-### 1. endpoint for frontend: https://localhost:8080/ai-api/game-mandatory?roomId={uuid}
+### 1. endpoint for frontend: https://localhost:8080/ai-api/game-mandatory
 
-### 2. nginx will authenticate the request and on success forward it to http://ai-bot:6969/ai-api/game-mandatory
+Method: `POST`
 
-### 3. this will open a websocket on the backend to http://pong-api:3010/pong-api/pong 
+Request body:
 
-(ws is hidden completely from frontend)
+```json
+{
+  "roomId": { type: "uuid" }, //room id where the human user is
+  "difficulty": { type: "string", enum: ["easy", "normal", "hard"] }
+}
+```
+
+only available to logged in users
+
+### 2. nginx will authenticate the request and forward it to backend bot http://ai-bot:6969/ai-api/game-mandatory
+
+### 3. this will open a websocket to backend pong at http://pong-api:3010/pong-api/pong 
+
+ws is hidden completely from frontend
   
-### 4. see also [Swagger docs](http://localhost:6969/ai-api/documentation)
+### 4. see also [Swagger docs](http://localhost:6969/ai-api/documentation) while we are in development

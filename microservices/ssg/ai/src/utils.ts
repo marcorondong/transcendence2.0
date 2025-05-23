@@ -17,7 +17,7 @@ export function findIntersectionWithVerticalLine(
 	const m = findGradient(p1, p2);
 	const b = p1.getY() - m * p1.getX();
 	yResult = m * xVertical + b;
-	return roundTo(yResult, 2);
+	return yResult;
 }
 
 export function distanceBetweenPoints(p1: Point, p2: Point): number {
