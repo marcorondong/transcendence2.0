@@ -1,22 +1,18 @@
 all: up
 
 up:
-	docker compose up --build
+	cd ../.. && docker compose up --no-deps auth_api
 
 dev:
-	docker compose build --no-cache
-	docker compose up
+	cd ../.. && docker compose build --no-cache auth_api && docker compose up --no-deps auth_api
 
 down:
-	docker compose down --volumes
+	make -C ../.. clean
 
 clear:
 	clear
 
 remove:
-	docker compose down --volumes
-	docker system prune -a -f --volumes
-	docker builder prune -a -f
+	make -C ../.. remove
 
 super: remove clear dev
-

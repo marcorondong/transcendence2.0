@@ -1,6 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { SignInInput } from "./zodSchemas";
-import { signInRequest, setCookieOpt, jwtSignOpt, clearCookieOpt } from "./service";
+import {
+	signInRequest,
+	setCookieOpt,
+	jwtSignOpt,
+	clearCookieOpt,
+} from "./service";
 import { env } from "../utils/env";
 
 export async function signInHandler(
@@ -33,7 +38,7 @@ export async function refreshJWTHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const payload = request.user;
+	const payload = { id: request.user.id, nickname: request.user.nickname };
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send({ success: true });
