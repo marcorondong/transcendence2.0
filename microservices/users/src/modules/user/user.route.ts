@@ -83,7 +83,7 @@ async function userRoutes(server: FastifyInstance) {
 				tags: ["Users"],
 				summary: "Authenticate a user and return token payload",
 				description:
-					"Verifies credentials and returns token payload used by the Auth service.",
+					"Verifies credentials using either email or username, and returns token payload used by the Auth service.",
 				body: loginSchema,
 				response: {
 					200: loginResponseSchema,
