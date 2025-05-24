@@ -88,6 +88,7 @@ fastify.register(async function (fastify) {
 
 	fastify.get(
 		`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}/:gameId`,
+		{ schema: PongSwagger.getBlockchainSchema() },
 		async (req, reply) => {
 			const { gameId } = req.params as { gameId: string };
 			let responseCode = 200;

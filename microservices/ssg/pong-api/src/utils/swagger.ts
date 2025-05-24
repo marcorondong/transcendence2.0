@@ -55,6 +55,29 @@ export class PongSwagger {
 		};
 	}
 
+	static getBlockchainSchema() {
+		return {
+			description: "Route for fetching log from blockchain",
+			tags: ["Blockchain"],
+			response: {
+				200: {
+					type: "object",
+					properties: {
+						message: { type: "string" },
+						record: { type: "string" },
+						log: { type: "string" },
+					},
+				},
+				404: {
+					type: "object",
+					properties: {
+						message: { type: "string" },
+					},
+				},
+			},
+		};
+	}
+
 	static getWebsocketSchema() {
 		return {
 			//hide: true, //TODO add this line later to hide if from swagger
