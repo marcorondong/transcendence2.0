@@ -116,12 +116,22 @@ export class Tournament extends EventEmitter {
 
 	private sendMatchToQueue(room: PongRoomSingles) {
 		const gameId: string = room.getGame().getGameId();
+		const tournamentId: string = this.getId();
+		const stageName: string = room.getMatchName();
 		const player1: string = room.getWinnerCaptain().getPlayerId();
 		const player2: string = room.getLoserCaptain().getPlayerId();
 		const score1: number = room.getGame().getScoreBoard().getWinnerGoals();
 		const score2: number = room.getGame().getScoreBoard().getLoserGoals();
 		BlockchainQueue.putMatchInQue(
-			new BlockchainData(gameId, player1, player2, score1, score2),
+			new BlockchainData(
+				gameId,
+				tournamentId,
+				stageName,
+				player1,
+				player2,
+				score1,
+				score2,
+			),
 		);
 	}
 
