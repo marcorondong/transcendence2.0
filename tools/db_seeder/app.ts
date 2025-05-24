@@ -35,8 +35,8 @@ const summaryPath =
 	typeof args.summary === "string" // -E.g: '--summary=custom/path.txt' --> Uses custom path
 		? args.summary
 		: args.summary === true
-		? "./logs/summary.log" // E.g: '--summary' (no value)--> Uses default
-		: null; // No summary is created
+			? "./logs/summary.log" // E.g: '--summary' (no value)--> Uses default
+			: null; // No summary is created
 
 // Validate mutually exclusive flags
 if (isAuto && filePath) {
@@ -287,6 +287,7 @@ async function main() {
 				/\/$/,
 				"",
 			)}/${fileName}.${format}`;
+			await mkdir(DEFAULT_OUTPUT_PATH, { recursive: true }); // Ensure folder exists
 			await writeDataFile(data, fullPath, schema, seed);
 			logPlain(`📁 Data saved to: ${fullPath}`);
 		}
