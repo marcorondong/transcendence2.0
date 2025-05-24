@@ -35,7 +35,7 @@ export const pongDbConfig: IPongDbConfig = {
 };
 
 export const blockchainConfig = {
-	contract_address: "0x5bCb0F26F4aFE2CE4ec8972da9FC212fe4CA1266",
+	contract_address: "0xc2E65341CEd6bF8f371C77ea4d50C820f337C673",
 	fuji_rpc_url: "https://api.avax-test.network/ext/bc/C/rpc",
 };
 

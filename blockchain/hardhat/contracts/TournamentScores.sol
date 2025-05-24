@@ -137,9 +137,9 @@ contract TournamentScores {
 				getGameWinner(oneGame),
 				", Loser: ",
 				getGameLoser(oneGame),
-				"In Knockout stage",
+				", In Knockout stage: ",
 				oneGame.stageName,
-				"Of tournament Id: ",
+				", of tournament Id: ",
 				oneGame.tournamentId
 			)
 		);
