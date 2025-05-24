@@ -59,8 +59,6 @@ function replacer(_key: string, value: any) {
 	return typeof value === "bigint" ? value.toString() : value;
 }
 
-// TODO: THIS functions are used for interacting with transactions of contract. Aka fetching game record from blockchain.
-// They will not be part of pong api, but separate service that is not required by subject. IF Filip will have time for that
 export async function interpretGame(gameId: string): Promise<string | false> {
 	try {
 		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
