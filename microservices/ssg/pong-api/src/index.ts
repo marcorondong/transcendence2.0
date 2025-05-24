@@ -102,7 +102,7 @@ fastify.register(async function (fastify) {
 				});
 			} else {
 				reply.send({
-					message: "Route for blockchain stuff",
+					message: "Record found",
 					record: gameData,
 					log: gameLogString,
 				});
