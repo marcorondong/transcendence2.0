@@ -11,13 +11,18 @@ export async function signInRequest(username: string, password: string) {
 		body: JSON.stringify({ username, password }),
 	});
 	if (!response.ok) {
+		const error = await response.json();
 		if (response.status === 401) {
-			throw new httpError.Unauthorized("Invalid email or password");
+			throw new httpError.Unauthorized(
+				error.message || "Invalid email or password",
+			);
 		} else if (response.status === 400) {
-			throw new httpError.BadRequest("Invalid input data");
+			throw new httpError.BadRequest(
+				error.message || "Invalid input data",
+			);
 		}
 		throw new httpError.InternalServerError(
-			"An error occurred while signing in",
+			error.message || "An error occurred while signing in",
 		);
 	}
 	const data = await response.json();
@@ -39,13 +44,18 @@ export async function signUpRequest(
 		body: JSON.stringify({ email, nickname, username, password }),
 	});
 	if (!response.ok) {
+		const error = await response.json();
 		if (response.status === 409) {
-			throw new httpError.Conflict("User already exists");
+			throw new httpError.Conflict(
+				error.message || "User already exists",
+			);
 		} else if (response.status === 400) {
-			throw new httpError.BadRequest("Invalid input data");
+			throw new httpError.BadRequest(
+				error.message || "Invalid input data",
+			);
 		}
 		throw new httpError.InternalServerError(
-			"An error occurred while signing up",
+			error.message || "An error occurred while signing up",
 		);
 	}
 	const data = await response.json();
