@@ -38,6 +38,13 @@ The goal of this app is to be used as a database seeder for testing purposes.
   - Extract data from file: `npm run seed:users:file`
   - Generate previous data: `npm run seed:users:seed`
 
+**Other examples:**
+Load from file (no data generation):
+`npm run seed -- --file=seed_data/users_seeded.csv --model=user`
+
+Auto mode with summary and silence terminal output:
+`pm run seed -- --auto --model=user --silent --summary=./logs/my_run.txt`
+
 For more info, check `package.json` "scripts" part;
 And `app.ts` code (_specially the args parsing and model preset_)
 
