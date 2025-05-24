@@ -1,22 +1,18 @@
 all: up
 
 up:
-	docker compose up --build
+	cd ../.. && docker compose up --no-deps pong_db
 
 dev:
-	docker compose build --no-cache
-	docker compose up
+	cd ../.. && docker compose build --no-cache pong_db && docker compose up --no-deps pong_db
 
 down:
-	docker compose down --volumes
+	make -C ../.. clean
 
 clear:
 	clear
 
 remove:
-	docker compose down --volumes
-	docker system prune -a -f --volumes
-	docker builder prune -a -f
+	make -C ../.. remove
 
 super: remove clear dev
-

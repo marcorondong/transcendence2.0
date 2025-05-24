@@ -43,6 +43,7 @@ declare module "@fastify/jwt" {
 const start = async () => {
 	try {
 		await server.listen({ port: env.AUTH_API_PORT, host: env.HOST });
+		console.log(`auth_api is running on port ${env.AUTH_API_PORT}`);
 	} catch (err) {
 		server.log.error(err);
 		process.exit(1);
