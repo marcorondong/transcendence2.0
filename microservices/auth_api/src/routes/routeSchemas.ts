@@ -1,5 +1,6 @@
 import {
 	signInZodSchema,
+	signUpZodSchema,
 	successResponseSchema,
 	payloadZodSchema,
 } from "./zodSchemas";
@@ -9,6 +10,14 @@ export const signInSchema = {
 	description: "Sign in a user. This will create the token for the user.",
 	tags: ["Auth"],
 	body: signInZodSchema,
+	response: { 200: successResponseSchema },
+};
+
+export const signUpSchema = {
+	summary: "Sign Up",
+	description: "Sign up a user. This will create the user and the token for the user.",
+	tags: ["Auth"],
+	body: signUpZodSchema,
 	response: { 201: successResponseSchema },
 };
 

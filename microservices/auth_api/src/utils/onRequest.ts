@@ -4,6 +4,7 @@ import { env } from "./env";
 export async function onRequest(request: FastifyRequest, reply: FastifyReply) {
 	if (
 		request.url === env.AUTH_API_SIGN_IN_STATIC ||
+		request.url === env.AUTH_API_SIGN_UP_STATIC ||
 		request.url === env.AUTH_API_HEALTH_CHECK_STATIC
 	)
 		return;

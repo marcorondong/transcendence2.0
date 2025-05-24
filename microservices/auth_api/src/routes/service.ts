@@ -2,17 +2,51 @@ import httpError from "http-errors";
 import { payloadZodSchema } from "./zodSchemas";
 import { env } from "../utils/env";
 
-export async function signInRequest(email: string, password: string) {
-	// TODO update signInRequest to use username instead of email when users service is updated
+export async function signInRequest(username: string, password: string) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ email, password }),
+		body: JSON.stringify({ username, password }),
 	});
 	if (!response.ok) {
-		throw new httpError.Unauthorized("Invalid email or password");
+		if (response.status === 401) {
+			throw new httpError.Unauthorized("Invalid email or password");
+		} else if (response.status === 400) {
+			throw new httpError.BadRequest("Invalid input data");
+		}
+		throw new httpError.InternalServerError(
+			"An error occurred while signing in",
+		);
+	}
+	const data = await response.json();
+	const payload = payloadZodSchema.parse(data);
+	return payload;
+}
+
+export async function signUpRequest(
+	email: string,
+	nickname: string,
+	username: string,
+	password: string,
+) {
+	const response = await fetch(env.USERS_REGISTRATION_REQUEST_DOCKER, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ email, nickname, username, password }),
+	});
+	if (!response.ok) {
+		if (response.status === 409) {
+			throw new httpError.Conflict("User already exists");
+		} else if (response.status === 400) {
+			throw new httpError.BadRequest("Invalid input data");
+		}
+		throw new httpError.InternalServerError(
+			"An error occurred while signing up",
+		);
 	}
 	const data = await response.json();
 	const payload = payloadZodSchema.parse(data);

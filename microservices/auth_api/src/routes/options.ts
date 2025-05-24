@@ -1,5 +1,6 @@
 import {
 	signInSchema,
+	signUpSchema,
 	signOutSchema,
 	verifyJWTSchema,
 	refreshJWTSchema,
@@ -8,6 +9,7 @@ import {
 } from "./routeSchemas";
 import {
 	signInHandler,
+	signUpHandler,
 	signOutHandler,
 	verifyJWTHandler,
 	refreshJWTHandler,
@@ -18,6 +20,11 @@ import {
 export const signInOpt = {
 	schema: signInSchema,
 	handler: signInHandler,
+};
+
+export const signUpOpt = {
+	schema: signUpSchema,
+	handler: signUpHandler,
 };
 
 export const signOutOpt = {
