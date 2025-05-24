@@ -55,7 +55,7 @@ interface PaddleTwistSelector {
 
 //the AI will twist the ball. maximum twist = 0.5 a.k.a. half of paddle height
 export const paddleTwistSelector: PaddleTwistSelector = {
-	easy: 0,
+	easy: 0.4,
 	normal: 0.25,
-	hard: 0.4,
+	hard: 0,
 };

@@ -86,7 +86,7 @@ export class Bot {
 			this.disconnectTimeout -= 10000;
 			await sleep(10000);
 		}
-		console.log("Game did not start on time, closing WebSocket connection");
+		console.log("Game is offline, closing WebSocket connection");
 		this.ws.close();
 	}
 
@@ -117,7 +117,8 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				if (--this.countdown <= this.FRAME_RATE) this.handleEvent(event);
+				if (--this.countdown <= this.FRAME_RATE)
+					this.handleEvent(event);
 				else if (this.firstFrame) {
 					this.readFirstFrame(event);
 					this.firstFrame = false;
@@ -130,18 +131,20 @@ export class Bot {
 	}
 
 	/*************************************************************************** */
-	/*                   AI LOGIC                                                */
+	/*                              AI LOGIC                                     */
 	/*************************************************************************** */
 
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
 		this.resetTimeout();
-		
+
 		const gameState = JSON.parse(event.toString()) as GameState;
-		
+
 		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
 
-		if (Math.abs(ballPosition.getX()) > 3.9) {console.log(ballPosition);}
+		if (Math.abs(ballPosition.getX()) > 3.9) {
+			console.log(ballPosition);
+		}
 		this.log += roundTo(ballPosition.getX(), 2) + " ";
 
 		if (this.countdown) return;
@@ -261,13 +264,12 @@ export class Bot {
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
 
-		console.log("origin x :", origin.getX(), " y ", origin.getY());
-
 		const distance = distanceBetweenPoints(origin, ballPosition);
 		if (this.ballBounced(distance)) {
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
 		}
-		if (this.ballHitPaddle()) this.target.setX(Math.round(-this.target.getX()));
+		if (this.ballHitPaddle())
+			this.target.setX(Math.round(-this.target.getX()));
 		this.ballSlope = findGradient(origin, ballPosition);
 		this.target.setY(
 			findIntersectionWithVerticalLine(
@@ -279,7 +281,7 @@ export class Bot {
 	}
 
 	private calculateFrames(ballPosition: Point) {
-		this.framesUntilTarget = Math.ceil(
+		this.framesUntilTarget = Math.floor(
 			distanceBetweenPoints(ballPosition, this.target) / this.BALL_SPEED,
 		);
 		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
@@ -306,26 +308,55 @@ export class Bot {
 	private hitPaddleAt(ballPosition: Point): Point {
 		let unitVector = Math.sqrt(1 + Math.pow(this.ballSlope, 2));
 		if (this.target.getX() < 0) unitVector *= -1;
-		const deltaX = this.framesUntilTarget * this.BALL_SPEED / unitVector;
-		const deltaY = this.framesUntilTarget * this.BALL_SPEED * this.ballSlope / unitVector;
-		return new Point(ballPosition.getX() + deltaX, ballPosition.getY() + deltaY);
+		const deltaX = (this.framesUntilTarget * this.BALL_SPEED) / unitVector;
+		const deltaY =
+			(this.framesUntilTarget * this.BALL_SPEED * this.ballSlope) /
+			unitVector;
+		return new Point(
+			ballPosition.getX() + deltaX,
+			ballPosition.getY() + deltaY,
+		);
 	}
 
-	private actualTarget(ballPosition: Point) {
+	private fitTargetInField() {
 		while (
 			this.target.getY() > field.TOP_EDGE_Y ||
 			this.target.getY() < field.BOTTOM_EDGE_Y
 		)
 			this.target.setY(this.accountForBounce(this.target.getY()));
-		this.movePaddleTo =
-			this.target.getX() === this.side ? this.target.getY() : 0;
-		if (this.canReachTarget() === false) this.movePaddleTo = 0;
-		let possiblepoint = this.hitPaddleAt(ballPosition);
-		if (Math.abs(possiblepoint.getX()) > 4.02) {
+	}
+
+	private getTargetByFrame(ballPosition: Point) {
+		let possiblePoint = this.hitPaddleAt(ballPosition);
+		if (
+			Math.abs(possiblePoint.getX()) < 3.95
+		) {
+			this.framesUntilTarget++;
+			this.framesAfterTarget--;
+			possiblePoint = this.hitPaddleAt(ballPosition);
+		}
+		if (
+			Math.abs(possiblePoint.getX()) > 4.015
+		) {
 			this.framesUntilTarget--;
 			this.framesAfterTarget++;
+			possiblePoint = this.hitPaddleAt(ballPosition);
 		}
-		this.target = this.hitPaddleAt(ballPosition);
+		this.target = possiblePoint;
+	}
+
+	private whereToMovePaddle() {
+		this.movePaddleTo =
+			Math.round(this.target.getX()) === this.side
+				? this.target.getY()
+				: 0;
+		if (this.canReachTarget() === false) this.movePaddleTo = 0;
+	}
+
+	private actualTarget(ballPosition: Point) {
+		// this.getTargetByFrame(ballPosition);
+		this.fitTargetInField();
+		this.whereToMovePaddle();
 	}
 
 	private calculateTarget(ballPosition: Point) {
@@ -342,7 +373,7 @@ export class Bot {
 		if (Math.abs(this.side) < Math.abs(this.lastBall.getX())) {
 			reachable = false;
 		} else if (
-			this.botSpeed !== botSpeedSelector["hard"] &&
+			this.botSpeed !== 0 &&
 			this.framesUntilTarget <
 				(this.movePaddleTo -
 					this.paddleY -
