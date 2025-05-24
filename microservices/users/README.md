@@ -59,7 +59,7 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 > - 👥 User friendship management (friend requests).
 > - 🏃‍♂️💨 Change in how the code is "compiled" and run.
 > - Makefile
-> - [x] Login to be done via email **AND** username.
+> - [x] Login to be done via email **OR** username.
 > - [x] `npm` utilities commands.
 > - ♻️ Code refactoring and code clean-up
 
