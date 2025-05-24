@@ -113,7 +113,7 @@ fastify.register(async function (fastify) {
 			);
 			if (player === false) return;
 			if (manager.addPlayerToActiveList(player) == false) {
-				player.sendNotification("You are already in a game Room");
+				player.sendError("You are already in a game Room");
 				player.connection.close(1008, "Already in pong-api");
 				return;
 			}
