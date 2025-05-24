@@ -117,7 +117,7 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				if (--this.countdown <= this.FRAME_RATE)
+				if (--this.countdown == 0)
 					this.handleEvent(event);
 				else if (this.firstFrame) {
 					this.readFirstFrame(event);
@@ -137,24 +137,13 @@ export class Bot {
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
 		this.resetTimeout();
+		this.countdown = this.FRAME_RATE;
 
 		const gameState = JSON.parse(event.toString()) as GameState;
 
 		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
 
-		if (Math.abs(ballPosition.getX()) > 3.9) {
-			console.log(ballPosition);
-		}
-		this.log += roundTo(ballPosition.getX(), 2) + " ";
-
-		if (this.countdown) return;
-		this.countdown = this.FRAME_RATE;
-
-		console.log(this.log);
-		this.log = "";
-		console.log(gameState.score);
-		console.log(gameState.ball);
-
+		this.logGameState(gameState);
 		this.updatePaddle(gameState);
 		this.handleScore(gameState.score);
 		this.calculateTarget(ballPosition);
@@ -162,6 +151,11 @@ export class Bot {
 
 		if (this.paddleY != this.movePaddleTo) this.makeMove(this.botSpeed);
 		else this.twistBall(this.paddleTwist);
+	}
+
+	private logGameState(gameState: GameState) {
+		console.log(gameState.score);
+		console.log(gameState.ball);
 	}
 
 	// send the necessary amount of moves to ws to get to the calculated target
