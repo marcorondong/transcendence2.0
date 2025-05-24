@@ -61,7 +61,7 @@ function replacer(_key: string, value: any) {
 
 // TODO: THIS functions are used for interacting with transactions of contract. Aka fetching game record from blockchain.
 // They will not be part of pong api, but separate service that is not required by subject. IF Filip will have time for that
-export async function interpretGame(gameId: string): Promise<string> {
+export async function interpretGame(gameId: string): Promise<string | false> {
 	try {
 		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
 		const wallet = new ethers.Wallet(WALLET_PRIVATE_KEY, provider);
@@ -72,10 +72,10 @@ export async function interpretGame(gameId: string): Promise<string> {
 		return JSON.stringify(game, replacer);
 	} catch (error) {
 		console.error("❌ Failed to fetch game from blockchain:", error);
-		return "error";
+		return false;
 	}
 }
-export async function gameLog(gameId: string) {
+export async function gameLog(gameId: string): Promise<string | false> {
 	try {
 		const provider = new ethers.JsonRpcProvider(FUJI_RPC_URL);
 		const wallet = new ethers.Wallet(WALLET_PRIVATE_KEY, provider);
@@ -85,7 +85,7 @@ export async function gameLog(gameId: string) {
 		return game.toString();
 	} catch (error) {
 		console.error("❌ Failed to fetch game log from blockchain:", error);
-		return "fail";
+		return false;
 	}
 }
 export async function listenToGameLogs() {

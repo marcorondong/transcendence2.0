@@ -86,13 +86,29 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	fastify.get(`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}`, async (req, reply) => {
-		reply.send({
-			message: "Route for blockchain stuff",
-			interpret: await gameLog("e4506f60-214c-4cc3-ace5-b643fcae3bac"),
-			log: await interpretGame("e4506f60-214c-4cc3-ace5-b643fcae3bac"),
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}/:gameId`,
+		async (req, reply) => {
+			const { gameId } = req.params as { gameId: string };
+			let responseCode = 200;
+			const gameData = await interpretGame(gameId);
+			const gameLogString = await gameLog(gameId);
+			if (gameData === false || gameLogString === false) {
+				responseCode = 404;
+			}
+			if (responseCode !== 200) {
+				reply.code(responseCode).send({
+					message: "Provided gameId is not recorded on blockchain",
+				});
+			} else {
+				reply.send({
+					message: "Route for blockchain stuff",
+					record: gameData,
+					log: gameLogString,
+				});
+			}
+		},
+	);
 
 	fastify.get(
 		`/${BASE_API_NAME}/player-room/:playerId`,
