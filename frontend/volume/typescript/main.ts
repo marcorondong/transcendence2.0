@@ -28,4 +28,4 @@ chat.classList.add(
 );
 
 // STARTING ROUTER
-router.loadComponent();
+router.auth();

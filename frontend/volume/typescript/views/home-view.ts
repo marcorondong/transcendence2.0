@@ -1,10 +1,13 @@
 import "../components/pong-component.js";
 import { notificationEvent } from "../services/events.js";
+import { FetchAuth } from "../services/fetch-auth.js";
 
 class HomeView extends HTMLElement {
 	constructor() {
 		super();
 	}
+	button = document.createElement("button");
+	buttonVerify = document.createElement("button");
 
 	connectedCallback() {
 		this.classList.add("flex", "flex-col", "items-start");
@@ -15,13 +18,19 @@ class HomeView extends HTMLElement {
 		h1.textContent = "Home";
 		this.appendChild(h1);
 
-		const button = document.createElement("button");
-		button.classList.add("pong-button");
-		button.addEventListener("click", () => {
-			button.dispatchEvent(notificationEvent("helloooo", "info"));
+		this.button.classList.add("pong-button");
+		this.button.addEventListener("click", () => {
+			this.button.dispatchEvent(notificationEvent("helloooo", "info"));
 		});
-		button.innerText = "press me";
-		this.append(button);
+		this.button.innerText = "notification";
+
+		this.buttonVerify.classList.add("pong-button");
+		this.buttonVerify.addEventListener("click", () =>
+			FetchAuth.verifyJwt(),
+		);
+		this.buttonVerify.innerText = "verify token";
+
+		this.append(this.button, this.buttonVerify);
 	}
 
 	disconnectedCallback() {

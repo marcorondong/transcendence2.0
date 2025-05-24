@@ -29,6 +29,7 @@ export function notificationEvent(message: string, state: State) {
 		message,
 		state,
 	};
+	console.log("sending notification");
 	return new CustomEvent("notification", {
 		detail: { source: data },
 		bubbles: true,

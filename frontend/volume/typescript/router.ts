@@ -1,4 +1,5 @@
 import { ChatComponent } from "./components/chat-component.js";
+import { FetchAuth } from "./services/fetch-auth.js";
 
 export class Router {
 	containerDiv = document.getElementById("content");
@@ -19,7 +20,6 @@ export class Router {
 		return array;
 	}
 
-	// helo there whats up?
 	// write a auth handler function here, that checks inititally if the user
 	// has sign in  rights or not. If not user should be redirected to the sign
 	// in page. from sign in page sign up page should be reachable
@@ -35,6 +35,14 @@ export class Router {
 	// repeated. If the refresh fails -> sign in page
 	//
 	// handle token refresh on user activity
+	async auth() {
+		this.clearContent();
+		const returnValue = await FetchAuth.verifyJwt();
+		if (!returnValue) {
+			return;
+		}
+		this.loadComponent();
+	}
 
 	stringAfterSlash(link: string) {
 		const n = link.lastIndexOf("/");
@@ -81,10 +89,13 @@ export class Router {
 		}
 	}
 
-	loadComponent() {
+	clearContent() {
 		if (this.component && this.containerDiv) {
 			this.containerDiv.removeChild(this.component);
 		}
+	}
+	loadComponent() {
+		this.clearContent();
 		this.appendComponent();
 	}
 

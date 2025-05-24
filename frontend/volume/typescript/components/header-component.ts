@@ -1,4 +1,4 @@
-import { fetchSignOut } from "../services/fetch-sign-out.js";
+import { FetchAuth } from "../services/fetch-auth.js";
 import { IconComponent } from "./icon-component.js";
 import { ThemeToggleComponent } from "./theme-toggle-component.js";
 
@@ -97,7 +97,12 @@ export class HeaderComponent extends HTMLElement {
 
 		// SIGN OUT BUTTON
 		const logoutButton = document.createElement("button");
-		logoutButton.classList.add("pong-button", "pong-button-info", "w-full");
+		logoutButton.classList.add(
+			"pong-button",
+			"pong-button-info",
+			"w-full",
+			"auth-needed",
+		);
 		logoutButton.innerText = "Sign Out";
 		const listElement = document.createElement("li");
 		listElement.append(logoutButton);
@@ -125,7 +130,7 @@ export class HeaderComponent extends HTMLElement {
 			closeButton.classList.add("hidden");
 		});
 		logoutButton.addEventListener("click", async () => {
-			await fetchSignOut();
+			await FetchAuth.signOut();
 		});
 	}
 

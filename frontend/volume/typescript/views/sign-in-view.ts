@@ -4,8 +4,7 @@ import {
 	notificationEvent,
 	signUpLinkEvent,
 } from "../services/events.js";
-import { fetchAuth, UserAuth } from "../services/fetch-sign-in.js";
-import { NotificationService } from "../services/notification-service.js";
+import { FetchAuth, UserAuth } from "../services/fetch-auth.js";
 
 export class SignInView extends HTMLElement {
 	chat: ChatComponent;
@@ -78,7 +77,7 @@ export class SignInView extends HTMLElement {
 			this.signUpNote,
 		);
 		this.append(this.container);
-		document.addEventListener("click", this);
+		this.addEventListener("click", this);
 	}
 	handleEvent(event: Event) {
 		const handlerName =
@@ -100,28 +99,21 @@ export class SignInView extends HTMLElement {
 		}
 		if (target.id === "sign-in-button") {
 			event.preventDefault();
-			const data: UserAuth = {
+			const user: UserAuth = {
 				email: this.inputUsername.value,
 				password: this.inputPassword.value,
 			};
-			try {
-				const response = await fetchAuth(data);
-				const message = await response.json();
-				console.log("response of auth service:", message);
-				if (message.success === true) {
-					console.log("got into success");
-					this.chat.openWebsocket();
-					this.dispatchEvent(homeLinkEvent);
-				}
-			} catch (e) {
-				console.log("error at fetch sign in", e);
-				this.dispatchEvent(notificationEvent("Sign in " + e, "error"));
+			const returnValue = await FetchAuth.signIn(user);
+			if (returnValue && returnValue.response.ok) {
+				this.chat.openWebsocket();
+				this.dispatchEvent(homeLinkEvent);
 			}
 		}
 	}
 
 	disconnectedCallback() {
 		console.log("LOGIN VIEW has been DISCONNECTED");
+		this.removeEventListener("click", this.onClick);
 	}
 }
 
