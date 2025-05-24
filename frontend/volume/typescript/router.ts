@@ -19,6 +19,23 @@ export class Router {
 		return array;
 	}
 
+	// helo there whats up?
+	// write a auth handler function here, that checks inititally if the user
+	// has sign in  rights or not. If not user should be redirected to the sign
+	// in page. from sign in page sign up page should be reachable
+	// every http call and ws connection should react correctly to a 401
+	// response. This means on 401 user should be redirected to login.
+	//
+	// what about switching to another view? should that also check the token?
+	// what about a running websocket? is that checked with every transmit over
+	// the ws?
+	//
+	// handle token refresh. So upon receiving a 401, a token refresh call
+	// should be made. If that succeeds the initial http call should be
+	// repeated. If the refresh fails -> sign in page
+	//
+	// handle token refresh on user activity
+
 	stringAfterSlash(link: string) {
 		const n = link.lastIndexOf("/");
 		return link.substring(n);

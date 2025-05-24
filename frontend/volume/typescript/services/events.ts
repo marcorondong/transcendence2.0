@@ -1,3 +1,5 @@
+import { NotificationData, State } from "../types/Notification.js";
+
 export const pongLinkEvent = new CustomEvent("pong-link", {
 	detail: { source: "pong-view" },
 	bubbles: true,
@@ -21,3 +23,15 @@ export const signInLinkEvent = new CustomEvent("pong-link", {
 	bubbles: true,
 	composed: true,
 });
+
+export function notificationEvent(message: string, state: State) {
+	const data: NotificationData = {
+		message,
+		state,
+	};
+	return new CustomEvent("notification", {
+		detail: { source: data },
+		bubbles: true,
+		composed: true,
+	});
+}

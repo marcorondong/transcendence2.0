@@ -1,6 +1,11 @@
 import { ChatComponent } from "../components/chat-component.js";
-import { homeLinkEvent, signUpLinkEvent } from "../services/events.js";
+import {
+	homeLinkEvent,
+	notificationEvent,
+	signUpLinkEvent,
+} from "../services/events.js";
 import { fetchAuth, UserAuth } from "../services/fetch-sign-in.js";
+import { NotificationService } from "../services/notification-service.js";
 
 export class SignInView extends HTMLElement {
 	chat: ChatComponent;
@@ -99,13 +104,18 @@ export class SignInView extends HTMLElement {
 				email: this.inputUsername.value,
 				password: this.inputPassword.value,
 			};
-			console.log("data: ", data);
-			const response = await fetchAuth(data);
-			console.log("response of auth service:", response);
-			if (response.success === true) {
-				console.log("got into success");
-				this.chat.openWebsocket();
-				this.dispatchEvent(homeLinkEvent);
+			try {
+				const response = await fetchAuth(data);
+				const message = await response.json();
+				console.log("response of auth service:", message);
+				if (message.success === true) {
+					console.log("got into success");
+					this.chat.openWebsocket();
+					this.dispatchEvent(homeLinkEvent);
+				}
+			} catch (e) {
+				console.log("error at fetch sign in", e);
+				this.dispatchEvent(notificationEvent("Sign in " + e, "error"));
 			}
 		}
 	}

@@ -3,9 +3,12 @@ import "./components/header-component.js";
 import "./components/chat-component.js";
 import "./components/footer-component.js";
 import { ChatComponent } from "./components/chat-component.js";
+import { NotificationService } from "./services/notification-service.js";
 
 const chat = new ChatComponent();
 const router = new Router(chat);
+const notificationService = new NotificationService();
+notificationService.listen();
 
 // PUTTING CHAT INTO DOM TREE
 const container = document.getElementById("container");
