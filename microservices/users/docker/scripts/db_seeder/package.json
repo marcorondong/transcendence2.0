@@ -1,9 +1,9 @@
 {
-  "name": "scripts",
+  "name": "db_seeder",
   "version": "1.0.1",
   "main": "index.js",
   "scripts": {
-    "seed": "ts-node user-seeder.ts",
+    "seed": "ts-node app.ts",
     "seed:users:auto": "npm run seed -- --model=user --auto",
     "seed:users:file": "npm run seed -- --model=user --file=./seed_data/users_seeded.csv",
     "seed:users:seed": "npm run seed -- --model=user --auto --seed=871160",
