@@ -12,6 +12,7 @@ const envZodSchema = z.object({
 	AUTH_API_DOCUMENTATION_STATIC: z.string().nonempty(),
 	AUTH_API_JWT_SECRET_FILE_LOCATION_CONTAINER: z.string().nonempty(),
 	AUTH_API_COOKIE_SECRET_FILE_LOCATION_CONTAINER: z.string().nonempty(),
+	USERS_LOGIN_REQUEST_DOCKER: z.string().nonempty(),
 	JWT_TOKEN_NAME: z.string().nonempty(),
 	NODE_ENV: z.enum(["development", "production"]),
 });
