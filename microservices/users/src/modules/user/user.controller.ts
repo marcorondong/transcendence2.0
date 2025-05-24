@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
+	UniqueUserField,
 	createUserInput,
 	userResponseSchema,
 	loginInput,
@@ -41,9 +42,24 @@ export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
-	const { email, password } = request.body;
+	const { email, username, password } = request.body;
+	let identifier: string;
+	let userWhere: UniqueUserField;
+
+	if (email) {
+		identifier = email.toLowerCase(); // enforce lowercase emails
+		userWhere = { email: identifier };
+	} else {
+		identifier = username!; // username may be mixed case
+		// identifier = username!.toLowerCase(); // <- uncomment to enforce lowercase usernames later
+		userWhere = { username: identifier };
+	}
+
 	try {
-		const user = await findUserByUnique({ email }); // Might throw 404 Not Found
+		// const user = await findUserByUnique({ email }); // Might throw 404 Not Found
+		const user = await findUserByUnique(
+			email ? { email: identifier } : { username: identifier },
+		);
 		const valid = verifyPassword({
 			candidatePassword: password,
 			hash: user.passwordHash,
@@ -129,8 +145,8 @@ function applyPagination(params: {
 		typeof params.page === "number"
 			? (params.page - 1) * take
 			: typeof params.skip === "number"
-			? params.skip
-			: 0;
+				? params.skip
+				: 0;
 
 	return { skip, take };
 }
