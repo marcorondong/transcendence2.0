@@ -227,18 +227,30 @@ export const putUserSchema = z
 // Schema to update SOME user fields
 export const patchUserSchema = putUserSchema.partial().strict(); // Rejects unknown fields
 
-// Schema for login
+// Schema for login (Is possible to log in with email OR username, but not both)
 export const loginSchema = z
 	.object({
-		email: z
+		email: z.string().email().optional(), // Optional because it could be use email OR username
+		username: z
+			.string()
+			.min(3, "Username must be at least 3 character long") // Set min to avoid invalid request reach db
+			.optional(), // Optional because it could be use username OR email
+		password: z
 			.string({
-				required_error: "Email is required",
-				invalid_type_error: "Email must be a string",
+				required_error: "Password is required",
 			})
-			.email(),
-		password: z.string(),
+			.min(6, "Password must be at least 6 character long"), // Set min to avoid invalid request reach db
 	})
-	.strict(); // Rejects unknown fields
+	.strict() // Rejects unknown fields
+	// Refine the values (email OR username must be present, but NOT both)
+	.refine(
+		(data) =>
+			(data.email || data.username) && !(data.email && data.username),
+		{
+			message: "Provide either email or username, not both",
+			path: ["email"], // TODO: For Swagger UI display (check this)
+		},
+	);
 
 // Schema for token payload
 const tokenPayloadSchema = z.object({
