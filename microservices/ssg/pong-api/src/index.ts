@@ -89,8 +89,8 @@ fastify.register(async function (fastify) {
 	fastify.get(`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}`, async (req, reply) => {
 		reply.send({
 			message: "Route for blockchain stuff",
-			interpret: await gameLog("24b49bb0-c8fc-4d02-b93f-4cb4313187d0"),
-			log: await interpretGame("24b49bb0-c8fc-4d02-b93f-4cb4313187d0"),
+			interpret: await gameLog("5fd01ccd-e30f-408a-8d6b-ec4147e4b5b9"),
+			log: await interpretGame("5fd01ccd-e30f-408a-8d6b-ec4147e4b5b9"),
 		});
 	});
 

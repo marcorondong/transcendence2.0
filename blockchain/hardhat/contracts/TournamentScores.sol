@@ -16,6 +16,8 @@ contract TournamentScores {
 
 	struct Game {
 		string gameId;
+		string tournamentId;
+		string stageName;
 		string player1Id;
 		string player2Id;
 		uint8 player1Score;
@@ -25,6 +27,8 @@ contract TournamentScores {
 
 	event GameLog(
 		string gameId,
+		string tournamentId,
+		string stageName,
 		string player1Id,
 		uint8 player1Score,
 		string player2Id,
@@ -38,6 +42,8 @@ contract TournamentScores {
 
 	function recordGame(
 		string memory _gameId,
+		string memory _tournamentId,
+		string memory _stageName,
 		string memory _player1,
 		string memory _player2,
 		uint8 _player1Score,
@@ -50,6 +56,8 @@ contract TournamentScores {
 		);
 		Game memory oneGame = Game(
 			_gameId,
+			_tournamentId,
+			_stageName,
 			_player1,
 			_player2,
 			_player1Score,
@@ -60,6 +68,8 @@ contract TournamentScores {
 		gamesCount++;
 		emit GameLog(
 			_gameId,
+			_tournamentId,
+			_stageName,
 			_player1,
 			_player1Score,
 			_player2,
@@ -77,12 +87,22 @@ contract TournamentScores {
 	)
 		external
 		view
-		returns (string memory, string memory, string memory, uint8, uint8)
+		returns (
+			string memory,
+			string memory,
+			string memory,
+			string memory,
+			string memory,
+			uint8,
+			uint8
+		)
 	{
 		require(games[gameId].exist == true, "No record for requested gameID");
 		Game memory requestedGame = games[gameId];
 		return (
 			requestedGame.gameId,
+			requestedGame.tournamentId,
+			requestedGame.stageName,
 			requestedGame.player1Id,
 			requestedGame.player2Id,
 			requestedGame.player1Score,
@@ -116,7 +136,11 @@ contract TournamentScores {
 				", Winner: ",
 				getGameWinner(oneGame),
 				", Loser: ",
-				getGameLoser(oneGame)
+				getGameLoser(oneGame),
+				"In Knockout stage",
+				oneGame.stageName,
+				"Of tournament Id: ",
+				oneGame.tournamentId
 			)
 		);
 		return sentence;

@@ -25,6 +25,8 @@ const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY!;
 
 export async function recordGameOnBlockchain(
 	gameId: string,
+	tournamentId: string,
+	stageName: string,
 	player1: string,
 	player2: string,
 	score1: number,
@@ -37,6 +39,8 @@ export async function recordGameOnBlockchain(
 
 		const tx = await contract.recordGame(
 			gameId,
+			tournamentId,
+			stageName,
 			player1,
 			player2,
 			score1,
@@ -52,7 +56,7 @@ export async function recordGameOnBlockchain(
 }
 
 function replacer(_key: string, value: any) {
-  return typeof value === "bigint" ? value.toString() : value;
+	return typeof value === "bigint" ? value.toString() : value;
 }
 
 // TODO: THIS functions are used for interacting with transactions of contract. Aka fetching game record from blockchain.
