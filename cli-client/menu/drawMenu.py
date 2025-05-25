@@ -1,6 +1,7 @@
 import curses
 from menu.menuItems import menuItems, pressAnyKey, TAB_SIZE, BACK_BUTTON
 from menu.logger import myLogger
+from utils.player import *
 
 
 def cursorUp(stdscr, menuLength, position):
@@ -56,9 +57,16 @@ def drawCursor(stdscr, position):
     stdscr.refresh()
 
 
-def callHandlerFunction(stdscr, selectedItem):
-    """
-    Calls the function associated with the selected item.
+def callHandlerFunction(stdscr, selectedItem, user: Player):
+    """_summary_ Calls function of selected item
+
+    Args:
+        stdscr (_type_): _description_
+        selectedItem (_type_): _description_
+        user (Player): class that have all player/user data
+
+    Returns:
+        _type_: _description_
     """
     stdscr.clear()
     curses.curs_set(0)
@@ -66,7 +74,7 @@ def callHandlerFunction(stdscr, selectedItem):
     handler = menuItems.get(
         selectedItem, pressAnyKey
     )  # if selectedItem has no defined handler, press any key to return to menu
-    handler(stdscr)
+    handler(stdscr, user)
 
 
 def menuLoop(stdscr, title, items):

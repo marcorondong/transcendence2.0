@@ -3,6 +3,7 @@ import curses
 from menu.connect import client, TAB_SIZE
 from menu.logger import myLogger
 from utils.prompt import *
+from utils.player import *
 
 MAX_USERNAME_LENGTH = 40
 MAX_PASSWORD_LENGTH = 128
@@ -10,14 +11,14 @@ MAX_PASSWORD_LENGTH = 128
 BACK_BUTTON = "Back"
 
 
-def randomGame(stdscr):
+def randomGame(stdscr, user: Player):
     """
     get a random game
     """
     client(stdscr)
 
 
-def register(stdscr):
+def register(stdscr, user: Player):
     """
     register a new user
     """
@@ -25,7 +26,7 @@ def register(stdscr):
     # logic later
 
 
-def login(stdscr: curses.window):
+def login(stdscr: curses.window, user: Player):
     """
     login an existing user and open the main menu
     """
@@ -66,7 +67,7 @@ def login(stdscr: curses.window):
     return "username"
 
 
-def guestLogin(stdscr):
+def guestLogin(stdscr, user: Player):
     """
     login as a guest user
     """
@@ -75,7 +76,7 @@ def guestLogin(stdscr):
     return "guest"
 
 
-def logout(stdscr):
+def logout(stdscr, user: Player):
     """
     logout the current user
     """
@@ -83,7 +84,7 @@ def logout(stdscr):
     # logic later
 
 
-def pressAnyKey(stdscr):
+def pressAnyKey(stdscr, user: Player):
     """
     prints 'press any key to return to menu' on line 0 of the screen
     refreshes the screen and waits for user input
