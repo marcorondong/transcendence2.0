@@ -27,7 +27,8 @@ def register(stdscr, user: Player):
     # logic later
 
 
-def login(stdscr: curses.window, user: Player):
+# TODO remove this. It is auto login for filip account for faster testing
+def login(stdscr: curses.window, user: Player) -> None:
     """
     login an existing user and open the main menu
     """
@@ -35,14 +36,16 @@ def login(stdscr: curses.window, user: Player):
     username = UI.get_prompt("username", line)
     line += 1
     password = UI.get_secret_prompt("password", line)
+    line += 1
 
     user.set_username("f@gmail.com")  # FIXME put real input
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
     if user.log_user("A1!aaa"):  # FIXME put real input
         UI.log_notification("You are logged In")
-    stdscr.getch()
-    return "username"
+    UI.log_notification("Press Enter to continue", 1)
+    UI.screen.getch()
+    #return "username"
 
 
 def guestLogin(stdscr, user: Player):
