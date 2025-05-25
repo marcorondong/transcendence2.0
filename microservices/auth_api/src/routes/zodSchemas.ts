@@ -48,27 +48,29 @@ import { z } from "zod";
 // 	})
 // 	.strict();
 
-export const signInZodSchema = z
-	.object({
-		username: z.string(),
-		password: z.string(),
-	})
-	.strict();
+// export const signInZodSchema = z
+// 	.object({
+// 		username: z.string(),
+// 		password: z.string(),
+// 	})
+// 	.strict();
 
-export const signUpZodSchema = z
+// export const signUpZodSchema = z
+// 	.object({
+// 		email: z.string(),
+// 		password: z.string(),
+// 		nickname: z.string(),
+// 		username: z.string(),
+// 	})
+// 	.strict();
+
+// USERS service controls this, the agreement is at least 'id' and 'nickname' should be present in the payload
+export const payloadZodSchema = z
 	.object({
-		email: z.string(),
-		password: z.string(),
+		id: z.string(),
 		nickname: z.string(),
-		username: z.string(),
 	})
-	.strict();
+	.passthrough(); // Explicitly allow extra fields (this is for verbosity)
 
-
-export const payloadZodSchema = z.object({
-	id: z.string(),
-	nickname: z.string(),
-});
-
-export type SignInInput = z.infer<typeof signInZodSchema>;
-export type SignUpInput = z.infer<typeof signUpZodSchema>;
+// export type SignInInput = z.infer<typeof signInZodSchema>;
+// export type SignUpInput = z.infer<typeof signUpZodSchema>;

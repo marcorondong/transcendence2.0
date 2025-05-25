@@ -2,13 +2,13 @@ import httpError from "http-errors";
 import { payloadZodSchema } from "./zodSchemas";
 import { env } from "../utils/env";
 
-export async function signInRequest(username: string, password: string) {
+export async function signInRequest(body: unknown) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ username, password }),
+		body: JSON.stringify(body),
 	});
 	if (!response.ok) {
 		const error = await response.json();
@@ -30,18 +30,13 @@ export async function signInRequest(username: string, password: string) {
 	return payload;
 }
 
-export async function signUpRequest(
-	email: string,
-	nickname: string,
-	username: string,
-	password: string,
-) {
+export async function signUpRequest(body: unknown) {
 	const response = await fetch(env.USERS_REGISTRATION_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ email, nickname, username, password }),
+		body: JSON.stringify(body),
 	});
 	if (!response.ok) {
 		const error = await response.json();

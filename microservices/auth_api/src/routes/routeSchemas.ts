@@ -1,15 +1,16 @@
 import {
-	signInZodSchema,
-	signUpZodSchema,
+	// signInZodSchema,
+	// signUpZodSchema,
 	// successResponseSchema,
 	payloadZodSchema,
 } from "./zodSchemas";
 
+// TODO delete body in production
 export const signInSchema = {
 	summary: "Sign In",
 	description: "Sign in a user. This will create the token for the user.",
 	tags: ["Auth"],
-	body: signInZodSchema,
+	// body: signInZodSchema,
 	// response: { 200: successResponseSchema },
 };
 
@@ -17,7 +18,7 @@ export const signUpSchema = {
 	summary: "Sign Up",
 	description: "Sign up a user. This will create the user and the token.",
 	tags: ["Auth"],
-	body: signUpZodSchema,
+	// body: signUpZodSchema,
 	// response: { 200: successResponseSchema },
 };
 

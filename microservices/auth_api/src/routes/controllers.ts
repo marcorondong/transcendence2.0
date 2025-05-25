@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { SignInInput, SignUpInput } from "./zodSchemas";
+
 import {
 	signInRequest,
 	signUpRequest,
@@ -10,26 +10,22 @@ import {
 import { env } from "../utils/env";
 
 export async function signInHandler(
-	request: FastifyRequest<{ Body: SignInInput }>,
+	request: FastifyRequest<{ Body: Record<string, unknown> }>,
 	reply: FastifyReply,
 ) {
-	const { username, password } = request.body;
-	const payload = await signInRequest(username, password);
+	const payload = await signInRequest(request.body);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	// reply.status(200).send({ success: true });
 	reply.status(200).send();
 }
 
 export async function signUpHandler(
-	request: FastifyRequest<{ Body: SignUpInput }>,
+	request: FastifyRequest<{ Body: Record<string, unknown> }>,
 	reply: FastifyReply,
 ) {
-	const { email, nickname, username, password } = request.body;
-	const payload = await signUpRequest(email, nickname, username, password);
+	const payload = await signUpRequest(request.body);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	// reply.status(200).send({ success: true });
 	reply.status(200).send();
 }
 
