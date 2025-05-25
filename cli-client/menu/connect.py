@@ -7,6 +7,7 @@ import requests
 from menu.logger import myLogger
 import urllib3
 from utils.ui import UI
+import time
 
 HOST = "localhost"  # TODO read this from proper file like 10.12.5.7
 PORT = "8080"
@@ -40,7 +41,40 @@ def getMove(stdscr):
     return moveMapping.get(move, "none")
 
 
+# TODO THIS is old simpler version
+# def client(stdscr, user_header: dict[str, str]):
+#     with connect(
+#         WS_ROUTE,
+#         close_timeout=0.1,
+#         ping_interval=None,
+#         ssl=ssl_context,
+#         additional_headers=user_header,
+#     ) as websocket:
+#         stdscr.addstr(0, TAB_SIZE, CONTROLS_TUTORIAL)
+#         stdscr.refresh()
+#         while True:
+#             move = getMove(stdscr)
+#             if move == "quit":
+#                 websocket.close()
+#                 break
+#             if move != "none":
+#                 sendMove(websocket, move)
+
+
+# TODO This is  chat gpt solution for keydown i am not impressed. It is quite tricky to simulate
+# same paddle speed from CLI as it is currently on frontend.
+# Possible solution:
+# a) we keep this version: Not ideal but closest what I could get to frontend
+# b) we keep simpler version above
+# c) we keep simpler version above and make frontend more shitty so it does not use this smooth key down as it is now in order to have same paddle speed
+# d) Pong-api will limit moves on backend. as of 25.05.2025. What a nice date. It is not implemented any restriction on sending moves on backend
+# e) someone who is not Filip do whatever he wants. 
 def client(stdscr, user_header: dict[str, str]):
+    stdscr.nodelay(True)
+    paddle_direction = 0  # -1 for up, 1 for down, 0 for no movement
+    last_key_time = 0
+    key_timeout = 0.2  # seconds to reset paddle direction if no key pressed
+
     with connect(
         WS_ROUTE,
         close_timeout=0.1,
@@ -50,13 +84,38 @@ def client(stdscr, user_header: dict[str, str]):
     ) as websocket:
         stdscr.addstr(0, TAB_SIZE, CONTROLS_TUTORIAL)
         stdscr.refresh()
-        while True:
-            move = getMove(stdscr)
-            if move == "quit":
-                websocket.close()
-                break
-            if move != "none":
+
+        running = True
+        while running:
+            start_time = time.time()
+            key = stdscr.getch()
+
+            if key != -1:
+                last_key_time = time.time()
+                if key == ord("q"):
+                    running = False
+                    websocket.close()
+                    break
+                elif key == curses.KEY_UP or key == ord("w"):
+                    paddle_direction = -1
+                elif key == curses.KEY_DOWN or key == ord("s"):
+                    paddle_direction = 1
+                else:
+                    # other keys: do nothing or ignore
+                    pass
+            else:
+                # No key pressed this iteration
+                # If timeout exceeded, reset paddle direction (simulate key release)
+                if time.time() - last_key_time > key_timeout:
+                    paddle_direction = 0
+
+            if paddle_direction != 0:
+                move = "up" if paddle_direction == -1 else "down"
                 sendMove(websocket, move)
+
+            elapsed = time.time() - start_time
+            sleep_time = max(0, (1 / 60) - elapsed)
+            time.sleep(sleep_time)
 
 
 # TODO fix check if it was successful
