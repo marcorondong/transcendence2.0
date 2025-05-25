@@ -40,48 +40,6 @@ export const gameRequestSchema = {
 	},
 };
 
-export const extraGameSchema = {
-	description: "Connect a new bot opponent to the pong game server",
-	tags: ["Game vs extra AI"],
-	summary: "The bot can move faster or slower depending on difficulty",
-	body: {
-		type: "object",
-		properties: {
-			difficulty: {
-				type: "string",
-				enum: ["easy", "normal", "hard"],
-				default: "hard",
-			},
-			mode: {
-				type: "string",
-				default: "extra",
-			},
-			roomId: { type: "string" },
-		},
-		required: ["roomId"]
-	},
-	response: {
-		200: {
-			type: "object",
-			properties: {
-				description: { type: "string" }
-			},
-		},
-		400: {
-			type: "object",
-			properties: {
-				error: { type: "string" },
-			},
-		},
-		500: {
-			type: "object",
-			properties: {
-				error: { type: "string" },
-			},
-		},
-	},
-};
-
 export const healthSchema = {
 	description: "endpoint for blackbox scraper",
 	tags: ["health"],

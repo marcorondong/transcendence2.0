@@ -10,7 +10,6 @@ import {
 	findGradient,
 } from "./utils";
 import {
-	botSpeedSelector,
 	paddleTwistSelector,
 	GameState,
 	Score,
@@ -50,7 +49,7 @@ export class Bot {
 	private movePaddleTo = 0;
 	private paddleHeight = 1;
 	private countdown = this.FRAME_RATE + 2; // to skip the first 2 welcome frames
-	private firstFrame = true;
+	private welcomeFrames = 2;
 	private disconnectTimeout = 10000; // 30 seconds
 	private log = [] as number[];
 	private ballSlope = 0;
@@ -59,10 +58,7 @@ export class Bot {
 		console.log(initializers);
 		//room info
 		this.difficulty = initializers.difficulty ?? "normal";
-		this.botSpeed =
-			initializers.mode === "mandatory"
-				? this.MANDATORY_SPEED
-				: botSpeedSelector[this.difficulty] ?? this.MANDATORY_SPEED;
+		this.botSpeed =	(initializers.mode === "mandatory") ? this.MANDATORY_SPEED : 0;
 		this.roomId = initializers.roomId ?? "unknown_room_id";
 		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP;
 		this.ws = null;
@@ -122,9 +118,9 @@ export class Bot {
 			this.ws.on("message", (event: any) => {
 				// if (--this.countdown <= this.FRAME_RATE)
 				if (--this.countdown == 0) this.handleEvent(event);
-				else if (this.firstFrame) {
-					this.readFirstFrame(event);
-					this.firstFrame = false;
+				else if (this.welcomeFrames) {
+					this.readwelcomeFrames(event);
+					this.welcomeFrames--;
 				}
 			});
 		} catch (error) {
@@ -168,7 +164,7 @@ export class Bot {
 		this.logAIState();
 
 		if (this.paddleY != this.movePaddleTo) this.makeMove(this.botSpeed);
-		else this.twistBall(this.paddleTwist);
+		else this.twistBall(this.paddleHeight / 2 - this.BALL_RADIUS);
 	}
 
 	private logGameState(gameState: GameState) {
@@ -307,7 +303,7 @@ export class Bot {
 		this.lastBall.setY(ballPosition.getY());
 	}
 
-	private readFirstFrame(event: object) {
+	private readwelcomeFrames(event: object) {
 		const roomInfo = JSON.parse(event.toString());
 		console.log("first frame: ", roomInfo);
 		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
@@ -316,7 +312,8 @@ export class Bot {
 		if (Object.getOwnPropertyNames(roomInfo).includes("matchStatus")) {
 			let status = roomInfo.matchStatus;
 			if (status.includes("Left") || status.includes("left"))
-				this.side = -this.side;
+				this.side =
+					field.LEFT_EDGE_X + this.PADDLE_GAP + this.AVG_BOUNCE_GAP;
 		}
 	}
 

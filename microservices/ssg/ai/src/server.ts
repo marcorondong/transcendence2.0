@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { gameRoute, cheatRoute, healthRoute } from "./gameRoutes";
+import { gameRoute, debugRoute, healthRoute } from "./gameRoutes";
 import axios from "axios";
 import { botConfig } from "./config";
 
@@ -26,7 +26,7 @@ fastify.register(swaggerUi, {
 });
 
 fastify.register(gameRoute, { prefix: "/ai-api" });
-fastify.register(cheatRoute);
+fastify.register(debugRoute);
 fastify.register(healthRoute);
 
 fastify.ready().then(() => {
@@ -36,10 +36,10 @@ fastify.ready().then(() => {
 async function registerBotUser() {
 	try {
 		const botUser = await axios.post("http://users:3000/api/users/", {
-			"email": botConfig.email,
-			"username": botConfig.name,
-			"nickname": botConfig.name,
-			"password": botConfig.password
+			email: botConfig.email,
+			username: botConfig.name,
+			nickname: botConfig.name,
+			password: botConfig.password,
 		});
 		console.log("Bot user created: ", botUser.status);
 	} catch (error: any) {

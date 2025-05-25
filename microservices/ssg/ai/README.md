@@ -9,7 +9,7 @@ Request body:
 ```json
 {
   "roomId": { type: "uuid" }, //room id where the human user is
-  "difficulty": { type: "string", enum: ["easy", "normal", "hard"] }
+  "difficulty": { type: "string", enum: ["easy", "normal", "hard"] },
 }
 ```
 
@@ -17,7 +17,7 @@ only available to logged in users
 
 ### 2. nginx will authenticate the request and forward it to backend bot http://ai-bot:6969/ai-api/game-mandatory
 
-### 3. this will open a websocket to backend pong at http://pong-api:3010/pong-api/pong 
+### 3. this will open a websocket to backend pong
 
 ws is hidden completely from frontend
   

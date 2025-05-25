@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { gameRequestSchema, extraGameSchema, healthSchema } from "./gameSchema";
+import { gameRequestSchema, healthSchema } from "./gameSchema";
 import { Bot } from "./bot";
 import axios from "axios";
 import { botConfig } from "./config";
@@ -53,10 +53,10 @@ export async function gameRoute(fastify: FastifyInstance) {
 	);
 }
 
-export async function cheatRoute(fastify: FastifyInstance) {
+export async function debugRoute(fastify: FastifyInstance) {
 	fastify.post(
-		"/game-extra",
-		{ schema: extraGameSchema },
+		"/game-debug",
+		{ schema: gameRequestSchema },
 		async (request: any, reply: any) => {
 			const cookies = await cookieSubRequest(reply);
 
