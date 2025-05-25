@@ -15,7 +15,13 @@ def mainMenu(stdscr):
     menuLoop(
         stdscr,
         "Main menu: ",
-        ["Random Game", "Register", "nonexistent menu option", "Login Filip"],
+        [
+            "Random Game",
+            "Register",
+            "nonexistent menu option",
+            "Login",
+            "Auto login",
+        ],  # it took me a lot of time to realize this and menuItems from menuItems.py are not same
         user,
     )
     myLogger.debug(f"my name is {user.username}")

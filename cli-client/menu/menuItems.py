@@ -27,8 +27,26 @@ def register(stdscr, user: Player):
     # logic later
 
 
-# TODO remove this. It is auto login for filip account for faster testing
 def login(stdscr: curses.window, user: Player) -> None:
+    """
+    login an existing user and open the main menu
+    """
+    line = 0
+    username = UI.get_prompt("username", line)
+    line += 1
+    password = UI.get_secret_prompt("password", line)
+    line += 1
+
+    user.set_username(username)
+    if user.log_user(password):
+        UI.log_notification("You are logged In")
+    UI.log_notification("Press Enter to continue", 1)
+    UI.screen.getch()
+    # return "username"
+
+
+# TODO remove this. It is auto login for filip account for faster testing
+def auto_login(stdscr: curses.window, user: Player) -> None:
     """
     login an existing user and open the main menu
     """
@@ -45,7 +63,7 @@ def login(stdscr: curses.window, user: Player) -> None:
         UI.log_notification("You are logged In")
     UI.log_notification("Press Enter to continue", 1)
     UI.screen.getch()
-    #return "username"
+    # return "username"
 
 
 def guestLogin(stdscr, user: Player):
@@ -79,8 +97,8 @@ def pressAnyKey(stdscr, user: Player):
 
 menuItems = {
     "Register": register,
-    "Login Filip": login,
-    # "Login": login,
+    "Login": login,
+    "Auto login": auto_login,
     "Logout": logout,
     "Random Game": randomGame,
     "Guest Login": guestLogin,
