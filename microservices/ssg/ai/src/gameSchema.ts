@@ -16,13 +16,13 @@ export const gameRequestSchema = {
 			},
 			roomId: { type: "string" },
 		},
-		required: ["roomId"]
+		required: ["roomId"],
 	},
 	response: {
 		200: {
 			type: "object",
 			properties: {
-				description: { type: "string" }
+				description: { type: "string" },
 			},
 		},
 		400: {
