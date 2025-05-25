@@ -126,7 +126,7 @@ export class PongComponent extends HTMLElement {
 		if (this.paddleDirection !== 0 && this.wss) {
 			this.wss.send(
 				JSON.stringify({
-					move: this.paddleDirection > 0 ? "down" : "up"
+					move: this.paddleDirection > 0 ? "down" : "up",
 					//paddle: "left",
 				}),
 			);
@@ -141,12 +141,12 @@ export class PongComponent extends HTMLElement {
 		this.ctx.textAlign = "center";
 		const space = this.canvas.width / 10;
 		this.ctx.fillText(
-			String(state.score?.leftGoals ?? 0),
+			String(state.score?.leftTeam.goals ?? 0),
 			this.canvasWidthHalf - space,
 			fontSize * 1.2,
 		);
 		this.ctx.fillText(
-			String(state.score?.rightGoals ?? 0),
+			String(state.score?.rightTeam.goals ?? 0),
 			this.canvasWidthHalf + space,
 			fontSize * 1.2,
 		);

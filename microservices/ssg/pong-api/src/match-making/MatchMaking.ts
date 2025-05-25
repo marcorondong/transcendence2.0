@@ -105,7 +105,7 @@ export class MatchMaking {
 	private tournamentJoiner(player: PongPlayer, tournamentSize: number) {
 		if (Tournament.isSizeValid(tournamentSize) === false) {
 			console.warn(`Tournament size ${tournamentSize} is not valid`);
-			player.sendNotification(
+			player.sendError(
 				`Size ${tournamentSize} is not valid, Switch to default value ${Tournament.getDefaultTournamentSize()}`,
 			);
 			tournamentSize = Tournament.getDefaultTournamentSize();
@@ -115,7 +115,10 @@ export class MatchMaking {
 
 	public spectatorJoiner(connection: WebSocket, roomId: string): void {
 		if (roomId === "") {
-			connection.send("roomId is required query if you are spectator");
+			PongPlayer.sendErrorMessage(
+				"roomId is required query if you are spectator",
+				connection,
+			);
 			connection.close();
 			return;
 		}
@@ -127,7 +130,10 @@ export class MatchMaking {
 		if (roomToWatch != undefined) {
 			roomToWatch.addSpectator(connection);
 		} else {
-			connection.send(`Room with id ${roomId} was not found`);
+			PongPlayer.sendErrorMessage(
+				`Room with id ${roomId} was not found`,
+				connection,
+			);
 			return;
 		}
 	}

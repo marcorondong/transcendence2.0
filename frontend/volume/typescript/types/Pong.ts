@@ -8,9 +8,14 @@ export interface Pong {
 	knockoutName?: string;
 }
 
+interface ITeamScore {
+	goals: number;
+	teamNickname: string;
+}
+
 export interface Score {
-	leftGoals: number;
-	rightGoals: number;
+	leftTeam: ITeamScore;
+	rightTeam: ITeamScore;
 	time: number;
 }
 

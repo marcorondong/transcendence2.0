@@ -1,0 +1,17 @@
+services:
+  chat_api:
+    image: ${CHAT_API_IMAGE_NAME}
+    container_name: ${CHAT_API_CONTAINER_NAME}
+    build: ${CHAT_API_BUILD_FOLDER}
+    env_file:
+      - ${CHAT_API_ENV_FILE_PATH}
+    volumes:
+      - ${CHAT_API_SRC_FOLDER_LOCAL}:${CHAT_API_SRC_FOLDER_CONTAINER} #TODO remove in production
+    ports:
+      - ${CHAT_API_PORT}:${CHAT_API_PORT} # TODO remove this in production
+    networks:
+      - ${NETWORK_NAME}
+    depends_on:
+      - ${CHAT_DB_MICRO_SERVICE_NAME}
+    restart: ${RESTART_POLICY}
+

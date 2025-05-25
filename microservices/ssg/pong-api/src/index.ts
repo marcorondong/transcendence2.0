@@ -9,6 +9,10 @@ import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
 import { Parsing } from "./utils/Parsing";
 import fCookie from "@fastify/cookie";
 import { PongPlayer } from "./game/PongPlayer";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+import { PongSwagger } from "./utils/swagger";
+import { gameLog, interpretGame } from "./blockchain-transaction/recordGame";
 
 dotenv.config();
 
@@ -37,6 +41,7 @@ const PORT: number = 3010;
 const HOST: string = "0.0.0.0";
 const BASE_API_NAME = "pong-api";
 const BASE_GAME_PATH = "pong";
+const BLOCKCHAIN_PATH = "blockchain";
 
 const fastify = Fastify({
 	logger:
@@ -61,24 +66,56 @@ fastify.register(fastifyStatic, {
 	prefix: "/", // Optional: Sets the URL prefix
 });
 
+fastify.register(swagger, PongSwagger.getSwaggerOptions());
+
+fastify.register(swaggerUi, {
+	routePrefix: "/docs",
+});
+
 fastify.register(fCookie);
 fastify.register(websocket);
 fastify.register(async function (fastify) {
-	fastify.get("/", (request, reply) => {
-		reply.send({
-			hello: "ssl",
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/health-check`,
+		{ schema: PongSwagger.getHealthCheckSchema() },
+		async (request, reply) => {
+			reply.code(200).send({
+				message:
+					"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
+			});
+		},
+	);
 
-	fastify.get(`/${BASE_API_NAME}/health-check`, async (request, reply) => {
-		reply.code(200).send({
-			message:
-				"You ping to pingpong pong-api so pong-api pong back to ping. Terrible joke; Don't worry, I'll let myself out",
-		});
-	});
+	fastify.get(
+		`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}/:gameId`,
+		{ schema: PongSwagger.getBlockchainSchema() },
+		async (req, reply) => {
+			const { gameId } = req.params as { gameId: string };
+			let responseCode = 200;
+			const gameData = await interpretGame(gameId);
+			const gameLogString = await gameLog(gameId);
+			if (gameData === false || gameLogString === false) {
+				responseCode = 404;
+			}
+			if (responseCode !== 200) {
+				reply.code(responseCode).send({
+					message: "Provided gameId is not recorded on blockchain",
+				});
+			} else {
+				reply.send({
+					message: "Record found",
+					record: gameData,
+					log: gameLogString,
+				});
+			}
+		},
+	);
 
 	fastify.get(
 		`/${BASE_API_NAME}/player-room/:playerId`,
+		{
+			schema: PongSwagger.getPlayerRoomSchema(),
+		},
 		async (request, reply) => {
 			const { playerId } = request.params as { playerId: string };
 			const playerRoomId = manager.getPlayerRoomId(playerId);
@@ -94,7 +131,7 @@ fastify.register(async function (fastify) {
 
 	fastify.get(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/spectate/:roomId`,
-		{ websocket: true },
+		{ websocket: true, schema: PongSwagger.getWebsocketSchema() },
 		(connection, req) => {
 			const { roomId } = req.params as { roomId: string };
 			console.log("Spectate game: ", roomId);
@@ -104,7 +141,7 @@ fastify.register(async function (fastify) {
 
 	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
 		`/${BASE_API_NAME}/${BASE_GAME_PATH}/:matchType`,
-		{ websocket: true },
+		{ websocket: true, schema: PongSwagger.getWebsocketSchema() },
 		async (connection, req) => {
 			const { matchType } = req.params as { matchType: string };
 			const player = await PongPlayer.createAuthorizedPlayer(
@@ -113,7 +150,7 @@ fastify.register(async function (fastify) {
 			);
 			if (player === false) return;
 			if (manager.addPlayerToActiveList(player) == false) {
-				player.sendNotification("You are already in a game Room");
+				player.sendError("You are already in a game Room");
 				player.connection.close(1008, "Already in pong-api");
 				return;
 			}
@@ -121,6 +158,7 @@ fastify.register(async function (fastify) {
 		},
 	);
 
+	//TODO: remove this on final version
 	fastify.get("/pong-api/ping-pong", async (request, reply) => {
 		const filePath = path.join(process.cwd(), "src/public/pong.html");
 		if (fs.existsSync(filePath)) {

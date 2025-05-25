@@ -1,0 +1,16 @@
+services:
+  chat_db:
+    image: ${CHAT_DB_IMAGE_NAME}
+    container_name: ${CHAT_DB_CONTAINER_NAME}
+    build: ${CHAT_DB_BUILD_FOLDER}
+    env_file:
+      - ${CHAT_DB_ENV_FILE_PATH}
+    volumes:
+      - ${CHAT_DB_SRC_FOLDER_LOCAL}:${CHAT_DB_SRC_FOLDER_CONTAINER} #TODO remove in production
+      - ${CHAT_DB_PRISMA_FOLDER_LOCAL}:/${CHAT_DB_PRISMA_FOLDER_CONTAINER} #TODO remove in production
+      #- ${CHAT_DB_DATABASE_FOLDER_LOCAL}:${CHAT_DB_DATABASE_FOLDER_CONTAINER} #TODO define path to db and uncomment this line when using the local DB
+    ports:
+      - ${CHAT_DB_PORT}:${CHAT_DB_PORT}
+    networks:
+      - ${NETWORK_NAME}
+    restart: ${RESTART_POLICY}
