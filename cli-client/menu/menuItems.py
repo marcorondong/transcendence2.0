@@ -4,6 +4,7 @@ from menu.connect import client, TAB_SIZE
 from menu.logger import myLogger
 from utils.prompt import *
 from utils.player import *
+from menu.connect import log_in
 
 MAX_USERNAME_LENGTH = 40
 MAX_PASSWORD_LENGTH = 128
@@ -15,7 +16,7 @@ def randomGame(stdscr, user: Player):
     """
     get a random game
     """
-    client(stdscr)
+    client(stdscr, user.get_custom_headers())
 
 
 def register(stdscr, user: Player):
@@ -37,34 +38,11 @@ def login(stdscr: curses.window, user: Player):
     line += 1
     password = password_prompt.get_secret_prompt(stdscr, line)
 
-    user.set_username(username)
+    user.set_username("f@gmail.com")  # FIXME put real input
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
+    user.log_user("A!1aaa")  # FIXME put real input
     stdscr.getch()
-    # line_number_y = 0
-    # curses.echo()
-    # stdscr.clear()
-
-    # greeting = "Enter username: "
-    # password_prompt = "Enter password: "
-    # stdscr.addstr(line_number_y , 0, "Logging in...")
-    # stdscr.addstr(2, 0, greeting)
-    # stdscr.refresh()
-    # username_bytes = stdscr.getstr(2, len(greeting), MAX_USERNAME_LENGTH)  # Wait for user input
-    # username = username_bytes.decode()
-
-    # stdscr.addstr(4, 0, f"Hello, {username}!")
-    # stdscr.addstr(7, 0, password_prompt)
-    # password_bytes = stdscr.getstr(7, len(password_prompt), MAX_PASSWORD_LENGTH)
-    # stdscr.getch()
-    # password = password_bytes.decode()
-    # stdscr.addstr(8, 0, f"Password is: {password}")
-
-    # stdscr.addstr(7, 0, "Press Enter to go back to main menu")
-    # stdscr.getch()
-    # stdscr.refresh()
-    # curses.noecho()
-
     return "username"
 
 

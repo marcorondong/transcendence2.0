@@ -1,11 +1,16 @@
+import requests
+from menu.logger import myLogger
+from menu.connect import log_in
+
+
 class Player:
     username: str
-    access_token: bool
+    access_token: str
 
     def __init__(self):
         """Initial Player class"""
         self.username = "<GUEST>"
-        self.access_token = False
+        self.access_token = ""
 
     def set_username(self, username: str) -> None:
         """Set username for player
@@ -17,3 +22,13 @@ class Player:
 
     def get_personal_greeting(self) -> str:
         return f"Welcome {self.username}!"
+
+    def set_access_token(self, token: str) -> None:
+        self.access_token = token
+
+    def log_user(self, password: str):
+        token = log_in(self.username, password)
+        self.set_access_token(token)
+
+    def get_custom_headers(self) -> dict[str, str]:
+        return {"Cookie": f"access_token={self.access_token}"}
