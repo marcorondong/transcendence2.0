@@ -80,6 +80,7 @@ def log_in(username: str, password: str) -> str:
     )
     cookies = session.cookies.get_dict()
     user_access_token = cookies.get("access_token")
+    myLogger.debug(f"Code is {response.status_code}")
     return user_access_token
 
 

@@ -41,7 +41,7 @@ def login(stdscr: curses.window, user: Player):
     user.set_username("f@gmail.com")  # FIXME put real input
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
-    user.log_user("A!1aaa")  # FIXME put real input
+    user.log_user("A1!aaa")  # FIXME put real input
     stdscr.getch()
     return "username"
 
