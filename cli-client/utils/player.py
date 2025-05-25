@@ -1,4 +1,3 @@
-import requests
 from menu.logger import myLogger
 from menu.connect import log_in
 

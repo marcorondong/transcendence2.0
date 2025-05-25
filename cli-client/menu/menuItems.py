@@ -1,4 +1,3 @@
-import requests
 import curses
 from menu.connect import client, TAB_SIZE
 from menu.logger import myLogger

@@ -5,6 +5,7 @@ Benjamin
 benszilas
 bkgd
 blackbox
+cls
 Etherium
 EVM
 filip
@@ -16,6 +17,7 @@ gabrieldanis
 gdanis
 getch
 getmaxyx
+getstr
 grafana
 gte
 HEHE
@@ -48,3 +50,6 @@ vec
 vect
 xl
 xs
+noecho
+nodelay
+gpt
