@@ -3,14 +3,14 @@
 
 ## Description
 
-This service (_USERS_) handles users information and "management".
-It creates, update and deletes users; and also provide their information.
+This service (_USERS_) handles users information and management.
+It creates, updates and deletes users; and also provides their information.
 It's basically a **database API**.
 
-## How to configure it
+## How to customize it
 
 🤔💭👨‍🔧
-It can be configured via docker secrets, environment variables, `package.json` and hardcoded values.
+It can be customized via docker secrets, environment variables, `package.json` and hardcoded values.
 Check the file `./microservices/users/src/utils/config.ts` to check it's logic and to add values.
 
 ## Supported methods
@@ -38,7 +38,7 @@ It supports pagination (_by default_) and modifiable via query string:
 
 - skip: To skip x amount of entries.
 - take: To take x amount of entries.
-- page: This is an abstraction of skip and take , but it's easier to understand and handle.
+- page: This is an abstraction of skip and take, but it's easier to understand and handle.
   - E.g:
     - page 1: skip = 0 && take = 10
     - page 2: skip = 10 && take = 10
@@ -59,8 +59,8 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 > - 👥 User friendship management (friend requests).
 > - 🏃‍♂️💨 Change in how the code is "compiled" and run.
 > - Makefile
-> - Login to be done via email **AND** username.
-> - `npm` utilities commands.
+> - [x] Login to be done via email **OR** username.
+> - [x] `npm` utilities commands.
 > - ♻️ Code refactoring and code clean-up
 
 ---
@@ -98,17 +98,22 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 ### Checking or reviewing the service
 
 1. Remember to run `npm ci` (or `npm clean-install`) to install the Node packages required by the service (_only if you don't have them_).
-2. If you're **getting errors** (red squiggly underlines), then you need to **update the TypeScript definitions** made by Prisma.
+2. **Only want to run the service for check it?** (_PR review, etc_. This deletes the db)
+   1. Run this command: `npm run rebuild` and then run the service `npm run dev`
+3. Need to regenerate everything because you changed the schema? (`schema.prisma`. This deletes the db and migrations)
+   1. Run this command: `npm run migrate` and then run the service `npm run dev`
+4. If you're **getting errors** (red squiggly underlines), then you need to **update the TypeScript definitions** made by Prisma.
    1. Run this command to update them: `npx prisma generate`
-3. If you **don't have a users database** or need to update it, run these commands:
-   1. Remove old database: `rm -rf prisma/database`
-   2. Apply existing migrations to create dev.db: `npx prisma migrate dev`
-   3. Generate Prisma client (_optional but recommended_): `npx prisma generate`
-4. If you want to start fresh; run these commands (_you must be located in `./microservices/users/` folder_):
-   1. Delete database: `rm -rf prisma/database`
-   2. Delete migrations folder: `rm -rf prisma/migrations`
-   3. Generate new migration with current model and apply schema: `npx prisma migrate dev --name init`
-   4. Generate Prisma client (_optional but recommended_): `npx prisma generate`
+5. **Deprecated instructions** (they're now executed by `npm run rebuild` and `npm run migrate` respectively)
+   1. If you **don't have a users database** or need to update it, run these commands:
+      1. Remove old database: `rm -rf prisma/database`
+      2. Apply existing migrations to create dev.db: `npx prisma migrate dev`
+      3. Generate Prisma client (_optional but recommended_): `npx prisma generate`
+   2. If you want to start fresh; run these commands (_you must be located in `./microservices/users/` folder_):
+      1. Delete database: `rm -rf prisma/database`
+      2. Delete migrations folder: `rm -rf prisma/migrations`
+      3. Generate new migration with current model and apply schema: `npx prisma migrate dev --name init`
+      4. Generate Prisma client (_optional but recommended_): `npx prisma generate`
 
 > [!WARNING]
 >
@@ -122,7 +127,8 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 
 ## ⚙️ Configuration
 
-By default, **no additional configuration is required** to run the service. However, you can customize the service using docker secrets, environmental variables, `package.json`, or hardcoded values as described in the "How to configure it" section.
+By default, **no additional configuration is required** to run the service.
+However, you can customize the service using docker secrets, environmental variables, `package.json`, or hardcoded values as described in the "[How to customize it](#how-to-customize-it)" section.
 
 > [!NOTE]
 >

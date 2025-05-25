@@ -1,9 +1,10 @@
 import httpError from "http-errors";
 import { payloadZodSchema } from "./zodSchemas";
+import { env } from "../utils/env";
 
 export async function signInRequest(email: string, password: string) {
 	// TODO update signInRequest to use username instead of email when users service is updated
-	const response = await fetch("http://users:3000/api/users/login", {
+	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

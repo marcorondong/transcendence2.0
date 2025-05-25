@@ -28,10 +28,21 @@
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2
 	},
+	// Configure settings to be overridden for the json language.
+	"[json]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	},
 	// Configure settings to be overridden for the markdown language.
 	"[markdown]": {
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2
+	},
+	// Configure settings to be overridden for the yaml language.
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter",
+		"editor.insertSpaces": true,
+		"editor.tabSize": 4
 	},
 	// Configure settings to be overridden for the yaml language.
 	"[yaml]": {

@@ -63,7 +63,8 @@ In hardhat project file `scripts/deploy.ts` is for deploying contract
 TournamentScores deployed to: 0x61B6Bd9d657D8106b3A683572b97C391E6b3F0f5
 
 ~~[Link to snowtrace of old TournamentScores contract](https://testnet.snowtrace.io/address/0x1d031C721F4A89845B716dF92410E0A90A8Fe1E4)~~  
-[Link to snowtrace of our TournamentScores contract](https://testnet.snowtrace.io/address/0x61B6Bd9d657D8106b3A683572b97C391E6b3F0f5)
+~~[Link to snowtrace of our TournamentScores contract](https://testnet.snowtrace.io/address/0x61B6Bd9d657D8106b3A683572b97C391E6b3F0f5)~~
+[Link to snowtrace of our TournamentScores contract](https://testnet.snowtrace.io/address/0xc2E65341CEd6bF8f371C77ea4d50C820f337C673)
 
 
 
