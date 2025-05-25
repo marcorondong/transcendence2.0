@@ -11,13 +11,13 @@ user = Player()
 
 def mainMenu(stdscr):
     setColors(stdscr, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    guestUser = "guest"
-    menuName = "Welcome " + user.username + "! Main menu:"
     menuLoop(
         stdscr,
-        menuName,
+        "Main menu: ",
         ["Random Game", "Register", "nonexistent menu option", "Login Filip"],
+        user,
     )
+    myLogger.debug(f"my name is {user.username}")
 
 
 if __name__ == "__main__":

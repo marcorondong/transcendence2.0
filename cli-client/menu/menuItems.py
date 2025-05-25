@@ -37,6 +37,7 @@ def login(stdscr: curses.window, user: Player):
     line += 1
     password = password_prompt.get_secret_prompt(stdscr, line)
 
+    user.set_username(username)
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
     stdscr.getch()

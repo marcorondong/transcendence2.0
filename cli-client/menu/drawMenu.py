@@ -77,7 +77,7 @@ def callHandlerFunction(stdscr, selectedItem, user: Player):
     handler(stdscr, user)
 
 
-def menuLoop(stdscr, title, items):
+def menuLoop(stdscr, title, items, user: Player):
     """
     draws menu and waits for user input.
     Args:
@@ -100,7 +100,12 @@ def menuLoop(stdscr, title, items):
                 break
             else:
                 selectedItem = items[position - 1]
-                callHandlerFunction(stdscr, selectedItem)
-                drawMenu(stdscr, title, items, position)
+                callHandlerFunction(stdscr, selectedItem, user)
+                drawMenu(
+                    stdscr,
+                    f"{user.getPersonalGreeting()} {title}",
+                    items,
+                    position,
+                )
         # elif key == 27:  # ESC key
         # 	confirmExit()
