@@ -15,5 +15,5 @@ class Player:
         """
         self.username = username
 
-    def getPersonalGreeting(self) -> str:
+    def get_personal_greeting(self) -> str:
         return f"Welcome {self.username}!"

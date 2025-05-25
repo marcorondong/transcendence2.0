@@ -103,7 +103,7 @@ def menuLoop(stdscr, title, items, user: Player):
                 callHandlerFunction(stdscr, selectedItem, user)
                 drawMenu(
                     stdscr,
-                    f"{user.getPersonalGreeting()} {title}",
+                    f"{user.get_personal_greeting()} {title}",
                     items,
                     position,
                 )
