@@ -2,7 +2,7 @@ import requests
 import curses
 from menu.connect import client, TAB_SIZE
 from menu.logger import myLogger
-from utils.prompt import *
+from utils.ui import *
 from utils.player import *
 from menu.connect import log_in
 
@@ -32,11 +32,9 @@ def login(stdscr: curses.window, user: Player):
     login an existing user and open the main menu
     """
     line = 0
-    user_prompt = Prompt("username")
-    password_prompt = Prompt("password")
-    username = user_prompt.get_prompt(stdscr, line)
+    username = UI.get_prompt("username", stdscr, line)
     line += 1
-    password = password_prompt.get_secret_prompt(stdscr, line)
+    password = UI.get_secret_prompt("password", stdscr, line)
 
     user.set_username("f@gmail.com")  # FIXME put real input
     stdscr.addstr(line + 2, 0, f"Username is {username}")
