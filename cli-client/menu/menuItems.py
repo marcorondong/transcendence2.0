@@ -4,7 +4,7 @@ from menu.connect import client, TAB_SIZE
 from menu.logger import myLogger
 from utils.ui import *
 from utils.player import *
-from menu.connect import log_in
+from menu.connect import log_in, register_user
 
 MAX_USERNAME_LENGTH = 40
 MAX_PASSWORD_LENGTH = 128
@@ -23,8 +23,20 @@ def register(stdscr, user: Player):
     """
     register a new user
     """
-    stdscr.addstr(2, TAB_SIZE, "Registering a new user...")
-    # logic later
+    UI.screen.clear()
+
+    line = 0
+    email = UI.get_prompt("email", line)
+    line += 1
+    nickname = UI.get_prompt("nickname", line)
+    line += 1
+    username = UI.get_prompt("username", line)
+    line += 1
+    password = UI.get_secret_prompt("password", line)
+
+    register_user(email, nickname, username, password)
+    UI.log_notification("Press Enter to continue", 1)
+    UI.screen.getch()
 
 
 def login(stdscr: curses.window, user: Player) -> None:

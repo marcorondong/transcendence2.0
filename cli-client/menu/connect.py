@@ -68,7 +68,7 @@ def getMove(stdscr):
 # b) we keep simpler version above
 # c) we keep simpler version above and make frontend more shitty so it does not use this smooth key down as it is now in order to have same paddle speed
 # d) Pong-api will limit moves on backend. as of 25.05.2025. What a nice date. It is not implemented any restriction on sending moves on backend
-# e) someone who is not Filip do whatever he wants. 
+# e) someone who is not Filip do whatever he wants.
 def client(stdscr, user_header: dict[str, str]):
     stdscr.nodelay(True)
     paddle_direction = 0  # -1 for up, 1 for down, 0 for no movement
@@ -118,7 +118,6 @@ def client(stdscr, user_header: dict[str, str]):
             time.sleep(sleep_time)
 
 
-# TODO fix check if it was successful
 def log_in(username: str, password: str) -> str | bool:
     """log user
 
@@ -145,6 +144,37 @@ def log_in(username: str, password: str) -> str | bool:
     user_access_token = cookies.get("access_token")
     myLogger.debug(f"Code is {response.status_code}")
     return user_access_token
+
+
+def register_user(email: str, nickname: str, username: str, password: str) -> bool:
+    """_summary_
+
+    Args:
+        email (str): _description_
+        nickname (str): _description_
+        username (str): _description_
+        password (str): _description_
+
+    Returns:
+        bool: true if success, false otherwise
+    """
+    response = requests.post(
+        "https://localhost:8080/api/users/",
+        json={
+            "email": email,
+            "nickname": nickname,
+            "username": username,
+            "password": password,
+        },
+        verify=False,
+    )
+    if not 200 <= response.status_code < 300:
+        UI.log_error(f"Registering user failed. Return code {response.status_code}")
+        return False
+    myLogger.debug(f"Code is {response.status_code}")
+    myLogger.debug(response.text)
+    UI.log_notification("User successfully registered")
+    return True
 
 
 # myLogger.debug(response.cookies)
