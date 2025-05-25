@@ -14,6 +14,7 @@ import {
 	GameState,
 	Score,
 } from "./config";
+import { time } from "console";
 
 const field = new PongField();
 
@@ -53,6 +54,8 @@ export class Bot {
 	private disconnectTimeout = 10000; // 30 seconds
 	private log = [] as number[];
 	private ballSlope = 0;
+	private gotFrame = false;
+	private handlingBlocked = false; // to prevent multiple calls of handleEvent in the same frame
 
 	constructor(initializers: any) {
 		console.log(initializers);
@@ -85,8 +88,14 @@ export class Bot {
 			await sleep(10000);
 		}
 		console.log("Game is inactive, closing WebSocket connection");
-		this.ws.close();
+		this.ws.terminate();
 	}
+
+	// private async blockHandling(timeout: number = 1000) {
+	// 	this.handling = true;
+	// 	await sleep(timeout);
+	// 	this.handling = false;
+	// }
 
 	public playGame(cookie: string) {
 		this.ws = new WebSocket(
@@ -116,12 +125,19 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				// if (--this.countdown <= this.FRAME_RATE)
-				if (--this.countdown == 0) this.handleEvent(event);
-				else if (this.welcomeFrames) {
-					this.readwelcomeFrames(event);
+				if (this.welcomeFrames) {
+					this.readWelcomeFrames(event);
 					this.welcomeFrames--;
 				}
+				else if (!this.handlingBlocked) {
+					this.handlingBlocked = true;
+					this.handleEvent(event);
+					setTimeout(() => {
+						this.handlingBlocked = false;
+					}, 1000);
+				}
+				// if (--this.countdown <= this.FRAME_RATE)
+				// if (--this.countdown == 0) this.handleEvent(event);
 			});
 		} catch (error) {
 			console.error(`WebSocket at ${this.host}:${this.port}: `, error);
@@ -148,15 +164,12 @@ export class Bot {
 	/*************************************************************************** */
 
 	// check game state, calculate target based on the last known positions, and send moves
-	public handleEvent(event: object) {
+	public async handleEvent(event: object) {
 		this.resetTimeout();
 
 		const gameState = JSON.parse(event.toString()) as GameState;
 
 		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
-		this.logAverageBounce(ballPosition.getX());
-		if (this.countdown) return;
-		this.countdown = this.FRAME_RATE;
 		this.logGameState(gameState);
 		this.updatePaddle(gameState);
 		this.handleScore(gameState.score);
@@ -303,7 +316,7 @@ export class Bot {
 		this.lastBall.setY(ballPosition.getY());
 	}
 
-	private readwelcomeFrames(event: object) {
+	private readWelcomeFrames(event: object) {
 		const roomInfo = JSON.parse(event.toString());
 		console.log("first frame: ", roomInfo);
 		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
