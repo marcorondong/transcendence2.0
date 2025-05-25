@@ -1,5 +1,5 @@
 import { Auth } from "./auth.js";
-import { notificationEvent, pongLinkEvent, signInLinkEvent } from "./events.js";
+import { notificationEvent, signInLinkEvent } from "./events.js";
 import { FetchConfig, fetchPong } from "./fetch.js";
 
 export interface UserAuth {

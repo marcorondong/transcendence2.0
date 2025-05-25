@@ -9,7 +9,6 @@ export class NotificationService {
 				notification.classList.add("pong-notification-info");
 				break;
 			case "error":
-				console.log("case error");
 				notification.classList.add("pong-notification-error");
 				break;
 			case "success":
@@ -19,7 +18,7 @@ export class NotificationService {
 		this.notificationContainer?.appendChild(notification);
 		setTimeout(() => {
 			notification?.remove();
-		}, 8000);
+		}, 4000);
 	}
 
 	listen() {
@@ -28,7 +27,6 @@ export class NotificationService {
 		this.notificationContainer.classList.add("fixed", "top-10", "right-10");
 		this.notificationContainer.id = "notification-container";
 		document.addEventListener("notification", (e) => {
-			console.log("got custom event");
 			if (e instanceof CustomEvent) {
 				// CREATE NOTIFICATION
 				const notification = document.createElement("div");

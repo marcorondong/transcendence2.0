@@ -8,7 +8,7 @@ export interface FetchConfig {
 	body?: any;
 	url: string;
 }
-const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
+export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
 
 export async function fetchPong(config: FetchConfig) {
 	const { url, method, header, body } = config;

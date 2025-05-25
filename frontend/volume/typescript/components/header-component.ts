@@ -82,7 +82,6 @@ export class HeaderComponent extends HTMLElement {
 
 		// list elements in navigation
 		const listElements = list?.querySelectorAll("li");
-		console.log("LIIIIIIIIIIIIST", listElements);
 		if (listElements) {
 			const listElementsArray = [...listElements];
 			listElementsArray.map((lE) =>

@@ -1,6 +1,4 @@
 import "../components/pong-component.js";
-import { notificationEvent } from "../services/events.js";
-import { FetchAuth } from "../services/fetch-auth.js";
 
 class HomeView extends HTMLElement {
 	constructor() {
@@ -15,22 +13,39 @@ class HomeView extends HTMLElement {
 		const h1 = document.createElement("h1");
 		h1.className =
 			"mb-4 font-bold leading-none text-gray-900 text-3xl dark:text-gray-200";
-		h1.textContent = "Home";
-		this.appendChild(h1);
+		h1.textContent = "Pick a game";
 
-		this.button.classList.add("pong-button");
-		this.button.addEventListener("click", () => {
-			this.button.dispatchEvent(notificationEvent("helloooo", "info"));
-		});
-		this.button.innerText = "notification";
-
-		this.buttonVerify.classList.add("pong-button");
-		this.buttonVerify.addEventListener("click", () =>
-			FetchAuth.verifyJwt(),
+		// GAMES TO PICK
+		const gamesContainer = document.createElement("div");
+		gamesContainer.classList.add(
+			"w-full",
+			"flex",
+			"justify-center",
+			"gap-4",
 		);
-		this.buttonVerify.innerText = "verify token";
+		const pong = document.createElement("div");
+		pong.classList.add(
+			"p-1",
+			"sm:p-3",
+			"xl:p-5",
+			"mb-10",
+			"sm:border-5",
+			"xl:border-6",
+			"border-3",
+			"sm:rounded-xl",
+			"rounded-lg",
+			"bg-indigo-950",
+			"border-cyan-300",
+			"glow",
+		);
+		const pongImage = document.createElement("img");
+		pongImage.src = "/static-files/images/pong.png";
+		pongImage.width = 300;
+		pong.append(pongImage);
 
-		this.append(this.button, this.buttonVerify);
+		gamesContainer.append(pong);
+
+		this.append(h1, gamesContainer);
 	}
 
 	disconnectedCallback() {
