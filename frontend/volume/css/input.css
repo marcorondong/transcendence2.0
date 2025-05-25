@@ -113,7 +113,11 @@ a {
 /* big elements */
 
 .pong-card {
-	@apply bg-indigo-900/50 rounded-xl border-1 border-indigo-800/50;
+	@apply bg-indigo-900/30 rounded-xl border-1 border-indigo-800/50;
+}
+
+.pong-card-thick {
+	@apply border-5 border-indigo-900;
 }
 
 .pong-card-dark {

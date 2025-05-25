@@ -9,46 +9,54 @@ class HomeView extends HTMLElement {
 	buttonVerify = document.createElement("button");
 
 	connectedCallback() {
-		this.classList.add("flex", "flex-col", "items-start", "gap-8");
+		this.classList.add(
+			"grid",
+			"gap-[4rem]",
+			"grid-cols-[repeat(auto-fit,minmax(400px,1fr))]",
+			"grid-rows-[40rem]",
+			"auto-rows-1fr",
+		);
 		console.log("HOME VIEW has been CONNECTED");
 
 		// GAMES TO PICK
 		const gamesContainer = document.createElement("div");
-		gamesContainer.classList.add(
-			"w-full",
+
+		const containerStyles = [
+			"relative",
+			"p-10",
 			"flex",
 			"justify-center",
 			"gap-x-24",
-			"gap-y-10",
+			"gap-y-6",
 			"pong-card",
-			"flex-wrap",
-		);
-
-		const heading = document.createElement("div");
-		heading.classList.add(
-			"grow",
-			"w-full",
+			"pong-card-thick",
+			"self-start",
+		];
+		const pillStyles = [
+			"absolute",
+			"-top-6",
+			"left-10",
 			"flex",
+			"rounded-3xl",
 			"gap-4",
-			"bg-cyan-500/50",
-			"rounded-t-xl",
-			"px-8",
-			"py-4",
-		);
+			"px-2",
+			"bg-indigo-900",
+			"px-4",
+			"py-2",
+		];
+
+		gamesContainer.classList.add(...containerStyles);
+
+		const pill = document.createElement("div");
+		pill.classList.add(...pillStyles);
 		const h1 = document.createElement("h2");
-		h1.classList.add("pong-heading", "text-3xl");
+		h1.classList.add("pong-heading", "text-xl");
 		h1.textContent = "Pick a game";
-		const gameIcon = new IconComponent("game", 10);
-		heading.append(gameIcon, h1);
+		const gameIcon = new IconComponent("game", 8);
+		pill.append(gameIcon, h1);
 
 		const pongContainer = document.createElement("div");
-		pongContainer.classList.add(
-			"rounded-2xl",
-			"bg-indigo-950",
-			"p-5",
-			"inset-shadow-sm",
-			"inset-shadow-stone-950/50",
-		);
+		pongContainer.classList.add("rounded-2xl", "bg-indigo-950", "p-5");
 		const pong = document.createElement("div");
 		const pongLabel = document.createElement("div");
 		pongLabel.classList.add(
@@ -75,13 +83,7 @@ class HomeView extends HTMLElement {
 		pongContainer.append(pong, pongLabel);
 
 		const tttContainer = document.createElement("div");
-		tttContainer.classList.add(
-			"rounded-2xl",
-			"bg-indigo-950",
-			"p-5",
-			"inset-shadow-sm",
-			"inset-shadow-stone-950/50",
-		);
+		tttContainer.classList.add("rounded-2xl", "bg-indigo-950", "p-5");
 		const ttt = document.createElement("div");
 		const tttLabel = document.createElement("div");
 		tttLabel.classList.add(
@@ -107,29 +109,50 @@ class HomeView extends HTMLElement {
 		ttt.append(tttImage);
 		tttContainer.append(ttt, tttLabel);
 
-		gamesContainer.append(heading, pongContainer, tttContainer);
+		gamesContainer.append(pongContainer, tttContainer, pill);
 
+		// MATCH TYPE
 		const matchTypeContainer = document.createElement("div");
-		matchTypeContainer.classList.add(
-			"w-full",
+		matchTypeContainer.classList.add(...containerStyles);
+
+		const matchTypeH1 = document.createElement("h2");
+		matchTypeH1.classList.add("pong-heading", "text-xl");
+		matchTypeH1.textContent = "Pick a Match Type";
+		const matchTypeIcon = new IconComponent("list", 8);
+		const matchPill = document.createElement("div");
+		matchPill.classList.add(...pillStyles);
+		matchPill.append(matchTypeIcon, matchTypeH1);
+
+		// MATCH TYPE OPTIONS
+		const optionsContainer = document.createElement("div");
+		optionsContainer.classList.add(
+			"flex-col",
 			"flex",
-			"justify-center",
-			"gap-x-24",
-			"gap-y-10",
-			"pong-card",
-			"p-12",
-			"flex-wrap",
+			"gap-2",
+			"w-full",
+			"mx-12",
+			"items-center",
+			"rounded-2xl",
+			"bg-indigo-950",
+			"p-5",
 		);
 
-		const matchTypeHeading = document.createElement("div");
-		matchTypeHeading.classList.add("grow", "w-full", "flex", "gap-4");
-		const matchTypeH1 = document.createElement("h2");
-		matchTypeH1.classList.add("pong-heading", "text-3xl");
-		matchTypeH1.textContent = "Pick a Match Type";
-		const matchTypeIcon = new IconComponent("list", 10);
-		matchTypeHeading.append(matchTypeIcon, matchTypeH1);
+		const optionSingles = document.createElement("div");
+		optionSingles.innerText = "Single Player Mode";
+		const optionDoubles = document.createElement("div");
+		optionDoubles.innerText = "Doubles Mode";
+		const optionTournament = document.createElement("div");
+		optionTournament.innerText = "Tournament Mode";
+		const optionSpectator = document.createElement("div");
+		optionSpectator.innerText = "Spectator Mode";
+		optionsContainer.append(
+			optionSingles,
+			optionDoubles,
+			optionTournament,
+			optionSpectator,
+		);
 
-		matchTypeContainer.append(matchTypeHeading);
+		matchTypeContainer.append(optionsContainer, matchPill);
 
 		this.append(gamesContainer, matchTypeContainer);
 	}

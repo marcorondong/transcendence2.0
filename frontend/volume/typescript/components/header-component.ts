@@ -70,12 +70,15 @@ export class HeaderComponent extends HTMLElement {
 				"sm:flex-row",
 				"sm:content-center",
 				"sm:items-stretch",
-				"sm:p-0",
+				"sm:px-6",
+				"sm:py-2",
+				"sm:rounded-full",
 				"bg-gray-200",
 				"sm:bg-transparent",
 				"dark:bg-indigo-950",
-				"dark:sm:bg-transparent",
+				"dark:sm:bg-indigo-900",
 				"z-42",
+				"sm:me-6",
 			);
 			navigation.appendChild(list);
 		}
@@ -106,7 +109,7 @@ export class HeaderComponent extends HTMLElement {
 		const listElement = document.createElement("li");
 		listElement.append(logoutButton);
 		listElement.classList.add("flex", "justify-center");
-		list?.append(listElement);
+		navigation.append(listElement);
 
 		// THEME TOGGLE
 		const themeToggle = new ThemeToggleComponent();
