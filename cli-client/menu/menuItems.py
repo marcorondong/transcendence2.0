@@ -49,9 +49,9 @@ def login(stdscr: curses.window, user: Player) -> None:
     password = UI.get_secret_prompt("password", line)
     line += 1
 
-    user.set_username(username)
     if user.log_user(password):
         UI.log_notification("You are logged In")
+        user.set_username(username)
     UI.log_notification("Press Enter to continue", 1)
     UI.screen.getch()
     # return "username"
@@ -91,7 +91,9 @@ def logout(stdscr, user: Player):
     """
     logout the current user
     """
-    stdscr.addstr(2, TAB_SIZE, "Logging out...")
+    user.unset_access_token()
+    UI.log_notification("Logged out, Press enter to continue")
+    UI.screen.getch()
     # logic later
 
 
