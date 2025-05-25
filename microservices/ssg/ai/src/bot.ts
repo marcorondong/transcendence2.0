@@ -27,7 +27,7 @@ export class Bot {
 	private readonly port = "3010";
 	private readonly host = "pong-api";
 	private side: number;
-	private roomId: "";
+	private roomId: string = "";
 	private ws: WebSocket | null;
 
 	//dynamic game state
