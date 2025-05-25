@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import { PongField } from "../imports/PongField";
 import { Point } from "../imports/Point";
+import fs from "fs";
 import {
 	distanceBetweenPoints,
 	findIntersectionWithVerticalLine,
@@ -25,6 +26,7 @@ export class Bot {
 	private readonly PADDLE_GAP = 0.5;
 	private readonly MANDATORY_SPEED = 1000 / this.FRAME_RATE;
 	private readonly BALL_RADIUS = 0.075;
+	private readonly AVG_BOUNCE_GAP = 0.03; // the average distance between the ball and the paddle when it bounces
 
 	//room info
 	private readonly difficulty: string;
@@ -50,7 +52,7 @@ export class Bot {
 	private countdown = this.FRAME_RATE + 2; // to skip the first 2 welcome frames
 	private firstFrame = true;
 	private disconnectTimeout = 10000; // 30 seconds
-	private log = "";
+	private log = [] as number[];
 	private ballSlope = 0;
 
 	constructor(initializers: any) {
@@ -62,13 +64,13 @@ export class Bot {
 				? this.MANDATORY_SPEED
 				: botSpeedSelector[this.difficulty] ?? this.MANDATORY_SPEED;
 		this.roomId = initializers.roomId ?? "unknown_room_id";
-		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP;
+		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP;
 		this.ws = null;
 
 		//dynamic game state
 		this.paddleTwist = paddleTwistSelector[this.difficulty] ?? 0;
 		this.lastBall = new Point(0, 0);
-		this.target = new Point(field.RIGHT_EDGE_X - this.PADDLE_GAP, 0);
+		this.target = new Point(this.side, 0);
 		this.framesUntilTarget = Math.round(
 			Math.abs(this.target.getX()) / this.BALL_SPEED,
 		);
@@ -76,17 +78,17 @@ export class Bot {
 	}
 
 	private resetTimeout() {
-		this.disconnectTimeout = 10000; // reset the timeout to 30 seconds
+		this.disconnectTimeout = 30000; // reset the timeout to 30 seconds
 	}
 
-	//ping server after 1 sec to see if the room is successfully created
+	//if no activity, close the connection
 	private async checkTimeout() {
 		if (!this.ws) return;
 		while (this.disconnectTimeout > 0) {
 			this.disconnectTimeout -= 10000;
 			await sleep(10000);
 		}
-		console.log("Game is offline, closing WebSocket connection");
+		console.log("Game is inactive, closing WebSocket connection");
 		this.ws.close();
 	}
 
@@ -113,12 +115,13 @@ export class Bot {
 					`WebSocket closed at ${this.host}:${this.port} in room ${this.roomId}: `,
 					event,
 				);
+				// fs.appendFileSync("average_bounce.log", this.log.join("\n"));
 				return;
 			});
 
 			this.ws.on("message", (event: any) => {
-				if (--this.countdown == 0)
-					this.handleEvent(event);
+				// if (--this.countdown <= this.FRAME_RATE)
+				if (--this.countdown == 0) this.handleEvent(event);
 				else if (this.firstFrame) {
 					this.readFirstFrame(event);
 					this.firstFrame = false;
@@ -130,6 +133,20 @@ export class Bot {
 		}
 	}
 
+	private logAverageBounce(x: number) {
+		const last = this.log.pop();
+		if (last === undefined || Math.sign(x) !== Math.sign(last)) {
+			this.log.push(last ?? 0);
+			this.log.push(x);
+			return;
+		}
+		if (Math.abs(x) > Math.abs(last)) {
+			this.log.push(x);
+		} else if (last && Math.abs(last) < 4.02) {
+			this.log.push(last);
+		}
+	}
+
 	/*************************************************************************** */
 	/*                              AI LOGIC                                     */
 	/*************************************************************************** */
@@ -137,12 +154,13 @@ export class Bot {
 	// check game state, calculate target based on the last known positions, and send moves
 	public handleEvent(event: object) {
 		this.resetTimeout();
-		this.countdown = this.FRAME_RATE;
 
 		const gameState = JSON.parse(event.toString()) as GameState;
 
 		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
-
+		this.logAverageBounce(ballPosition.getX());
+		if (this.countdown) return;
+		this.countdown = this.FRAME_RATE;
 		this.logGameState(gameState);
 		this.updatePaddle(gameState);
 		this.handleScore(gameState.score);
@@ -228,11 +246,15 @@ export class Bot {
 	private handleScore(score: Score) {
 		while (score.leftTeam.goals !== this.leftScore) {
 			this.leftScore++;
-			this.resetAfterGoal(field.RIGHT_EDGE_X - this.PADDLE_GAP); //if left side scored, ball will go to the right
+			this.resetAfterGoal(
+				field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP,
+			); //if left side scored, ball will go to the right
 		}
 		while (score.rightTeam.goals !== this.rightScore) {
 			this.rightScore++;
-			this.resetAfterGoal(field.LEFT_EDGE_X + this.PADDLE_GAP);
+			this.resetAfterGoal(
+				field.LEFT_EDGE_X + this.PADDLE_GAP + this.AVG_BOUNCE_GAP,
+			); //if right side scored, ball will go to the left
 		}
 	}
 
@@ -262,8 +284,7 @@ export class Bot {
 		if (this.ballBounced(distance)) {
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
 		}
-		if (this.ballHitPaddle())
-			this.target.setX(Math.round(-this.target.getX()));
+		if (this.ballHitPaddle()) this.target.setX(-this.target.getX());
 		this.ballSlope = findGradient(origin, ballPosition);
 		this.target.setY(
 			findIntersectionWithVerticalLine(
@@ -295,7 +316,7 @@ export class Bot {
 		if (Object.getOwnPropertyNames(roomInfo).includes("matchStatus")) {
 			let status = roomInfo.matchStatus;
 			if (status.includes("Left") || status.includes("left"))
-				this.side = field.LEFT_EDGE_X + this.PADDLE_GAP;
+				this.side = -this.side;
 		}
 	}
 
@@ -322,16 +343,12 @@ export class Bot {
 
 	private getTargetByFrame(ballPosition: Point) {
 		let possiblePoint = this.hitPaddleAt(ballPosition);
-		if (
-			Math.abs(possiblePoint.getX()) < 3.95
-		) {
+		if (Math.abs(possiblePoint.getX()) < 3.95) {
 			this.framesUntilTarget++;
 			this.framesAfterTarget--;
 			possiblePoint = this.hitPaddleAt(ballPosition);
 		}
-		if (
-			Math.abs(possiblePoint.getX()) > 4.015
-		) {
+		if (Math.abs(possiblePoint.getX()) > 4.015) {
 			this.framesUntilTarget--;
 			this.framesAfterTarget++;
 			possiblePoint = this.hitPaddleAt(ballPosition);
@@ -341,9 +358,7 @@ export class Bot {
 
 	private whereToMovePaddle() {
 		this.movePaddleTo =
-			Math.round(this.target.getX()) === this.side
-				? this.target.getY()
-				: 0;
+			this.target.getX() === this.side ? this.target.getY() : 0;
 		if (this.canReachTarget() === false) this.movePaddleTo = 0;
 	}
 
@@ -385,7 +400,7 @@ export class Bot {
 			? this.framesAfterTarget
 			: this.FRAME_RATE;
 		this.logBounce(distance, expectedDistance);
-		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // to account for 2 dropped frame or bad rounding
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // to account for bounce calculation on server side
 	}
 
 	private logAIState() {
