@@ -26,6 +26,9 @@ class Player:
     def set_access_token(self, token: str) -> None:
         self.access_token = token
 
+    def unset_access_toke(self) -> None:
+        self.access_token = ""
+
     def log_user(self, password: str) -> bool:
         token = log_in(self.username, password)
         if token == False:
