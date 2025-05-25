@@ -1,6 +1,6 @@
 import { ChatComponent } from "./components/chat-component.js";
 import { FetchAuth } from "./services/fetch-auth.js";
-import { baseUrl, baseUrl } from "./services/fetch.js";
+import { baseUrl } from "./services/fetch.js";
 
 export class Router {
 	containerDiv = document.getElementById("content");

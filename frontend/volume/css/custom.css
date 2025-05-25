@@ -5,9 +5,14 @@
 }
 
 .glow-small {
-	-webkit-box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.88);
-	-moz-box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.88);
-	box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.88);
+	-webkit-box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.5);
+	-moz-box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.5);
+	box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.5);
+}
+.glow-small-hover:hover {
+	-webkit-box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.5);
+	-moz-box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.5);
+	box-shadow: 0px 0px 32px 1px rgba(6, 181, 212, 0.5);
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -15,5 +20,3 @@
 		visibility: visible !important;
 	}
 }
-
-
