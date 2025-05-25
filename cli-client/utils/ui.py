@@ -17,7 +17,14 @@ def secret_typing(screen: curses.window) -> str:
 
 class UI:
 
-    def get_prompt(prompt_title: str, screen: curses.window, starting_line=0) -> str:
+    screen: curses.window = None
+
+    @classmethod
+    def set_screen(cls, scr: curses.window):
+        cls.screen = scr
+
+    @classmethod
+    def get_prompt(cls, prompt_title: str, starting_line=0) -> str:
         """Return user prompt visible typing
 
         Args:
@@ -29,16 +36,17 @@ class UI:
         """
         curses.echo()
         prompt = f"Enter {prompt_title}:"
-        screen.addstr(starting_line, 0, prompt)
-        screen.refresh()
-        user_input_bytes = screen.getstr(starting_line, len(prompt), MAX_INPUT_LENGTH)
+        cls.screen.addstr(starting_line, 0, prompt)
+        cls.screen.refresh()
+        user_input_bytes = cls.screen.getstr(
+            starting_line, len(prompt), MAX_INPUT_LENGTH
+        )
         curses.noecho()
 
         return user_input_bytes.decode()
 
-    def get_secret_prompt(
-        prompt_title: str, screen: curses.window, starting_line=0
-    ) -> str:
+    @classmethod
+    def get_secret_prompt(cls, prompt_title: str, starting_line=0) -> str:
         """Return user prompt but it is not visible while typing.\n
         It shows "*" instead of real input
 
@@ -51,15 +59,20 @@ class UI:
         """
         curses.noecho()
         prompt = f"Enter {prompt_title}:"
-        screen.addstr(starting_line, 0, prompt, curses.A_STANDOUT)
-        screen.refresh()
-        return secret_typing(screen)
+        cls.screen.addstr(starting_line, 0, prompt, curses.A_STANDOUT)
+        cls.screen.refresh()
+        return secret_typing(cls.screen)
 
-    def log_notification(
-        notification: str, screen: curses.window, starting_line=0
-    ) -> None:
-       # curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        height, width = screen.getmaxyx()
+    @classmethod
+    def log_notification(cls, notification: str, starting_line=0) -> None:
+        height, width = cls.screen.getmaxyx()
         x = width - len(notification)
-        screen.addstr(starting_line, x, notification, curses.color_pair(2))
-        screen.refresh()
+        cls.screen.addstr(starting_line, x, notification, curses.color_pair(2))
+        cls.screen.refresh()
+
+    @classmethod
+    def log_error(cls, notification: str, starting_line=2) -> None:
+        height, width = cls.screen.getmaxyx()
+        x = width - len(notification)
+        cls.screen.addstr(starting_line, x, notification, curses.color_pair(3))
+        cls.screen.refresh()

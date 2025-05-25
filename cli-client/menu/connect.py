@@ -6,6 +6,7 @@ from websockets.sync.client import connect
 import requests
 from menu.logger import myLogger
 import urllib3
+from utils.ui import UI
 
 HOST = "localhost"  # TODO read this from proper file like 10.12.5.7
 PORT = "8080"
@@ -59,7 +60,7 @@ def client(stdscr, user_header: dict[str, str]):
 
 
 # TODO fix check if it was successful
-def log_in(username: str, password: str) -> str:
+def log_in(username: str, password: str) -> str | bool:
     """log user
 
     Args:
@@ -78,6 +79,9 @@ def log_in(username: str, password: str) -> str:
         },
         verify=False,
     )
+    if not 200 <= response.status_code < 300:
+        UI.log_error(f"Log in fail. Return code {response.status_code}")
+        return False
     cookies = session.cookies.get_dict()
     user_access_token = cookies.get("access_token")
     myLogger.debug(f"Code is {response.status_code}")

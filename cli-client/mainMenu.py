@@ -4,12 +4,13 @@ from window.windowColors import setColors
 import curses
 from menu.logger import myLogger
 from utils.player import Player
-
+from utils.ui import UI
 
 user = Player()
 
 
 def mainMenu(stdscr):
+    UI.set_screen(stdscr)
     setColors(stdscr, curses.COLOR_WHITE, curses.COLOR_BLACK)
     menuLoop(
         stdscr,

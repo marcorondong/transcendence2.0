@@ -26,9 +26,12 @@ class Player:
     def set_access_token(self, token: str) -> None:
         self.access_token = token
 
-    def log_user(self, password: str):
+    def log_user(self, password: str) -> bool:
         token = log_in(self.username, password)
+        if token == False:
+            return False
         self.set_access_token(token)
+        return True
 
     def get_custom_headers(self) -> dict[str, str]:
         return {"Cookie": f"access_token={self.access_token}"}

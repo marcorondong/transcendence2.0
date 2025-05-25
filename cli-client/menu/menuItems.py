@@ -32,15 +32,15 @@ def login(stdscr: curses.window, user: Player):
     login an existing user and open the main menu
     """
     line = 0
-    username = UI.get_prompt("username", stdscr, line)
+    username = UI.get_prompt("username", line)
     line += 1
-    password = UI.get_secret_prompt("password", stdscr, line)
+    password = UI.get_secret_prompt("password", line)
 
     user.set_username("f@gmail.com")  # FIXME put real input
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
-    user.log_user("A1!aaa")  # FIXME put real input
-    UI.log_notification("You are logged In", stdscr)
+    if user.log_user("A1!aaa"):  # FIXME put real input
+        UI.log_notification("You are logged In")
     stdscr.getch()
     return "username"
 
