@@ -54,3 +54,12 @@ class UI:
         screen.addstr(starting_line, 0, prompt, curses.A_STANDOUT)
         screen.refresh()
         return secret_typing(screen)
+
+    def log_notification(
+        notification: str, screen: curses.window, starting_line=0
+    ) -> None:
+       # curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        height, width = screen.getmaxyx()
+        x = width - len(notification)
+        screen.addstr(starting_line, x, notification, curses.color_pair(2))
+        screen.refresh()

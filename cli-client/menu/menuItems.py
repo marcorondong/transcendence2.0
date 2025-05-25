@@ -40,6 +40,7 @@ def login(stdscr: curses.window, user: Player):
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
     user.log_user("A1!aaa")  # FIXME put real input
+    UI.log_notification("You are logged In", stdscr)
     stdscr.getch()
     return "username"
 
