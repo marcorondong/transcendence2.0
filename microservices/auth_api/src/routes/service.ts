@@ -1,21 +1,59 @@
 import httpError from "http-errors";
-import { payloadZodSchema } from "./zodSchemas";
 import { env } from "../utils/env";
 
-export async function signInRequest(email: string, password: string) {
-	// TODO update signInRequest to use username instead of email when users service is updated
+export async function signInRequest(body: unknown) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ email, password }),
+		body: JSON.stringify(body),
 	});
 	if (!response.ok) {
-		throw new httpError.Unauthorized("Invalid email or password");
+		const error = await response.json();
+		if (response.status === 401) {
+			throw new httpError.Unauthorized(
+				error.message || "Invalid email or password",
+			);
+		} else if (response.status === 400) {
+			throw new httpError.BadRequest(
+				error.message || "Invalid input data",
+			);
+		}
+		throw new httpError.InternalServerError(
+			error.message || "An error occurred while signing in",
+		);
 	}
 	const data = await response.json();
-	const payload = payloadZodSchema.parse(data);
+	const payload = { id: data.id, nickname: data.nickname };
+	return payload;
+}
+
+export async function signUpRequest(body: unknown) {
+	const response = await fetch(env.USERS_REGISTRATION_REQUEST_DOCKER, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		if (response.status === 409) {
+			throw new httpError.Conflict(
+				error.message || "User already exists",
+			);
+		} else if (response.status === 400) {
+			throw new httpError.BadRequest(
+				error.message || "Invalid input data",
+			);
+		}
+		throw new httpError.InternalServerError(
+			error.message || "An error occurred while signing up",
+		);
+	}
+	const data = await response.json();
+	const payload = { id: data.id, nickname: data.nickname };
 	return payload;
 }
 
