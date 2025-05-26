@@ -14,6 +14,12 @@ export const idsZodSchema = z
 	.strict()
 	.refine((data) => data.userId !== data.opponentId);
 
+export const userIdsZodSchema = z
+	.object({
+		userIds: z.array(z.string().uuid()).min(1),
+	})
+	.strict();
+
 const baseSchema = z.object({
 	winnerId: z.string().uuid(),
 	loserId: z.string().uuid(),
@@ -48,6 +54,15 @@ export const statsResponseSchema = z
 	.strict()
 	.refine((data) => data.total === data.wins + data.losses);
 
+export const usersStatsResponseSchema = z.array(
+	z.object({
+		userId: z.string().uuid(),
+		total: z.number().int().nonnegative(),
+		wins: z.number().int().nonnegative(),
+		losses: z.number().int().nonnegative(),
+	})
+	.strict());
+
 export const successResponseSchema = z
 	.object({
 		success: z.boolean(),
@@ -56,6 +71,7 @@ export const successResponseSchema = z
 
 export type IdInput = z.infer<typeof idZodSchema>;
 export type IdsInput = z.infer<typeof idsZodSchema>;
+export type UserIdsInput = z.infer<typeof userIdsZodSchema>;
 export type GameInput = z.infer<typeof gameSchema>;
 export type GamesInput = z.infer<typeof gameHistoryResponseSchema>;
 export type GameResponse = z.infer<typeof gameResponseSchema>;
