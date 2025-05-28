@@ -103,6 +103,6 @@ E.g:
 - [Tic-Tac-Toe DB](/microservices/tictactoe_db/README.md)
 - [Users](/microservices/users/README.md)
 
-## 🔗 Links to others readme files
+## 🔗 Links to other README files
 
 - [Database Seeder](/tools/db_seeder/README.md)
