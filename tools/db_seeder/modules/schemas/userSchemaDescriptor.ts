@@ -31,7 +31,10 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 		// fixed: () => `user_${Math.floor(Math.random() * 1000)}`, // Example
 		postProcess: (value: string) =>
 			value
+				.replace(/[\x00-\x1F\x7F]/g, "") // Remove control/non-printable chars
 				.replace(/[^\x00-\x7F]/g, "") // Remove non-ASCII
+				.replace(/\s+/g, " ") // collapse multiple whitespaces
+				.trim() // remove leading/trailing whitespace
 				.slice(0, 70), // Enforce max length
 		validator: (value: string) =>
 			typeof value === "string" &&
