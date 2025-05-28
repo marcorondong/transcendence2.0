@@ -47,8 +47,7 @@ def login(stdscr: curses.window, user: Player) -> None:
     line += 1
     password = UI.get_secret_prompt("password", line)
     line += 1
-
-    if user.log_user(password):
+    if user.log_user(username, password):
         UI.log_notification("You are logged In")
         user.set_username(username)
     UI.log_notification("Press Enter to continue", 1)
@@ -67,11 +66,12 @@ def auto_login(stdscr: curses.window, user: Player) -> None:
     password = UI.get_secret_prompt("password", line)
     line += 1
 
-    user.set_username("f@gmail.com")  # FIXME put real input
+    username = "f@gmail.com"
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
-    if user.log_user("A1!aaa"):  # FIXME put real input
+    if user.log_user(username, "A1!aaa"):  # FIXME put real input
         UI.log_notification("You are logged In")
+        user.set_username(username)
     UI.log_notification("Press Enter to continue", 1)
     UI.screen.getch()
     # return "username"

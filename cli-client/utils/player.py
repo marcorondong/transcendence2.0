@@ -29,8 +29,8 @@ class Player:
         self.access_token = ""
         self.username = "<GUEST>"
 
-    def log_user(self, password: str) -> bool:
-        token = log_in(self.username, password)
+    def log_user(self, username: str, password: str) -> bool:
+        token = log_in(username, password)
         if token == False:
             return False
         self.set_access_token(token)
