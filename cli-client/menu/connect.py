@@ -1,18 +1,14 @@
-from websockets.sync.client import connect
-import json
-import curses
-import ssl
-from websockets.sync.client import connect
-import requests
 from menu.logger import myLogger
-import urllib3
 from utils.ui import UI
+from websockets.sync.client import connect
+import curses
+import json
+import requests
+import ssl
 import time
+import urllib3
+from cli_config import PONG_SINGLES_URL, LOGIN_URL, REGISTER_URL
 
-HOST = "localhost"  # TODO read this from proper file like 10.12.5.7
-PORT = "8080"
-ROUTE = "/pong-api/pong/singles"
-WS_ROUTE = f"wss://{HOST}:{PORT}{ROUTE}"
 
 ssl_context = (
     ssl._create_unverified_context()
@@ -76,7 +72,7 @@ def client(stdscr, user_header: dict[str, str]):
     key_timeout = 0.2  # seconds to reset paddle direction if no key pressed
 
     with connect(
-        WS_ROUTE,
+        PONG_SINGLES_URL,
         close_timeout=0.1,
         ping_interval=None,
         ssl=ssl_context,
@@ -159,7 +155,7 @@ def register_user(email: str, nickname: str, username: str, password: str) -> bo
         bool: true if success, false otherwise
     """
     response = requests.post(
-        "https://localhost:8080/api/users/",
+        REGISTER_URL,
         json={
             "email": email,
             "nickname": nickname,
