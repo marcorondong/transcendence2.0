@@ -3,15 +3,27 @@ import curses
 MAX_INPUT_LENGTH = 128
 
 
+def delete_char_from_screen(screen: curses.window):
+    y, x = screen.getyx()
+    screen.move(y, x - 1)
+    screen.delch()
+    screen.refresh
+
+
 def secret_typing(screen: curses.window) -> str:
     password = ""
     while True:
         one_char = screen.getch()
         if one_char == ord("\n"):
             break
-        screen.addstr("*")
-        password += chr(one_char)
-        screen.refresh()
+        elif one_char in (curses.KEY_BACKSPACE, 127, 8):
+            if len(password) > 0:
+                password = password[:-1]
+                delete_char_from_screen(screen)
+        else:
+            screen.addstr("*")
+            password += chr(one_char)
+            screen.refresh()
     return password
 
 
@@ -65,8 +77,11 @@ class UI:
 
     @classmethod
     def log_notification(cls, notification: str, starting_line=0) -> None:
+        notification_len = len(notification)
+        if notification_len <= 0:
+            return
         height, width = cls.screen.getmaxyx()
-        x = width - len(notification)
+        x = width - notification_len
         cls.screen.addstr(starting_line, x, notification, curses.color_pair(2))
         cls.screen.refresh()
 
