@@ -126,7 +126,7 @@ def log_in(username: str, password: str) -> str | bool:
     """
     session = requests.Session()
     response = session.post(
-        "https://localhost:8080/auth-api/sign-in",
+        LOGIN_URL,
         json={
             "email": username,
             "password": password,
