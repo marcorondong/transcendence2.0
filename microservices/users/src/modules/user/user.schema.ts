@@ -131,9 +131,21 @@ const nicknameField = z
 	.regex(/\S/, "Nickname cannot be empty or whitespace only")
 	.regex(/[a-zA-Z]/, "Nickname must contain at least one letter")
 	.regex(/^[\x00-\x7F]+$/, "Nickname must contain only ASCII characters")
+	// .regex(
+	// 	/^[^\s\x00-\x1F\x7F]+(?: [^\s\x00-\x1F\x7F]+)*$/,
+	// 	"Nickname cannot have leading or trailing whitespace or control characters",
+	// )
+	// .regex(
+	// 	/^[^\s\x00-\x1F\x7F](?:[^\x00-\x1F\x7F]*[^\s\x00-\x1F\x7F])?$/,
+	// 	"Nickname cannot start or end with whitespace/control characters, and must not contain control characters",
+	// )
+	//trtrtrtrtr
+	.regex(/^[^\s]/, "Nickname cannot start with whitespace")
+	.regex(/[^\s]$/, "Nickname cannot end with whitespace")
+	.regex(/^(?!.*  ).*$/, "Nickname cannot contain consecutive spaces")
 	.regex(
-		/^[^\s\x00-\x1F\x7F]+(?: [^\s\x00-\x1F\x7F]+)*$/,
-		"Nickname cannot have leading or trailing whitespace or control characters",
+		/^[^\x00-\x1F\x7F]*$/,
+		"Nickname cannot contain control characters (tabs, newlines, etc)",
 	);
 
 // Email field schema
