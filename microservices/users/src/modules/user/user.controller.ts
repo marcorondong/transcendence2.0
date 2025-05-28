@@ -38,28 +38,41 @@ export async function registerUserHandler(
 
 // TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
 
+// Define valid login modes: "email", "username", or "email,username"
+const LOGIN_IDENTIFIER_MODE = "email,username"; // ← Change this as needed
+
 export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
 	const { email, username, password } = request.body;
-	let identifier: string;
+	// Determine allowed identifiers
+	const allowedIdentifiers = LOGIN_IDENTIFIER_MODE.split(",").map((s) =>
+		s.trim(),
+	);
+	let identifier: string | undefined;
 	let userWhere: UniqueUserField;
 
-	if (email) {
-		identifier = email.toLowerCase(); // enforce lowercase emails
+	if (allowedIdentifiers.includes("email") && email) {
+		identifier = email.toLowerCase(); // transform to lowercase emails
 		userWhere = { email: identifier };
-	} else {
-		identifier = username!; // username may be mixed case
-		// identifier = username!.toLowerCase(); // <- uncomment to enforce lowercase usernames later
+	} else if (allowedIdentifiers.includes("username") && username) {
+		identifier = username.toLowerCase(); // transform to lowercase usernames
 		userWhere = { username: identifier };
+	} else {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_LOGIN,
+			message: "Login requires a valid email or username",
+		});
 	}
 
 	try {
 		// const user = await findUserByUnique({ email }); // Might throw 404 Not Found
-		const user = await findUserByUnique(
-			email ? { email: identifier } : { username: identifier },
-		);
+		// const user = await findUserByUnique(
+		// 	email ? { email: identifier } : { username: identifier },
+		// );
+		const user = await findUserByUnique(userWhere);
 		const valid = verifyPassword({
 			candidatePassword: password,
 			hash: user.passwordHash,
@@ -69,7 +82,7 @@ export async function loginHandler(
 			throw new AppError({
 				statusCode: 401,
 				code: USER_ERRORS.USER_LOGIN,
-				message: "Invalid email or password",
+				message: "Invalid credentials",
 			});
 		}
 		// Explicitly exclude 'passwordHash' and 'salt' since we don't want to retrieve that info
@@ -90,11 +103,11 @@ export async function loginHandler(
 	} catch (err) {
 		// If user not found or password invalid, always send same generic 401
 		if (err instanceof AppError && err.statusCode === 404) {
-			// Change 404 Not Found to 401 Invalid email or password (Hide sensitive info)
+			// Change 404 Not Found to 401 Invalid credentials (Hide sensitive info)
 			throw new AppError({
 				statusCode: 401,
 				code: USER_ERRORS.USER_LOGIN,
-				message: "Invalid email or password",
+				message: "Invalid credentials",
 			});
 		}
 		// Unknown errors bubble up to global error handler.

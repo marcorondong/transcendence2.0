@@ -269,7 +269,7 @@ export const loginSchema = z
 		(data) =>
 			(data.email || data.username) && !(data.email && data.username),
 		{
-			message: "Provide either email or username, not both",
+			message: "Login requires a valid email or username",
 			path: ["email"], // TODO: For Swagger UI display (check this)
 		},
 	);
