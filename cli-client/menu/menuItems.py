@@ -1,12 +1,8 @@
-import curses
 from menu.connect import client, TAB_SIZE
-from menu.logger import myLogger
-from utils.ui import *
+from menu.connect import register_user
 from utils.player import *
-from menu.connect import log_in, register_user
-
-MAX_USERNAME_LENGTH = 40
-MAX_PASSWORD_LENGTH = 128
+from utils.ui import *
+import curses
 
 BACK_BUTTON = "Back"
 
