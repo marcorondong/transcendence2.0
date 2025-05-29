@@ -28,11 +28,19 @@ export class HeadToHeadMatchMaking {
 		roomId: string,
 		mode: "singles" | "doubles",
 	) {
+		if (roomId === "private") //TODO: read from config 
+			return this.createHostPrivateRoom(player, mode);
+
 		let privateRoom: APongRoom<APongGame> | undefined =
 			this.getAllMatches().get(roomId);
-		if (privateRoom === undefined)
-			return this.createHostPrivateRoom(player, mode);
-		else {
+
+		if (privateRoom === undefined) {
+			player.sendError(
+				"Room with provided Id doesn't exist. Invite expired, or Host left lobby",
+			);
+			player.connection.close(1008, "Room with id not found");
+			return;
+		} else {
 			if (privateRoom.isFull() === false)
 				this.addPlayerToRoom(player, privateRoom);
 			else {
