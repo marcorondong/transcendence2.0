@@ -20,6 +20,7 @@ model User {
   nickname     String    @unique
   passwordHash String
   salt         String
+  picture      String    @default("/uploads/users/default/avatar.jpg")
   products     Product[]
 }
 

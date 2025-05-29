@@ -7,7 +7,8 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "nickname" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
-    "salt" TEXT NOT NULL
+    "salt" TEXT NOT NULL,
+    "picture" TEXT NOT NULL DEFAULT '/uploads/users/default/avatar.jpg'
 );
 
 -- CreateTable
