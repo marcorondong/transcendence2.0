@@ -24,21 +24,20 @@ clean:
 remove:
 	docker compose down --volumes
 	docker system prune -a -f --volumes
-	docker builder prune -a -f
 	$(MAKE) delete-secrets
 
 delete-secrets:
 	echo "Deleting secrets"
 	rm -f $(SECRET_FILES)
-	rmdir $(SECRET_DIRECTORIES)
+	rm -rf $(SECRET_DIRECTORIES)
 
 dev:
 	docker compose build --no-cache
 	docker compose up
 
-##TODO I think we don't need this. Remove should be more than enough
 nuke: clean
-	docker system prune -a --volumes
+	docker system prune -a -f --volumes
+	docker builder prune -a -f
 	$(MAKE) delete-secrets
 
 cli: all
