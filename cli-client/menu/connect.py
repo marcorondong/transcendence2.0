@@ -57,7 +57,7 @@ def getMove(stdscr):
 #                 sendMove(websocket, move)
 
 
-# TODO This is  chat gpt solution for keydown i am not impressed. It is quite tricky to simulate
+# TODO This is senior dev solution for keydown i am not impressed. It is quite tricky to simulate
 # same paddle speed from CLI as it is currently on frontend.
 # Possible solution:
 # a) we keep this version: Not ideal but closest what I could get to frontend
