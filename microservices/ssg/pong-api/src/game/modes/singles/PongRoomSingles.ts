@@ -38,7 +38,7 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 				this.getGame().storeResultInDatabase(winnerId, loserId);
 			else {
 				console.warn(
-					`Game ${this.getGame().getGameId()}will not be stored in database`,
+					`Game ${this.getGame().getGameId()} will not be stored in database`,
 				);
 			}
 		});
