@@ -2,6 +2,7 @@
 # env
 *.env
 *.txt
+!cli-client/requirements.txt
 *.sensitive_env
 *.pem
 *.key
