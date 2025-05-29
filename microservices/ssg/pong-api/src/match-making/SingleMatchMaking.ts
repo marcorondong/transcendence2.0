@@ -28,7 +28,7 @@ export class HeadToHeadMatchMaking {
 		roomId: string,
 		mode: "singles" | "doubles",
 	) {
-		if (roomId === "private") //TODO: read from config 
+		if (roomId === "private") //TODO: read from config
 			return this.createHostPrivateRoom(player, mode);
 
 		let privateRoom: APongRoom<APongGame> | undefined =
@@ -36,7 +36,7 @@ export class HeadToHeadMatchMaking {
 
 		if (privateRoom === undefined) {
 			player.sendError(
-				"Room with provided Id doesn't exist. Invite expired, or Host left lobby",
+				"Room with provided Id doesn't exist. Invite expired, or Host left lobby. If you want to be host send roomId=private as query",
 			);
 			player.connection.close(1008, "Room with id not found");
 			return;
