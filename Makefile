@@ -21,25 +21,31 @@ re: clean
 clean:
 	docker compose down
 
-remove: delete-secrets
+remove:
 	docker compose down --volumes
 	docker system prune -a -f --volumes
-
-delete-secrets:
-	echo "Deleting secrets"
-	rm -f $(SECRET_FILES)
-	rm -rf $(SECRET_DIRECTORIES)
+	$(MAKE) delete-secrets
 
 dev:
 	docker compose build --no-cache
 	docker compose up
 
-nuke: clean delete-secrets
-	docker system prune -a -f --volumes
-	docker builder prune -a -f
-
 cli: all
 	make -C cli-client
+
+nuke:
+	docker ps -aq | xargs -r docker rm -f
+	-docker images -q | xargs -r docker rmi -f
+	-docker volume ls -q | xargs -r docker volume rm
+	-docker network ls -q | xargs -r docker network inspect --format '{{.Name}} {{.Id}}' | grep -vE '^(bridge|host|none)' | awk '{print $2}' | xargs -r docker network rm
+	docker system prune -a -f --volumes
+	docker builder prune -a -f
+	$(MAKE) delete-secrets
+
+delete-secrets:
+	echo "Deleting secrets"
+	rm -f $(SECRET_FILES)
+	rm -rf $(SECRET_DIRECTORIES)
 
 $(SECRET_DIRECTORIES):
 	mkdir -p $(SECRET_DIRECTORIES)
