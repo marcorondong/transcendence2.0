@@ -19,12 +19,10 @@ import {
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
-// import { server } from "../../app";
 import { getConfig } from "../../utils/config";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
-// safeParse is for adding an extra layer of security (since it comes from the user).
 
 export async function registerUserHandler(
 	request: FastifyRequest<{ Body: createUserInput }>,
@@ -36,10 +34,8 @@ export async function registerUserHandler(
 	return reply.code(201).send(parsedUser);
 }
 
-// TODO: I should enforce return type (check https://chatgpt.com/c/67db0437-6944-8005-95f2-21ffe52eedda#:~:text=ChatGPT%20said%3A-,ANSWER004,-Great%20to%20hear)
-
 // Define valid login modes: "email", "username", or "email,username"
-const LOGIN_IDENTIFIER_MODE = "email,username"; // ← Change this as needed
+const LOGIN_IDENTIFIER_MODE = "email,username"; // Change this as needed
 
 export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
@@ -68,11 +64,7 @@ export async function loginHandler(
 	}
 
 	try {
-		// const user = await findUserByUnique({ email }); // Might throw 404 Not Found
-		// const user = await findUserByUnique(
-		// 	email ? { email: identifier } : { username: identifier },
-		// );
-		const user = await findUserByUnique(userWhere);
+		const user = await findUserByUnique(userWhere); // Might throw 404 Not Found
 		const valid = verifyPassword({
 			candidatePassword: password,
 			hash: user.passwordHash,
@@ -89,16 +81,8 @@ export async function loginHandler(
 		const { passwordHash, salt, ...rest } = user;
 		// For testing purposes: Comment out line above and comment in line below to have full user info
 		// const { ...rest } = user;
-		// TODO: Without AUTH service (token generation logic)
-		// // Generate access token
-		// const accessToken = server.jwt.sign(rest);
-		// // Serialize/validate/filter response via Zod schemas (loginResponseSchema.parse)
-		// const parsedToken = loginResponseSchema.parse({ accessToken });
-		// return reply.code(200).send(parsedToken);
-		//
-		// TODO: With AUTH service (just reply with data to include in JWT token)
+		// With AUTH service (just reply with data to include in JWT token)
 		const parsedResponse = loginResponseSchema.parse(rest);
-		// return reply.code(200).send({ id: user.id, nickname: user.nickname });
 		return reply.code(200).send(parsedResponse);
 	} catch (err) {
 		// If user not found or password invalid, always send same generic 401
@@ -116,7 +100,6 @@ export async function loginHandler(
 }
 
 export async function getUserHandler(
-	// request: FastifyRequest<{ Params: { id: number } }>,
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
@@ -147,7 +130,7 @@ function applyPagination(params: {
 	const take =
 		typeof params.take === "number" ? params.take : defaultPageSize;
 
-	// ❗ Optional: Enforce that both `page` and `skip` are not allowed together
+	// Enforce that both `page` and `skip` are not allowed together
 	if (typeof params.page === "number" && typeof params.skip === "number") {
 		// TODO: Use AppError here
 		throw new Error("Cannot use both 'page' and 'skip' in the same query");
@@ -168,7 +151,7 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
-	// TODO: Log full query for debugging purposes
+	// Log full query for debugging purposes
 	// console.log("[Request Query]", request.query);
 
 	// Destructure request query into respective fields
@@ -199,31 +182,12 @@ export async function getUsersHandler(
 		take: queryTake,
 		page,
 	});
-	// // ======= START DEBUGGING =========
-	// let skip: number | undefined;
-	// let take: number | undefined;
-	// try {
-	// 	({ skip, take } = applyPagination({
-	// 		all,
-	// 		skip: querySkip,
-	// 		take: queryTake,
-	// 		page,
-	// 	}));
-	// } catch (err) {
-	// 	console.error("Pagination error:", err);
-	// 	throw new AppError({
-	// 		statusCode: 400,
-	// 		code: "PAGINATION_PARSE_ERROR",
-	// 		message: (err as Error).message,
-	// 	});
-	// }
-	// // ======= END DEBUGGING =========
-	// TODO: Log pagination results for debugging purposes
+	// Log pagination results for debugging purposes
 	// console.log(
 	// 	`[Pagination] page: ${page}, skip: ${skip}, take: ${take}, all: ${all}`,
 	// );
 
-	// MR_NOTE: 'page' nor 'all' field are not handled by service `findUsers()`;
+	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
 	// since pagination is an abstraction for 'skip' and 'take'
 	const users = await findUsers({
 		where: {
@@ -281,137 +245,3 @@ export async function patchUserHandler(
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
 }
-
-// =============================================================================
-// OLD applyPagination() THAT DIDN'T HANDLE 'page' FIELD
-// function applyPagination(params: {
-// 	all?: boolean;
-// 	skip?: number;
-// 	take?: number;
-// }) {
-// 	// Get config from utils function getConfig() (utils/config.ts)
-// 	const config = getConfig();
-// 	const paginationEnabled = config.PAGINATION_ENABLED === "true";
-// 	const defaultPageSize = parseInt(config.DEFAULT_PAGE_SIZE || "10", 10);
-
-// 	// If query string has "?all=true" then all results will be provided (no pagination)
-// 	if (params.all === true) return { skip: undefined, take: undefined };
-// 	if (!paginationEnabled) return { skip: undefined, take: undefined };
-
-// 	return {
-// 		skip: typeof params.skip === "number" ? params.skip : 0,
-// 		take: typeof params.take === "number" ? params.take : defaultPageSize,
-// 	};
-// }
-// =============================================================================
-// OLD getUsersHandler() WHICH DIDN'T HANDLED 'page'
-// export async function getUsersHandler(
-// 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
-// 	reply: FastifyReply,
-// ) {
-// 	// TODO: Log full query for debugging purposes
-// 	console.log("[Request Query]", request.query);
-
-// 	// Destructure request query into respective fields
-// 	const {
-// 		id,
-// 		email,
-// 		username,
-// 		nickname,
-// 		createdAt,
-// 		updatedAt,
-// 		dateTarget,
-// 		before,
-// 		after,
-// 		between,
-// 		useFuzzy,
-// 		useOr,
-// 		skip: querySkip,
-// 		take: queryTake,
-// 		sortBy,
-// 		order,
-// 		all,
-// 	} = request.query;
-
-// 	const { skip, take } = applyPagination({
-// 		all,
-// 		skip: querySkip,
-// 		take: queryTake,
-// 	});
-
-// 	// TODO: Log pagination results for debugging purposes
-// 	console.log(`[Pagination] skip: ${skip}, take: ${take}, all: ${all}`);
-
-// 	const users = await findUsers({
-// 		where: {
-// 			id,
-// 			email,
-// 			username,
-// 			nickname,
-// 			createdAt,
-// 			updatedAt,
-// 		},
-// 		useFuzzy,
-// 		useOr,
-// 		dateTarget,
-// 		before,
-// 		after,
-// 		between,
-// 		skip,
-// 		take,
-// 		sortBy,
-// 		order,
-// 	});
-
-// 	const parsedUsers = userArrayResponseSchema.parse(users);
-// 	return reply.code(200).send(parsedUsers);
-// }
-// =============================================================================
-// OLD getUsersHandler() WHICH DIDN'T HANDLED PAGINATION
-// export async function getUsersHandler(
-// 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
-// 	reply: FastifyReply,
-// ) {
-// 	// Destructure request query into respective fields
-// 	const {
-// 		id,
-// 		email,
-// 		username,
-// 		nickname,
-// 		createdAt,
-// 		updatedAt,
-// 		dateTarget,
-// 		before,
-// 		after,
-// 		between,
-// 		useFuzzy,
-// 		useOr,
-// 		skip,
-// 		take,
-// 		sortBy,
-// 		order,
-// 	} = request.query;
-
-// 	const users = await findUsers({
-// 		where: {
-// 			id,
-// 			email,
-// 			username,
-// 			nickname,
-// 			createdAt,
-// 			updatedAt,
-// 		},
-// 		useFuzzy,
-// 		useOr,
-// 		dateTarget,
-// 		before,
-// 		after,
-// 		between,
-// 		skip,
-// 		take,
-// 		sortBy,
-// 		order,
-// 	});
-// 	const parsedUsers = userArrayResponseSchema.parse(users);
-// 	return reply.code(200).send(parsedUsers);
-// }

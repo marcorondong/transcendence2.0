@@ -27,7 +27,6 @@ export type UserPublicField = (typeof userPublicFields)[number];
 
 // Type definition to allow one field per query (used in )
 export type UniqueUserField =
-	// | { id: number }
 	| { id: string }
 	| { email: string }
 	| { username: string }
@@ -89,16 +88,6 @@ const usernameField = z
 		required_error: "Username is required",
 		invalid_type_error: "Username must be a string",
 	})
-	// .min(3, "Username must be at least 3 characters long")
-	// .refine((val) => val.trim().length > 0, {
-	// 	message: "Username must not be empty or whitespace only",
-	// })
-	// .refine((val) => !/^\d+$/.test(val), {
-	// 	message: "Username must not be numbers only",
-	// })
-	// .refine((val) => /[a-zA-Z]/.test(val), {
-	// 	message: "Username must contain at least one letter",
-	// });
 	.min(3, "Username must be at least 3 characters long")
 	.max(40, "Username cannot be longer than 40 characters")
 	.regex(
@@ -106,9 +95,6 @@ const usernameField = z
 		"Username can only contain lowercase letters, digits, dashes and underscores",
 	)
 	.regex(/[a-z]/, "Username must contain at least one letter");
-// .regex(/\S/, "Username must not be empty or whitespace only")
-// .regex(/\D/, "Username must not be numbers only")
-// .regex(/[a-zA-Z]/, "Username must contain at least one letter");
 
 // Nickname field schema
 const nicknameField = z
@@ -116,30 +102,11 @@ const nicknameField = z
 		required_error: "Nickname is required",
 		invalid_type_error: "Nickname must be a string",
 	})
-	// .min(3, "Nickname must be at least 3 characters long")
-	// .refine((val) => val.trim().length > 0, {
-	// 	message: "Nickname must not be empty or whitespace only",
-	// })
-	// .refine((val) => !/^\d+$/.test(val), {
-	// 	message: "Nickname must not be numbers only",
-	// })
-	// .refine((val) => /[a-zA-Z]/.test(val), {
-	// 	message: "Nickname must contain at least one letter",
-	// });
 	.min(3, "Nickname must be at least 3 characters long")
 	.max(70, "Nickname cannot be longer than 70 characters")
 	.regex(/\S/, "Nickname cannot be empty or whitespace only")
 	.regex(/[a-zA-Z]/, "Nickname must contain at least one letter")
 	.regex(/^[\x00-\x7F]+$/, "Nickname must contain only ASCII characters")
-	// .regex(
-	// 	/^[^\s\x00-\x1F\x7F]+(?: [^\s\x00-\x1F\x7F]+)*$/,
-	// 	"Nickname cannot have leading or trailing whitespace or control characters",
-	// )
-	// .regex(
-	// 	/^[^\s\x00-\x1F\x7F](?:[^\x00-\x1F\x7F]*[^\s\x00-\x1F\x7F])?$/,
-	// 	"Nickname cannot start or end with whitespace/control characters, and must not contain control characters",
-	// )
-	//trtrtrtrtr
 	.regex(/^[^\s]/, "Nickname cannot start with whitespace")
 	.regex(/[^\s]$/, "Nickname cannot end with whitespace")
 	.regex(/^(?!.*  ).*$/, "Nickname cannot contain consecutive spaces")
@@ -155,9 +122,6 @@ const emailField = z
 		invalid_type_error: "Email must be a string",
 	})
 	.email()
-	// .refine((val) => val === val.toLowerCase(), {
-	// 	message: "Invalid email format",
-	// });
 	.min(6, "Email must be at least 6 characters long")
 	.max(254, "Email must be at most 254 characters long")
 	.regex(/^[^A-Z]+$/, "Email cannot contain uppercase letters")
@@ -174,32 +138,15 @@ const passwordField = z
 		invalid_type_error: "Password must be a string",
 	})
 	.min(6, "Password must be at least 6 characters long")
-	// .refine(
-	// 	(val) =>
-	// 		/[a-z]/.test(val) && // lowercase
-	// 		/[A-Z]/.test(val) && // uppercase
-	// 		/\d/.test(val) && // digit
-	// 		/[^a-zA-Z0-9]/.test(val), // symbol
-	// 	{
-	// 		message:
-	// 			"Password must include at least one uppercase, one lowercase, one number, and one symbol",
-	// 	},
-	// );
 	.max(100, "Password cannot be longer than 100 characters")
-	// .regex(
-	// 	/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/,
-	// 	"Password must include at least one uppercase, one lowercase, one number, and one symbol",
-	// );
 	.regex(/[a-z]/, "Password must contain at least one lowercase letter")
 	.regex(/[A-Z]/, "Password must contain at least one uppercase letter")
 	.regex(/\d/, "Password must contain at least one digit")
 	.regex(/[^a-zA-Z0-9]/, "Password must contain at least one symbol");
 
 // Core user schema
-// const userCore = {
 const userCoreFields = {
 	email: emailField.describe("User's email address"),
-	// username: usernameField,
 	nickname: nicknameField.describe("User's unique display nickname"),
 };
 
@@ -226,14 +173,11 @@ export const createUserSchema = z
 		...userCoreFields,
 		...userImmutableFields,
 		...userAuthFields,
-		// password: passwordField,
 	})
 	.strict();
 
 // Schema for single user
 export const userResponseSchema = z.object({
-	// id: z.number(),
-	// id: z.string().uuid(),
 	...userMetaFields,
 	...userImmutableFields,
 	...userCoreFields,
@@ -242,7 +186,6 @@ export const userResponseSchema = z.object({
 // Schema to get a user by ID
 export const userIdParamSchema = z
 	.object({
-		// id: blankToUndefined(z.coerce.number().min(1)),
 		id: blankToUndefined(
 			z.string().uuid().describe("User ID (UUID format)"),
 		),
@@ -250,7 +193,6 @@ export const userIdParamSchema = z
 	.strict(); // Rejects unknown fields
 
 // Schema to update ALL user fields
-// export const putUserSchema = createUserSchema;
 export const putUserSchema = z
 	.object({
 		...userCoreFields,
@@ -320,22 +262,6 @@ export const loginResponseSchema = tokenPayloadSchema.describe(
 	"Response body after successful login, used by Auth service to generate the JWT payload",
 );
 
-// // Schema for login response
-// export const loginResponseSchema = z
-// 	.object({
-// 		// accessToken: z.string(),
-// 		id: z
-// 			.string()
-// 			.uuid()
-// 			.describe("User ID (UUID) included in the access token"),
-// 		nickname: nicknameField.describe(
-// 			"Nickname displayed in the client and included in the token",
-// 		),
-// 	})
-// 	.describe(
-// 		"Response body after successful login, used by the Auth service to build the JWT payload",
-// 	);
-
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
@@ -343,9 +269,7 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 // Note that all fields will be marked with '.optional()' and "coerced"
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
-	// id: z.string().uuid().describe("Exact match for user ID (UUID)"),
 	id: z.string().describe("Find users by user ID (UUID)"),
-	// email: z.string().email().describe("Exact match for user email"),
 	email: z.string().describe("Find users by email"),
 	username: z.string().describe("Find users by username"),
 	nickname: z.string().describe("Find users by nickname"),
@@ -421,7 +345,6 @@ export const emptyResponseSchema = z
 	.void()
 	.describe("User deleted successfully");
 
-// // NEW: Standardized error response schema
 export const errorResponseSchema = z.object({
 	statusCode: z.number().describe("HTTP status code"),
 	error: z
