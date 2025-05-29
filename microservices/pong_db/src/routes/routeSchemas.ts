@@ -1,9 +1,11 @@
 import {
 	idZodSchema,
 	idsZodSchema,
+	userIdsZodSchema,
 	gameSchema,
 	gameHistoryResponseSchema,
 	statsResponseSchema,
+	usersStatsResponseSchema,
 	successResponseSchema,
 } from "./zodSchemas";
 
@@ -23,12 +25,20 @@ export const gameHistorySchema = {
 	response: { 200: gameHistoryResponseSchema },
 };
 
-export const totalStatsSchema = {
-	summary: "Get Total Stats",
-	description: "Get the total stats for a specific user",
+export const userStatsSchema = {
+	summary: "Get User Stats",
+	description: "Get the user stats for a specific user",
 	tags: ["PONG-DB"],
 	params: idZodSchema,
 	response: { 200: statsResponseSchema },
+};
+
+export const usersStatsSchema = {
+	summary: "Get Users Stats",
+	description: "Get the stats for multiple users",
+	tags: ["PONG-DB"],
+	body: userIdsZodSchema,
+	response: { 200: usersStatsResponseSchema },
 };
 
 export const headToHeadSchema = {
