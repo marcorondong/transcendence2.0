@@ -38,12 +38,6 @@ function processPlayerJoin(
 	}
 }
 
-// const PORT: number = 3010;
-// const HOST: string = "0.0.0.0";
-// const BASE_API_NAME = "pong-api";
-// const BASE_GAME_PATH = "pong";
-// const BLOCKCHAIN_PATH = "blockchain";
-
 const fastify = Fastify({
 	logger:
 		process.env.NODE_ENV === "development"
