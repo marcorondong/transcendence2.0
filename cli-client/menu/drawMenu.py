@@ -1,7 +1,7 @@
 import curses
 from menu.menuItems import menuItems, pressAnyKey, TAB_SIZE, BACK_BUTTON
 from menu.logger import myLogger
-from utils.player import *
+from utils.player import Player
 
 
 def cursorUp(stdscr, menuLength, position):

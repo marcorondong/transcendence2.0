@@ -1,7 +1,7 @@
 from menu.connect import client, TAB_SIZE
 from menu.connect import register_user
-from utils.player import *
-from utils.ui import *
+from utils.player import Player
+from utils.ui import UI
 import curses
 
 BACK_BUTTON = "Back"
@@ -19,6 +19,7 @@ def register(stdscr, user: Player):
     register a new user
     """
     UI.screen.clear()
+    UI.screen.refresh()
 
     line = 0
     email = UI.get_prompt("email", line)
@@ -39,7 +40,9 @@ def login(stdscr: curses.window, user: Player) -> None:
     login an existing user and open the main menu
     """
     line = 0
-    username = UI.get_prompt("username", line)
+    username = UI.get_prompt(
+        "email", line
+    )  # TODO: change this to username instead of email if auth will allow it. It is simpler to type username than email
     line += 1
     password = UI.get_secret_prompt("password", line)
     line += 1
@@ -57,7 +60,7 @@ def auto_login(stdscr: curses.window, user: Player) -> None:
     login an existing user and open the main menu
     """
     line = 0
-    username = UI.get_prompt("username", line)
+    username = UI.get_prompt("email", line)
     line += 1
     password = UI.get_secret_prompt("password", line)
     line += 1
@@ -71,15 +74,6 @@ def auto_login(stdscr: curses.window, user: Player) -> None:
     UI.log_notification("Press Enter to continue", 1)
     UI.screen.getch()
     # return "username"
-
-
-def guestLogin(stdscr, user: Player):
-    """
-    login as a guest user
-    """
-    stdscr.addstr(2, TAB_SIZE, "Logging in as guest...")
-    # logic later
-    return "guest"
 
 
 def logout(stdscr, user: Player):
@@ -110,6 +104,5 @@ menuItems = {
     "Auto login": auto_login,
     "Logout": logout,
     "Random Game": randomGame,
-    "Guest Login": guestLogin,
     "none": pressAnyKey,
 }

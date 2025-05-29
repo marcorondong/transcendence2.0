@@ -7,7 +7,7 @@ def delete_char_from_screen(screen: curses.window):
     y, x = screen.getyx()
     screen.move(y, x - 1)
     screen.delch()
-    screen.refresh
+    screen.refresh()
 
 
 def secret_typing(screen: curses.window) -> str:

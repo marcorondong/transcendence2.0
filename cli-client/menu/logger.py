@@ -6,4 +6,4 @@ logging.basicConfig(
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-myLogger = logging.getLogger("cliClient") #use myLogger.debug("Hello word") to print in file called cli-client.log
+myLogger = logging.getLogger("cliClient") #use myLogger.debug("Hello world") to print in file called cli-client.log
