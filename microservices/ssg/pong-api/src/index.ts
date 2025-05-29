@@ -1,18 +1,19 @@
+import { gameLog, interpretGame } from "./blockchain-transaction/recordGame";
+import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
+import { MatchMaking } from "./match-making/MatchMaking";
+import { Parsing } from "./utils/Parsing";
+import { PongPlayer } from "./game/PongPlayer";
+import { PongSwagger } from "./utils/swagger";
+import { serverConfig } from "./config";
+import dotenv from "dotenv";
 import Fastify, { FastifyRequest } from "fastify";
-import websocket, { WebSocket } from "@fastify/websocket";
+import fastifyStatic from "@fastify/static";
+import fCookie from "@fastify/cookie";
 import fs from "fs";
 import path from "path";
-import fastifyStatic from "@fastify/static";
-import dotenv from "dotenv";
-import { MatchMaking } from "./match-making/MatchMaking";
-import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
-import { Parsing } from "./utils/Parsing";
-import fCookie from "@fastify/cookie";
-import { PongPlayer } from "./game/PongPlayer";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { PongSwagger } from "./utils/swagger";
-import { gameLog, interpretGame } from "./blockchain-transaction/recordGame";
+import websocket, { WebSocket } from "@fastify/websocket";
 
 dotenv.config();
 
@@ -37,11 +38,11 @@ function processPlayerJoin(
 	}
 }
 
-const PORT: number = 3010;
-const HOST: string = "0.0.0.0";
-const BASE_API_NAME = "pong-api";
-const BASE_GAME_PATH = "pong";
-const BLOCKCHAIN_PATH = "blockchain";
+// const PORT: number = 3010;
+// const HOST: string = "0.0.0.0";
+// const BASE_API_NAME = "pong-api";
+// const BASE_GAME_PATH = "pong";
+// const BLOCKCHAIN_PATH = "blockchain";
 
 const fastify = Fastify({
 	logger:
@@ -55,7 +56,7 @@ const fastify = Fastify({
 							ignore: "pid,hostname", //Hide fields
 						},
 					},
-				}
+			  }
 			: true,
 });
 
@@ -76,7 +77,7 @@ fastify.register(fCookie);
 fastify.register(websocket);
 fastify.register(async function (fastify) {
 	fastify.get(
-		`/${BASE_API_NAME}/health-check`,
+		`/${serverConfig.BASE_API_NAME}/health-check`,
 		{ schema: PongSwagger.getHealthCheckSchema() },
 		async (request, reply) => {
 			reply.code(200).send({
@@ -87,7 +88,7 @@ fastify.register(async function (fastify) {
 	);
 
 	fastify.get(
-		`/${BASE_API_NAME}/${BLOCKCHAIN_PATH}/:gameId`,
+		`/${serverConfig.BASE_API_NAME}/${serverConfig.BLOCKCHAIN_PATH}/:gameId`,
 		{ schema: PongSwagger.getBlockchainSchema() },
 		async (req, reply) => {
 			const { gameId } = req.params as { gameId: string };
@@ -112,7 +113,7 @@ fastify.register(async function (fastify) {
 	);
 
 	fastify.get(
-		`/${BASE_API_NAME}/player-room/:playerId`,
+		`/${serverConfig.BASE_API_NAME}/player-room/:playerId`,
 		{
 			schema: PongSwagger.getPlayerRoomSchema(),
 		},
@@ -130,7 +131,7 @@ fastify.register(async function (fastify) {
 	);
 
 	fastify.get(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/spectate/:roomId`,
+		`/${serverConfig.BASE_API_NAME}/${serverConfig.BASE_GAME_PATH}/spectate/:roomId`,
 		{ websocket: true, schema: PongSwagger.getWebsocketSchema() },
 		(connection, req) => {
 			const { roomId } = req.params as { roomId: string };
@@ -140,7 +141,7 @@ fastify.register(async function (fastify) {
 	);
 
 	fastify.get<{ Querystring: Partial<HeadToHeadQuery> }>(
-		`/${BASE_API_NAME}/${BASE_GAME_PATH}/:matchType`,
+		`/${serverConfig.BASE_API_NAME}/${serverConfig.BASE_GAME_PATH}/:matchType`,
 		{ websocket: true, schema: PongSwagger.getWebsocketSchema() },
 		async (connection, req) => {
 			const { matchType } = req.params as { matchType: string };
@@ -171,8 +172,13 @@ fastify.register(async function (fastify) {
 
 const startServer = async () => {
 	try {
-		await fastify.listen({ port: PORT, host: HOST });
-		console.log(`Pong server is running on https://${HOST}:${PORT}`);
+		await fastify.listen({
+			port: serverConfig.PORT,
+			host: serverConfig.HOST,
+		});
+		console.log(
+			`Pong server is running on https://${serverConfig.HOST}:${serverConfig.PORT}`,
+		);
 	} catch (err) {
 		console.log(err);
 		process.exit(1);
