@@ -5,7 +5,6 @@ import type {
 	StatsInput,
 	GameResponse,
 } from "./zodSchemas";
-import httpError from "http-errors";
 
 const prisma = new PrismaClient();
 
@@ -26,17 +25,12 @@ async function getGamesByIdAndOpponentId(userId: string, opponentId: string) {
 			createdAt: true,
 		},
 	});
-	if (!games || games.length === 0) {
-		throw new httpError.NotFound(
-			"No games found for this user and opponent",
-		);
-	}
 	return games;
 }
 
 function statsCalculation(games: GamesInput, userId: string) {
 	const initialStats: StatsInput = { total: 0, wins: 0, losses: 0 };
-	const totalStats: StatsInput = games.reduce(
+	const userStats: StatsInput = games.reduce(
 		(acc: StatsInput, game: GameResponse) => {
 			if (game.winnerId === userId) {
 				acc.wins++;
@@ -48,7 +42,7 @@ function statsCalculation(games: GamesInput, userId: string) {
 		},
 		initialStats,
 	);
-	return totalStats;
+	return userStats;
 }
 
 export async function createGame(game: GameInput) {
@@ -67,21 +61,21 @@ export async function getGameHistory(userId: string) {
 		},
 		orderBy: { createdAt: "desc" },
 	});
-	if (!games || games.length === 0)
-		throw new httpError.NotFound("No games found for this user");
 	return games;
 }
 
-export async function getTotalStats(userId: string) {
+export async function getUserStats(userId: string) {
 	const games = await getGameHistory(userId);
-	const totalStats = statsCalculation(games, userId);
-	return totalStats;
+	if (!games || games.length === 0) return null;
+	const userStats = statsCalculation(games, userId);
+	return userStats;
 }
 
 export async function getHeadToHeadStats(userId: string, opponentId: string) {
 	const games = await getGamesByIdAndOpponentId(userId, opponentId);
-	const totalStats = statsCalculation(games, userId);
-	return totalStats;
+	if (!games || games.length === 0) return null;
+	const headToHeadStats = statsCalculation(games, userId);
+	return headToHeadStats;
 }
 
 export async function healthCheck() {
