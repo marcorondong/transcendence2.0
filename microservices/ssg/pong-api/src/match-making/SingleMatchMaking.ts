@@ -134,6 +134,12 @@ export class HeadToHeadMatchMaking {
 		const playerRole: EPlayerRole = room.getMissingPlayerRole();
 		player.setPlayerRole(playerRole);
 		room.addPlayer(player);
+		if (player.isBot()) {
+			console.log(
+				"Bot joined room, game flag for saving is set to false",
+			);
+			room.getGame().disableSaveToDatabase();
+		}
 	}
 
 	private cleanRoom(roomToClean: APongRoom<APongGame>) {

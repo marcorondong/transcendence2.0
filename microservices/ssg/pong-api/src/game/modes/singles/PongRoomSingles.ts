@@ -4,9 +4,7 @@ import {
 	PongPlayer,
 	EPlayerRole,
 	EPlayerRoleFiltered,
-	ETeamSideFiltered,
 } from "../../PongPlayer";
-import { error } from "console";
 import { APongRoom } from "../../APongRoom";
 import { GameEvents } from "../../../customEvents";
 
@@ -34,10 +32,15 @@ export class PongRoomSingles extends APongRoom<PongGameSingles> {
 
 	gameFinishListener(): void {
 		this.getGame().once(GameEvents.FINISHED, async () => {
-			console.log("Game is about to be stored in database");
 			const winnerId = this.getWinnerCaptain().getPlayerId();
 			const loserId = this.getLoserCaptain().getPlayerId();
-			this.getGame().storeResultInDatabase(winnerId, loserId);
+			if (this.getGame().isSaveToDatabaseEnabled())
+				this.getGame().storeResultInDatabase(winnerId, loserId);
+			else {
+				console.warn(
+					`Game ${this.getGame().getGameId()}will not be stored in database`,
+				);
+			}
 		});
 	}
 

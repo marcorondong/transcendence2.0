@@ -77,6 +77,13 @@ export class MatchMaking {
 		connectedPlayer: PongPlayer,
 		tournamentSize: number,
 	) {
+		if (connectedPlayer.isBot()) {
+			connectedPlayer.sendError(
+				"Bot cannot join tournament, You can report us to the Office for Robot Rights in Vienna",
+			);
+			connectedPlayer.connection.close(1008, "Only for humans");
+			return;
+		}
 		this.tournamentJoiner(connectedPlayer, tournamentSize);
 	}
 
