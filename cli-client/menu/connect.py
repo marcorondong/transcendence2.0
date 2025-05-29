@@ -128,7 +128,7 @@ def log_in(username: str, password: str) -> str | bool:
     response = session.post(
         LOGIN_URL,
         json={
-            "email": username,
+            "username": username,
             "password": password,
         },
         verify=False,

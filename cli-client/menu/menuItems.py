@@ -40,9 +40,7 @@ def login(stdscr: curses.window, user: Player) -> None:
     login an existing user and open the main menu
     """
     line = 0
-    username = UI.get_prompt(
-        "email", line
-    )  # TODO: change this to username instead of email if auth will allow it. It is simpler to type username than email
+    username = UI.get_prompt("username", line)
     line += 1
     password = UI.get_secret_prompt("password", line)
     line += 1
@@ -60,12 +58,12 @@ def auto_login(stdscr: curses.window, user: Player) -> None:
     login an existing user and open the main menu
     """
     line = 0
-    username = UI.get_prompt("email", line)
+    username = UI.get_prompt("username", line)
     line += 1
     password = UI.get_secret_prompt("password", line)
     line += 1
 
-    username = "f@gmail.com"
+    username = "fseles"
     stdscr.addstr(line + 2, 0, f"Username is {username}")
     stdscr.addstr(line + 3, 0, f"Password is {password}")
     if user.log_user(username, "A1!aaa"):  # FIXME put real input
