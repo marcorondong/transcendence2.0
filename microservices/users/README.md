@@ -72,7 +72,7 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 - Authentication management in combination with AUTH service:
   - _AUTH sends candidate password and USERS checks it against users database_
   - _If match: its responds with `200 OK` and sends required fields to be included in token._
-  - _If not match: its responds with `401 Invalid email or password`._
+  - _If not match: its responds with `401 Invalid credentials`._
 - Expose a REST API.
 
 ---
@@ -182,6 +182,7 @@ None. 👍
 - Follows this structure pattern: route -> controller → service → schema.
 - UsesSwagger to easily show (and test) behavior.
 - Accept configurations via secrets, files, env vars and hardcoded values.
+- Check `user.schema.ts` file to see the constraints of username, nickname, email and password.
 
 ---
 

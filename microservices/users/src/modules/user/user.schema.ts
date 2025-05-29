@@ -100,9 +100,15 @@ const usernameField = z
 	// 	message: "Username must contain at least one letter",
 	// });
 	.min(3, "Username must be at least 3 characters long")
-	.regex(/\S/, "Username must not be empty or whitespace only")
-	.regex(/\D/, "Username must not be numbers only")
-	.regex(/[a-zA-Z]/, "Username must contain at least one letter");
+	.max(40, "Username cannot be longer than 40 characters")
+	.regex(
+		/^[a-z0-9_-]+$/,
+		"Username can only contain lowercase letters, digits, dashes and underscores",
+	)
+	.regex(/[a-z]/, "Username must contain at least one letter");
+// .regex(/\S/, "Username must not be empty or whitespace only")
+// .regex(/\D/, "Username must not be numbers only")
+// .regex(/[a-zA-Z]/, "Username must contain at least one letter");
 
 // Nickname field schema
 const nicknameField = z
@@ -121,9 +127,26 @@ const nicknameField = z
 	// 	message: "Nickname must contain at least one letter",
 	// });
 	.min(3, "Nickname must be at least 3 characters long")
-	.regex(/\S/, "Nickname must not be empty or whitespace only")
-	.regex(/\D/, "Nickname must not be numbers only")
-	.regex(/[a-zA-Z]/, "Nickname must contain at least one letter");
+	.max(70, "Nickname cannot be longer than 70 characters")
+	.regex(/\S/, "Nickname cannot be empty or whitespace only")
+	.regex(/[a-zA-Z]/, "Nickname must contain at least one letter")
+	.regex(/^[\x00-\x7F]+$/, "Nickname must contain only ASCII characters")
+	// .regex(
+	// 	/^[^\s\x00-\x1F\x7F]+(?: [^\s\x00-\x1F\x7F]+)*$/,
+	// 	"Nickname cannot have leading or trailing whitespace or control characters",
+	// )
+	// .regex(
+	// 	/^[^\s\x00-\x1F\x7F](?:[^\x00-\x1F\x7F]*[^\s\x00-\x1F\x7F])?$/,
+	// 	"Nickname cannot start or end with whitespace/control characters, and must not contain control characters",
+	// )
+	//trtrtrtrtr
+	.regex(/^[^\s]/, "Nickname cannot start with whitespace")
+	.regex(/[^\s]$/, "Nickname cannot end with whitespace")
+	.regex(/^(?!.*  ).*$/, "Nickname cannot contain consecutive spaces")
+	.regex(
+		/^[^\x00-\x1F\x7F]*$/,
+		"Nickname cannot contain control characters (tabs, newlines, etc)",
+	);
 
 // Email field schema
 const emailField = z
@@ -135,8 +158,14 @@ const emailField = z
 	// .refine((val) => val === val.toLowerCase(), {
 	// 	message: "Invalid email format",
 	// });
+	.min(6, "Email must be at least 6 characters long")
+	.max(254, "Email must be at most 254 characters long")
+	.regex(/^[^A-Z]+$/, "Email cannot contain uppercase letters")
 	.regex(/^[\x00-\x7F]+$/, "Email must contain only ASCII characters")
-	.regex(/^[^A-Z]+$/, "Email must not contain uppercase letters");
+	.refine((email) => {
+		const [local, domain] = email.split("@");
+		return local?.length >= 1 && local.length <= 64 && domain?.length >= 3;
+	}, "Invalid email structure");
 
 // Password field schema
 const passwordField = z
@@ -156,10 +185,15 @@ const passwordField = z
 	// 			"Password must include at least one uppercase, one lowercase, one number, and one symbol",
 	// 	},
 	// );
-	.regex(
-		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/,
-		"Password must include at least one uppercase, one lowercase, one number, and one symbol",
-	);
+	.max(100, "Password cannot be longer than 100 characters")
+	// .regex(
+	// 	/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/,
+	// 	"Password must include at least one uppercase, one lowercase, one number, and one symbol",
+	// );
+	.regex(/[a-z]/, "Password must contain at least one lowercase letter")
+	.regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+	.regex(/\d/, "Password must contain at least one digit")
+	.regex(/[^a-zA-Z0-9]/, "Password must contain at least one symbol");
 
 // Core user schema
 // const userCore = {
@@ -247,7 +281,7 @@ export const loginSchema = z
 		(data) =>
 			(data.email || data.username) && !(data.email && data.username),
 		{
-			message: "Provide either email or username, not both",
+			message: "Login requires a valid email or username",
 			path: ["email"], // TODO: For Swagger UI display (check this)
 		},
 	);
