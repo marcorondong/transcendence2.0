@@ -1,14 +1,16 @@
 import {
 	createGameSchema,
 	gameHistorySchema,
-	totalStatsSchema,
+	userStatsSchema,
+	usersStatsSchema,
 	headToHeadSchema,
 	healthCheckSchema,
 } from "./routeSchemas";
 import {
 	createGameHandler,
 	gameHistoryHandler,
-	totalStatsHandler,
+	userStatsHandler,
+	usersStatsHandler,
 	headToHeadHandler,
 	healthCheckHandler,
 } from "./controllers";
@@ -23,9 +25,14 @@ export const gameHistoryOpt = {
 	handler: gameHistoryHandler,
 };
 
-export const totalStatsOpt = {
-	schema: totalStatsSchema,
-	handler: totalStatsHandler,
+export const userStatsOpt = {
+	schema: userStatsSchema,
+	handler: userStatsHandler,
+};
+
+export const usersStatsOpt = {
+	schema: usersStatsSchema,
+	handler: usersStatsHandler,
 };
 
 export const headToHeadOpt = {

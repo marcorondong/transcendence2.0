@@ -9,6 +9,12 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 		type: "string",
 		minLength: 3,
 		fakerMethod: "internet.username",
+		postProcess: (value: string) =>
+			value
+				.toLowerCase()
+				.replace(/[^\x00-\x7F]/g, "") // Remove non-ASCII
+				.replace(/[^a-z0-9_-]/g, "") // Keep only valid characters
+				.slice(0, 40), // Enforce maxLength
 		validator: (value: string) =>
 			typeof value === "string" &&
 			value.length >= 3 &&
@@ -20,8 +26,16 @@ export const userSchemaDescriptor: SchemaDescriptor = {
 	nickname: {
 		type: "string",
 		minLength: 3,
-		fakerMethod: "person.firstName",
+		// fakerMethod: "person.firstName",
+		fakerMethod: "internet.displayName",
 		// fixed: () => `user_${Math.floor(Math.random() * 1000)}`, // Example
+		postProcess: (value: string) =>
+			value
+				.replace(/[\x00-\x1F\x7F]/g, "") // Remove control/non-printable chars
+				.replace(/[^\x00-\x7F]/g, "") // Remove non-ASCII
+				.replace(/\s+/g, " ") // collapse multiple whitespaces
+				.trim() // remove leading/trailing whitespace
+				.slice(0, 70), // Enforce max length
 		validator: (value: string) =>
 			typeof value === "string" &&
 			value.length >= 3 &&
