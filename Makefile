@@ -21,10 +21,9 @@ re: clean
 clean:
 	docker compose down
 
-remove:
+remove: delete-secrets
 	docker compose down --volumes
 	docker system prune -a -f --volumes
-	$(MAKE) delete-secrets
 
 delete-secrets:
 	echo "Deleting secrets"
@@ -35,10 +34,9 @@ dev:
 	docker compose build --no-cache
 	docker compose up
 
-nuke: clean
+nuke: clean delete-secrets
 	docker system prune -a -f --volumes
 	docker builder prune -a -f
-	$(MAKE) delete-secrets
 
 cli: all
 	make -C cli-client
