@@ -13,5 +13,5 @@ LOGIN_ROUTE = "auth-api/sign-in"
 LOGIN_URL = f"{PROTOCOL}://{HOST}:{PORT}/{LOGIN_ROUTE}"
 
 # users-api config
-REGISTER_ROUTE = "api/users/"
+REGISTER_ROUTE = "auth-api/sign-up"
 REGISTER_URL = f"{PROTOCOL}://{HOST}:{PORT}/{REGISTER_ROUTE}"

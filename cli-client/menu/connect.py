@@ -154,21 +154,39 @@ def register_user(email: str, nickname: str, username: str, password: str) -> bo
     Returns:
         bool: true if success, false otherwise
     """
-    response = requests.post(
-        REGISTER_URL,
-        json={
-            "email": email,
-            "nickname": nickname,
-            "username": username,
-            "password": password,
-        },
-        verify=False,
-    )
-    if not 200 <= response.status_code < 300:
-        UI.log_error(f"Registering user failed. Return code {response.status_code}")
+    json_var = {
+        "email": email,
+        "nickname": nickname,
+        "username": username,
+        "password": password,
+    }
+
+    try:
+        response = requests.post(
+            REGISTER_URL,
+            json=json_var,
+            verify=False,
+        )
+    except requests.exceptions.RequestException as e:
+        myLogger.error(f"Request to register user failed: {e}")
+        UI.log_error("Network error while trying to register user.")
         return False
-    myLogger.debug(f"Code is {response.status_code}")
-    myLogger.debug(response.text)
+
+    myLogger.debug(f"Response Status Code: {response.status_code} - {response.reason}")
+    myLogger.debug(f"Response Headers: {response.headers}")
+    myLogger.debug(f"Response Body: {response.text}")
+
+    if not 200 <= response.status_code < 300:
+        try:
+            error_detail = response.json()
+        except ValueError:
+            error_detail = response.text
+        myLogger.error(
+            f"Registering user failed. Status code: {response.status_code}. Details: {error_detail}"
+        )
+        UI.log_error("Registering user failed.")
+        return False
+
     UI.log_notification("User successfully registered")
     return True
 
