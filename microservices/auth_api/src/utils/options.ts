@@ -1,4 +1,4 @@
-import { jsonSchemaTransform } from "fastify-type-provider-zod";
+// import { jsonSchemaTransform } from "fastify-type-provider-zod";
 import { env } from "./env";
 import fs from "fs";
 
@@ -38,7 +38,7 @@ export const swaggerOption = {
 		},
 		security: [{ bearerAuth: [] }],
 	},
-	transform: jsonSchemaTransform,
+	// transform: jsonSchemaTransform,
 };
 
 export const swaggerUiOption = {

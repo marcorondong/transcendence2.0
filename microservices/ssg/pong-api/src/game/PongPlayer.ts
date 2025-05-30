@@ -3,6 +3,7 @@ import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "../customEvents";
 import { Paddle } from "./elements/Paddle";
 import { APongGame } from "./modes/APongGame";
+import { BOT_NICKNAME } from "../config";
 
 export enum EPlayerStatus {
 	ONLINE,
@@ -71,6 +72,11 @@ export class PongPlayer extends EventEmitter {
 			playerInfo.nickname,
 		);
 		return connectedPlayer;
+	}
+
+	isBot(): boolean {
+		if (this.nickname === BOT_NICKNAME) return true;
+		return false;
 	}
 
 	equals(otherPlayer: PongPlayer): boolean {

@@ -46,7 +46,6 @@ import { errorHandler } from "../../utils/errors";
 // Expected response structure and status code for Fastify to validate responses (against Zod schemas).
 // To validate request/response structure must match schema (Fastify/Zod enforcement).
 
-// TODO: Add explanation to routes and that authentication is enabled by default?
 // TODO: Add examples for the error responses (maybe easier when implementing zod-to-openapi)
 
 async function userRoutes(server: FastifyInstance) {
@@ -68,10 +67,7 @@ async function userRoutes(server: FastifyInstance) {
 				// response: withCommonErrors({
 				// 	201: userResponseSchema,
 				// }),
-				security: [], // Remove Swagger auth
 			},
-			// TODO: This route is public. But commenting out since AUTH is doing the authentication check
-			// config: { authRequired: false }, // Remove authentication (this route is public)
 		},
 		errorHandler(registerUserHandler),
 	);
@@ -93,16 +89,12 @@ async function userRoutes(server: FastifyInstance) {
 				// response: withCommonErrors({
 				// 	200: loginResponseSchema,
 				// }),
-				security: [], // Remove Swagger auth
 			},
-			// TODO: This route is public. But commenting out since AUTH is doing the authentication check
-			// config: { authRequired: false }, // Remove authentication (this route is public)
 		},
 		errorHandler(loginHandler),
 	);
 
 	// 3. Get a single user by ID
-	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.get(
 		"/:id",
 		{
@@ -125,7 +117,6 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 4. Get all users (filter/sort/paginate)
-	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.get(
 		"/",
 		{
@@ -149,7 +140,6 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 5. Update ALL user fields (PUT)
-	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.put(
 		"/:id",
 		{
@@ -174,7 +164,6 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 6. Update SOME user fields (PATCH)
-	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.patch(
 		"/:id",
 		{
@@ -199,7 +188,6 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 7. Delete a user by ID
-	// This route IS authenticated (doesn't have "config: { authRequired: false },")
 	server.delete(
 		"/:id",
 		{
