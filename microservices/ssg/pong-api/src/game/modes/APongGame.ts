@@ -28,6 +28,7 @@ export abstract class APongGame extends EventEmitter {
 	readonly CRITICAL_DISTANCE;
 	protected readonly gameId: string;
 	protected gameStatus: EGameStatus;
+	protected saveToDatabase: boolean;
 
 	abstract getPaddle(role: EPlayerRole): Paddle;
 	abstract resetPaddlePosition(): void;
@@ -46,10 +47,19 @@ export abstract class APongGame extends EventEmitter {
 		this.field = field;
 		this.CRITICAL_DISTANCE = ball.getCriticalDistance();
 		this.gameStatus = EGameStatus.NOT_STARTED;
+		this.saveToDatabase = true;
 	}
 
 	getGameId(): string {
 		return this.gameId;
+	}
+
+	disableSaveToDatabase(): void {
+		this.saveToDatabase = false;
+	}
+
+	isSaveToDatabaseEnabled(): boolean {
+		return this.saveToDatabase;
 	}
 
 	getGameStatus(): EGameStatus {

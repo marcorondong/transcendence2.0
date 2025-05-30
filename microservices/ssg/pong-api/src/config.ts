@@ -1,4 +1,15 @@
 // ==============================
+// 🖥 General pong-api Server configuration
+// ==============================
+export const serverConfig = {
+	PORT: 3010,
+	HOST: "0.0.0.0",
+	BASE_API_NAME: "pong-api",
+	BASE_GAME_PATH: "pong",
+	BLOCKCHAIN_PATH: "blockchain",
+};
+
+// ==============================
 // 🎮 Game Configuration
 // ==============================
 export const ballConfig: IBallConfig = {
