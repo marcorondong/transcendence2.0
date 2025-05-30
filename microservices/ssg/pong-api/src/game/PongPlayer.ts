@@ -3,7 +3,7 @@ import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "../customEvents";
 import { Paddle } from "./elements/Paddle";
 import { APongGame } from "./modes/APongGame";
-import { BOT_NICKNAME } from "../config";
+import { BOT_NICKNAME, JWT_VERIFY_URL } from "../config";
 
 export enum EPlayerStatus {
 	ONLINE,
@@ -187,8 +187,7 @@ export class PongPlayer extends EventEmitter {
 }
 
 function contactAuthService(cookie: string) {
-	//TODO read this container path somehow smarter in file or so
-	return fetch("http://auth_api_container:2999/auth-api/verify-connection", {
+	return fetch(JWT_VERIFY_URL, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
