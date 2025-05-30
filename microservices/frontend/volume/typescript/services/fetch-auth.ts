@@ -3,7 +3,7 @@ import { notificationEvent, signInLinkEvent } from "./events.js";
 import { FetchConfig, fetchPong } from "./fetch.js";
 
 export interface UserAuth {
-	email: string;
+	username: string;
 	password: string;
 }
 

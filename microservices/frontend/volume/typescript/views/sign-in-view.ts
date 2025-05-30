@@ -100,7 +100,7 @@ export class SignInView extends HTMLElement {
 		if (target.id === "sign-in-button") {
 			event.preventDefault();
 			const user: UserAuth = {
-				email: this.inputUsername.value,
+				username: this.inputUsername.value,
 				password: this.inputPassword.value,
 			};
 			const returnValue = await FetchAuth.signIn(user);

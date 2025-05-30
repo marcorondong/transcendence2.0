@@ -120,8 +120,7 @@ export class SignUpView extends HTMLElement {
 				password: this.inputPassword.value,
 			};
 			try {
-				const response = await fetchSignUp(data);
-				const message = await response.json();
+				await fetchSignUp(data);
 				document.dispatchEvent(signInLinkEvent);
 				this.dispatchEvent(notificationEvent("Sign up " + e, "error"));
 			} catch (e) {
