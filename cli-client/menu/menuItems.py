@@ -65,8 +65,8 @@ def auto_login(user: Player) -> None:
     line += 1
 
     username = "fseles"
-    UI.screen.addstr(line + 2, 0, f"Username is {username}")
-    UI.screen.addstr(line + 3, 0, f"Password is {password}")
+    # UI.screen.addstr(line + 2, 0, f"Username is {username}")
+    # UI.screen.addstr(line + 3, 0, f"Password is {password}")
     if user.log_user(username, "A1!aaa"):  # FIXME put real input
         UI.log_notification("You are logged In")
         user.set_username(username)
