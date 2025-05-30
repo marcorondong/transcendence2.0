@@ -207,8 +207,6 @@ async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
 		const playerInfo = await response.json();
 		const { id, nickname } = playerInfo;
 		console.log("User full:", playerInfo);
-		console.log("id", id);
-		console.log("nickname", nickname);
 		return { id, nickname };
 	} catch (err) {
 		console.error("Fetch failed, maybe auth microservice is down", err);
