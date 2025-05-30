@@ -6,7 +6,9 @@ services:
       context: ./
       dockerfile: docker/tailwind/Dockerfile-Tailwind
     volumes:
-      - ./volume:/app/volume
+      - tailwind:/app/volume
+    networks:
+      - ${NETWORK_NAME}
     restart: unless-stopped
   typescript:
     container_name: typescript
@@ -15,5 +17,23 @@ services:
       context: ./
       dockerfile: docker/typescript/Dockerfile-Typescript
     volumes:
-      - ./volume:/app/volume
+      - typescript:/app/volume
+    networks:
+      - ${NETWORK_NAME}
     restart: unless-stopped
+
+volumes:
+  tailwind:
+    name: tailwind
+    driver: local
+    driver_opts:
+      type: none
+      device: ./volume
+      o: bind
+  typescript:
+    name: typescript
+    driver: local
+    driver_opts:
+      type: none
+      device: ./volume
+      o: bind

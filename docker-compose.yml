@@ -6,7 +6,7 @@ services:
       context: ./microservices/ssg/pong-api
       dockerfile: Dockerfile
     volumes:
-      - ./microservices/ssg/pong-api/src/:/pong/pong-api/src/
+      - pong-api:/pong/pong-api/src/
     ports:
       - 3010:3010 #TODO remove it will not be exposed at final version
     environment:
@@ -29,14 +29,14 @@ services:
       - Transcendence2.0
 
   frontend:
+    image: frontend
     build:
-      context: ./frontend
+      context: ./microservices/frontend
       dockerfile: docker/nginx/Dockerfile-Nginx
     container_name: frontend
-    # image: nginx:1.26.2
     volumes:
-      - ./frontend/volume:/usr/share/nginx/html
-      - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - frontend:/usr/share/nginx/html
+      - ./microservices/frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "8080:443"
     restart: unless-stopped
@@ -45,7 +45,7 @@ services:
 
 include:
   - ./microservices/auth_api/docker-compose.yml
-  - ./frontend/docker-compose.yml
+  - ./microservices/frontend/docker-compose.yml
   - ./monitoring/monitoring-docker-compose.yml
   - ./microservices/users/docker-compose.yml
   - ./microservices/pong_db/docker-compose.yml
@@ -54,5 +54,23 @@ include:
   - ./microservices/tictactoe_db/docker-compose.yml
   - ./microservices/tictactoe_api/docker-compose.yml
 
+volumes:
+  frontend:
+    name: frontend
+    driver: local
+    driver_opts:
+      type: none
+      device: ./microservices/frontend/volume
+      o: bind
+  pong-api:
+    name: pong-api
+    driver: local
+    driver_opts:
+      type: none
+      device: ./microservices/ssg/pong-api/src/
+      o: bind
+
 networks:
   Transcendence2.0:
+    name: ${NETWORK_NAME}
+    driver: bridge
