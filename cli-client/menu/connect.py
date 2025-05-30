@@ -65,8 +65,8 @@ def getMove(stdscr):
 # c) we keep simpler version above and make frontend more shitty so it does not use this smooth key down as it is now in order to have same paddle speed
 # d) Pong-api will limit moves on backend. as of 25.05.2025. What a nice date. It is not implemented any restriction on sending moves on backend
 # e) someone who is not Filip do whatever he wants.
-def client(stdscr, user_header: dict[str, str]):
-    stdscr.nodelay(True)
+def client(user_header: dict[str, str]):
+    UI.screen.nodelay(True)
     paddle_direction = 0  # -1 for up, 1 for down, 0 for no movement
     last_key_time = 0
     key_timeout = 0.2  # seconds to reset paddle direction if no key pressed
@@ -78,13 +78,13 @@ def client(stdscr, user_header: dict[str, str]):
         ssl=ssl_context,
         additional_headers=user_header,
     ) as websocket:
-        stdscr.addstr(0, TAB_SIZE, CONTROLS_TUTORIAL)
-        stdscr.refresh()
+        UI.screen.addstr(0, TAB_SIZE, CONTROLS_TUTORIAL)
+        UI.screen.refresh()
 
         running = True
         while running:
             start_time = time.time()
-            key = stdscr.getch()
+            key = UI.screen.getch()
 
             if key != -1:
                 last_key_time = time.time()

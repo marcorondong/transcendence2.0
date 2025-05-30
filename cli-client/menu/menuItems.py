@@ -7,14 +7,15 @@ import curses
 BACK_BUTTON = "Back"
 
 
-def randomGame(stdscr, user: Player):
+def randomGame(user: Player):
     """
     get a random game
     """
-    client(stdscr, user.get_custom_headers())
+    client(user.get_custom_headers())
+    UI.screen.nodelay(False)
 
 
-def register(stdscr, user: Player):
+def register(user: Player):
     """
     register a new user
     """
@@ -35,7 +36,7 @@ def register(stdscr, user: Player):
     UI.screen.getch()
 
 
-def login(stdscr: curses.window, user: Player) -> None:
+def login(user: Player) -> None:
     """
     login an existing user and open the main menu
     """
@@ -53,7 +54,7 @@ def login(stdscr: curses.window, user: Player) -> None:
 
 
 # TODO remove this. It is auto login for filip account for faster testing
-def auto_login(stdscr: curses.window, user: Player) -> None:
+def auto_login(user: Player) -> None:
     """
     login an existing user and open the main menu
     """
@@ -64,8 +65,8 @@ def auto_login(stdscr: curses.window, user: Player) -> None:
     line += 1
 
     username = "fseles"
-    stdscr.addstr(line + 2, 0, f"Username is {username}")
-    stdscr.addstr(line + 3, 0, f"Password is {password}")
+    UI.screen.addstr(line + 2, 0, f"Username is {username}")
+    UI.screen.addstr(line + 3, 0, f"Password is {password}")
     if user.log_user(username, "A1!aaa"):  # FIXME put real input
         UI.log_notification("You are logged In")
         user.set_username(username)
@@ -74,7 +75,7 @@ def auto_login(stdscr: curses.window, user: Player) -> None:
     # return "username"
 
 
-def logout(stdscr, user: Player):
+def logout(user: Player):
     """
     logout the current user
     """
@@ -84,16 +85,16 @@ def logout(stdscr, user: Player):
     # logic later
 
 
-def pressAnyKey(stdscr, user: Player):
+def pressAnyKey(user: Player):
     """
     prints 'press any key to return to menu' on line 0 of the screen
     refreshes the screen and waits for user input
     """
-    stdscr.clear()
-    stdscr.addstr(0, 0, "Press any key to return to menu")
-    stdscr.refresh()
-    stdscr.getch()
-    stdscr.clear()
+    UI.screen.clear()
+    UI.screen.addstr(0, 0, "Press any key to return to menu")
+    UI.screen.refresh()
+    UI.screen.getch()
+    UI.screen.clear()
 
 
 menuItems = {
