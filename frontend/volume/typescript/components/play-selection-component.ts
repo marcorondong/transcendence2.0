@@ -1,4 +1,5 @@
 import { GameData } from "../views/home-view.js";
+import { IconComponent } from "./icon-component.js";
 
 class PlaySelectionComponent extends HTMLElement {
 	gameData: GameData;
@@ -8,14 +9,68 @@ class PlaySelectionComponent extends HTMLElement {
 		this.gameData = gameData;
 	}
 
-	async connectedCallback() {
-		if (this.h1) {
+	connectedCallback() {
+		this.replaceChildren();
+		const playOptions = this.gameData.modeOptions.find(
+			(m) => this.gameData.selectionState.modeSelection === m.id,
+		);
+		this.classList.add("flex", "flex-col", "items-center", "gap-8", "p-8");
+
+		// headline
+		this.h1 = document.createElement("h1");
+		this.h1.innerText = "Let's Play";
+		this.h1.classList.add(
+			"pong-heading",
+			"pong-heading-big",
+			"pong-heading-indigo",
+		);
+		const header = document.createElement("div");
+		const icon = new IconComponent("play", 10);
+		header.append(icon, this.h1);
+		header.classList.add(
+			"w-full",
+			"grow-1",
+			"flex",
+			"gap-2",
+			"justify-center",
+			"items-center",
+			"text-slate-200/70",
+		);
+
+		// PLAY OPTIONS
+		const optionsContainer = document.createElement("div");
+		optionsContainer.classList.add(
+			"flex-col",
+			"flex",
+			"gap-1",
+			"w-full",
+			"mx-12",
+			"items-center",
+			"rounded-2xl",
+			"bg-indigo-950",
+		);
+
+		console.log("play options: ", playOptions);
+
+		if (!playOptions) {
 			return;
 		}
-		this.h1 = document.createElement("h1");
-		this.h1.classList.add("pong-heading", "pong-heading-big");
-		this.h1.textContent = "Let's Play";
-		this.append(this.h1);
+
+		playOptions.play.forEach((m) => {
+			const button = document.createElement("button");
+			button.innerText = m;
+			button.id = m;
+			button.classList.add(
+				"hover:bg-slate-200/10",
+				"p-3",
+				"self-stretch",
+				"rounded-2xl",
+				"cursor-pointer",
+				"play-button",
+			);
+			optionsContainer.append(button);
+		});
+		this.append(header, optionsContainer);
 	}
 
 	disconnectedCallback() {}

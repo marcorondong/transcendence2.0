@@ -21,6 +21,9 @@
 .pong-heading-big {
 	@apply text-2xl;
 }
+.pong-heading-indigo {
+	@apply text-slate-200/70;
+}
 
 /* BUTTONS */
 .pong-button {
@@ -135,7 +138,7 @@ a {
 }
 
 .pong-card-dark {
-	@apply bg-slate-950;
+	@apply bg-indigo-950/80;
 }
 
 .pong-card-hover {

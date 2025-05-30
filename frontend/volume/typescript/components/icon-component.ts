@@ -9,6 +9,7 @@ class IconComponent extends HTMLElement {
 		}
 	}
 
+	iconElement: null | HTMLElement = null;
 	iconName: string | null = null;
 	iconSize: number = 20;
 
@@ -66,6 +67,9 @@ class IconComponent extends HTMLElement {
 
 	async connectedCallback() {
 		console.log("ICON has been CONNECTED");
+		if (this.iconElement) {
+			return;
+		}
 		this.nameFromAttribute();
 		this.sizeFromAttribute();
 		const iconElement = await this.fetchIcon();

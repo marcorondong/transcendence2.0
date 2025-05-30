@@ -1,4 +1,5 @@
 import { GameData } from "../views/home-view.js";
+import { IconComponent } from "./icon-component.js";
 
 class ModeSelectionComponent extends HTMLElement {
 	gameData: GameData;
@@ -9,16 +10,31 @@ class ModeSelectionComponent extends HTMLElement {
 	}
 
 	connectedCallback() {
-		if (this.h1) {
-			return;
-		}
-		console.log("RUNNING CONNECTED CALLBACK MODE");
+		this.replaceChildren();
+
 		//MATCH TYPE
 		this.classList.add("flex", "flex-col", "items-center", "gap-8", "p-8");
 
+		// headline
 		this.h1 = document.createElement("h1");
-		this.h1.classList.add("pong-heading", "pong-heading-big");
-		this.h1.textContent = "Select a Match Mode";
+		this.h1.innerText = "Select a Mode";
+		this.h1.classList.add(
+			"pong-heading",
+			"pong-heading-big",
+			"pong-heading-indigo",
+		);
+		const header = document.createElement("div");
+		const icon = new IconComponent("mode", 10);
+		header.append(icon, this.h1);
+		header.classList.add(
+			"w-full",
+			"grow-1",
+			"flex",
+			"gap-2",
+			"justify-center",
+			"items-center",
+			"text-slate-200/70",
+		);
 
 		// MATCH TYPE OPTIONS
 		const optionsContainer = document.createElement("div");
@@ -35,8 +51,8 @@ class ModeSelectionComponent extends HTMLElement {
 
 		this.gameData.modeOptions.forEach((m) => {
 			const button = document.createElement("button");
-			button.innerText = m;
-			button.id = m.split(" ")[0];
+			button.innerText = m.label;
+			button.id = m.id;
 			button.classList.add(
 				"hover:bg-slate-200/10",
 				"p-3",
@@ -47,7 +63,7 @@ class ModeSelectionComponent extends HTMLElement {
 			);
 			optionsContainer.append(button);
 		});
-		this.append(this.h1, optionsContainer);
+		this.append(header, optionsContainer);
 	}
 
 	disconnectedCallback() {}

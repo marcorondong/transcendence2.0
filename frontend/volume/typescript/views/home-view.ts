@@ -2,6 +2,7 @@ import { GameSelectionComponent } from "../components/game-selection-component.j
 import { MenuSelectionComponent } from "../components/menu-selection-component.js";
 import { ModeSelectionComponent } from "../components/mode-selection-component.js";
 import { PlaySelectionComponent } from "../components/play-selection-component.js";
+import { pongLinkEvent } from "../services/events.js";
 
 export interface SelectionState {
 	menuSelection: "game" | "mode" | "play";
@@ -17,9 +18,7 @@ export interface Menu {
 export interface GameData {
 	menuItems: Menu[];
 	gameOptions: string[];
-	modeOptions: string[];
-	playOptionsSingle: string[];
-	playOptionsTournament: string[];
+	modeOptions: { id: string; label: string; play: string[] }[];
 	selectionState: SelectionState;
 }
 
@@ -38,20 +37,30 @@ class HomeView extends HTMLElement {
 		menuItems: [
 			{ icon: "game", label: "Pick a Game" },
 			{ icon: "mode", label: "Select Mode" },
-			{ icon: "rocket", label: "Let's Play" },
+			{ icon: "play", label: "Let's Play" },
 		],
 		gameOptions: ["pong", "ttt"],
 		modeOptions: [
-			"Single Player Mode",
-			"Doubles Mode",
-			"Tournament Mode",
-			"Spectator Mode",
-		],
-		playOptionsSingle: ["Play Random Opponent", "Play Friend"],
-		playOptionsTournament: [
-			"4 Player Tournament",
-			"8 Player Tournament",
-			"16 Player Tournament",
+			{
+				id: "single",
+				label: "Single Player Mode",
+				play: ["Play Random Opponent", "Play Friend"],
+			},
+			{ id: "double", label: "Doubles Mode", play: ["Let's Play"] },
+			{
+				id: "tournament",
+				label: "Tournament Mode",
+				play: [
+					"4 Player Tournament",
+					"8 Player Tournament",
+					"16 Player Tournament",
+				],
+			},
+			{
+				id: "spectator",
+				label: "Spectator Mode",
+				play: ["Start watching"],
+			},
 		],
 		selectionState: this.selectionSate,
 	};
@@ -150,6 +159,8 @@ class HomeView extends HTMLElement {
 		if (button) {
 			this.handleMenuButtons(button);
 			this.handleGameButtons(button);
+			this.handleModeButtons(button);
+			this.handlePlayButtons(button);
 		}
 	}
 
@@ -186,6 +197,25 @@ class HomeView extends HTMLElement {
 		this.updateContent();
 	}
 
+	handleModeButtons(button: HTMLButtonElement) {
+		if (!button.classList.contains("mode-button")) {
+			return;
+		}
+		const state = this.gameData.selectionState;
+		state.modeSelection = this.gameData.modeOptions.find(
+			(m) => m.id === button.id,
+		)?.id;
+		state.menuSelection = "play";
+		this.updateMenuButtons();
+		this.updateContent();
+	}
+	handlePlayButtons(button: HTMLButtonElement) {
+		if (!button.classList.contains("play-button")) {
+			return;
+		}
+		this.dispatchEvent(pongLinkEvent);
+	}
+
 	connectedCallback() {
 		this.classList.add(
 			"flex",
@@ -205,7 +235,7 @@ class HomeView extends HTMLElement {
 			"grow-1",
 			"w-full",
 		);
-		this.menuContent.classList.add(...this.contentStyles);
+		this.menuContent.classList.add(...this.contentStyles, "z-200");
 		this.append(this.gameContent, this.menuContent);
 		this.addEventListener("click", this);
 		this.updateMenuButtons();
@@ -214,6 +244,7 @@ class HomeView extends HTMLElement {
 
 	disconnectedCallback() {
 		console.log("HOME VIEW has been DISCONNECTED");
+		document.removeEventListener("click", this, false);
 	}
 }
 

@@ -1,4 +1,5 @@
 import { GameData } from "../views/home-view.js";
+import { IconComponent } from "./icon-component.js";
 
 class GameSelectionComponent extends HTMLElement {
 	gameData: GameData;
@@ -9,9 +10,7 @@ class GameSelectionComponent extends HTMLElement {
 	}
 
 	connectedCallback() {
-		if (this.h1) {
-			return;
-		}
+		this.replaceChildren();
 		this.classList.add(
 			"gap-x-18",
 			"gap-y-8",
@@ -38,9 +37,19 @@ class GameSelectionComponent extends HTMLElement {
 		this.h1.classList.add(
 			"pong-heading",
 			"pong-heading-big",
-			"grow-1",
+			"pong-heading-indigo",
+		);
+		const header = document.createElement("div");
+		const icon = new IconComponent("game", 10);
+		header.append(icon, this.h1);
+		header.classList.add(
 			"w-full",
-			"text-center",
+			"grow-1",
+			"flex",
+			"gap-2",
+			"justify-center",
+			"items-center",
+			"text-slate-200/70",
 		);
 
 		// PONG GAME
@@ -69,7 +78,7 @@ class GameSelectionComponent extends HTMLElement {
 		ttt.append(tttImage);
 		tttContainer.append(ttt);
 
-		this.append(this.h1, pongContainer, tttContainer);
+		this.append(header, pongContainer, tttContainer);
 	}
 
 	disconnectedCallback() {}
