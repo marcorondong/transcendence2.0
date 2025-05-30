@@ -39,6 +39,10 @@ export async function fetchChatDb(
 		const data = await ret.json();
 		return data;
 	} catch (e) {
-		console.error(e.message);
+		let message = "";
+		if (e instanceof Error) {
+			message = "e.message";
+		}
+		console.error(message);
 	}
 }

@@ -1,160 +1,215 @@
-import { IconComponent } from "../components/icon-component.js";
-import "../components/pong-component.js";
+import { GameSelectionComponent } from "../components/game-selection-component.js";
+import { MenuSelectionComponent } from "../components/menu-selection-component.js";
+import { ModeSelectionComponent } from "../components/mode-selection-component.js";
+import { PlaySelectionComponent } from "../components/play-selection-component.js";
+
+export interface SelectionState {
+	menuSelection: "game" | "mode" | "play";
+	gameSelection: undefined | "pong" | "ttt";
+	modeSelection: undefined | string;
+	playSelection: undefined | string;
+}
+export interface Menu {
+	icon: string;
+	label: string;
+}
+
+export interface GameData {
+	menuItems: Menu[];
+	gameOptions: string[];
+	modeOptions: string[];
+	playOptionsSingle: string[];
+	playOptionsTournament: string[];
+	selectionState: SelectionState;
+}
 
 class HomeView extends HTMLElement {
 	constructor() {
 		super();
 	}
-	button = document.createElement("button");
-	buttonVerify = document.createElement("button");
+	// GAME STATE
+	selectionSate: SelectionState = {
+		menuSelection: "game",
+		gameSelection: undefined,
+		modeSelection: undefined,
+		playSelection: undefined,
+	};
+	gameData: GameData = {
+		menuItems: [
+			{ icon: "game", label: "Pick a Game" },
+			{ icon: "mode", label: "Select Mode" },
+			{ icon: "rocket", label: "Let's Play" },
+		],
+		gameOptions: ["pong", "ttt"],
+		modeOptions: [
+			"Single Player Mode",
+			"Doubles Mode",
+			"Tournament Mode",
+			"Spectator Mode",
+		],
+		playOptionsSingle: ["Play Random Opponent", "Play Friend"],
+		playOptionsTournament: [
+			"4 Player Tournament",
+			"8 Player Tournament",
+			"16 Player Tournament",
+		],
+		selectionState: this.selectionSate,
+	};
+
+	contentStyles: string[] = [
+		"pong-card",
+		"flex",
+		"justify-center",
+		"max-w-3xl",
+	];
+	gameContent: HTMLElement = new GameSelectionComponent(this.gameData);
+	modeContent: HTMLElement = new ModeSelectionComponent(this.gameData);
+	playContent: HTMLElement = new PlaySelectionComponent(this.gameData);
+	menuContent: HTMLElement = new MenuSelectionComponent(this.gameData);
+
+	updateMenuButtons() {
+		const menuButtons = [...document.querySelectorAll(".menu-button")];
+		if (!menuButtons) {
+			return;
+		}
+
+		menuButtons.forEach((b) => b.classList.remove("pong-menu-active"));
+
+		const firstButton = menuButtons.find(
+			(b) => b.id === this.gameData.menuItems[0].icon,
+		);
+		if (firstButton) {
+			if (this.gameData.selectionState.menuSelection === "game") {
+				firstButton.classList.add("pong-menu-active");
+			}
+		}
+
+		const secondButton = menuButtons.find(
+			(b) => b.id === this.gameData.menuItems[1].icon,
+		);
+		if (secondButton) {
+			if (!this.gameData.selectionState.gameSelection) {
+				secondButton.setAttribute("disabled", "true");
+			} else {
+				secondButton.removeAttribute("disabled");
+			}
+			if (this.gameData.selectionState.menuSelection === "mode") {
+				secondButton.classList.add("pong-menu-active");
+			}
+		}
+		const thirdButton = menuButtons.find(
+			(b) => b.id === this.gameData.menuItems[2].icon,
+		);
+		if (thirdButton) {
+			if (!this.gameData.selectionState.modeSelection) {
+				thirdButton.setAttribute("disabled", "true");
+			} else {
+				thirdButton.removeAttribute("disabled");
+			}
+			if (this.gameData.selectionState.menuSelection === "play") {
+				thirdButton.classList.add("pong-menu-active");
+			}
+		}
+	}
+	updateContent() {
+		const firstChild = this.firstChild;
+		console.log("replacing this content:", firstChild);
+		if (firstChild) {
+			switch (this.gameData.selectionState.menuSelection) {
+				case "game":
+					console.log("switching to game");
+					this.replaceChild(this.gameContent, firstChild);
+					break;
+				case "mode":
+					console.log("switching to mode");
+					this.replaceChild(this.modeContent, firstChild);
+					break;
+				case "play":
+					console.log("switching to play");
+					this.replaceChild(this.playContent, firstChild);
+			}
+		}
+	}
+
+	handleEvent(event: Event) {
+		const handlerName =
+			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
+		const handler = this[handlerName as keyof this];
+		if (typeof handler === "function") {
+			handler.call(this, event);
+		}
+	}
+	onClick(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target) {
+			return;
+		}
+
+		// HANDLE ALL BUTTONS
+		const button = target.closest("button");
+		if (button) {
+			this.handleMenuButtons(button);
+			this.handleGameButtons(button);
+		}
+	}
+
+	handleMenuButtons(button: HTMLButtonElement) {
+		if (button.classList.contains("menu-button")) {
+			console.log("menuButton pressed with id:", button.id);
+			switch (button.id) {
+				case "game":
+					this.gameData.selectionState.menuSelection = "game";
+					break;
+				case "mode":
+					this.gameData.selectionState.menuSelection = "mode";
+					break;
+				case "play":
+					this.gameData.selectionState.menuSelection = "play";
+			}
+			this.updateMenuButtons();
+			this.updateContent();
+		}
+	}
+
+	handleGameButtons(button: HTMLButtonElement) {
+		if (!button.classList.contains("game-button")) {
+			return;
+		}
+		if (button.id === "pong") {
+			this.gameData.selectionState.gameSelection = "pong";
+		}
+		if (button.id === "ttt") {
+			this.gameData.selectionState.gameSelection = "ttt";
+		}
+		this.gameData.selectionState.menuSelection = "mode";
+		this.updateMenuButtons();
+		this.updateContent();
+	}
 
 	connectedCallback() {
 		this.classList.add(
-			"grid",
-			"gap-[4rem]",
-			"grid-cols-[repeat(auto-fit,minmax(400px,1fr))]",
-			"grid-rows-[40rem]",
-			"auto-rows-1fr",
-		);
-		console.log("HOME VIEW has been CONNECTED");
-
-		// GAMES TO PICK
-		const gamesContainer = document.createElement("div");
-
-		const containerStyles = [
-			"relative",
-			"p-10",
-			"flex",
-			"justify-center",
-			"gap-x-24",
-			"gap-y-6",
-			"pong-card",
-			"pong-card-thick",
-			"self-start",
-		];
-		const pillStyles = [
-			"absolute",
-			"-top-6",
-			"left-10",
-			"flex",
-			"rounded-3xl",
-			"gap-4",
-			"px-2",
-			"bg-indigo-900",
-			"px-4",
-			"py-2",
-		];
-
-		gamesContainer.classList.add(...containerStyles);
-
-		const pill = document.createElement("div");
-		pill.classList.add(...pillStyles);
-		const h1 = document.createElement("h2");
-		h1.classList.add("pong-heading", "text-xl");
-		h1.textContent = "Pick a game";
-		const gameIcon = new IconComponent("game", 8);
-		pill.append(gameIcon, h1);
-
-		const pongContainer = document.createElement("div");
-		pongContainer.classList.add("rounded-2xl", "bg-indigo-950", "p-5");
-		const pong = document.createElement("div");
-		const pongLabel = document.createElement("div");
-		pongLabel.classList.add(
-			"pong-heading",
-			"text-center",
-			"mt-6",
-			"text-xl",
-		);
-		pongLabel.innerText = "Pong";
-		pong.classList.add(
-			"p-3",
-			"border-4",
-			"rounded-lg",
-			"bg-indigo-950",
-			"border-cyan-400",
-			"glow-small-hover",
-			"cursor-pointer",
-		);
-		const pongImage = document.createElement("img");
-		pongImage.src = "/static-files/images/pong.png";
-		pongImage.width = 200;
-		pongImage.classList.add("rounded-lg");
-		pong.append(pongImage);
-		pongContainer.append(pong, pongLabel);
-
-		const tttContainer = document.createElement("div");
-		tttContainer.classList.add("rounded-2xl", "bg-indigo-950", "p-5");
-		const ttt = document.createElement("div");
-		const tttLabel = document.createElement("div");
-		tttLabel.classList.add(
-			"pong-heading",
-			"text-center",
-			"mt-6",
-			"text-xl",
-		);
-		tttLabel.innerText = "Tic-Tac-Toe";
-		ttt.classList.add(
-			"p-3",
-			"border-4",
-			"rounded-lg",
-			"bg-indigo-950",
-			"border-cyan-400",
-			"glow-small-hover",
-			"cursor-pointer",
-		);
-		const tttImage = document.createElement("img");
-		tttImage.src = "/static-files/images/ttt.png";
-		tttImage.width = 200;
-		tttImage.classList.add("rounded-lg");
-		ttt.append(tttImage);
-		tttContainer.append(ttt, tttLabel);
-
-		gamesContainer.append(pongContainer, tttContainer, pill);
-
-		// MATCH TYPE
-		const matchTypeContainer = document.createElement("div");
-		matchTypeContainer.classList.add(...containerStyles);
-
-		const matchTypeH1 = document.createElement("h2");
-		matchTypeH1.classList.add("pong-heading", "text-xl");
-		matchTypeH1.textContent = "Pick a Match Type";
-		const matchTypeIcon = new IconComponent("list", 8);
-		const matchPill = document.createElement("div");
-		matchPill.classList.add(...pillStyles);
-		matchPill.append(matchTypeIcon, matchTypeH1);
-
-		// MATCH TYPE OPTIONS
-		const optionsContainer = document.createElement("div");
-		optionsContainer.classList.add(
-			"flex-col",
 			"flex",
 			"gap-2",
+			"py-1",
+			"justify-center",
+			"flex-wrap",
+		);
+		this.gameContent.classList.add(...this.contentStyles, "grow-1");
+		this.modeContent.classList.add(
+			...this.contentStyles,
+			"grow-1",
 			"w-full",
-			"mx-12",
-			"items-center",
-			"rounded-2xl",
-			"bg-indigo-950",
-			"p-5",
 		);
-
-		const optionSingles = document.createElement("div");
-		optionSingles.innerText = "Single Player Mode";
-		const optionDoubles = document.createElement("div");
-		optionDoubles.innerText = "Doubles Mode";
-		const optionTournament = document.createElement("div");
-		optionTournament.innerText = "Tournament Mode";
-		const optionSpectator = document.createElement("div");
-		optionSpectator.innerText = "Spectator Mode";
-		optionsContainer.append(
-			optionSingles,
-			optionDoubles,
-			optionTournament,
-			optionSpectator,
+		this.playContent.classList.add(
+			...this.contentStyles,
+			"grow-1",
+			"w-full",
 		);
-
-		matchTypeContainer.append(optionsContainer, matchPill);
-
-		this.append(gamesContainer, matchTypeContainer);
+		this.menuContent.classList.add(...this.contentStyles);
+		this.append(this.gameContent, this.menuContent);
+		this.addEventListener("click", this);
+		this.updateMenuButtons();
+		console.log("HOME VIEW has been CONNECTED");
 	}
 
 	disconnectedCallback() {

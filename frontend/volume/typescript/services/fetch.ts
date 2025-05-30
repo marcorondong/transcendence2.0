@@ -29,7 +29,11 @@ export async function fetchPong(config: FetchConfig) {
 		const data = await response.json();
 		return { response, data };
 	} catch (e) {
-		document.dispatchEvent(notificationEvent(e, "error"));
+		let message: string = "";
+		if (e instanceof Error) {
+			message = e.message;
+		}
+		document.dispatchEvent(notificationEvent(message, "error"));
 		return;
 	}
 }

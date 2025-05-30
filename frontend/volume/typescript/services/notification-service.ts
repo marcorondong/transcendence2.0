@@ -1,7 +1,7 @@
 import { State } from "../types/Notification.js";
 
 export class NotificationService {
-	notificationContainer: HTMLElement | null;
+	notificationContainer = document.createElement("div");
 
 	styleNotification(notification: HTMLElement, state: State) {
 		switch (state) {
@@ -23,7 +23,6 @@ export class NotificationService {
 
 	listen() {
 		console.log("NOTIFICATION is LISTENING");
-		this.notificationContainer = document.createElement("div");
 		this.notificationContainer.classList.add("fixed", "top-10", "right-10");
 		this.notificationContainer.id = "notification-container";
 		document.addEventListener("notification", (e) => {

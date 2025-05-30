@@ -16,10 +16,29 @@ export class HeaderComponent extends HTMLElement {
 		const logoAnchor = document.createElement("a");
 		logoAnchor.href = "/";
 		const logo = document.createElement("img");
-		logo.classList.add("size-18", "rounded-lg");
+		logo.classList.add(
+			"size-18",
+			"rounded-lg",
+			// "absolute",
+			// "-top-4",
+			// "left-10",
+		);
 		logo.src = "/static-files/images/pong-logo.png";
 		logoAnchor.appendChild(logo);
 		this.appendChild(logoAnchor);
+		this.classList.add(
+			// "bg-indigo-900/50",
+			// "border-1",
+			"border-indigo-900",
+			"py-14",
+			// "mb-4",
+			"flex",
+			"content-center",
+			"justify-between",
+			"self-stretch",
+			"rounded-full",
+			"relative",
+		);
 
 		// CONTAINER FOR NAVIGATION
 		const navigation = document.createElement("nav");
@@ -63,7 +82,7 @@ export class HeaderComponent extends HTMLElement {
 				"items-stretch",
 				"justify-center",
 				"gap-4",
-				"p-6",
+				"px-6",
 				"sm:static",
 				"sm:w-auto",
 				"sm:flex",
@@ -71,12 +90,12 @@ export class HeaderComponent extends HTMLElement {
 				"sm:content-center",
 				"sm:items-stretch",
 				"sm:px-6",
-				"sm:py-2",
+				// "sm:py-1",
 				"sm:rounded-full",
 				"bg-gray-200",
 				"sm:bg-transparent",
 				"dark:bg-indigo-950",
-				"dark:sm:bg-indigo-900",
+				"dark:sm:bg-transparent",
 				"z-42",
 				"sm:me-6",
 			);

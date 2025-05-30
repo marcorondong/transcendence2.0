@@ -18,6 +18,10 @@
 	@apply font-bold text-slate-800 dark:text-slate-300;
 }
 
+.pong-heading-big {
+	@apply text-2xl;
+}
+
 /* BUTTONS */
 .pong-button {
 	@apply cursor-pointer rounded-full text-center bg-indigo-300  text-lg p-2 text-indigo-900 transition-colors duration-300 hover:bg-indigo-600 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-indigo-900 dark:bg-indigo-900 dark:text-amber-50 hover:dark:bg-indigo-700 font-medium no-underline whitespace-nowrap z-0;
@@ -52,6 +56,16 @@
 
 .pong-nav-link-active {
 	@apply dark:bg-indigo-900;
+}
+
+/* menu */
+
+.pong-menu {
+	@apply text-base font-bold hover:text-cyan-400 text-slate-400 cursor-pointer disabled:opacity-30 disabled:cursor-default disabled:hover:text-slate-400;
+}
+
+.pong-menu-active {
+	@apply text-cyan-400;
 }
 
 /* input */
@@ -117,7 +131,7 @@ a {
 }
 
 .pong-card-thick {
-	@apply border-5 border-indigo-900;
+	@apply border-4 border-indigo-900;
 }
 
 .pong-card-dark {
