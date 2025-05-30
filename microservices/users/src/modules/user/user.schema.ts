@@ -165,7 +165,7 @@ const userMetaFields = {
 	id: z.string().uuid().describe("User ID (UUID format)"),
 	createdAt: z.date().describe("Timestamp of user creation"),
 	updatedAt: z.date().describe("Timestamp of last update"),
-	picture: z.string().describe("Path to user's avatar image"),
+	picture: z.string().describe("Path to user's picture"),
 };
 
 // Schema for createUser

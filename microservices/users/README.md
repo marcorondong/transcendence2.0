@@ -139,7 +139,7 @@ However, you can customize the service using docker secrets, environmental varia
 > - `.env` file containing host and port for USERS service.
 > - `.env` file containing page size for responses.
 > - `.env` file containing location of database.
-> - `.env` file containing location of users avatars' folder.
+> - `.env` file containing location of users pictures' folder.
 > - `.env` file containing `PAGINATION_ENABLED` and `DEFAULT_PAGE_SIZE`.
 
 ---

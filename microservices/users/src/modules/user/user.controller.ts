@@ -1,4 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import fs from "fs"; // for createWriteStream
+import { mkdir } from "fs/promises";
+import path from "path";
+import { pipeline } from "stream/promises";
 import {
 	UniqueUserField,
 	createUserInput,
@@ -16,6 +20,7 @@ import {
 	findUsers,
 	deleteUser,
 	updateUser,
+	updateUserPicture,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
@@ -244,4 +249,63 @@ export async function patchUserHandler(
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
+}
+
+export async function pictureHandler(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply,
+) {
+	const user = await findUserByUnique({ id: request.params.id });
+
+	const parts = request.parts();
+	let pictureFile;
+	for await (const part of parts) {
+		if (part.type === "file" && part.fieldname === "picture") {
+			pictureFile = part;
+			break;
+		}
+	}
+
+	if (!pictureFile) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_PICTURE,
+			message: "No picture file uploaded",
+		});
+	}
+
+	// File validation: max size 1MB, accepted types
+	if (!["image/jpeg", "image/png"].includes(pictureFile.mimetype)) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_PICTURE,
+			message: "Only JPEG or PNG files are allowed",
+		});
+	}
+	// if (pictureFile.file.bytesRead > 1024 * 1024) {
+	if (pictureFile.file.truncated) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_PICTURE,
+			message: "File too large (max 1MB)",
+		});
+	}
+
+	// Build destination path
+	const uploadsBase = path.resolve("uploads/users");
+	const userFolder = path.join(uploadsBase, user.username);
+	const filePath = path.join(userFolder, "picture.jpg");
+	console.log("Saving picture to:", filePath); // TODO: Remove this later
+
+	await mkdir(userFolder, { recursive: true });
+	// console.log(`Would run: mkdir(${userFolder}, { recursive: true })`);
+	await pipeline(pictureFile.file, fs.createWriteStream(filePath));
+	// console.log(
+	// 	`Would run: pipeline(<picture stream>, createWriteStream(${filePath}))`,
+	// );
+
+	const publicPath = `/uploads/users/${user.username}/picture.jpg`;
+	const updatedUser = await updateUserPicture(user.id, publicPath);
+
+	reply.code(200).send(updatedUser);
 }
