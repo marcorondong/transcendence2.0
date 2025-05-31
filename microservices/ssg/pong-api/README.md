@@ -39,17 +39,18 @@ If noting is specified it is same as sending `?tournamentSize=4`
 * `wss://localhost:8080/pong-api/pong/doubles` -> DOUBLES basic
 
 ### Possible errors on websocket
-| Closing Code on ws  | Error Message                          | Possible Solution                                      |
-|--------------|----------------------------------------|--------------------------------------------------------|
-| 1008     | Unauthorized | Invalid JWT token, no token is sent or Auth-api is down.|
-| 1008  | Unknown match type  | not supported game mode received on server side                                 |
-| 1008  | You are already in a game Room | Player with that JWT already is on pong-api. First connection is not closed. Client should close (first connection) on it own or wait until game is over/player is kicked in order to connect with "second"     |
-| NOT_CLOSED          | Invalid move| wrong format of control is sent. Check JSON key and value, make sure no other info is sent  |
-| NOT_CLOSED       | It is not zod Error, but probably empty move sent:{ERR}        | Likely empty move sent. Or something went terribly wrong on backed. [Sekula](https://github.com/Sekula34) to blame in second case |
-| 1008          | Bot cannot join tournament, You can report us to the Office for Robot Rights in Vienna | Pay to [benszilas](https://github.com/benszilas) and [Sekula](https://github.com/Sekula34) to implement feature where Bot can play tournament  |
-| NOT_CLOSED      | Size _tournamentSize_ is not valid, Switch to default value _value_$  | Invalid tournament size sent but it is switched to default value|
-| 1008          | Room with id not found        | Player want to be guest in room where HOST already left room. Or you are just evaluator who now tries really hard to crash us on backend, which is not nice but you will need to try harder than this  |
-| NOT_ON_LIST          | "**f\*ck**, **sche\*se** , **JEB\*TE** SEKULA i njegove gluposti"| PANIC, call or try to find (probably hiding in Croatia) Sekula and explain him why he is stupid.|
+| Closing Code on ws  | Error Message sent to socket                         | Possible Solution                                      | Close Error Msg |
+|---------------------|----------------------------------------|--------------------------------------------------------|-----------------|
+| 1008                | Request JWT Token aka LOG IN before trying to play pong                          | Invalid JWT token, no token is sent or Auth-api is down. | Unauthorized |
+| 1008                | NONE                    | Not supported game mode received on server side.        | Unknown match type |
+| 1008                | You are already in a game Room         | Player with that JWT is already on pong-api. First connection is not closed. Client should close it or wait for game to finish. | Already in pong-api|
+| NOT_CLOSED          | Invalid move                           | Wrong format of control is sent. Check JSON key/value and make sure no extra info is sent. | NONE |
+| NOT_CLOSED          | It is not zod Error, but probably empty move sent: {ERR} | Likely empty move sent. Or something went terribly wrong on backend. [Sekula](https://github.com/Sekula34) to blame in second case. | No close sent |
+| 1008                | Bot cannot join tournament, You can report us to the Office for Robot Rights in Vienna | Pay to [benszilas](https://github.com/benszilas) and [Sekula](https://github.com/Sekula34) to implement bot-tournament support. | Only for humans |
+| NOT_CLOSED          | Size _tournamentSize_ is not valid, Switch to default value _value_ | Invalid tournament size sent, but it is switched to default. | NONE |
+| 1008                | Room with provided Id doesn't exist. Invite expired, or Host left lobby. If you want to be host send roomId=private as query        | Player wants to join a room where HOST already left. Or you're just an evaluator trying to break us. Try harder. | Room with id not found |
+| NOT_ON_LIST         | "**f\*ck**, **sche\*se**, **JEB\*TE** SEKULA i njegove gluposti" | PANIC. Call or hunt down [Sekula](https://github.com/Sekula34) (probably hiding in Croatia) and explain why he is **stupid**. | BIS BALD |
+
 
 
 
