@@ -1,13 +1,17 @@
+import { ChatComponent } from "../components/chat-component.js";
 import { GameSelectionComponent } from "../components/game-selection-component.js";
 import { MenuSelectionComponent } from "../components/menu-selection-component.js";
 import { ModeSelectionComponent } from "../components/mode-selection-component.js";
 import { PlaySelectionComponent } from "../components/play-selection-component.js";
 import { pongLinkEvent } from "../services/events.js";
 
+export type GameMode = "tournament" | "singles" | "doubles" | "spectate";
+export type GamePlay = "";
+
 export interface SelectionState {
 	menuSelection: "game" | "mode" | "play";
 	gameSelection: undefined | "pong" | "ttt";
-	modeSelection: undefined | string;
+	modeSelection: undefined | GameMode;
 	playSelection: undefined | string;
 }
 export interface Menu {
@@ -18,14 +22,21 @@ export interface Menu {
 export interface GameData {
 	menuItems: Menu[];
 	gameOptions: string[];
-	modeOptions: { id: string; label: string; play: string[] }[];
+	modeOptions: {
+		id: GameMode;
+		label: string;
+		play: { value: string; label: string }[];
+	}[];
 	selectionState: SelectionState;
 }
 
 class HomeView extends HTMLElement {
-	constructor() {
+	chat: ChatComponent;
+	constructor(chat: ChatComponent) {
 		super();
+		this.chat = chat;
 	}
+
 	// GAME STATE
 	selectionSate: SelectionState = {
 		menuSelection: "game",
@@ -42,24 +53,31 @@ class HomeView extends HTMLElement {
 		gameOptions: ["pong", "ttt"],
 		modeOptions: [
 			{
-				id: "single",
+				id: "singles",
 				label: "Single Player Mode",
-				play: ["Play Random Opponent", "Play Friend"],
+				play: [
+					{ value: "public", label: "Play Random Opponent" },
+					{ value: "private", label: "Play Friend" },
+				],
 			},
-			{ id: "double", label: "Doubles Mode", play: ["Let's Play"] },
+			{
+				id: "doubles",
+				label: "Doubles Mode",
+				play: [{ value: "public", label: "Let's Play" }],
+			},
 			{
 				id: "tournament",
 				label: "Tournament Mode",
 				play: [
-					"4 Player Tournament",
-					"8 Player Tournament",
-					"16 Player Tournament",
+					{ value: "4", label: "4 Player Tournament" },
+					{ value: "8", label: "8 Player Tournament" },
+					{ value: "16", label: "16 Player Tournament" },
 				],
 			},
 			{
-				id: "spectator",
+				id: "spectate",
 				label: "Spectator Mode",
-				play: ["Start watching"],
+				play: [{ value: "input", label: "Start watching" }],
 			},
 		],
 		selectionState: this.selectionSate,
@@ -206,10 +224,13 @@ class HomeView extends HTMLElement {
 		this.updateMenuButtons();
 		this.updateContent();
 	}
+
 	handlePlayButtons(button: HTMLButtonElement) {
 		if (!button.classList.contains("play-button")) {
 			return;
 		}
+		this.gameData.selectionState.playSelection = button.id;
+		this.chat.gameSelection = this.gameData.selectionState;
 		this.dispatchEvent(pongLinkEvent);
 	}
 
@@ -241,6 +262,6 @@ class HomeView extends HTMLElement {
 
 customElements.define("home-view", HomeView);
 
-export function createComponent() {
-	return document.createElement("home-view");
+export function createComponent(chat: ChatComponent) {
+	return new HomeView(chat);
 }

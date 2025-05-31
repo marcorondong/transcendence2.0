@@ -59,8 +59,8 @@ class PlaySelectionComponent extends HTMLElement {
 
 		playOptions.play.forEach((m) => {
 			const button = document.createElement("button");
-			button.innerText = m;
-			button.id = m;
+			button.innerText = m.label;
+			button.id = m.value;
 			button.classList.add(
 				"pong-button",
 				"pong-button-info",

@@ -2,6 +2,7 @@ import { IconComponent } from "./icon-component.js";
 import { User, Chat, ChatUser, Message } from "../types/Chat.js";
 import { fetchChatDb } from "../services/fetch-chat.js";
 import { notificationEvent, pongLinkEvent } from "../services/events.js";
+import { SelectionState } from "../views/home-view.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -9,6 +10,7 @@ class ChatComponent extends HTMLElement {
 	onlineUsers: ChatUser[] = [];
 	selectedUser: ChatUser | undefined = undefined;
 	roomId: string | undefined = undefined;
+	gameSelection: SelectionState | undefined;
 	me: User | undefined;
 
 	//ICONS

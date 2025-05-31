@@ -27,21 +27,49 @@ export class PongComponent extends HTMLElement {
 
 	createNewWebsocket() {
 		// const queryParams = window.location.search;
-		let queryParams: undefined | string = undefined;
-		let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/singles`;
+		let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
 
 		this.wss?.close();
 
+		console.log("roomId", this.chat.roomId);
 		if (this.chat.roomId) {
-			queryParams = "?roomId=" + this.chat.roomId;
-			url += queryParams;
-			if (this.chat.roomId !== "private") {
-				this.chat.roomId = undefined;
-			}
+			url = this.urlFromRoomId(url);
+		}
+		if (this.chat.gameSelection) {
+			this.urlFromGameSelection(url);
 		}
 
 		console.log("ws to: ", url);
 		this.wss = new WebSocket(url);
+	}
+
+	urlFromGameSelection(url: string) {
+		const selection = this.chat.gameSelection;
+		if (!selection) {
+			return;
+		}
+		url += selection.modeSelection;
+		if (selection.playSelection === "public") {
+			return url;
+		}
+		if (
+			selection.modeSelection === "singles" ||
+			selection.modeSelection === "doubles"
+		) {
+			url += "?roomId=private";
+		}
+		if (selection.modeSelection === "tournament") {
+			url += "?tournamentSize=" + selection.playSelection;
+		}
+		return url;
+	}
+
+	urlFromRoomId(url: string) {
+		url += "singles?roomId=" + this.chat.roomId;
+		if (this.chat.roomId !== "private") {
+			this.chat.roomId = undefined;
+		}
+		return url;
 	}
 
 	adjustCanvasToWindow() {
@@ -217,6 +245,7 @@ export class PongComponent extends HTMLElement {
 
 	connectedCallback() {
 		console.log("Pong CONNECTED");
+		console.log("gamed State", this.chat.gameSelection);
 
 		this.classList.add("shrink-0", "w-fit");
 		const canvasContainer = document.createElement("div");
@@ -246,6 +275,7 @@ export class PongComponent extends HTMLElement {
 
 		document.addEventListener("keydown", this, false);
 		document.addEventListener("keyup", this, false);
+		document.addEventListener("game-data", this);
 		window.addEventListener("resize", this);
 		this.canvas.addEventListener("touchstart", this);
 		this.canvas.addEventListener("touchend", this);
