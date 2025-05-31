@@ -1,7 +1,7 @@
 import { IconComponent } from "./icon-component.js";
 import { User, Chat, ChatUser, Message } from "../types/Chat.js";
 import { fetchChatDb } from "../services/fetch-chat.js";
-import { pongLinkEvent } from "../services/events.js";
+import { notificationEvent, pongLinkEvent } from "../services/events.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -32,24 +32,52 @@ class ChatComponent extends HTMLElement {
 	navMe = document.createElement("div");
 	chatInput = document.createElement("textarea");
 	chatContainer = document.createElement("div");
+	closeChat() {
+		this.onlineUsers = [];
+		this.selectedUser = undefined;
+		if (this.plusIcon.classList.contains("hidden")) {
+			this.handleMinMaxButton(this.minMaxButton);
+		}
+		const children = [...this.nav.children];
+		children.forEach((c) => {
+			if (c.id != "nav-me") {
+				c.classList.add("hidden");
+			}
+		});
+
+		// this.mainMessages.replaceChildren();
+		this.navMe.innerText = "offline";
+		this.classList.add("text-slate-500");
+	}
 
 	openWebsocket() {
 		// OPEN NEW WEBSOCKET
-		this.ws = new WebSocket(
-			`wss://${window.location.hostname}:${window.location.port}/chat-api`,
-		);
+		try {
+			if (this.ws?.OPEN) {
+				console.log("CLOSING WS");
+				this.ws.close();
+			}
+
+			console.log("OPENING WS");
+			this.ws = new WebSocket(
+				`wss://${window.location.hostname}:${window.location.port}/chat-api`,
+			);
+		} catch (e) {
+			console.log("ERROR");
+			console.log(e);
+			this.closeChat();
+			this.dispatchEvent(
+				notificationEvent("chat websocket failed", "error"),
+			);
+			return;
+		}
 
 		// WEBSOCKET CONNECTION CLOSED
 		this.ws.onclose = () => {
-			console.log("websocket has closed");
-			this.onlineUsers = [];
-			this.selectedUser = undefined;
-			if (this.plusIcon.classList.contains("hidden")) {
-				this.handleMinMaxButton(this.minMaxButton);
-			}
-			this.mainMessages.replaceChildren();
-			this.classList.add("text-slate-500");
-			this.innerText = "offline";
+			document.dispatchEvent(
+				notificationEvent("chat websocket closed", "info"),
+			);
+			this.closeChat();
 		};
 
 		this.ws.onmessage = (event) => {
@@ -531,6 +559,21 @@ class ChatComponent extends HTMLElement {
 		console.log("Chat CONNECTED");
 		document.addEventListener("click", this);
 		document.addEventListener("keydown", this);
+
+		const button = document.createElement("button");
+		button.addEventListener("click", () => {
+			this.openWebsocket();
+		});
+		button.innerText = "open ws";
+		this.append(button);
+	}
+
+	disconnectedCallback() {
+		console.log("Chat DISCONNECTED");
+		this.ws?.close();
+	}
+	initChatElement() {
+		console.log("INIT CHAT");
 		this.nav.classList.add(
 			"col-span-full",
 			"flex",
@@ -578,12 +621,14 @@ class ChatComponent extends HTMLElement {
 		);
 		this.navUsersContainer.appendChild(this.navUsersCount);
 		this.navUsersCount.innerText = "0";
+		this.navUsersCount.classList.remove("hidden");
 
 		this.navMe.classList.add("hidden");
-
+		this.navMe.id = "nav-me";
 		this.minusIcon.classList.add("hidden");
 		this.minMaxButton.classList.add("pong-button");
 		this.minMaxButton.id = "min-max-button";
+		this.minMaxButton.classList.remove("hidden");
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
 		this.nav.append(this.navUsersContainer, this.navMe, this.minMaxButton);
 
@@ -634,11 +679,6 @@ class ChatComponent extends HTMLElement {
 			this.inviteButton,
 			this.blockButton,
 		);
-	}
-
-	disconnectedCallback() {
-		console.log("Chat DISCONNECTED");
-		this.ws?.close();
 	}
 }
 

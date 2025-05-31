@@ -38,14 +38,7 @@ export class FetchAuth {
 			url: "/auth-api/sign-up",
 		};
 
-		try {
-			await fetchPong(config);
-			document.dispatchEvent(
-				notificationEvent("You just signed up!", "success"),
-			);
-			Auth.toggleAuthClasses(true);
-			document.dispatchEvent(homeLinkEvent);
-		} catch (e) {}
+		await fetchPong(config);
 	}
 	static async signOut() {
 		const config: FetchConfig = {

@@ -226,7 +226,7 @@ class HomeView extends HTMLElement {
 			"grow-1",
 			"w-full",
 		);
-		this.menuContent.classList.add(...this.contentStyles, "z-200");
+		this.menuContent.classList.add(...this.contentStyles);
 		this.append(this.menuContent, this.gameContent);
 		this.addEventListener("click", this);
 		this.updateMenuButtons();

@@ -1,10 +1,17 @@
-import { notificationEvent, signInLinkEvent } from "../services/events.js";
+import { ChatComponent } from "../components/chat-component.js";
+import { Auth } from "../services/auth.js";
+import {
+	homeLinkEvent,
+	notificationEvent,
+	signInLinkEvent,
+} from "../services/events.js";
 import { FetchAuth } from "../services/fetch-auth.js";
-import { fetchSignUp } from "../services/fetch-sign-up.js";
 
 export class SignUpView extends HTMLElement {
-	constructor() {
+	chat: ChatComponent;
+	constructor(chat: ChatComponent) {
 		super();
+		this.chat = chat;
 	}
 
 	frame = document.createElement("div");
@@ -120,7 +127,18 @@ export class SignUpView extends HTMLElement {
 				nickname: this.inputNickname.value,
 				password: this.inputPassword.value,
 			};
-			await FetchAuth.signUp(data);
+			try {
+				await FetchAuth.signUp(data);
+				Auth.toggleAuthClasses(true);
+				this.chat.openWebsocket();
+				document.dispatchEvent(
+					notificationEvent("You just signed up!", "success"),
+				);
+				document.dispatchEvent(homeLinkEvent);
+			} catch (e) {
+				document.dispatchEvent(notificationEvent(e, "error"));
+				console.log("from sign up", e);
+			}
 		});
 	}
 
@@ -128,9 +146,8 @@ export class SignUpView extends HTMLElement {
 		console.log("SIGNUP VIEW has been DISCONNECTED");
 	}
 }
+customElements.define("sign-un-view", SignUpView);
 
-customElements.define("sign-up-view", SignUpView);
-
-export function createComponent() {
-	return document.createElement("sign-up-view");
+export function createComponent(chat: ChatComponent) {
+	return new SignUpView(chat);
 }

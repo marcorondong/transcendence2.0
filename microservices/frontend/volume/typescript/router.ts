@@ -28,6 +28,7 @@ export class Router {
 		try {
 			await FetchAuth.verifyJwt();
 			document.dispatchEvent(notificationEvent("JWT valid", "success"));
+			this.chat.openWebsocket();
 			Auth.toggleAuthClasses(true);
 			this.loadComponent();
 		} catch (e) {
@@ -52,7 +53,6 @@ export class Router {
 		);
 
 		if (linkElement && linkElement.classList.contains("pong-nav-link")) {
-			console.log("setting active linke!");
 			linkElement.classList.add("pong-nav-link-active");
 		}
 	}

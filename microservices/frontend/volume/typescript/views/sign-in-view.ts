@@ -112,7 +112,11 @@ export class SignInView extends HTMLElement {
 				Auth.toggleAuthClasses(true);
 				this.chat.openWebsocket();
 				this.dispatchEvent(homeLinkEvent);
-			} catch (e) {}
+			} catch (e) {
+				document.dispatchEvent(
+					notificationEvent("sign in failed", "error"),
+				);
+			}
 		}
 	}
 
