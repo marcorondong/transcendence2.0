@@ -1,5 +1,5 @@
 # Docs pong-api
-## Intro
+## Intro 📖
 Pong-api is microservice that:
 * handles incoming connection on websocket, 
 * let authorized player to play 3 different game modes: singles, doubles and tournament.
@@ -8,13 +8,13 @@ Pong-api is microservice that:
 
 
 
-## User Manual
-### Connect as spectator
+## User Manual 👤
+### Connect as spectator 🕶️
 `wss://localhost:8080/pong-api/pong/spectate/{{ROOM_ID}}`
 
 VALID JWT is not required for spectating. Spectator receives all same frames as player but anything spectator send to websocket is completely ignored by server
 
-### How to connect as player
+### How to connect as player 🎾
 If Pong-api is behind nginx, websocket protocol is secure  `wss` otherwise it is not secure `ws`. In our case nginx is configured that way that anything that is for pong-api is forwarded to container for it. So most basic form of connecting to pong api is: `WEBSOCKET_PROTOCOL://IP:PORT/pong-api/pong/MATCH_TYPE?QUERY` where: 
 * WEBSOCKET_PROTOCOL -> `wss | ws`
 * IP -> ip address of nginx or pong api (example: `localhost`, `10.12.6.1`, etc )
@@ -64,7 +64,7 @@ Get Log of tournament game from blockchain -> GET `http://localhost:3010/pong-ap
 }
 ```
 
-### Possible errors on websocket
+### Possible errors on websocket ⛔
 | Closing Code on ws  | Error Message sent to socket                         | Possible Solution                                      | Close Error Msg |
 |---------------------|----------------------------------------|--------------------------------------------------------|-----------------|
 | 1008                | Request JWT Token aka LOG IN before trying to play pong                          | Invalid JWT token, no token is sent or Auth-api is down. | Unauthorized |
@@ -80,7 +80,7 @@ Get Log of tournament game from blockchain -> GET `http://localhost:3010/pong-ap
 
 
 
-### Controls
+### Controls 🕹️
 1. Once connected via websocket client is sending json with either:
 
 ```json
@@ -93,7 +93,7 @@ or
 2. Server in next frame should send updated paddle position
 
 
-### Frames examples 
+### Frames examples 🖼️
 #### Welcome Frame
 Frame sent when player connects
 ```json
