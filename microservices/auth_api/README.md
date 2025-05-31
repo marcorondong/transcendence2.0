@@ -1,127 +1,35 @@
 # 🔐 AUTH Service
 
-## Table Of Contents
-
-- [🔐 AUTH Service](#-auth-service)
-  - [Table Of Contents](#table-of-contents)
-  - [🔀 API Endpoints](#-api-endpoints)
-  - [User Authentication Endpoints](#user-authentication-endpoints)
-    - [1. Register User](#1-register-user)
-    - [2. Login User](#2-login-user)
-    - [3. Logout](#3-logout)
-  - [Protected Routes](#protected-routes)
-    - [Game Statistics](#game-statistics)
-    - [Chat Management](#chat-management)
-    - [User Management](#user-management)
-    - [Further Token Management](#further-token-management)
-  - [Problem](#problem)
+Swagger link: http://localhost:2999/auth-api/documentation
 
 ## 🔀 API Endpoints
 
-| Method | Path                                           | Description                            |
-| ------ | ---------------------------------------------- | -------------------------------------- |
-| POST   | `https://{frontend:port}/auth-api/sign-in`     | Login user                             |
-| DELETE | `https://{frontend:port}/auth-api/sign-out`    | Logout user                            |
-| GET    | `https://{frontend:port}/auth-api/verify-jwt`   | Verify JWT Token                       |
-| GET    | `https://{frontend:port}/auth-api/refresh-jwt` | Refresh JWT Token                      |
-| GET    | `http://localhost:2999/auth-api/documentation` | Swagger (Good for testing all options) |
+| #  | Method | Path                                                         | Description     | Microservice     |
+| -- | ------ | ------------------------------------------------------------ | --------------- |----------------- |
+| 1  | POST   | `https://localhost:8080/auth-api/sign-in`                    | Login user      | Frontend         |
+| 2  | POST   | `https://localhost:8080/auth-api/sign-up`                    | Register user   | Frontend         |
+| 3  | DELETE | `https://localhost:8080/auth-api/sign-out`                   | Logout user     | Frontend         |
+| 4  | GET    | `https://localhost:8080/auth-api/verify-jwt`                 | Verify JWT      | Frontend         |
+| 5  | GET    | `https://localhost:8080/auth-api/refresh-jwt`                | Refresh JWT     | Frontend         |
+| 6  | PATCH  | `https://localhost:8080/auth-api/users/:id`                  | Edit Profile    | Frontend         |
+| 7  | PUT    | `https://localhost:8080/auth-api/users/:id`                  | Update Profile  | Frontend         |
+| 8  | DELETE | `https://localhost:8080/auth-api/users/:id`                  | Delete User     | Frontend         |
+| 9  | GET    | `http://auth_api_container:2999/auth-api/bot-jwt`            | Token for Bot   | Ai-Bot           |
+| 10 | GET    | `http://auth_api_container:2999/auth-api/verify-connection`  | Verify WS Conn. | Pong, Chat, Tic  |
+| 11 | GET    | `http://auth_api_container:2999/auth-api/health-check`       | Health check    | Monitoring       |
+| 12 | GET    | `http://localhost:2999/auth-api/documentation`               | Swagger         | Everyone         |
 
-## User Authentication Endpoints
+1) Sign in a user. This will create the token for the user.
+2) Sign up a user. This will create the user and the token.
+3) Sign out a user. This will delete the token for the user.
+4) Verify a user. This will check if the token is valid.
+5) Refresh a user. This will refresh the token for the user.
+6) Edit the profile of the user and update token.
+7) Update the whole profile of the user and update token.
+8) Delete a user. This will delete the user and the token.
+9) Get the bot JWT. This will return the JWT for bot.
+10) Verify Cookies and JWT for internal services. Returns id and nickname
+11) Check the health of the service
+12) Swagger page for detailed information
 
-### 1. Register User
-
-**Endpoint:** `POST https://{frontend:port}/api/users/`  
-*Note: Keep the trailing "/"*
-
-**Request Body:**
-
-```json
-{
-    "email": "valid email format",
-    "username": "min. 3 chars, including 1 letter",
-    "nickname": "min. 3 chars, including 1 letter",
-    "password": "min. 6 chars, including 1 lower, 1 upper, 1 digit, 1 symbol"
-}
-```
-
-**Response Codes:**
-
-- `400 Bad Request` - Invalid input
-- `409 Conflict` - Username/email already exists
-- `201 Created` - Registration successful
-
-### 2. Login User
-
-**Endpoint:** `POST https://{frontend:port}/auth-api/sign-in`
-
-**Request Body:**
-
-```json
-{
-    "identifier": "email or username",
-    "password": "user password"
-}
-```
-
-**Response Codes:**
-
-- `400 Bad Request` - Empty credentials
-- `401 Unauthorized` - Invalid credentials
-- `201 Created` - Login successful (access token saved in client cookies)
-
-### 3. Logout
-
-**Endpoint** `DELETE https://{frontend:port}/auth-api/sign-out`
-
-**Request Body:**
-
-None
-
-**Response Codes:**
-
-- `200 OK` - cookie deleted from client
-
-## Protected Routes
-
-The following endpoints are routed through nginx with authentication sub-request:
-
-### Game Statistics
-
-- `GET https://{frontend:port}/tictactoe-db/game-history`
-- `GET https://{frontend:port}/tictactoe-db/total-stats`
-- `GET https://{frontend:port}/tictactoe-db/head-to-head`
-- `GET https://{frontend:port}/pong-db/game-history`
-- `GET https://{frontend:port}/pong-db/total-stats`
-- `GET https://{frontend:port}/pong-db/head-to-head`
-
-### Chat Management
-
-- `GET https://{frontend:port}/chat-db/block-status`
-- `POST https://{frontend:port}/chat-db/block-user`
-- `POST https://{frontend:port}/chat-db/unblock-user`
-
-### User Management
-
-- `GET/PUT/PATCH https://{frontend:port}/api/users/{uuid}`
-
-### Further Token Management
-
-- `GET https://{frontend:port}/auth-api/verify-jwt`
-- `GET https://{frontend:port}/auth-api/refresh-jwt`
-
-## Problem
-
-- `GET https://{frontend:port}/api/users/`
-- `POST https://{frontend:port}/api/users/`
-
-You can make two different request to the root of our user service.
-
-GET should be protected by an auth sub-request.
-
-POST should not be protected.
-
-I tried if conditions and limit_except rule in nginx config, but could not get it working.
-
-best case we can make a conditional auth sub-request on this route
-
-worst case we have to redefine the route
+Detailed information about routes, shape of body, param, response is in swagger page. 

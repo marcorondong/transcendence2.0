@@ -61,15 +61,53 @@ export const serverOption = {
 
 export const jwtOption = {
 	secret: jwtSecret,
+	// namespace: "security",
+	// jwtVerify: 'securityVerify',
+	// jwtSign: 'securitySign',
+	// message: "Unauthorized access",
+	// decoratorName: "'customName'",
 	cookie: {
 		cookieName: env.JWT_TOKEN_NAME,
 		signed: true,
 	},
+	sign: {
+		expiresIn: "1h",
+		// issuer: "auth_api_sign",
+		// iss: "auth_api",
+		// audience: "users",
+		// aud: "users",
+		// jwtid: "auth_api",
+		// keyid: "auth_api",
+		// notBefore: '10s',
+		// subject: "auth_api",
+		// algorithm: "HS256",
+		// customClaim: "customClaimValue",
+	},
+	// verify: {
+	// 	// ignoreExpiration: false,
+	// 	// issuer: "auth_api",
+	// 	// iss: "auth_api",
+	// 	// audience: "users",
+	// 	// aud: "users",
+	// 	// allowedAud: "users",
+	// 	// allowedIss: "auth_api",
+	// 	// jwtid: "auth_api",
+	// 	// keyid: "auth_api",
+	// 	// subject: "auth_api",
+	// 	// algorithm: "HS256",
+	// 	// customClaim: "customClaimValue",
+	// 	// algorithms: ["HS256"],
+	// },
 };
 
 export const cookieOption = {
 	secret: cookieSecret,
 	parseOptions: {
+		path: "/",
+		httpOnly: true,
+		secure: true,
 		signed: true,
+		sameSite: "strict" as const,
+		maxAge: 60 * 60,
 	},
 };

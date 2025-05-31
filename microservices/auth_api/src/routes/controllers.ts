@@ -2,10 +2,12 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import {
 	signInRequest,
 	signUpRequest,
-	setCookieOpt,
-	jwtSignOpt,
-	clearCookieOpt,
-} from "./service";
+	editProfileRequest,
+	updateProfileRequest,
+	deleteUserRequest,
+} from "./httpRequests";
+import { setCookieOpt, jwtSignOpt, clearCookieOpt } from "./configs";
+
 import { env } from "../utils/env";
 
 export async function signInHandler(
@@ -59,6 +61,47 @@ export async function verifyConnectionHandler(
 ) {
 	const { id, nickname } = request.user;
 	reply.status(200).send({ id, nickname });
+}
+
+export async function botJWTHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const payload = { id: env.BOT_UUID, nickname: env.BOT_NICKNAME };
+	const access_token = await reply.jwtSign(payload, jwtSignOpt);
+	reply.status(200).send({ access_token });
+}
+
+export async function editProfileHandler(
+	request: FastifyRequest<{ Body: unknown; Params: unknown }>,
+	reply: FastifyReply,
+) {
+	const { id } = request.params as { id: string };
+	const payload = await editProfileRequest(request.body, id);
+	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
+	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
+	reply.status(200).send();
+}
+
+export async function updateProfileHandler(
+	request: FastifyRequest<{ Body: unknown; Params: unknown }>,
+	reply: FastifyReply,
+) {
+	const { id } = request.params as { id: string };
+	const payload = await updateProfileRequest(request.body, id);
+	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
+	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
+	reply.status(200).send();
+}
+
+export async function deleteUserHandler(
+	request: FastifyRequest<{ Params: unknown }>,
+	reply: FastifyReply,
+) {
+	const { id } = request.params as { id: string };
+	await deleteUserRequest(id);
+	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
+	reply.status(200).send();
 }
 
 export async function healthCheckHandler(

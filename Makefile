@@ -26,6 +26,11 @@ remove:
 	docker system prune -a -f --volumes
 	$(MAKE) delete-secrets
 
+reset:
+	docker-compose down --volumes
+	docker system prune -a -f --volumes
+	docker builder prune -a -f
+
 dev:
 	docker compose build --no-cache
 	docker compose up
@@ -71,4 +76,4 @@ $(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
 
-.PHONY: all re clean remove dev cli nuke delete-secrets
+.PHONY: all re clean remove dev cli nuke delete-secrets reset

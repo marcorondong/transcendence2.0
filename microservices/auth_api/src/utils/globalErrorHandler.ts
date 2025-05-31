@@ -1,13 +1,15 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 
 export function globalErrorHandler(
-	error: FastifyError,
+	error: unknown,
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
 	reply.log.error(error);
 
-	if (process.env.NODE_ENV === "production") {
+	const fastifyError = error as FastifyError & { expose?: boolean };
+
+	if (process.env.NODE_ENV === "production" && !fastifyError.expose) {
 		reply.status(503).send({
 			error: "Service Unavailable",
 			message:
@@ -15,11 +17,11 @@ export function globalErrorHandler(
 		});
 		return;
 	}
-	const statusCode = (error as any).statusCode || 500;
+	const statusCode = fastifyError.statusCode || 500;
 	reply.status(statusCode).send({
-		error: error.name || "Internal Server Error",
-		message: error.message || "An unexpected error occurred.",
+		error: fastifyError.name || "Internal Server Error",
+		message: fastifyError.message || "An unexpected error occurred.",
 		statusCode: statusCode,
-		stack: error.stack,
+		stack: fastifyError.stack,
 	});
 }
