@@ -1,16 +1,41 @@
-## Overall server POV
-1. Lobby phase
-2. Game phase 
-3. On each client message server should update position of that player paddle.
-4. While game is running server is sending 60 frames per second. Each frame send:
-    * left paddle 
-    * right paddle 
-    * ball
-    * score 
-    * some additional info (knockout stage, game phase etc)
+# Docs pong-api
+## Intro
+Pong-api is microservice that:
+* handles incoming connection on websocket, 
+* let authorized player to play 3 different game modes: singles, doubles and tournament.
+* stores result of games against other players in database, in addition to that tournament is stored on testing Avalanche blockchain too
+* have spectator mode
 
 
-## Client POV and controls
+
+## User Manual
+### How to connect
+If Pong-api is behind nginx, websocket protocol is secure  `wss` otherwise it is not secure `ws`. In our case nginx is configured that way that anything that is for pong-api is forwarded to container for it. So most basic form of connecting to pong api is: `WEBSOCKET_PROTOCOL://IP:PORT/pong-api/pong/MATCH_TYPE?QUERY` where: 
+* WEBSOCKET_PROTOCOL -> `wss | ws`
+* IP -> ip address of nginx or pong api (example: `localhost`, `10.12.6.1`, etc )
+* PORT -> port of pong-api or frontend (example: `8080`, `3010`)
+* MATCH_TYPE -> `singles | doubles | tournament`
+#### Queries
+Queries are optional and send after `?` with `KEY`=`VALUE`
+##### roomId
+In match type of `singles` and `doubles` client can send query with key `roomId` valid values for this keys are (defined in `pong-api/src/utils/zodSchema.ts`): 
+* `public` -> player joins random public room either as HOST(first player) or GUEST (all players that are not HOST)
+* `private` -> player become HOST of room where only player who knows roomId can join
+* `UUID_OF_ROOM_YOU_WANT_TO_JOIN` -> player joins as GUEST to room of HOST. Example is (`0f2217d6-a378-484e-98a2-4c07a377f5c5`)
+
+If noting is specified it is same as sending `?roomId=public`
+
+#### tournamentSize
+In match type tournament client can send query with key `tournamentSize`. valid values for this keys are (defined in `pong-api/src/utils/config.ts`) are `4 | 8 | 16`. 
+
+If noting is specified it is same as sending `?tournamentSize=4`
+
+#### Valid examples
+
+
+### Possible errors on websocket
+
+### Controls
 1. Once connected via websocket client is sending json with either:
 
 ```json
@@ -23,7 +48,18 @@ or
 2. Server in next frame should send updated paddle position
 
 
+# More Info about backend
 
+## Overall server POV
+1. Lobby phase
+2. Game phase 
+3. On each client message server should update position of that player paddle.
+4. While game is running server is sending 60 frames per second. Each frame send:
+    * left paddle 
+    * right paddle 
+    * ball
+    * score 
+    * some additional info (knockout stage, game phase etc)
 ## Game mechanics and elements logic 
 Both paddle and ball have their hit boxes. Aka area around center that register hit.
 Values are defined in `pong-api/config.ts`
@@ -91,7 +127,7 @@ Player who just opens websocket with pong-api is in Lobby phase until required n
 As soon as Lobby have required number of players. Match phase begins. From this point on server is sending frame description in json format 60 times per second. Match is played until time runs out. If it is draw game is going in overtime. In overtime phase each paddle hit with ball shrinks the paddle by factor defined in `config.ts`. Overtime ends as soon as one player score goal and becomes winner. This technique prevents never ending game since paddle will not exist due to shrinking. Just be good enough and you will not depend on luck in overtime. How hard could it be?!. If player close connection in this phase; That player is losing with score 3 - 0 no matter what what score before that.
 
 
-## Game modes
+## Match Types/Game modes
 There is three main type of games: 
 * singles (1 vs 1)
 * doubles (2 vs 2)
