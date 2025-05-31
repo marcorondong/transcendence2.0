@@ -228,7 +228,9 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 
 	private disconnectBehavior(rageQuitPlayer: PongPlayer): void {
 		rageQuitPlayer.on(ClientEvents.GONE_OFFLINE, (player: PongPlayer) => {
-			console.log("Player disconnect");
+			console.log(
+				`Player ${rageQuitPlayer.getPlayerNickname()} disconnect`,
+			);
 			if (this.game.getGameStatus() === EGameStatus.RUNNING) {
 				console.log("Game was running. Rage quitter side lost");
 				this.game.forfeitGame(player.getTeamSideLR());

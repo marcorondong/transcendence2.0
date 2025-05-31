@@ -123,7 +123,7 @@ export class MatchMaking {
 	public spectatorJoiner(connection: WebSocket, roomId: string): void {
 		if (roomId === "") {
 			PongPlayer.sendErrorMessage(
-				"roomId is required query if you are spectator",
+				"roomId is required if you are spectator",
 				connection,
 			);
 			connection.close();
@@ -141,6 +141,7 @@ export class MatchMaking {
 				`Room with id ${roomId} was not found`,
 				connection,
 			);
+			connection.close(1008, "Room not found");
 			return;
 		}
 	}
