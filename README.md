@@ -97,7 +97,7 @@ E.g:
 - [CLI Client-broken](/microservices/cli_client/README.md)
 - [Front-end-broken](/microservices/frontend/README.md)
 - [Monitoring-broken](/microservices/monitoring/README.md)
-- [Pong-broken](/microservices/pong/README.md)
+- [Pong-api](./microservices/ssg/pong-api/README.md)
 - [Pong DB](/microservices/pong_db/README.md)
 - [Tic-Tac-Toe-broken](/microservices/tictactoe_api/README.md)
 - [Tic-Tac-Toe DB](/microservices/tictactoe_db/README.md)
