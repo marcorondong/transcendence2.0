@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import fs from "fs"; // for createWriteStream
-import { mkdir } from "fs/promises";
+import fs from "fs"; // for createWriteStream, and promises (mkdir, readdir, unlink)
 import path from "path";
 import { pipeline } from "stream/promises";
 import {
@@ -251,6 +250,24 @@ export async function patchUserHandler(
 	return reply.code(200).send(parsed);
 }
 
+// const ALLOWED_IMAGE_MODES = "image/jpeg"; // Enable more types if needed
+const ALLOWED_IMAGE_MODES = "image/jpeg,image/png,image/gif"; // Example full config
+
+const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
+	(acc, type) => {
+		acc[type] =
+			type === "image/jpeg"
+				? "jpg"
+				: type === "image/png"
+					? "png"
+					: type === "image/gif"
+						? "gif"
+						: "";
+		return acc;
+	},
+	{} as Record<string, string>,
+);
+
 export async function pictureHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
@@ -274,12 +291,14 @@ export async function pictureHandler(
 		});
 	}
 
-	// File validation: max size 1MB, accepted types
-	if (!["image/jpeg", "image/png"].includes(pictureFile.mimetype)) {
+	// TODO: Make these file checks (type/size) in Nginx config
+	// Validate mimetype and map to extension
+	const ext = ALLOWED_IMAGE_TYPES[pictureFile.mimetype];
+	if (!ext) {
 		throw new AppError({
 			statusCode: 400,
 			code: USER_ERRORS.USER_PICTURE,
-			message: "Only JPEG or PNG files are allowed",
+			message: "Unsupported file type",
 		});
 	}
 	// if (pictureFile.file.bytesRead > 1024 * 1024) {
@@ -291,20 +310,28 @@ export async function pictureHandler(
 		});
 	}
 
-	// Build destination path
+	// Ensure destination folder exists
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
-	const filePath = path.join(userFolder, "picture.jpg");
-	console.log("Saving picture to:", filePath); // TODO: Remove this later
-
-	await mkdir(userFolder, { recursive: true });
+	console.log("Saving picture to:", userFolder); // TODO: Remove this later
+	await fs.promises.mkdir(userFolder, { recursive: true });
 	// console.log(`Would run: mkdir(${userFolder}, { recursive: true })`);
+
+	// Delete all files in the user's folder (remove old pictures)
+	const oldFiles = await fs.promises.readdir(userFolder);
+	for (const file of oldFiles) {
+		await fs.promises.unlink(path.join(userFolder, file));
+	}
+
+	// Save new picture
+	const filePath = path.join(userFolder, `picture.${ext}`);
 	await pipeline(pictureFile.file, fs.createWriteStream(filePath));
 	// console.log(
 	// 	`Would run: pipeline(<picture stream>, createWriteStream(${filePath}))`,
 	// );
 
-	const publicPath = `/uploads/users/${user.username}/picture.jpg`;
+	// Store relative path in DB
+	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
 	reply.code(200).send(updatedUser);
