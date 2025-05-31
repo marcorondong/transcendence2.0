@@ -67,6 +67,142 @@ or
 2. Server in next frame should send updated paddle position
 
 
+### Frames examples 
+#### Welcome Frame
+Frame sent when player connects
+```json
+{
+    "roomId": "9f1573bd-b06e-4852-a54e-3e6d336eabdc",
+    "matchStatus": "Welcome! You are player [Left one] wait for 1 more player to join"
+}
+```
+
+#### Mid game frame example singles
+```json
+{
+    "score": {
+        "leftTeam": {
+            "goals": 1,
+            "teamNickname": "alexandra"
+        },
+        "rightTeam": {
+            "goals": 0,
+            "teamNickname": "shakira"
+        },
+        "time": 4
+    },
+    "matchStatus": "Game is running",
+    "ball": {
+        "x": -2.6000000000000014,
+        "y": 0,
+        "radius": 0.075
+    },
+    "leftPaddle": {
+        "x": -4,
+        "y": 0,
+        "height": 1
+    },
+    "rightPaddle": {
+        "x": 4,
+        "y": 0,
+        "height": 1
+    },
+    "roomId": "29f2b9c8-d41c-4cf0-9cf1-c2930ee9956b",
+    "knockoutName": "single match"
+}
+```
+
+#### Mid game frame example doubles 
+```json
+{
+    "score": {
+        "leftTeam": {
+            "goals": 1,
+            "teamNickname": "filip shakira TEAM"
+        },
+        "rightTeam": {
+            "goals": 0,
+            "teamNickname": "alexandra dragana TEAM"
+        },
+        "time": 1
+    },
+    "matchStatus": "Game is running",
+    "ball": {
+        "x": 1.2,
+        "y": 1.25,
+        "radius": 0.075
+    },
+    "leftSecondPaddle": {
+        "x": -4,
+        "y": -1.25,
+        "height": 0.5
+    },
+    "leftPaddle": {
+        "x": -3.5,
+        "y": 1.25,
+        "height": 0.5
+    },
+    "rightSecondPaddle": {
+        "x": 4,
+        "y": -1.25,
+        "height": 0.5
+    },
+    "rightPaddle": {
+        "x": 3.5,
+        "y": 1.25,
+        "height": 0.5
+    },
+    "roomId": "f89ae83e-af93-4e40-b2e9-2ec3dd2d86dd",
+    "knockoutName": "doubles match"
+}
+```
+
+#### End game Tournament example 
+```json
+{
+    "score": {
+        "leftTeam": {
+            "goals": 0,
+            "teamNickname": "alexandra"
+        },
+        "rightTeam": {
+            "goals": 1,
+            "teamNickname": "shakira"
+        },
+        "time": 0
+    },
+    "matchStatus": "Game finished",
+    "ball": {
+        "x": 3.100000000000002,
+        "y": 0,
+        "radius": 0.075
+    },
+    "leftPaddle": {
+        "x": -4,
+        "y": 0,
+        "height": 1
+    },
+    "rightPaddle": {
+        "x": 4,
+        "y": 0,
+        "height": 1
+    },
+    "roomId": "f8bc0b11-8354-42ec-a57f-1cec12995ba8",
+    "knockoutName": "finals"
+}
+```
+
+### How backend sees field in coordinates by default starting values
+x = 0, y = 0 will is center of pong table and start position of ball.
+* Left Up corner => (-4.5), (2.5)
+* Left Down corner => (-4.5), (-2.5)
+* Right Up corner => (4.5), (2.5)
+* Right Down corner => (4.5), (-2.5)
+* Left Paddle => (-4.0), (0)
+* Right Paddle => (4.0), (0)
+
+![picture](./Pong_dimensions.svg)
+
 # More Info about backend
 
 ## Overall server POV
