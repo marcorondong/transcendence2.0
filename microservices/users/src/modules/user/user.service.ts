@@ -356,7 +356,7 @@ export async function updateUserPicture(id: string, picturePath: string) {
 		if (!currentUser) {
 			throw new AppError({
 				statusCode: 404,
-				code: USER_ERRORS.USER_UPDATE,
+				code: USER_ERRORS.USER_PICTURE,
 				message: "User not found",
 			});
 		}
@@ -372,7 +372,7 @@ export async function updateUserPicture(id: string, picturePath: string) {
 				case "P2025":
 					throw new AppError({
 						statusCode: 404,
-						code: USER_ERRORS.USER_UPDATE,
+						code: USER_ERRORS.USER_PICTURE,
 						message: "User not found",
 					});
 			}
