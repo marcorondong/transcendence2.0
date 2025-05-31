@@ -42,18 +42,15 @@ class ChatComponent extends HTMLElement {
 	}
 	goOffline() {
 		this.navMe.innerText = "offline";
-		const children = [...this.nav.children];
-		children.forEach((c) => {
-			if (c.id != "nav-me") {
-				c.classList.add("hidden");
-			}
-		});
+		this.navMe.classList.remove("hidden");
+		this.minMaxButton.classList.add("hidden");
+		this.navUsersContainer.classList.add("hidden");
 	}
 	goOnline() {
 		this.navMe.innerText = "offline";
 		const children = [...this.nav.children];
 		children.forEach((c) => {
-			if (c.id != "nav-me") {
+			if (c.id !== "nav-me") {
 				c.classList.remove("hidden");
 			}
 		});
