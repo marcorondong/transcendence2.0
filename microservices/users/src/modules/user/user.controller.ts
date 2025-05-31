@@ -222,7 +222,16 @@ export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	await deleteUser(request.params.id);
+	const user = await findUserByUnique({ id: request.params.id });
+
+	const uploadsBase = path.resolve("uploads/users");
+	const userFolder = path.join(uploadsBase, user.username);
+
+	if (fs.existsSync(userFolder)) {
+		await fs.promises.rm(userFolder, { recursive: true, force: true });
+	}
+
+	await deleteUser(user.id);
 	return reply.code(204).send();
 }
 
