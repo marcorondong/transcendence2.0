@@ -16,36 +16,37 @@ class ModeSelectionComponent extends HTMLElement {
 		this.classList.add("flex", "flex-col", "items-center", "gap-8", "p-8");
 
 		// headline
-		this.h1 = document.createElement("h1");
-		this.h1.innerText = "Select a Mode";
-		this.h1.classList.add(
-			"pong-heading",
-			"pong-heading-big",
-			"pong-heading-indigo",
-		);
-		const header = document.createElement("div");
-		const icon = new IconComponent("mode", 10);
-		header.append(icon, this.h1);
-		header.classList.add(
-			"w-full",
-			"grow-1",
-			"flex",
-			"gap-2",
-			"justify-center",
-			"items-center",
-			"text-slate-200/70",
-		);
+		// this.h1 = document.createElement("h1");
+		// this.h1.innerText = "Select a Mode";
+		// this.h1.classList.add(
+		// 	"pong-heading",
+		// 	"pong-heading-big",
+		// 	"pong-heading-indigo",
+		// );
+		// const header = document.createElement("div");
+		// const icon = new IconComponent("mode", 10);
+		// header.append(icon, this.h1);
+		// header.classList.add(
+		// 	"w-full",
+		// 	"grow-1",
+		// 	"flex",
+		// 	"gap-2",
+		// 	"justify-center",
+		// 	"items-center",
+		// 	"text-slate-200/70",
+		// );
 
 		// MATCH TYPE OPTIONS
 		const optionsContainer = document.createElement("div");
 		optionsContainer.classList.add(
 			"flex-col",
 			"flex",
+			"p-1",
 			"gap-1",
 			"w-full",
 			"mx-12",
 			"items-center",
-			"rounded-2xl",
+			"rounded-lg",
 			"bg-indigo-950",
 		);
 
@@ -54,7 +55,8 @@ class ModeSelectionComponent extends HTMLElement {
 			button.innerText = m.label;
 			button.id = m.id;
 			button.classList.add(
-				"hover:bg-slate-200/10",
+				"pong-button",
+				"pong-button-info",
 				"p-3",
 				"self-stretch",
 				"rounded-2xl",
@@ -63,7 +65,7 @@ class ModeSelectionComponent extends HTMLElement {
 			);
 			optionsContainer.append(button);
 		});
-		this.append(header, optionsContainer);
+		this.append(optionsContainer);
 	}
 
 	disconnectedCallback() {}

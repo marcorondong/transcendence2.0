@@ -121,20 +121,17 @@ class HomeView extends HTMLElement {
 		}
 	}
 	updateContent() {
-		const firstChild = this.firstChild;
+		const firstChild = this.lastChild;
 		console.log("replacing this content:", firstChild);
 		if (firstChild) {
 			switch (this.gameData.selectionState.menuSelection) {
 				case "game":
-					console.log("switching to game");
 					this.replaceChild(this.gameContent, firstChild);
 					break;
 				case "mode":
-					console.log("switching to mode");
 					this.replaceChild(this.modeContent, firstChild);
 					break;
 				case "play":
-					console.log("switching to play");
 					this.replaceChild(this.playContent, firstChild);
 			}
 		}
@@ -217,13 +214,7 @@ class HomeView extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.classList.add(
-			"flex",
-			"gap-2",
-			"py-1",
-			"justify-center",
-			"flex-wrap",
-		);
+		this.classList.add("flex", "gap-4", "justify-center", "flex-wrap");
 		this.gameContent.classList.add(...this.contentStyles, "grow-1");
 		this.modeContent.classList.add(
 			...this.contentStyles,
@@ -236,7 +227,7 @@ class HomeView extends HTMLElement {
 			"w-full",
 		);
 		this.menuContent.classList.add(...this.contentStyles, "z-200");
-		this.append(this.gameContent, this.menuContent);
+		this.append(this.menuContent, this.gameContent);
 		this.addEventListener("click", this);
 		this.updateMenuButtons();
 		console.log("HOME VIEW has been CONNECTED");

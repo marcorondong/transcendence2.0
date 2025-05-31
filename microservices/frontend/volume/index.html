@@ -34,62 +34,62 @@
 		class="bg-gray-200 text-lg text-indigo-900 dark:bg-indigo-950 dark:text-slate-200"
 	>
 		<div
-			class="min-h-screen flex flex-col justify-between relative"
+			class="min-h-screen flex flex-col justify-between relative bg-gradient-to-b from-slate-950/30 to-indigo-900/50"
 			id="container"
 		>
+			<header-component>
+				<ul id="navigation">
+					<li>
+						<a
+							href="/"
+							class="pong-button pong-nav-link hidden auth-needed"
+						>
+							games
+						</a>
+					</li>
+					<li class="hidden">
+						<a
+							href="pong-view"
+							class="pong-button pong-nav-link"
+						>
+							pong
+						</a>
+					</li>
+					<li>
+						<a
+							href="profile-view"
+							class="pong-button pong-nav-link hidden auth-needed"
+						>
+							profile
+						</a>
+					</li>
+					<li>
+						<a
+							href="users-view"
+							class="pong-button pong-nav-link hidden auth-needed"
+						>
+							users
+						</a>
+					</li>
+					<li>
+						<a
+							href="sign-in-view"
+							class="pong-button pong-button-info w-full no-auth-needed"
+						>
+							Sign In
+						</a>
+					</li>
+					<li>
+						<a
+							href="sign-up-view"
+							class="pong-button pong-button-info no-auth-needed"
+						>
+							Sign Up
+						</a>
+					</li>
+				</ul>
+			</header-component>
 			<div class="max-w-5xl w-8/10 self-center">
-				<header-component>
-					<ul id="navigation">
-						<li>
-							<a
-								href="/"
-								class="pong-button pong-nav-link hidden auth-needed"
-							>
-								games
-							</a>
-						</li>
-						<li class="hidden">
-							<a
-								href="pong-view"
-								class="pong-button pong-nav-link"
-							>
-								pong
-							</a>
-						</li>
-						<li>
-							<a
-								href="profile-view"
-								class="pong-button pong-nav-link hidden auth-needed"
-							>
-								profile
-							</a>
-						</li>
-						<li>
-							<a
-								href="users-view"
-								class="pong-button pong-nav-link hidden auth-needed"
-							>
-								users
-							</a>
-						</li>
-						<li>
-							<a
-								href="sign-in-view"
-								class="pong-button pong-button-info w-full no-auth-needed"
-							>
-								Sign In
-							</a>
-						</li>
-						<li>
-							<a
-								href="sign-up-view"
-								class="pong-button pong-button-info no-auth-needed"
-							>
-								Sign Up
-							</a>
-						</li>
-					</ul>
-				</header-component>
 				<div id="content"></div>
 			</div>
 			<footer-component

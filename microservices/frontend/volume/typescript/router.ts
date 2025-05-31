@@ -1,4 +1,6 @@
 import { ChatComponent } from "./components/chat-component.js";
+import { Auth } from "./services/auth.js";
+import { notificationEvent } from "./services/events.js";
 import { FetchAuth } from "./services/fetch-auth.js";
 import { baseUrl } from "./services/fetch.js";
 
@@ -23,11 +25,14 @@ export class Router {
 
 	async auth() {
 		this.clearContent();
-		const returnValue = await FetchAuth.verifyJwt();
-		if (!returnValue) {
-			return;
+		try {
+			await FetchAuth.verifyJwt();
+			document.dispatchEvent(notificationEvent("JWT valid", "success"));
+			Auth.toggleAuthClasses(true);
+			this.loadComponent();
+		} catch (e) {
+			Auth.toggleAuthClasses(false);
 		}
-		this.loadComponent();
 	}
 
 	stringAfterSlash(link: string) {
@@ -77,8 +82,8 @@ export class Router {
 	}
 
 	clearContent() {
-		if (this.component && this.containerDiv) {
-			this.containerDiv.removeChild(this.component);
+		if (this.containerDiv) {
+			this.containerDiv.replaceChildren();
 		}
 	}
 	loadComponent() {

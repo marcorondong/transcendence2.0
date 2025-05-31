@@ -1,3 +1,5 @@
+import { Auth } from "../services/auth.js";
+import { notificationEvent, signInLinkEvent } from "../services/events.js";
 import { FetchAuth } from "../services/fetch-auth.js";
 import { IconComponent } from "./icon-component.js";
 import { ThemeToggleComponent } from "./theme-toggle-component.js";
@@ -27,16 +29,18 @@ export class HeaderComponent extends HTMLElement {
 		logoAnchor.appendChild(logo);
 		this.appendChild(logoAnchor);
 		this.classList.add(
-			// "bg-indigo-900/50",
-			// "border-1",
+			"bg-indigo-900/30",
+			"border-1",
 			"border-indigo-900",
-			"py-14",
-			// "mb-4",
+			"pt-6",
+			"pb-2",
+			"px-12",
+			"mb-14",
 			"flex",
-			"content-center",
+			"content-end",
+			"items-end",
 			"justify-between",
 			"self-stretch",
-			"rounded-full",
 			"relative",
 		);
 
@@ -151,7 +155,9 @@ export class HeaderComponent extends HTMLElement {
 			closeButton.classList.add("hidden");
 		});
 		logoutButton.addEventListener("click", async () => {
-			await FetchAuth.signOut();
+			try {
+				await FetchAuth.signOut();
+			} catch (e) {}
 		});
 	}
 

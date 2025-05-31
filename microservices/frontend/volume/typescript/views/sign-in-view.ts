@@ -1,4 +1,5 @@
 import { ChatComponent } from "../components/chat-component.js";
+import { Auth } from "../services/auth.js";
 import {
 	homeLinkEvent,
 	notificationEvent,
@@ -103,11 +104,15 @@ export class SignInView extends HTMLElement {
 				username: this.inputUsername.value,
 				password: this.inputPassword.value,
 			};
-			const returnValue = await FetchAuth.signIn(user);
-			if (returnValue && returnValue.response.ok) {
+			try {
+				await FetchAuth.signIn(user);
+				document.dispatchEvent(
+					notificationEvent("You just signed in!", "success"),
+				);
+				Auth.toggleAuthClasses(true);
 				this.chat.openWebsocket();
 				this.dispatchEvent(homeLinkEvent);
-			}
+			} catch (e) {}
 		}
 	}
 

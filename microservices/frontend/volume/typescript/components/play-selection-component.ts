@@ -16,26 +16,26 @@ class PlaySelectionComponent extends HTMLElement {
 		);
 		this.classList.add("flex", "flex-col", "items-center", "gap-8", "p-8");
 
-		// headline
-		this.h1 = document.createElement("h1");
-		this.h1.innerText = "Let's Play";
-		this.h1.classList.add(
-			"pong-heading",
-			"pong-heading-big",
-			"pong-heading-indigo",
-		);
-		const header = document.createElement("div");
-		const icon = new IconComponent("play", 10);
-		header.append(icon, this.h1);
-		header.classList.add(
-			"w-full",
-			"grow-1",
-			"flex",
-			"gap-2",
-			"justify-center",
-			"items-center",
-			"text-slate-200/70",
-		);
+		// // headline
+		// this.h1 = document.createElement("h1");
+		// this.h1.innerText = "Let's Play";
+		// this.h1.classList.add(
+		// 	"pong-heading",
+		// 	"pong-heading-big",
+		// 	"pong-heading-indigo",
+		// );
+		// const header = document.createElement("div");
+		// const icon = new IconComponent("play", 10);
+		// header.append(icon, this.h1);
+		// header.classList.add(
+		// 	"w-full",
+		// 	"grow-1",
+		// 	"flex",
+		// 	"gap-2",
+		// 	"justify-center",
+		// 	"items-center",
+		// 	"text-slate-200/70",
+		// );
 
 		// PLAY OPTIONS
 		const optionsContainer = document.createElement("div");
@@ -43,6 +43,7 @@ class PlaySelectionComponent extends HTMLElement {
 			"flex-col",
 			"flex",
 			"gap-1",
+			"p-1",
 			"w-full",
 			"mx-12",
 			"items-center",
@@ -61,16 +62,14 @@ class PlaySelectionComponent extends HTMLElement {
 			button.innerText = m;
 			button.id = m;
 			button.classList.add(
-				"hover:bg-slate-200/10",
-				"p-3",
+				"pong-button",
+				"pong-button-info",
 				"self-stretch",
-				"rounded-2xl",
-				"cursor-pointer",
 				"play-button",
 			);
 			optionsContainer.append(button);
 		});
-		this.append(header, optionsContainer);
+		this.append(optionsContainer);
 	}
 
 	disconnectedCallback() {}

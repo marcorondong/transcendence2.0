@@ -11,18 +11,11 @@ class GameSelectionComponent extends HTMLElement {
 
 	connectedCallback() {
 		this.replaceChildren();
-		this.classList.add(
-			"gap-x-18",
-			"gap-y-8",
-			"px-18",
-			"pb-16",
-			"py-8",
-			"flex-wrap",
-		);
+		this.classList.add("gap-18", "p-8", "flex-wrap");
 		const gameContainerStyles = ["rounded-2xl", "bg-indigo-950", "p-5"];
 		const gameStyles = [
-			"p-3",
-			"border-4",
+			"p-1",
+			"border-2",
 			"rounded-lg",
 			"bg-indigo-950",
 			"border-cyan-400",
@@ -30,27 +23,6 @@ class GameSelectionComponent extends HTMLElement {
 			"cursor-pointer",
 			"game-button",
 		];
-
-		// headline
-		this.h1 = document.createElement("h1");
-		this.h1.innerText = "Pick a Game";
-		this.h1.classList.add(
-			"pong-heading",
-			"pong-heading-big",
-			"pong-heading-indigo",
-		);
-		const header = document.createElement("div");
-		const icon = new IconComponent("game", 10);
-		header.append(icon, this.h1);
-		header.classList.add(
-			"w-full",
-			"grow-1",
-			"flex",
-			"gap-2",
-			"justify-center",
-			"items-center",
-			"text-slate-200/70",
-		);
 
 		// PONG GAME
 		const pongContainer = document.createElement("div");
@@ -78,7 +50,7 @@ class GameSelectionComponent extends HTMLElement {
 		ttt.append(tttImage);
 		tttContainer.append(ttt);
 
-		this.append(header, pongContainer, tttContainer);
+		this.append(pongContainer, tttContainer);
 	}
 
 	disconnectedCallback() {}

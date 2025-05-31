@@ -582,7 +582,7 @@ class ChatComponent extends HTMLElement {
 		this.navMe.classList.add("hidden");
 
 		this.minusIcon.classList.add("hidden");
-		this.minMaxButton.classList.add("pong-button", "pong-button-secondary");
+		this.minMaxButton.classList.add("pong-button");
 		this.minMaxButton.id = "min-max-button";
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
 		this.nav.append(this.navUsersContainer, this.navMe, this.minMaxButton);

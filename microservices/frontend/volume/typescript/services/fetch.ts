@@ -13,27 +13,19 @@ export const baseUrl = `https://${window.location.hostname}:${window.location.po
 export async function fetchPong(config: FetchConfig) {
 	const { url, method, header, body } = config;
 
-	try {
-		const response = await fetch(baseUrl + url, {
-			method: method,
-			headers: header,
-			body: JSON.stringify(body),
-		});
+	const response = await fetch(baseUrl + url, {
+		method: method,
+		headers: header,
+		body: JSON.stringify(body),
+	});
 
-		if (!response.ok) {
-			if (response.status === 401) {
-				document.dispatchEvent(signInLinkEvent);
-			}
-			throw new Error(`Response status: ${response.status}`);
+	if (!response.ok) {
+		document.dispatchEvent(notificationEvent(response.statusText, "error"));
+		if (response.status === 401) {
+			document.dispatchEvent(signInLinkEvent);
 		}
-		const data = await response.json();
-		return { response, data };
-	} catch (e) {
-		let message: string = "";
-		if (e instanceof Error) {
-			message = e.message;
-		}
-		document.dispatchEvent(notificationEvent(message, "error"));
-		return;
+		throw new Error(`Response status: ${response.status}`);
 	}
+	// const data = await response.json();
+	return;
 }

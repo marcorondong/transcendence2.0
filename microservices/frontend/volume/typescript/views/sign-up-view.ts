@@ -1,4 +1,5 @@
 import { notificationEvent, signInLinkEvent } from "../services/events.js";
+import { FetchAuth } from "../services/fetch-auth.js";
 import { fetchSignUp } from "../services/fetch-sign-up.js";
 
 export class SignUpView extends HTMLElement {
@@ -119,13 +120,7 @@ export class SignUpView extends HTMLElement {
 				nickname: this.inputNickname.value,
 				password: this.inputPassword.value,
 			};
-			try {
-				await fetchSignUp(data);
-				document.dispatchEvent(signInLinkEvent);
-				this.dispatchEvent(notificationEvent("Sign up " + e, "error"));
-			} catch (e) {
-				this.dispatchEvent(notificationEvent("Sign up " + e, "error"));
-			}
+			await FetchAuth.signUp(data);
 		});
 	}
 

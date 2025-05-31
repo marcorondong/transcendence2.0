@@ -1,10 +1,17 @@
 import { Auth } from "./auth.js";
-import { notificationEvent, signInLinkEvent } from "./events.js";
+import { homeLinkEvent, notificationEvent, signInLinkEvent } from "./events.js";
 import { FetchConfig, fetchPong } from "./fetch.js";
 
 export interface UserAuth {
 	username: string;
 	password: string;
+}
+
+export interface ProfileAuth {
+	username: string;
+	password: string;
+	nickname: string;
+	email: string;
 }
 
 export class FetchAuth {
@@ -18,14 +25,27 @@ export class FetchAuth {
 			body: user,
 			url: "/auth-api/sign-in",
 		};
+		await fetchPong(config);
+	}
+	static async signUp(user: UserAuth) {
+		const config: FetchConfig = {
+			method: "POST",
+			header: {
+				"accept": "application/json",
+				"Content-Type": "application/json",
+			},
+			body: user,
+			url: "/auth-api/sign-up",
+		};
 
-		const returnValue = await fetchPong(config);
-		if (returnValue && returnValue.response.ok)
+		try {
+			await fetchPong(config);
 			document.dispatchEvent(
-				notificationEvent("You just signed in!", "success"),
+				notificationEvent("You just signed up!", "success"),
 			);
-		Auth.toggleAuthClasses(true);
-		return returnValue;
+			Auth.toggleAuthClasses(true);
+			document.dispatchEvent(homeLinkEvent);
+		} catch (e) {}
 	}
 	static async signOut() {
 		const config: FetchConfig = {
@@ -33,15 +53,14 @@ export class FetchAuth {
 			method: "DELETE",
 			header: { accept: "application/json" },
 		};
-		console.log("running sign out");
-		const returnValue = await fetchPong(config);
-		if (returnValue && returnValue.response.ok) {
+		try {
+			await fetchPong(config);
 			document.dispatchEvent(
 				notificationEvent("You logged out!", "success"),
 			);
 			Auth.toggleAuthClasses(false);
 			document.dispatchEvent(signInLinkEvent);
-		}
+		} catch (e) {}
 	}
 	static async verifyJwt() {
 		const config: FetchConfig = {
@@ -49,13 +68,6 @@ export class FetchAuth {
 			method: "GET",
 			header: { accept: "application/json" },
 		};
-		const returnValue = await fetchPong(config);
-		if (!returnValue) {
-			Auth.toggleAuthClasses(false);
-		} else if (returnValue.response.ok) {
-			document.dispatchEvent(notificationEvent("JWT valid", "success"));
-			Auth.toggleAuthClasses(true);
-		}
-		return returnValue;
+		await fetchPong(config);
 	}
 }
