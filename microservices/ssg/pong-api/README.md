@@ -44,18 +44,12 @@ If noting is specified it is same as sending `?tournamentSize=4`
 | 1008  | Unknown match type  | not supported game mode received on server side                                 |
 | 1008  | You are already in a game Room | Player with that JWT already is on pong-api. First connection is not closed. Client should close (first connection) on it own or wait until game is over/player is kicked in order to connect with "second"     |
 | NOT_CLOSED          | Invalid move| wrong format of control is sent. Check JSON key and value, make sure no other info is sent  |
-| NOT_CLOSED       | It is not zod Error, but probably empty move sent:{ERR}        | Likely empty move sent. Or something went terribly wrong on backed. [Filip](https://github.com/Sekula34) to blame in second case |
-| 1008          | Bot cannot join tournament, You can report us to the Office for Robot Rights in Vienna | Pay to [benszilas](https://github.com/benszilas) and [Sekula34](https://github.com/Sekula34) to implement feature where Bot can play tournament  |
+| NOT_CLOSED       | It is not zod Error, but probably empty move sent:{ERR}        | Likely empty move sent. Or something went terribly wrong on backed. [Sekula](https://github.com/Sekula34) to blame in second case |
+| 1008          | Bot cannot join tournament, You can report us to the Office for Robot Rights in Vienna | Pay to [benszilas](https://github.com/benszilas) and [Sekula](https://github.com/Sekula34) to implement feature where Bot can play tournament  |
 | NOT_CLOSED      | Size _tournamentSize_ is not valid, Switch to default value _value_$  | Invalid tournament size sent but it is switched to default value|
 | 1008          | Room with id not found        | Player want to be guest in room where HOST already left room. Or you are just evaluator who now tries really hard to crash us on backend, which is not nice but you will need to try harder than this  |
-| 255          | Exit status out of range               | Likely a misbehaving script or application. Debug logs.|
-| 1001         | WebSocket: Going Away                  | Server is closing the connection. Reconnect if needed. |
-| 1006         | WebSocket: Abnormal Closure            | Check for network issues or server crash.              |
-| 400          | HTTP Bad Request                       | Verify request format, headers, and parameters.        |
-| 401          | HTTP Unauthorized                      | Check API token or login credentials.                  |
-| 403          | HTTP Forbidden                         | Confirm you have the right permissions.                |
-| 404          | HTTP Not Found                         | Check if the endpoint or URL is correct.               |
-| 500          | HTTP Internal Server Error             | Server-side issue. Look at server logs.                |
+| NOT_ON_LIST          | "**f\*ck**, **sche\*se** , **JEB\*TE** SEKULA i njegove gluposti"| PANIC, call or try to find (probably hiding in Croatia) Sekula and explain him why he is stupid.|
+
 
 
 ### Controls
