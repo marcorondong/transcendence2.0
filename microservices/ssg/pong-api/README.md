@@ -41,6 +41,7 @@ If noting is specified it is same as sending `?tournamentSize=4`
 ### Possible errors on websocket
 | Closing Code on ws  | Error Message                          | Possible Solution                                      |
 |--------------|----------------------------------------|--------------------------------------------------------|
+| 1008     | Unauthorized | Invalid JWT token, no token is sent or Auth-api is down.|
 | 1008  | Unknown match type  | not supported game mode received on server side                                 |
 | 1008  | You are already in a game Room | Player with that JWT already is on pong-api. First connection is not closed. Client should close (first connection) on it own or wait until game is over/player is kicked in order to connect with "second"     |
 | NOT_CLOSED          | Invalid move| wrong format of control is sent. Check JSON key and value, make sure no other info is sent  |
