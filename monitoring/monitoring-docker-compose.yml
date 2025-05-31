@@ -39,8 +39,8 @@ services:
     container_name: alertmanager
     restart: unless-stopped
     volumes:
-      - ./alertmanager:/etc/alertmanager
-      - alertmanager_data:/alertmanager
+      - ./alertmanager:/etc/alertmanager:ro # = mount our config for alertmanager
+      - alertmanager_data:/alertmanager # = name the docker volume that alertmanager image must create for persistence
     networks:
       - Transcendence2.0
     depends_on:
