@@ -1,22 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { env } from "./env";
 
-// export const jwtVerifyOpt = {
-// 	// ignoreExpiration: false,
-// 	// issuer: "auth_api",
-// 	// iss: "auth_api",
-// 	// audience: "users",
-// 	// aud: "users",
-// 	// allowedAud: "users",
-// 	// allowedIss: "auth_api",
-// 	// jwtid: "auth_api",
-// 	// keyid: "auth_api",
-// 	// subject: "auth_api",
-// 	// algorithm: "HS256",
-// 	// customClaim: "customClaimValue",
-// 	// algorithms: ["HS256"],
-// };
-
 export async function ft_onRequest(
 	request: FastifyRequest,
 	reply: FastifyReply,

@@ -34,8 +34,8 @@ export async function signUpRequest(body: unknown) {
 		const raw = await response.json();
 		throw httpError(
 			raw.statusCode || 500,
-			raw.message || "An error occurred while signing in",
-			{ name: raw.error || "SignIn Error" },
+			raw.message || "An error occurred while signing up",
+			{ name: raw.error || "SignUp Error" },
 		);
 	}
 	const data = await response.json();
