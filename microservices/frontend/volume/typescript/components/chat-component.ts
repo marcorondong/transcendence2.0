@@ -145,6 +145,7 @@ class ChatComponent extends HTMLElement {
 				}
 				this.displayCurrentChat();
 				this.updateUsers();
+				this.dispatchEvent(onlineUserEvent);
 			}
 
 			// INVITATION TO GAME
@@ -170,7 +171,6 @@ class ChatComponent extends HTMLElement {
 				this.dispatchEvent(
 					notificationEvent("New user online!", "info"),
 				);
-				this.dispatchEvent(onlineUserEvent);
 				const user: ChatUser = {
 					id: chatServiceData.user.id,
 					messages: [],
@@ -180,6 +180,7 @@ class ChatComponent extends HTMLElement {
 				};
 				this.onlineUsers.push(user);
 				this.updateUsers();
+				this.dispatchEvent(onlineUserEvent);
 			}
 
 			// WHEN USER LOGS IN, SETTING UP PEOPLE THAT ARE ONLINE
