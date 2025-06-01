@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply, FastifyError } from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { env } from "./env";
 
 // export const jwtVerifyOpt = {

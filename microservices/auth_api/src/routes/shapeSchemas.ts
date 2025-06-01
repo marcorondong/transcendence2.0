@@ -33,6 +33,7 @@ export const idParamShape = {
 	properties: {
 		id: { type: "string" },
 	},
+	required: ["id"],
 };
 
 export const payloadResponseShape = {
@@ -50,4 +51,8 @@ export const accessTokenResponseShape = {
 		access_token: { type: "string" },
 	},
 	required: ["access_token"],
+};
+
+export type IdInput = {
+	id: string;
 };
