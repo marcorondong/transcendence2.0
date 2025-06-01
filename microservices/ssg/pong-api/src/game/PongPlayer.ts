@@ -3,6 +3,7 @@ import { WebSocket, RawData } from "ws";
 import { ClientEvents } from "../customEvents";
 import { Paddle } from "./elements/Paddle";
 import { APongGame } from "./modes/APongGame";
+import { BOT_NICKNAME, JWT_VERIFY_URL } from "../config";
 
 export enum EPlayerStatus {
 	ONLINE,
@@ -71,6 +72,11 @@ export class PongPlayer extends EventEmitter {
 			playerInfo.nickname,
 		);
 		return connectedPlayer;
+	}
+
+	isBot(): boolean {
+		if (this.nickname === BOT_NICKNAME) return true;
+		return false;
 	}
 
 	equals(otherPlayer: PongPlayer): boolean {
@@ -181,8 +187,7 @@ export class PongPlayer extends EventEmitter {
 }
 
 function contactAuthService(cookie: string) {
-	//TODO read this container path somehow smarter in file or so
-	return fetch("http://auth_api_container:2999/auth-api/verify-connection", {
+	return fetch(JWT_VERIFY_URL, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
@@ -202,8 +207,6 @@ async function getPlayerInfo(cookie: string): Promise<false | IPlayerInfo> {
 		const playerInfo = await response.json();
 		const { id, nickname } = playerInfo;
 		console.log("User full:", playerInfo);
-		console.log("id", id);
-		console.log("nickname", nickname);
 		return { id, nickname };
 	} catch (err) {
 		console.error("Fetch failed, maybe auth microservice is down", err);
