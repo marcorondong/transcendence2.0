@@ -30,3 +30,10 @@ export interface Paddle {
 	y: number;
 	height: number;
 }
+
+export interface Stats {
+	userId: string;
+	total: number;
+	wins: number;
+	losses: number;
+}

@@ -2,16 +2,17 @@ import { notificationEvent, signInLinkEvent } from "./events.js";
 
 export type Method = "GET" | "POST" | "PUT" | "POST" | "DELETE";
 
-export interface FetchConfig {
+export interface FetchConfig<T = unknown> {
 	method: Method;
 	header: HeadersInit;
-	body?: any;
 	url: string;
+	body?: any;
+	validator?: (data: unknown) => T;
 }
 export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
 
-export async function fetchPong(config: FetchConfig) {
-	const { url, method, header, body } = config;
+export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
+	const { url, method, header, body, validator } = config;
 
 	const response = await fetch(baseUrl + url, {
 		method: method,
@@ -26,6 +27,20 @@ export async function fetchPong(config: FetchConfig) {
 		}
 		throw new Error(`Response status: ${response.status}`);
 	}
-	// const data = await response.json();
-	return;
+
+	// Check if response has a body
+	const contentLength = response.headers.get("Content-Length");
+	const contentType = response.headers.get("Content-Type");
+
+	const hasBody =
+		(contentLength && parseInt(contentLength) > 0) ||
+		(contentType && contentType.includes("application/json"));
+
+	if (hasBody) {
+		return response.json();
+		// const data = (await response.json()) as Promise<T>;
+		// return validator ? validator(data) : (data as T);
+	}
+
+	return undefined;
 }

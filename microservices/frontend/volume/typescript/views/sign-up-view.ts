@@ -136,7 +136,9 @@ export class SignUpView extends HTMLElement {
 				);
 				document.dispatchEvent(homeLinkEvent);
 			} catch (e) {
-				document.dispatchEvent(notificationEvent(e, "error"));
+				document.dispatchEvent(
+					notificationEvent("failed to sign up", "error"),
+				);
 				console.log("from sign up", e);
 			}
 		});

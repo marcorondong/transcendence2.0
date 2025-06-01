@@ -24,6 +24,12 @@ export const signInLinkEvent = new CustomEvent("pong-link", {
 	composed: true,
 });
 
+export const onlineUserEvent = new CustomEvent("online-user", {
+	detail: { source: "new online user" },
+	bubbles: true,
+	composed: true,
+});
+
 export function notificationEvent(message: string, state: State) {
 	const data: NotificationData = {
 		message,

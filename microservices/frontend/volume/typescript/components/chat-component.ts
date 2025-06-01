@@ -1,7 +1,11 @@
 import { IconComponent } from "./icon-component.js";
 import { User, Chat, ChatUser, Message } from "../types/Chat.js";
 import { fetchChatDb } from "../services/fetch-chat.js";
-import { notificationEvent, pongLinkEvent } from "../services/events.js";
+import {
+	notificationEvent,
+	onlineUserEvent,
+	pongLinkEvent,
+} from "../services/events.js";
 import { SelectionState } from "../views/home-view.js";
 
 class ChatComponent extends HTMLElement {
@@ -163,6 +167,10 @@ class ChatComponent extends HTMLElement {
 
 			// A NEW USER CAME ONLINE
 			if (chatServiceData.type === "newUser" && chatServiceData.user) {
+				this.dispatchEvent(
+					notificationEvent("New user online!", "info"),
+				);
+				this.dispatchEvent(onlineUserEvent);
 				const user: ChatUser = {
 					id: chatServiceData.user.id,
 					messages: [],

@@ -1,32 +1,90 @@
 import { IconComponent } from "../components/icon-component.js";
+import { ChatComponent } from "../components/chat-component.js";
+import { FetchConfig, fetchPong } from "../services/fetch.js";
+import { User } from "../types/User.js";
+import { Stats } from "../types/Pong.js";
 
-const users = [
-	{
-		nickname: "ShadowHunter",
-		wins: 34,
-		losses: 12,
-		online: true,
-	},
-	{ nickname: "PixelPirate", wins: 21, losses: 19, online: false },
-	{ nickname: "NoScopeKing", wins: 48, losses: 5, online: true },
-	{ nickname: "LavaWizard", wins: 17, losses: 22, online: false },
-	{ nickname: "SneakyPanda", wins: 29, losses: 18, online: true },
-	{ nickname: "QuantumKnight", wins: 40, losses: 10, online: false },
-	{ nickname: "TurboToad", wins: 5, losses: 30, online: false },
-	{ nickname: "EpicElf", wins: 26, losses: 15, online: true },
-	{ nickname: "RageMage", wins: 38, losses: 7, online: true },
-	{ nickname: "SilentStorm", wins: 13, losses: 27, online: false },
-];
+// const users = [
+// 	{
+// 		nickname: "ShadowHunter",
+// 		wins: 34,
+// 		losses: 12,
+// 		online: true,
+// 	},
+// 	{ nickname: "PixelPirate", wins: 21, losses: 19, online: false },
+// 	{ nickname: "NoScopeKing", wins: 48, losses: 5, online: true },
+// 	{ nickname: "LavaWizard", wins: 17, losses: 22, online: false },
+// 	{ nickname: "SneakyPanda", wins: 29, losses: 18, online: true },
+// 	{ nickname: "QuantumKnight", wins: 40, losses: 10, online: false },
+// 	{ nickname: "TurboToad", wins: 5, losses: 30, online: false },
+// 	{ nickname: "EpicElf", wins: 26, losses: 15, online: true },
+// 	{ nickname: "RageMage", wins: 38, losses: 7, online: true },
+// 	{ nickname: "SilentStorm", wins: 13, losses: 27, online: false },
+// ];
+
+interface Users {
+	nickname: string;
+	wins: number;
+	losses: number;
+	online: boolean;
+}
+[];
 
 export class UsersView extends HTMLElement {
-	constructor() {
+	chat: ChatComponent;
+	users: Users[] | undefined;
+	constructor(chat: ChatComponent) {
 		super();
+		this.chat = chat;
 	}
 
-	users = users;
-
-	connectedCallback() {
+	async connectedCallback() {
 		console.log("users View has been connected");
+
+		const usersConfig: FetchConfig<User> = {
+			url: `/api/users/?dateTarget=createdAt&page=1&all=false&sortBy=createdAt&order=asc`,
+			header: { accept: "application/json" },
+			method: "GET",
+			// validator: validateUser,
+		};
+		// TODO: replace this as with valibot parse
+		const usersData = (await fetchPong<User>(usersConfig)) as User[];
+		console.log(usersData);
+		const userIds = usersData.map((u) => u.id);
+		console.log(userIds);
+		const statsConfig: FetchConfig<User> = {
+			url: `/pong-db/users-stats`,
+			header: {
+				"accept": "application/json",
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: { userIds: userIds },
+			// validator: validateStats,
+		};
+		// TODO: replace this as with valibot parse
+		const statsData = (await fetchPong(statsConfig)) as Stats[];
+		console.log(statsData);
+
+		this.users = usersData.map((user) => {
+			const stats = statsData.find((s) => s.userId === user.id);
+			const data = {
+				nickname: user.nickname,
+				wins: stats?.wins ?? 0,
+				losses: stats?.losses ?? 0,
+				online: !!(
+					this.chat.onlineUsers.find(
+						(onlineUser) => onlineUser.id === user.id,
+					) || user.id === this.chat.me?.id
+				),
+			};
+			return data;
+		});
+
+		document.addEventListener("online-user", () => {
+			console.log("somebody came online");
+			this.applyOnlineStatus();
+		});
 
 		// const h1 = document.createElement("h1");
 		// h1.textContent = "Users";
@@ -41,7 +99,7 @@ export class UsersView extends HTMLElement {
 			"sm:justify-self-center",
 		);
 		this.append(container);
-		for (const user of users) {
+		for (const user of this.users) {
 			const card = document.createElement("div");
 			card.classList.add(
 				"pong-card",
@@ -102,7 +160,8 @@ export class UsersView extends HTMLElement {
 			const friendButton = document.createElement("button");
 			friendButton.classList.add(
 				"pong-button",
-				"pong-button-special",
+				"pong-button-info",
+				"pong-button-round",
 				"justify-self-center",
 			);
 			friendButton.append(friendIcon);
@@ -211,9 +270,16 @@ export class UsersView extends HTMLElement {
 	}
 
 	applyOnlineStatus() {
+		const allUsers = this.users;
+		if (allUsers === undefined) {
+			return;
+		}
 		const icons = [...this.getElementsByClassName("status-icon")];
+		if (!icons) {
+			return;
+		}
 		icons.map((icon) => {
-			const status = this.users.find(
+			const status = allUsers.find(
 				(user) => user.nickname === icon.id,
 			)?.online;
 			if (status) {
@@ -237,8 +303,8 @@ export class UsersView extends HTMLElement {
 
 customElements.define("users-view", UsersView);
 
-export function createComponent() {
-	return document.createElement("users-view");
+export function createComponent(chat: ChatComponent) {
+	return new UsersView(chat);
 }
 
 // async function getData() {
