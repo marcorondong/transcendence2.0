@@ -1,4 +1,4 @@
-import { notificationEvent, signInLinkEvent } from "./events.js";
+import { signInLinkEvent } from "./events.js";
 
 export type Method = "GET" | "POST" | "PUT" | "POST" | "DELETE";
 
@@ -21,7 +21,7 @@ export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
 	});
 
 	if (!response.ok) {
-		document.dispatchEvent(notificationEvent(response.statusText, "error"));
+		// document.dispatchEvent(notificationEvent(response.statusText, "error"));
 		if (response.status === 401) {
 			document.dispatchEvent(signInLinkEvent);
 		}
