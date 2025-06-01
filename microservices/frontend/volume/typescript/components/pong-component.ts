@@ -36,7 +36,7 @@ export class PongComponent extends HTMLElement {
 			url = this.urlFromRoomId(url);
 		}
 		if (this.chat.gameSelection) {
-			this.urlFromGameSelection(url);
+			url = this.urlFromGameSelection(url);
 		}
 
 		console.log("ws to: ", url);
@@ -46,7 +46,7 @@ export class PongComponent extends HTMLElement {
 	urlFromGameSelection(url: string) {
 		const selection = this.chat.gameSelection;
 		if (!selection) {
-			return;
+			return url;
 		}
 		url += selection.modeSelection;
 		if (selection.playSelection === "public") {
