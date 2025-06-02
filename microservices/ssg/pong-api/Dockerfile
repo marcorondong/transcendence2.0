@@ -6,7 +6,7 @@ COPY ./nodemon.json /pong/pong-api/
 COPY ./package.json /pong/pong-api/
 COPY ./tsconfig.json /pong/pong-api/
 COPY ./.env /pong/pong-api/
-
+COPY ./trans-conf.json /pong/pong-api/
 RUN npm --prefix /pong/pong-api/ install
 
 #TODO remove this

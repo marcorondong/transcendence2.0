@@ -1,0 +1,8 @@
+{
+  "docker": {
+    "pongApi": {
+      "port": $PONG_API_PORT,
+      "containerName": "$PONG_API_CONTAINER_NAME"
+    }
+  }
+}

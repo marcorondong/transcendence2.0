@@ -2,10 +2,21 @@
   "pongApi": {
     "routes": {
       "singles": "pong-api/pong/singles",
-      "doubles": "pong-api/pong/doubles"
+      "doubles": "pong-api/pong/doubles",
+      "tournament": "pong-api/pong/tournament",
+      "spectate": "pong-api/pong/spectate/",
+      "healthCheck": "pong-api/health-check",
+      "blockchain": "pong-api/blockchain/",
+      "playerRoom": "pong-api/player-room/"
     }
   },
   "aiBot": {
     "nickname": "NovakBotkovic"
-  }
+  },
+  "pongDb": {
+    "routes": {
+      "record": "pong-db/create-game"
+    }
+  },
+  "authApi": {}
 }

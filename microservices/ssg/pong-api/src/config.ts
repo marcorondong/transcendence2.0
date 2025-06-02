@@ -1,3 +1,4 @@
+import sLink from "../trans-conf.json";
 // ==============================
 // 🖥 General pong-api Server configuration
 // ==============================
@@ -56,7 +57,8 @@ export const JWT_VERIFY_URL =
 // ==============================
 // BOT Configuration
 // ==============================
-export const BOT_NICKNAME = "NovakBotkovic";
+export const BOT_NICKNAME = sLink.aiBot.nickname;
+console.log("Bot name", BOT_NICKNAME);
 
 // ==============================
 // ⚙️ Interfaces
