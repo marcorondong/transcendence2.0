@@ -36,13 +36,14 @@ create_global_conf()
 	#TODO acitvate this rm part1 part2, try to make it more fancy with ,
 }
 
-create_symbolic_links()
+create_copies_for_microservice()
 {
   MICROSERVICES_FOLDER="$SCRIPT_DIR/../microservices"
 	OG_FILE="$SCRIPT_DIR/$TRANSCENDENCE_CONFIG_JSON_NAME"
 	PONG_API_LINK="$MICROSERVICES_FOLDER/ssg/pong-api/$TRANSCENDENCE_CONFIG_JSON_NAME"
 	cp $OG_FILE $PONG_API_LINK
-	chmod -w $PONG_API_LINK
+	#TODO remove write permission once final json will look nice
+	#chmod -w $PONG_API_LINK
 }
 
 main(){
@@ -50,7 +51,7 @@ main(){
   echo "$TEST"
   create_base_json
   create_global_conf
-  create_symbolic_links
+  create_copies_for_microservices
 }
 
 
