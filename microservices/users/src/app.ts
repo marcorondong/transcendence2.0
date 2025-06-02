@@ -1,5 +1,6 @@
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
+import multipart from "@fastify/multipart";
 import {
 	ZodTypeProvider,
 	validatorCompiler,
@@ -16,6 +17,13 @@ export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
+
+// Register multipart (for picture uploads) and set limits
+// TODO: Later move these constraints to Nginx (separation of concerns, unique source of truth)
+server.register(multipart, {
+	limits: { fileSize: 1_048_576 }, // 1MB in bytes
+});
+// server.register(multipart); // No config needed. (When Nginx is configured)
 
 // MR_NOTE: Code snippet example for checking path ONLY when in DEVELOPMENT mode
 // const publicPaths: string[] =

@@ -7,6 +7,7 @@ import {
 	putUserHandler,
 	patchUserHandler,
 	deleteUserHandler,
+	pictureHandler,
 } from "./user.controller";
 import {
 	createUserSchema,
@@ -208,6 +209,47 @@ async function userRoutes(server: FastifyInstance) {
 			},
 		},
 		errorHandler(deleteUserHandler),
+	);
+
+	// 8. Update user picture by ID
+	server.put(
+		"/:id/picture",
+		{
+			schema: {
+				tags: ["Users"],
+				summary: " Update user picture by ID",
+				description:
+					"Accepts multipart/form-data with a 'picture' file. Replaces any existing user picture.",
+				params: userIdParamSchema,
+				// requestBody: {
+				// 	required: true,
+				// 	content: {
+				// 		"multipart/form-data": {
+				// 			schema: {
+				// 				type: "object",
+				// 				properties: {
+				// 					picture: {
+				// 						type: "string",
+				// 						format: "binary",
+				// 					},
+				// 				},
+				// 				required: ["picture"],
+				// 			},
+				// 		},
+				// 	},
+				// },
+				response: {
+					200: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+				// response: withCommonErrors({
+				// 	204: emptyResponseSchema,
+				// }),
+				consumes: ["multipart/form-data"], // Enable file upload support in Swagger UI (by default is 'application/json')
+			},
+		},
+		errorHandler(pictureHandler),
 	);
 }
 

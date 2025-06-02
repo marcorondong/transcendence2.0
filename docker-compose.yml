@@ -37,6 +37,7 @@ services:
     volumes:
       - ./frontend/volume:/usr/share/nginx/html
       - ./frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - user_pictures:/usr/share/nginx/html/uploads # Users pictures (Shared with Nginx)
     ports:
       - "8080:443"
     restart: unless-stopped
@@ -53,6 +54,9 @@ include:
   - ./microservices/chat_api/docker-compose.yml
   - ./microservices/tictactoe_db/docker-compose.yml
   - ./microservices/tictactoe_api/docker-compose.yml
+
+volumes:
+  user_pictures:
 
 networks:
   Transcendence2.0:

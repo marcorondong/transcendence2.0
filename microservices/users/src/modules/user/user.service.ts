@@ -347,3 +347,36 @@ export async function updateUser(id: string, data: UpdateUserData) {
 		throw err;
 	}
 }
+
+// Updates user picture path
+export async function updateUserPicture(id: string, picturePath: string) {
+	try {
+		// Ensure user exists
+		const currentUser = await prisma.user.findUnique({ where: { id } });
+		if (!currentUser) {
+			throw new AppError({
+				statusCode: 404,
+				code: USER_ERRORS.USER_PICTURE,
+				message: "User not found",
+			});
+		}
+		// Update picture path
+		const updatedUser = await prisma.user.update({
+			where: { id },
+			data: { picture: picturePath },
+		});
+		return updatedUser;
+	} catch (err) {
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			switch (err.code) {
+				case "P2025":
+					throw new AppError({
+						statusCode: 404,
+						code: USER_ERRORS.USER_PICTURE,
+						message: "User not found",
+					});
+			}
+		}
+		throw err;
+	}
+}

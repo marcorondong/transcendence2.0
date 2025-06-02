@@ -51,11 +51,18 @@ The `defaultPageSize = 10` but it can be configured via the query string:
 1. Specify `take` as the amount of entries you want your page to contain.
 2. Use the query string `?page={number}` to traverse the database.
 
+It supports user profile pictures.
+Note that since we're using SQLite (_it's lightweight, and doesn't handle well binary data_);
+we're storing in user the path to the picture instead of the real picture.
+So NGINX will serve those static files (_and it could be enhanced by implementing some sort of CDN, minIO, etc_).
+_**Currently**_ it's not possible to upload the picture via USERS service Swagger;
+it needs a `curl` command directed to the endpoint to upload the picture.
+
 > [!NOTE]
 >
 > In next version, it'll handle also:
 >
-> - 🖼️ Avatar (user image).
+> - [x] 🖼️ Avatar (user image).
 > - 👥 User friendship management (friend requests).
 > - 🏃‍♂️💨 Change in how the code is "compiled" and run.
 > - Makefile
@@ -115,6 +122,15 @@ The `defaultPageSize = 10` but it can be configured via the query string:
       3. Generate new migration with current model and apply schema: `npx prisma migrate dev --name init`
       4. Generate Prisma client (_optional but recommended_): `npx prisma generate`
 
+6. For checking the picture functionality:
+   1. Run the following `curl` command directed to the user id to update its picture:
+
+    ```bash
+    curl -v -X PUT http://localhost:3000/api/users/<user_id>/picture \
+    -H "Content-Type: multipart/form-data" \
+    -F "picture=@/absolute/path/to/picture.jpg"
+    ```
+
 > [!WARNING]
 >
 > You **SHOULD NOT** be changing `migrations/` folder unless you're **explicitly** need to.
@@ -139,7 +155,7 @@ However, you can customize the service using docker secrets, environmental varia
 > - `.env` file containing host and port for USERS service.
 > - `.env` file containing page size for responses.
 > - `.env` file containing location of database.
-> - `.env` file containing location of users avatars' folder.
+> - `.env` file containing location of users pictures' folder.
 > - `.env` file containing `PAGINATION_ENABLED` and `DEFAULT_PAGE_SIZE`.
 
 ---
@@ -158,6 +174,7 @@ However, you can customize the service using docker secrets, environmental varia
 | PUT    | `/api/users/:id`          | Update user (all fields)               |
 | PATCH  | `/api/users/:id`          | Update user (some fields)              |
 | DELETE | `/api/users/:id`          | Delete user                            |
+| PUT    | `/api/users/:id/picture`  | Update user picture                    |
 
 > [!NOTE]
 >
@@ -183,6 +200,8 @@ None. 👍
 - UsesSwagger to easily show (and test) behavior.
 - Accept configurations via secrets, files, env vars and hardcoded values.
 - Check `user.schema.ts` file to see the constraints of username, nickname, email and password.
+- When running "containerized", it uses NGINX to serve the pictures.
+- When running "locally" (`npm run ...`), it doesn't serve pictures, but it saves them in root `users\uploads` folder.
 
 ---
 
@@ -192,6 +211,7 @@ None. 👍
 2. Click [here](http://localhost:3000/api/documentation)
    1. Check that is `HTTP` and not `httpS`
 3. Issue all the requests you want.
+4. For checking the picture functionality, read _**point 6**_ of [How to run the service](#-how-to-run-the-service)
 
 > [!IMPORTANT]
 >
@@ -199,4 +219,5 @@ None. 👍
 >   - Change some values, try to send invalid data (numbers, empty strings, additional fields, missing info, etc).
 > - You can also use Postman to test it.
 > - Please note that automated tests aren't implemented yet.
+> - Please note that currently, it's not possible to update the picture in SWagger UI; only via `curl` command.
 > - In a future version, it'll include a database seeder to all the functionality can be tested.
