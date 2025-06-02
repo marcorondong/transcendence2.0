@@ -1,0 +1,43 @@
+{
+  "docker": {
+    "network": "Transcendence2.0",
+    "pongApi": {
+      "port": 3010,
+      "imageName": "pong-api-img",
+      "containerName": "pong-api"
+    },
+    "aiBot": {
+      "port": 3010,
+      "imageName": "ai-bot",
+      "containerName": "ai-bot"
+    },
+    "frontend": {
+      "port": 8080,
+      "imageName": "frontend",
+      "containerName": "frontend"
+    },
+    "authApi": {
+      "port": 2999,
+      "imageName": "auth_api_image",
+      "containerName": "auth_api_container"
+    }
+  },
+//////// In env
+
+  "pongApi": {
+    "routes": {
+      "singles": "pong-api/pong/singles",
+      "doubles": "pong-api/pong/doubles"
+    }
+  },
+
+  "authApi": {
+    "routes": {
+      "singles": "pong-api/pong/singles",
+      "doubles": "pong-api/pong/doubles"
+    }
+  },
+  "aiBot": {
+    "nickname": "NovakBotkovic"
+  }
+}

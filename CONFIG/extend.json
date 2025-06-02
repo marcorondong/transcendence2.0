@@ -1,0 +1,18 @@
+{
+  "pongApi": {
+    "routes": {
+      "singles": "pong-api/pong/singles",
+      "doubles": "pong-api/pong/doubles"
+    }
+  },
+
+  "authApi": {
+    "routes": {
+      "login": "auth-api/login",
+      "register": "auth-api/register"
+    }
+  },
+  "aiBot": {
+    "nickname": "NovakBotkovic"
+  }
+}

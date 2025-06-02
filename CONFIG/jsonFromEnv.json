@@ -1,0 +1,25 @@
+{
+  "docker": {
+      "network": ENV_NAME,
+      "pongApi": {
+        "port": ENV_PORT,
+        "imageName": ENV_IMG,
+        "containerName": ENV_CONTAINER
+      },
+      "aiBot": {
+        "port": ENV_PORT,
+        "imageName": ENV_IMG,
+        "containerName": ENV_CONTAINER
+      },
+      "frontend": {
+        "port": ENV_PORT,
+        "imageName": ENV_IMG,
+        "containerName": ENV_CONTAINER
+      },
+      "authApi": {
+        "port": ENV_PORT,
+        "imageName": ENV_IMG,
+        "containerName": ENV_CONTAINER
+      }
+  }
+}
