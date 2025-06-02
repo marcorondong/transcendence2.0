@@ -34,6 +34,7 @@ class Player:
         if token == False:
             return False
         self.set_access_token(token)
+        self.set_username(username)
         return True
 
     def get_custom_headers(self) -> dict[str, str]:
