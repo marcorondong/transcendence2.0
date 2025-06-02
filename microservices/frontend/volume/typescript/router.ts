@@ -96,6 +96,7 @@ export class Router {
 		this.handleRouterLink = this.handleRouterLink.bind(this);
 		this.addEventListenerNavLinks();
 		document.addEventListener("pong-link", this.handleRouterLink);
+		document.addEventListener("error-link", this.handleRouterLink);
 		window.addEventListener("popstate", () => {
 			this.loadComponent();
 		});

@@ -1,5 +1,3 @@
-import { Auth } from "../services/auth.js";
-import { notificationEvent, signInLinkEvent } from "../services/events.js";
 import { FetchAuth } from "../services/fetch-auth.js";
 import { IconComponent } from "./icon-component.js";
 import { ThemeToggleComponent } from "./theme-toggle-component.js";
@@ -18,13 +16,7 @@ export class HeaderComponent extends HTMLElement {
 		const logoAnchor = document.createElement("a");
 		logoAnchor.href = "/";
 		const logo = document.createElement("img");
-		logo.classList.add(
-			"size-18",
-			"rounded-lg",
-			// "absolute",
-			// "-top-4",
-			// "left-10",
-		);
+		logo.classList.add("size-18", "rounded-lg");
 		logo.src = "/static-files/images/pong-logo.png";
 		logoAnchor.appendChild(logo);
 		this.appendChild(logoAnchor);
@@ -122,6 +114,7 @@ export class HeaderComponent extends HTMLElement {
 
 		// SIGN OUT BUTTON
 		const logoutButton = document.createElement("button");
+		logoutButton.id = "sign-out-button";
 		logoutButton.classList.add(
 			"pong-button",
 			"pong-button-info",

@@ -54,12 +54,9 @@ class ChatComponent extends HTMLElement {
 	}
 	goOnline() {
 		this.navMe.innerText = "offline";
-		const children = [...this.nav.children];
-		children.forEach((c) => {
-			if (c.id !== "nav-me") {
-				c.classList.remove("hidden");
-			}
-		});
+		this.navMe.classList.add("hidden");
+		this.minMaxButton.classList.remove("hidden");
+		this.navUsersContainer.classList.remove("hidden");
 	}
 
 	openWebsocket() {
@@ -424,7 +421,14 @@ class ChatComponent extends HTMLElement {
 			this.handleSendButton(button);
 			this.handleBlockButton(button);
 			this.handleInviteButton(button);
+			this.signOutButton(button);
 		}
+	}
+	signOutButton(button: HTMLButtonElement) {
+		if (button.id !== "sign-out-button") {
+			return;
+		}
+		this.ws?.close();
 	}
 
 	handleMinMaxButton(button: HTMLButtonElement) {

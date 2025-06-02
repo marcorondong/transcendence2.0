@@ -6,6 +6,12 @@ export const pongLinkEvent = new CustomEvent("pong-link", {
 	composed: true,
 });
 
+export const errorLinkEvent = new CustomEvent("error-link", {
+	detail: { source: "error-view" },
+	bubbles: true,
+	composed: true,
+});
+
 export const homeLinkEvent = new CustomEvent("pong-link", {
 	detail: { source: "/" },
 	bubbles: true,

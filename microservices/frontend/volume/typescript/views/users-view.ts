@@ -3,6 +3,7 @@ import { ChatComponent } from "../components/chat-component.js";
 import { baseUrl, FetchConfig, fetchPong } from "../services/fetch.js";
 import { User } from "../types/User.js";
 import { Stats } from "../types/Pong.js";
+import { errorLinkEvent } from "../services/events.js";
 
 interface UserAggregated {
 	id: string;
@@ -29,7 +30,6 @@ export class UsersView extends HTMLElement {
 		this.buildDomElements();
 
 		document.addEventListener("online-user", () => {
-			console.log("somebody came online");
 			this.applyOnlineStatus();
 		});
 		this.applyOnlineStatus();
@@ -88,6 +88,27 @@ export class UsersView extends HTMLElement {
 		this.applyOnlineStatus();
 	}
 
+	async fetchUsers(page: number) {
+		const urlApi = `/api/users/?page=${page}`;
+		const usersConfig: FetchConfig<User> = {
+			url: urlApi,
+			header: { accept: "application/json" },
+			method: "GET",
+			// validator: validateUser,
+		};
+		// TODO: replace this as with valibot parse
+		return (await fetchPong<User>(usersConfig)) as User[];
+	}
+
+	async checkNextPage() {
+		try {
+			const user = (await this.fetchUsers(this.page + 1)) as User[];
+			return !!user.length;
+		} catch (e) {
+			return false;
+		}
+	}
+
 	async aggregateData() {
 		const paramsString = window.location.search;
 		const searchParams = new URLSearchParams(paramsString);
@@ -95,20 +116,11 @@ export class UsersView extends HTMLElement {
 		if (pageFromQuery && pageFromQuery > 0 && pageFromQuery < 1000) {
 			this.page = Number(pageFromQuery);
 		}
-		const urlApi = `/api/users/?page=${this.page}`;
 		const urlBrowser = baseUrl + "/users-view?page=" + this.page;
+		window.history.pushState({ path: urlBrowser }, "", urlBrowser);
 
-		const usersConfig: FetchConfig<User> = {
-			url: urlApi,
-			header: { accept: "application/json" },
-			method: "GET",
-			// validator: validateUser,
-		};
 		try {
-			window.history.pushState({ path: urlBrowser }, "", urlBrowser);
-			// TODO: replace this as with valibot parse
-			this.usersData = (await fetchPong<User>(usersConfig)) as User[];
-			console.log(this.usersData);
+			this.usersData = await this.fetchUsers(this.page);
 			const userIds = this.usersData.map((u) => u.id);
 			const statsConfig: FetchConfig<User> = {
 				url: `/pong-db/users-stats`,
@@ -134,18 +146,14 @@ export class UsersView extends HTMLElement {
 				};
 				return data;
 			});
-		} catch (e) {}
-	}
-	checkNextPage() {
-		// const usersConfig: FetchConfig<User> = {
-		// 	url: urlApi,
-		// 	header: { accept: "application/json" },
-		// 	method: "GET",
-		// 	// validator: validateUser,
-		// };
+		} catch (e) {
+			console.log("error in try block");
+			this.dispatchEvent(errorLinkEvent);
+			return;
+		}
 	}
 
-	buildDomElements() {
+	async buildDomElements() {
 		const container = document.createElement("div");
 		container.classList.add(
 			"flex",
@@ -311,6 +319,11 @@ export class UsersView extends HTMLElement {
 		buttonLeft.append(leftArrowIcon);
 		const buttonRight = document.createElement("button");
 		buttonRight.id = "button-right";
+
+		const nextPage = await this.checkNextPage();
+		if (!nextPage) {
+			buttonRight.setAttribute("disabled", "true");
+		}
 		buttonRight.classList.add(...buttonClassList);
 		const rightArrowIcon = new IconComponent("arrow_right", 3);
 		buttonRight.append(rightArrowIcon);
