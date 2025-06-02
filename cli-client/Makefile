@@ -1,9 +1,7 @@
 VENV_DIR := venv
 PYTHON := $(VENV_DIR)/bin/python
 PIP := $(VENV_DIR)/bin/pip
-PYCACHE_DIR := __pycache__
 LOG_FILE := cli-client.log
-ALL_PYCACHE_DIRS = $(PYCACHE_DIR) menu/$(PYCACHE_DIR) utils/$(PYCACHE_DIR) window/$(PYCACHE_DIR)
 
 .PHONY: all venv install run clean
 
@@ -20,5 +18,6 @@ run: install
 
 clean:
 	rm -rf $(VENV_DIR)
-	rm -rf $(ALL_PYCACHE_DIRS)
+	find . -name '__pycache__' -exec rm -rf {} +
+	find . -name '*.pyc' -delete
 	rm -f $(LOG_FILE)
