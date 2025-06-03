@@ -1,0 +1,18 @@
+services:
+  pong-api:
+    # env_file: ./compose.env This does not work for interpolation inside docker compose. only in container. But if you include it from root you can use it
+    # All interpolation is from pong.env (BUT YOU NEED TO USE LONG INCLUDE SYNTAX in root compose.yaml)
+    image: pong-api-img #I don't see point it putting this in env file
+    container_name: ${PONG_CONTAINER_NAME:-pong-api} #Make sense to put in env file
+    build:
+      context: ./ #No point to put in env
+      dockerfile: Dockerfile #No need in env
+    volumes:
+      - ./src/:/pong/pong-api/src/ #FIXME No volumes at final version
+    ports:
+      - ${PONG_PORT:-3010}:${PONG_PORT:-3010} #TODO remove it will not be exposed at final version, Port make sense to put in env
+    environment:
+      - NODE_ENV=production
+    command: ["npm", "--prefix", "/pong/pong-api/", "run", "pong-api"] #No need in env
+    networks:
+      - ${DOCKER_NETWORK:-Transcendence2.0} #Nice to have in env

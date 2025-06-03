@@ -1,20 +1,4 @@
 services:
-  pong-api:
-    image: pong-api-img
-    container_name: pong-api
-    build:
-      context: ./microservices/ssg/pong-api
-      dockerfile: Dockerfile
-    volumes:
-      - ./microservices/ssg/pong-api/src/:/pong/pong-api/src/
-    ports:
-      - 3010:3010 #TODO remove it will not be exposed at final version
-    environment:
-      - NODE_ENV=production
-    command: ["npm", "--prefix", "/pong/pong-api/", "run", "pong-api"]
-    networks:
-      - Transcendence2.0
-
   ai-bot:
     image: ai-bot
     build:
@@ -45,6 +29,7 @@ services:
       - Transcendence2.0
 
 include:
+  #TODO once all microservices will use LONG INCLUDE remove this short syntax
   - ./microservices/auth_api/docker-compose.yml
   - ./frontend/docker-compose.yml
   - ./monitoring/monitoring-docker-compose.yml
@@ -54,6 +39,15 @@ include:
   - ./microservices/chat_api/docker-compose.yml
   - ./microservices/tictactoe_db/docker-compose.yml
   - ./microservices/tictactoe_api/docker-compose.yml
+
+  #PONG_API LONG INCLUDE
+  - path: ./microservices/ssg/pong-api/compose.yaml #path to "small" compose file of microservice relative to this root compose.yaml
+    project_directory: ./microservices/ssg/pong-api #If i am not mistaken this is build context kinda
+    env_file: ./microservices/ssg/pong-api/.env #this file will be used for interpolation in docker compose
+
+  # - path: ./microservices/auth_api/docker-compose.yml #Suggestion how to do it.
+  #   project_directory: ./microservices/auth_api
+  #   env_file: ./.env
 
 volumes:
   user_pictures:
