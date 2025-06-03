@@ -1,17 +1,14 @@
-### deploy:
+# MONITORING Service
 
-´´´make´´´
+## How to deploy
 
-from project root.
+From project root, run `make`
+This will check if the necessary secrets are there and create the ones it can.
+If slack_webhook is missing, copy from our channel.
 
-this will check if the necessary secrets are there and create the ones it can.
+## Access
 
-if slack_webhook is missing copy from our channel.
-
-### access:
-
-(grafana)[https://localhost:8080/grafana]
+Link to [Grafana](https://localhost:8080/grafana)
 
 admin
-
 pass: see secrets directory
