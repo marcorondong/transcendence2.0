@@ -1,4 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import fs from "fs"; // for createWriteStream, and promises (mkdir, readdir, unlink)
+import path from "path";
+import { pipeline } from "stream/promises";
 import {
 	UniqueUserField,
 	createUserInput,
@@ -16,6 +19,7 @@ import {
 	findUsers,
 	deleteUser,
 	updateUser,
+	updateUserPicture,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
@@ -218,7 +222,16 @@ export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	await deleteUser(request.params.id);
+	const user = await findUserByUnique({ id: request.params.id });
+
+	const uploadsBase = path.resolve("uploads/users");
+	const userFolder = path.join(uploadsBase, user.username);
+
+	if (fs.existsSync(userFolder)) {
+		await fs.promises.rm(userFolder, { recursive: true, force: true });
+	}
+
+	await deleteUser(user.id);
 	return reply.code(204).send();
 }
 
@@ -244,4 +257,91 @@ export async function patchUserHandler(
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
+}
+
+// const ALLOWED_IMAGE_MODES = "image/jpeg"; // Enable more types if needed
+const ALLOWED_IMAGE_MODES = "image/jpeg,image/png,image/gif"; // Example full config
+
+const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
+	(acc, type) => {
+		acc[type] =
+			type === "image/jpeg"
+				? "jpg"
+				: type === "image/png"
+					? "png"
+					: type === "image/gif"
+						? "gif"
+						: "";
+		return acc;
+	},
+	{} as Record<string, string>,
+);
+
+export async function pictureHandler(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply,
+) {
+	const user = await findUserByUnique({ id: request.params.id });
+
+	const parts = request.parts();
+	let pictureFile;
+	for await (const part of parts) {
+		if (part.type === "file" && part.fieldname === "picture") {
+			pictureFile = part;
+			break;
+		}
+	}
+
+	if (!pictureFile) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_PICTURE,
+			message: "No picture file uploaded",
+		});
+	}
+
+	// TODO: Make these file checks (type/size) in Nginx config
+	// Validate mimetype and map to extension
+	const ext = ALLOWED_IMAGE_TYPES[pictureFile.mimetype];
+	if (!ext) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_PICTURE,
+			message: "Unsupported file type",
+		});
+	}
+	// if (pictureFile.file.bytesRead > 1024 * 1024) {
+	if (pictureFile.file.truncated) {
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.USER_PICTURE,
+			message: "File too large (max 1MB)",
+		});
+	}
+
+	// Ensure destination folder exists
+	const uploadsBase = path.resolve("uploads/users");
+	const userFolder = path.join(uploadsBase, user.username);
+	console.log("Saving picture to:", userFolder); // TODO: Remove this later
+	await fs.promises.mkdir(userFolder, { recursive: true });
+	// console.log(`Would run: mkdir(${userFolder}, { recursive: true })`);
+
+	// Delete all files in the user's folder (remove old pictures)
+	const oldFiles = await fs.promises.readdir(userFolder);
+	for (const file of oldFiles) {
+		await fs.promises.unlink(path.join(userFolder, file));
+	}
+
+	// Save new picture
+	const filePath = path.join(userFolder, `picture.${ext}`);
+	await pipeline(pictureFile.file, fs.createWriteStream(filePath));
+	// console.log(
+	// 	`Would run: pipeline(<picture stream>, createWriteStream(${filePath}))`,
+	// );
+
+	// Store relative path in DB
+	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
+	const updatedUser = await updateUserPicture(user.id, publicPath);
+
+	reply.code(200).send(updatedUser);
 }

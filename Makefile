@@ -25,6 +25,7 @@ remove:
 	docker compose down --volumes
 	docker system prune -a -f --volumes
 	$(MAKE) delete-secrets
+	$(MAKE) -C cli-client clean
 
 reset:
 	docker-compose down --volumes
