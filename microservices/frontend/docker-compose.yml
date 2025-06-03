@@ -1,0 +1,39 @@
+services:
+  tailwind:
+    container_name: tailwind
+    image: tailwind-img
+    build:
+      context: ./
+      dockerfile: docker/tailwind/Dockerfile-Tailwind
+    volumes:
+      - tailwind:/app/volume
+    networks:
+      - ${NETWORK_NAME}
+    restart: unless-stopped
+  typescript:
+    container_name: typescript
+    image: typescript-img
+    build:
+      context: ./
+      dockerfile: docker/typescript/Dockerfile-Typescript
+    volumes:
+      - typescript:/app/volume
+    networks:
+      - ${NETWORK_NAME}
+    restart: unless-stopped
+
+volumes:
+  tailwind:
+    name: tailwind
+    driver: local
+    driver_opts:
+      type: none
+      device: ./volume
+      o: bind
+  typescript:
+    name: typescript
+    driver: local
+    driver_opts:
+      type: none
+      device: ./volume
+      o: bind
