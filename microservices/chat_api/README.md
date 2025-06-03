@@ -11,9 +11,10 @@ Each interaction follows this pattern:
 
 ## 📩 Message Someone
 
-**User1 sends a message to User2**
+User1 sends a message to User2
 
-### Request (from User1)
+Request sent by User1
+
 ```json
 {
     "type": "message",
@@ -22,7 +23,8 @@ Each interaction follows this pattern:
 }
 ```
 
-### Reply (to User1)
+Reply sent to User1
+
 ```json
 {
     "type": "message",
@@ -37,7 +39,9 @@ Each interaction follows this pattern:
     "message": "new message"
 }
 ```
+
 ### Reply (to User2)
+
 ```json
 {
     "type": "message",
@@ -55,9 +59,10 @@ Each interaction follows this pattern:
 
 ## 📨 Invite Someone
 
-**User1 sends an invitation to User2**
+User1 sends an invitation to User2
 
-### Request (from User1)
+Request sent by User1
+
 ```json
 {
   "type": "invite",
@@ -65,7 +70,8 @@ Each interaction follows this pattern:
 }
 ```
 
-### Reply (to User2)
+Reply sent to User1
+
 ``` json
 {
     "type": "invite",
@@ -76,18 +82,20 @@ Each interaction follows this pattern:
     "roomId": "Room id to open socket",
 }
 ```
+
 Note: No reply is sent to User1. Can be add upon request.
 
 ## 👤 New User Joined
 
-**A new User (e.g., User101) joins the server**
+A new User (e.g., User101) joins the server
 
-### Reply (to User101)
+Reply sent to User1
+
 ```json
 {
     "type": "onlineUsers",
     "users": 
-	[
+      [
         {
             "id": "id of User1",
             "nickname": "nickname of User1"
@@ -100,14 +108,16 @@ Note: No reply is sent to User1. Can be add upon request.
             "id": "id of User100",
             "nickname": "nickname of User100"
         }
-    ],
+      ],
     "me": {
         "id": "id of current user",
         "nickname": "nickname of current user"
     }
 }
 ```
-### Reply (to all other Users)
+
+Reply sent to all other users
+
 ``` json
 {
     "type": "newUser",
@@ -120,9 +130,10 @@ Note: No reply is sent to User1. Can be add upon request.
 
 ## 🔌 Disconnection Event
 
-**When a User disconnects, the backend sends a disconnection event.**
+When a User disconnects, the backend sends a disconnection event.
 
-### Reply (to all other Users)
+Reply sent to all other users
+
 ```json
 {
     "type": "disconnected",
@@ -132,17 +143,18 @@ Note: No reply is sent to User1. Can be add upon request.
     }
 }
 ```
+
 Note: This event informs all other clients about the disconnection, and they can update their UI accordingly (e.g., removing the user from the online list).
 
 ## ❌ Error Handling
 
-**In case of an error, the backend replies with an error message**
+In case of an error, the backend replies with an error message
 
-### Reply (to client)
+Reply sent to client
+
 ```json
 {
     "type": "error",
     "errorMessage": "Error Message"
 }
-``` 
-
+```
