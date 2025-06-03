@@ -57,13 +57,6 @@ volumes:
       type: none
       device: ./microservices/frontend/volume
       o: bind
-  pong-api:
-    name: pong-api
-    driver: local
-    driver_opts:
-      type: none
-      device: ./microservices/ssg/pong-api/src/
-      o: bind
   user_pictures:
 
 networks:
