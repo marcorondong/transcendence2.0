@@ -2,7 +2,7 @@ import { env } from "./env";
 import fs from "fs";
 
 let jwtSecret: string;
-let cookieSecret: string;
+export let cookieSecret: string;
 
 try {
 	jwtSecret = fs.readFileSync(

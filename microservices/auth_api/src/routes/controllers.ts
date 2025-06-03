@@ -8,6 +8,8 @@ import {
 } from "./httpRequests";
 import { setCookieOpt, jwtSignOpt, clearCookieOpt } from "./configs";
 import { env } from "../utils/env";
+import * as cookieSignature from 'cookie-signature';
+import { cookieSecret } from "../utils/options";
 
 export async function signInHandler(
 	request: FastifyRequest<{ Body: unknown }>,
@@ -67,7 +69,13 @@ export async function botJWTHandler(
 	reply: FastifyReply,
 ) {
 	const payload = { id: env.BOT_UUID, nickname: env.BOT_NICKNAME };
-	const access_token = await reply.jwtSign(payload, jwtSignOpt);
+	const raw_access_token = await reply.jwtSign(payload, jwtSignOpt);
+	console.log("raw_access_token", raw_access_token);
+	const access_token = cookieSignature.sign(
+		raw_access_token,
+		cookieSecret,
+	);
+	console.log("access_token", access_token);
 	reply.status(200).send({ [env.JWT_TOKEN_NAME]: access_token });
 }
 
