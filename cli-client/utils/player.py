@@ -8,7 +8,7 @@ class Player:
 
     def __init__(self):
         """Initial Player class"""
-        self.username = "<GUEST>"
+        self.username = "<GUEST USER>"
         self.access_token = ""
 
     def set_username(self, username: str) -> None:
@@ -39,3 +39,8 @@ class Player:
 
     def get_custom_headers(self) -> dict[str, str]:
         return {"Cookie": f"access_token={self.access_token}"}
+
+    def is_logged_in(self) -> bool:
+        if self.access_token == "":
+            return False
+        return True
