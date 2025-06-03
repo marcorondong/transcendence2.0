@@ -208,7 +208,7 @@ None. 👍
 ## 🧪 Testing
 
 1. Run the service.
-2. Click [here](http://localhost:3000/api/documentation)
+2. Click here for [Swagger page](http://localhost:3000/api/documentation)
    1. Check that is `HTTP` and not `httpS`
 3. Issue all the requests you want.
 4. For checking the picture functionality, read _**point 6**_ of [How to run the service](#-how-to-run-the-service)
