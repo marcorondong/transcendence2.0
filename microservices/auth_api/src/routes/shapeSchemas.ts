@@ -54,6 +54,6 @@ export const accessTokenResponseShape = {
 };
 
 // FIXME: This is not used anywhere. I guess it comes from copy/pasting
-export type IdInput = {
-	id: string;
-};
+// export type IdInput = {
+// 	id: string;
+// };
