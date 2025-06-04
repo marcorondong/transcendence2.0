@@ -2,9 +2,8 @@ from menu.connect import client, TAB_SIZE
 from menu.connect import register_user
 from utils.player import Player
 from utils.ui import UI
-import curses
 
-BACK_BUTTON = "Back"
+BACK_BUTTON = "Quit"
 
 
 def randomGame(user: Player):

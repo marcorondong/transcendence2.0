@@ -103,11 +103,21 @@ def menuLoop(stdscr, title, items, user: Player):
             else:
                 selectedItem = items[position - 1]
                 callHandlerFunction(selectedItem, user)
+                if user.is_logged_in():
+                    items = [
+                        "Random Game",
+                        "Logout"
+                    ]
+                    title = "Main Menu"
+                else:
+                    items = [
+                        "Register",
+                        "Login",
+                    ]
+                    title = "Login Menu"
                 drawMenu(
                     stdscr,
                     f"{user.get_personal_greeting()} {title}",
                     items,
                     position,
                 )
-        # elif key == 27:  # ESC key
-        # 	confirmExit()
