@@ -58,7 +58,7 @@ So NGINX will serve those static files (_and it could be enhanced by implementin
 _**Currently**_ it's not possible to upload the picture via USERS service Swagger;
 it needs a `curl` command directed to the endpoint to upload the picture.
 
-It support **blacklist**
+It supports **blacklisting**
 Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded from a config file_)
 
 > [!NOTE]
