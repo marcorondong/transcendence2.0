@@ -40,6 +40,7 @@ class PongView extends HTMLElement {
 
 	async handlePlayAI() {
 		try {
+			const roomId = this.chat.roomId;
 			const response = await fetch(
 				`https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`,
 				{
@@ -49,6 +50,7 @@ class PongView extends HTMLElement {
 					},
 					body: JSON.stringify({
 						difficulty: "normal",
+						roomId: "roomId",
 					}),
 				},
 			);

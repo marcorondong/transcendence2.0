@@ -6,6 +6,7 @@ PONG_ENV = ./microservices/ssg/pong-api/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
 GLOBAL_ENV = .env
+REBUILD_SERVICE = -re
 
 SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 

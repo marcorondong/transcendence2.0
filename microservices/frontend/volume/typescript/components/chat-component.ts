@@ -1,7 +1,4 @@
 import { IconComponent } from "./icon-component.js";
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-import { Chat, ChatUser, Message } from "../types/Chat.js";
-=======
 import { User, Chat, ChatUser, Message } from "../types/Chat.js";
 import { fetchChatDb } from "../services/fetch-chat.js";
 import {
@@ -10,19 +7,15 @@ import {
 	pongLinkEvent,
 } from "../services/events.js";
 import { SelectionState } from "../views/home-view.js";
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
 	ws: WebSocket | undefined = undefined;
 	onlineUsers: ChatUser[] = [];
 	selectedUser: ChatUser | undefined = undefined;
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-=======
 	roomId: string | undefined = undefined;
 	gameSelection: SelectionState | undefined;
 	me: User | undefined;
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 
 	//ICONS
 	plusIcon = new IconComponent("plus", 4);
@@ -42,30 +35,6 @@ class ChatComponent extends HTMLElement {
 	mainUsers = document.createElement("div");
 	navUsersContainer = document.createElement("div");
 	navUsersCount = document.createElement("span");
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-	chatInput = document.createElement("textarea");
-	chatContainer = document.createElement("div");
-
-	constructor() {
-		super();
-
-		// OPEN NEW WEBSOCKET
-		this.ws = new WebSocket(
-			`wss://${window.location.hostname}:${window.location.port}/ws`,
-		);
-
-		// WEBSOCKET CONNECTION CLOSED
-		this.ws.onclose = () => {
-			console.log("websocket has closed");
-			this.onlineUsers = [];
-			this.selectedUser = undefined;
-			if (this.plusIcon.classList.contains("hidden")) {
-				this.handleMinMaxButton(this.minMaxButton);
-			}
-			this.mainMessages.replaceChildren();
-			this.classList.add("text-slate-500");
-			this.innerText = "offline";
-=======
 	navMe = document.createElement("div");
 	chatInput = document.createElement("textarea");
 	chatContainer = document.createElement("div");
@@ -120,43 +89,12 @@ class ChatComponent extends HTMLElement {
 				notificationEvent("chat websocket closed", "info"),
 			);
 			this.closeChat();
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		};
 
 		this.ws.onmessage = (event) => {
 			const chatServiceData: Chat = JSON.parse(event.data);
 			console.log("websocket data", chatServiceData);
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-			//CHAT SERVICE RETURNS USERS OWN MESSAGE
-			if (chatServiceData.type === "messageResponse") {
-				const newMessage: Message = {
-					id: chatServiceData.relatedId || "",
-					content: chatServiceData.message ?? "",
-				};
-				this.addTimestamp(newMessage);
-				this.selectedUser?.messages.push(newMessage);
-				this.displayCurrentChat();
-			}
-
-			// RECEIVING MESSAGE
-			if (
-				chatServiceData.messageResponse &&
-				chatServiceData.messageResponse.type === "messageResponse"
-			) {
-				const sender = this.onlineUsers.find(
-					(user) =>
-						user.id === chatServiceData.messageResponse?.relatedId,
-				);
-				if (sender) {
-					console.log("this message must come from ", sender.id);
-					const newMessage: Message = {
-						id: sender.id,
-						content: chatServiceData.messageResponse.message ?? "",
-					};
-					this.addTimestamp(newMessage, sender);
-					sender.messages.push(newMessage);
-=======
 			// RECEIVING MESSAGE
 			if (chatServiceData.type === "message") {
 				if (
@@ -187,50 +125,23 @@ class ChatComponent extends HTMLElement {
 					};
 					this.addTimestamp(newMessage, relevantChat);
 					relevantChat.messages.push(newMessage);
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 					this.displayCurrentChat();
 				}
 			}
 
 			// A USER LEAVES THE CHAT
 			if (chatServiceData.type === "disconnected") {
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-				if (this.selectedUser?.id === chatServiceData.relatedId) {
-					this.selectedUser = undefined;
-				}
-				const userToRemove = this.onlineUsers.findIndex(
-					(u) => u.id === chatServiceData.relatedId,
-=======
 				if (this.selectedUser?.id === chatServiceData.user?.id) {
 					this.selectedUser = undefined;
 				}
 				const userToRemove = this.onlineUsers.findIndex(
 					(u) => u.id === chatServiceData.user?.id,
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 				);
 				if (userToRemove !== undefined) {
 					this.onlineUsers.splice(userToRemove, 1);
 				}
 				this.displayCurrentChat();
 				this.updateUsers();
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-			}
-
-			// CHAT SERVICE CONFIRMS BLOCKED USER
-			if (chatServiceData.type === "blockResponse") {
-				const id = chatServiceData.relatedId;
-				const userToBlock = this.onlineUsers.find((u) => u.id === id);
-				if (userToBlock) {
-					userToBlock.blocked = !userToBlock.blocked;
-					this.updateBlockButton(userToBlock);
-				}
-			}
-
-			// INVITATION TO GAME
-			if (chatServiceData.type === "inviteResponse") {
-				const id = chatServiceData.relatedId;
-				if (!id) {
-=======
 				this.dispatchEvent(onlineUserEvent);
 			}
 
@@ -238,30 +149,11 @@ class ChatComponent extends HTMLElement {
 			if (chatServiceData.type === "invite") {
 				const id = chatServiceData.user?.id;
 				if (!id || this.me?.id === id) {
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 					return;
 				}
 				const userToInvite = this.onlineUsers.find((u) => u.id === id);
 				if (userToInvite) {
 					userToInvite.messages.push({
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-						id: id,
-						content: "Let's play PONG together! ",
-						invitation: chatServiceData.roomId,
-					});
-					this.displayCurrentChat();
-				}
-			}
-			// A NEW USER CAME ONLINE
-			if (chatServiceData.type === "newClient") {
-				const user: ChatUser = {
-					id: chatServiceData.relatedId ?? "",
-					messages: [],
-					blocked: false,
-				};
-				this.onlineUsers.push(user);
-				this.updateUsers();
-=======
 						receiver: userToInvite,
 						message: "Let's play PONG together! ",
 						invitation: true,
@@ -286,24 +178,10 @@ class ChatComponent extends HTMLElement {
 				this.onlineUsers.push(user);
 				this.updateUsers();
 				this.dispatchEvent(onlineUserEvent);
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			}
 
 			// WHEN USER LOGS IN, SETTING UP PEOPLE THAT ARE ONLINE
 			if (
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-				chatServiceData.type === "peopleOnline" &&
-				chatServiceData.peopleOnline
-			) {
-				chatServiceData.peopleOnline.map((person) => {
-					if (
-						!this.onlineUsers.some((myUser) => myUser.id === person)
-					) {
-						const newUser: ChatUser = {
-							id: person,
-							messages: [],
-							blocked: false,
-=======
 				chatServiceData.type === "onlineUsers" &&
 				chatServiceData.users
 			) {
@@ -323,7 +201,6 @@ class ChatComponent extends HTMLElement {
 							messages: [],
 							blocked: false,
 							blockStatusChecked: false,
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 						};
 						this.onlineUsers.push(newUser);
 						this.updateUsers();
@@ -333,35 +210,6 @@ class ChatComponent extends HTMLElement {
 		};
 	}
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-	findRelevantUser(message: Message) {
-		const user = this.onlineUsers.find((u) => u.id === message.id);
-		if (user) {
-			return user;
-		}
-		return this.selectedUser;
-	}
-
-	addTimestamp(newMessage: Message, sender?: ChatUser) {
-		let user: ChatUser;
-		if (sender) {
-			user = sender;
-		} else if (!this.selectedUser) {
-			return;
-		} else {
-			user = this.selectedUser;
-		}
-		console.log("will add message to:", user.id);
-
-		if (
-			user.messages.length === 0 ||
-			(!user.messages[user.messages.length - 1].dateTime &&
-				user.messages[user.messages.length - 1].id !== newMessage.id)
-		) {
-			let sender: string;
-			if (newMessage.id === user.id) {
-				sender = `${newMessage.id} | `;
-=======
 	constructor() {
 		super();
 	}
@@ -378,20 +226,12 @@ class ChatComponent extends HTMLElement {
 			let sender: string;
 			if (newMessage.sender?.id === chat.id) {
 				sender = `${newMessage.sender?.nickname} | `;
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			} else {
 				sender = "You | ";
 			}
 			const now = new Date();
 			sender = sender + now.toLocaleTimeString();
 			const timestamp: Message = {
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-				id: newMessage.id,
-				content: sender,
-				dateTime: now,
-			};
-			user.messages.push(timestamp);
-=======
 				sender: {
 					id: newMessage.sender!.id,
 					nickname: newMessage.sender!.nickname,
@@ -400,7 +240,6 @@ class ChatComponent extends HTMLElement {
 				dateTime: now,
 			};
 			chat.messages.push(timestamp);
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		}
 	}
 
@@ -445,11 +284,7 @@ class ChatComponent extends HTMLElement {
 				"grow-1",
 			);
 			userButton.id = user.id;
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-			userButton.innerText = user.id;
-=======
 			userButton.innerText = user.nickname;
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			if (user.id === this.selectedUser?.id) {
 				userButton.classList.add(
 					"pong-button",
@@ -461,17 +296,6 @@ class ChatComponent extends HTMLElement {
 	}
 
 	chatBubble(message: Message) {
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		const div = document.createElement("div");
-		div.innerText = message.content;
-		if (message.invitation) {
-			const link = document.createElement("a");
-			link.textContent = "click here";
-			link.href = `https://${window.location.hostname}:${window.location.port}/pong/${message.invitation}`;
-			div.appendChild(link);
-		}
-		if (message.id === this.selectedUser?.id) {
-=======
 		console.log(message);
 		const div = document.createElement("div");
 		div.innerText = message.message;
@@ -479,7 +303,6 @@ class ChatComponent extends HTMLElement {
 			div.append(this.createInvitationLink());
 		}
 		if (message.sender?.id === this.selectedUser?.id) {
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			div.classList.add("self-start", "text-left");
 			if (!message.dateTime) {
 				div.classList.add("dark:bg-slate-500/50");
@@ -498,11 +321,7 @@ class ChatComponent extends HTMLElement {
 		return div;
 	}
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-	setStateChatButtons(size: number) {
-=======
 	async setStateChatButtons(size: number) {
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		if (size === 0) {
 			this.chatInput.disabled = true;
 			this.sendButton.disabled = true;
@@ -514,17 +333,6 @@ class ChatComponent extends HTMLElement {
 			this.blockButton.disabled = false;
 			this.inviteButton.disabled = false;
 		}
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-	}
-
-	displayCurrentChat() {
-		this.setStateChatButtons(this.onlineUsers.length);
-		this.mainMessages.replaceChildren();
-		if (this.onlineUsers.length === 0) {
-			const chatBubble = this.chatBubble({
-				id: this.selectedUser?.id || "",
-				content: "no Chat History available",
-=======
 		if (!this.selectedUser) {
 			return;
 		}
@@ -552,7 +360,6 @@ class ChatComponent extends HTMLElement {
 		if (this.onlineUsers.length === 0) {
 			const chatBubble = this.chatBubble({
 				message: "no Chat History available",
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
@@ -562,62 +369,21 @@ class ChatComponent extends HTMLElement {
 			this.selectedUser = this.onlineUsers[0];
 		}
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		if (this.selectedUser.messages.length === 0) {
-			const chatBubble = this.chatBubble({
-				id: this.selectedUser.id || "",
-				content: `no Chat History available with ${this.selectedUser.id}`,
-=======
 		// IF THERE IS NO CHAT HISTORY CURRENTLY SELECTED USER
 		if (this.selectedUser.messages.length === 0) {
 			const chatBubble = this.chatBubble({
 				message: `no Chat History available with ${this.selectedUser.nickname}`,
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			});
 			chatBubble.classList.add("text-slate-400");
 			this.mainMessages.appendChild(chatBubble);
 		}
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		// const messagesWithMeta: Message[] = [];
-		// const length = this.selectedUser.messages.length;
-		// const messages = this.selectedUser.messages;
-
-		// for (let i = 0; i < length; ++i) {
-		// 	if (
-		// 		i === 0 ||
-		// 		(!messages[i - 1].meta && messages[i - 1].id !== messages[i].id)
-		// 	) {
-		// 		let sender: string;
-		// 		if (messages[i].id === this.selectedUser?.id) {
-		// 			sender = `${messages[i].id} | `;
-		// 		} else {
-		// 			sender = "You | ";
-		// 		}
-		// 		sender = sender + messages[i].dateTime?.toLocaleTimeString();
-		// 		const metaMessage: Message = {
-		// 			meta: true,
-		// 			id: messages[i].id,
-		// 			content: sender,
-		// 		};
-		// 		messagesWithMeta.push(metaMessage);
-		// 		messagesWithMeta.push(messages[i]);
-		// 	} else {
-		// 		messagesWithMeta.push(messages[i]);
-		// 	}
-		// }
-
-=======
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		for (const message of this.selectedUser.messages) {
 			const chatBubble = this.chatBubble(message);
 			this.mainMessages.appendChild(chatBubble);
 		}
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-=======
 		// DISPLAY THE CORRECT STATE OF THE BLOCK BUTTON
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		this.updateBlockButton(this.selectedUser);
 
 		this.mainMessages.scrollTop = this.mainMessages.scrollHeight;
@@ -655,10 +421,6 @@ class ChatComponent extends HTMLElement {
 			this.handleSendButton(button);
 			this.handleBlockButton(button);
 			this.handleInviteButton(button);
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		}
-	}
-=======
 			this.signOutButton(button);
 		}
 	}
@@ -668,7 +430,6 @@ class ChatComponent extends HTMLElement {
 		}
 		this.ws?.close();
 	}
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 
 	handleMinMaxButton(button: HTMLButtonElement) {
 		if (button.id !== "min-max-button") {
@@ -676,10 +437,7 @@ class ChatComponent extends HTMLElement {
 		}
 		if (this.minusIcon.classList.contains("hidden")) {
 			// CLICKED TO MAXIMIZE
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-=======
 			this.navMe.classList.remove("hidden");
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			this.minusIcon.classList.remove("hidden");
 			this.minusIcon.classList.add("block");
 			this.plusIcon.classList.remove("block");
@@ -703,10 +461,7 @@ class ChatComponent extends HTMLElement {
 			this.chatContainer.classList.remove("hidden");
 		} else {
 			// CLICKED TO MINIMIZE
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-=======
 			this.navMe.classList.add("hidden");
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 			this.plusIcon.classList.remove("hidden");
 			this.plusIcon.classList.add("block");
 			this.minusIcon.classList.remove("block");
@@ -736,11 +491,7 @@ class ChatComponent extends HTMLElement {
 			return;
 		}
 		this.selectedUser = this.onlineUsers.find(
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-			(user) => user.id === button.textContent,
-=======
 			(user) => user.nickname === button.textContent,
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		);
 		this.displayCurrentChat();
 		this.displayOnlineUsers();
@@ -750,12 +501,6 @@ class ChatComponent extends HTMLElement {
 		if (button.id !== "send-button") {
 			return;
 		}
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		const chat: Chat = {
-			type: "message",
-			message: this.chatInput.value,
-			relatedId: this.selectedUser?.id,
-=======
 		const message = this.chatInput.value.trim();
 		if (message === "") {
 			this.chatInput.value = "";
@@ -766,7 +511,6 @@ class ChatComponent extends HTMLElement {
 			type: "message",
 			message: message,
 			id: this.selectedUser?.id,
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		};
 		if (this.ws) {
 			this.ws.send(JSON.stringify(chat));
@@ -774,23 +518,11 @@ class ChatComponent extends HTMLElement {
 		this.chatInput.value = "";
 	}
 
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-	handleBlockButton(button: HTMLButtonElement) {
-=======
 	async handleBlockButton(button: HTMLButtonElement) {
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		if (button.id !== "block-button") {
 			return;
 		}
 		console.log("trying to block a user");
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		const chat: Chat = {
-			type: "block",
-			relatedId: this.selectedUser?.id,
-		};
-		if (this.ws) {
-			this.ws.send(JSON.stringify(chat));
-=======
 		const data = await fetchChatDb(
 			this.me?.id,
 			this.selectedUser?.id,
@@ -799,7 +531,6 @@ class ChatComponent extends HTMLElement {
 		if (data.success === true && this.selectedUser) {
 			this.selectedUser.blocked = !this.selectedUser.blocked;
 			this.updateBlockButton(this.selectedUser);
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		}
 	}
 
@@ -808,11 +539,6 @@ class ChatComponent extends HTMLElement {
 			return;
 		}
 		console.log("trying to invite a user");
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		const chat: Chat = {
-			type: "invite",
-			relatedId: this.selectedUser?.id,
-=======
 
 		this.roomId = "private";
 
@@ -847,7 +573,6 @@ class ChatComponent extends HTMLElement {
 		const chat: Chat = {
 			type: "invite",
 			id: this.selectedUser?.id,
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		};
 		if (this.ws) {
 			this.ws.send(JSON.stringify(chat));
@@ -858,8 +583,6 @@ class ChatComponent extends HTMLElement {
 		console.log("Chat CONNECTED");
 		document.addEventListener("click", this);
 		document.addEventListener("keydown", this);
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-=======
 		this.initChatElement();
 	}
 
@@ -869,7 +592,6 @@ class ChatComponent extends HTMLElement {
 	}
 	initChatElement() {
 		console.log("INIT CHAT");
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 		this.nav.classList.add(
 			"col-span-full",
 			"flex",
@@ -917,15 +639,6 @@ class ChatComponent extends HTMLElement {
 		);
 		this.navUsersContainer.appendChild(this.navUsersCount);
 		this.navUsersCount.innerText = "0";
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-		this.nav.appendChild(this.navUsersContainer);
-
-		this.minusIcon.classList.add("hidden");
-		this.minMaxButton.classList.add("pong-button", "pong-button-secondary");
-		this.minMaxButton.id = "min-max-button";
-		this.minMaxButton.append(this.plusIcon, this.minusIcon);
-		this.nav.append(this.minMaxButton);
-=======
 		this.navUsersCount.classList.remove("hidden");
 
 		this.navMe.classList.add("hidden");
@@ -936,7 +649,6 @@ class ChatComponent extends HTMLElement {
 		this.minMaxButton.classList.remove("hidden");
 		this.minMaxButton.append(this.plusIcon, this.minusIcon);
 		this.nav.append(this.navUsersContainer, this.navMe, this.minMaxButton);
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 
 		this.displayCurrentChat();
 		this.displayOnlineUsers();
@@ -986,13 +698,6 @@ class ChatComponent extends HTMLElement {
 			this.blockButton,
 		);
 	}
-<<<<<<< HEAD:frontend/volume/typescript/components/chat-component.ts
-
-	disconnectedCallback() {
-		console.log("Chat DISCONNECTED");
-	}
-=======
->>>>>>> main:microservices/frontend/volume/typescript/components/chat-component.ts
 }
 
 customElements.define("chat-component", ChatComponent);

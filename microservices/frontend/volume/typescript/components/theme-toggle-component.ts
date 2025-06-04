@@ -60,15 +60,11 @@ class ThemeToggleComponent extends HTMLElement {
 
 	connectedCallback() {
 		console.log("TOGGLE has been CONNECTED");
-<<<<<<< HEAD:frontend/volume/typescript/components/theme-toggle-component.ts
-		this.button.classList.add("pong-button");
-=======
 		this.button.classList.add(
 			"pong-button",
 			"pong-button-primary",
 			"pong-button-round",
 		);
->>>>>>> main:microservices/frontend/volume/typescript/components/theme-toggle-component.ts
 		this.append(this.button);
 		this.darkIcon.setIcon(this.darkIconName);
 		this.lightIcon.setIcon(this.lightIconName);

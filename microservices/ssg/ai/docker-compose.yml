@@ -1,0 +1,14 @@
+services:
+  ai-bot:
+    image: ai-bot
+    build:
+      dockerfile: ./ai/Dockerfile
+    container_name: ai-bot
+    volumes:
+      - ./ai/src:/app/src:ro
+    ports:
+      - 6969:6969 #TODO keep now for swagger documentation, remove later
+    environment:
+      - AUTH_API_BOT_JWT_END_POINT=http://auth_api_container:2999/auth-api/bot-jwt
+    networks:
+      - Transcendence2.0

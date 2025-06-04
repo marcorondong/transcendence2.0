@@ -44,14 +44,7 @@ export class Router {
 	setActiveViewInNavigation(link: string) {
 		const navLinks = [...this.navLinks];
 		navLinks.map((l) => {
-<<<<<<< HEAD:frontend/volume/typescript/router.ts
-			const li = l.querySelector("nav li button");
-			if (li) {
-				li.classList.remove("pong-nav-link-active");
-			}
-=======
 			l.classList.remove("pong-nav-link-active");
->>>>>>> main:microservices/frontend/volume/typescript/router.ts
 		});
 
 		const linkElement = navLinks.find(
@@ -59,14 +52,8 @@ export class Router {
 				this.stringAfterSlash(l.href) === this.stringAfterSlash(link),
 		);
 
-<<<<<<< HEAD:frontend/volume/typescript/router.ts
-		const listItem = linkElement?.querySelector("nav li button");
-		if (listItem && listItem.classList.contains("pong-nav-link")) {
-			listItem.classList.add("pong-nav-link-active");
-=======
 		if (linkElement && linkElement.classList.contains("pong-nav-link")) {
 			linkElement.classList.add("pong-nav-link-active");
->>>>>>> main:microservices/frontend/volume/typescript/router.ts
 		}
 	}
 

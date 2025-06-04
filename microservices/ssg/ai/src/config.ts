@@ -13,30 +13,18 @@ export interface GameState {
 	knockoutName: string;
 }
 
-interface BotConfig {
-	email: string;
-	password: string;
-	name: string;
+function parseTokenRoute(): string {
+	const tokenRoute = process.env.AUTH_API_BOT_JWT_END_POINT;
+
+	if (!tokenRoute)
+		throw new Error(
+			"AUTH_API_BOT_JWT_END_POINT environment variable is not set",
+		);
+
+	return tokenRoute;
 }
 
-function validateEnvVariables(): BotConfig {
-	const email = process.env.BOT_EMAIL;
-	const password = process.env.BOT_PASSWORD;
-	const name = process.env.BOT_NAME;
-
-	if (!email) throw new Error("BOT_EMAIL environment variable is not set");
-	if (!password)
-		throw new Error("BOT_PASSWORD environment variable is not set");
-	if (!name) throw new Error("BOT_NAME environment variable is not set");
-
-	return {
-		email,
-		password,
-		name,
-	};
-}
-
-export const botConfig = validateEnvVariables();
+export const tokenRoute = parseTokenRoute();
 
 interface PaddleTwistSelector {
 	[difficulty: string]: number;

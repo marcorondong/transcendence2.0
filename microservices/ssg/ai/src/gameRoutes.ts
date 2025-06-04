@@ -1,31 +1,32 @@
 import { FastifyInstance } from "fastify";
 import { gameRequestSchema, healthSchema } from "./gameSchema";
 import { Bot } from "./bot";
-import axios from "axios";
-import { botConfig } from "./config";
+import { tokenRoute } from "./config";
 
 async function cookieSubRequest(gameRequestReply: any): Promise<string> {
-	const authResponse = await axios.post(
-		"http://auth_api_container:2999/auth-api/sign-in",
-		{ email: botConfig.email, password: botConfig.password },
-		{
-			headers: { "Content-Type": "application/json" },
-			withCredentials: true,
-		},
-	);
+	const res = await fetch(tokenRoute);
 
-	if (authResponse.status !== 201) {
+	if (!res.ok) {
 		gameRequestReply.code(401).send({ error: "bot is unauthorized" });
 		throw new Error("bot is unauthorized");
 	}
 
-	const cookies = authResponse.headers["set-cookie"];
-	if (!cookies) {
-		throw new Error("Bot received no access token");
-	}
-	console.log("Auth cookies received:", cookies);
+    const authResponse = await res.json();
+	console.log("Auth response received:", authResponse);
 
-	return cookies;
+	if (!authResponse || !authResponse.access_token) {
+		gameRequestReply.code(500).send({ error: "Failed to retrieve auth data" });
+		throw new Error("Failed to retrieve auth data");
+	}
+
+	const token = authResponse.access_token;
+	if (!token) {
+		gameRequestReply.code(500).send({ error: "Token not found in response" });
+		throw new Error("Token not found in response");
+	}
+	console.log("Token retrieved successfully:", token);
+
+	return "access_token=" + token;
 }
 
 export async function gameRoute(fastify: FastifyInstance) {
