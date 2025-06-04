@@ -58,17 +58,20 @@ So NGINX will serve those static files (_and it could be enhanced by implementin
 _**Currently**_ it's not possible to upload the picture via USERS service Swagger;
 it needs a `curl` command directed to the endpoint to upload the picture.
 
+It support **blacklist**
+Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded from a config file_)
+
 > [!NOTE]
 >
 > In next version, it'll handle also:
 >
-> - [x] 🖼️ Avatar (user image).
 > - 👥 User friendship management (friend requests).
-> - 🏃‍♂️💨 Change in how the code is "compiled" and run.
 > - Makefile
+> - ♻️ Code refactoring and code clean-up
+> - 🏃‍♂️💨 Change in how the code is "compiled" and run.
+> - [x] 🖼️ Avatar (user image).
 > - [x] Login to be done via email **OR** username.
 > - [x] `npm` utilities commands.
-> - ♻️ Code refactoring and code clean-up
 
 ---
 
@@ -157,6 +160,7 @@ However, you can customize the service using docker secrets, environmental varia
 > - `.env` file containing location of database.
 > - `.env` file containing location of users pictures' folder.
 > - `.env` file containing `PAGINATION_ENABLED` and `DEFAULT_PAGE_SIZE`.
+> - `.env` file containing blacklisted values for users fields.
 
 ---
 
