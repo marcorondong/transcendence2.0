@@ -1,331 +1,331 @@
 {
-	"dashboard": {
-		"annotations": {
-			"list": [
-				{
-					"builtIn": 1,
-					"datasource": {
-						"type": "grafana",
-						"uid": "-- Grafana --"
-					},
-					"enable": true,
-					"hide": true,
-					"iconColor": "rgba(0, 211, 255, 1)",
-					"name": "Annotations & Alerts",
-					"type": "dashboard"
-				}
-			]
-		},
-		"editable": true,
-		"fiscalYearStartMonth": 0,
-		"graphTooltip": 0,
-		"id": null,
-		"links": [],
-		"panels": [
-			{
-				"datasource": {
-					"type": "prometheus"
-				},
-				"fieldConfig": {
-					"defaults": {
-						"color": {
-							"mode": "continuous-RdYlGr"
-						},
-						"mappings": [],
-						"max": 1,
-						"min": 0,
-						"thresholds": {
-							"mode": "absolute",
-							"steps": [
-								{
-									"color": "green"
-								},
-								{
-									"color": "red",
-									"value": 80
-								}
-							]
-						},
-						"unit": "bool_yes_no"
-					},
-					"overrides": []
-				},
-				"gridPos": {
-					"h": 6,
-					"w": 24,
-					"x": 0,
-					"y": 0
-				},
-				"id": 2,
-				"options": {
-					"colorMode": "background",
-					"graphMode": "area",
-					"justifyMode": "auto",
-					"orientation": "auto",
-					"percentChangeColorMode": "standard",
-					"reduceOptions": {
-						"calcs": ["lastNotNull"],
-						"fields": "",
-						"values": false
-					},
-					"showPercentChange": false,
-					"textMode": "value_and_name",
-					"wideLayout": true
-				},
-				"pluginVersion": "11.6.0",
-				"targets": [
-					{
-						"disableTextWrap": false,
-						"editorMode": "builder",
-						"expr": "probe_success",
-						"fullMetaSearch": false,
-						"includeNullMetadata": true,
-						"legendFormat": "{{instance}}",
-						"range": true,
-						"refId": "A",
-						"useBackend": false
-					}
-				],
-				"title": "Probe success",
-				"type": "stat"
-			},
-			{
-				"datasource": {
-					"type": "prometheus"
-				},
-				"fieldConfig": {
-					"defaults": {
-						"color": {
-							"mode": "continuous-BlYlRd"
-						},
-						"mappings": [],
-						"max": 600,
-						"min": 0,
-						"thresholds": {
-							"mode": "absolute",
-							"steps": [
-								{
-									"color": "green"
-								},
-								{
-									"color": "red",
-									"value": 80
-								}
-							]
-						}
-					},
-					"overrides": []
-				},
-				"gridPos": {
-					"h": 6,
-					"w": 24,
-					"x": 0,
-					"y": 6
-				},
-				"id": 3,
-				"options": {
-					"colorMode": "background",
-					"graphMode": "area",
-					"justifyMode": "auto",
-					"orientation": "auto",
-					"percentChangeColorMode": "standard",
-					"reduceOptions": {
-						"calcs": ["lastNotNull"],
-						"fields": "",
-						"values": false
-					},
-					"showPercentChange": false,
-					"textMode": "auto",
-					"wideLayout": true
-				},
-				"pluginVersion": "11.6.0",
-				"targets": [
-					{
-						"editorMode": "builder",
-						"expr": "probe_http_status_code",
-						"legendFormat": "{{instance}}",
-						"range": true,
-						"refId": "A"
-					}
-				],
-				"title": "Probe status code",
-				"type": "stat"
-			},
-			{
-				"datasource": {
-					"type": "prometheus"
-				},
-				"fieldConfig": {
-					"defaults": {
-						"color": {
-							"mode": "thresholds"
-						},
-						"mappings": [],
-						"thresholds": {
-							"mode": "absolute",
-							"steps": [
-								{
-									"color": "green"
-								},
-								{
-									"color": "red",
-									"value": 80
-								}
-							]
-						},
-						"unit": "bool_yes_no"
-					},
-					"overrides": []
-				},
-				"gridPos": {
-					"h": 7,
-					"w": 4,
-					"x": 0,
-					"y": 12
-				},
-				"id": 1,
-				"options": {
-					"colorMode": "background",
-					"graphMode": "none",
-					"justifyMode": "auto",
-					"orientation": "auto",
-					"percentChangeColorMode": "standard",
-					"reduceOptions": {
-						"calcs": ["lastNotNull"],
-						"fields": "",
-						"values": false
-					},
-					"showPercentChange": false,
-					"textMode": "auto",
-					"wideLayout": true
-				},
-				"pluginVersion": "11.6.0",
-				"targets": [
-					{
-						"datasource": {
-							"type": "prometheus"
-						},
-						"disableTextWrap": false,
-						"editorMode": "builder",
-						"expr": "blackbox_exporter_config_last_reload_successful{instance=\"blackbox-exporter:9115\"}",
-						"fullMetaSearch": false,
-						"includeNullMetadata": true,
-						"legendFormat": "__auto",
-						"range": true,
-						"refId": "A",
-						"useBackend": false
-					}
-				],
-				"title": "Blackbox config loaded",
-				"type": "stat"
-			},
-			{
-				"datasource": {
-					"type": "prometheus"
-				},
-				"fieldConfig": {
-					"defaults": {
-						"color": {
-							"mode": "palette-classic"
-						},
-						"custom": {
-							"axisBorderShow": false,
-							"axisCenteredZero": false,
-							"axisColorMode": "text",
-							"axisLabel": "",
-							"axisPlacement": "auto",
-							"barAlignment": 0,
-							"barWidthFactor": 0.6,
-							"drawStyle": "line",
-							"fillOpacity": 0,
-							"gradientMode": "none",
-							"hideFrom": {
-								"legend": false,
-								"tooltip": false,
-								"viz": false
-							},
-							"insertNulls": false,
-							"lineInterpolation": "linear",
-							"lineWidth": 1,
-							"pointSize": 5,
-							"scaleDistribution": {
-								"type": "linear"
-							},
-							"showPoints": "auto",
-							"spanNulls": false,
-							"stacking": {
-								"group": "A",
-								"mode": "none"
-							},
-							"thresholdsStyle": {
-								"mode": "off"
-							}
-						},
-						"mappings": [],
-						"thresholds": {
-							"mode": "absolute",
-							"steps": [
-								{
-									"color": "green"
-								},
-								{
-									"color": "red",
-									"value": 80
-								}
-							]
-						},
-						"unit": "s"
-					},
-					"overrides": []
-				},
-				"gridPos": {
-					"h": 7,
-					"w": 20,
-					"x": 4,
-					"y": 12
-				},
-				"id": 4,
-				"options": {
-					"legend": {
-						"calcs": ["min", "max", "mean"],
-						"displayMode": "table",
-						"placement": "bottom",
-						"showLegend": true
-					},
-					"tooltip": {
-						"hideZeros": false,
-						"mode": "single",
-						"sort": "none"
-					}
-				},
-				"pluginVersion": "11.6.0",
-				"targets": [
-					{
-						"editorMode": "code",
-						"expr": "avg_over_time(probe_duration_seconds[5m])",
-						"legendFormat": "{{instance}}",
-						"range": true,
-						"refId": "A"
-					}
-				],
-				"title": "Average respose time",
-				"type": "timeseries"
-			}
-		],
-		"preload": false,
-		"schemaVersion": 41,
-		"tags": ["endpoints_availability"],
-		"templating": {
-			"list": []
-		},
-		"time": {
-			"from": "now-6h",
-			"to": "now"
-		},
-		"timepicker": {},
-		"timezone": "browser",
-		"title": "Endpoints availability",
-		"uid": null
-	},
-	"overwrite": true
+  "dashboard": {
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "panels": [
+      {
+        "datasource": {
+          "type": "prometheus"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-RdYlGr"
+            },
+            "mappings": [],
+            "max": 1,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "bool_yes_no"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 2,
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "value_and_name",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.6.0",
+        "targets": [
+          {
+            "disableTextWrap": false,
+            "editorMode": "builder",
+            "expr": "probe_success",
+            "fullMetaSearch": false,
+            "includeNullMetadata": true,
+            "legendFormat": "{{instance}}",
+            "range": true,
+            "refId": "A",
+            "useBackend": false
+          }
+        ],
+        "title": "Probe success",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlYlRd"
+            },
+            "mappings": [],
+            "max": 600,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 6
+        },
+        "id": 3,
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.6.0",
+        "targets": [
+          {
+            "editorMode": "builder",
+            "expr": "probe_http_status_code",
+            "legendFormat": "{{instance}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Probe status code",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "bool_yes_no"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 4,
+          "x": 0,
+          "y": 12
+        },
+        "id": 1,
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "percentChangeColorMode": "standard",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "11.6.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus"
+            },
+            "disableTextWrap": false,
+            "editorMode": "builder",
+            "expr": "blackbox_exporter_config_last_reload_successful{instance=\"blackbox-exporter:9115\"}",
+            "fullMetaSearch": false,
+            "includeNullMetadata": true,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A",
+            "useBackend": false
+          }
+        ],
+        "title": "Blackbox config loaded",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green"
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 20,
+          "x": 4,
+          "y": 12
+        },
+        "id": 4,
+        "options": {
+          "legend": {
+            "calcs": ["min", "max", "mean"],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "11.6.0",
+        "targets": [
+          {
+            "editorMode": "code",
+            "expr": "avg_over_time(probe_duration_seconds[5m])",
+            "legendFormat": "{{instance}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Average response time",
+        "type": "timeseries"
+      }
+    ],
+    "preload": false,
+    "schemaVersion": 41,
+    "tags": ["endpoints_availability"],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Endpoints availability",
+    "uid": null
+  },
+  "overwrite": true
 }

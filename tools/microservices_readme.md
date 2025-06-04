@@ -12,6 +12,7 @@ _Paste here a short description of the service's purpose_
 ## 🧠 Responsibilities
 
 _Paste here a short list of what things the service does._
+
 > [!NOTE]
 > E.g:
 >
@@ -25,6 +26,7 @@ _Paste here a short list of what things the service does._
 ## 📦 Tech Stack
 
 _Paste here a short list of which stack/technologies the service uses._
+
 > [!NOTE]
 > E.g:
 >
@@ -38,6 +40,7 @@ _Paste here a short list of which stack/technologies the service uses._
 ## 🚀 How to Run the Service
 
 _Paste here a short list of the commands to run the service._
+
 > [!NOTE]
 > E.g:
 >
@@ -50,6 +53,7 @@ _Paste here a short list of the commands to run the service._
 ## ⚙️ Configuration
 
 _Paste here a short info/list of the variables/secrets and other configuration that the service needs._
+
 > [!NOTE]
 > E.g:
 > Before running the project, make sure the following files exist:
@@ -71,6 +75,7 @@ _Paste here a short info/list of the variables/secrets and other configuration t
 ## 🔀 API Endpoints
 
 _Paste here a short info/list of the available endpoints the service provides._
+
 > [!NOTE]
 > E.g:
 >
@@ -87,6 +92,7 @@ _Paste here a short info/list of the available endpoints the service provides._
 ## 🧩 Dependencies
 
 _Paste here a short info/list of service's dependencies._
+
 > [!NOTE]
 > E.g:
 >
@@ -98,6 +104,7 @@ _Paste here a short info/list of service's dependencies._
 ## 📚 Notes
 
 _Paste here a short info/list of service's notes._
+
 > [!NOTE]
 > E.g:
 >
@@ -110,6 +117,7 @@ _Paste here a short info/list of service's notes._
 ## 🧪 Testing
 
 _Paste here a short info/list of how to run test for the service._
+
 > [!NOTE]
 > E.g:
 > Tests not yet implemented.

@@ -233,7 +233,7 @@ This section will be populated soon
 1. You can check these sources for commit messages best practice:
    1. [Free Code Camp](https://www.freecodecamp.org/news/writing-good-commit-messages-a-practical-guide/)
    2. [Baeldung](https://www.baeldung.com/ops/git-commit-messages)
-   3. [Conventionalcommits](https://www.conventionalcommits.org/en/v1.0.0/)
+   3. [ConventionalCommits](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ##### Atomic commits
 
@@ -329,7 +329,7 @@ This section will be populated soon
 
 ##### In the codebase
 
-1. If it's a service/script/set-up and it needs to be configured and/or used in an specific way, consider adding a `README.md` file to its root folder. Everyone will appreciate to have some documentation to use your service. (_How many times we complained about minilibx not having a correct manual; or estrange-written MAN pages of our libft Unix functions_).
+1. If it's a service/script/set-up and it needs to be configured and/or used in an specific way, consider adding a `README.md` file to its root folder. Everyone will appreciate to have some documentation to use your service. (_How many times we complained about MiniLibX not having a correct manual; or estrange-written MAN pages of our LibFT Unix functions_).
 2. If your function is not self-descriptive or hard to understand; include some comments for it. Your future self and the team will appreciate it when reviewing it (_specially when +2weeks have passed since you code it_).
 3. This will save you time because you won't need to explain (_or at least not too much/often_) the purpose of your contribution and how to make it work. And everyone won't need to wait for you to explain it, make it work, or spend their time figuring it out.
 
@@ -346,7 +346,7 @@ This section will be populated soon
 2. We have the label "**on-hold**" in case you need to explicitly announce that a certain PR should not be merge yet.
 3. When creating a Pull Request, please use the appropriates labels (_e.g: "breaking change", "code clean-up", etc_).
 4. If you're changing someone's code, you should add him as a your PR reviewer. Also, if you know that someone has a wider knowledge of a key aspect of your PR, add him too.
-5. Currently we have an automated reviewer assignation through "Code Owners" ( more info [here](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)). So to **keep that in sync** with the project growth; remember to **update the file** located at the root of the repo (`.github/CODEOWNERS`) when you start to develop a service, or working together in specific files.
+5. Currently we have an automated reviewer assignation through "Code Owners" ([more info here](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)). So to **keep that in sync** with the project growth; remember to **update the file** located at the root of the repo (`.github/CODEOWNERS`) when you start to develop a service, or working together in specific files.
 6. If you're going to "update" someone's branch, please issue a Pull Request to his branch instead of directly pushing to it.
 7. See some examples here: [Pull Request Templates](#pull-request)
 
@@ -743,8 +743,8 @@ This section will be populated soon
       2. [GitHub - Reviewing proposed changes in a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request)
       3. [GitHub - Commenting on a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request)
       4. [Rewind - Best Practices for Reviewing Pull Requests in GitHub](https://rewind.com/blog/best-practices-for-reviewing-pull-requests-in-github/)
-      5. [Youtube - How to Review a Pull Request on GitHub](https://www.youtube.com/watch?v=TO9xK4XTBbQ)
-      6. [Youtube - How to Review a Pull Request Like a Senior Developer](https://www.youtube.com/watch?v=LheeJPkdCu8)
+      5. [YouTube - How to Review a Pull Request on GitHub](https://www.youtube.com/watch?v=TO9xK4XTBbQ)
+      6. [YouTube - How to Review a Pull Request Like a Senior Developer](https://www.youtube.com/watch?v=LheeJPkdCu8)
 
 ### Reporting issues
 
