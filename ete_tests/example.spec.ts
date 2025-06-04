@@ -21,5 +21,6 @@ test("get started link", async ({ page }) => {
 
 test("first Filip test", async ({ page }) => {
 	await page.goto("https://10.12.7.1:8080/sign-in-view");
-	await expect(page).toHaveTitle("Sign in to your account");
+	const header= page.getByRole("heading")
+	await expect(header).toHaveText("Sign in to your account");
 });
