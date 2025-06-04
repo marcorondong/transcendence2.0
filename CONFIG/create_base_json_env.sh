@@ -51,7 +51,7 @@ main(){
   echo "$TEST"
   create_base_json
   create_global_conf
-  create_copies_for_microservices
+  create_copies_for_microservice
 }
 
 
