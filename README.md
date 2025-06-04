@@ -61,7 +61,7 @@ make cli       # build & start all services AND use cli makefile to run it
 | User API            | [http://localhost:3000/api](http://localhost:3000/api/users/)                              |
 | Game Service        | ws://localhost:5000/ws                                                                     |
 | Swagger USERS (dev) | [http://localhost:3000/api/documentation](http://localhost:3000/api/tools/swagger)         |
-| Healthcheck USERS   | [http://localhost:3000/api/health-check](http://localhost:3000/api/health-check) |
+| Health-check USERS   | [http://localhost:3000/api/health-check](http://localhost:3000/api/health-check) |
 
 ---
 
@@ -90,15 +90,19 @@ E.g:
 ## 🔗 Links to services' readme files
 
 - [AI-broken](/microservices/ai/README.md)
-- [Auth](/microservices/auth/README.md)
+- [Auth](/microservices/auth_api/README.md)
 - [Blockchain-broken](/microservices/blockchain/README.md)
-- [Chat-broken](/microservices/chat_api/README.md)
-- [Chat DB-broken](/microservices/chat_db/README.md)
+- [Chat](/microservices/chat_api/README.md)
+- [Chat DB](/microservices/chat_db/README.md)
 - [CLI Client-broken](/microservices/cli_client/README.md)
 - [Front-end-broken](/microservices/frontend/README.md)
 - [Monitoring-broken](/microservices/monitoring/README.md)
-- [Pong-broken](/microservices/pong/README.md)
+- [Pong-api](./microservices/ssg/pong-api/README.md)
 - [Pong DB](/microservices/pong_db/README.md)
-- [Tic-Tac-Toe-broken](/microservices/tictactoe_api/README.md)
-- [Tic-Tac-Toe DB-broken](/microservices/tictactoe_db/README.md)
-- [Users-broken](/microservices/users/README.md)
+- [TicTacToe-broken](/microservices/tictactoe_api/README.md)
+- [TicTacToe DB](/microservices/tictactoe_db/README.md)
+- [Users](/microservices/users/README.md)
+
+## 🔗 Links to other README files
+
+- [Database Seeder](/tools/db_seeder/README.md)

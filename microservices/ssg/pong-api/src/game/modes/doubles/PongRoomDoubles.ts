@@ -195,6 +195,6 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 		firstNickname: string,
 		secondNickname: string,
 	): string {
-		return firstNickname + "-" + secondNickname + "-TEAM";
+		return firstNickname + " " + secondNickname + " TEAM";
 	}
 }

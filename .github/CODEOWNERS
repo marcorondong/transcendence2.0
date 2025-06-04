@@ -18,11 +18,20 @@
 # /microservices/tictactoe/        @ismayilguliyev28
 /microservices/users/            @marcorondong
 
+# === Temporary solution to issue with AUTH and NGINX config === #
+microservices/frontend/docker/nginx/config/    @marcorondong
+microservices/auth_api/src/      @marcorondong
+
+# === Temporary solution to root env pollution and overwriting === #
+./.env.enc                       @marcorondong
+
 # === TOOLS === #
 /tools/entrypoint.sh             @marcorondong
 /tools/fill_db.py                @marcorondong
 /tools/show-schema.ts            @marcorondong
 /tools/microservices_readme.md   @marcorondong
+/tools/db_seeder/                @marcorondong
+/tools/db_seeder/seed_data
 
 # === CONFIGURATION & TOOLING === #
 /.vscode/                        @marcorondong

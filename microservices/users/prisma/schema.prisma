@@ -11,7 +11,6 @@ datasource db {
   url      = "file:./database/dev.db"
 }
 
-// id           Int       @id @unique @default(autoincrement())
 model User {
   id           String    @id @default(uuid())
   createdAt    DateTime  @default(now())
@@ -21,6 +20,7 @@ model User {
   nickname     String    @unique
   passwordHash String
   salt         String
+  picture      String    @default("/uploads/users/default/picture.jpg")
   products     Product[]
 }
 

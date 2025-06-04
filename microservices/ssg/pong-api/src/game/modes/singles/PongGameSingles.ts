@@ -88,7 +88,7 @@ export class PongGameSingles extends APongGame {
 					`Game data is not stored in database: ${response.status}`,
 				);
 			const status = await response.json();
-			console.log("Server Response:", status);
+			console.log("Database api Response:", status);
 		} catch (error) {
 			console.error(`❌ Failed to store to database: ${error}`);
 		}

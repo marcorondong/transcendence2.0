@@ -1,5 +1,6 @@
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
+import multipart from "@fastify/multipart";
 import {
 	ZodTypeProvider,
 	validatorCompiler,
@@ -7,8 +8,7 @@ import {
 } from "fastify-type-provider-zod";
 import userRoutes from "./modules/user/user.route";
 import productRoutes from "./modules/product/product.route";
-import { setupSwagger } from "./modules/tools/tools.route";
-import toolsRoutes from "./modules/tools/tools.route";
+import { setupSwagger, toolsRoutes } from "./modules/tools/tools.route";
 import { AppError } from "./utils/errors";
 
 // Creating server with global Zod type inference
@@ -18,86 +18,18 @@ export const server = Fastify().withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
-// TODO: This should be done in a "types/fastify.d.ts" file
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Extend TypeScript Fastify's types to add "authRequired" custom field. (augmenting)(augmenting Fastify's type system)
-// declare module "fastify" {
-// 	interface FastifyContextConfig {
-// 		authRequired?: boolean;
-// 	}
-// }
-
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Extend TypeScript Fastify's types to add "authenticate" function. (extending public types)(augmenting Fastify's type system)
-// declare module "fastify" {
-// 	export interface FastifyInstance {
-// 		authenticate: (
-// 			request: FastifyRequest,
-// 			reply: FastifyReply,
-// 		) => Promise<void>;
-// 	}
-// }
-
-// TODO: register this differently. e.g., src/types/jwt.d.ts or in app.ts before initializing Fastify
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Extend FastifyJWT module to recognize "user" (fields in JWT). (module augmentation)(augmenting Fastify's type system)
-// declare module "@fastify/jwt" {
-// 	interface FastifyJWT {
-// 		user: {
-// 			// id: number;
-// 			id: string;
-// 			email: string;
-// 			username: string;
-// 		};
-// 	}
-// }
-
-// TODO: Maybe this JWT part should be handled by Authentication Service
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Set JWT plugin
-// server.register(fastifyJwt, {
-// 	secret: "supersecret",
-// });
-
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Add JWT Authentication Middleware
-// server.decorate(
-// 	"authenticate", // This is a custom function on Fastify
-// 	async (request: FastifyRequest, reply: FastifyReply) => {
-// 		try {
-// 			await request.jwtVerify();
-// 		} catch (err) {
-// 			return reply.send(err);
-// 		}
-// 	},
-// );
+// Register multipart (for picture uploads) and set limits
+// TODO: Later move these constraints to Nginx (separation of concerns, unique source of truth)
+server.register(multipart, {
+	limits: { fileSize: 1_048_576 }, // 1MB in bytes
+});
+// server.register(multipart); // No config needed. (When Nginx is configured)
 
 // MR_NOTE: Code snippet example for checking path ONLY when in DEVELOPMENT mode
 // const publicPaths: string[] =
 // 	process.env.NODE_ENV !== "production"
 // 		? ["/api/dev/test", "/api/debug/info"]
 // 		: [];
-
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Public paths to NOT enforce authentication (ONLY for development. Each route must define its own authentication needs)
-// const publicPaths: string[] = [
-// 	// "/api/tools/health-check",
-// 	// "/api/tools/swagger",
-// 	// "/api/tools/swagger",
-// ];
-
-// TODO: This set-up is for Authenticated routes. But commenting out since AUTH is doing the authentication check
-// // Hook to check route config (authentication required by default)
-// server.addHook("onRequest", async (request, reply) => {
-// 	if (request.routeOptions?.handler?.name === "basic404") return; // Skip auth for non-existent routes (Detect fallback 404 route by handler name)
-// 	const isPublic = publicPaths.some((path) =>
-// 		request.raw.url?.startsWith(path),
-// 	);
-// 	const requiresAuth =
-// 		!isPublic && request.routeOptions?.config?.authRequired !== false;
-// 	if (!requiresAuth) return;
-// 	await server.authenticate(request, reply);
-// });
 
 async function main() {
 	// Register swagger/openAPI plugins
@@ -108,7 +40,7 @@ async function main() {
 	server.register(productRoutes, { prefix: "api/products" });
 	// Global error handler
 	server.setErrorHandler((error, request, reply) => {
-		// Custom AppError (e.g., domain-specific errors like "Email exists")
+		// Custom AppError (E.g., domain-specific errors like "Email exists")
 		if (error instanceof AppError) {
 			request.log.error({
 				code: error.code,

@@ -20,16 +20,18 @@
   "devDependencies": {
     "@fastify/swagger": "^9.5.0",
     "@fastify/swagger-ui": "^5.2.2",
+    "@types/cookie-signature": "^1.1.2",
     "@types/http-errors": "^2.0.4",
     "@types/node": "^22.13.9",
     "nodemon": "^3.1.9",
-	"pino-pretty": "^13.0.0",
+    "pino-pretty": "^13.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/jwt": "^9.1.0",
+    "cookie-signature": "^1.2.2",
     "fastify": "^5.3.2",
     "fastify-type-provider-zod": "^4.0.2",
     "zod": "^3.24.3",

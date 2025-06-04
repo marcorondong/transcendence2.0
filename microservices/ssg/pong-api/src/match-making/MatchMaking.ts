@@ -77,6 +77,13 @@ export class MatchMaking {
 		connectedPlayer: PongPlayer,
 		tournamentSize: number,
 	) {
+		if (connectedPlayer.isBot()) {
+			connectedPlayer.sendError(
+				"Bot cannot join tournament, You can report us to the Office for Robot Rights in Vienna",
+			);
+			connectedPlayer.connection.close(1008, "Only for humans");
+			return;
+		}
 		this.tournamentJoiner(connectedPlayer, tournamentSize);
 	}
 
@@ -116,7 +123,7 @@ export class MatchMaking {
 	public spectatorJoiner(connection: WebSocket, roomId: string): void {
 		if (roomId === "") {
 			PongPlayer.sendErrorMessage(
-				"roomId is required query if you are spectator",
+				"roomId is required if you are spectator",
 				connection,
 			);
 			connection.close();
@@ -134,6 +141,7 @@ export class MatchMaking {
 				`Room with id ${roomId} was not found`,
 				connection,
 			);
+			connection.close(1008, "Room not found");
 			return;
 		}
 	}
