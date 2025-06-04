@@ -19,8 +19,11 @@
 /microservices/users/            @marcorondong
 
 # === Temporary solution to issue with AUTH and NGINX config === #
-frontend/docker/nginx/config/    @marcorondong
+microservices/frontend/docker/nginx/config/    @marcorondong
 microservices/auth_api/src/      @marcorondong
+
+# === Temporary solution to root env pollution and overwriting === #
+./.env.enc                       @marcorondong
 
 # === TOOLS === #
 /tools/entrypoint.sh             @marcorondong
