@@ -12,14 +12,14 @@ export const signInSchema = {
 	summary: "Sign In",
 	description: "Sign in a user. This will create the token for the user.",
 	tags: ["Auth"],
-	body: signInBodyShape,
+	// body: signInBodyShape,
 };
 
 export const signUpSchema = {
 	summary: "Sign Up",
 	description: "Sign up a user. This will create the user and the token.",
 	tags: ["Auth"],
-	body: signUpBodyShape,
+	// body: signUpBodyShape,
 };
 
 export const signOutSchema = {
