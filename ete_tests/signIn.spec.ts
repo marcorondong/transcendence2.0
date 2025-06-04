@@ -45,12 +45,36 @@ test("Sign in without account", async ({ page }) => {
 	await page
 		.getByRole("textbox", { name: "Your Password" })
 		.fill("Password!234");
-	await page.getByRole("button", { name: "Sign in" }).click();
+	const button = await page.getByRole("button", { name: "Sign in" });
+	// await page.getByRole("button", { name: "Sign in" }).click();
 	const [response] = await Promise.all([
 		page.waitForResponse((res) => res.url().includes("/auth-api/sign-in")), //wait for response where url contains this
-		page.click("text=Sign in"), //simulate click that have visible text Sign in
+		button.click(),
 	]);
 
 	expect(response.status()).toBe(401);
 	await expect(page.getByText("sign in failed")).toBeVisible();
+});
+
+test("Sign up page first view. Not logged", async ({ page }) => {
+	await page.goto("https://localhost:8080/sign-in-view");
+	await page.getByRole("link", { name: "Sign Up", exact: true }).click();
+	await expect(
+		page.getByRole("textbox", { name: "Your Username" }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("textbox", { name: "Your Password" }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("textbox", { name: "Repeat Password" }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("textbox", { name: "Your Email" }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("textbox", { name: "Your Nickname" }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Register new account" }),
+	).toBeVisible();
 });
