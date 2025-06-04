@@ -36,3 +36,21 @@ test("Home page visibility test", async ({ page }) => {
 		page.locator("theme-toggle-component").getByRole("button"),
 	).toBeVisible();
 });
+
+test("Sign in without account", async ({ page }) => {
+	await page.goto(`${homeUrl}`);
+	await page.getByRole("textbox", { name: "Your Username" }).dblclick();
+	await page.getByRole("textbox", { name: "Your Username" }).fill("pwguest");
+	await page.getByRole("textbox", { name: "Your Username" }).press("Tab");
+	await page
+		.getByRole("textbox", { name: "Your Password" })
+		.fill("Password!234");
+	await page.getByRole("button", { name: "Sign in" }).click();
+	const [response] = await Promise.all([
+		page.waitForResponse((res) => res.url().includes("/auth-api/sign-in")), //wait for response where url contains this
+		page.click("text=Sign in"), //simulate click that have visible text Sign in
+	]);
+
+	expect(response.status()).toBe(401);
+	await expect(page.getByText("sign in failed")).toBeVisible();
+});
