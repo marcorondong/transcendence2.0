@@ -3,7 +3,7 @@ import {
 	signUpBodyShape,
 	payloadResponseShape,
 	accessTokenResponseShape,
-	profileBodyShape,
+	// profileBodyShape, // AUTH will only handle cookies/jwt management it should intercept calls
 	idParamShape,
 } from "./shapeSchemas";
 
@@ -54,28 +54,29 @@ export const botJWTSchema = {
 	response: { 200: accessTokenResponseShape },
 };
 
-export const editProfileSchema = {
-	summary: "Edit Profile",
-	description: "Edit the profile of the user and update token.",
-	tags: ["Auth"],
-	body: profileBodyShape,
-	params: idParamShape,
-};
+// TODO: This won't be handled by AUTH. And will have major refactoring to limit scope (only handling cookies/jwt)
+// export const editProfileSchema = {
+// 	summary: "Edit Profile",
+// 	description: "Edit the profile of the user and update token.",
+// 	tags: ["Auth"],
+// 	body: profileBodyShape,
+// 	params: idParamShape,
+// };
 
-export const updateProfileSchema = {
-	summary: "Update Profile",
-	description: "Update the whole profile of the user and update token.",
-	tags: ["Auth"],
-	body: profileBodyShape,
-	params: idParamShape,
-};
+// export const updateProfileSchema = {
+// 	summary: "Update Profile",
+// 	description: "Update the whole profile of the user and update token.",
+// 	tags: ["Auth"],
+// 	body: profileBodyShape,
+// 	params: idParamShape,
+// };
 
-export const deleteUserSchema = {
-	summary: "Delete User",
-	description: "Delete a user. This will delete the user and the token.",
-	tags: ["Auth"],
-	params: idParamShape,
-};
+// export const deleteUserSchema = {
+// 	summary: "Delete User",
+// 	description: "Delete a user. This will delete the user and the token.",
+// 	tags: ["Auth"],
+// 	params: idParamShape,
+// };
 
 export const healthCheckSchema = {
 	summary: "Health Check",
