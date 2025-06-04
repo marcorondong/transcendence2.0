@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// TODO: Later; is very probable that none of USERS requests will be handled by AUTH.
 const envZodSchema = z.object({
 	HOST: z.string().nonempty(),
 	AUTH_API_PORT: z.coerce.number().int().positive(),

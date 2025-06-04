@@ -1,5 +1,6 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 
+// FIXME: This should be refactored. THe errors should caught by AUTH should not be discarded / mutated.
 export function globalErrorHandler(
 	error: unknown,
 	request: FastifyRequest,

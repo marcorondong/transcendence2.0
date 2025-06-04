@@ -1,6 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { env } from "./env";
 
+// TODO: Later; is very probable that none of USERS requests will be handled by AUTH.
 export async function ft_onRequest(
 	request: FastifyRequest,
 	reply: FastifyReply,
