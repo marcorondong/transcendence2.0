@@ -8,6 +8,29 @@ import { z, ZodTypeAny, ZodObject } from "zod";
 // But for that, the payload must have the fields to check.
 // So for PATCH, it's not suitable since I could only PATCH password (and the other fields won't be present)
 
+// Blacklisting logic
+// Defined blacklist as hardcoded strings (later will come from getConfig())
+// TODO: Later, load them from config using `getConfig()`
+const BLACKLISTED_USERNAME_STRING = "novakbotkovic,botco,bot,default,admin";
+const BLACKLISTED_NICKNAME_STRING = "NovakBotkovic,Botco";
+const BLACKLISTED_EMAIL_STRING =
+	"admin@email.com,alermanager@ourserver.net,iswearthisismyemail@joke.com";
+
+// Convert to lowercase arrays for case-insensitive comparison
+const BLACKLISTED_USERNAMES = BLACKLISTED_USERNAME_STRING.split(",").map((v) =>
+	v.trim().toLowerCase(),
+);
+const BLACKLISTED_NICKNAMES = BLACKLISTED_NICKNAME_STRING.split(",").map((v) =>
+	v.trim().toLowerCase(),
+);
+const BLACKLISTED_EMAILS = BLACKLISTED_EMAIL_STRING.split(",").map((v) =>
+	v.trim().toLowerCase(),
+);
+
+// Helper function to check blacklist
+const isBlacklisted = (value: string, blacklist: string[]) =>
+	blacklist.includes(value.toLowerCase());
+
 // Type definition for ordering (ascending/descending)
 const sortDirections = ["asc", "desc"] as const;
 const sortDirectionEnum = z.enum(sortDirections);
@@ -94,7 +117,10 @@ const usernameField = z
 		/^[a-z0-9_-]+$/,
 		"Username can only contain lowercase letters, digits, dashes and underscores",
 	)
-	.regex(/[a-z]/, "Username must contain at least one letter");
+	.regex(/[a-z]/, "Username must contain at least one letter")
+	.refine((val) => !isBlacklisted(val, BLACKLISTED_USERNAMES), {
+		message: "This username is not allowed",
+	});
 
 // Nickname field schema
 const nicknameField = z
@@ -113,7 +139,10 @@ const nicknameField = z
 	.regex(
 		/^[^\x00-\x1F\x7F]*$/,
 		"Nickname cannot contain control characters (tabs, newlines, etc)",
-	);
+	)
+	.refine((val) => !isBlacklisted(val, BLACKLISTED_NICKNAMES), {
+		message: "This nickname is not allowed",
+	});
 
 // Email field schema
 const emailField = z
@@ -129,7 +158,10 @@ const emailField = z
 	.refine((email) => {
 		const [local, domain] = email.split("@");
 		return local?.length >= 1 && local.length <= 64 && domain?.length >= 3;
-	}, "Invalid email structure");
+	}, "Invalid email structure")
+	.refine((val) => !isBlacklisted(val, BLACKLISTED_EMAILS), {
+		message: "This email is not allowed",
+	});
 
 // Password field schema
 const passwordField = z
