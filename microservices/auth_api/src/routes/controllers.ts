@@ -8,7 +8,7 @@ import {
 } from "./httpRequests";
 import { setCookieOpt, jwtSignOpt, clearCookieOpt } from "./configs";
 import { env } from "../utils/env";
-import * as cookieSignature from 'cookie-signature';
+import * as cookieSignature from "cookie-signature";
 import { cookieSecret } from "../utils/options";
 
 export async function signInHandler(
@@ -71,10 +71,7 @@ export async function botJWTHandler(
 	const payload = { id: env.BOT_UUID, nickname: env.BOT_NICKNAME };
 	const raw_access_token = await reply.jwtSign(payload, jwtSignOpt);
 	console.log("raw_access_token", raw_access_token);
-	const access_token = cookieSignature.sign(
-		raw_access_token,
-		cookieSecret,
-	);
+	const access_token = cookieSignature.sign(raw_access_token, cookieSecret);
 	console.log("access_token", access_token);
 	reply.status(200).send({ [env.JWT_TOKEN_NAME]: access_token });
 }
@@ -102,10 +99,10 @@ export async function updateProfileHandler(
 }
 
 export async function deleteUserHandler(
-	request: FastifyRequest<{ Params: unknown }>,
+	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	const { id } = request.params as { id: string };
+	const { id } = request.params;
 	await deleteUserRequest(id);
 	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
 	reply.status(200).send();
