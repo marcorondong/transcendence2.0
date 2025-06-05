@@ -1,9 +1,10 @@
 import { IconComponent } from "../components/icon-component.js";
 import { ChatComponent } from "../components/chat-component.js";
-import { baseUrl, FetchConfig, fetchPong } from "../services/fetch.js";
 import { User } from "../types/User.js";
 import { Stats } from "../types/Pong.js";
 import { errorLinkEvent } from "../services/events.js";
+import { baseUrl, fetchPong } from "../services/fetch.js";
+import { FetchConfig } from "../types/Fetch.js";
 
 interface UserAggregated {
 	id: string;
@@ -114,7 +115,7 @@ export class UsersView extends HTMLElement {
 		const searchParams = new URLSearchParams(paramsString);
 		const pageFromQuery = Number(searchParams.get("page"));
 		if (pageFromQuery && pageFromQuery > 0 && pageFromQuery < 1000) {
-			this.page = Number(pageFromQuery);
+			this.page = pageFromQuery;
 		}
 		const urlBrowser = baseUrl + "/users-view?page=" + this.page;
 		window.history.pushState({ path: urlBrowser }, "", urlBrowser);

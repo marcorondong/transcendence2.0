@@ -1,4 +1,5 @@
 import { Ball, Paddle, Pong } from "../types/Pong";
+import { PongMeta } from "../views/pong-view.js";
 import { ChatComponent } from "./chat-component.js";
 import { IconComponent } from "./icon-component.js";
 import { printMessage } from "./pong-utils.js";
@@ -9,6 +10,7 @@ export class PongComponent extends HTMLElement {
 	canvas = document.createElement("canvas");
 	ctx = this.canvas.getContext("2d");
 	chat: ChatComponent;
+	pongMeta: PongMeta;
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -237,10 +239,11 @@ export class PongComponent extends HTMLElement {
 		requestAnimationFrame(this.gameLoop);
 	};
 
-	constructor(chat: ChatComponent) {
+	constructor(chat: ChatComponent, pongMeta: PongMeta) {
 		super();
 		this.adjustCanvasToWindow();
 		this.chat = chat;
+		this.pongMeta = pongMeta;
 	}
 
 	connectedCallback() {
