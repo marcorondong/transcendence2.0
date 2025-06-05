@@ -1,0 +1,37 @@
+name: Add Label If Missing
+description: Adds a label to a PR if it's not already present
+inputs:
+  label:
+    description: The name of the label to add
+    required: true
+  pr_number:
+    description: The pull request number
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Add label if not present
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const { owner, repo } = context.repo;
+          const prNumber = Number("${{ inputs.pr_number }}");
+          const labelName = "${{ inputs.label }}";
+
+          console.log(`🏷️ Checking if label '${labelName}' is present on PR #${prNumber}...`);
+
+          const { data: labels } = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber });
+          const alreadyHasLabel = labels.some(label => label.name === labelName);
+
+          if (alreadyHasLabel) {
+            console.log(`✅ Label '${labelName}' already present.`);
+          } else {
+            console.log(`➕ Adding label '${labelName}' to PR #${prNumber}`);
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [labelName],
+            });
+          }

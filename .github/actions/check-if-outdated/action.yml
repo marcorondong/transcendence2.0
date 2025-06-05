@@ -1,0 +1,32 @@
+name: Check if PR is Outdated
+description: Determine if a pull request branch is behind the base branch
+inputs:
+  base:
+    description: The base branch to compare against (e.g., origin/main)
+    required: true
+  head:
+    description: The head commit SHA or ref of the PR branch
+    required: true
+outputs:
+  is_outdated:
+    description: Whether the PR branch is outdated (true/false)
+    value: ${{ steps.check.outputs.is_outdated }}
+runs:
+  using: "composite"
+  steps:
+    - name: Fetch base branch
+      shell: bash
+      run: git fetch origin ${{ inputs.base }}
+
+    - name: Check if PR is outdated
+      id: check
+      shell: bash
+      run: |
+        echo "🔍 Comparing base '${{ inputs.base }}' with head '${{ inputs.head }}'..."
+        if git merge-base --is-ancestor "origin/${{ inputs.base }}" "${{ inputs.head }}"; then
+          echo "✅ PR is up-to-date."
+          echo "is_outdated=false" >> $GITHUB_OUTPUT
+        else
+          echo "❌ PR is outdated."
+          echo "is_outdated=true" >> $GITHUB_OUTPUT
+        fi
