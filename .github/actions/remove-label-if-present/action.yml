@@ -2,7 +2,7 @@ name: Remove Label If Present
 description: Removes a label from a PR if it exists
 inputs:
   label:
-    description: The name of the label to remove
+    description: The name of the label to remove (accessible as OUTDATED_LABEL in script)
     required: true
   pr_number:
     description: The pull request number

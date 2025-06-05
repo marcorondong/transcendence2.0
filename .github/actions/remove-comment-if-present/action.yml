@@ -5,7 +5,7 @@ inputs:
     description: The pull request number
     required: true
   comment_body:
-    description: The exact comment text to look for and delete
+    description: The comment text to look for and remove (accessible as INPUT_COMMENT_BODY in script)
     required: true
 runs:
   using: "composite"

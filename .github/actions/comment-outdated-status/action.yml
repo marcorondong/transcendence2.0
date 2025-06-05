@@ -5,7 +5,7 @@ inputs:
     description: The pull request number
     required: true
   comment_body:
-    description: The comment text to post
+    description: The comment text to post (accessible as INPUT_COMMENT_BODY in script)
     required: true
   lookback_count:
     description: Number of recent comments to check for duplicates

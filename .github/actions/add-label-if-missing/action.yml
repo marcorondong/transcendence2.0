@@ -2,7 +2,7 @@ name: Add Label If Missing
 description: Adds a label to a PR if it's not already present
 inputs:
   label:
-    description: The name of the label to add
+    description: The name of the label to add (accessible as OUTDATED_LABEL in script)
     required: true
   pr_number:
     description: The pull request number

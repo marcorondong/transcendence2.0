@@ -2,7 +2,7 @@ name: Check if PR is Outdated
 description: Determine if a pull request branch is behind the base branch
 inputs:
   base:
-    description: The base branch to compare against (e.g., origin/main)
+    description: The base branch name to compare against (e.g., 'main'; do not include 'origin/')
     required: true
   head:
     description: The head commit SHA or ref of the PR branch
