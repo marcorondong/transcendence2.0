@@ -21,7 +21,7 @@ runs:
         script: |
           const { owner, repo } = context.repo;
           const prNumber = Number("${{ inputs.pr_number }}");
-          const commentBody = `${{ inputs.comment_body }}`;
+          const commentBody = `${process.env.INPUT_COMMENT_BODY}`;
           const lookback = Number("${{ inputs.lookback_count }}");
 
           console.log(`💬 Checking for outdated comment on PR #${prNumber}...`);
