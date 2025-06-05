@@ -123,8 +123,8 @@ jobs:
               pull_number: parseInt(process.env.PR_NUMBER),
             });
 
-            core.setOutput('head_sha', pr.data.head.sha);
-            core.setOutput('head_ref', pr.data.head.ref);
+            console.log(`::set-output name=head_sha::${pr.data.head.sha}`);
+            console.log(`::set-output name=head_ref::${pr.data.head.ref}`);
 
       - name: Checkout
         uses: actions/checkout@v4
