@@ -15,9 +15,10 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
-          const { owner, repo } = context.repo;
-          const prNumber = Number("${{ inputs.pr_number }}");
-          const labelName = "${{ inputs.label }}";
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const prNumber = Number(process.env.INPUT_PR_NUMBER);
+          const labelName = process.env.INPUT_LABEL;
 
           console.log(`🏷️ Checking if label '${labelName}' is present on PR #${prNumber}...`);
 
