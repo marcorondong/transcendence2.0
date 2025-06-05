@@ -95,7 +95,6 @@ jobs:
               state: "open",
               base: "main"
             });
-
             const prNumbers = prs.map(pr => pr.number);
             console.log("🔢 Open PRs:", prNumbers);
             core.setOutput('pr_numbers', JSON.stringify(prNumbers));
@@ -115,18 +114,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           github-token: ${{ github.token }}
-          result-encoding: string
           script: |
-            const { repo, owner } = context.repo;
             const pr = await github.rest.pulls.get({
-              owner,
-              repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               pull_number: ${{ matrix.pr_number }},
             });
-            return {
-              head_sha: pr.data.head.sha,
-              head_ref: pr.data.head.ref
-            };
+            core.setOutput('head_sha', pr.data.head.sha);
+            core.setOutput('head_ref', pr.data.head.ref);
 
       - name: Checkout
         uses: actions/checkout@v4
