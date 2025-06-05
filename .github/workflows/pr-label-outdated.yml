@@ -117,14 +117,21 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: parseInt(process.env.PR_NUMBER),
-            });
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+            const { repo, owner } = context.repo;
 
-            console.log(`::set-output name=head_sha::${pr.data.head.sha}`);
-            console.log(`::set-output name=head_ref::${pr.data.head.ref}`);
+            try {
+              const pr = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber,
+              });
+
+              core.setOutput("head_sha", pr.data.head.sha);
+              core.setOutput("head_ref", pr.data.head.ref);
+            } catch (error) {
+              core.setFailed(`❌ Failed to fetch PR #${prNumber}: ${error.message}`);
+            }
 
       - name: Checkout
         uses: actions/checkout@v4
