@@ -140,6 +140,9 @@ jobs:
           token: ${{ github.token }}
           fetch-depth: 0
 
+      - name: Fetch all branches (ensure main is available)
+        run: git fetch --all --prune
+
       - name: Check if PR is outdated
         uses: ./.github/actions/check-if-outdated
         id: outdated
