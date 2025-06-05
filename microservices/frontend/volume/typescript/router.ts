@@ -112,7 +112,7 @@ export class Router {
 			scriptName = `./views/error-view.js`;
 			window.history.pushState({ path: baseUrl }, "", baseUrl);
 		}
-		console.log("scriptname name: ", scriptName);
+		console.log("script name: ", scriptName);
 		const js = await import(scriptName);
 		return js;
 	}

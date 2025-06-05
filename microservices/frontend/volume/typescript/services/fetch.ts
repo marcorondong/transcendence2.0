@@ -1,14 +1,6 @@
+import { FetchConfig } from "../types/Fetch.js";
 import { signInLinkEvent } from "./events.js";
 
-export type Method = "GET" | "POST" | "PUT" | "POST" | "DELETE";
-
-export interface FetchConfig<T = unknown> {
-	method: Method;
-	header: HeadersInit;
-	url: string;
-	body?: any;
-	validator?: (data: unknown) => T;
-}
 export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
 
 export async function fetchPong<T = unknown>(config: FetchConfig<T>) {

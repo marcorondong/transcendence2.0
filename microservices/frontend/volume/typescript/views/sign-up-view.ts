@@ -148,7 +148,7 @@ export class SignUpView extends HTMLElement {
 		console.log("SIGNUP VIEW has been DISCONNECTED");
 	}
 }
-customElements.define("sign-un-view", SignUpView);
+customElements.define("sign-up-view", SignUpView);
 
 export function createComponent(chat: ChatComponent) {
 	return new SignUpView(chat);

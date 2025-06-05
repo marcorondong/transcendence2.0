@@ -1,18 +1,8 @@
 import { Auth } from "./auth.js";
-import { homeLinkEvent, notificationEvent, signInLinkEvent } from "./events.js";
-import { FetchConfig, fetchPong } from "./fetch.js";
-
-export interface UserAuth {
-	username: string;
-	password: string;
-}
-
-export interface ProfileAuth {
-	username: string;
-	password: string;
-	nickname: string;
-	email: string;
-}
+import { UserAuth } from "../types/User.js";
+import { notificationEvent, signInLinkEvent } from "./events.js";
+import { FetchConfig } from "../types/Fetch.js";
+import { fetchPong } from "./fetch.js";
 
 export class FetchAuth {
 	static async signIn(user: UserAuth) {

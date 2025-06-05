@@ -39,6 +39,7 @@ export async function fetchChatDb(
 		const data = await ret.json();
 		return data;
 	} catch (e) {
+		//TODO: don't change the error message here
 		let message = "";
 		if (e instanceof Error) {
 			message = "e.message";
