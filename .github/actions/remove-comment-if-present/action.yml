@@ -15,9 +15,10 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
-          const { owner, repo } = context.repo;
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
           const prNumber = Number("${{ inputs.pr_number }}");
-          const bodyToRemove = `${{ inputs.comment_body }}`;
+          const bodyToRemove = `${process.env.INPUT_COMMENT_BODY}`;
 
           console.log(`🧹 Searching for matching comment on PR #${prNumber}...`);
 
