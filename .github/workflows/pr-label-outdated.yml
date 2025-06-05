@@ -74,92 +74,100 @@ jobs:
   # ───────────────────────────────────────────────
   # ⏰ JOB 2: Scheduled (checks open PRs via GitHub API only)
   # ───────────────────────────────────────────────
-  label_on_schedule_event:
+  collect_open_prs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    name: Label outdated PRs (scheduled check)
+    name: Collect Open PRs
     runs-on: ubuntu-latest
-
+    outputs:
+      pr_numbers: ${{ steps.set-matrix.outputs.pr_numbers }}
     steps:
-      - name: Run scheduled PR check
+      - name: Get open PR numbers targeting main
+        id: set-matrix
         uses: actions/github-script@v7
-        env:
-          OUTDATED_LABEL: ${{ env.OUTDATED_LABEL }}
-          OUTDATED_COMMENT: ${{ env.OUTDATED_COMMENT }}
-          COMMENT_LOOKBACK_COUNT: ${{ env.COMMENT_LOOKBACK_COUNT }}
         with:
           github-token: ${{ github.token }}
+          result-encoding: string
           script: |
             const { repo, owner } = context.repo;
-            const outdatedLabel = process.env.OUTDATED_LABEL;
-            const commentBody = process.env.OUTDATED_COMMENT;
-            const lookback = Number(process.env.COMMENT_LOOKBACK_COUNT) || 2;
-
-            console.log(`🔁 Scheduled check for ${owner}/${repo}`);
-
             const prs = await github.paginate(github.rest.pulls.list, {
               owner,
               repo,
-              state: 'open',
-              base: 'main'
+              state: "open",
+              base: "main"
             });
 
-            for (const pr of prs) {
-              const prNumber = pr.number;
+            const prNumbers = prs.map(pr => pr.number);
+            console.log("🔢 Open PRs:", prNumbers);
+            return JSON.stringify(prNumbers);
 
-              const compare = await github.rest.repos.compareCommits({
-                owner,
-                repo,
-                base: 'main',
-                head: pr.head.ref,
-              });
+  handle_outdated_matrix:
+    name: Handle Outdated PRs (Matrix)
+    needs: collect_open_prs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pr_number: ${{ fromJson(needs.collect_open_prs.outputs.pr_numbers) }}
 
-              const is_outdated = compare.data.behind_by > 0;
+    steps:
+      - name: Get PR info
+        id: pr_data
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          result-encoding: string
+          script: |
+            const { repo, owner } = context.repo;
+            const pr = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: ${{ matrix.pr_number }},
+            });
+            return {
+              head_sha: pr.data.head.sha,
+              head_ref: pr.data.head.ref
+            };
 
-              const { data: labels } = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: prNumber });
-              const hasOutdated = labels.some(label => label.name === outdatedLabel);
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+          fetch-depth: 0
 
-              if (is_outdated && !hasOutdated) {
-                console.log(`➕ Adding '${outdatedLabel}' to PR #${prNumber}`);
-                await github.rest.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number: prNumber,
-                  labels: [outdatedLabel],
-                });
+      - name: Check if PR is outdated
+        uses: ./.github/actions/check-if-outdated
+        id: outdated
+        with:
+          base: main
+          head: ${{ steps.pr_data.outputs.head_sha }}
 
-                const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
-                const recent = comments.slice(-lookback);
-                const exists = recent.some(c => c.body === commentBody);
-                if (!exists) {
-                  const previous = comments.find(c => c.body === commentBody);
-                  if (previous) {
-                    await github.rest.issues.deleteComment({ owner, repo, comment_id: previous.id });
-                  }
-                  await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: commentBody });
-                }
-              }
+      - name: Add label if outdated
+        if: steps.outdated.outputs.is_outdated == 'true'
+        uses: ./.github/actions/add-label-if-missing
+        with:
+          pr_number: ${{ matrix.pr_number }}
+          label: ${{ env.OUTDATED_LABEL }}
 
-              if (!is_outdated && hasOutdated) {
-                try {
-                  console.log(`➖ Removing '${outdatedLabel}' from PR #${prNumber}`);
-                  await github.rest.issues.removeLabel({
-                    owner,
-                    repo,
-                    issue_number: prNumber,
-                    name: outdatedLabel,
-                  });
-                } catch (e) {
-                  if (e.status !== 404) throw e;
-                }
+      - name: Comment about outdated status
+        if: steps.outdated.outputs.is_outdated == 'true'
+        uses: ./.github/actions/comment-outdated-status
+        with:
+          pr_number: ${{ matrix.pr_number }}
+          comment_body: ${{ env.OUTDATED_COMMENT }}
+          lookback_count: ${{ env.COMMENT_LOOKBACK_COUNT }}
 
-                const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
-                const match = comments.find(c => c.body === commentBody);
-                if (match) {
-                  await github.rest.issues.deleteComment({ owner, repo, comment_id: match.id });
-                }
-              }
-            }
+      - name: Remove label if up-to-date
+        if: steps.outdated.outputs.is_outdated == 'false'
+        uses: ./.github/actions/remove-label-if-present
+        with:
+          pr_number: ${{ matrix.pr_number }}
+          label: ${{ env.OUTDATED_LABEL }}
 
+      - name: Remove outdated comment if up-to-date
+        if: steps.outdated.outputs.is_outdated == 'false'
+        uses: ./.github/actions/remove-comment-if-present
+        with:
+          pr_number: ${{ matrix.pr_number }}
+          comment_body: ${{ env.OUTDATED_COMMENT }}
 # ───────────────────────────────────────────────
 # 🛠 DEBUGGING TIPS
 # To enable step debug logs:
