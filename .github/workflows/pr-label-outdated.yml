@@ -98,7 +98,6 @@ jobs:
 
             const prNumbers = prs.map(pr => pr.number);
             console.log("🔢 Open PRs:", prNumbers);
-            const core = require('@actions/core');
             core.setOutput('pr_numbers', JSON.stringify(prNumbers));
 
   handle_outdated_matrix:
