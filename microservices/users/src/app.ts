@@ -10,9 +10,12 @@ import userRoutes from "./modules/user/user.route";
 import productRoutes from "./modules/product/product.route";
 import { setupSwagger, toolsRoutes } from "./modules/tools/tools.route";
 import { AppError } from "./utils/errors";
+import { fastifyLoggerConfig } from "./utils/logger";
 
-// Creating server with global Zod type inference
-export const server = Fastify().withTypeProvider<ZodTypeProvider>();
+// Creating server with global Zod type inference and logger config
+export const server = Fastify({
+	logger: fastifyLoggerConfig(),
+}).withTypeProvider<ZodTypeProvider>();
 
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);
