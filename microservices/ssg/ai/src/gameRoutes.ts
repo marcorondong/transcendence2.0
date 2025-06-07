@@ -24,7 +24,6 @@ async function cookieSubRequest(gameRequestReply: any): Promise<string> {
 		gameRequestReply.code(500).send({ error: "Token not found in response" });
 		throw new Error("Token not found in response");
 	}
-	console.log("Token retrieved successfully:", token);
 
 	return "access_token=" + token;
 }

@@ -50,7 +50,7 @@ class PongView extends HTMLElement {
 					},
 					body: JSON.stringify({
 						difficulty: "normal",
-						roomId: "roomId",
+						roomId: roomId,
 					}),
 				},
 			);
