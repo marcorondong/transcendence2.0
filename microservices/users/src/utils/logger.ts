@@ -29,7 +29,39 @@ if (PINO_LOGGER) {
 function wrap(method: "info" | "warn" | "error" | "debug" | "fatal") {
 	return (...args: any[]) => {
 		if (PINO_LOGGER) {
-			(internalLogger[method] as (...a: any[]) => void)(...args);
+			if (!args.length) return;
+
+			let msg: string | undefined;
+			let structuredLog: Record<string, unknown> = {};
+			let argCounter = 1;
+
+			const first = args[0];
+			const rest = args.slice(1);
+
+			if (typeof first === "string") {
+				msg = first;
+			} else if (first && typeof first === "object") {
+				structuredLog = { ...structuredLog, ...first };
+			} else {
+				structuredLog[`arg${argCounter++}`] = first;
+			}
+
+			for (const arg of rest) {
+				if (arg && typeof arg === "object" && !Array.isArray(arg)) {
+					structuredLog = { ...structuredLog, ...arg };
+				} else {
+					structuredLog[`arg${argCounter++}`] = arg;
+				}
+			}
+
+			if (Object.keys(structuredLog).length) {
+				(internalLogger[method] as (...a: any[]) => void)(
+					structuredLog,
+					msg,
+				);
+			} else {
+				(internalLogger[method] as (...a: any[]) => void)(msg);
+			}
 		} else {
 			const consoleMethod = method === "info" ? "log" : method;
 			(console as any)[consoleMethod](...args);
