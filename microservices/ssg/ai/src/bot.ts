@@ -140,6 +140,8 @@ export class Bot {
 			if (status.includes("Left") || status.includes("left"))
 				this.side =
 					field.LEFT_EDGE_X + this.PADDLE_GAP + this.AVG_BOUNCE_GAP;
+			if (status.includes("0 more player"))
+				this.welcomeFrames = 1;
 		}
 	}
 

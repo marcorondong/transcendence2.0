@@ -9,6 +9,7 @@ export class PongComponent extends HTMLElement {
 	canvas = document.createElement("canvas");
 	ctx = this.canvas.getContext("2d");
 	chat: ChatComponent;
+	botJoined: boolean | undefined = undefined;
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -237,6 +238,28 @@ export class PongComponent extends HTMLElement {
 		requestAnimationFrame(this.gameLoop);
 	};
 
+	async requestBot() {
+		while (!this.gameState || !this.gameState?.roomId) {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			console.log("waiting for roomId");
+		}
+		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
+		const reqBody = JSON.stringify({
+			roomId: this.gameState?.roomId,
+			difficulty: this.chat.gameSelection?.playSelection,
+		});
+
+		const response = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: reqBody,
+		});
+		this.botJoined = response.ok;
+		if (!response.ok) {
+			console.log("response from bot request", response);
+		}
+	}
+
 	constructor(chat: ChatComponent) {
 		super();
 		this.adjustCanvasToWindow();
@@ -342,6 +365,26 @@ export class PongComponent extends HTMLElement {
 			}
 		};
 		this.gameLoop();
+		this.launchBotIfNeeded();
+	}
+
+	launchBotIfNeeded() {
+		if (
+			(this.chat.gameSelection?.playSelection === "easy" ||
+				this.chat.gameSelection?.playSelection === "normal" ||
+				this.chat.gameSelection?.playSelection === "hard") &&
+			this.botJoined === undefined
+		) {
+			this.requestBot();
+		}
+		if (this.botJoined === false) {
+			printMessage(
+				"NovakBotkovic is offline, try again",
+				this.ctx,
+				this.canvasWidth,
+				this.canvasHeight,
+			);
+		}
 	}
 
 	handleEvent(event: Event) {
