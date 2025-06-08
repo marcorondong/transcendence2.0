@@ -104,17 +104,11 @@ def menuLoop(stdscr, title, items, user: Player):
                 selectedItem = items[position - 1]
                 callHandlerFunction(selectedItem, user)
                 if user.is_logged_in():
-                    items = [
-                        "Random Game",
-                        "Logout"
-                    ]
                     title = "Main Menu"
+                    items = ["Random Game","Logout"]
                 else:
-                    items = [
-                        "Register",
-                        "Login",
-                    ]
                     title = "Login Menu"
+                    items = ["Register","Login",]
                 menuLength = item.__len__() + 1
                 drawMenu(
                     stdscr,
