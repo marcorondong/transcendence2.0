@@ -1,0 +1,65 @@
+services:
+  ai-bot:
+    image: ai-bot
+    build:
+      context: ./microservices/ssg
+      dockerfile: ./ai/Dockerfile
+    container_name: ai-bot
+    environment:
+      - NODE_ENV=production
+    ports:
+      - 6969:6969 #TODO keep now for swagger documentation, remove later
+    networks:
+      - Transcendence2.0
+
+  frontend:
+    image: frontend
+    build:
+      context: ./microservices/frontend
+      dockerfile: docker/nginx/Dockerfile-Nginx
+    container_name: frontend
+    volumes:
+      - frontend:/usr/share/nginx/html
+      - ./microservices/frontend/docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - user_pictures:/usr/share/nginx/html/uploads # Users pictures (Shared with Nginx)
+    ports:
+      - "8080:443"
+    restart: unless-stopped
+    networks:
+      - Transcendence2.0
+
+include:
+  #TODO once all microservices will use LONG INCLUDE remove this short syntax
+  - ./microservices/auth_api/docker-compose.yml
+  - ./microservices/frontend/docker-compose.yml
+  - ./monitoring/monitoring-docker-compose.yml
+  - ./microservices/users/docker-compose.yml
+  - ./microservices/pong_db/docker-compose.yml
+  - ./microservices/chat_db/docker-compose.yml
+  - ./microservices/chat_api/docker-compose.yml
+  - ./microservices/tictactoe_db/docker-compose.yml
+  - ./microservices/tictactoe_api/docker-compose.yml
+
+  #PONG_API LONG INCLUDE
+  - path: ./microservices/ssg/pong-api/compose.yaml #path to "small" compose file of microservice relative to this root compose.yaml
+    project_directory: ./microservices/ssg/pong-api #If i am not mistaken this is build context kinda
+    env_file: ./microservices/ssg/pong-api/.env #this file will be used for interpolation in docker compose
+
+  # - path: ./microservices/auth_api/docker-compose.yml #Suggestion how to do it.
+  #   project_directory: ./microservices/auth_api
+  #   env_file: ./.env
+
+volumes:
+  frontend:
+    name: frontend
+    driver: local
+    driver_opts:
+      type: none
+      device: ./microservices/frontend/volume
+      o: bind
+  user_pictures:
+
+networks:
+  Transcendence2.0:
+    name: ${NETWORK_NAME}
+    driver: bridge

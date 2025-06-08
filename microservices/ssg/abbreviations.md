@@ -1,4 +1,6 @@
-Filip is terrible with remebering abbreviations. 
+# Filip's abbreviations
 
-ssg -> server side game 
+Filip is terrible with remembering abbreviations.
+
+ssg -> server side game
 rps -> rock paper scissors

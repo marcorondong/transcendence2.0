@@ -61,7 +61,7 @@ make cli       # build & start all services AND use cli makefile to run it
 | User API            | [http://localhost:3000/api](http://localhost:3000/api/users/)                              |
 | Game Service        | ws://localhost:5000/ws                                                                     |
 | Swagger USERS (dev) | [http://localhost:3000/api/documentation](http://localhost:3000/api/tools/swagger)         |
-| Healthcheck USERS   | [http://localhost:3000/api/health-check](http://localhost:3000/api/health-check) |
+| Health-check USERS   | [http://localhost:3000/api/health-check](http://localhost:3000/api/health-check) |
 
 ---
 
@@ -99,8 +99,8 @@ E.g:
 - [Monitoring-broken](/microservices/monitoring/README.md)
 - [Pong-api](./microservices/ssg/pong-api/README.md)
 - [Pong DB](/microservices/pong_db/README.md)
-- [Tic-Tac-Toe-broken](/microservices/tictactoe_api/README.md)
-- [Tic-Tac-Toe DB](/microservices/tictactoe_db/README.md)
+- [TicTacToe-broken](/microservices/tictactoe_api/README.md)
+- [TicTacToe DB](/microservices/tictactoe_db/README.md)
 - [Users](/microservices/users/README.md)
 
 ## 🔗 Links to other README files
