@@ -1,6 +1,5 @@
 import { GameSelection } from "../types/Game.js";
 import { NotificationData, State } from "../types/Notification.js";
-import { baseUrl } from "./fetch.js";
 
 export const errorLinkEvent = new CustomEvent("pong-link", {
 	detail: { source: "error-view" },

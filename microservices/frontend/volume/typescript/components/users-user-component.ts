@@ -1,6 +1,7 @@
-import { User } from "../types/User.js";
-import { UserAggregated } from "../views/users-view";
+import { User, UserAggregated } from "../types/User.js";
 import { IconComponent } from "./icon-component.js";
+import { AvatarComponent } from "./shared/avatar-component.js";
+import { NicknameComponent } from "./shared/nickname-component.js";
 
 class UsersUserComponent extends HTMLElement {
 	user: UserAggregated;
@@ -22,7 +23,7 @@ class UsersUserComponent extends HTMLElement {
 			"flex",
 			"sm:grid",
 			"sm:grid-rows-0",
-			"sm:grid-cols-[6rem_12rem_1fr_1fr_1fr_1fr]",
+			"sm:grid-cols-[4rem_12rem_1fr_1fr_1fr_1fr]",
 			"lg:grid-cols-[6rem_24rem_1fr_1fr_1fr_1fr]",
 			"items-center",
 			"gap-x-8",
@@ -30,43 +31,11 @@ class UsersUserComponent extends HTMLElement {
 			"sm:gap-2",
 		);
 		// AVATAR PICTURE
-		const avatarContainer = document.createElement("div");
-		avatarContainer.classList.add("flex", "justify-center");
-		const avatar = document.createElement("img");
-		avatarContainer.append(avatar);
-		avatar.classList.add(
-			"rounded-full",
-			"sm:border-6",
-			"border-8",
-			"border-indigo-800",
-			"w-30",
-			"object-cover",
-			"aspect-square",
-			"sm:w-20",
-		);
-		avatar.src = "/static-files/images/avatar_placeholder.png";
+		const avatar = new AvatarComponent(this.user);
+		avatar.styleComponent("border-indigo-800");
 
 		// NICKNAME
-		const name = document.createElement("a");
-		name.id = this.user.id;
-		name.innerText = this.user.nickname;
-		name.classList.add(
-			"flex-grow",
-			"basis-full",
-			"sm:flex-none",
-			"px-4",
-			"sm:text-xl",
-			"text-2xl",
-			"font-bold",
-			"text-center",
-			"sm:text-left",
-			"text-nowrap",
-			"text-ellipsis",
-			"overflow-hidden",
-			"cursor-pointer",
-			"user-link",
-			"pong-link",
-		);
+		const nickname = new NicknameComponent(this.user);
 
 		const containerStyles = [
 			"relative",
@@ -130,8 +99,8 @@ class UsersUserComponent extends HTMLElement {
 		statusText.classList.add("text-xs", "text-slate-500");
 		statusContainer.append(statusIcon, statusText);
 		this.append(
-			avatarContainer,
-			name,
+			avatar,
+			nickname,
 			friendContainer,
 			winsContainer,
 			lossesContainer,

@@ -424,14 +424,12 @@ export class PongComponent extends HTMLElement {
 			this.paddleDirection = 0;
 	}
 	onClick(event: MouseEvent) {
-		console.log("you clicked");
 		const target = event.target as HTMLElement;
 		if (!target) {
 			return;
 		}
 		const button = target.closest("button");
 		if (button) {
-			console.log("you clicked a button");
 			this.handleCopyButton(button);
 		}
 	}
@@ -439,7 +437,6 @@ export class PongComponent extends HTMLElement {
 		if (button.id !== "copy-button") {
 			return;
 		}
-		console.log("you clicked a copy");
 		this.copyToClipboard();
 	}
 

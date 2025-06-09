@@ -1,20 +1,11 @@
 import { ChatComponent } from "../components/chat-component.js";
-import { User } from "../types/User.js";
+import { User, UserAggregated } from "../types/User.js";
 import { errorLinkEvent, profileLinkEvent } from "../services/events.js";
 import { baseUrl, fetchPong } from "../services/fetch.js";
 import { FetchConfig } from "../types/Fetch.js";
 import { FetchPongDb } from "../services/fetch-pong-db.js";
 import { UsersUserComponent } from "../components/users-user-component.js";
 import { UsersPaginationComponent } from "../components/users-pagination-component.js";
-
-export interface UserAggregated {
-	id: string;
-	nickname: string;
-	wins: number;
-	losses: number;
-	online: boolean;
-}
-[];
 
 export class UsersView extends HTMLElement {
 	chat: ChatComponent;
@@ -163,8 +154,7 @@ export class UsersView extends HTMLElement {
 			this.usersAggregated = this.usersData.map((user) => {
 				const stats = statsData.find((s) => s.userId === user.id);
 				const data = {
-					id: user.id,
-					nickname: user.nickname,
+					...user,
 					wins: stats?.wins ?? 0,
 					losses: stats?.losses ?? 0,
 					online: false,
@@ -186,9 +176,13 @@ export class UsersView extends HTMLElement {
 		}
 
 		const nextPage = await this.checkNextPage();
-		const pagination = new UsersPaginationComponent(this.page, nextPage);
-
-		this.append(pagination);
+		if (!(this.page === 1 && !nextPage)) {
+			const pagination = new UsersPaginationComponent(
+				this.page,
+				nextPage,
+			);
+			this.append(pagination);
+		}
 	}
 
 	userIsOnline(user: UserAggregated) {
