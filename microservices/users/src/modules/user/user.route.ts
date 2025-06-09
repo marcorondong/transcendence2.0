@@ -24,6 +24,7 @@ import {
 } from "./user.schema";
 import { errorHandler } from "../../utils/errors";
 // import { z } from "zod";
+import { logger } from "../../utils/logger";
 
 // Helper function for SWagger to define common errors messages and assign them to Swagger UI examples
 // Redefinition of error messages in the caller is possible
@@ -251,6 +252,21 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		errorHandler(pictureHandler),
 	);
+	// TODO: Remove this route. It's only for testing logger and Fastify's request.log()
+	server.get("/test", async (request, reply) => {
+		const log = logger.from(request);
+
+		log.info("From const log = logger.from(request): test info");
+		log.warn("From const log = logger.from(request): test warn");
+		log.error("From const log = logger.from(request): test error");
+
+		logger.from(request).info("From logger.from(req): test info");
+		logger.from(request).warn("From logger.from(req): test warn");
+		logger.from(request).error("From logger.from(req): test error");
+
+		request.log.info("Hello from Fastify");
+		reply.send({ ok: true });
+	});
 }
 
 export default userRoutes;
