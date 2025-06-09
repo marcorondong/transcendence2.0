@@ -1,9 +1,8 @@
-// import { jsonSchemaTransform } from "fastify-type-provider-zod";
 import { env } from "./env";
 import fs from "fs";
 
 let jwtSecret: string;
-let cookieSecret: string;
+export let cookieSecret: string;
 
 try {
 	jwtSecret = fs.readFileSync(
@@ -38,7 +37,6 @@ export const swaggerOption = {
 		},
 		security: [{ bearerAuth: [] }],
 	},
-	// transform: jsonSchemaTransform,
 };
 
 export const swaggerUiOption = {
@@ -65,11 +63,19 @@ export const jwtOption = {
 		cookieName: env.JWT_TOKEN_NAME,
 		signed: true,
 	},
+	sign: {
+		expiresIn: "1h",
+	},
 };
 
 export const cookieOption = {
 	secret: cookieSecret,
 	parseOptions: {
+		path: "/",
+		httpOnly: true,
+		secure: true,
 		signed: true,
+		sameSite: "strict" as const,
+		maxAge: 60 * 60,
 	},
 };

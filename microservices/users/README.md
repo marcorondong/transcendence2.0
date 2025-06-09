@@ -58,17 +58,20 @@ So NGINX will serve those static files (_and it could be enhanced by implementin
 _**Currently**_ it's not possible to upload the picture via USERS service Swagger;
 it needs a `curl` command directed to the endpoint to upload the picture.
 
+It supports **blacklisting**
+Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded from a config file_)
+
 > [!NOTE]
 >
 > In next version, it'll handle also:
 >
-> - [x] 🖼️ Avatar (user image).
 > - 👥 User friendship management (friend requests).
-> - 🏃‍♂️💨 Change in how the code is "compiled" and run.
 > - Makefile
+> - ♻️ Code refactoring and code clean-up
+> - 🏃‍♂️💨 Change in how the code is "compiled" and run.
+> - [x] 🖼️ Avatar (user image).
 > - [x] Login to be done via email **OR** username.
 > - [x] `npm` utilities commands.
-> - ♻️ Code refactoring and code clean-up
 
 ---
 
@@ -157,6 +160,7 @@ However, you can customize the service using docker secrets, environmental varia
 > - `.env` file containing location of database.
 > - `.env` file containing location of users pictures' folder.
 > - `.env` file containing `PAGINATION_ENABLED` and `DEFAULT_PAGE_SIZE`.
+> - `.env` file containing blacklisted values for users fields.
 
 ---
 
@@ -208,7 +212,7 @@ None. 👍
 ## 🧪 Testing
 
 1. Run the service.
-2. Click [here](http://localhost:3000/api/documentation)
+2. Click here for [Swagger page](http://localhost:3000/api/documentation)
    1. Check that is `HTTP` and not `httpS`
 3. Issue all the requests you want.
 4. For checking the picture functionality, read _**point 6**_ of [How to run the service](#-how-to-run-the-service)

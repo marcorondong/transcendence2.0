@@ -1,0 +1,42 @@
+name: Remove Comment If Present
+description: Removes a specific comment body from a PR if it exists
+inputs:
+  pr_number:
+    description: The pull request number
+    required: true
+  comment_body:
+    description: The comment text to look for and remove (accessible as INPUT_COMMENT_BODY in script)
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Remove comment if present
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const prNumber = Number("${{ inputs.pr_number }}");
+          const bodyToRemove = `${process.env.INPUT_COMMENT_BODY}`;
+
+          console.log(`🧹 Searching for matching comment on PR #${prNumber}...`);
+
+          const { data: comments } = await github.rest.issues.listComments({
+            owner,
+            repo,
+            issue_number: prNumber,
+          });
+
+          const match = comments.find(c => c.body === bodyToRemove);
+
+          if (match) {
+            console.log(`🧽 Deleting comment ID ${match.id}...`);
+            await github.rest.issues.deleteComment({
+              owner,
+              repo,
+              comment_id: match.id,
+            });
+          } else {
+            console.log("🚫 No matching comment found — nothing to remove.");
+          }
