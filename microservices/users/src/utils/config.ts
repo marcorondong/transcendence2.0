@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { logger } from "./logger";
 
 // Function Return type definition (for type safety)
 type AppConfig = {
@@ -20,7 +21,7 @@ let cachedConfig: AppConfig | null = null;
 export function getConfig(): AppConfig {
 	if (cachedConfig) return cachedConfig;
 
-	console.log("[Config] Loading config...");
+	logger.log("[Config] Loading config...");
 
 	const secretsPath = "/run/secrets"; // Docker-style secrets path
 	const fixPackageJsonPath = "../../package.json";
@@ -42,14 +43,14 @@ export function getConfig(): AppConfig {
 			const pkgPath = path.resolve(__dirname, fixPackageJsonPath);
 			return JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 		} catch (err) {
-			console.warn("[Config] Could not load package.json:", err);
+			logger.warn("[Config] Could not load package.json:", err);
 			return {};
 		}
 	})();
 
 	// Helper function to load from Docker-style secrets
 	const loadSecret = (key: string | undefined): string | undefined => {
-		console.log("[Config] loadSecret() called for key:", key);
+		logger.log("[Config] loadSecret() called for key:", key);
 		if (!key || !hasSecretsFolder) return undefined;
 		const filePath = path.join(secretsPath, key.toLowerCase());
 		try {
@@ -58,7 +59,7 @@ export function getConfig(): AppConfig {
 			}
 		} catch (err) {
 			// Optional:
-			console.warn(`[Config] Failed to read secret ${key}:`, err);
+			logger.warn(`[Config] Failed to read secret ${key}:`, err);
 		}
 		return undefined;
 	};
@@ -99,7 +100,7 @@ export function getConfig(): AppConfig {
 			hardcodedDefaults.NODE_ENV,
 	};
 
-	console.log("[Config] Final config object:", config);
+	logger.log("[Config] Final config object:", config);
 
 	cachedConfig = config; // Cache the config
 	return config;
