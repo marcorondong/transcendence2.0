@@ -57,6 +57,9 @@ export class Router {
 		}
 	}
 
+	// handles two possibilities:
+	// user clicks on link -> href is written into browser uri
+	// customEvent  -> the content of event.detail.source goes into uri
 	handleRouterLink(event: Event) {
 		event.preventDefault();
 		let link: string = "";
@@ -86,6 +89,7 @@ export class Router {
 			this.containerDiv.replaceChildren();
 		}
 	}
+
 	loadComponent() {
 		this.clearContent();
 		this.appendComponent();

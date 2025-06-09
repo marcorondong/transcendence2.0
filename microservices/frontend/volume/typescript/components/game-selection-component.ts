@@ -1,5 +1,4 @@
-import { GameData } from "../views/home-view.js";
-import { IconComponent } from "./icon-component.js";
+import { GameData } from "../types/Game.js";
 
 class GameSelectionComponent extends HTMLElement {
 	gameData: GameData;

@@ -1,4 +1,4 @@
-import { GameData } from "../views/home-view.js";
+import { GameData } from "../types/Game.js";
 import { IconComponent } from "./icon-component.js";
 
 class ModeSelectionComponent extends HTMLElement {
@@ -15,27 +15,6 @@ class ModeSelectionComponent extends HTMLElement {
 		//MATCH TYPE
 		this.classList.add("flex", "flex-col", "items-center", "gap-8", "p-8");
 
-		// headline
-		// this.h1 = document.createElement("h1");
-		// this.h1.innerText = "Select a Mode";
-		// this.h1.classList.add(
-		// 	"pong-heading",
-		// 	"pong-heading-big",
-		// 	"pong-heading-indigo",
-		// );
-		// const header = document.createElement("div");
-		// const icon = new IconComponent("mode", 10);
-		// header.append(icon, this.h1);
-		// header.classList.add(
-		// 	"w-full",
-		// 	"grow-1",
-		// 	"flex",
-		// 	"gap-2",
-		// 	"justify-center",
-		// 	"items-center",
-		// 	"text-slate-200/70",
-		// );
-
 		// MATCH TYPE OPTIONS
 		const optionsContainer = document.createElement("div");
 		optionsContainer.classList.add(
@@ -50,7 +29,7 @@ class ModeSelectionComponent extends HTMLElement {
 			"bg-indigo-950",
 		);
 
-		this.gameData.modeOptions.forEach((m) => {
+		this.gameData.mode.forEach((m) => {
 			const button = document.createElement("button");
 			button.innerText = m.label;
 			button.id = m.id;

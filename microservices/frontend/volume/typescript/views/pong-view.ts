@@ -2,13 +2,8 @@ import "../components/pong-component.js";
 import "../components/container-for-view.js";
 import { PongComponent } from "../components/pong-component.js";
 import { ChatComponent } from "../components/chat-component.js";
-import { GameMode } from "../types/Game.js";
-
-export interface PongMeta {
-	mode?: GameMode;
-	roomId?: string;
-	size?: 4 | 8 | 16;
-}
+import { PongQueryParams } from "../types/Fetch.js";
+import { GameMode, GameModes } from "../types/Game.js";
 
 class PongView extends HTMLElement {
 	chat: ChatComponent;
@@ -17,35 +12,19 @@ class PongView extends HTMLElement {
 		this.chat = chat;
 	}
 
-	initPongMeta() {
-		const pongMeta: PongMeta = {};
+	initPongQueryParams() {
+		const pongQueryParams: PongQueryParams = {};
 		const paramsString = window.location.search;
 		const searchParams = new URLSearchParams(paramsString);
 		const modeFromQuery = searchParams.get("mode");
-		const roomIdFromQuery = searchParams.get("roomId");
-		const sizeFromQuery = Number(searchParams.get("size"));
-		//TODO: this is super shitty. should be done with valibot or zod. also
-		//the values of check should not be hardcoded . What if sizes
-		//of tournaments changes?
-		if (
-			sizeFromQuery &&
-			(sizeFromQuery === 4 || sizeFromQuery === 8 || sizeFromQuery === 16)
-		) {
-			pongMeta.size = sizeFromQuery;
+		const roomFromQuery = searchParams.get("room");
+		if (modeFromQuery && GameModes.find((x) => modeFromQuery === x)) {
+			pongQueryParams.mode = modeFromQuery as GameMode;
 		}
-		if (
-			modeFromQuery &&
-			(modeFromQuery === "tournament" ||
-				modeFromQuery === "singles" ||
-				modeFromQuery === "doubles" ||
-				modeFromQuery === "spectate")
-		) {
-			pongMeta.mode = modeFromQuery;
+		if (roomFromQuery && roomFromQuery.length < 100) {
+			pongQueryParams.room = roomFromQuery;
 		}
-		if (roomIdFromQuery && roomIdFromQuery.length < 100) {
-			pongMeta.roomId = roomIdFromQuery;
-		}
-		return pongMeta;
+		return pongQueryParams;
 	}
 
 	connectedCallback() {
@@ -53,7 +32,10 @@ class PongView extends HTMLElement {
 
 		const container = document.createElement("container-for-view");
 		this.append(container);
-		const pongComponent = new PongComponent(this.chat, this.initPongMeta());
+		const pongComponent = new PongComponent(
+			this.chat,
+			this.initPongQueryParams(),
+		);
 		container.appendChild(pongComponent);
 		pongComponent.classList.add("self-center");
 	}

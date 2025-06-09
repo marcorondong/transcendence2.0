@@ -2,9 +2,10 @@ import { IconComponent } from "../components/icon-component.js";
 import { ChatComponent } from "../components/chat-component.js";
 import { User } from "../types/User.js";
 import { Stats } from "../types/Pong.js";
-import { errorLinkEvent } from "../services/events.js";
+import { errorLinkEvent, profileLinkEvent } from "../services/events.js";
 import { baseUrl, fetchPong } from "../services/fetch.js";
 import { FetchConfig } from "../types/Fetch.js";
+import { FetchPongDb } from "../services/fetch-pong-db.js";
 
 interface UserAggregated {
 	id: string;
@@ -51,18 +52,41 @@ export class UsersView extends HTMLElement {
 		}
 	}
 	onClick(event: MouseEvent) {
+		event.preventDefault();
 		const target = event.target as HTMLElement;
 		if (!target) {
 			return;
 		}
 
+		this.handleUserLink(target);
+
 		// HANDLE ALL BUTTONS
 		const button = target.closest("button");
 		if (button) {
+			this.handleFriend(button);
 			this.handleButtonLeft(button);
 			this.handleButtonRight(button);
 		}
 	}
+
+	handleUserLink(target: HTMLElement) {
+		if (!target.classList.contains("user-link")) {
+			return;
+		}
+
+		const anchor = target.closest("a") as HTMLAnchorElement | null;
+		if (anchor) {
+			this.dispatchEvent(profileLinkEvent(anchor.id));
+		}
+	}
+
+	async handleFriend(button: HTMLButtonElement) {
+		if (!button.classList.contains("button-friend")) {
+			return;
+		}
+		console.log("befriend:", button.id);
+	}
+
 	async handleButtonLeft(button: HTMLButtonElement) {
 		if (button.id !== "button-left") {
 			return;
@@ -110,7 +134,7 @@ export class UsersView extends HTMLElement {
 		}
 	}
 
-	async aggregateData() {
+	handleQueryParam() {
 		const paramsString = window.location.search;
 		const searchParams = new URLSearchParams(paramsString);
 		const pageFromQuery = Number(searchParams.get("page"));
@@ -119,22 +143,15 @@ export class UsersView extends HTMLElement {
 		}
 		const urlBrowser = baseUrl + "/users-view?page=" + this.page;
 		window.history.pushState({ path: urlBrowser }, "", urlBrowser);
+	}
 
+	async aggregateData() {
+		this.handleQueryParam();
 		try {
 			this.usersData = await this.fetchUsers(this.page);
 			const userIds = this.usersData.map((u) => u.id);
-			const statsConfig: FetchConfig<User> = {
-				url: `/pong-db/users-stats`,
-				header: {
-					"accept": "application/json",
-					"Content-Type": "application/json",
-				},
-				method: "POST",
-				body: { userIds: userIds },
-				// validator: validateStats,
-			};
-			// TODO: replace this as with valibot parse
-			const statsData = (await fetchPong(statsConfig)) as Stats[];
+			const statsData = await FetchPongDb.stats(userIds);
+			console.log("users:", statsData);
 
 			this.usersAggregated = this.usersData.map((user) => {
 				const stats = statsData.find((s) => s.userId === user.id);
@@ -148,7 +165,7 @@ export class UsersView extends HTMLElement {
 				return data;
 			});
 		} catch (e) {
-			console.log("error in try block");
+			console.log(e);
 			this.dispatchEvent(errorLinkEvent);
 			return;
 		}
@@ -203,7 +220,8 @@ export class UsersView extends HTMLElement {
 			avatar.src = "/static-files/images/avatar_placeholder.png";
 
 			// NICKNAME
-			const name = document.createElement("h2");
+			const name = document.createElement("a");
+			name.id = user.id;
 			name.innerText = user.nickname;
 			name.classList.add(
 				"flex-grow",
@@ -218,6 +236,9 @@ export class UsersView extends HTMLElement {
 				"text-nowrap",
 				"text-ellipsis",
 				"overflow-hidden",
+				"cursor-pointer",
+				"user-link",
+				"pong-link",
 			);
 
 			const containerStyles = [
@@ -237,8 +258,10 @@ export class UsersView extends HTMLElement {
 				"pong-button-info",
 				"pong-button-round",
 				"justify-self-center",
+				"button-friend",
 			);
 			friendButton.append(friendIcon);
+			friendButton.id = "friend-" + user.id;
 			const friendLabel = document.createElement("div");
 			friendLabel.innerText = "friend";
 			friendLabel.classList.add("text-xs", "text-slate-500");

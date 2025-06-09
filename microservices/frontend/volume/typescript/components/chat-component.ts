@@ -6,7 +6,6 @@ import {
 	onlineUserEvent,
 	pongLinkEvent,
 } from "../services/events.js";
-import { SelectionState } from "../views/home-view.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -14,7 +13,6 @@ class ChatComponent extends HTMLElement {
 	onlineUsers: ChatUser[] = [];
 	selectedUser: ChatUser | undefined = undefined;
 	roomId: string | undefined = undefined;
-	gameSelection: SelectionState | undefined;
 	me: User | undefined;
 
 	//ICONS
@@ -551,25 +549,40 @@ class ChatComponent extends HTMLElement {
 		this.selectedUser?.messages.push(message);
 		this.displayCurrentChat();
 		this.minMaxButton.click();
-		this.dispatchEvent(pongLinkEvent);
+		this.dispatchEvent(
+			pongLinkEvent({
+				game: "pong",
+				mode: "singles",
+				room: "private",
+			}),
+		);
 	}
 
 	createInvitationLink() {
 		const link = document.createElement("a");
 		link.href = "#";
 		link.textContent = "Click to join game";
+		const roomId = this.roomId;
 		link.addEventListener("click", (e: MouseEvent) => {
 			e.preventDefault();
 			this.minMaxButton.click();
-			link.dispatchEvent(pongLinkEvent);
+			link.dispatchEvent(
+				pongLinkEvent({
+					game: "pong",
+					mode: "singles",
+					room: roomId,
+				}),
+			);
 		});
+		console.log("room id that invitation is pointing to:", this.roomId);
+		this.roomId = undefined;
 		return link;
 	}
 
 	sendInvitation() {
 		// TODO: THIS IS A BIT SUBOPTIMAL. WE ARE INVITING THE USER WHO'S CHAT IS OPEN. NOT GUARANTEED THAT THIS IS THE CORRECT USER
 		// COULD BE SOLVED WITH DEFERRED PROMISE WHICH WOULD ALLOW TO WAIT FOR PONG GAME TO RESOLVE THE PROMISE AND TELL US THAT WE ARE READY
-		// TO SEND THE INVITATION. SO WE CEN SEND THE INVITATION FROM CHAT COMPONENT AND THEN WE KNOW TO WHOM WE HAVE TO SEND IT
+		// TO SEND THE INVITATION. SO WE CAN SEND THE INVITATION FROM CHAT COMPONENT AND THEN WE KNOW TO WHOM WE HAVE TO SEND IT
 		const chat: Chat = {
 			type: "invite",
 			id: this.selectedUser?.id,

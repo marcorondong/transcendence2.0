@@ -1,4 +1,4 @@
-import { GameData } from "../views/home-view.js";
+import { GameData } from "../types/Game.js";
 import { IconComponent } from "./icon-component.js";
 
 class MenuSelectionComponent extends HTMLElement {
@@ -12,7 +12,7 @@ class MenuSelectionComponent extends HTMLElement {
 	async connectedCallback() {
 		this.classList.add("flex-row", "gap-4", "px-4", "py-2", "items-center");
 
-		const menuItems = this.gameData.menuItems;
+		const menuItems = this.gameData.menu;
 		for (let i = 0; i < menuItems.length; ++i) {
 			const button = document.createElement("button");
 			button.classList.add("pong-menu", "flex", "gap-1", "menu-button");

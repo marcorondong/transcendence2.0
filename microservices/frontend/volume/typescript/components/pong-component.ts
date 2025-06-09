@@ -1,5 +1,6 @@
+import { baseUrl } from "../services/fetch.js";
+import { PongQueryParams } from "../types/Fetch.js";
 import { Ball, Paddle, Pong } from "../types/Pong";
-import { PongMeta } from "../views/pong-view.js";
 import { ChatComponent } from "./chat-component.js";
 import { IconComponent } from "./icon-component.js";
 import { printMessage } from "./pong-utils.js";
@@ -10,7 +11,7 @@ export class PongComponent extends HTMLElement {
 	canvas = document.createElement("canvas");
 	ctx = this.canvas.getContext("2d");
 	chat: ChatComponent;
-	pongMeta: PongMeta;
+	pongQueryParams: PongQueryParams;
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -27,51 +28,187 @@ export class PongComponent extends HTMLElement {
 	// Buttons
 	fullscreenButton = document.createElement("button");
 
-	createNewWebsocket() {
-		// const queryParams = window.location.search;
+	constructor(chat: ChatComponent, pongQueryParams: PongQueryParams) {
+		super();
+		this.adjustCanvasToWindow();
+		this.chat = chat;
+		this.pongQueryParams = pongQueryParams;
+	}
+
+	connectedCallback() {
+		console.log("Pong CONNECTED");
+
+		// CANVAS ELEMENT
+		this.classList.add("shrink-0", "w-fit");
+		const canvasContainer = document.createElement("div");
+		canvasContainer.classList.add(
+			"p-1",
+			"sm:p-3",
+			"xl:p-5",
+			"mb-10",
+			"sm:border-5",
+			"xl:border-6",
+			"border-3",
+			"sm:rounded-xl",
+			"rounded-lg",
+			"bg-indigo-950",
+			"border-cyan-300",
+			"glow",
+			"shrink-0",
+			"w-fit",
+			"relative",
+			"group",
+		);
+		this.canvas.classList.add("bg-black", "rounded-lg");
+		canvasContainer.appendChild(this.canvas);
+		this.append(canvasContainer);
+
+		// FULLSCREEN BUTTON
+		this.fullscreenButton.id = "fullscreen-button";
+		this.fullscreenButton.classList.add(
+			"top-3",
+			"right-3",
+			"md:top-5",
+			"md:right-5",
+			"lg:top-8",
+			"lg:right-8",
+			"invisible",
+			"absolute",
+			"opacity-60",
+			"group-hover:visible",
+			"pong-button",
+			"pong-button-pale",
+			"touch-visible",
+		);
+		const fullscreenIcon = new IconComponent("fullscreen", 7);
+		fullscreenIcon.id = "fullscreen-icon";
+		this.fullscreenButton.appendChild(fullscreenIcon);
+		canvasContainer.appendChild(this.fullscreenButton);
+
+		// COPY LINK BUTTON FOR PRIVATE ROOMS
+		if (this.pongQueryParams.room === "private") {
+			this.appendCopyLink();
+		}
+
+		// EVENT LISTENER
+		document.addEventListener("keydown", this, false);
+		document.addEventListener("keyup", this, false);
+		document.addEventListener("game-data", this);
+		document.addEventListener("click", this);
+		window.addEventListener("resize", this);
+		this.canvas.addEventListener("touchstart", this);
+		this.canvas.addEventListener("touchend", this);
+		this.fullscreenButton.addEventListener("click", () => {
+			this.goFullscreen();
+		});
+
+		this.createNewWebsocket();
+
+		if (!this.wss) {
+			return;
+		}
+
+		this.wss.onmessage = (event) => {
+			this.gameState = JSON.parse(event.data);
+			// console.log("game data from pong", event.data);
+			if (this.chat.roomId) {
+				this.chat.roomId = undefined;
+				this.chat.sendInvitation();
+			}
+			if (this.pongQueryParams.room === "private") {
+				const link = document.getElementById(
+					"copy-link",
+				) as HTMLElement;
+				if (link && this.gameState) {
+					link.innerText =
+						baseUrl +
+						"/pong-view?mode=singles&room=" +
+						this.gameState.roomId;
+				}
+			}
+		};
+		this.gameLoop();
+	}
+
+	disconnectedCallback() {
+		console.log("Pong DISCONNECTED");
+		this.wss?.close();
+		document.removeEventListener("keydown", this, false);
+		document.removeEventListener("keyup", this, false);
+		document.removeEventListener("click", this, false);
+	}
+
+	copyToClipboard() {
+		// Get the text field
+		var copyText = document.getElementById("copy-link");
+
+		// Copy the text inside the text field
+		if (copyText) {
+			navigator.clipboard.writeText(copyText?.innerText);
+		}
+	}
+
+	appendCopyLink() {
+		const headline = document.createElement("h2");
+		headline.classList.add("pong-heading", "text-center", "mb-2");
+		headline.innerText = "Share this link to play";
+		const linkContainer = document.createElement("div");
+		linkContainer.classList.add(
+			"pong-card",
+			"pong-card-dark",
+			"flex",
+			"gap-8",
+			"px-4",
+			"py-2",
+			"items-center",
+			"justify-between",
+		);
+		const copyIcon = new IconComponent("copy", 4);
+		const copyButton = document.createElement("button");
+		copyButton.classList.add("pong-button", "pong-button-primary");
+		copyButton.id = "copy-button";
+		copyButton.append(copyIcon);
+		const link = document.createElement("div");
+		link.classList.add("text-xs");
+		link.id = "copy-link";
+		linkContainer.append(link, copyButton);
+		this.append(headline, linkContainer);
+	}
+
+	websocketUrl(): string {
 		let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
+		if (this.pongQueryParams.mode) {
+			url += this.pongQueryParams.mode;
+		}
+		if (
+			!this.pongQueryParams.room ||
+			this.pongQueryParams.room === "public"
+		) {
+			return url;
+		}
+		if (this.pongQueryParams.mode === "spectate") {
+			url += "/" + this.pongQueryParams.room;
+			return url;
+		}
+		if (this.pongQueryParams.room) {
+			url += "?";
+		}
+		if (this.pongQueryParams.mode === "tournament") {
+			url += "tournamentSize=" + this.pongQueryParams.room;
+			return url;
+		}
+		url += `roomId=${this.pongQueryParams.room}`;
+		return url;
+	}
+
+	createNewWebsocket() {
+		console.log("query PARAMS", this.pongQueryParams);
 
 		this.wss?.close();
 
-		console.log("roomId", this.chat.roomId);
-		if (this.chat.roomId) {
-			url = this.urlFromRoomId(url);
-		}
-		if (this.chat.gameSelection) {
-			url = this.urlFromGameSelection(url);
-		}
-
+		const url = this.websocketUrl();
 		console.log("ws to: ", url);
 		this.wss = new WebSocket(url);
-	}
-
-	urlFromGameSelection(url: string) {
-		const selection = this.chat.gameSelection;
-		if (!selection) {
-			return url;
-		}
-		url += selection.modeSelection;
-		if (selection.playSelection === "public") {
-			return url;
-		}
-		if (
-			selection.modeSelection === "singles" ||
-			selection.modeSelection === "doubles"
-		) {
-			url += "?roomId=private";
-		}
-		if (selection.modeSelection === "tournament") {
-			url += "?tournamentSize=" + selection.playSelection;
-		}
-		return url;
-	}
-
-	urlFromRoomId(url: string) {
-		url += "singles?roomId=" + this.chat.roomId;
-		if (this.chat.roomId !== "private") {
-			this.chat.roomId = undefined;
-		}
-		return url;
 	}
 
 	adjustCanvasToWindow() {
@@ -239,114 +376,6 @@ export class PongComponent extends HTMLElement {
 		requestAnimationFrame(this.gameLoop);
 	};
 
-	constructor(chat: ChatComponent, pongMeta: PongMeta) {
-		super();
-		this.adjustCanvasToWindow();
-		this.chat = chat;
-		this.pongMeta = pongMeta;
-	}
-
-	connectedCallback() {
-		console.log("Pong CONNECTED");
-		console.log("gamed State", this.chat.gameSelection);
-
-		this.classList.add("shrink-0", "w-fit");
-		const canvasContainer = document.createElement("div");
-		canvasContainer.classList.add(
-			"p-1",
-			"sm:p-3",
-			"xl:p-5",
-			"mb-10",
-			"sm:border-5",
-			"xl:border-6",
-			"border-3",
-			"sm:rounded-xl",
-			"rounded-lg",
-			"bg-indigo-950",
-			"border-cyan-300",
-			"glow",
-			"shrink-0",
-			"w-fit",
-			"relative",
-			"group",
-		);
-
-		this.canvas.classList.add("bg-black", "rounded-lg");
-		canvasContainer.appendChild(this.canvas);
-
-		this.append(canvasContainer);
-
-		document.addEventListener("keydown", this, false);
-		document.addEventListener("keyup", this, false);
-		document.addEventListener("game-data", this);
-		window.addEventListener("resize", this);
-		this.canvas.addEventListener("touchstart", this);
-		this.canvas.addEventListener("touchend", this);
-
-		const gameDataContainer = document.createElement("div");
-		gameDataContainer.classList.add(
-			"text-[5px]",
-			"sm:text-xs",
-			"md:text-sm",
-			"lg:text:md",
-		);
-		const matchStatus = document.createElement("div");
-		const roomId = document.createElement("div");
-		const knockoutName = document.createElement("div");
-		gameDataContainer.append(matchStatus, roomId, knockoutName);
-
-		this.fullscreenButton.addEventListener("click", () => {
-			this.goFullscreen();
-		});
-
-		this.fullscreenButton.id = "fullscreen-button";
-		this.fullscreenButton.classList.add(
-			"top-3",
-			"right-3",
-			"md:top-5",
-			"md:right-5",
-			"lg:top-8",
-			"lg:right-8",
-			"invisible",
-			"absolute",
-			"opacity-60",
-			"group-hover:visible",
-			"pong-button",
-			"pong-button-pale",
-			"touch-visible",
-		);
-		const fullscreenIcon = new IconComponent("fullscreen", 7);
-		fullscreenIcon.id = "fullscreen-icon";
-		this.fullscreenButton.appendChild(fullscreenIcon);
-		canvasContainer.appendChild(this.fullscreenButton);
-
-		this.append(gameDataContainer);
-
-		this.createNewWebsocket();
-
-		if (!this.wss) {
-			return;
-		}
-
-		this.wss.onmessage = (event) => {
-			this.gameState = JSON.parse(event.data);
-			// console.log("game data from pong", event.data);
-			if (this.chat.roomId) {
-				this.chat.roomId = undefined;
-				this.chat.sendInvitation();
-			}
-			if (this.gameState) {
-				matchStatus.innerText =
-					"Match Status: " + this.gameState?.matchStatus;
-				roomId.innerText = "Room Id: " + this.gameState?.roomId;
-				knockoutName.innerText =
-					"Knockout Name: " +
-					(this.gameState?.knockoutName ?? "no info");
-			}
-		};
-		this.gameLoop();
-	}
-
 	handleEvent(event: Event) {
 		const handlerName =
 			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
@@ -394,18 +423,28 @@ export class PongComponent extends HTMLElement {
 		if (event.key === "ArrowUp" || event.key === "ArrowDown")
 			this.paddleDirection = 0;
 	}
-	onClick(event: MouseEvent) {}
+	onClick(event: MouseEvent) {
+		console.log("you clicked");
+		const target = event.target as HTMLElement;
+		if (!target) {
+			return;
+		}
+		const button = target.closest("button");
+		if (button) {
+			console.log("you clicked a button");
+			this.handleCopyButton(button);
+		}
+	}
+	handleCopyButton(button: HTMLButtonElement) {
+		if (button.id !== "copy-button") {
+			return;
+		}
+		console.log("you clicked a copy");
+		this.copyToClipboard();
+	}
 
 	onResize() {
 		this.adjustCanvasToWindow();
-	}
-
-	disconnectedCallback() {
-		console.log("Pong DISCONNECTED");
-		this.wss?.close();
-		document.removeEventListener("keydown", this, false);
-		document.removeEventListener("keyup", this, false);
-		document.removeEventListener("click", this, false);
 	}
 }
 

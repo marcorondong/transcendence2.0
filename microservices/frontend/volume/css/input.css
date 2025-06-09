@@ -15,7 +15,7 @@
 }
 
 .pong-heading {
-	@apply font-bold text-slate-800 dark:text-slate-300;
+	@apply font-bold;
 }
 
 .pong-heading-big {
@@ -81,17 +81,20 @@
 }
 
 .pong-form-label {
-	@apply text-sm font-semibold text-slate-200;
+	@apply text-sm font-semibold;
 }
 
 .pong-form-heading {
-	@apply font-bold text-2xl text-slate-200;
+	@apply font-bold text-2xl;
 }
 
 /* links  */
 
 a {
 	@apply underline dark:text-indigo-400;
+}
+.pong-link {
+	@apply no-underline dark:text-slate-300;
 }
 
 .pong-label {

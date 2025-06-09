@@ -4,7 +4,15 @@ import { MenuSelectionComponent } from "../components/menu-selection-component.j
 import { ModeSelectionComponent } from "../components/mode-selection-component.js";
 import { PlaySelectionComponent } from "../components/play-selection-component.js";
 import { pongLinkEvent } from "../services/events.js";
-import { GameData, SelectionState } from "../types/Game.js";
+import {
+	GameData,
+	GameModes,
+	GameRoom,
+	GameRooms,
+	GameSelection,
+	TournamentSize,
+	TournamentSizes,
+} from "../types/Game.js";
 
 class HomeView extends HTMLElement {
 	chat: ChatComponent;
@@ -14,20 +22,20 @@ class HomeView extends HTMLElement {
 	}
 
 	// GAME STATE
-	selectionSate: SelectionState = {
-		menuSelection: "game",
-		gameSelection: undefined,
-		modeSelection: undefined,
-		playSelection: undefined,
+	selection: GameSelection = {
+		menu: "game",
+		game: undefined,
+		mode: undefined,
+		room: undefined,
 	};
 	gameData: GameData = {
-		menuItems: [
+		menu: [
 			{ icon: "game", label: "Pick a Game" },
 			{ icon: "mode", label: "Select Mode" },
 			{ icon: "play", label: "Let's Play" },
 		],
-		gameOptions: ["pong", "ttt"],
-		modeOptions: [
+		game: ["pong", "ttt"],
+		mode: [
 			{
 				id: "singles",
 				label: "Single Player Mode",
@@ -56,7 +64,7 @@ class HomeView extends HTMLElement {
 				play: [{ value: "input", label: "Start watching" }],
 			},
 		],
-		selectionState: this.selectionSate,
+		selection: this.selection,
 	};
 
 	contentStyles: string[] = [
@@ -79,37 +87,37 @@ class HomeView extends HTMLElement {
 		menuButtons.forEach((b) => b.classList.remove("pong-menu-active"));
 
 		const firstButton = menuButtons.find(
-			(b) => b.id === this.gameData.menuItems[0].icon,
+			(b) => b.id === this.gameData.menu[0].icon,
 		);
 		if (firstButton) {
-			if (this.gameData.selectionState.menuSelection === "game") {
+			if (this.gameData.selection.menu === "game") {
 				firstButton.classList.add("pong-menu-active");
 			}
 		}
 
 		const secondButton = menuButtons.find(
-			(b) => b.id === this.gameData.menuItems[1].icon,
+			(b) => b.id === this.gameData.menu[1].icon,
 		);
 		if (secondButton) {
-			if (!this.gameData.selectionState.gameSelection) {
+			if (!this.gameData.selection.game) {
 				secondButton.setAttribute("disabled", "true");
 			} else {
 				secondButton.removeAttribute("disabled");
 			}
-			if (this.gameData.selectionState.menuSelection === "mode") {
+			if (this.gameData.selection.menu === "mode") {
 				secondButton.classList.add("pong-menu-active");
 			}
 		}
 		const thirdButton = menuButtons.find(
-			(b) => b.id === this.gameData.menuItems[2].icon,
+			(b) => b.id === this.gameData.menu[2].icon,
 		);
 		if (thirdButton) {
-			if (!this.gameData.selectionState.modeSelection) {
+			if (!this.gameData.selection.mode) {
 				thirdButton.setAttribute("disabled", "true");
 			} else {
 				thirdButton.removeAttribute("disabled");
 			}
-			if (this.gameData.selectionState.menuSelection === "play") {
+			if (this.gameData.selection.menu === "play") {
 				thirdButton.classList.add("pong-menu-active");
 			}
 		}
@@ -118,7 +126,7 @@ class HomeView extends HTMLElement {
 		const firstChild = this.lastChild;
 		console.log("replacing this content:", firstChild);
 		if (firstChild) {
-			switch (this.gameData.selectionState.menuSelection) {
+			switch (this.gameData.selection.menu) {
 				case "game":
 					this.replaceChild(this.gameContent, firstChild);
 					break;
@@ -160,13 +168,13 @@ class HomeView extends HTMLElement {
 			console.log("menuButton pressed with id:", button.id);
 			switch (button.id) {
 				case "game":
-					this.gameData.selectionState.menuSelection = "game";
+					this.gameData.selection.menu = "game";
 					break;
 				case "mode":
-					this.gameData.selectionState.menuSelection = "mode";
+					this.gameData.selection.menu = "mode";
 					break;
 				case "play":
-					this.gameData.selectionState.menuSelection = "play";
+					this.gameData.selection.menu = "play";
 			}
 			this.updateMenuButtons();
 			this.updateContent();
@@ -178,12 +186,12 @@ class HomeView extends HTMLElement {
 			return;
 		}
 		if (button.id === "pong") {
-			this.gameData.selectionState.gameSelection = "pong";
+			this.gameData.selection.game = "pong";
 		}
 		if (button.id === "ttt") {
-			this.gameData.selectionState.gameSelection = "ttt";
+			this.gameData.selection.game = "ttt";
 		}
-		this.gameData.selectionState.menuSelection = "mode";
+		this.gameData.selection.menu = "mode";
 		this.updateMenuButtons();
 		this.updateContent();
 	}
@@ -192,22 +200,25 @@ class HomeView extends HTMLElement {
 		if (!button.classList.contains("mode-button")) {
 			return;
 		}
-		const state = this.gameData.selectionState;
-		state.modeSelection = this.gameData.modeOptions.find(
-			(m) => m.id === button.id,
-		)?.id;
-		state.menuSelection = "play";
+		const state = this.gameData.selection;
+		state.mode = this.gameData.mode.find((m) => m.id === button.id)?.id;
+		state.menu = "play";
 		this.updateMenuButtons();
 		this.updateContent();
 	}
 
 	handlePlayButtons(button: HTMLButtonElement) {
+		console.log("HANDLE PLAY BUTTON", button.id);
 		if (!button.classList.contains("play-button")) {
 			return;
 		}
-		this.gameData.selectionState.playSelection = button.id;
-		this.chat.gameSelection = this.gameData.selectionState;
-		this.dispatchEvent(pongLinkEvent);
+		console.log(
+			"HANDLE PLAY BUTTON -> check passed, button id:",
+			button.id,
+		);
+		this.gameData.selection.room = button.id;
+
+		this.dispatchEvent(pongLinkEvent(this.gameData.selection));
 	}
 
 	connectedCallback() {

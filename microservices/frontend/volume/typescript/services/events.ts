@@ -1,12 +1,8 @@
+import { GameSelection } from "../types/Game.js";
 import { NotificationData, State } from "../types/Notification.js";
+import { baseUrl } from "./fetch.js";
 
-export const pongLinkEvent = new CustomEvent("pong-link", {
-	detail: { source: "pong-view" },
-	bubbles: true,
-	composed: true,
-});
-
-export const errorLinkEvent = new CustomEvent("error-link", {
+export const errorLinkEvent = new CustomEvent("pong-link", {
 	detail: { source: "error-view" },
 	bubbles: true,
 	composed: true,
@@ -36,12 +32,41 @@ export const onlineUserEvent = new CustomEvent("online-user", {
 	composed: true,
 });
 
+export function pongLinkEvent(selection?: GameSelection) {
+	let url = "";
+	// TODO: 👇 if we implement tictactoe then should not be hardcoded
+	url += "/pong-view";
+
+	if (selection?.mode) {
+		url += "?mode=" + selection.mode;
+		if (selection?.room) {
+			url += "&room=" + selection.room;
+		}
+	}
+	console.log("url when pong view from custom event:", url);
+
+	return new CustomEvent("pong-link", {
+		detail: { source: url },
+		bubbles: true,
+		composed: true,
+	});
+}
+
+export function profileLinkEvent(uuid: string) {
+	let url = "/profile-view?userId=" + uuid;
+
+	return new CustomEvent("pong-link", {
+		detail: { source: url },
+		bubbles: true,
+		composed: true,
+	});
+}
+
 export function notificationEvent(message: string, state: State) {
 	const data: NotificationData = {
 		message,
 		state,
 	};
-	console.log("sending notification");
 	return new CustomEvent("notification", {
 		detail: { source: data },
 		bubbles: true,
