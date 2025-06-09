@@ -18,7 +18,7 @@ export class FetchPongDb {
 		// TODO: replace this AS with valibot parse
 		return (await fetchPong(statsConfig)) as Stats[];
 	}
-	static async matchHistory(userId: string) {
+	static async matchHistory(userId: string): Promise<MatchHistory[]> {
 		const statsConfig: FetchConfig<User> = {
 			url: `/pong-db/game-history/${userId}`,
 			header: {

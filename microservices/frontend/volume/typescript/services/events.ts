@@ -26,7 +26,7 @@ export const signInLinkEvent = new CustomEvent("pong-link", {
 	composed: true,
 });
 
-export const onlineUserEvent = new CustomEvent("online-user", {
+export const onlineUserEvent = new CustomEvent("onlineuser", {
 	detail: { source: "new online user" },
 	bubbles: true,
 	composed: true,
