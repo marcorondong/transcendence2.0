@@ -102,30 +102,6 @@ export function getConfig(): AppConfig {
 
 	logger.log("[Config] Final config object:", config);
 
-	// TODO: Remove these test cases for logger
-	// START of test cases
-	logger.log({ config }, "[Config] Final config object:");
-	logger.info("Testing info", config.APP_DESCRIPTION);
-	logger.warn({ appDescription: config.APP_DESCRIPTION }, "Testing warn");
-	logger.warn(config.APP_DESCRIPTION, "Testing warn");
-	logger.error("Testing error");
-	logger.debug("Testing debug");
-	logger.trace("Testing trace");
-	logger.fatal("Testing fatal");
-	logger.log("Testing log");
-
-	logger.info("Hello %s!", "Alice");
-	logger.debug("User %s has %d points", "Bob", 150);
-	logger.warn("JSON object: %j", { id: 1, name: "Test" });
-	logger.error("Price: $%d, Discount: %d%%", 199, 20);
-	logger.trace("Escaped percent: %% %s", "done");
-	logger.fatal("Multiple types: %s %d %j", "X", 42, { a: true });
-
-	const a: any = {};
-	a.self = a;
-	logger.info("Cyclic? %j", a);
-	// END of test cases
-
 	cachedConfig = config; // Cache the config
 	return config;
 }
