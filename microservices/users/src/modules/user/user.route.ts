@@ -300,12 +300,19 @@ async function userRoutes(server: FastifyInstance) {
 			},
 		};
 		// Notice the importance of placing "correctly" the message and specifying the fields and its order
-		logger
-			.from(request)
-			.info(
-				{ "event.action": "test_log", "user": sampleUser },
-				"Logging test object",
-			);
+		// logger
+		// 	.from(request)
+		// 	.info(
+		// 		{ "event.action": "test_log", "user": sampleUser },
+		// 		"Logging test object",
+		// 	);
+		logger.from(request).info(
+			{
+				"event.action": "test_log",
+				"user displayName": sampleUser.profile.displayName,
+			},
+			"Logging test object display name",
+		);
 		logger.log({ sampleUser }, "[Test Route] sampleUser object:");
 		logger.info("Testing info", sampleUser.username);
 		// Correct usage
