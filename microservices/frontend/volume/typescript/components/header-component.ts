@@ -94,7 +94,6 @@ export class HeaderComponent extends HTMLElement {
 				"dark:sm:bg-transparent",
 				"z-42",
 				"sm:me-6",
-				"self-end",
 			);
 			navigation.appendChild(list);
 		}
