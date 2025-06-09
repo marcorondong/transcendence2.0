@@ -16,3 +16,11 @@ export interface ProfileAuth extends UserAuth {
 	nickname: string;
 	email: string;
 }
+
+export interface MatchHistory {
+	winnerId: string;
+	loserId: string;
+	winnerScore: number;
+	loserScore: number;
+	createdAt: Date;
+}

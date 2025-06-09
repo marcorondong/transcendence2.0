@@ -1,12 +1,13 @@
 import { ChatComponent } from "../components/chat-component.js";
-import { fetchPong } from "../services/fetch.js";
 import { User } from "../types/User.js";
-import { FetchConfig } from "../types/Fetch.js";
+import { FetchUsers } from "../services/fetch-users.js";
+import { FetchPongDb } from "../services/fetch-pong-db.js";
 
 export class ProfileView extends HTMLElement {
 	chat: ChatComponent;
 	userData: User;
 	userId: string | null = null;
+	matchHistory: any;
 	constructor(chat: ChatComponent) {
 		super();
 		this.chat = chat;
@@ -17,7 +18,7 @@ export class ProfileView extends HTMLElement {
 
 		// FETCH DATA
 		this.userIdFromQueryParam();
-		await this.fetchUser();
+		await this.fetchData();
 
 		const headline = document.createElement("h1");
 		headline.innerText = "Your Profile";
@@ -103,24 +104,19 @@ export class ProfileView extends HTMLElement {
 		this.userId = searchParams.get("userId");
 	}
 
-	async fetchUser() {
-		//TODO: change the access to chat.me to a get requesest to users once
-		//API endpoint for GET Me exists
-		const userId = this.userId ?? this.chat.me!.id;
-		const config: FetchConfig = {
-			method: "GET",
-			header: {
-				accept: "application/json",
-			},
-			url: "/api/users/" + userId,
-		};
-
+	async fetchData() {
 		try {
-			this.userData = await fetchPong(config);
+			//TODO: change the access to chat.me to a get requesest to users once
+			//API endpoint for GET Me exists
+			const id = this.userId ?? this.chat.me!.id;
+			this.userData = await FetchUsers.users(id);
+			this.matchHistory = await FetchPongDb.matchHistory(id);
 		} catch (e) {
 			console.log(e);
 		}
 	}
+
+	async fetchMatchHistory() {}
 }
 
 customElements.define("profile-view", ProfileView);
