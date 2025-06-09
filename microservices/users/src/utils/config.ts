@@ -102,6 +102,16 @@ export function getConfig(): AppConfig {
 
 	logger.log("[Config] Final config object:", config);
 
+	logger.log({ config }, "[Config] Final config object:");
+	logger.info("Testing info", config.APP_DESCRIPTION);
+	logger.warn({ appDescription: config.APP_DESCRIPTION }, "Testing warn");
+	logger.warn(config.APP_DESCRIPTION, "Testing warn");
+	logger.error("Testing error");
+	logger.debug("Testing debug");
+	logger.trace("Testing trace");
+	logger.fatal("Testing fatal");
+	logger.log("Testing log");
+
 	cachedConfig = config; // Cache the config
 	return config;
 }
