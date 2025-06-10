@@ -295,6 +295,9 @@ server.get("/test", async (request, reply) => {
     // Correct usage: object first, message last (ELK compliant = Fastify's request.log compliant)
     if (true) {
       logger.from(request).info({ "event.action": "test_log", "user displayName": sampleUser.profile.displayName }, "Logging test object display name");
+    }
+    // Correct usage
+    if (true) {
       logger.log({ sampleUser }, "[Test Route] sampleUser object:");
       logger.warn({ sampleUser: sampleUser.profile.displayName }, "Testing warn");
       logger.warn({ message: "Testing warn" }, { sampleUser: sampleUser.profile.displayName });
