@@ -1,17 +1,24 @@
 import pino from "pino";
 import type { FastifyRequest } from "fastify";
-import util from "util"; // For handles %s, %d, %j, etc as console.log()
+import util from "util"; // For handling %s, %d, %j, etc as console.log()
 
+// === CONFIGURABLE CONSTANTS === //
+// Logger format section
 let PINO_LOGGER = true; // Change to true to enable full Pino logging
 const FASTIFY_LOGGER = true; // Change to false to disable Fastify logger
 const LOG_LEVEL = process.env.LOG_LEVEL || "trace";
 const NODE_ENV = process.env.NODE_ENV || "development";
+// Tracing section
 const SHOW_CALL_SITE = true; // Enable call_site (function, file, line) in debug and trace logs
-const LOG_STACK_TRACE = true; // Enable trace in debug, error and fatal logs
+const CALL_SITE_DEPTH_OVERRIDE = null; // Set a number (e.g. 5) to override, or keep null to auto
+const LOG_STACK_TRACE = false; // Enable trace in debug, error and fatal logs
 const SERVICE_NAME = "users"; // Optional: leave empty string to skip including in logs
+// ELK format section
 const USE_ELK_FORMAT = true; // Toggle ELK-style arg order: (data, message)
 const DEFAULT_LOG_MESSAGE = "<no message>"; // Default fallback if no msg
-const CALL_SITE_DEPTH_OVERRIDE = null; // Set a number (e.g. 5) to override, or keep null to auto
+const ELK_WARN_ENABLED = true; // Set to false to suppress non-ELK format warnings
+type InternalLogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal"; // Helper type to set level of non-ELK warning message
+const ELK_WARN_LEVEL: InternalLogLevel = "warn"; // Can be trace, debug, fatal, etc.
 
 // Helper function to check if pino-pretty is installed
 function isPinoPrettyAvailable(): boolean {
@@ -52,19 +59,6 @@ if (PINO_LOGGER) {
 		PINO_LOGGER = false; // Disable Pino usage to fallback
 	}
 }
-
-// Helper function for getCallSiteDetails() to get the depth for useful info (function, file, line)
-// function getDynamicCallSiteDepth(filePath: string): number {
-// 	if (CALL_SITE_DEPTH_OVERRIDE !== null) return CALL_SITE_DEPTH_OVERRIDE;
-
-// 	// Adjust the depth based on file structure
-// 	if (filePath.includes("/routes/")) return 4; // Shallow depth for route files
-// 	if (filePath.includes("/controllers/")) return 5;
-// 	if (filePath.includes("/services/")) return 6; // Deeper depth for service/schema files
-// 	if (filePath.includes("/schemas/")) return 6; // Deeper depth for service/schema files
-
-// 	return 7; // Default for utility or deep call stacks
-// }
 
 // Helper function for wrap() to get call_site (where the log was triggered)
 function getCallSiteDetails(): Record<string, unknown> {
@@ -124,83 +118,8 @@ function safeStringify(obj: any): string {
 	}
 }
 
-// // Helper function to fallback to console.* when PINO_LOGGER is false
-// function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
-// 	return (...args: any[]) => {
-// 		if (!args.length) return;
-
-// 		// If user (programmer) wants logs "pino formatted"
-// 		if (PINO_LOGGER) {
-// 			let msg: string | undefined;
-// 			let structuredLog: Record<string, unknown> = {};
-// 			let argCounter = 1;
-
-// 			const first = args[0];
-// 			const rest = args.slice(1);
-
-// 			// Handle format string (%s, %d, etc.)
-// 			if (typeof first === "string" && /%[sdj%]/.test(first)) {
-// 				const safeArgs = rest.map((arg) =>
-// 					typeof arg === "object" && arg !== null
-// 						? safeStringify(arg)
-// 						: arg,
-// 				);
-// 				msg = util.format(first, ...safeArgs);
-// 			} else {
-// 				if (typeof first === "string") {
-// 					msg = first;
-// 				} else if (first && typeof first === "object") {
-// 					structuredLog = { ...structuredLog, ...first };
-// 				} else {
-// 					structuredLog[`arg${argCounter++}`] = first;
-// 				}
-
-// 				for (const arg of rest) {
-// 					if (arg && typeof arg === "object" && !Array.isArray(arg)) {
-// 						structuredLog = { ...structuredLog, ...arg };
-// 					} else {
-// 						structuredLog[`arg${argCounter++}`] = arg;
-// 					}
-// 				}
-// 			}
-
-// 			// Stack trace & call_site logic
-// 			const isTrace = method === "trace";
-// 			const isDebug = method === "debug";
-// 			const isError = method === "error";
-// 			const isFatal = method === "fatal";
-
-// 			if (SHOW_CALL_SITE && (isTrace || isDebug)) {
-// 				Object.assign(structuredLog, getCallSiteDetails(4));
-// 			}
-
-// 			if (
-// 				isTrace ||
-// 				(LOG_STACK_TRACE && (isDebug || isError || isFatal))
-// 			) {
-// 				structuredLog.stack = new Error().stack;
-// 			}
-
-// 			if (Object.keys(structuredLog).length) {
-// 				(internalLogger[method] as (...a: any[]) => void)(
-// 					structuredLog,
-// 					msg,
-// 				);
-// 			} else {
-// 				(internalLogger[method] as (...a: any[]) => void)(msg);
-// 			}
-// 			// Plain old console.log console.warn, console.error
-// 		} else {
-// 			const consoleMethod = method === "info" ? "log" : method;
-// 			if (typeof (console as any)[consoleMethod] === "function") {
-// 				(console as any)[consoleMethod](...args);
-// 			} else {
-// 				console.error(...args);
-// 			}
-// 		}
-// 	};
-// }
-function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
+// Helper function to fallback to console.* when PINO_LOGGER is false
+function wrap(method: "trace" | "debug" | "info" | "warn" | "error" | "fatal") {
 	return (...args: any[]) => {
 		if (!args.length) return;
 
@@ -248,11 +167,8 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 						msg = args[1];
 					} else if (typeof fallbackMsg === "string") {
 						msg = fallbackMsg;
-						if (typeof args[0] === "string") {
-							// console.warn(
-							// 	`[Logger] Expected (object, message) for ELK logs. Got (string, ...).`,
-							// );
-							internalLogger.warn(
+						if (typeof args[0] === "string" && ELK_WARN_ENABLED) {
+							internalLogger[ELK_WARN_LEVEL](
 								{
 									source: "logger",
 									message:
@@ -304,8 +220,6 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 			const isFatal = method === "fatal";
 
 			if (SHOW_CALL_SITE && (isTrace || isDebug)) {
-				// Object.assign(structuredLog, getCallSiteDetails(4));
-				// Object.assign(structuredLog, getCallSiteDetails(__filename));
 				Object.assign(structuredLog, getCallSiteDetails());
 			}
 			if (
@@ -333,24 +247,18 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 
 // logger (main) function
 export const logger = {
+	trace: wrap("trace"),
+	debug: wrap("debug"),
 	info: wrap("info"),
 	warn: wrap("warn"),
 	error: wrap("error"),
-	debug: wrap("debug"),
-	trace: wrap("trace"),
 	fatal: wrap("fatal"),
 	log: wrap("info"), // Alias to mimic console.log
 
-	/**
-	 * Wraps Fastify's per-request logger (req.log)
-	 * Preserves requestId, method, url
-	 */
-	// from(req: FastifyRequest) {
-	// 	return req.log;
-	// },
+	// Wraps Fastify's per-request logger (req.log). Preserves requestId, method, url
 	from(request: FastifyRequest) {
 		const wrapRequestLog = (
-			method: "info" | "warn" | "error" | "debug" | "trace" | "fatal",
+			method: "trace" | "debug" | "info" | "warn" | "error" | "fatal",
 		) => {
 			return (...args: any[]) => {
 				if (!args.length) return;
@@ -372,11 +280,11 @@ export const logger = {
 		};
 
 		return {
+			trace: wrapRequestLog("trace"),
+			debug: wrapRequestLog("debug"),
 			info: wrapRequestLog("info"),
 			warn: wrapRequestLog("warn"),
 			error: wrapRequestLog("error"),
-			debug: wrapRequestLog("debug"),
-			trace: wrapRequestLog("trace"),
 			fatal: wrapRequestLog("fatal"),
 			log: wrapRequestLog("info"),
 		};
@@ -384,10 +292,7 @@ export const logger = {
 	console: (...args: any[]) => console.log(...args),
 };
 
-/**
- * Provides Fastify-compatible logger configuration.
- * Use this when initializing Fastify to keep logging centralized.
- */
+// Provides Fastify-compatible logger configuration. (Use when initializing Fastify)
 export function fastifyLoggerConfig() {
 	if (!FASTIFY_LOGGER) return false;
 
