@@ -167,7 +167,15 @@ function wrap(method: "trace" | "debug" | "info" | "warn" | "error" | "fatal") {
 						msg = args[1];
 					} else if (typeof fallbackMsg === "string") {
 						msg = fallbackMsg;
-						if (typeof args[0] === "string" && ELK_WARN_ENABLED) {
+
+						const isSingleStringArg =
+							args.length === 1 && typeof args[0] === "string";
+
+						if (
+							!isSingleStringArg &&
+							typeof args[0] === "string" &&
+							ELK_WARN_ENABLED
+						) {
 							internalLogger[ELK_WARN_LEVEL](
 								{
 									source: "logger",
