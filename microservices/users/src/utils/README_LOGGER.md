@@ -92,10 +92,12 @@ Inside `logger.ts` you can configure:
 | `FASTIFY_LOGGER`           | `const`   | Toggle Fastify’s internal logger (`req.log`)                           |
 | `LOG_LEVEL`                | `string`  | Set via `process.env.LOG_LEVEL` (e.g. `info`, `debug`)                 |
 | `SHOW_CALL_SITE`           | `boolean` | Adds `{ function, file, line }` to logs on debug/trace                 |
+| `CALL_SITE_DEPTH_OVERRIDE` | `int`     | Overrides dynamic depth calculation to a fixed one (used in call_site) |
 | `LOG_STACK_TRACE`          | `boolean` | Includes full stack traces in logs (error/fatal/debug)                 |
 | `SERVICE_NAME`             | `string`  | Tag service name in logs (e.g. `"users"`)                              |
 | `USE_ELK_FORMAT`           | `boolean` | Enforces ELK log formatting and warns invalid ones                     |
-| `CALL_SITE_DEPTH_OVERRIDE` | `int`     | Overrides dynamic depth calculation to a fixed one (used in call_site) |
+| `ELK_WARN_ENABLED`         | `boolean` | Enable/disable non-ELK format warnings                                 |
+| `ELK_WARN_LEVEL`           | `string`  | Set log level for non-ELK format warnings (debug, warning, etc)        |
 
 The effects are:
 
@@ -140,16 +142,20 @@ The effects are:
         line: 9
     ```
 
-5. `LOG_STACK_TRACE` (_only when pino-pretty is installed_):
+5. `CALL_SITE_DEPTH_OVERRIDE`:
+   1. Overrides the dynamic depth calculation to a fixed depth. This is used by `getCallSiteDetails()` to find values for `function`, `file`, `line`.
+6. `LOG_STACK_TRACE` (_only when pino-pretty is installed_):
    1. If `false`: Then **only** trace logs will have traces / stack calls.
    2. If `true`: Then debug, error, and fatal logs will have traces / stack calls.
-6. `SERVICE_NAME` (_only when pino-pretty is installed_):
+7. `SERVICE_NAME` (_only when pino-pretty is installed_):
    1. It's for identifying which service (_e.g: users, pong, chat, ai_) is logging.
-7. `USE_ELK_FORMAT`:
+8. `USE_ELK_FORMAT`:
    1. If `false`: Then it takes usual console.log() log formatting (`console.log("message", object)`).
    2. If `true`: Then it takes ELK logs formatting (`console.log(object, "message")`) and warns when no-ELK format is found.
-8. `CALL_SITE_DEPTH_OVERRIDE`:
-   1. Overrides the dynamic depth calculation to a fixed depth. This is used by `getCallSiteDetails()` to find values for `function`, `file`, `line`.
+9. `ELK_WARN_ENABLED`:
+   1. Enable/disable non-ELK format warnings.
+10. `ELK_WARN_LEVEL`:
+    1. Set log level for non-ELK format warnings (trace, debug, info, warning, error, fatal etc).
 
 ---
 
