@@ -1,6 +1,20 @@
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
 import { logger } from "./logger";
+
+// Load '.env' file (if any)
+// dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+// Load service-specific and shared project env files (if any)
+dotenv.config({
+	path: [
+		path.resolve(__dirname, "../.env"), // Service-level env (adjust as needed)
+		path.resolve(__dirname, "../../../.env"), // Repo-level shared env (adjust as needed)
+	],
+});
+
+// Note that the default is 'path.resolve(process.cwd(), '.env')'
+// So 'cwd' is 'pwd'; where I'm located at the moment of running the app.
 
 // Function Return type definition (for type safety)
 type AppConfig = {
@@ -18,7 +32,7 @@ type AppConfig = {
 let cachedConfig: AppConfig | null = null;
 
 // Function to read and assign config values from Docker secrets, environment or hardcoded values
-export function getConfig(): AppConfig {
+export default function getConfig(): AppConfig {
 	if (cachedConfig) return cachedConfig;
 
 	logger.log("[Config] Loading config...");
