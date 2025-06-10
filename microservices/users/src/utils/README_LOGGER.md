@@ -26,6 +26,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
     - [✅ Recommended structure for logs](#-recommended-structure-for-logs)
   - [🧪 Testing](#-testing)
   - [✅ Ready to migrate to ELK](#-ready-to-migrate-to-elk)
+  - [📚 Notes](#-notes)
 
 ---
 
@@ -316,3 +317,16 @@ server.get("/test", async (request, reply) => {
 ## ✅ Ready to migrate to ELK
 
 Once a log shipper (e.g. Logstash or Fluent Bit) is added, no changes are needed. All logs are already structured and parsable.
+
+## 📚 Notes
+
+These are `pino` log levels (string, number and meaning)
+
+| Level   | Numeric | What it means                     |
+| ------- | ------- | --------------------------------- |
+| `trace` | 10      | Very detailed logs (lowest level) |
+| `debug` | 20      | Debugging info                    |
+| `info`  | 30      | Normal app logs (default)         |
+| `warn`  | 40      | Something might be wrong          |
+| `error` | 50      | Something went wrong              |
+| `fatal` | 60      | App crashed                       |
