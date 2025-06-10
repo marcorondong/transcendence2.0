@@ -102,9 +102,6 @@ export function getConfig(): AppConfig {
 
 	logger.log("[Config] Final config object:", config);
 
-	logger.debug("Testing debug from config.ts");
-	logger.trace("Testing trace from config.ts");
-
 	cachedConfig = config; // Cache the config
 	return config;
 }
