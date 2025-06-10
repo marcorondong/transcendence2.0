@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { logger } from "./logger";
 
 export const USER_ERRORS = {
 	USER_CREATE: "USER_CREATE_ERROR",
@@ -102,7 +103,8 @@ export function ft_fastifyErrorHandler(
 	if (error instanceof AppError) {
 		error.handlerName ??= "unknown_handler";
 		// Log (terminal) part
-		request.log.error({
+		// request.log.error({
+		logger.from(request).error({
 			statusCode: error.statusCode,
 			code: error.code ?? "UNKNOWN_ERROR",
 			message: error.message,
@@ -126,7 +128,8 @@ export function ft_fastifyErrorHandler(
 		});
 	}
 	// Unknown/unexpected error
-	request.log.error({
+	// request.log.error({
+	logger.from(request).error({
 		// to access '.message' and '.stack' safely, I have to cast it,
 		// And '?.' ensures that if error is not an object or has no .message or .stack, it won’t crash.
 		message:
