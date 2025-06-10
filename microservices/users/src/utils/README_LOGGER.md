@@ -15,6 +15,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 - [Custom Logger](#custom-logger)
   - [Table of Contents](#table-of-contents)
   - [✅ Features](#-features)
+  - [🧩 Dependencies](#-dependencies)
   - [🔧 Setup](#-setup)
   - [🔀 Migration Steps](#-migration-steps)
   - [🔌 Configuration](#-configuration)
@@ -41,6 +42,17 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 
 ---
 
+## 🧩 Dependencies
+
+- Production:
+  - **None** 👍
+  - But `fastify` provides `pino` logger that it's the core of `logger`. if not present then it's only a `console.*()` wrapper
+- Development:
+  - `fastify`
+  - `pino-pretty`
+
+---
+
 ## 🔧 Setup
 
 1. Install dependencies:
@@ -53,7 +65,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 2. import { fastifyLoggerConfig } from "./utils/logger";
 
     ```ts
-    import { fastifyLoggerConfig } from "./utils/logger";
+    import { fastifyLoggerConfig } from "../path/to/logger";
     const server = fastify({
     logger: fastifyLoggerConfig(),
     });
@@ -75,7 +87,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 3. Register logger's `fastifyLoggerConfig` as Fastify's logger config. (Check [Setup](#-setup))
 4. Configure it to suit your taste. (Check [Configuration](#-configuration))
 5. Find all `console.` and do the following:
-   1. Import custom logger (`import { logger } from "./path/to/logger";`)
+   1. Import custom logger (`import { logger } from "../path/to/logger";`)
    2. Replace `console.` with `logger.`
 6. Follow [usage examples](#-usage-examples) and [recommended structure for logs](#-recommended-structure-for-logs) when reformatting existing logs and adding new ones.
 7. Change `USE_ELK_FORMAT` to `true` to see which logs are not ELK compliant.
