@@ -6,7 +6,7 @@ import util from "util"; // For handling %s, %d, %j, etc as console.log()
 // Logger format section
 let PINO_LOGGER = true; // Change to true to enable full Pino logging
 const FASTIFY_LOGGER = true; // Change to false to disable Fastify logger
-const LOG_LEVEL = process.env.LOG_LEVEL || "trace";
+const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 const NODE_ENV = process.env.NODE_ENV || "development";
 // Tracing section
 const SHOW_CALL_SITE = true; // Enable call_site (function, file, line) in debug and trace logs
