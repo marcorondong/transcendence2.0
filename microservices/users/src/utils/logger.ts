@@ -41,7 +41,7 @@ if (PINO_LOGGER) {
 								translateTime: "SYS:standard",
 								ignore: "pid,hostname",
 							},
-						}
+					  }
 					: undefined,
 		});
 	} catch (err: any) {
@@ -249,8 +249,16 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 					} else if (typeof fallbackMsg === "string") {
 						msg = fallbackMsg;
 						if (typeof args[0] === "string") {
-							console.warn(
-								`[Logger] Expected (object, message) for ELK logs. Got (string, ...).`,
+							// console.warn(
+							// 	`[Logger] Expected (object, message) for ELK logs. Got (string, ...).`,
+							// );
+							internalLogger.warn(
+								{
+									source: "logger",
+									message:
+										"[Logger] Expected (object, message) for ELK logs. Got (string, ...)",
+								},
+								"[Logger] Expected (object, message) for ELK logs. Got (string, ...)",
 							);
 						}
 					}
