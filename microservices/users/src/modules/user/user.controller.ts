@@ -23,7 +23,7 @@ import {
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
-import { getConfig } from "../../utils/config";
+import getConfig from "../../utils/config";
 import { logger } from "../../utils/logger";
 
 // MR_NOTE:
