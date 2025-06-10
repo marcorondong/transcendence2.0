@@ -4,11 +4,13 @@ import util from "util"; // For handles %s, %d, %j, etc as console.log()
 
 let PINO_LOGGER = true; // Change to true to enable full Pino logging
 const FASTIFY_LOGGER = true; // Change to false to disable Fastify logger
-const LOG_LEVEL = process.env.LOG_LEVEL || "info";
+const LOG_LEVEL = process.env.LOG_LEVEL || "trace";
 const NODE_ENV = process.env.NODE_ENV || "development";
 const SHOW_CALL_SITE = true; // Enable call_site (function, file, line) in debug and trace logs
 const LOG_STACK_TRACE = false; // Enable trace in debug, error and fatal logs
 const SERVICE_NAME = "users"; // Optional: leave empty string to skip including in logs
+const USE_ELK_FORMAT = true; // Toggle ELK-style arg order: (data, message)
+const DEFAULT_LOG_MESSAGE = "<no message>"; // Default fallback if no msg
 
 // Helper function to check if pino-pretty is installed
 function isPinoPrettyAvailable(): boolean {
@@ -94,7 +96,82 @@ function safeStringify(obj: any): string {
 	}
 }
 
-// Helper function to fallback to console.* when PINO_LOGGER is false
+// // Helper function to fallback to console.* when PINO_LOGGER is false
+// function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
+// 	return (...args: any[]) => {
+// 		if (!args.length) return;
+
+// 		// If user (programmer) wants logs "pino formatted"
+// 		if (PINO_LOGGER) {
+// 			let msg: string | undefined;
+// 			let structuredLog: Record<string, unknown> = {};
+// 			let argCounter = 1;
+
+// 			const first = args[0];
+// 			const rest = args.slice(1);
+
+// 			// Handle format string (%s, %d, etc.)
+// 			if (typeof first === "string" && /%[sdj%]/.test(first)) {
+// 				const safeArgs = rest.map((arg) =>
+// 					typeof arg === "object" && arg !== null
+// 						? safeStringify(arg)
+// 						: arg,
+// 				);
+// 				msg = util.format(first, ...safeArgs);
+// 			} else {
+// 				if (typeof first === "string") {
+// 					msg = first;
+// 				} else if (first && typeof first === "object") {
+// 					structuredLog = { ...structuredLog, ...first };
+// 				} else {
+// 					structuredLog[`arg${argCounter++}`] = first;
+// 				}
+
+// 				for (const arg of rest) {
+// 					if (arg && typeof arg === "object" && !Array.isArray(arg)) {
+// 						structuredLog = { ...structuredLog, ...arg };
+// 					} else {
+// 						structuredLog[`arg${argCounter++}`] = arg;
+// 					}
+// 				}
+// 			}
+
+// 			// Stack trace & call_site logic
+// 			const isTrace = method === "trace";
+// 			const isDebug = method === "debug";
+// 			const isError = method === "error";
+// 			const isFatal = method === "fatal";
+
+// 			if (SHOW_CALL_SITE && (isTrace || isDebug)) {
+// 				Object.assign(structuredLog, getCallSiteDetails(4));
+// 			}
+
+// 			if (
+// 				isTrace ||
+// 				(LOG_STACK_TRACE && (isDebug || isError || isFatal))
+// 			) {
+// 				structuredLog.stack = new Error().stack;
+// 			}
+
+// 			if (Object.keys(structuredLog).length) {
+// 				(internalLogger[method] as (...a: any[]) => void)(
+// 					structuredLog,
+// 					msg,
+// 				);
+// 			} else {
+// 				(internalLogger[method] as (...a: any[]) => void)(msg);
+// 			}
+// 			// Plain old console.log console.warn, console.error
+// 		} else {
+// 			const consoleMethod = method === "info" ? "log" : method;
+// 			if (typeof (console as any)[consoleMethod] === "function") {
+// 				(console as any)[consoleMethod](...args);
+// 			} else {
+// 				console.error(...args);
+// 			}
+// 		}
+// 	};
+// }
 function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 	return (...args: any[]) => {
 		if (!args.length) return;
@@ -108,7 +185,7 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 			const first = args[0];
 			const rest = args.slice(1);
 
-			// Handle format string (%s, %d, etc.)
+			// FORMAT STRING CASE (%s, %d, etc.)
 			if (typeof first === "string" && /%[sdj%]/.test(first)) {
 				const safeArgs = rest.map((arg) =>
 					typeof arg === "object" && arg !== null
@@ -117,24 +194,74 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 				);
 				msg = util.format(first, ...safeArgs);
 			} else {
-				if (typeof first === "string") {
-					msg = first;
-				} else if (first && typeof first === "object") {
-					structuredLog = { ...structuredLog, ...first };
-				} else {
-					structuredLog[`arg${argCounter++}`] = first;
+				const objects: Record<string, unknown>[] = [];
+				const others: any[] = [];
+
+				for (const arg of args) {
+					if (arg && typeof arg === "object" && !Array.isArray(arg)) {
+						objects.push(arg);
+					} else {
+						others.push(arg);
+					}
 				}
 
-				for (const arg of rest) {
-					if (arg && typeof arg === "object" && !Array.isArray(arg)) {
-						structuredLog = { ...structuredLog, ...arg };
-					} else {
-						structuredLog[`arg${argCounter++}`] = arg;
+				structuredLog = Object.assign({}, ...objects);
+
+				// Fallback logic for message
+				const stringArgs = args.filter((a) => typeof a === "string");
+				const fallbackMsg = stringArgs[stringArgs.length - 1];
+
+				if (USE_ELK_FORMAT) {
+					if (
+						args.length >= 2 &&
+						typeof args[0] === "object" &&
+						typeof args[1] === "string"
+					) {
+						msg = args[1];
+					} else if (typeof fallbackMsg === "string") {
+						msg = fallbackMsg;
+						if (typeof args[0] === "string") {
+							console.warn(
+								`[Logger] Expected (object, message) for ELK logs. Got (string, ...).`,
+							);
+						}
+					}
+
+					// Ensure message field exists
+					if (!structuredLog.message && msg) {
+						structuredLog.message = msg;
+					}
+					if (!msg && typeof structuredLog.message === "string") {
+						msg = structuredLog.message;
+					}
+				} else {
+					// DEV-FRIENDLY format (message first)
+					if (typeof args[0] === "string") {
+						msg = args[0];
+					}
+					if (!structuredLog.message) {
+						structuredLog.message = msg || DEFAULT_LOG_MESSAGE;
+					}
+					if (!msg && typeof structuredLog.message === "string") {
+						msg = structuredLog.message;
+					}
+				}
+
+				// Add remaining primitives
+				for (const other of others) {
+					if (
+						typeof other !== "object" &&
+						other !== msg // skip if already used as msg
+					) {
+						structuredLog[`arg${argCounter++}`] = other;
 					}
 				}
 			}
 
-			// Stack trace & call_site logic
+			// Always include source tag
+			structuredLog.source = "console";
+
+			// Add callsite/stack logic
 			const isTrace = method === "trace";
 			const isDebug = method === "debug";
 			const isError = method === "error";
@@ -143,7 +270,6 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 			if (SHOW_CALL_SITE && (isTrace || isDebug)) {
 				Object.assign(structuredLog, getCallSiteDetails(4));
 			}
-
 			if (
 				isTrace ||
 				(LOG_STACK_TRACE && (isDebug || isError || isFatal))
@@ -151,14 +277,10 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 				structuredLog.stack = new Error().stack;
 			}
 
-			if (Object.keys(structuredLog).length) {
-				(internalLogger[method] as (...a: any[]) => void)(
-					structuredLog,
-					msg,
-				);
-			} else {
-				(internalLogger[method] as (...a: any[]) => void)(msg);
-			}
+			(internalLogger[method] as (...a: any[]) => void)(
+				structuredLog,
+				msg || DEFAULT_LOG_MESSAGE,
+			);
 			// Plain old console.log console.warn, console.error
 		} else {
 			const consoleMethod = method === "info" ? "log" : method;
@@ -185,9 +307,43 @@ export const logger = {
 	 * Wraps Fastify's per-request logger (req.log)
 	 * Preserves requestId, method, url
 	 */
-	from(req: FastifyRequest) {
-		return req.log;
+	// from(req: FastifyRequest) {
+	// 	return req.log;
+	// },
+	from(request: FastifyRequest) {
+		const wrapRequestLog = (
+			method: "info" | "warn" | "error" | "debug" | "trace" | "fatal",
+		) => {
+			return (...args: any[]) => {
+				if (!args.length) return;
+
+				const [maybeObj, maybeMsg] = args;
+				if (
+					typeof maybeObj === "object" &&
+					!Array.isArray(maybeObj) &&
+					maybeObj !== null
+				) {
+					request.log[method](
+						{ ...maybeObj, source: "request" },
+						typeof maybeMsg === "string" ? maybeMsg : undefined,
+					);
+				} else {
+					request.log[method]({ source: "request" }, ...args);
+				}
+			};
+		};
+
+		return {
+			info: wrapRequestLog("info"),
+			warn: wrapRequestLog("warn"),
+			error: wrapRequestLog("error"),
+			debug: wrapRequestLog("debug"),
+			trace: wrapRequestLog("trace"),
+			fatal: wrapRequestLog("fatal"),
+			log: wrapRequestLog("info"),
+		};
 	},
+	console: (...args: any[]) => console.log(...args),
 };
 
 /**
