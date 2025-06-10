@@ -7,10 +7,11 @@ const FASTIFY_LOGGER = true; // Change to false to disable Fastify logger
 const LOG_LEVEL = process.env.LOG_LEVEL || "trace";
 const NODE_ENV = process.env.NODE_ENV || "development";
 const SHOW_CALL_SITE = true; // Enable call_site (function, file, line) in debug and trace logs
-const LOG_STACK_TRACE = false; // Enable trace in debug, error and fatal logs
+const LOG_STACK_TRACE = true; // Enable trace in debug, error and fatal logs
 const SERVICE_NAME = "users"; // Optional: leave empty string to skip including in logs
 const USE_ELK_FORMAT = true; // Toggle ELK-style arg order: (data, message)
 const DEFAULT_LOG_MESSAGE = "<no message>"; // Default fallback if no msg
+const CALL_SITE_DEPTH_OVERRIDE = null; // Set a number (e.g. 5) to override, or keep null to auto
 
 // Helper function to check if pino-pretty is installed
 function isPinoPrettyAvailable(): boolean {
@@ -52,12 +53,39 @@ if (PINO_LOGGER) {
 	}
 }
 
-// Helper function for wrap() to get call_site (where the log was triggered)
-function getCallSiteDetails(depth = 3) {
-	const stack = new Error().stack?.split("\n");
-	if (!stack || stack.length <= depth) return {};
+// Helper function for getCallSiteDetails() to get the depth for useful info (function, file, line)
+// function getDynamicCallSiteDepth(filePath: string): number {
+// 	if (CALL_SITE_DEPTH_OVERRIDE !== null) return CALL_SITE_DEPTH_OVERRIDE;
 
-	const line = stack[depth].trim();
+// 	// Adjust the depth based on file structure
+// 	if (filePath.includes("/routes/")) return 4; // Shallow depth for route files
+// 	if (filePath.includes("/controllers/")) return 5;
+// 	if (filePath.includes("/services/")) return 6; // Deeper depth for service/schema files
+// 	if (filePath.includes("/schemas/")) return 6; // Deeper depth for service/schema files
+
+// 	return 7; // Default for utility or deep call stacks
+// }
+
+// Helper function for wrap() to get call_site (where the log was triggered)
+function getCallSiteDetails(): Record<string, unknown> {
+	const stack = new Error().stack?.split("\n");
+	if (!stack) return {};
+
+	const startDepth = 2; // Skip Error() and wrap()
+	const maxDepth = 10; // Prevent infinite loop
+	const fileExclude = "logger.ts"; // Skip internal logger calls
+
+	const effectiveDepth = (() => {
+		if (CALL_SITE_DEPTH_OVERRIDE !== null) return CALL_SITE_DEPTH_OVERRIDE;
+
+		for (let i = startDepth; i < Math.min(stack.length, maxDepth); i++) {
+			const line = stack[i].trim();
+			if (!line.includes(fileExclude)) return i;
+		}
+		return startDepth; // fallback if all frames are from logger
+	})();
+
+	const line = stack[effectiveDepth]?.trim();
 	const match =
 		line.match(/at\s+(.*)\s+\((.*):(\d+):\d+\)/) ||
 		line.match(/at\s+(.*):(\d+):\d+/);
@@ -261,14 +289,16 @@ function wrap(method: "info" | "warn" | "error" | "debug" | "fatal" | "trace") {
 			// Always include source tag
 			structuredLog.source = "console";
 
-			// Add callsite/stack logic
+			// Add call_site/stack logic
 			const isTrace = method === "trace";
 			const isDebug = method === "debug";
 			const isError = method === "error";
 			const isFatal = method === "fatal";
 
 			if (SHOW_CALL_SITE && (isTrace || isDebug)) {
-				Object.assign(structuredLog, getCallSiteDetails(4));
+				// Object.assign(structuredLog, getCallSiteDetails(4));
+				// Object.assign(structuredLog, getCallSiteDetails(__filename));
+				Object.assign(structuredLog, getCallSiteDetails());
 			}
 			if (
 				isTrace ||
