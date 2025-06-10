@@ -22,6 +22,7 @@ export const PRODUCT_ERRORS = {
 };
 
 const SERVICE_NAME = "users"; // Replace with your actual service name or keep as ""
+const SERVICE_ERROR_TYPE = "UsersError"; // Replace with your actual service name or keep as "" to use "AppError"
 
 export class AppError extends Error {
 	// Used '?' only for fields that might not be defined when error is thrown.
@@ -49,8 +50,9 @@ export class AppError extends Error {
 		super(message);
 		this.statusCode = statusCode;
 		this.code = code;
-		this.errorType = this.constructor.name;
+		// this.errorType = this.constructor.name;
 		this.service = service;
+		this.errorType = SERVICE_ERROR_TYPE || this.constructor.name;
 		this.handlerName = handlerName;
 		if (stack) this.stack = stack;
 	}
@@ -99,20 +101,28 @@ export function ft_fastifyErrorHandler(
 	// Custom AppError (E.g., domain-specific errors like "Email exists")
 	if (error instanceof AppError) {
 		error.handlerName ??= "unknown_handler";
+		// Log (terminal) part
 		request.log.error({
-			code: error.code,
-			handler: error.handlerName,
+			statusCode: error.statusCode,
+			code: error.code ?? "UNKNOWN_ERROR",
 			message: error.message,
+			service: error.service,
+			type: error.errorType,
+			handler: error.handlerName,
 			stack: error.stack,
 		});
+		// Reply (curl, Postman, Swagger) part
 		return reply.code(error.statusCode).send({
 			statusCode: error.statusCode,
 			code: error.code ?? "UNKNOWN_ERROR",
-			error: error.errorType,
-			handler: error.handlerName,
 			message: error.message,
-			// Don't send stack. It's already printed in the terminal.
-			// If I send it, I'm exposing internal code structure.
+			// Don't send these. Already printed in the terminal.
+			// If I send them, I'm exposing internal code structure.
+			// service: error.service,
+			// type: error.errorType,
+			// handler: error.handlerName,
+			// stack: error.stack,
+			// Note that these values are "filtered" by `errorResponseSchema`
 		});
 	}
 	// Unknown/unexpected error
