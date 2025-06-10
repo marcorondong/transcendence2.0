@@ -271,6 +271,7 @@ async function userRoutes(server: FastifyInstance) {
 		logger.trace("Testing trace");
 		logger.fatal("Testing fatal");
 		logger.log("Testing log");
+		logger.console("Testing console");
 
 		// 3. Testing logger custom formatting (like printf)
 		logger.info("Hello %s!", "Alice");
