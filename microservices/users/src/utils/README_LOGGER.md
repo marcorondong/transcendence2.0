@@ -241,65 +241,71 @@ Add this route to your service (_Later please remove it_):
 // TODO: Remove this route. It's only for testing
 server.get("/test", async (request, reply) => {
   // 1. Testing Fastify's request logging
-  const log = logger.from(request); // Create custom logger
-  log.info("From const log = logger.from(request): test info");
-  log.warn("From const log = logger.from(request): test warn");
-  log.error("From const log = logger.from(request): test error");
-  // Or use it directly
-  logger.from(request).info("From logger.from(req): test info");
-  logger.from(request).warn("From logger.from(req): test warn");
-  logger.from(request).error("From logger.from(req): test error");
-  request.log.info("Hello from Fastify");
-
-  // 2. Testing logger "levels"
-  logger.error("Testing error");
-  logger.debug("Testing debug");
-  logger.trace("Testing trace");
-  logger.fatal("Testing fatal");
-  logger.log("Testing log");
-  logger.console("Testing console");
-
-  // 3. Testing logger custom formatting (like printf)(only for console.*() log format)
-  logger.info("Hello %s!", "Alice");
-  logger.debug("User %s has %d points", "Bob", 150);
-  logger.warn("JSON object: %j", { id: 1, name: "Test" });
-  logger.error("Price: $%d, Discount: %d%%", 199, 20);
-  logger.trace("Escaped percent: %% %s", "done");
-  logger.fatal("Multiple types: %s %d %j", "X", 42, { a: true });
-
-  // 4. Testing logger cyclic objects handling
-  const a: any = {};
-  a.self = a;
-  logger.info("Cyclic? %j", a);
-
-  // 5. Testing logger object logging
-  const sampleUser = {
-    id: "979b4b7b-d3ca-470e-a340-bd7e3011796d",
-    username: "your_name",
-    email: "yourname@example.com",
-    status: "active",
-    roles: ["user", "admin"],
-    createdAt: new Date().toISOString(),
-    profile: {
-      displayName: "Some Random Name",
-      country: "AT",
-      timezone: "Europe/Vienna",
-    },
+  if (true) {
+    const log = logger.from(request); // Create custom logger
+    log.info("From const log = logger.from(request): test info");
+    log.warn("From const log = logger.from(request): test warn");
+    log.error("From const log = logger.from(request): test error");
+    // Or use it directly
+    logger.from(request).info("From logger.from(req): test info");
+    logger.from(request).warn("From logger.from(req): test warn");
+    logger.from(request).error("From logger.from(req): test error");
+    request.log.info("Hello from Fastify");
   }
-  // Notice the importance of placing "correctly" the message and specifying the fields and its order
-  // Correct usage: object first, message last (ELK compliant = Fastify's request.log compliant)
-  logger.from(request).info({ "event.action": "test_log", "user": sampleUser }, "Logging test object");
-  logger.log({ sampleUser }, "[Test Route] sampleUser object:")
-  // Incorrect usage: message first, object last
-  logger.info("Testing info", sampleUser.username);
-  // Incorrect usage: message first, object last
-  logger.warn("Testing warn", {"message": "Testing warn"}, { sampleUser: sampleUser.profile.displayName });
-  // Correct usage: object first, message last
-  logger.warn({ sampleUser: sampleUser.profile.displayName }, "Testing warn");
-  // Correct usage: only objects, but 'message' is specified
-  logger.warn({"message": "Testing warn"}, { sampleUser: sampleUser.profile.displayName });
-  logger.warn({ sampleUser: sampleUser.profile.displayName }, {"message": "Testing warn"});
-
+  // 2. Testing logger "levels"
+  if (true) {
+    logger.error({ message: "Testing error" }); // ELK compliant format
+    logger.debug("Testing debug"); // console and ELK compliant format
+    logger.trace({ message: "Testing trace" }); // ELK compliant format
+    logger.fatal("Testing fatal"); // console and ELK compliant format
+    logger.log("Testing log"); // console and ELK compliant format
+    logger.console("Testing console");
+  }
+  // 3. Testing logger custom formatting (like printf)(only for console format)
+  if (true) {
+    logger.info("Hello %s!", "Alice");
+    logger.debug("User %s has %d points", "Bob", 150);
+    logger.warn("JSON object: %j", { id: 1, name: "Test" });
+    logger.error("Price: $%d, Discount: %d%%", 199, 20);
+    logger.trace("Escaped percent: %% %s", "done");
+    logger.fatal("Multiple types: %s %d %j", "X", 42, { a: true });
+  }
+  // 4. Testing logger cyclic objects handling
+  if (true) {
+    const a: any = {};
+    a.self = a;
+    logger.info("Cyclic? %j", a);
+  }
+  // 5. Testing logger object logging
+  if (true) {
+    const sampleUser = {
+      id: "979b4b7b-d3ca-470e-a340-bd7e3011796d",
+      username: "your_name",
+      email: "yourname@example.com",
+      status: "active",
+      roles: ["user", "admin"],
+      createdAt: new Date().toISOString(),
+      profile: {
+        displayName: "Some Random Name",
+        country: "AT",
+        timezone: "Europe/Vienna",
+      },
+    };
+    // Notice the importance of placing "correctly" the message and specifying the fields and its order
+    // Correct usage: object first, message last (ELK compliant = Fastify's request.log compliant)
+    if (true) {
+      logger.from(request).info({ "event.action": "test_log", "user displayName": sampleUser.profile.displayName }, "Logging test object display name");
+      logger.log({ sampleUser }, "[Test Route] sampleUser object:");
+      logger.warn({ sampleUser: sampleUser.profile.displayName }, "Testing warn");
+      logger.warn({ message: "Testing warn" }, { sampleUser: sampleUser.profile.displayName });
+      logger.warn({ sampleUser: sampleUser.profile.displayName }, { message: "Testing warn" });
+    }
+    // Incorrect usage: message first, object last
+    if (true) {
+      logger.info("Testing info", sampleUser.username);
+      logger.warn("Testing warn", { message: "Testing warn" }, { sampleUser: sampleUser.profile.displayName });
+    }
+  }
   reply.send({ ok: true });
 });
 ```
