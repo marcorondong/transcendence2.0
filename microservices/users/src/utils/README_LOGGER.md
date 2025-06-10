@@ -17,7 +17,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
   - [✅ Features](#-features)
   - [🔧 Setup](#-setup)
   - [🔀 Migration Steps](#-migration-steps)
-  - [🔌 Configuration Flags](#-configuration-flags)
+  - [🔌 Configuration](#-configuration)
   - [🧩 Usage Examples](#-usage-examples)
     - [Global logging](#global-logging)
     - [From request context](#from-request-context)
@@ -36,6 +36,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 - Attaches contextual metadata like `reqId`, `method`, `url`, and (optionally) `call_site`
 - Unified logging API across modules: `logger.info()`, `logger.error()`, etc.
 - Compatible with Fastify's native logger (`req.log.*()`)
+- Has `logger.console()` that behaves as a plain `console.log()` (for quick pints, emergency).
 
 ---
 
@@ -79,7 +80,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 
 ---
 
-## 🔌 Configuration Flags
+## 🔌 Configuration
 
 Inside `logger.ts` you can configure:
 
@@ -91,6 +92,7 @@ Inside `logger.ts` you can configure:
 | `SHOW_CALL_SITE`  | `boolean` | Adds `{ function, file, line }` to logs on debug/trace |
 | `LOG_STACK_TRACE` | `boolean` | Includes full stack traces in logs (error/fatal/debug) |
 | `SERVICE_NAME`    | `string`  | Tag service name in logs (e.g. `"users"`)              |
+| `USE_ELK_FORMAT`  | `boolean` | Enforces ELK log formatting and warns invalid ones     |
 
 The effects are:
 
@@ -102,7 +104,7 @@ The effects are:
 2. `FASTIFY_LOGGER`:
    1. If `false`: Then Fastify built-in `request.log.*()` _**WON'T**_ be available
    2. If `true`: Then requests logs _**WILL**- be available; very useful for logging/debugging requests
-      2. E.g:
+      1. E.g:
 
         ```json
         {"level":30,"time":1749494588611,"pid":102898,"hostname":"c2r7p5.42vienna.com","reqId":"req-1","req":{"method":"PATCH","url":"/api/users/979b4b7b-d3ca-470e-a340-bd7e3011796d","host":"localhost:3000","remoteAddress":"127.0.0.1","remotePort":42442},"msg":"incoming request"}
@@ -140,6 +142,9 @@ The effects are:
    2. If `true`: Then debug, error, and fatal logs will have traces / stack calls.
 6. `SERVICE_NAME` (_only when pino-pretty is installed_):
    1. It's for identifying which service (_e.g: users, pong, chat, ai_) is logging.
+7. `USE_ELK_FORMAT`:
+   1. If `false`: Then it takes usual console.log() log formatting (`console.log("message", object)`).
+   2. If `true`: Then it takes ELK logs formatting (`console.log(object, "message")`) and warns when no-ELK format is found.
 
 ---
 
@@ -152,7 +157,8 @@ import { logger } from "./utils/logger";
 
 logger.info("Hello world!");
 logger.warn("Testing logging", {"message": "Login attempt" }, { action: "user_login" });
-logger.error("Unexpected error", { err });
+logger.error("Unexpected error", { err }); // console.log style log format (NO ELK compliant)
+logger.error({ err }, "Unexpected error"); // Correct ELK style log format
 ```
 
 ### From request context
@@ -165,6 +171,7 @@ export async function myHandler(request: FastifyRequest, reply: FastifyReply) {
 
   // Or use it directly
   logger.from(request).error({ event: "validation_failed" }, "Bad payload");
+  // MUST be ELK format compliant, if not , it's wrong. Fastify request.log is the same
 }
 ```
 
@@ -207,6 +214,7 @@ logger.info({
 
 > [!IMPORTANT]
 >
+> Note the format is object and last is the message.
 > Keys like "event.action", "user.id", "http.status_code" match Elastic Common Schema (ECS) format.
 
 ---
@@ -235,6 +243,7 @@ server.get("/test", async (request, reply) => {
   logger.trace("Testing trace");
   logger.fatal("Testing fatal");
   logger.log("Testing log");
+  logger.console("Testing console");
 
   // 3. Testing logger custom formatting (like printf)
   logger.info("Hello %s!", "Alice");
