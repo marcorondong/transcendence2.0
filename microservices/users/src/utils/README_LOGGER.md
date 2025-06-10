@@ -21,7 +21,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
   - [🧩 Usage Examples](#-usage-examples)
     - [Global logging](#global-logging)
     - [From request context](#from-request-context)
-    - [Fallback to console when Pino is disabled](#fallback-to-console-when-pino-is-disabled)
+    - [Fallback to console when Pino is disabled or quick console logs](#fallback-to-console-when-pino-is-disabled-or-quick-console-logs)
   - [📦 ELK Compatibility](#-elk-compatibility)
     - [✅ Recommended structure for logs](#-recommended-structure-for-logs)
   - [🧪 Testing](#-testing)
@@ -72,11 +72,13 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 1. Install dependencies (`npm install --save-dev pino-pretty`) (Check [Setup](#-setup))
 2. Copy whole `logger.ts` file.
 3. Register logger's `fastifyLoggerConfig` as Fastify's logger config. (Check [Setup](#-setup))
-4. Configure it to suit your taste. (Check [Configuration](#-configuration-flags))
+4. Configure it to suit your taste. (Check [Configuration](#-configuration))
 5. Find all `console.` and do the following:
    1. Import custom logger (`import { logger } from "./path/to/logger";`)
    2. Replace `console.` with `logger.`
 6. Follow [usage examples](#-usage-examples) and [recommended structure for logs](#-recommended-structure-for-logs) when reformatting existing logs and adding new ones.
+7. Change `USE_ELK_FORMAT` to `true` to see which logs are not ELK compliant.
+8. Fix them and start using ELK log format.
 
 ---
 
@@ -84,15 +86,16 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 
 Inside `logger.ts` you can configure:
 
-| Flag              | Type      | Description                                            |
-| ----------------- | --------- | ------------------------------------------------------ |
-| `PINO_LOGGER`     | `let`     | Enable/disable Pino globally                           |
-| `FASTIFY_LOGGER`  | `const`   | Toggle Fastify’s internal logger (`req.log`)           |
-| `LOG_LEVEL`       | `string`  | Set via `process.env.LOG_LEVEL` (e.g. `info`, `debug`) |
-| `SHOW_CALL_SITE`  | `boolean` | Adds `{ function, file, line }` to logs on debug/trace |
-| `LOG_STACK_TRACE` | `boolean` | Includes full stack traces in logs (error/fatal/debug) |
-| `SERVICE_NAME`    | `string`  | Tag service name in logs (e.g. `"users"`)              |
-| `USE_ELK_FORMAT`  | `boolean` | Enforces ELK log formatting and warns invalid ones     |
+| Flag                       | Type      | Description                                                            |
+| -------------------------- | --------- | ---------------------------------------------------------------------- |
+| `PINO_LOGGER`              | `let`     | Enable/disable Pino globally                                           |
+| `FASTIFY_LOGGER`           | `const`   | Toggle Fastify’s internal logger (`req.log`)                           |
+| `LOG_LEVEL`                | `string`  | Set via `process.env.LOG_LEVEL` (e.g. `info`, `debug`)                 |
+| `SHOW_CALL_SITE`           | `boolean` | Adds `{ function, file, line }` to logs on debug/trace                 |
+| `LOG_STACK_TRACE`          | `boolean` | Includes full stack traces in logs (error/fatal/debug)                 |
+| `SERVICE_NAME`             | `string`  | Tag service name in logs (e.g. `"users"`)                              |
+| `USE_ELK_FORMAT`           | `boolean` | Enforces ELK log formatting and warns invalid ones                     |
+| `CALL_SITE_DEPTH_OVERRIDE` | `int`     | Overrides dynamic depth calculation to a fixed one (used in call_site) |
 
 The effects are:
 
@@ -145,6 +148,8 @@ The effects are:
 7. `USE_ELK_FORMAT`:
    1. If `false`: Then it takes usual console.log() log formatting (`console.log("message", object)`).
    2. If `true`: Then it takes ELK logs formatting (`console.log(object, "message")`) and warns when no-ELK format is found.
+8. `CALL_SITE_DEPTH_OVERRIDE`:
+   1. Overrides the dynamic depth calculation to a fixed depth. This is used by `getCallSiteDetails()` to find values for `function`, `file`, `line`.
 
 ---
 
@@ -156,9 +161,9 @@ The effects are:
 import { logger } from "./utils/logger";
 
 logger.info("Hello world!");
-logger.warn("Testing logging", {"message": "Login attempt" }, { action: "user_login" });
-logger.error("Unexpected error", { err }); // console.log style log format (NO ELK compliant)
 logger.error({ err }, "Unexpected error"); // Correct ELK style log format
+logger.error("Unexpected error", { err }); // console.log style log format (NO ELK compliant)
+logger.warn("Testing logging", {"message": "Login attempt" }, { action: "user_login" }); // console.log style log format (NO ELK compliant)
 ```
 
 ### From request context
@@ -171,11 +176,11 @@ export async function myHandler(request: FastifyRequest, reply: FastifyReply) {
 
   // Or use it directly
   logger.from(request).error({ event: "validation_failed" }, "Bad payload");
-  // MUST be ELK format compliant, if not , it's wrong. Fastify request.log is the same
+  // MUST be ELK format compliant, if not , it's wrong. Fastify request.log behaves the same
 }
 ```
 
-### Fallback to console when Pino is disabled
+### Fallback to console when Pino is disabled or quick console logs
 
 If `pino-pretty` is not installed or `PINO_LOGGER = false`, logs fallback automatically to console.*():
 
@@ -183,6 +188,9 @@ If `pino-pretty` is not installed or `PINO_LOGGER = false`, logs fallback automa
 [LOG] Hello world!
 [ERROR] Unexpected failure
 ```
+
+If `logger.console()` is used; it behaves as a plain `console.log()`;
+It's not affected by any configuration since it's the most basic log.
 
 ---
 
@@ -194,8 +202,8 @@ This logger is ELK-ready out of the box:
 - Structured fields are encouraged:
 
     ```ts
-    logger.info({ userId, action: "login_success" }, "User logged in");
-    logger.error({ errorCode: "DB_FAIL", reason }, "Database insert failed");
+    logger.info({ userId, action: "login_success" }, "User logged in"); // Correct ELK format: object first, message last.
+    logger.error({ errorCode: "DB_FAIL", reason }, "Database insert failed"); // Correct ELK format: object first, message last.
     ```
 
 ### ✅ Recommended structure for logs
@@ -245,7 +253,7 @@ server.get("/test", async (request, reply) => {
   logger.log("Testing log");
   logger.console("Testing console");
 
-  // 3. Testing logger custom formatting (like printf)
+  // 3. Testing logger custom formatting (like printf)(only for console.*() log format)
   logger.info("Hello %s!", "Alice");
   logger.debug("User %s has %d points", "Bob", 150);
   logger.warn("JSON object: %j", { id: 1, name: "Test" });
@@ -273,20 +281,21 @@ server.get("/test", async (request, reply) => {
     },
   }
   // Notice the importance of placing "correctly" the message and specifying the fields and its order
+  // Correct usage: object first, message last (ELK compliant = Fastify's request.log compliant)
   logger.from(request).info({ "event.action": "test_log", "user": sampleUser }, "Logging test object");
   logger.log({ sampleUser }, "[Test Route] sampleUser object:")
+  // Incorrect usage: message first, object last
   logger.info("Testing info", sampleUser.username);
-  // Correct usage
+  // Incorrect usage: message first, object last
   logger.warn("Testing warn", {"message": "Testing warn"}, { sampleUser: sampleUser.profile.displayName });
-  // Incorrect usage (arg1 = "Testing warn")
+  // Correct usage: object first, message last
   logger.warn({ sampleUser: sampleUser.profile.displayName }, "Testing warn");
-  // Missing display message in INFO line (e.g: INFO Testing warn)
+  // Correct usage: only objects, but 'message' is specified
   logger.warn({"message": "Testing warn"}, { sampleUser: sampleUser.profile.displayName });
   logger.warn({ sampleUser: sampleUser.profile.displayName }, {"message": "Testing warn"});
 
   reply.send({ ok: true });
 });
-
 ```
 
 ## ✅ Ready to migrate to ELK
