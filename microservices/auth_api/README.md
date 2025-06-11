@@ -1,6 +1,14 @@
 # 🔐 AUTH Service
 
-Swagger link: http://localhost:2999/auth-api/documentation
+## Table Of Contents
+
+- [🔐 AUTH Service](#-auth-service)
+  - [Table Of Contents](#table-of-contents)
+  - [🔀 API Endpoints](#-api-endpoints)
+  - [Protected Routes](#protected-routes)
+    - [Game Statistics](#game-statistics)
+    - [Chat Management](#chat-management)
+    - [User Management](#user-management)
 
 ## 🔀 API Endpoints
 
@@ -33,3 +41,26 @@ Swagger link: http://localhost:2999/auth-api/documentation
 12) Swagger page for detailed information
 
 Detailed information about routes, shape of body, param, response is in swagger page. 
+
+## Protected Routes
+
+The following endpoints are routed through nginx with authentication sub-request:
+
+### Game Statistics
+
+- `GET https://{frontend:port}/tictactoe-db/game-history`
+- `GET https://{frontend:port}/tictactoe-db/total-stats`
+- `GET https://{frontend:port}/tictactoe-db/head-to-head`
+- `GET https://{frontend:port}/pong-db/game-history`
+- `GET https://{frontend:port}/pong-db/total-stats`
+- `GET https://{frontend:port}/pong-db/head-to-head`
+
+### Chat Management
+
+- `GET https://{frontend:port}/chat-db/block-status`
+- `POST https://{frontend:port}/chat-db/block-user`
+- `POST https://{frontend:port}/chat-db/unblock-user`
+
+### User Management
+
+- `GET/PUT/PATCH https://{frontend:port}/api/users/{uuid}`

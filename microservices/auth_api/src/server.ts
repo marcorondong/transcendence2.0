@@ -39,7 +39,7 @@ const start = async () => {
 		console.log(`auth_api is running on port ${env.AUTH_API_PORT}`);
 	} catch (err) {
 		server.log.error(err);
-		// process.exit(1);
+		process.exit(1);
 	}
 };
 

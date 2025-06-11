@@ -52,7 +52,3 @@ export const accessTokenResponseShape = {
 	},
 	required: ["access_token"],
 };
-
-export type IdInput = {
-	id: string;
-};
