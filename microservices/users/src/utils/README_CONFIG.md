@@ -49,7 +49,7 @@ This module provides a custom config loader `getConfig` for loading multiple con
 
 1. Install dependencies: `npm install dotenv`
 2. Import `getConfig` function:
-  `import getConfig from "../path/to/config";`
+  `import getConfig from "../path/to/utils/config";`
 3. Add the correct variables:
    1. Their name and types inside `type AppConfig = { // [...] }`
    2. Their sources and order inside `const config: AppConfig = { // [...] }`
@@ -67,7 +67,7 @@ This module provides a custom config loader `getConfig` for loading multiple con
 1. Copy whole `config.ts` file.
 2. Configure it to suit your taste. (Check [Configuration](#-configuration) and ([Setup](#-setup)))
 3. Find all places where you need to load configurations and do the following:
-   1. Import `getConfig()` function (`import getConfig from "../path/to/config";`)
+   1. Import `getConfig()` function (`import getConfig from "../path/to/utils/config;`)
    2. Replace hardcoded values if the respective call to `getConfig()`. (E.g `const config = getConfig();` or `let var1 = getConfig().var1`)
 4. Add logger prints to track your imports and check their values.
    1. By default, `getConfig()` logs loaded `config` object in debug level (`logger.debug()`)

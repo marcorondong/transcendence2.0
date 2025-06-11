@@ -62,10 +62,10 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
     npm install --save-dev pino-pretty # Optional, for local development only
     ```
 
-2. import { fastifyLoggerConfig } from "./utils/logger";
+2. import { fastifyLoggerConfig } from "../path/to/utils/logger";
 
     ```ts
-    import { fastifyLoggerConfig } from "../path/to/logger";
+    import { fastifyLoggerConfig } from "../path/to/utils/logger";
     const server = fastify({
     logger: fastifyLoggerConfig(),
     });
@@ -87,7 +87,7 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 3. Register logger's `fastifyLoggerConfig` as Fastify's logger config. (Check [Setup](#-setup))
 4. Configure it to suit your taste. (Check [Configuration](#-configuration))
 5. Find all `console.` and do the following:
-   1. Import custom logger (`import { logger } from "../path/to/logger";`)
+   1. Import custom logger (`import { logger } from "../path/to/utils/logger";`)
    2. Replace `console.` with `logger.`
 6. Follow [usage examples](#-usage-examples) and [recommended structure for logs](#-recommended-structure-for-logs) when reformatting existing logs and adding new ones.
 7. Change `USE_ELK_FORMAT` to `true` to see which logs are not ELK compliant.
@@ -177,7 +177,7 @@ The effects are:
 ### Global logging
 
 ```ts
-import { logger } from "./utils/logger";
+import { logger } from "../path/to/utils/logger";
 
 logger.info("Hello world!");
 logger.error({ err }, "Unexpected error"); // Correct ELK style log format
@@ -248,6 +248,7 @@ logger.info({
 
 ## 🧪 Testing
 
+Import logger: `import { logger } from "../path/to/utils/logger";`
 Add this route to your service (_Later please remove it_):
 
 ```ts

@@ -52,14 +52,14 @@ This module provides a custom error class `AppError` to provide more info when a
 ## 🔧 Setup
 
 1. Import `AppError` class where you need it:
-  `import { AppError } from "../path/to/errors";`
+  `import { AppError } from "../path/to/utils/errors";`
   Include custom error codes (`error.code`) like `USER_ERRORS` (_needed to be defined inside `error.ts`_)
 2. Import error handler (`errorHandler`)
-  `import { errorHandler } from "../path/to/errors";`
+  `import { errorHandler } from "../path/to/utils/errors";`
   Wrap the functions (_Fastify request/reply functions_) with it.
   E.g: in `.microservices/users/src/modules/user/user.route.ts`: `errorHandler(getUserHandler),`
 3. Import custom Fastify's error handler (`ft_fastifyErrorHandler`)
-  `import { fastifyLoggerConfig } from "../path/to/logger";`
+  `import { fastifyLoggerConfig } from "../path/to/utils/logger";`
   Register the error handler.
   E.g: in `./microservices/users/src/app.ts`: `export const server = Fastify({logger: fastifyLoggerConfig(),});`
 4. Ensure .env includes the desired SERVICE_NAME and SERVICE_ERROR_TYPE, or set it in `error.ts` constant section:
@@ -77,7 +77,7 @@ This module provides a custom error class `AppError` to provide more info when a
 2. Register AppError's `ft_fastifyErrorHandler` as Fastify's error handler. (Check [Setup](#-setup))
 3. Configure it to suit your taste. (Check [Configuration](#-configuration))
 4. Find all `error` and do the following:
-   1. Import custom AppError class (`import { AppError } from "./path/to/error";`)
+   1. Import custom AppError class (`import { AppError } from "../path/to/utils/errors";`)
    2. Replace `error` generating/throw/catch logic with `AppError` logic. (E.g `./microservices/users/src/modules/user/user.service.ts`)
 5. Follow [usage examples](#-usage-examples) and [recommended logic](#-recommended-usage-of-apperror) when generating/throwing/catching errors.
 
