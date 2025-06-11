@@ -46,10 +46,10 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
 
 - Production:
   - **None** 👍
-  - But `fastify` provides `pino` logger that it's the core of `logger`. if not present then it's only a `console.*()` wrapper
+  - But `pino` logger (_which is provided by `fastify`_) is the core of this `logger`. If not present then it's only a `console.*()` wrapper
 - Development:
-  - `fastify`
-  - `pino-pretty`
+  - `pino` provided by `fastify` (_`pino` it's already bundled in `fastify`'s package_)
+  - `pino-pretty` for prettifying the logs (_color labels, structured json, "readable" timestamps, hiding extra fields_)
 
 ---
 

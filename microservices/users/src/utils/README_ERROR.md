@@ -43,13 +43,15 @@ This module provides a custom error class `AppError` to provide more info when a
 ## 🧩 Dependencies
 
 - Production / Development:
-  - Mixed: `fastify` but it can be refactored to NOT use it, or only use AppError class.
+  - `AppError` class: None 👍
+  - `errorHandler` function: `fastify`, but it can be refactored to **NOT** use it.
+  - `ft_fastifyErrorHandler` function: `fastify` and custom `logger` but easily changeable (_intended to be fastify's custom error handler_)
 
 ---
 
 ## 🔧 Setup
 
-1. Import `AppError` Class:
+1. Import `AppError` class where you need it:
   `import { AppError } from "../path/to/errors";`
   Include custom error codes (`error.code`) like `USER_ERRORS` (_needed to be defined inside `error.ts`_)
 2. Import error handler (`errorHandler`)

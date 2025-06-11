@@ -40,7 +40,8 @@ This module provides a custom config loader `getConfig` for loading multiple con
 ## 🧩 Dependencies
 
 - Production / Development:
-  - Mixed: `dotenv` but it can be easily removed and rely on the other 4 methods.
+  - `dotenv` but it can be easily removed and rely on the other 4 methods.
+  - `logger` but it can be easily changed to plain ol' `console.log()`
 
 ---
 
