@@ -16,6 +16,7 @@ export async function signInHandler(
 	reply: FastifyReply,
 ) {
 	const payload = await signInRequest(request.body, reply);
+	if (!payload) return;
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send();
@@ -25,7 +26,8 @@ export async function signUpHandler(
 	request: FastifyRequest<{ Body: unknown }>,
 	reply: FastifyReply,
 ) {
-	const payload = await signUpRequest(request.body);
+	const payload = await signUpRequest(request.body, reply);
+	if (!payload) return;
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send();
@@ -72,7 +74,6 @@ export async function botJWTHandler(
 	const raw_access_token = await reply.jwtSign(payload, jwtSignOpt);
 	console.log("raw_access_token", raw_access_token);
 	const access_token = cookieSignature.sign(raw_access_token, cookieSecret);
-	const access_token = cookieSignature.sign(raw_access_token, cookieSecret);
 	console.log("access_token", access_token);
 	reply.status(200).send({ [env.JWT_TOKEN_NAME]: access_token });
 }
@@ -82,7 +83,8 @@ export async function editProfileHandler(
 	reply: FastifyReply,
 ) {
 	const { id } = request.params;
-	const payload = await editProfileRequest(request.body, id);
+	const payload = await editProfileRequest(request.body, id, reply);
+	if (!payload) return;
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send();
@@ -93,7 +95,8 @@ export async function updateProfileHandler(
 	reply: FastifyReply,
 ) {
 	const { id } = request.params;
-	const payload = await updateProfileRequest(request.body, id);
+	const payload = await updateProfileRequest(request.body, id, reply);
+	if (!payload) return;
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send();
@@ -104,7 +107,8 @@ export async function deleteUserHandler(
 	reply: FastifyReply,
 ) {
 	const { id } = request.params;
-	await deleteUserRequest(id);
+	const result = await deleteUserRequest(id, reply);
+	if (!result) return;
 	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
 	reply.status(200).send();
 }

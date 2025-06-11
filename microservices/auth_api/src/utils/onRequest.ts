@@ -12,6 +12,11 @@ export async function ft_onRequest(
 		request.url === env.AUTH_API_HEALTH_CHECK_STATIC
 	)
 		return;
-	if (request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC)) return;
+	if (
+		request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC) ||
+		request.raw.url?.startsWith("/.well-known/")
+	)
+		return;
+	console.log("ft_onRequest", request.url);
 	await request.jwtVerify();
 }

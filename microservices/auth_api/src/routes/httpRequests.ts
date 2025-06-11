@@ -1,5 +1,4 @@
 import type { FastifyReply } from "fastify";
-import httpError from "http-errors";
 import { env } from "../utils/env";
 
 export async function signInRequest(body: unknown, reply: FastifyReply) {
@@ -12,14 +11,15 @@ export async function signInRequest(body: unknown, reply: FastifyReply) {
 	});
 	if (!response.ok) {
 		const raw = await response.json();
-		return reply.status(raw.statusCode || 500).send(raw);
+		reply.status(raw.statusCode || 500).send(raw);
+		return false;
 	}
 	const data = await response.json();
 	const payload = { id: data.id, nickname: data.nickname };
 	return payload;
 }
 
-export async function signUpRequest(body: unknown) {
+export async function signUpRequest(body: unknown, reply: FastifyReply) {
 	const response = await fetch(env.USERS_REGISTRATION_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
@@ -29,18 +29,15 @@ export async function signUpRequest(body: unknown) {
 	});
 	if (!response.ok) {
 		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while signing up",
-			{ name: raw.error || "SignUp Error" },
-		);
+		reply.status(raw.statusCode || 500).send(raw);
+		return false;
 	}
 	const data = await response.json();
 	const payload = { id: data.id, nickname: data.nickname };
 	return payload;
 }
 
-export async function editProfileRequest(body: unknown, userId: unknown) {
+export async function editProfileRequest(body: unknown, userId: unknown, reply: FastifyReply) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PATCH",
 		headers: {
@@ -50,18 +47,15 @@ export async function editProfileRequest(body: unknown, userId: unknown) {
 	});
 	if (!response.ok) {
 		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while editing profile",
-			{ name: raw.error || "EditProfile Error" },
-		);
+		reply.status(raw.statusCode || 500).send(raw);
+		return false;
 	}
 	const data = await response.json();
 	const payload = { id: data.id, nickname: data.nickname };
 	return payload;
 }
 
-export async function updateProfileRequest(body: unknown, userId: unknown) {
+export async function updateProfileRequest(body: unknown, userId: unknown, reply: FastifyReply) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PUT",
 		headers: {
@@ -71,27 +65,22 @@ export async function updateProfileRequest(body: unknown, userId: unknown) {
 	});
 	if (!response.ok) {
 		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while updating profile",
-			{ name: raw.error || "UpdateProfile Error" },
-		);
+		reply.status(raw.statusCode || 500).send(raw);
+		return false;
 	}
 	const data = await response.json();
 	const payload = { id: data.id, nickname: data.nickname };
 	return payload;
 }
 
-export async function deleteUserRequest(userId: unknown) {
+export async function deleteUserRequest(userId: unknown, reply: FastifyReply) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "DELETE",
 	});
 	if (!response.ok) {
 		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while deleting user",
-			{ name: raw.error || "DeleteUser Error" },
-		);
+		reply.status(raw.statusCode || 500).send(raw);
+		return false;
 	}
+	return true;
 }
