@@ -30,7 +30,6 @@ include:
 
   - path: ./microservices/ssg/ai/docker-compose.yml
     project_directory: ./microservices/ssg
-    env_file: .env # doesnt work but i will hard code the one single variable that bot needs so god help me
 
   #PONG_API LONG INCLUDE
   - path: ./microservices/ssg/pong-api/compose.yaml #path to "small" compose file of microservice relative to this root compose.yaml

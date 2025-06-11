@@ -42,7 +42,7 @@ export class Bot {
 	private paddleY = 0;
 	private movePaddleTo = 0;
 	private paddleHeight = 1;
-	private welcomeFrames = 2;
+	private welcomeFrames = true;
 	private disconnectTimeout = 10000;
 	private handlingBlocked = false;
 
@@ -52,18 +52,20 @@ export class Bot {
 		this.difficulty = initializers.difficulty ?? "normal";
 		this.botSpeed =
 			initializers.mode === "mandatory" ? this.MANDATORY_SPEED : 0;
-		this.roomId = initializers.roomId ?? "unknown_room_id";
+		this.roomId =
+			(initializers.roomId && initializers.roomId != "") ||
+			initializers.mode === "mandatory"
+				? initializers.roomId
+				: "public";
 		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP;
 		this.ws = null;
 
 		//dynamic game state
 		this.paddleTwist = paddleTwistSelector[this.difficulty] ?? 0;
-		this.lastBall = new Point(0, 0);
-		this.target = new Point(this.side, 0);
-		this.framesUntilTarget = Math.round(
-			Math.abs(this.target.getX()) / this.BALL_SPEED,
-		);
-		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
+		this.lastBall = new Point(-6, 0);
+		this.target = new Point(Math.abs(this.side), 0);
+		this.framesUntilTarget = this.FRAME_RATE;
+		this.framesAfterTarget = 0;
 	}
 
 	public playGame(cookie: string) {
@@ -95,13 +97,12 @@ export class Bot {
 			this.ws.on("message", (event: any) => {
 				if (this.welcomeFrames) {
 					this.readWelcomeFrames(event);
-					this.welcomeFrames--;
 				} else if (this.handlingBlocked === false) {
 					this.handlingBlocked = true;
 					this.handleEvent(event);
 					setTimeout(() => {
 						this.handlingBlocked = false;
-					}, 1000);
+					}, 998);
 				}
 			});
 		} catch (error) {
@@ -126,10 +127,12 @@ export class Bot {
 			await sleep(10000);
 		}
 		console.log("Game is inactive, terminating ", this.roomId);
+		console.timeEnd("time since welcome frame");
 		this.ws.terminate();
 	}
 
 	private readWelcomeFrames(event: object) {
+		console.time("time since welcome frame");
 		const roomInfo = JSON.parse(event.toString());
 		console.log("first frame: ", roomInfo);
 		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
@@ -140,8 +143,7 @@ export class Bot {
 			if (status.includes("Left") || status.includes("left"))
 				this.side =
 					field.LEFT_EDGE_X + this.PADDLE_GAP + this.AVG_BOUNCE_GAP;
-			if (status.includes("0 more player"))
-				this.welcomeFrames = 1;
+			if (status.includes("Game is running")) this.welcomeFrames = false;
 		}
 	}
 
@@ -361,7 +363,7 @@ export class Bot {
 			ballHitPaddle: this.ballHitPaddle(),
 			movePaddleTo: roundTo(this.movePaddleTo, 2),
 		};
-		console.log(AIState);
+		console.log("AIState: ", AIState);
 	}
 
 	private logBounce(distance: number, expectedDistance: number) {
@@ -374,7 +376,8 @@ export class Bot {
 	}
 
 	private logGameState(gameState: GameState) {
-		console.log(gameState.score);
-		console.log(gameState.ball);
+		console.log("score: ", gameState.score);
+		console.log("ball at: ", gameState.ball);
+		console.timeLog("time since welcome frame");
 	}
 }

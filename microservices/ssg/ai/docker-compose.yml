@@ -8,7 +8,8 @@ services:
       - ./ai/src:/app/src:ro
     ports:
       - 6969:6969 #TODO keep now for swagger documentation, remove later
-    environment:
-      - AUTH_API_BOT_JWT_END_POINT=http://auth_api_container:2999/auth-api/bot-jwt
+    env_file:
+      - ./ai/docker/.env
+    restart: unless-stopped
     networks:
       - Transcendence2.0

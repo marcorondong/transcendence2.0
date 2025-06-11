@@ -83,4 +83,4 @@ $(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
 
-.PHONY: all re clean remove dev cli nuke delete-secrets reset remove dev nuke cli %$(REBUILD_SERVICE) 
+.PHONY: all re clean remove dev cli nuke delete-secrets reset %$(REBUILD_SERVICE) 
