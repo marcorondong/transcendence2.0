@@ -24,7 +24,6 @@ import {
 } from "./user.schema";
 import { errorHandler } from "../../utils/errors";
 // import { z } from "zod";
-import { logger } from "../../utils/logger";
 
 // Helper function for SWagger to define common errors messages and assign them to Swagger UI examples
 // Redefinition of error messages in the caller is possible
