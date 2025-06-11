@@ -15,7 +15,7 @@ export async function signInHandler(
 	request: FastifyRequest<{ Body: unknown }>,
 	reply: FastifyReply,
 ) {
-	const payload = await signInRequest(request.body);
+	const payload = await signInRequest(request.body, reply);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
 	reply.status(200).send();

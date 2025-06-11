@@ -1,7 +1,8 @@
+import type { FastifyReply } from "fastify";
 import httpError from "http-errors";
 import { env } from "../utils/env";
 
-export async function signInRequest(body: unknown) {
+export async function signInRequest(body: unknown, reply: FastifyReply) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
@@ -11,11 +12,7 @@ export async function signInRequest(body: unknown) {
 	});
 	if (!response.ok) {
 		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while signing in",
-			{ name: raw.error || "SignIn Error" },
-		);
+		return reply.status(raw.statusCode || 500).send(raw);
 	}
 	const data = await response.json();
 	const payload = { id: data.id, nickname: data.nickname };
@@ -44,16 +41,13 @@ export async function signUpRequest(body: unknown) {
 }
 
 export async function editProfileRequest(body: unknown, userId: unknown) {
-	const response = await fetch(
-		`${env.USERS_REQUEST_DOCKER}${userId}`,
-		{
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(body),
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
 		},
-	);
+		body: JSON.stringify(body),
+	});
 	if (!response.ok) {
 		const raw = await response.json();
 		throw httpError(
@@ -68,16 +62,13 @@ export async function editProfileRequest(body: unknown, userId: unknown) {
 }
 
 export async function updateProfileRequest(body: unknown, userId: unknown) {
-	const response = await fetch(
-		`${env.USERS_REQUEST_DOCKER}${userId}`,
-		{
-			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(body),
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "PUT",
+		headers: {
+			"Content-Type": "application/json",
 		},
-	);
+		body: JSON.stringify(body),
+	});
 	if (!response.ok) {
 		const raw = await response.json();
 		throw httpError(
