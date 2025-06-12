@@ -17,6 +17,5 @@ export async function ft_onRequest(
 		request.raw.url?.startsWith("/.well-known/")
 	)
 		return;
-	console.log("ft_onRequest", request.url);
 	await request.jwtVerify();
 }

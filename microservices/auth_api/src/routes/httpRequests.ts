@@ -1,5 +1,6 @@
 import type { FastifyReply } from "fastify";
 import { env } from "../utils/env";
+import { payloadZodSchema } from "./zodSchemas";
 
 export async function signInRequest(body: unknown, reply: FastifyReply) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
@@ -15,7 +16,7 @@ export async function signInRequest(body: unknown, reply: FastifyReply) {
 		return false;
 	}
 	const data = await response.json();
-	const payload = { id: data.id, nickname: data.nickname };
+	const payload = payloadZodSchema.parse(data);
 	return payload;
 }
 
@@ -33,7 +34,7 @@ export async function signUpRequest(body: unknown, reply: FastifyReply) {
 		return false;
 	}
 	const data = await response.json();
-	const payload = { id: data.id, nickname: data.nickname };
+	const payload = payloadZodSchema.parse(data);
 	return payload;
 }
 
