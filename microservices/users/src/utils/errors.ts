@@ -139,5 +139,28 @@ export function ft_fastifyErrorHandler(
 				: JSON.stringify(error) || "Unhandled exception",
 		stack: (error as any)?.stack,
 	});
-	return reply.send(error);
+	// return reply.send(error);
+	// return reply.code(500).send({
+	// 	statusCode: 500,
+	// 	code: "UNHANDLED_ERROR",
+	// 	message:
+	// 		typeof error === "string"
+	// 			? error
+	// 			: (error as any)?.message || "Unhandled exception",
+	// });
+	const statusCode =
+		typeof (error as any)?.statusCode === "number" &&
+		(error as any).statusCode >= 400 &&
+		(error as any).statusCode < 600
+			? (error as any).statusCode
+			: 500;
+
+	return reply.code(statusCode).send({
+		statusCode,
+		code: (error as any)?.code ?? "UNHANDLED_ERROR",
+		message:
+			typeof error === "string"
+				? error
+				: (error as any)?.message || "Unhandled exception",
+	});
 }
