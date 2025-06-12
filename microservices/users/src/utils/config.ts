@@ -6,12 +6,44 @@ import { logger } from "./logger";
 // Load '.env' file (if any)
 // dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 // Load service-specific and shared project env files (if any)
-dotenv.config({
-	path: [
-		path.resolve(__dirname, "../.env"), // Service-level env (adjust as needed)
-		path.resolve(__dirname, "../../../.env"), // Repo-level shared env (adjust as needed)
-	],
-});
+// dotenv.config({
+// 	path: [
+// 		path.resolve(__dirname, "../.env"), // Service-level env (adjust as needed)
+// 		path.resolve(__dirname, "../../../.env"), // Repo-level shared env (adjust as needed)
+// 	],
+// });
+// TODO: START Testing
+try {
+	// const result = dotenv.config({
+	// 	path: [path.resolve(__dirname, "../../../.env")],
+	// 	path: [path.resolve(__dirname, "../../.env")],
+	// });
+	// const result = dotenv.config({ path: ['.env.local', '.env'] })
+	const result = dotenv.config({
+		path: [
+			path.resolve(__dirname, "../../../.env"),
+			path.resolve(__dirname, "../../.env"),
+		],
+	});
+
+	console.log("[dotenv] config result:", result);
+	console.log(
+		"(expected: WATA + FACK). process.env.WATA + ",
+		process.env.WATA,
+	);
+	console.log(
+		"(expected: MOTHA + FUKA). process.env.MOTHA + ",
+		process.env.MOTHA,
+	);
+	if (result.error) {
+		console.error("[dotenv] Error loading .env:", result.error);
+	} else {
+		console.log("[dotenv] Loaded variables:", result.parsed);
+	}
+} catch (err) {
+	console.error("[dotenv] Threw error:", err);
+}
+// TODO: END Testing
 
 // Note that the default is 'path.resolve(process.cwd(), '.env')'
 // So 'cwd' is 'pwd'; where I'm located at the moment of running the app.
