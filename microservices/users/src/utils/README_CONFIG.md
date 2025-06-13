@@ -1,6 +1,8 @@
 # Configuration Loader
 
 This module provides a custom config loader `getConfig` for loading multiple configurations from multiple sources.
+It loads values from environment variables, `.env` files, docker secrets files, json files and hardcoded values.
+It works "locally" and in "container". You just need to specify the paths to your files in both scenarios.
 
 ---
 
@@ -25,7 +27,7 @@ This module provides a custom config loader `getConfig` for loading multiple con
   - docker secrets.
   - environment.
   - `.env` files.
-  - `package.json` files.
+  - `json` files (`package.json`).
   - hardcoded values.
 - The loading order can be easily changed.
 - The configurations values are are typed. This is good because:
@@ -42,6 +44,7 @@ This module provides a custom config loader `getConfig` for loading multiple con
 - Production / Development:
   - `dotenv` but it can be easily removed and rely on the other 4 methods.
   - `logger` but it can be easily changed to plain ol' `console.log()`
+  - `AppError` but it can be easily changed to normal `Error` class.
 
 ---
 
@@ -85,6 +88,11 @@ This module provides a custom config loader `getConfig` for loading multiple con
 
 Inside `config.ts` you can configure:
 
+- `RUNNING_ENV` to determine if the app is running in local machine or in container.
+  - Pass it via en `.env` var, or inline when calling node; e.g: ``RUNNING_ENV=container npm run dev``
+  - The default is `"local"`.
+- `SECRETS_PATH` to set the paths for the docker secrets (locally and inside container).
+- `JSON_PATH`: to set the paths for the `package.json` (locally and inside container).
 - `type AppConfig`: To add all the variables you need.
 - All the paths for your docker secrets, `.env` files and `package.json` file.
 - `hardcodedDefaults` to hold your hardcoded values.
@@ -93,7 +101,7 @@ Inside `config.ts` you can configure:
 > [!NOTE]
 >
 > The logic of loading `package.json` files and docker secrets could be adapted
-> to load any json file or single value key=value `.txt` file.
+> to load any json file or single value filename=value `.txt` file.
 
 A fully loaded `config: AppConfig` object will look like this (_printed with logger.debug() so adjust the logs level to see it_)
 
@@ -128,5 +136,15 @@ Check USERS service code.
 
 ## 🧪 Testing
 
+Use USERS Service as example (`cd` into `./microservices/users`)
+
 Try to load from different places (_or even invalid_) and see what;s your final `config` object.
-Adjust the logs level, or change `logger.debug()` to `logger.info()` or something that matches your current logs level.
+Adjust the logs level, or change `logger.debug()` to `logger.info()` or something that matches your current logs level to see the configuration.
+
+Create the following files:
+
+| File                | Content                             | Location                                                                      |
+| ------------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
+| `.env`              | `ROOT_ENV="loaded from root"`       | Repo's root: `/transcendence2.0/`                                             |
+| `.env`              | `SERVICE_ENV="loaded from service"` | USERS Service's docker folder: `./microservices/users/docker/`                |
+| `docker_secret.txt` | `secret loaded`                     | USERS Service's docker secret folder: `./microservices/users/docker/secrets/` |

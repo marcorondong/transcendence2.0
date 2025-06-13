@@ -26,6 +26,11 @@ This module provides a flexible, Fastify-compatible logger based on [`pino`](htt
   - [📦 ELK Compatibility](#-elk-compatibility)
     - [✅ Recommended structure for logs](#-recommended-structure-for-logs)
   - [🧪 Testing](#-testing)
+    - [Test 1](#test-1)
+    - [Test 2](#test-2)
+    - [Test 3](#test-3)
+    - [Test 4](#test-4)
+    - [Test 5](#test-5)
   - [✅ Ready to migrate to ELK](#-ready-to-migrate-to-elk)
   - [📚 Notes](#-notes)
 
@@ -247,6 +252,26 @@ logger.info({
 ---
 
 ## 🧪 Testing
+
+Use USERS Service as example (`cd` into `./microservices/users`)
+
+### Test 1
+
+Run USERS service in production mode: `NODE_ENV=production npm run dev`
+
+### Test 2
+
+Rename `node_modules/pino_pretty` folder to test when it's not installed (_as in production_).
+
+### Test 3
+
+Change the constants `PINO` and `PRETTY` to `false` to see how it behaves
+
+### Test 4
+
+Change the constant `LOG_LEVEL` to a higher level (e.g: "error" or fatal) and you'll see less logs.
+
+### Test 5
 
 Import logger: `import { logger } from "../path/to/utils/logger";`
 Add this route to your service (_Later please remove it_):

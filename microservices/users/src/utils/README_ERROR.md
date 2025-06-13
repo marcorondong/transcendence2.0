@@ -36,6 +36,7 @@ This module provides a custom error class `AppError` to provide more info when a
   - `errorType`: error class name. Useful for sorting/analyzing/debugging errors.
   - `handlerName`: function within which the error was generated
   - `stack`: trace of which functions were called, in what order, from which line and file, and with what arguments.
+  - `nestedCause`: original error (_if any_) or precedent errors, so they can be linked (like `stack`)
 - All fields can be overridden to change their values.
 
 ---
@@ -68,6 +69,8 @@ This module provides a custom error class `AppError` to provide more info when a
     SERVICE_NAME=users # Change it to your service name
     SERVICE_ERROR_TYPE=UsersError # Change it to your service name
     ```
+
+5. In case you need to log deed nested errors, change the constant `ERROR_CAUSE_DEPTH` to the desirable value.
 
 ---
 
@@ -221,10 +224,22 @@ Check USERS service code.
 
 ## 🧪 Testing
 
-Use USERS Service as example:
+Use USERS Service as example (`cd` into `./microservices/users`)
 
 1. Run USERS Service
-2. Make some invalid requests
+2. Make some invalid requests:
+   1. Try to get all users when no database is created.
+   2. Try to register an invalid user (invalid/missing/extra fields and values).
+   3. Try to send a request with an invalid json format (remove a comma, remove a doubleQuote, etc)
 3. Check the terminal logs and replies in curl/PostMan/Swagger for AppError messages.
+4. If you want to dig deeper, then:
+   1. Go to `microservices/users/src/utils/errors.ts` and look for `ft_fastifyErrorHandler`.
+   2. Uncomment the fields below this line: `return reply.code(error.statusCode).send({`
+   3. Go to `microservices/users/src/modules/user/user.schema.ts` and look for `errorResponseSchema`
+   4. Uncomment the fields that are commented.
+   5. Issue invalid request and now you'll see the info also returned to the client.
+   6. Go to `microservices/users/src/utils/errors.ts` and look for the first occurrence of `logger.from(request).error({`
+   7. Comment some fields
+   8. Issue invalid request and now you'll see that we log less data in the terminal
 
 Later, adapt its logic to your service for the use of AppError.
