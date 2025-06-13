@@ -109,7 +109,7 @@ def menuLoop(stdscr, title, items, user: Player):
                 else:
                     title = "Login Menu"
                     items = ["Register","Login",]
-                menuLength = item.__len__() + 1
+                menuLength = items.__len__() + 1
                 drawMenu(
                     stdscr,
                     f"{user.get_personal_greeting()} {title}",
