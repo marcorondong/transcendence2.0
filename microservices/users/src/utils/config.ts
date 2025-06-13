@@ -55,7 +55,8 @@ try {
 		path: [
 			getPath("./.env"), // Repo-level shared env (adjust as needed)
 			getPath(path.join(ENVS_PATH, ".env")), // Service-level env (adjust as needed)
-			getPath("./microservices/users/docker/.env"), // Custom path, adjust as needed
+			// getPath("./microservices/users/docker/.env"), // Custom path, adjust as needed
+			getPath("./microservices/.env"), // Custom path, adjust as needed
 		],
 		debug: true,
 	});
