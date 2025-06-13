@@ -46,6 +46,7 @@ function getPath(relPath: string): string {
 // Note that the default is 'path.resolve(process.cwd(), '.env')'
 // E.g: dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 try {
+	const dotenv = require("dotenv");
 	dotenv.config({
 		path: [
 			getPath("./.env"), // Repo-level shared env (adjust as needed)
@@ -146,6 +147,7 @@ export default function getConfig(): AppConfig {
 		sources: [string, T | undefined | null][],
 	): T {
 		for (const [sourceName, value] of sources) {
+			// If value DO exist (it's not undefined, null)
 			if (value != null) {
 				logger.log(
 					`[config] ${key} = ${value} Loaded from ${sourceName}`,
