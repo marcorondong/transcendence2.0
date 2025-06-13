@@ -145,6 +145,6 @@ Create the following files:
 
 | File                | Content                             | Location                                                                      |
 | ------------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
-| `.env`              | `ROOT_ENV="loaded from root"`       | Repo's root: `/transcendence2.0/`                                             |
+| `.env`              | `ROOT_ENV="loaded from root"`       | Microservices's root: `./microservices/`                                      |
 | `.env`              | `SERVICE_ENV="loaded from service"` | USERS Service's docker folder: `./microservices/users/docker/`                |
 | `docker_secret.txt` | `secret loaded`                     | USERS Service's docker secret folder: `./microservices/users/docker/secrets/` |
