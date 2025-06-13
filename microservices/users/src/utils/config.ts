@@ -9,12 +9,16 @@ import { AppError, CONFIG_ERRORS } from "./errors";
 // If "local", folder structure according to our repo
 const RUNNING_ENV = process.env.RUNNING_ENV || "local";
 const ROOT_FOLDER_NAME = RUNNING_ENV === "container" ? "/" : "transcendence2.0";
+const ENVS_PATH =
+	RUNNING_ENV === "container"
+		? "./app/docker"
+		: "./microservices/users/docker";
+const JSON_PATH =
+	RUNNING_ENV === "container" ? "./app" : "./microservices/users";
 const SECRETS_PATH =
 	RUNNING_ENV === "container"
 		? "./run/secrets"
 		: "./microservices/users/docker/secrets";
-const JSON_PATH =
-	RUNNING_ENV === "container" ? "./app/users" : "./microservices/users";
 
 function findRoot(startDir = __dirname): string {
 	if (ROOT_FOLDER_NAME === "/") return "/";
@@ -50,7 +54,8 @@ try {
 	dotenv.config({
 		path: [
 			getPath("./.env"), // Repo-level shared env (adjust as needed)
-			getPath("./microservices/users/docker/.env"), // Service-level env (adjust as needed)
+			getPath(path.join(ENVS_PATH, ".env")), // Service-level env (adjust as needed)
+			getPath("./microservices/users/docker/.env"), // Custom path, adjust as needed
 		],
 		debug: true,
 	});
