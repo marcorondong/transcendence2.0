@@ -390,6 +390,7 @@ export const errorResponseSchema = z.object({
 	// 	.string()
 	// 	.describe("Function that caught the error (handler function)"),
 	// stack: z.string().describe("stack calls"),
+	// nestedCause: z.any().describe("Original error object or nested AppError"),
 });
 
 // TypeScript types inferred from schemas
