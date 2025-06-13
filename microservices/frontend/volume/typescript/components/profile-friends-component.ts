@@ -23,8 +23,8 @@ class ProfileFriendsComponent extends HTMLElement {
 			"pong-card",
 			"p-8",
 			"grid",
+			"[grid-template-columns:repeat(auto-fit,minmax(60px,1fr))]",
 			"gap-6",
-			"[grid-template-columns:repeat(auto-fit,minmax(90px,1fr))]",
 		);
 		for (let friend of this.friends) {
 			const container = document.createElement("div");

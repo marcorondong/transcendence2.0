@@ -1,4 +1,5 @@
 import { FetchConfig } from "../types/Fetch.js";
+import { UserPut } from "../types/User.js";
 import { fetchPong } from "./fetch.js";
 
 export class FetchUsers {
@@ -9,6 +10,19 @@ export class FetchUsers {
 				accept: "application/json",
 			},
 			url: "/api/users/" + id,
+		};
+
+		return await fetchPong(config);
+	}
+	static async userPut(id: string, body: UserPut) {
+		const config: FetchConfig = {
+			method: "PUT",
+			header: {
+				"accept": "application/json",
+				"Content-Type": "application/json",
+			},
+			url: "/api/users/" + id,
+			body,
 		};
 
 		return await fetchPong(config);

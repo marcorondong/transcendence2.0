@@ -5,7 +5,8 @@ import {
 	notificationEvent,
 	signUpLinkEvent,
 } from "../services/events.js";
-import { FetchAuth, UserAuth } from "../services/fetch-auth.js";
+import { FetchAuth } from "../services/fetch-auth.js";
+import { UserAuth } from "../types/User.js";
 
 export class SignInView extends HTMLElement {
 	chat: ChatComponent;
@@ -113,6 +114,7 @@ export class SignInView extends HTMLElement {
 				this.chat.openWebsocket();
 				this.dispatchEvent(homeLinkEvent);
 			} catch (e) {
+				console.log(e);
 				document.dispatchEvent(
 					notificationEvent("sign in failed", "error"),
 				);
@@ -122,7 +124,7 @@ export class SignInView extends HTMLElement {
 
 	disconnectedCallback() {
 		console.log("LOGIN VIEW has been DISCONNECTED");
-		this.removeEventListener("click", this.onClick);
+		this.removeEventListener("click", this);
 	}
 }
 

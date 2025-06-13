@@ -1,11 +1,11 @@
 import { ChatComponent } from "../components/chat-component.js";
 import { User, UserAggregated } from "../types/User.js";
-import { errorLinkEvent, profileLinkEvent } from "../services/events.js";
-import { baseUrl, fetchPong } from "../services/fetch.js";
 import { FetchConfig } from "../types/Fetch.js";
 import { FetchPongDb } from "../services/fetch-pong-db.js";
 import { UsersUserComponent } from "../components/users-user-component.js";
 import { UsersPaginationComponent } from "../components/users-pagination-component.js";
+import { errorLinkEvent, profileLinkEvent } from "../services/events.js";
+import { baseUrl, fetchPong } from "../services/fetch.js";
 
 export class UsersView extends HTMLElement {
 	chat: ChatComponent;

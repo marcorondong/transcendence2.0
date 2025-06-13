@@ -13,6 +13,12 @@ export interface UserAuth {
 	password: string;
 }
 
+export interface UserPut {
+	nickname: string;
+	password: string;
+	email: string;
+}
+
 export interface MatchHistory {
 	winnerId: string;
 	loserId: string;

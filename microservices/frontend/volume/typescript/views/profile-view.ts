@@ -9,9 +9,9 @@ import { ProfileFriendsComponent } from "../components/profile-friends-component
 
 export class ProfileView extends HTMLElement {
 	chat: ChatComponent;
-	userData: User | null;
+	userData: User | null = null;
 	userId: string | null = null;
-	matchHistory: MatchHistory[] | null;
+	matchHistory: MatchHistory[] | null = null;
 
 	friendsList = [
 		"Lagzilla",
@@ -20,7 +20,7 @@ export class ProfileView extends HTMLElement {
 		"CtrlAltDefeat",
 		"CampfireKing",
 		"Teabaggins",
-		"SnaccAttackkkkkkkkkkkk",
+		"SnaccAttack",
 	];
 
 	constructor(chat: ChatComponent) {
@@ -62,7 +62,10 @@ export class ProfileView extends HTMLElement {
 	buildDomElements() {
 		this.classList.add("flex", "flex-col", "gap-3");
 		if (this.userData) {
-			this.append(new ProfileDetailComponent(this.userData));
+			this.append(new HeadlineComponent("Profile"));
+			const detail = new ProfileDetailComponent(this.userData);
+			detail.classList.add("mb-12");
+			this.append(detail);
 		}
 
 		if (this.friendsList) {

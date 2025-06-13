@@ -77,11 +77,11 @@
 /* input */
 
 .pong-form-input {
-	@apply rounded-xl border-1 text-lg border-slate-400 bg-slate-500/50 px-4 py-2 outline-none focus:ring-2  focus:ring-indigo-500 mt-1;
+	@apply rounded-xl border-1 text-lg border-slate-400 bg-slate-500/50 px-4 py-2 outline-none focus:ring-2  focus:ring-indigo-500 mt-2;
 }
 
 .pong-form-label {
-	@apply text-sm font-semibold;
+	@apply text-sm font-semibold text-slate-400;
 }
 
 .pong-form-heading {
@@ -96,9 +96,6 @@ a {
 
 .pong-link {
 	@apply no-underline dark:text-slate-300;
-}
-.pong-label {
-	@apply text-sm text-slate-400;
 }
 
 .pong-badge {

@@ -1,5 +1,3 @@
-import { User } from "../types/User.js";
-import { UserAggregated } from "../views/users-view";
 import { IconComponent } from "./icon-component.js";
 
 class UsersPaginationComponent extends HTMLElement {

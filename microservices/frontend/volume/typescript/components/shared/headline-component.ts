@@ -8,12 +8,7 @@ class HeadlineComponent extends HTMLElement {
 	connectedCallback() {
 		const headline = document.createElement("h1");
 		headline.innerText = this.text;
-		headline.classList.add(
-			"pong-heading",
-			"pong-heading-big",
-			"mb-6",
-			"mt-12",
-		);
+		headline.classList.add("pong-heading", "pong-heading-big", "mb-6");
 		this.append(headline);
 	}
 

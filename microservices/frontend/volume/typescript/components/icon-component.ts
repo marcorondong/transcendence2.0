@@ -9,7 +9,7 @@ class IconComponent extends HTMLElement {
 		}
 	}
 
-	iconElement: null | HTMLElement = null;
+	iconElement: undefined | HTMLElement = undefined;
 	iconName: string | null = null;
 	iconSize: number = 20;
 
@@ -67,15 +67,14 @@ class IconComponent extends HTMLElement {
 
 	async connectedCallback() {
 		console.log("ICON has been CONNECTED");
-		if (this.iconElement) {
-			return;
-		}
 		this.nameFromAttribute();
 		this.sizeFromAttribute();
-		const iconElement = await this.fetchIcon();
-		this.applySize(iconElement);
-		if (iconElement) {
-			this.appendChild(iconElement);
+		if (!this.iconElement) {
+			this.iconElement = await this.fetchIcon();
+		}
+		this.applySize(this.iconElement);
+		if (this.iconElement) {
+			this.appendChild(this.iconElement);
 		}
 	}
 
