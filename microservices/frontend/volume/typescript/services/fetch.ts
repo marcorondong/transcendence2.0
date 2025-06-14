@@ -4,12 +4,13 @@ import { signInLinkEvent } from "./events.js";
 export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
 
 export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
-	const { url, method, header, body, validator } = config;
+	const { url, method, headers, body, form, validator } = config;
 
+	const finalBody = body ? JSON.stringify(body) : form;
 	const response = await fetch(baseUrl + url, {
-		method: method,
-		headers: header,
-		body: JSON.stringify(body),
+		method,
+		headers,
+		body: finalBody,
 	});
 
 	if (!response.ok) {

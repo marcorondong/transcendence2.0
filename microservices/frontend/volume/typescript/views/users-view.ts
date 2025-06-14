@@ -117,7 +117,7 @@ export class UsersView extends HTMLElement {
 		const urlApi = `/api/users/?page=${page}`;
 		const usersConfig: FetchConfig<User> = {
 			url: urlApi,
-			header: { accept: "application/json" },
+			headers: { accept: "application/json" },
 			method: "GET",
 			// validator: validateUser,
 		};

@@ -1,5 +1,5 @@
 import { FetchConfig } from "../types/Fetch.js";
-import { UserPut } from "../types/User.js";
+import { User, UserPut } from "../types/User.js";
 import { fetchPong } from "./fetch.js";
 
 export class FetchUsers {
@@ -14,26 +14,43 @@ export class FetchUsers {
 
 		return await fetchPong(config);
 	}
-	static async userPut(id: string, body: UserPut, picture: File | undefined) {
-		console.log("picture", picture);
-		if (picture) {
-			const formData = new FormData();
-			formData.append("picture", picture);
+
+	static async userDelete(id: string) {
+		const config: FetchConfig = {
+			method: "DELETE",
+			headers: {
+				accept: "application/json",
+			},
+			url: "/api/users/" + id,
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async userPutAvatar(id: string) {
+		const uploadInput = document.getElementById(
+			"uploadAvatar",
+		) as HTMLInputElement;
+		if (uploadInput?.files?.[0]) {
+			const form = new FormData();
+			const imageFile = uploadInput.files[0];
+			console.log("image File", imageFile);
+			form.append("picture", imageFile);
 			const config: FetchConfig = {
 				method: "PUT",
-				headers: {
-					accept: "application/json",
-				},
+				headers: undefined,
+				form: form,
 				url: "/api/users/" + id + "/picture",
-				body: formData,
 			};
 
-			await fetchPong(config);
-			return;
+			return await fetchPong(config);
 		}
+		return undefined;
+	}
 
+	static async userPatch(id: string, body: UserPut) {
 		if (Object.values(body).every((v) => v === undefined)) {
-			return;
+			return undefined;
 		}
 
 		const config: FetchConfig = {

@@ -40,6 +40,15 @@
 .pong-button-info {
 	@apply bg-indigo-300 border-1 border-cyan-400/40 hover:bg-cyan-600 dark:text-cyan-400 dark:bg-cyan-300/10 hover:dark:bg-cyan-500/20;
 }
+
+.pong-button-success {
+	@apply bg-indigo-300 border-1 border-green-400/40 hover:bg-green-600 dark:text-green-400 dark:bg-green-300/10 hover:dark:bg-green-500/20;
+}
+
+.pong-button-error {
+	@apply bg-indigo-300 border-1 border-red-400/40 hover:bg-red-600 dark:text-red-400 dark:bg-red-300/10 hover:dark:bg-red-500/20;
+}
+
 .pong-button-round {
 	@apply rounded-full;
 }

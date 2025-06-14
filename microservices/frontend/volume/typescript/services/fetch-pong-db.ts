@@ -7,7 +7,7 @@ export class FetchPongDb {
 	static async stats(userIds: string[]): Promise<Stats[]> {
 		const statsConfig: FetchConfig<User> = {
 			url: `/pong-db/users-stats`,
-			header: {
+			headers: {
 				"accept": "application/json",
 				"Content-Type": "application/json",
 			},
@@ -21,7 +21,7 @@ export class FetchPongDb {
 	static async matchHistory(userId: string): Promise<MatchHistory[]> {
 		const statsConfig: FetchConfig<User> = {
 			url: `/pong-db/game-history/${userId}`,
-			header: {
+			headers: {
 				accept: "application/json",
 			},
 			method: "GET",
