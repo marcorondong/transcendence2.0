@@ -8,7 +8,7 @@ export class FetchAuth {
 	static async signIn(user: UserAuth) {
 		const config: FetchConfig = {
 			method: "POST",
-			header: {
+			headers: {
 				"accept": "application/json",
 				"Content-Type": "application/json",
 			},
@@ -20,7 +20,7 @@ export class FetchAuth {
 	static async signUp(user: UserAuth) {
 		const config: FetchConfig = {
 			method: "POST",
-			header: {
+			headers: {
 				"accept": "application/json",
 				"Content-Type": "application/json",
 			},
@@ -34,7 +34,7 @@ export class FetchAuth {
 		const config: FetchConfig = {
 			url: "/auth-api/sign-out",
 			method: "DELETE",
-			header: { accept: "application/json" },
+			headers: { accept: "application/json" },
 		};
 		try {
 			await fetchPong(config);
@@ -49,7 +49,7 @@ export class FetchAuth {
 		const config: FetchConfig = {
 			url: "/auth-api/verify-jwt",
 			method: "GET",
-			header: { accept: "application/json" },
+			headers: { accept: "application/json" },
 		};
 		await fetchPong(config);
 	}

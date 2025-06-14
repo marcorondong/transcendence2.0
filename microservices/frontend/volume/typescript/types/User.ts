@@ -14,9 +14,9 @@ export interface UserAuth {
 }
 
 export interface UserPut {
-	nickname: string;
-	password: string;
-	email: string;
+	nickname?: string;
+	password?: string;
+	email?: string;
 }
 
 export interface MatchHistory {

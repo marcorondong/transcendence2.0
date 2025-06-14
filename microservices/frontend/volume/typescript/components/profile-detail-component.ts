@@ -18,11 +18,16 @@ class ProfileDetailComponent extends HTMLElement {
 	email = document.createElement("div");
 	emailInput = document.createElement("input");
 
+	uploadLabel = document.createElement("label");
+	uploadInput = document.createElement("input");
+
 	passwordContainer = document.createElement("div");
 	passwordInput = document.createElement("input");
 
 	editButton = document.createElement("button");
 	cancelSaveContainer = document.createElement("div");
+
+	avatarContainer = document.createElement("div");
 
 	constructor(userData: User) {
 		super();
@@ -39,6 +44,7 @@ class ProfileDetailComponent extends HTMLElement {
 	}
 
 	displayDetail() {
+		this.uploadLabel.remove();
 		this.article.replaceChildren();
 		this.cancelSaveContainer.remove();
 		this.nicknameInput.remove();
@@ -68,21 +74,35 @@ class ProfileDetailComponent extends HTMLElement {
 			this.emailContainer,
 			this.cancelSaveContainer,
 		);
+		this.avatarContainer.append(this.uploadLabel);
 	}
 
 	async putDetail() {
-		console.log("PUTTING");
+		console.log("picture path", this.uploadInput.files?.[0].name);
 		try {
-			const returnedData = await FetchUsers.userPut(this.userData.id, {
-				email: this.emailInput.value,
-				password: this.passwordInput.value,
-				nickname: this.nicknameInput.value,
-			});
+			const returnedData = await FetchUsers.userPut(
+				this.userData.id,
+				{
+					email:
+						this.emailInput.value === this.userData.email
+							? undefined
+							: this.emailInput.value,
+					password:
+						this.passwordInput.value === ""
+							? undefined
+							: this.passwordInput.value,
+					nickname:
+						this.userData.nickname === this.nicknameInput.value
+							? undefined
+							: this.nicknameInput.value,
+				},
+				this.uploadInput.files?.[0],
+			);
 			if (returnedData) {
 				this.userData = { ...this.userData, ...returnedData };
 				this.applyUserData();
-				this.displayDetail();
 			}
+			this.displayDetail();
 		} catch (e) {
 			console.log(e);
 		}
@@ -102,6 +122,7 @@ class ProfileDetailComponent extends HTMLElement {
 		if (!target) {
 			return;
 		}
+
 		const button = target.closest("button");
 		if (button) {
 			this.handleEditButton(button);
@@ -150,7 +171,7 @@ class ProfileDetailComponent extends HTMLElement {
 			"overflow-hidden",
 		);
 
-		const editIcon = new IconComponent("pencil", 4);
+		const editIcon = new IconComponent("pencil", 5);
 		this.editButton.id = "editButton";
 		this.editButton.classList.add(
 			"pong-button",
@@ -173,16 +194,6 @@ class ProfileDetailComponent extends HTMLElement {
 		);
 		cancelButton.innerText = "cancel";
 
-		const uploadButton = document.createElement("button");
-		uploadButton.id = "uploadButton";
-		uploadButton.classList.add(
-			"pong-button",
-			"pong-button-primary",
-			"rounded-xl",
-			"cursor-pointer",
-		);
-		uploadButton.innerText = "upload avatar";
-
 		const saveButton = document.createElement("button");
 		saveButton.id = "saveButton";
 		saveButton.classList.add(
@@ -200,10 +211,10 @@ class ProfileDetailComponent extends HTMLElement {
 			"mt-2",
 			"flex-wrap",
 		);
-		this.cancelSaveContainer.append(cancelButton, uploadButton, saveButton);
+		this.cancelSaveContainer.append(cancelButton, saveButton);
 
 		// AVATAR
-		const avatarContainer = document.createElement("div");
+		this.avatarContainer.classList.add("relative");
 		const avatar = document.createElement("img");
 		avatar.src = "/static-files/images/homer.png";
 		avatar.classList.add(
@@ -214,7 +225,7 @@ class ProfileDetailComponent extends HTMLElement {
 			"sm:rounded-l-xl",
 			"sm:w-100",
 		);
-		avatarContainer.append(avatar);
+		this.avatarContainer.append(avatar);
 
 		// DETAIL INFORMATION
 		this.article.classList.add(
@@ -256,6 +267,24 @@ class ProfileDetailComponent extends HTMLElement {
 		passwordLabel.classList.add("pong-form-label");
 		this.passwordContainer.append(passwordLabel, this.passwordInput);
 
+		// UPLOAD AVATAR
+		this.uploadInput.id = "uploadAvatar";
+		this.uploadInput.accept = "image/*";
+		this.uploadInput.type = "file";
+		this.uploadInput.classList.add("hidden");
+		this.uploadLabel.classList.add(
+			"pong-button",
+			"pong-button-pale",
+			"pong-button-round",
+			"absolute",
+			"top-3",
+			"left-3",
+		);
+		this.uploadLabel.id = "uploadLabel";
+		const uploadIcon = new IconComponent("image", 5);
+
+		this.uploadLabel.append(this.uploadInput, uploadIcon);
+
 		// EMAIL
 		this.email.classList.add("pong-heading");
 		const emailLabel = document.createElement("div");
@@ -270,16 +299,21 @@ class ProfileDetailComponent extends HTMLElement {
 		this.applyUserData();
 		this.article.append(this.editButton, details, this.cancelSaveContainer);
 
-		this.append(avatarContainer, this.article);
+		this.append(this.avatarContainer, this.article);
 		this.displayDetail();
 
 		// ADD CLASSES AND PLACEHOLDERS
 		this.passwordInput.classList.add("pong-form-input", "block", "w-full");
 		this.passwordInput.placeholder = "••••••••";
 		this.emailInput.classList.add("pong-form-input", "block", "w-full");
-		this.emailInput.placeholder = this.email.innerText;
+		this.emailInput.value = this.email.innerText;
 		this.nicknameInput.classList.add("pong-form-input", "block", "w-full");
-		this.nicknameInput.placeholder = this.nickname.innerText;
+		this.nicknameInput.value = this.nickname.innerText;
+		this.uploadInput.classList.add(
+			"pong-button",
+			"pong-button-primary",
+			"rounded-xl",
+		);
 	}
 }
 

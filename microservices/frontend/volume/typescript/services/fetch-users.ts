@@ -6,7 +6,7 @@ export class FetchUsers {
 	static async user(id: string) {
 		const config: FetchConfig = {
 			method: "GET",
-			header: {
+			headers: {
 				accept: "application/json",
 			},
 			url: "/api/users/" + id,
@@ -14,10 +14,31 @@ export class FetchUsers {
 
 		return await fetchPong(config);
 	}
-	static async userPut(id: string, body: UserPut) {
+	static async userPut(id: string, body: UserPut, picture: File | undefined) {
+		console.log("picture", picture);
+		if (picture) {
+			const formData = new FormData();
+			formData.append("picture", picture);
+			const config: FetchConfig = {
+				method: "PUT",
+				headers: {
+					accept: "application/json",
+				},
+				url: "/api/users/" + id + "/picture",
+				body: formData,
+			};
+
+			await fetchPong(config);
+			return;
+		}
+
+		if (Object.values(body).every((v) => v === undefined)) {
+			return;
+		}
+
 		const config: FetchConfig = {
-			method: "PUT",
-			header: {
+			method: "PATCH",
+			headers: {
 				"accept": "application/json",
 				"Content-Type": "application/json",
 			},
