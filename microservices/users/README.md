@@ -226,7 +226,7 @@ None. 👍
 >   - Change some values, try to send invalid data (numbers, empty strings, additional fields, missing info, etc).
 > - You can also use Postman to test it.
 > - Please note that automated tests aren't implemented yet.
-> - Please note that currently, it's not possible to update the picture in SWagger UI; only via `curl` command.
+> - Please note that currently, it's not possible to update the picture in Swagger UI; only via `curl` command.
 > - In a future version, it'll include a database seeder to all the functionality can be tested.
 
 ### Testing in Docker
