@@ -240,7 +240,7 @@ export async function deleteUserHandler(
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
 
-	// Since service is database logic, I remove the user folder here in controller
+	// Remove user folder here in controller, since service (should basically) handles database operations;
 	if (fs.existsSync(userFolder)) {
 		await fs.promises.rm(userFolder, { recursive: true, force: true });
 	}

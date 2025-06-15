@@ -267,7 +267,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 export async function deleteUser(id: string): Promise<void> {
 	try {
 		await prisma.user.delete({ where: { id } });
-		// Since service is database logic, I remove the user folder in controller
+		// Service handles database operations; so other logic like file cleanup is handled in controller
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (
@@ -376,6 +376,7 @@ export async function updateUserPicture(id: string, picturePath: string) {
 
 export async function getUserFriends(id: string) {
 	try {
+		await getUserOrThrow({ id }); // Ensure users exist
 		const friendships = await prisma.friendship.findMany({
 			where: {
 				OR: [{ user1Id: id }, { user2Id: id }],
@@ -395,6 +396,7 @@ export async function getUserFriends(id: string) {
 				message: "Failed to fetch friends",
 			});
 		}
+		if (err instanceof AppError) throw err;
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
