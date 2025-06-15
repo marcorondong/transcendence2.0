@@ -2,12 +2,10 @@ services:
   ai-bot:
     image: ai-bot
     build:
-      dockerfile: ./ai/Dockerfile
+      dockerfile: ./ai/docker/Dockerfile
     container_name: ai-bot
     volumes:
       - ./ai/src:/app/src:ro
-    ports:
-      - 6969:6969 #TODO keep now for swagger documentation, remove later
     env_file:
       - ./ai/docker/.env
     restart: unless-stopped

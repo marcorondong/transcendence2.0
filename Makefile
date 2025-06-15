@@ -3,6 +3,7 @@ MONITORING_SECRETS = ./monitoring/secrets
 GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
 PONG_ENV = ./microservices/ssg/pong-api/.env
+BOT_ENV = ./microservices/ssg/ai-bot/docker/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
 GLOBAL_ENV = .env
@@ -10,7 +11,9 @@ REBUILD_SERVICE = -re
 
 SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
-SECRET_FILES = $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) $(GLOBAL_ENV) $(AUTH_API_COOKIE_SECRET) $(AUTH_API_JWT_SECRET)
+SECRET_FILES = $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) \
+	$(GLOBAL_ENV) $(AUTH_API_COOKIE_SECRET) $(AUTH_API_JWT_SECRET) \
+	$(BOT_ENV)
 
 all: $(SECRET_FILES)
 	docker compose up -d
@@ -68,6 +71,9 @@ $(GRAFANA_PW): $(SECRET_DIRECTORIES)
 
 $(PONG_ENV):
 	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
+
+$(BOT_ENV):
+	ft_crypt.sh --decrypt="$(BOT_ENV).enc" --force
 
 $(AUTH_API_COOKIE_SECRET):
 	ft_crypt.sh --decrypt="$(AUTH_API_COOKIE_SECRET).enc" --force

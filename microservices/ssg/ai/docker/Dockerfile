@@ -11,4 +11,4 @@ COPY ./pong-api/src/game/modes/singles/PongGameSingles.ts ./imports/PongGameSing
 COPY ./pong-api/src/game/elements/Point.ts ./imports/Point.ts
 COPY ./pong-api/src/game/elements/PongField.ts ./imports/PongField.ts
 
-CMD ["npx", "nodemon", "src/server.ts"]
+CMD ["npx", "ts-node", "src/server.ts"]

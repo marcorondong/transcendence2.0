@@ -238,25 +238,27 @@ export class PongComponent extends HTMLElement {
 		requestAnimationFrame(this.gameLoop);
 	};
 
-	async requestBot() {
-		while (!this.gameState || !this.gameState?.roomId) {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			console.log("waiting for roomId");
-		}
+	async requestBot(roomId: string) {
 		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
 		const reqBody = JSON.stringify({
-			roomId: this.gameState?.roomId,
+			roomId: roomId,
 			difficulty: this.chat.gameSelection?.playSelection,
 		});
 
-		const response = await fetch(url, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: reqBody,
-		});
-		this.botJoined = response.ok;
-		if (!response.ok) {
-			console.log("response from bot request", response);
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: reqBody,
+			});
+			this.botJoined = response.ok;
+		} catch (error) {
+			console.error("Exception in requestBot:", error);
+			this.botJoined = false;
+		}
+
+		if (this.botJoined === false) {
+			console.error("Bot is offline. Try again later."); // will improve error msg, in a different branch
 		}
 	}
 
@@ -365,26 +367,32 @@ export class PongComponent extends HTMLElement {
 			}
 		};
 		this.gameLoop();
-		this.launchBotIfNeeded();
+		this.botWrapper();
 	}
 
-	launchBotIfNeeded() {
-		if (
-			(this.chat.gameSelection?.playSelection === "easy" ||
-				this.chat.gameSelection?.playSelection === "normal" ||
-				this.chat.gameSelection?.playSelection === "hard") &&
-			this.botJoined === undefined
-		) {
-			this.requestBot();
+	botWrapper() {
+		if (this.isBotNeeded() === true) {
+			let intervalId = setInterval(() => {
+				if (
+					this.wss?.readyState === this.wss?.OPEN &&
+					this.gameState?.roomId
+				) {
+					console.log("got roomId:", this.gameState.roomId);
+					clearInterval(intervalId);
+					this.requestBot(this.gameState.roomId);
+				} else {
+					console.log("waiting for roomId...");
+				}
+			}, 1000);
 		}
-		if (this.botJoined === false) {
-			printMessage(
-				"NovakBotkovic is offline, try again",
-				this.ctx,
-				this.canvasWidth,
-				this.canvasHeight,
-			);
-		}
+	}
+
+	isBotNeeded() {
+		return (
+			this.chat.gameSelection?.playSelection === "easy" ||
+			this.chat.gameSelection?.playSelection === "normal" ||
+			this.chat.gameSelection?.playSelection === "hard"
+		);
 	}
 
 	handleEvent(event: Event) {
