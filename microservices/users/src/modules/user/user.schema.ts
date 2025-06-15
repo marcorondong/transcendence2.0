@@ -380,10 +380,17 @@ export const emptyResponseSchema = z
 
 export const errorResponseSchema = z.object({
 	statusCode: z.number().describe("HTTP status code"),
-	error: z
-		.string()
-		.describe("Short title describing the error (e.g., 'Not Found')"),
+	code: z.string().describe("Error string code"),
 	message: z.string().describe("Detailed message about the error"),
+	// Don't send these. Already printed in the terminal.
+	// If I send them, I'm exposing internal code structure.
+	// service: z.string().describe("Service that threw the error"),
+	// type: z.string().describe("Error type/class"),
+	// handler: z
+	// 	.string()
+	// 	.describe("Function that caught the error (handler function)"),
+	// stack: z.string().describe("stack calls"),
+	// nestedCause: z.any().describe("Original error object or nested AppError"),
 });
 
 // TypeScript types inferred from schemas

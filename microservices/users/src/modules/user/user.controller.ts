@@ -23,7 +23,8 @@ import {
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
-import { getConfig } from "../../utils/config";
+import getConfig from "../../utils/config";
+import { logger } from "../../utils/logger";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -32,6 +33,7 @@ export async function registerUserHandler(
 	request: FastifyRequest<{ Body: createUserInput }>,
 	reply: FastifyReply,
 ) {
+	logger.info("testing logger in registerUserHandler");
 	const user = await createUser(request.body);
 	// Serialize/validate/filter response via Zod schemas (userResponseSchema.parse)
 	const parsedUser = userResponseSchema.parse(user);
@@ -45,6 +47,7 @@ export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
+	logger.warn("testing logger in loginHandler");
 	const { email, username, password } = request.body;
 	// Determine allowed identifiers
 	const allowedIdentifiers = LOGIN_IDENTIFIER_MODE.split(",").map((s) =>
@@ -107,6 +110,7 @@ export async function getUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.error("testing logger in getUserHandler");
 	const user = await findUserByUnique({ id: request.params.id });
 	const parsedUser = userResponseSchema.parse(user);
 	return reply.code(200).send(parsedUser);
@@ -145,8 +149,8 @@ function applyPagination(params: {
 		typeof params.page === "number"
 			? (params.page - 1) * take
 			: typeof params.skip === "number"
-				? params.skip
-				: 0;
+			? params.skip
+			: 0;
 
 	return { skip, take };
 }
@@ -155,6 +159,7 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
+	logger.debug("testing logger in getUsersHandler");
 	// Log full query for debugging purposes
 	// console.log("[Request Query]", request.query);
 
@@ -222,6 +227,7 @@ export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.fatal("testing logger in deleteUserHandler");
 	const user = await findUserByUnique({ id: request.params.id });
 
 	const uploadsBase = path.resolve("uploads/users");
@@ -242,6 +248,7 @@ export async function putUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.log("testing logger in putUserHandler");
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -254,6 +261,7 @@ export async function patchUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.from(request).info("testing logger in patchUserHandler");
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -268,10 +276,10 @@ const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
 			type === "image/jpeg"
 				? "jpg"
 				: type === "image/png"
-					? "png"
-					: type === "image/gif"
-						? "gif"
-						: "";
+				? "png"
+				: type === "image/gif"
+				? "gif"
+				: "";
 		return acc;
 	},
 	{} as Record<string, string>,
@@ -281,6 +289,9 @@ export async function pictureHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger
+		.from(request)
+		.info({ "event.action": "pictureHandler" }, "Update user picture");
 	const user = await findUserByUnique({ id: request.params.id });
 
 	const parts = request.parts();

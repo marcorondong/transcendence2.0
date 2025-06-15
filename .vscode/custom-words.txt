@@ -112,6 +112,7 @@ Rondón
 rootfs
 rotrpm
 sda
+sdj
 Segs
 sekula
 Sekula
