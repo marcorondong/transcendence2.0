@@ -1,54 +1,73 @@
 import { FastifyInstance } from "fastify";
-import {
-	gameRequestSchema,
-	extraGameSchema,
-	healthSchema,
-} from "./gameRequestSchema";
+import { gameRequestSchema, healthSchema } from "./gameSchema";
 import { Bot } from "./bot";
+import { tokenRoute } from "./config";
 
-export async function gameRoutes(fastify: FastifyInstance) {
+async function cookieSubRequest(gameRequestReply: any): Promise<string> {
+	const res = await fetch(tokenRoute);
+
+	if (!res.ok) {
+		gameRequestReply.code(401).send({ error: "bot is unauthorized" });
+		throw new Error("bot is unauthorized");
+	}
+
+    const authResponse = await res.json();
+	console.log("Auth response received:", authResponse);
+
+	if (!authResponse || !authResponse.access_token) {
+		gameRequestReply.code(500).send({ error: "Failed to retrieve auth data" });
+		throw new Error("Failed to retrieve auth data");
+	}
+
+	const token = authResponse.access_token;
+	if (!token) {
+		gameRequestReply.code(500).send({ error: "Token not found in response" });
+		throw new Error("Token not found in response");
+	}
+
+	return "access_token=" + token;
+}
+
+export async function gameRoute(fastify: FastifyInstance) {
 	fastify.post(
 		"/game-mandatory",
 		{ schema: gameRequestSchema },
 		async (request: any, reply: any) => {
-			if (!request.body) {
-				return reply.code(400).send({ error: "Invalid game request" });
-			}
-			const gameRequest = new Object({
-				host: request.body.host,
-				port: request.body.port,
-				side: request.body.side,
+			const cookies = await cookieSubRequest(reply);
+
+			const gameRequest = {
 				roomId: request.body.roomId,
-			});
+				difficulty: request.body.difficulty,
+				mode: "mandatory",
+			};
 			try {
-				new Bot(gameRequest).playGame();
+				new Bot(gameRequest).playGame(cookies);
 				reply.code(200).send({
-					description: "Game successfully started",
-					gameRequest,
+					description: `Game id ${gameRequest.roomId} successfully started`,
 				});
 			} catch (error) {
-				request.log.error(error);
+				console.error(error);
 				reply.code(500).send({ error: "Failed to start bot" });
 			}
 		},
 	);
-	fastify.post(
-		"/game-extra",
-		{ schema: extraGameSchema },
-		async (request: any, reply: any) => {
-			const gameRequest = request.body as object;
-			if (!gameRequest) {
-				return reply.code(400).send({ error: "Invalid game request" });
-			}
+}
 
+export async function debugRoute(fastify: FastifyInstance) {
+	fastify.post(
+		"/game-debug",
+		{ schema: gameRequestSchema },
+		async (request: any, reply: any) => {
+			const cookies = await cookieSubRequest(reply);
+
+			const gameRequest = request.body;
 			try {
-				new Bot(gameRequest).playGame();
+				new Bot(gameRequest).playGame(cookies);
 				reply.code(200).send({
-					description: "Game successfully started",
-					gameRequest,
+					description: `Game id ${gameRequest.roomId} successfully started`,
 				});
 			} catch (error) {
-				request.log.error(error);
+				console.error(error);
 				reply.code(500).send({ error: "Failed to start bot" });
 			}
 		},
@@ -59,7 +78,7 @@ export async function healthRoute(fastify: FastifyInstance) {
 	fastify.get(
 		"/health-check",
 		{ schema: healthSchema },
-		async (request: any, reply: any) => {
+		async (_: any, reply: any) => {
 			reply.code(200).send({ status: "ok" });
 		},
 	);
