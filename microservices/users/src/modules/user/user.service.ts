@@ -460,20 +460,19 @@ export async function deleteFriend(userId: string, targetUserId: string) {
 				? [userId, targetUserId]
 				: [targetUserId, userId];
 
-		await prisma.friendship.deleteMany({
+		const result = await prisma.friendship.deleteMany({
 			where: { user1Id, user2Id },
 		});
+		// deleteMany doesn't throw is anything is deleted. So I have to check how many rows where deleted
+		if (result.count === 0) {
+			throw new AppError({
+				statusCode: 404,
+				code: FRIEND_ERRORS.DELETE_FRIEND,
+				message: "Users were not friends",
+			});
+		}
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
-		if (err instanceof Prisma.PrismaClientKnownRequestError) {
-			if (err.code === "P2002") {
-				throw new AppError({
-					statusCode: 404,
-					code: FRIEND_ERRORS.DELETE_FRIEND, // or create a FRIENDSHIP_ERRORS entry
-					message: "Users were not friends",
-				});
-			}
-		}
 		if (err instanceof AppError) throw err;
 		// Unknown errors bubble up to global error handler.
 		throw err;
