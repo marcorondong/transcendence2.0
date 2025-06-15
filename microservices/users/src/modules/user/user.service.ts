@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { AppError, USER_ERRORS } from "../../utils/errors";
+import { AppError, FRIEND_ERRORS, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import {
@@ -86,18 +86,25 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
+// Helper function to retrieve a user from the database
+async function getUserOrThrow(where: UniqueUserField) {
+	const user = await prisma.user.findUnique({ where });
+
+	if (!user) {
+		throw new AppError({
+			statusCode: 404,
+			code: USER_ERRORS.NOT_FOUND,
+			message: "User not found",
+		});
+	}
+
+	return user;
+}
+
 // This function returns all user fields (no filtering). It only accepts unique fields, so it returns ONLY ONE user
 export async function findUserByUnique(where: UniqueUserField) {
 	try {
-		const user = await prisma.user.findUnique({ where });
-		if (!user) {
-			throw new AppError({
-				statusCode: 404,
-				code: USER_ERRORS.NOT_FOUND,
-				message: "User not found",
-			});
-		}
-		return user;
+		return await getUserOrThrow(where);
 	} catch (err) {
 		if (err instanceof AppError) {
 			// Known/Expected errors bubble up to controller as AppError (custom error)
@@ -203,11 +210,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		const query = useOr
 			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
 			: // : transformed;
-				Object.fromEntries(
+			  Object.fromEntries(
 					Object.entries(transformed).filter(
 						([_, v]) => v !== undefined,
 					),
-				);
+			  );
 
 		// console.log("✅ Step 3: Final Query Shape", query);
 
@@ -257,10 +264,10 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	}
 }
 
-// export async function deleteUser(id: number): Promise<void> {
 export async function deleteUser(id: string): Promise<void> {
 	try {
 		await prisma.user.delete({ where: { id } });
+		// Since service is database logic, I remove the user folder in controller
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (
@@ -278,20 +285,12 @@ export async function deleteUser(id: string): Promise<void> {
 	}
 }
 
-// export async function updateUser(id: number, data: UpdateUserData) {
+// TODO: Check also when updating username, nickname and email to check password constraints
 export async function updateUser(id: string, data: UpdateUserData) {
 	try {
 		const updatePayload: Record<string, any> = { ...data };
+		let currentUser = await getUserOrThrow({ id }); // get user to ensure it exists and work with it
 		if (data.password) {
-			// Find user for password constrains check
-			const currentUser = await prisma.user.findUnique({ where: { id } });
-			if (!currentUser) {
-				throw new AppError({
-					statusCode: 404,
-					code: USER_ERRORS.USER_UPDATE,
-					message: "User not found",
-				});
-			}
 			// Check password constraints
 			try {
 				checkPasswordConstraints(data.password, {
@@ -312,11 +311,11 @@ export async function updateUser(id: string, data: UpdateUserData) {
 			updatePayload.salt = salt;
 			delete updatePayload.password; // remove plain password
 		}
-		const updatedUser = await prisma.user.update({
+		currentUser = await prisma.user.update({
 			where: { id },
 			data: updatePayload,
 		});
-		return updatedUser;
+		return currentUser;
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -351,22 +350,15 @@ export async function updateUser(id: string, data: UpdateUserData) {
 // Updates user picture path
 export async function updateUserPicture(id: string, picturePath: string) {
 	try {
-		// Ensure user exists
-		const currentUser = await prisma.user.findUnique({ where: { id } });
-		if (!currentUser) {
-			throw new AppError({
-				statusCode: 404,
-				code: USER_ERRORS.USER_PICTURE,
-				message: "User not found",
-			});
-		}
+		let currentUser = await getUserOrThrow({ id }); // get user to ensure it exists and work with it
 		// Update picture path
-		const updatedUser = await prisma.user.update({
+		currentUser = await prisma.user.update({
 			where: { id },
 			data: { picture: picturePath },
 		});
-		return updatedUser;
+		return currentUser;
 	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
 			switch (err.code) {
 				case "P2025":
@@ -377,6 +369,113 @@ export async function updateUserPicture(id: string, picturePath: string) {
 					});
 			}
 		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+export async function getUserFriends(id: string) {
+	try {
+		const friendships = await prisma.friendship.findMany({
+			where: {
+				OR: [{ user1Id: id }, { user2Id: id }],
+			},
+			include: {
+				user1: true,
+				user2: true,
+			},
+		});
+		return friendships.map((f) => (f.user1Id === id ? f.user2 : f.user1));
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			throw new AppError({
+				statusCode: 400,
+				code: FRIEND_ERRORS.GET_FRIEND, // or define a new FRIENDSHIP_ERRORS.FETCH
+				message: "Failed to fetch friends",
+			});
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+export async function addFriend(userId: string, targetUserId: string) {
+	if (userId === targetUserId) {
+		throw new AppError({
+			statusCode: 400,
+			code: FRIEND_ERRORS.ADD_FRIEND,
+			message: "Cannot add yourself as a friend",
+		});
+	}
+	try {
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: userId }),
+			getUserOrThrow({ id: targetUserId }),
+		]);
+		// Sort users so they are always user1Id < user2Id to avoid A-B and B-A are not stored twice
+		const [user1Id, user2Id] =
+			userId < targetUserId
+				? [userId, targetUserId]
+				: [targetUserId, userId];
+
+		await prisma.friendship.create({
+			data: { user1Id, user2Id },
+		});
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			if (err.code === "P2002") {
+				throw new AppError({
+					statusCode: 409,
+					code: FRIEND_ERRORS.ADD_FRIEND,
+					message: "Users are already friends",
+				});
+			}
+		}
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+export async function deleteFriend(userId: string, targetUserId: string) {
+	if (userId === targetUserId) {
+		throw new AppError({
+			statusCode: 400,
+			code: FRIEND_ERRORS.DELETE_FRIEND,
+			message: "Cannot delete yourself as a friend",
+		});
+	}
+	try {
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: userId }),
+			getUserOrThrow({ id: targetUserId }),
+		]);
+		// Sort users so they are always user1Id < user2Id to avoid A-B and B-A are not stored twice
+		const [user1Id, user2Id] =
+			userId < targetUserId
+				? [userId, targetUserId]
+				: [targetUserId, userId];
+
+		await prisma.friendship.deleteMany({
+			where: { user1Id, user2Id },
+		});
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			if (err.code === "P2002") {
+				throw new AppError({
+					statusCode: 404,
+					code: FRIEND_ERRORS.DELETE_FRIEND, // or create a FRIENDSHIP_ERRORS entry
+					message: "Users were not friends",
+				});
+			}
+		}
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
