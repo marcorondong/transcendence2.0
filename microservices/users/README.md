@@ -128,11 +128,14 @@ Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded 
 6. For checking the picture functionality:
    1. Run the following `curl` command directed to the user id to update its picture:
 
-    ```bash
-    curl -v -X PUT http://localhost:3000/api/users/<user_id>/picture \
-    -H "Content-Type: multipart/form-data" \
-    -F "picture=@/absolute/path/to/picture.jpg"
-    ```
+      ```bash
+      curl -v -X PUT http://localhost:3000/api/users/<user_id>/picture \
+      -H "Content-Type: multipart/form-data" \
+      -F "picture=@/absolute/path/to/picture.jpg"
+      ```
+
+   2. If you're running "locally" (`npm run dev`); check the pictures at `./microservices/users/uploads/`
+   3. If you're running with Docker; check the pictures in the Browser at: `https://localhost:8080/uploads/users/<your-username>/picture.jpg`
 
 > [!WARNING]
 >
@@ -223,5 +226,87 @@ None. 👍
 >   - Change some values, try to send invalid data (numbers, empty strings, additional fields, missing info, etc).
 > - You can also use Postman to test it.
 > - Please note that automated tests aren't implemented yet.
-> - Please note that currently, it's not possible to update the picture in SWagger UI; only via `curl` command.
+> - Please note that currently, it's not possible to update the picture in Swagger UI; only via `curl` command.
 > - In a future version, it'll include a database seeder to all the functionality can be tested.
+
+### Testing in Docker
+
+If you're running the project with Docker, then you can also use `curl` to test USERS by issuing the following commands
+(_Check the correct endpoints, ports, if they're open, etc_)
+
+For testing with `curl` and USERS Service functionality going through AUTH Service and/or NGINX:
+
+1. CREATE USER VIA FRONTEND + AUTH (_use valid values_):
+
+    ```bash
+    curl -v -k -X 'POST' \
+      'https://localhost:8080/auth-api/sign-up' \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '{
+      "email": "randomuser@example.com",
+      "nickname": "Some Awesome Nickname",
+      "username": "whatever",
+      "password": "change-Me"
+    }'
+    ```
+
+2. COPY THE COOKIE VALUE RETURNED BY AUTH:
+
+    `set-cookie: access_token=eyJhbG..; Max-Age=3600; Path=/; HttpOnly; Secure; SameSite=Strict`
+
+3. USE IT IN YOUR `curl` requests by adding the following header (always BEFORE the body):
+
+    `-H 'Cookie: access_token=eyJhbG...'`
+
+4. GET ALL THE USERS TO GET YOUR ID:
+
+    ```bash
+    curl -v -k https://localhost:8080/api/users/ \
+      -H 'Cookie: access_token=eyJhbG...'
+    ```
+
+    And use it in your `curl` requests that use this (look for the placeholder `<user-id>`)
+
+5. Have in mind that the COOKIE EXPIRES AFTER 1 HOUR. So you need to request it again like this:
+
+    ```bash
+    curl -v -k -X 'POST' \
+      'https://localhost:8080/auth-api/sign-in' \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '{
+      "username": "whatever",
+      "password": "change-Me"
+    }'
+    ```
+
+    And remember to update your `curl` request with the new cookie.
+
+6. UPDATE USER VIA FRONTEND + AUTH:
+
+    ```bash
+    curl -v -k -X 'PATCH' \
+      'https://localhost:8080/api/users/<user-id>' \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -H 'Cookie: access_token=eyJhbG...' \
+      -d '{
+      "nickname": "Tell Me Something Funny"
+    }'
+    ```
+
+7. UPDATE THE USER PICTURE
+
+    ```bash
+    curl -v -k -X PUT https://localhost:8080/api/users/<user-id>/picture \
+      -H "Content-Type: multipart/form-data" \
+      -H 'Cookie: access_token=eyJhbG...' \
+      -F "picture=@/path/to/your/picture.jpg"
+    ```
+
+8. TO CHECK IF THE PICTURE WAS CHANGED:
+
+  You can request your user details, or even better! use the Browser:
+  Copy this URL: `https://localhost:8080/uploads/users/<your-username>/picture.jpg`
+  Update the placeholder <your-username> with the correct value
