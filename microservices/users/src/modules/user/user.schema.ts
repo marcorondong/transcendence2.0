@@ -387,9 +387,7 @@ export const addFriendSchema = z
 // TODO: Check if better to reuse userIdParamSchema
 export const targetUserIdParamSchema = z
 	.object({
-		targetUserId: blankToUndefined(
-			z.string().uuid().describe("User ID (UUID format)"),
-		),
+		targetUserId: z.string().uuid().describe("User ID (UUID format)"),
 	})
 	.strict(); // Rejects unknown fields
 
@@ -428,4 +426,4 @@ export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
 // TODO: Check if I need these:
 export type addFriendInput = z.infer<typeof addFriendSchema>;
-export type removeFriendParams = z.infer<typeof targetUserIdParamSchema>;
+// export type removeFriendParams = z.infer<typeof targetUserIdParamSchema>;
