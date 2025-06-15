@@ -12,6 +12,10 @@ import {
 	getUsersQuery,
 	updateUserPutInput,
 	updateUserPatchInput,
+	addFriendInput,
+	addFriendSchema, // TODO: Check if I use these
+	targetUserIdParamSchema,
+	userIdParamSchema,
 } from "./user.schema";
 import {
 	createUser,
@@ -20,6 +24,9 @@ import {
 	deleteUser,
 	updateUser,
 	updateUserPicture,
+	getUserFriends,
+	addFriend,
+	deleteFriend,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
@@ -233,6 +240,7 @@ export async function deleteUserHandler(
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
 
+	// Remove user folder here in controller, since service (should basically) handles database operations;
 	if (fs.existsSync(userFolder)) {
 		await fs.promises.rm(userFolder, { recursive: true, force: true });
 	}
@@ -292,7 +300,7 @@ export async function pictureHandler(
 	logger
 		.from(request)
 		.info({ "event.action": "pictureHandler" }, "Update user picture");
-	const user = await findUserByUnique({ id: request.params.id });
+	const user = await findUserByUnique({ id: request.params.id }); // TODO: Check if I can make it "let" and reuse it
 
 	const parts = request.parts();
 	let pictureFile;
@@ -355,4 +363,38 @@ export async function pictureHandler(
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
 	reply.code(200).send(updatedUser);
+}
+
+export async function getFriendsHandler(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply,
+) {
+	const friends = await getUserFriends(request.params.id);
+	// return reply.code(200).send({ friends });
+	return reply.code(200).send(friends);
+}
+
+export async function addFriendHandler(
+	request: FastifyRequest<{
+		Params: { id: string };
+		Body: addFriendInput;
+	}>,
+	reply: FastifyReply,
+) {
+	await addFriend(request.params.id, request.body.targetUserId);
+	const friends = await getUserFriends(request.params.id);
+	// return reply.code(200).send({ friends });
+	return reply.code(201).send(friends);
+}
+
+export async function deleteFriendHandler(
+	request: FastifyRequest<{
+		Params: { id: string; targetUserId: string };
+	}>,
+	reply: FastifyReply,
+) {
+	await deleteFriend(request.params.id, request.params.targetUserId);
+	const friends = await getUserFriends(request.params.id);
+	// return reply.code(200).send({ friends });
+	return reply.code(200).send(friends);
 }

@@ -61,6 +61,11 @@ it needs a `curl` command directed to the endpoint to upload the picture.
 It supports **blacklisting**
 Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded from a config file_)
 
+It supports **friends**
+So a friend is a `User` array.
+Currently the "friendship" is AUTOMATIC. So no "_friend request_", etc.
+(_It's like **"follow"** in 'X' (formerly Twitter)_)
+
 > [!NOTE]
 >
 > In next version, it'll handle also:
@@ -69,6 +74,7 @@ Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded 
 > - Makefile
 > - ♻️ Code refactoring and code clean-up
 > - 🏃‍♂️💨 Change in how the code is "compiled" and run.
+> - [x] User "friends".
 > - [x] 🖼️ Avatar (user image).
 > - [x] Login to be done via email **OR** username.
 > - [x] `npm` utilities commands.
@@ -169,19 +175,22 @@ However, you can customize the service using docker secrets, environmental varia
 
 ## 🔀 API Endpoints
 
-| Method | Path                      | Description                            |
-| ------ | ------------------------- | -------------------------------------- |
-| GET    | `/api/health-check/`      | Health check                           |
-| GET    | `/api/documentation/`     | Swagger (Good for testing all options) |
-| POST   | `/api/users/`             | Create a new user                      |
-| GET    | `/api/users/`             | List all users                         |
-| GET    | `/api/users/?field=value` | Query string for sorting and filtering |
-| POST   | `/api/users/login`        | Authenticate user                      |
-| GET    | `/api/users/:id`          | Get specific user                      |
-| PUT    | `/api/users/:id`          | Update user (all fields)               |
-| PATCH  | `/api/users/:id`          | Update user (some fields)              |
-| DELETE | `/api/users/:id`          | Delete user                            |
-| PUT    | `/api/users/:id/picture`  | Update user picture                    |
+| Method | Path                                    | Description                            |
+| ------ | --------------------------------------- | -------------------------------------- |
+| GET    | `/api/health-check/`                    | Health check                           |
+| GET    | `/api/documentation/`                   | Swagger (Good for testing all options) |
+| POST   | `/api/users/`                           | Create a new user                      |
+| GET    | `/api/users/`                           | List all users                         |
+| GET    | `/api/users/?field=value`               | Query string for sorting and filtering |
+| POST   | `/api/users/login`                      | Authenticate user                      |
+| GET    | `/api/users/:id`                        | Get specific user                      |
+| PUT    | `/api/users/:id`                        | Update user (all fields)               |
+| PATCH  | `/api/users/:id`                        | Update user (some fields)              |
+| DELETE | `/api/users/:id`                        | Delete user                            |
+| PUT    | `/api/users/:id/picture`                | Update user picture                    |
+| GET    | `/api/users/:id/friends`                | Get user's friends (returned as array) |
+| POST   | `/api/users/:id/friends`                | Add a friend to user (send id in body) |
+| DELETE | `/api/users/:id/friends/:targetUserId`  | Delete a user's friend                 |
 
 > [!NOTE]
 >
@@ -209,6 +218,14 @@ None. 👍
 - Check `user.schema.ts` file to see the constraints of username, nickname, email and password.
 - When running "containerized", it uses NGINX to serve the pictures.
 - When running "locally" (`npm run ...`), it doesn't serve pictures, but it saves them in root `users\uploads` folder.
+
+> [!WARNING]
+>
+> Currently, the `./microservices/users/uploads/` folder is created and owned by root;
+> And is created in `./microservices/frontend/volume/`
+> so you'll have to execute sudo commands to delete it (_**if running in your laptop**_).
+> This is for the user profile picture.
+> In a next version, this issue will be solved.
 
 ---
 

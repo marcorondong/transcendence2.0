@@ -21,11 +21,28 @@ model User {
   passwordHash String
   salt         String
   picture      String    @default("/uploads/users/default/picture.jpg")
-  products     Product[]
+
+  friendships1 Friendship[] @relation("User1Friends")
+  friendships2 Friendship[] @relation("User2Friends")
+  // SQLite doesn't support lists of primitive types** like `String[]` so I cannot do:
+  // friends      String[]  @default([])
+  products     Product[] // TODO: Remove this legacy code
 }
 
+model Friendship {
+  id        String   @id @default(uuid())
+  user1     User     @relation("User1Friends", fields: [user1Id], references: [id])
+  user1Id   String
+  user2     User     @relation("User2Friends", fields: [user2Id], references: [id])
+  user2Id   String
+  createdAt DateTime @default(now())
+  @@unique([user1Id, user2Id]) // prevents duplicate friendships.
+  // We'll enforce user1Id < user2Id to avoid A-B and B-A are not stored twice
+}
+
+ // TODO: Remove this legacy code
 model Product {
-  id        Int      @id @default(autoincrement()) // TODO: Change this to uuid
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   title     String //@db.VarChar(255)

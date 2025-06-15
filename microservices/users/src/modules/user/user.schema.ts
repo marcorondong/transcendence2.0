@@ -373,6 +373,30 @@ export const getUsersQuerySchema = sanitizeQuerySchema(
 	baseGetUsersQuerySchema,
 ).strict(); // Rejects unknown fields
 
+// Schema for adding friends (addFriend)
+export const addFriendSchema = z
+	.object({
+		targetUserId: z
+			.string()
+			.uuid()
+			.describe("Target user ID (UUID format)"),
+	})
+	.strict();
+
+// Schema for removing friends (removeFriend)
+// TODO: Check if better to reuse userIdParamSchema
+export const targetUserIdParamSchema = z
+	.object({
+		targetUserId: z.string().uuid().describe("User ID (UUID format)"),
+	})
+	.strict(); // Rejects unknown fields
+
+// // TODO: Maybe I can use userArrayResponseSchema instead?
+// // Schema for user friends
+// export const userFriendsResponseSchema = z.object({
+// 	friends: z.array(userResponseSchema),
+// });
+
 // Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
 export const emptyResponseSchema = z
 	.void()
@@ -400,3 +424,6 @@ export type updateUserPutInput = z.infer<typeof putUserSchema>;
 export type updateUserPatchInput = z.infer<typeof patchUserSchema>;
 export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
+// TODO: Check if I need these:
+export type addFriendInput = z.infer<typeof addFriendSchema>;
+// export type removeFriendParams = z.infer<typeof targetUserIdParamSchema>;
