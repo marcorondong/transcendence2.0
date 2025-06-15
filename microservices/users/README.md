@@ -221,8 +221,8 @@ None. 👍
 
 > [!WARNING]
 >
-> Currently, the `./microservices/users/upload/` folder is created and owned by root;
-> And is created in `./microservices/frontend/volume`
+> Currently, the `./microservices/users/uploads/` folder is created and owned by root;
+> And is created in `./microservices/frontend/volume/`
 > so you'll have to execute sudo commands to delete it (_**if running in your laptop**_).
 > This is for the user profile picture.
 > In a next version, this issue will be solved.
