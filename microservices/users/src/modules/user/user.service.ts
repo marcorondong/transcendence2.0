@@ -249,6 +249,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			take,
 		});
 		// console.log("✅ Step 5: Result", users);
+		// This is not-standard, but it's easier to check by the status code
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -412,6 +413,24 @@ export async function getUserFriends(id: string) {
 	}
 }
 
+// Helper function for friendRequest module
+export async function areAlreadyFriends(
+	userId: string,
+	targetUserId: string,
+): Promise<boolean> {
+	if (userId === targetUserId) return false;
+
+	const [user1Id, user2Id] =
+		userId < targetUserId ? [userId, targetUserId] : [targetUserId, userId];
+
+	const friendship = await prisma.friendship.findFirst({
+		where: { user1Id, user2Id },
+		select: { id: true },
+	});
+
+	return !!friendship;
+}
+
 export async function addFriend(userId: string, targetUserId: string) {
 	if (userId === targetUserId) {
 		throw new AppError({
@@ -431,6 +450,16 @@ export async function addFriend(userId: string, targetUserId: string) {
 			userId < targetUserId
 				? [userId, targetUserId]
 				: [targetUserId, userId];
+		// Check if users are already friends
+		// Note that I'm already enforcing @@unique, but apparently this is best practice
+		// Avoids DB errors as flow control and feels like I'm  "avoiding failure" instead of "handling it"
+		if (await areAlreadyFriends(userId, targetUserId)) {
+			throw new AppError({
+				statusCode: 409,
+				code: FRIEND_ERRORS.ADD_FRIEND,
+				message: "Users are already friends",
+			});
+		}
 
 		await prisma.friendship.create({
 			data: { user1Id, user2Id },
@@ -490,3 +519,21 @@ export async function deleteFriend(userId: string, targetUserId: string) {
 		throw err;
 	}
 }
+
+// Helper function for future-proof (modifying the Friendship table externally, etc)
+// export async function getFriendshipId(
+// 	userId: string,
+// 	targetUserId: string,
+// ): Promise<string | null> {
+// 	if (userId === targetUserId) return null;
+
+// 	const [user1Id, user2Id] =
+// 		userId < targetUserId ? [userId, targetUserId] : [targetUserId, userId];
+
+// 	const friendship = await prisma.friendship.findFirst({
+// 		where: { user1Id, user2Id },
+// 		select: { id: true },
+// 	});
+
+// 	return friendship?.id || null;
+// }
