@@ -298,7 +298,7 @@ export const loginResponseSchema = tokenPayloadSchema.describe(
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
-const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in filterIds (it's an array, so there should bne more than 1 item)
+const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in filterIds (it's an array, so there should be more than 1 item)
 
 // Base schema for query parameters
 // Note that all fields will be marked with '.optional()' and "coerced"
