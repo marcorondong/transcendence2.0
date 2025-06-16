@@ -298,11 +298,25 @@ export const loginResponseSchema = tokenPayloadSchema.describe(
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in filterIds (it's an array, so there should be more than 1 item)
+
 // Base schema for query parameters
 // Note that all fields will be marked with '.optional()' and "coerced"
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	id: z.string().describe("Find users by user ID (UUID)"),
+	filterIds: ARRAY_STRICT_MODE // REJECT/ALLOW single items in filterIds (array of user ids)
+		? z
+				.array(z.string().uuid())
+				.describe("Filter users by UUIDs (array format)")
+		: z
+				.preprocess(
+					(val) => (typeof val === "string" ? [val] : val),
+					z.array(z.string().uuid()),
+				)
+				.describe(
+					"Filter users by UUIDs (supports single or multiple values)",
+				),
 	email: z.string().describe("Find users by email"),
 	username: z.string().describe("Find users by username"),
 	nickname: z.string().describe("Find users by nickname"),
@@ -319,7 +333,7 @@ const baseGetUsersQuerySchema = z.object({
 	// TODO: Make this as a type, and same for before, after and between
 	dateTarget: z
 		.enum(["createdAt", "updatedAt", "both"])
-		.default("createdAt")
+		// .default("createdAt")
 		.describe("Choose which date field to apply filters to"),
 	before: z
 		.preprocess((val) => new Date(val as string), z.date())
@@ -364,8 +378,8 @@ const baseGetUsersQuerySchema = z.object({
 		.min(1)
 		.describe("Page number to use for pagination (starts at 1)"),
 	all: z.boolean().describe("If true, return all results without pagination"),
-	sortBy: userSortByEnum.default("createdAt"),
-	order: sortDirectionEnum.default("asc"),
+	sortBy: userSortByEnum, //.default("createdAt"),
+	order: sortDirectionEnum, //.default("asc"),
 });
 
 // Refined schema for query parameters to find users
