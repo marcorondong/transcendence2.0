@@ -298,6 +298,8 @@ export const loginResponseSchema = tokenPayloadSchema.describe(
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in filterIds (it's an array, so there should bne more than 1 item)
+
 // Base schema for query parameters
 // Note that all fields will be marked with '.optional()' and "coerced"
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
@@ -306,12 +308,24 @@ const baseGetUsersQuerySchema = z.object({
 	// filterIds: z
 	// 	.array(z.string().uuid())
 	// 	.describe("Filter users by an array of UUIDs"),
-	filterIds: z
-		.preprocess(
-			(val) => (typeof val === "string" ? [val] : val),
-			z.array(z.string().uuid()),
-		)
-		.describe("Filter users by an array of UUIDs"),
+	// filterIds: z
+	// 	.preprocess(
+	// 		(val) => (typeof val === "string" ? [val] : val),
+	// 		z.array(z.string().uuid()),
+	// 	)
+	// 	.describe("Filter users by an array of UUIDs"),
+	filterIds: ARRAY_STRICT_MODE
+		? z
+				.array(z.string().uuid())
+				.describe("Filter users by UUIDs (array format)")
+		: z
+				.preprocess(
+					(val) => (typeof val === "string" ? [val] : val),
+					z.array(z.string().uuid()),
+				)
+				.describe(
+					"Filter users by UUIDs (supports single or multiple values)",
+				),
 	email: z.string().describe("Find users by email"),
 	username: z.string().describe("Find users by username"),
 	nickname: z.string().describe("Find users by nickname"),
