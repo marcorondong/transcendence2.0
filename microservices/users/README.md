@@ -33,6 +33,7 @@ It also supports query strings:
 - useFuzzy: Change queries to allow partial matches (fuzzy search).
 - sortBy: Order by a specific field.
 - Order: Ascending or descending order.
+- Users id array.
 
 It supports pagination (_by default_) and modifiable via query string:
 
@@ -216,6 +217,9 @@ None. 👍
 - UsesSwagger to easily show (and test) behavior.
 - Accept configurations via secrets, files, env vars and hardcoded values.
 - Check `user.schema.ts` file to see the constraints of username, nickname, email and password.
+- `id` and `filterIds` act as one field.
+- `useFuzzy` **doesn't** work with uuid nor dates.
+- If "_target_" is empty (no user's fields) then `useOr` will behave as it's not present (there's no "field1" or "field2")
 - When running "containerized", it uses NGINX to serve the pictures.
 - When running "locally" (`npm run ...`), it doesn't serve pictures, but it saves them in root `users\uploads` folder.
 
