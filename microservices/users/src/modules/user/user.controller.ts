@@ -364,7 +364,7 @@ export async function pictureHandler(
 	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
-	reply.code(200).send(updatedUser);
+	reply.code(200).send(updatedUser); // TODO: Should I parse here?
 }
 
 export async function getFriendsHandler(
@@ -372,8 +372,7 @@ export async function getFriendsHandler(
 	reply: FastifyReply,
 ) {
 	const friends = await getUserFriends(request.params.id);
-	// return reply.code(200).send({ friends });
-	return reply.code(200).send(friends);
+	return reply.code(200).send(friends); // TODO: Should I parse here?
 }
 
 export async function addFriendHandler(
@@ -385,10 +384,10 @@ export async function addFriendHandler(
 ) {
 	await addFriend(request.params.id, request.body.targetUserId);
 	const friends = await getUserFriends(request.params.id);
-	// return reply.code(200).send({ friends });
-	return reply.code(201).send(friends);
+	return reply.code(201).send(friends); // TODO: Should I parse here?
 }
 
+// TODO: Should I still return the updated friends array, or 204 instead?
 export async function deleteFriendHandler(
 	request: FastifyRequest<{
 		Params: { id: string; targetUserId: string };
@@ -397,6 +396,5 @@ export async function deleteFriendHandler(
 ) {
 	await deleteFriend(request.params.id, request.params.targetUserId);
 	const friends = await getUserFriends(request.params.id);
-	// return reply.code(200).send({ friends });
-	return reply.code(200).send(friends);
+	return reply.code(200).send(friends); // TODO: Should I parse here?
 }
