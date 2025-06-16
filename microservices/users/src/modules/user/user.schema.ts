@@ -305,16 +305,7 @@ const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in fi
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	id: z.string().describe("Find users by user ID (UUID)"),
-	// filterIds: z
-	// 	.array(z.string().uuid())
-	// 	.describe("Filter users by an array of UUIDs"),
-	// filterIds: z
-	// 	.preprocess(
-	// 		(val) => (typeof val === "string" ? [val] : val),
-	// 		z.array(z.string().uuid()),
-	// 	)
-	// 	.describe("Filter users by an array of UUIDs"),
-	filterIds: ARRAY_STRICT_MODE
+	filterIds: ARRAY_STRICT_MODE // REJECT/ALLOW single items in filterIds (array of user ids)
 		? z
 				.array(z.string().uuid())
 				.describe("Filter users by UUIDs (array format)")
