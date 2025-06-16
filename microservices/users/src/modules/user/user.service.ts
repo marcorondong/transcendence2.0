@@ -217,8 +217,21 @@ export async function findUsers(options: UserQueryOptions = {}) {
 						([_, v]) => v !== undefined,
 					),
 			  );
+		// TODO: REmove this old logic where I didn't combine the ids
+		// if (filterIds?.length) {
+		// 	query.id = { in: filterIds };
+		// }
+		// Merge 'filterIds' and 'where.id' into a unified filter
+		const combinedIds = new Set<string>();
 		if (filterIds?.length) {
-			query.id = { in: filterIds };
+			filterIds.forEach((id) => combinedIds.add(id));
+		}
+		if (where.id) {
+			combinedIds.add(where.id as string);
+			delete query.id; // remove direct 'id' filter so it doesn't conflict
+		}
+		if (combinedIds.size > 0) {
+			query.id = { in: Array.from(combinedIds) };
 		}
 		// console.log("✅ Step 3: Final Query Shape", query);
 
