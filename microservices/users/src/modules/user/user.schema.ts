@@ -333,7 +333,7 @@ const baseGetUsersQuerySchema = z.object({
 	// TODO: Make this as a type, and same for before, after and between
 	dateTarget: z
 		.enum(["createdAt", "updatedAt", "both"])
-		.default("createdAt")
+		// .default("createdAt")
 		.describe("Choose which date field to apply filters to"),
 	before: z
 		.preprocess((val) => new Date(val as string), z.date())
@@ -378,8 +378,8 @@ const baseGetUsersQuerySchema = z.object({
 		.min(1)
 		.describe("Page number to use for pagination (starts at 1)"),
 	all: z.boolean().describe("If true, return all results without pagination"),
-	sortBy: userSortByEnum.default("createdAt"),
-	order: sortDirectionEnum.default("asc"),
+	sortBy: userSortByEnum, //.default("createdAt"),
+	order: sortDirectionEnum, //.default("asc"),
 });
 
 // Refined schema for query parameters to find users

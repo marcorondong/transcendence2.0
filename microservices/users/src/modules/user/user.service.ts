@@ -118,6 +118,7 @@ export async function findUserByUnique(where: UniqueUserField) {
 // Type definition for query options
 type UserQueryOptions = {
 	where?: UserField; // To filter by UserField
+	filterIds?: string[]; // To filter by array of IDs
 	useFuzzy?: boolean; // To allow partial matches
 	useOr?: boolean; // To allow OR logic
 	dateTarget?: "createdAt" | "updatedAt" | "both";
@@ -128,7 +129,6 @@ type UserQueryOptions = {
 	take?: number; // To limit the number of returned entries
 	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
 	order?: SortDirection; // to order asc/desc
-	filterIds?: string[]; // To filter by array of IDs
 };
 
 // TODO: MR: Check if I can avoid using keyword `any`
@@ -141,6 +141,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 
 	const {
 		where = {},
+		filterIds,
 		useFuzzy = false,
 		useOr = false,
 		dateTarget = "createdAt",
@@ -151,17 +152,14 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		take,
 		sortBy = "createdAt",
 		order = "asc",
-		filterIds,
 	} = cleanedOptions;
 
 	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
-
 	try {
 		// Remove undefined fields from 'where'
 		const cleanedWhere = Object.fromEntries(
 			Object.entries(where).filter(([_, v]) => v !== undefined),
 		);
-
 		const transformed = Object.entries(cleanedWhere).reduce(
 			(acc, [key, value]) => {
 				// Enable fuzzy search (transform string fields to `contains` filters)
@@ -174,7 +172,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			},
 			{} as Record<string, any>,
 		);
-		// Apply date filters to 'createdAt'
+		// Helper function to apply date filters
 		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
 			if (before) {
 				transformed[field] = {
@@ -199,6 +197,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			}
 		};
 
+		// Apply date filters
 		if (dateTarget === "both") {
 			applyDateFilter("createdAt");
 			applyDateFilter("updatedAt");
@@ -206,21 +205,6 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			//applyDateFilter(dateTarget ?? "createdAt");
 			applyDateFilter(dateTarget);
 		}
-
-		// console.log("✅ Step 2: Transformed 'where'", transformed);
-		// Enable OR queries (map provided fields to build individual queries)
-		const query = useOr
-			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
-			: // : transformed;
-			  Object.fromEntries(
-					Object.entries(transformed).filter(
-						([_, v]) => v !== undefined,
-					),
-			  );
-		// TODO: REmove this old logic where I didn't combine the ids
-		// if (filterIds?.length) {
-		// 	query.id = { in: filterIds };
-		// }
 		// Merge 'filterIds' and 'where.id' into a unified filter
 		const combinedIds = new Set<string>();
 		if (filterIds?.length) {
@@ -228,13 +212,28 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		}
 		if (where.id) {
 			combinedIds.add(where.id as string);
-			delete query.id; // remove direct 'id' filter so it doesn't conflict
 		}
-		if (combinedIds.size > 0) {
-			query.id = { in: Array.from(combinedIds) };
-		}
-		// console.log("✅ Step 3: Final Query Shape", query);
 
+		let query: Record<string, any>;
+
+		// console.log("✅ Step 2: Transformed 'where'", transformed);
+		// Enable OR queries (map provided fields to build individual queries)
+		if (useOr) {
+			const orConditions = Object.entries(transformed).map(([k, v]) => ({
+				[k]: v,
+			}));
+			if (combinedIds.size > 0) {
+				orConditions.push({ id: { in: Array.from(combinedIds) } });
+			}
+			query = orConditions.length > 0 ? { OR: orConditions } : {};
+		} else {
+			query = { ...transformed };
+			if (combinedIds.size > 0) {
+				query.id = { in: Array.from(combinedIds) };
+			}
+		}
+
+		// console.log("✅ Step 3: Final Query Shape", query);
 		const prismaSortBy = { [sortBy]: order };
 
 		// console.log("✅ Step 4: Final Prisma Query", {
@@ -243,16 +242,13 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		// 	skip,
 		// 	take,
 		// });
-
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
-
 		// console.log("✅ Step 5: Result", users);
-
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -260,7 +256,6 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: "No users found",
 			});
 		}
-
 		return users;
 	} catch (err) {
 		// console.log("❌ Step 6: Error Caught", err);
@@ -272,9 +267,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: `Invalid sortBy field: ${sortBy}`,
 			});
 		}
-
 		if (err instanceof AppError) throw err;
-
 		// console.error("❌ Step 6.2: Unknown error", err);
 		// Unknown errors bubble up to global error handler.
 		throw err;
