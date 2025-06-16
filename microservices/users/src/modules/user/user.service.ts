@@ -128,6 +128,7 @@ type UserQueryOptions = {
 	take?: number; // To limit the number of returned entries
 	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
 	order?: SortDirection; // to order asc/desc
+	filterIds?: string[]; // To filter by array of IDs
 };
 
 // TODO: MR: Check if I can avoid using keyword `any`
@@ -150,6 +151,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		take,
 		sortBy = "createdAt",
 		order = "asc",
+		filterIds,
 	} = cleanedOptions;
 
 	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
@@ -215,7 +217,9 @@ export async function findUsers(options: UserQueryOptions = {}) {
 						([_, v]) => v !== undefined,
 					),
 			  );
-
+		if (filterIds?.length) {
+			query.id = { in: filterIds };
+		}
 		// console.log("✅ Step 3: Final Query Shape", query);
 
 		const prismaSortBy = { [sortBy]: order };

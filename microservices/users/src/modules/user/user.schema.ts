@@ -303,6 +303,9 @@ export const userArrayResponseSchema = z.array(userResponseSchema);
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	id: z.string().describe("Find users by user ID (UUID)"),
+	filterIds: z
+		.array(z.string().uuid())
+		.describe("Filter users by an array of UUIDs"),
 	email: z.string().describe("Find users by email"),
 	username: z.string().describe("Find users by username"),
 	nickname: z.string().describe("Find users by nickname"),
