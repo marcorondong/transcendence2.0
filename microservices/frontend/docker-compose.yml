@@ -1,39 +1,14 @@
 services:
-  tailwind:
-    container_name: tailwind
-    image: tailwind-img
+  frontend:
     build:
-      context: ./
-      dockerfile: docker/tailwind/Dockerfile-Tailwind
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "5173:5173" # dev server port
+    environment:
+      - NODE_ENV=development # or production
     volumes:
-      - tailwind:/app/volume
+      - .:/app # mount source code for dev
     networks:
-      - ${NETWORK_NAME}
+      - Transcendence2.0
     restart: unless-stopped
-  typescript:
-    container_name: typescript
-    image: typescript-img
-    build:
-      context: ./
-      dockerfile: docker/typescript/Dockerfile-Typescript
-    volumes:
-      - typescript:/app/volume
-    networks:
-      - ${NETWORK_NAME}
-    restart: unless-stopped
-
-volumes:
-  tailwind:
-    name: tailwind
-    driver: local
-    driver_opts:
-      type: none
-      device: ./volume
-      o: bind
-  typescript:
-    name: typescript
-    driver: local
-    driver_opts:
-      type: none
-      device: ./volume
-      o: bind
