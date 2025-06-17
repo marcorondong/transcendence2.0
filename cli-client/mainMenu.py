@@ -14,14 +14,10 @@ def mainMenu(stdscr):
     setColors(stdscr, curses.COLOR_WHITE, curses.COLOR_BLACK)
     menuLoop(
         stdscr,
-        "Main menu: ",
+        "Login menu: ",
         [
             "Register",
             "Login",
-            "Auto login",
-            "Random Game",
-            "Logout",
-            "nonexistent menu option",
         ],  # it took me a lot of time to realize this and menuItems from menuItems.py are not same
         user,
     )

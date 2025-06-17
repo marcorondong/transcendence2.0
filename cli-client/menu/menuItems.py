@@ -2,9 +2,8 @@ from menu.connect import client, TAB_SIZE
 from menu.connect import register_user
 from utils.player import Player
 from utils.ui import UI
-import curses
 
-BACK_BUTTON = "Back"
+BACK_BUTTON = "Quit"
 
 
 def randomGame(user: Player):
@@ -31,7 +30,8 @@ def register(user: Player):
     line += 1
     password = UI.get_secret_prompt("password", line)
 
-    register_user(email, nickname, username, password)
+    if register_user(email, nickname, username, password) == True:
+        user.log_user(username, password)
     UI.log_notification("Press Enter to continue", 1)
     UI.screen.getch()
 
@@ -47,7 +47,6 @@ def login(user: Player) -> None:
     line += 1
     if user.log_user(username, password):
         UI.log_notification("You are logged In")
-        user.set_username(username)
     UI.log_notification("Press Enter to continue", 1)
     UI.screen.getch()
     # return "username"
