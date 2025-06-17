@@ -3,12 +3,12 @@ import {
 	acceptFriendRequestHandler,
 	deleteFriendRequestHandler,
 	getFriendRequestsHandler,
-	sendFriendRequestHandler,
+	createFriendRequestHandler,
 } from "./friend_request.controller";
 import {
 	friendRequestIdParamSchema,
 	acceptFriendRequestBodySchema,
-	sendFriendRequestSchema,
+	createFriendRequestSchema,
 	friendRequestResponseSchema,
 	errorResponseSchema,
 	friendRequestArrayResponseSchema,
@@ -16,16 +16,16 @@ import {
 import { errorHandler } from "../../utils/errors";
 
 async function friendRequestRoutes(server: FastifyInstance) {
-	// 1. Send a friend request (create a new friend request)
+	// 1. Create a friend request (send a new friend request)
 	server.post(
 		"/",
 		{
 			schema: {
 				tags: ["Friend Request"],
-				summary: "Send a friend request",
+				summary: "Create a friend request",
 				description:
 					"Creates a new friend request and sends it to the target user.",
-				body: sendFriendRequestSchema,
+				body: createFriendRequestSchema,
 				response: {
 					201: friendRequestResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
@@ -33,7 +33,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				},
 			},
 		},
-		errorHandler(sendFriendRequestHandler),
+		errorHandler(createFriendRequestHandler),
 	);
 	// 2. Get all friend requests //TODO: filter/sort/paginate ?
 	server.get(

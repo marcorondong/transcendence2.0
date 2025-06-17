@@ -22,7 +22,7 @@ async function resolveFriendRequest(
 	}
 }
 
-export async function sendFriendRequest(
+export async function createFriendRequest(
 	fromId: string,
 	toId: string,
 	message: string,
@@ -32,7 +32,7 @@ export async function sendFriendRequest(
 			throw new AppError({
 				statusCode: 400,
 				code: FRIEND_REQUEST_ERRORS.SELF,
-				message: "Cannot send a friend request to yourself",
+				message: "Cannot create a friend request to yourself",
 			});
 		}
 		// Already friends?

@@ -2,8 +2,8 @@ import { z } from "zod";
 
 // TODO: Add later the `.describe()`
 
-// Schema to send friend request
-export const sendFriendRequestSchema = z
+// Schema to create friend request
+export const createFriendRequestSchema = z
 	.object({
 		fromId: z.string().uuid(),
 		toId: z.string().uuid(),
@@ -62,7 +62,9 @@ export const emptyResponseSchema = z
 	.describe("friend request deleted successfully");
 
 // TypeScript types inferred from schemas
-export type SendFriendRequestInput = z.infer<typeof sendFriendRequestSchema>;
+export type CreateFriendRequestInput = z.infer<
+	typeof createFriendRequestSchema
+>;
 export type AcceptFriendRequestInput = z.infer<
 	typeof acceptFriendRequestBodySchema
 >;

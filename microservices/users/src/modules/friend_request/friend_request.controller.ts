@@ -1,22 +1,22 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
-	sendFriendRequest,
+	createFriendRequest,
 	getFriendRequests,
 	acceptFriendRequest,
 	deleteFriendRequest,
 } from "./friend_request.service";
 import {
-	SendFriendRequestInput,
+	CreateFriendRequestInput,
 	friendRequestResponseSchema,
 	friendRequestArrayResponseSchema,
 } from "./friend_request.schema";
 
-export async function sendFriendRequestHandler(
-	request: FastifyRequest<{ Body: SendFriendRequestInput }>,
+export async function createFriendRequestHandler(
+	request: FastifyRequest<{ Body: CreateFriendRequestInput }>,
 	reply: FastifyReply,
 ) {
 	const { fromId, toId, message } = request.body;
-	const result = await sendFriendRequest(fromId, toId, message);
+	const result = await createFriendRequest(fromId, toId, message);
 
 	// If it was auto-accepted, return a 201 with a flag
 	if ("autoAccepted" in result) {
