@@ -51,14 +51,14 @@ export async function sendFriendRequest(
 			if (AUTO_ACCEPT_REVERSE_REQUESTS) {
 				await resolveFriendRequest(fromId, toId, reverseRequest.id);
 				return { autoAccepted: true };
+			} else {
+				throw new AppError({
+					statusCode: 409,
+					code: "FRIEND_REQUEST_PENDING_INCOMING",
+					message:
+						"A friend request from this user is already pending. Accept it instead.",
+				});
 			}
-		} else {
-			throw new AppError({
-				statusCode: 409,
-				code: "FRIEND_REQUEST_PENDING_INCOMING",
-				message:
-					"A friend request from this user is already pending. Accept it instead.",
-			});
 		}
 		// Duplicate same-direction request?
 		// Note that I'm already enforcing @@unique, but apparently this is best practice

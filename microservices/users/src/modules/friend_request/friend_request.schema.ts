@@ -25,7 +25,7 @@ export const friendRequestResponseSchema = z
 		fromId: z.string().uuid(),
 		toId: z.string().uuid(),
 		message: z.string(),
-		createdAt: z.string().datetime(),
+		createdAt: z.date(),
 	})
 	.strict();
 
