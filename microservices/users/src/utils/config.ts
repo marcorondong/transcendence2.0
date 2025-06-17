@@ -1,5 +1,69 @@
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
+import { logger } from "./logger";
+import { AppError, CONFIG_ERRORS } from "./errors";
+
+// === Derive runtime context === //
+// If "container", folder structure according to a container.
+// If "local", folder structure according to our repo
+const RUNNING_ENV = process.env.RUNNING_ENV || "local";
+const ROOT_FOLDER_NAME = RUNNING_ENV === "container" ? "/" : "transcendence2.0";
+const ENVS_PATH =
+	RUNNING_ENV === "container"
+		? "./app/docker"
+		: "./microservices/users/docker";
+const JSON_PATH =
+	RUNNING_ENV === "container" ? "./app" : "./microservices/users";
+const SECRETS_PATH =
+	RUNNING_ENV === "container"
+		? "./run/secrets"
+		: "./microservices/users/docker/secrets";
+
+function findRoot(startDir = __dirname): string {
+	if (ROOT_FOLDER_NAME === "/") return "/";
+	let current = startDir;
+	while (current !== path.parse(current).root) {
+		if (path.basename(current) === ROOT_FOLDER_NAME) {
+			return current;
+		}
+		current = path.dirname(current);
+	}
+	throw new AppError({
+		statusCode: 500,
+		code: CONFIG_ERRORS.ROOT_FOLDER,
+		message: `Project root ${ROOT_FOLDER_NAME} not found`,
+		handlerName: "getConfig",
+	});
+}
+
+const resolvedRoot = findRoot();
+
+// Function to get resolved path relative to ROOT_FOLDER_NAME (`/` or `transcendence2.0`)
+function getPath(relPath: string): string {
+	const cleanPath = relPath.replace(/^\.?\/*/, ""); // Remove leading './' or '/'
+	// logger.debug(path.resolve(resolvedRoot, cleanPath)); // Comment-in to see resolved path
+	return path.resolve(resolvedRoot, cleanPath);
+}
+
+// === Load service-specific and shared project env files (if any) === //
+// Note that the default is 'path.resolve(process.cwd(), '.env')'
+// E.g: dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+try {
+	const dotenv = require("dotenv");
+	dotenv.config({
+		path: [
+			getPath("./.env"), // Repo-level shared env (adjust as needed)
+			getPath(path.join(ENVS_PATH, ".env")), // Service-level env (adjust as needed)
+			// getPath("./microservices/users/docker/.env"), // Custom path, adjust as needed
+			getPath("./microservices/.env"), // Custom path, adjust as needed
+		],
+		debug: true,
+	});
+	logger.log(`${process.env.SERVICE_ENV} and ${process.env.ROOT_ENV}`);
+} catch (err) {
+	logger.error("[dotenv] Threw error:", err);
+}
 
 // Function Return type definition (for type safety)
 type AppConfig = {
@@ -9,140 +73,163 @@ type AppConfig = {
 	APP_NAME: string;
 	APP_DESCRIPTION: string;
 	NODE_ENV: string;
+	ROOT_ENV: string;
+	SERVICE_ENV: string;
+	docker_secret: string;
 };
 
-// For caching the result of reading files/envs.
-// It’s initialized once when getConfig() is first called.
-// It optimizes performance, ensures consistency, prevents unnecessary file reads or env parsing multiple times.
+// To cache the result of reading files/envs. (initialized once, optimizes performance)
 let cachedConfig: AppConfig | null = null;
 
-// Function to read and assign config values from Docker secrets, environment or hardcoded values
-export function getConfig(): AppConfig {
+// Main Function: read and assign config values from Docker secrets, environment or hardcoded values
+export default function getConfig(): AppConfig {
 	if (cachedConfig) return cachedConfig;
 
-	console.log("[Config] Loading config...");
+	logger.log("[config] Loading config...");
 
-	const secretsPath = "/run/secrets"; // Docker-style secrets path
-	const fixPackageJsonPath = "../../package.json";
-	const hasSecretsFolder = fs.existsSync(secretsPath); // For checking if folder exists
 	// Define hardcoded values here
 	const hardcodedDefaults = {
+		NODE_ENV: "development",
 		PAGINATION_ENABLED: "true",
 		DEFAULT_PAGE_SIZE: "10",
 		APP_VERSION: "1.0.0",
 		APP_NAME: "ft_transcendence",
 		APP_DESCRIPTION: "User service API",
-		NODE_ENV: "development",
+		ROOT_ENV: "Not Found", // For testing
+		SERVICE_ENV: "Not Found", // For testing
+		docker_secret: "Not Found", // For testing
 	};
 
-	// TODO: Later make it more versatile (define a constant for the path).
-	// or code a function that loads from files (different from loadSecret)
+	// Load values from package..json (or any other json)
 	const pkg = (() => {
 		try {
-			const pkgPath = path.resolve(__dirname, fixPackageJsonPath);
+			const pkgPath = getPath(path.join(JSON_PATH, "package.json"));
 			return JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 		} catch (err) {
-			console.warn("[Config] Could not load package.json:", err);
-			return {};
+			logger.warn("[config] Could not load package.json:", err);
+			// Optional: throw an error?
+			// throw new AppError({
+			// 	statusCode: 500,
+			// 	code: CONFIG_ERRORS.NOT_FOUND,
+			// 	message: "[config] Could not load package.json:",
+			// 	handlerName: "getConfig",
+			// });
 		}
+		return {};
 	})();
 
-	// Helper function to load from Docker-style secrets
+	// Load values from Docker-style secrets
 	const loadSecret = (key: string | undefined): string | undefined => {
-		console.log("[Config] loadSecret() called for key:", key);
-		if (!key || !hasSecretsFolder) return undefined;
-		const filePath = path.join(secretsPath, key.toLowerCase());
-		try {
-			if (fs.existsSync(filePath)) {
-				return fs.readFileSync(filePath, "utf-8").trim();
+		logger.log("[config] loadSecret() called for key:", key);
+		if (!key) return undefined;
+		const candidates = [
+			getPath(path.join(SECRETS_PATH, key.toLowerCase() + ".txt")), // local
+			getPath(path.join(SECRETS_PATH, key.toLowerCase())), // container
+		];
+		for (const filePath of candidates) {
+			try {
+				if (fs.existsSync(filePath)) {
+					return fs.readFileSync(filePath, "utf-8").trim();
+				}
+			} catch (err) {
+				logger.warn(
+					`[config] Failed to read secret ${key} at ${filePath}:`,
+					err,
+				);
+				// Optional: throw an error?
+				// throw new AppError({
+				// 	statusCode: 500,
+				// 	code: CONFIG_ERRORS.NOT_FOUND,
+				// 	message: `[config] Failed to read secret ${key}:`,
+				// 	handlerName: "getConfig",
+				// });
 			}
-		} catch (err) {
-			// Optional:
-			console.warn(`[Config] Failed to read secret ${key}:`, err);
 		}
 		return undefined;
 	};
 
-	// Loads config in this order (conditional): 1st Docker secret | 2nd environment | 3rd hardcoded values
+	function resolveConfigValue<T>(
+		key: string,
+		sources: [string, T | undefined | null][],
+	): T {
+		for (const [sourceName, value] of sources) {
+			// If value DO exist (it's not undefined, null)
+			if (value != null) {
+				logger.log(
+					`[config] ${key} = ${value} Loaded from ${sourceName}`,
+				);
+				return value;
+			}
+		}
+		logger.warn(`[config] ${key} is missing in all sources`);
+		// Optional: throw an error?
+		throw new AppError({
+			statusCode: 500,
+			code: CONFIG_ERRORS.NOT_FOUND,
+			message: `[config] ${key} is missing in all sources`,
+			handlerName: "getConfig",
+		});
+	}
+
+	// Build config from env + secrets + pkg + fallbacks
 	const config: AppConfig = {
-		PAGINATION_ENABLED:
-			loadSecret("PAGINATION_ENABLED") ??
-			process.env.PAGINATION_ENABLED ??
-			hardcodedDefaults.PAGINATION_ENABLED,
+		NODE_ENV: resolveConfigValue("NODE_ENV", [
+			["secret", loadSecret("NODE_ENV")],
+			["env", process.env.NODE_ENV],
+			["default", hardcodedDefaults.NODE_ENV],
+		]),
 
-		DEFAULT_PAGE_SIZE:
-			loadSecret("DEFAULT_PAGE_SIZE") ??
-			process.env.DEFAULT_PAGE_SIZE ??
-			hardcodedDefaults.DEFAULT_PAGE_SIZE,
+		PAGINATION_ENABLED: resolveConfigValue("PAGINATION_ENABLED", [
+			["secret", loadSecret("PAGINATION_ENABLED")],
+			["env", process.env.PAGINATION_ENABLED],
+			["default", hardcodedDefaults.PAGINATION_ENABLED],
+		]),
 
-		APP_VERSION:
-			loadSecret("APP_VERSION") ??
-			process.env.APP_VERSION ??
-			pkg.version ??
-			hardcodedDefaults.APP_VERSION,
+		DEFAULT_PAGE_SIZE: resolveConfigValue("DEFAULT_PAGE_SIZE", [
+			["secret", loadSecret("DEFAULT_PAGE_SIZE")],
+			["env", process.env.DEFAULT_PAGE_SIZE],
+			["default", hardcodedDefaults.DEFAULT_PAGE_SIZE],
+		]),
 
-		APP_NAME:
-			loadSecret("APP_NAME") ??
-			process.env.APP_NAME ??
-			pkg.name ??
-			hardcodedDefaults.APP_NAME,
+		APP_VERSION: resolveConfigValue("APP_VERSION", [
+			["secret", loadSecret("APP_VERSION")],
+			["env", process.env.APP_VERSION],
+			["package.json", pkg.version],
+			["default", hardcodedDefaults.APP_VERSION],
+		]),
 
-		APP_DESCRIPTION:
-			loadSecret("APP_DESCRIPTION") ??
-			process.env.APP_DESCRIPTION ??
-			pkg.description ??
-			hardcodedDefaults.APP_DESCRIPTION,
+		APP_NAME: resolveConfigValue("APP_NAME", [
+			["secret", loadSecret("APP_NAME")],
+			["env", process.env.APP_NAME],
+			["package.json", pkg.name],
+			["default", hardcodedDefaults.APP_NAME],
+		]),
 
-		NODE_ENV:
-			loadSecret("NODE_ENV") ??
-			process.env.NODE_ENV ??
-			hardcodedDefaults.NODE_ENV,
+		APP_DESCRIPTION: resolveConfigValue("APP_DESCRIPTION", [
+			["secret", loadSecret("APP_DESCRIPTION")],
+			["env", process.env.APP_DESCRIPTION],
+			["package.json", pkg.description],
+			["default", hardcodedDefaults.APP_DESCRIPTION],
+		]),
+		// For testing
+		ROOT_ENV: resolveConfigValue("ROOT_ENV", [
+			["env", process.env.ROOT_ENV],
+			["default", hardcodedDefaults.ROOT_ENV],
+		]),
+		// For testing
+		SERVICE_ENV: resolveConfigValue("SERVICE_ENV", [
+			["env", process.env.SERVICE_ENV],
+			["default", hardcodedDefaults.SERVICE_ENV],
+		]),
+		// For testing
+		docker_secret: resolveConfigValue("docker_secret", [
+			["secret", loadSecret("docker_secret")],
+			["default", hardcodedDefaults.ROOT_ENV],
+		]),
 	};
 
-	console.log("[Config] Final config object:", config);
+	logger.log("[config] Final config object:", config);
 
 	cachedConfig = config; // Cache the config
 	return config;
 }
-
-// =============================================================================
-// OLD FUNCTION CODE THAT DIDN'T HAVE CONSOLE LOG PRINTS NOR CHECKED IF loadSecrets EXISTS
-// Function to read and assign config values from Docker secrets, environment or hardcoded values
-// export function getConfig(): AppConfig {
-// 	console.log("[Config] Loading config keys...");
-
-// 	if (cachedConfig) return cachedConfig;
-
-// 	const secretsPath = "/run/secrets"; // Docker-style secrets path
-// 	// Define hardcoded values here
-// 	const hardcodedDefaults = {
-// 		PAGINATION_ENABLED: "true",
-// 		DEFAULT_PAGE_SIZE: "10",
-// 	};
-
-// 	// Helper function to load from Docker-style secrets
-// 	const loadSecret = (key: string): string | undefined => {
-// 		const filePath = path.join(secretsPath, key.toLowerCase());
-// 		if (fs.existsSync(filePath)) {
-// 			return fs.readFileSync(filePath, "utf-8").trim();
-// 		}
-// 		return undefined;
-// 	};
-
-// 	// Loads config in this order (conditional): 1st Docker secret | 2nd environment | 3rd hardcoded values
-// 	const config: AppConfig = {
-// 		PAGINATION_ENABLED:
-// 			loadSecret("PAGINATION_ENABLED") ??
-// 			process.env.PAGINATION_ENABLED ??
-// 			hardcodedDefaults.PAGINATION_ENABLED,
-
-// 		DEFAULT_PAGE_SIZE:
-// 			loadSecret("DEFAULT_PAGE_SIZE") ??
-// 			process.env.DEFAULT_PAGE_SIZE ??
-// 			hardcodedDefaults.DEFAULT_PAGE_SIZE,
-// 	};
-
-// 	cachedConfig = config; // Cache the config
-// 	console.log("[Config] Final config object:", config);
-// 	return config;
-// }

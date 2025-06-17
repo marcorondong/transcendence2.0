@@ -40,7 +40,7 @@
 11) Check the health of the service
 12) Swagger page for detailed information
 
-Detailed information about routes, shape of body, param, response is in swagger page. 
+Detailed information about routes, shape of body, param, response is in swagger page.
 
 ## Protected Routes
 
