@@ -2,3 +2,5 @@
 
 
 `npx playwright test --ui` fancy ui testing
+
+ `npx playwright test` simple fast mode 
