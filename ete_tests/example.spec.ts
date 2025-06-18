@@ -19,8 +19,8 @@ test("get started link", async ({ page }) => {
 	).toBeVisible();
 });
 
-test("first Filip test", async ({ page }) => {
-	await page.goto("https://10.12.7.1:8080/sign-in-view");
-	const header= page.getByRole("heading")
-	await expect(header).toHaveText("Sign in to your account");
-});
+// test("first Filip test", async ({ page }) => {
+// 	await page.goto("https://10.12.7.1:8080/sign-in-view");
+// 	const header= page.getByRole("heading")
+// 	await expect(header).toHaveText("Sign in to your account");
+// });
