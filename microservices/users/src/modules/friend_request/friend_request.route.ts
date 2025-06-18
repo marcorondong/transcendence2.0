@@ -12,7 +12,9 @@ import {
 	friendRequestResponseSchema,
 	errorResponseSchema,
 	friendRequestArrayResponseSchema,
+	emptyResponseSchema,
 } from "./friend_request.schema";
+import { userArrayResponseSchema } from "../user/user.schema";
 import { errorHandler } from "../../utils/errors";
 
 async function friendRequestRoutes(server: FastifyInstance) {
@@ -28,6 +30,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				body: createFriendRequestSchema,
 				response: {
 					201: friendRequestResponseSchema,
+					200: userArrayResponseSchema, // When reverse request is auto-accepted
 					400: errorResponseSchema.describe("Bad request"),
 					409: errorResponseSchema.describe("Conflict"),
 				},
@@ -64,7 +67,8 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				params: friendRequestIdParamSchema,
 				body: acceptFriendRequestBodySchema,
 				response: {
-					201: friendRequestResponseSchema,
+					// 201: friendRequestResponseSchema,
+					200: userArrayResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
 					404: errorResponseSchema.describe("Not Found"),
 				},
@@ -82,7 +86,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				description: "Rejects a friend request and deletes it.",
 				params: friendRequestIdParamSchema,
 				response: {
-					204: friendRequestResponseSchema,
+					204: emptyResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
 					404: errorResponseSchema.describe("Not Found"),
 				},
