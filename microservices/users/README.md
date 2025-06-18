@@ -64,17 +64,35 @@ Check `user.schema.ts` to see the blacklisted values (_later, they'll be loaded 
 
 It supports **friends**
 So a friend is a `User` array.
-Currently the "friendship" is AUTOMATIC. So no "_friend request_", etc.
-(_It's like **"follow"** in 'X' (formerly Twitter)_)
+Now this is managed by _**"friend request" module**_, so "friendship" is no more automatic but OPTATIVE.
+(_It's **NOT ANYMORE** like **"follow"** in 'X' (formerly Twitter)_)
+
+> [!IMPORTANT]
+>
+> _**Friend Request**_ is **NOT** compatible with _**Direct**_ interaction with friendship;
+> Because friend request manages the creation and DELETION of friend requests once they are accepted.
+> So if you accept/create a friendship directly via users' friendship endpoint,
+> no pending friend request will be deleted.
+
+It supports **friends request**
+It's for making a friendship optative and not automatically (_to **enable** accept/reject the friend request_)
+With this,the "friendship" is **NOT** automatic. So the user can choose if he wants to become friends.
+Note when an "_**reverse**_" friend request exists (e.g: UserB already send a friend request to UserA);
+then this module have two behaviors depending on the value of `AUTO_ACCEPT_REVERSE_REQUESTS`
+
+- If `true`:
+  - Instead of creating a friend request (_UserA to UserB_), the reverse request is **accepted**.
+- If `false`:
+  - USERS Service will throw an error indicating to accept the reverse request instead of creating a new one.
 
 > [!NOTE]
 >
 > In next version, it'll handle also:
 >
-> - 👥 User friendship management (friend requests).
 > - Makefile
 > - ♻️ Code refactoring and code clean-up
 > - 🏃‍♂️💨 Change in how the code is "compiled" and run.
+> - [x] 👥 User friendship management (friend requests).
 > - [x] User "friends".
 > - [x] 🖼️ Avatar (user image).
 > - [x] Login to be done via email **OR** username.
@@ -192,13 +210,18 @@ However, you can customize the service using docker secrets, environmental varia
 | GET    | `/api/users/:id/friends`                | Get user's friends (returned as array) |
 | POST   | `/api/users/:id/friends`                | Add a friend to user (send id in body) |
 | DELETE | `/api/users/:id/friends/:targetUserId`  | Delete a user's friend                 |
+| POST   | `/api/friend-requests/`                 | Create a friend request                |
+| GET    | `/api/friend-requests/`                 | List all friend requests               |
+| POST   | `/api/friend-requests/:id/accept`       | Accept `id` friend request             |
+| DELETE | `/api/friend-requests/:id`              | Delete `id` friend request             |
 
 > [!NOTE]
 >
 > In next version, the routes will be `users_api` and will have:
 >
 > - `users`: for **users** operations (e.g: `http://host:port/users_api/users/`).
-> - `friends`: for **friend request** operations (e.g: `http://host:port/users_api/friends/`).
+> - `friends`: for **friendship** operations (e.g: `http://host:port/users_api/friends/`).
+> - `friend-requests`: for **friend request** operations (e.g: `http://host:port/users_api/friend-requests/`).
 
 ---
 

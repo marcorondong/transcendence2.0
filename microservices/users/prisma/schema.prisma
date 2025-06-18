@@ -26,7 +26,13 @@ model User {
   friendships2 Friendship[] @relation("User2Friends")
   // SQLite doesn't support lists of primitive types** like `String[]` so I cannot do:
   // friends      String[]  @default([])
+
+  friendRequestsSent     FriendRequest[] @relation("FriendRequestsSent")
+  friendRequestsReceived FriendRequest[] @relation("FriendRequestsReceived")
+
   products     Product[] // TODO: Remove this legacy code
+
+  @@index([createdAt])
 }
 
 model Friendship {
@@ -36,8 +42,25 @@ model Friendship {
   user2     User     @relation("User2Friends", fields: [user2Id], references: [id])
   user2Id   String
   createdAt DateTime @default(now())
-  @@unique([user1Id, user2Id]) // prevents duplicate friendships.
+  @@unique([user1Id, user2Id]) // prevents duplicate friendships
   // We'll enforce user1Id < user2Id to avoid A-B and B-A are not stored twice
+
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+model FriendRequest {
+  id        String   @id @default(uuid())
+  from      User     @relation("FriendRequestsSent", fields: [fromId], references: [id])
+  fromId    String
+  to        User     @relation("FriendRequestsReceived", fields: [toId], references: [id])
+  toId      String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@unique([fromId, toId]) // prevents duplicate FriendRequest
+  @@index([fromId])
+  @@index([toId])
 }
 
  // TODO: Remove this legacy code

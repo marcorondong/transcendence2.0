@@ -22,6 +22,17 @@ CREATE TABLE "Friendship" (
 );
 
 -- CreateTable
+CREATE TABLE "FriendRequest" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "fromId" TEXT NOT NULL,
+    "toId" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "FriendRequest_fromId_fkey" FOREIGN KEY ("fromId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "FriendRequest_toId_fkey" FOREIGN KEY ("toId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Product" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -43,4 +54,22 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "User_nickname_key" ON "User"("nickname");
 
 -- CreateIndex
+CREATE INDEX "User_createdAt_idx" ON "User"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "Friendship_user1Id_idx" ON "Friendship"("user1Id");
+
+-- CreateIndex
+CREATE INDEX "Friendship_user2Id_idx" ON "Friendship"("user2Id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Friendship_user1Id_user2Id_key" ON "Friendship"("user1Id", "user2Id");
+
+-- CreateIndex
+CREATE INDEX "FriendRequest_fromId_idx" ON "FriendRequest"("fromId");
+
+-- CreateIndex
+CREATE INDEX "FriendRequest_toId_idx" ON "FriendRequest"("toId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FriendRequest_fromId_toId_key" ON "FriendRequest"("fromId", "toId");
