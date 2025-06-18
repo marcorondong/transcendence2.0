@@ -15,6 +15,8 @@ bg
 BG
 bkgd
 blackbox
+botco
+Botco
 buildx
 Canva
 celsius
@@ -35,6 +37,7 @@ efi
 Etherium
 EVM
 Excalidraw
+ey
 fadein
 fi
 fieldname
@@ -67,6 +70,7 @@ iguliyev
 Isi
 Ismayil
 ismayilguliyev28
+Jhb
 jwtid
 keyout
 lcd
@@ -88,6 +92,7 @@ nodaemon
 nodelay
 noecho
 notif
+novakbotkovic
 NovakBotkovic
 octo
 octocat
@@ -109,6 +114,7 @@ Rondón
 rootfs
 rotrpm
 sda
+sdj
 Segs
 sekula
 Sekula

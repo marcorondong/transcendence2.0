@@ -1,3 +1,4 @@
+// TODO delete in production, these are just for swagger
 export const signInBodyShape = {
 	type: "object",
 	properties: {
@@ -6,6 +7,7 @@ export const signInBodyShape = {
 	},
 };
 
+// TODO delete in production, these are just for swagger
 export const signUpBodyShape = {
 	type: "object",
 	properties: {
@@ -16,6 +18,24 @@ export const signUpBodyShape = {
 	},
 };
 
+// TODO delete in production, these are just for swagger
+// export const profileBodyShape = {
+// 	type: "object",
+// 	properties: {
+// 		nickname: { type: "string" },
+// 		email: { type: "string" },
+// 		password: { type: "string" },
+// 	},
+// };
+
+export const idParamShape = {
+	type: "object",
+	properties: {
+		id: { type: "string" },
+	},
+	required: ["id"],
+};
+
 export const payloadResponseShape = {
 	type: "object",
 	properties: {
@@ -24,3 +44,16 @@ export const payloadResponseShape = {
 	},
 	required: ["id", "nickname"],
 };
+
+export const accessTokenResponseShape = {
+	type: "object",
+	properties: {
+		access_token: { type: "string" },
+	},
+	required: ["access_token"],
+};
+
+// FIXME: This is not used anywhere. I guess it comes from copy/pasting
+// export type IdInput = {
+// 	id: string;
+// };

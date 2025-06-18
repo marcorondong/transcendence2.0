@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { gameRoutes, healthRoute } from "./gameRoutes";
+import { gameRoute, debugRoute, healthRoute } from "./gameRoutes";
 
 const fastify = Fastify({ logger: true });
 
@@ -16,14 +16,15 @@ fastify.register(swagger, {
 });
 
 fastify.register(swaggerUi, {
-	routePrefix: "/documentation",
+	routePrefix: "/ai-api/documentation",
 	uiConfig: {
 		docExpansion: "list",
 		deepLinking: false,
 	},
 });
 
-fastify.register(gameRoutes);
+fastify.register(gameRoute, { prefix: "/ai-api" });
+fastify.register(debugRoute);
 fastify.register(healthRoute);
 
 fastify.ready().then(() => {
@@ -35,6 +36,7 @@ const start = async () => {
 		await fastify.listen({ port: 6969, host: "0.0.0.0" });
 	} catch (error) {
 		fastify.log.error(error);
+		process.exit(1);
 	}
 };
 start();

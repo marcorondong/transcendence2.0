@@ -8,6 +8,29 @@ import { z, ZodTypeAny, ZodObject } from "zod";
 // But for that, the payload must have the fields to check.
 // So for PATCH, it's not suitable since I could only PATCH password (and the other fields won't be present)
 
+// Blacklisting logic
+// Defined blacklist as hardcoded strings (later will come from getConfig())
+// TODO: Later, load them from config using `getConfig()`
+const BLACKLISTED_USERNAME_STRING = "novakbotkovic,botco,bot,default,admin";
+const BLACKLISTED_NICKNAME_STRING = "NovakBotkovic,Botco";
+const BLACKLISTED_EMAIL_STRING =
+	"admin@email.com,alermanager@ourserver.net,iswearthisismyemail@joke.com";
+
+// Convert to lowercase arrays for case-insensitive comparison
+const BLACKLISTED_USERNAMES = BLACKLISTED_USERNAME_STRING.split(",").map((v) =>
+	v.trim().toLowerCase(),
+);
+const BLACKLISTED_NICKNAMES = BLACKLISTED_NICKNAME_STRING.split(",").map((v) =>
+	v.trim().toLowerCase(),
+);
+const BLACKLISTED_EMAILS = BLACKLISTED_EMAIL_STRING.split(",").map((v) =>
+	v.trim().toLowerCase(),
+);
+
+// Helper function to check blacklist
+const isBlacklisted = (value: string, blacklist: string[]) =>
+	blacklist.includes(value.toLowerCase());
+
 // Type definition for ordering (ascending/descending)
 const sortDirections = ["asc", "desc"] as const;
 const sortDirectionEnum = z.enum(sortDirections);
@@ -94,7 +117,10 @@ const usernameField = z
 		/^[a-z0-9_-]+$/,
 		"Username can only contain lowercase letters, digits, dashes and underscores",
 	)
-	.regex(/[a-z]/, "Username must contain at least one letter");
+	.regex(/[a-z]/, "Username must contain at least one letter")
+	.refine((val) => !isBlacklisted(val, BLACKLISTED_USERNAMES), {
+		message: "This username is not allowed",
+	});
 
 // Nickname field schema
 const nicknameField = z
@@ -113,7 +139,10 @@ const nicknameField = z
 	.regex(
 		/^[^\x00-\x1F\x7F]*$/,
 		"Nickname cannot contain control characters (tabs, newlines, etc)",
-	);
+	)
+	.refine((val) => !isBlacklisted(val, BLACKLISTED_NICKNAMES), {
+		message: "This nickname is not allowed",
+	});
 
 // Email field schema
 const emailField = z
@@ -129,7 +158,10 @@ const emailField = z
 	.refine((email) => {
 		const [local, domain] = email.split("@");
 		return local?.length >= 1 && local.length <= 64 && domain?.length >= 3;
-	}, "Invalid email structure");
+	}, "Invalid email structure")
+	.refine((val) => !isBlacklisted(val, BLACKLISTED_EMAILS), {
+		message: "This email is not allowed",
+	});
 
 // Password field schema
 const passwordField = z
@@ -266,11 +298,25 @@ export const loginResponseSchema = tokenPayloadSchema.describe(
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in filterIds (it's an array, so there should be more than 1 item)
+
 // Base schema for query parameters
 // Note that all fields will be marked with '.optional()' and "coerced"
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	id: z.string().describe("Find users by user ID (UUID)"),
+	filterIds: ARRAY_STRICT_MODE // REJECT/ALLOW single items in filterIds (array of user ids)
+		? z
+				.array(z.string().uuid())
+				.describe("Filter users by UUIDs (array format)")
+		: z
+				.preprocess(
+					(val) => (typeof val === "string" ? [val] : val),
+					z.array(z.string().uuid()),
+				)
+				.describe(
+					"Filter users by UUIDs (supports single or multiple values)",
+				),
 	email: z.string().describe("Find users by email"),
 	username: z.string().describe("Find users by username"),
 	nickname: z.string().describe("Find users by nickname"),
@@ -287,7 +333,7 @@ const baseGetUsersQuerySchema = z.object({
 	// TODO: Make this as a type, and same for before, after and between
 	dateTarget: z
 		.enum(["createdAt", "updatedAt", "both"])
-		.default("createdAt")
+		// .default("createdAt")
 		.describe("Choose which date field to apply filters to"),
 	before: z
 		.preprocess((val) => new Date(val as string), z.date())
@@ -332,14 +378,38 @@ const baseGetUsersQuerySchema = z.object({
 		.min(1)
 		.describe("Page number to use for pagination (starts at 1)"),
 	all: z.boolean().describe("If true, return all results without pagination"),
-	sortBy: userSortByEnum.default("createdAt"),
-	order: sortDirectionEnum.default("asc"),
+	sortBy: userSortByEnum, //.default("createdAt"),
+	order: sortDirectionEnum, //.default("asc"),
 });
 
 // Refined schema for query parameters to find users
 export const getUsersQuerySchema = sanitizeQuerySchema(
 	baseGetUsersQuerySchema,
 ).strict(); // Rejects unknown fields
+
+// Schema for adding friends (addFriend)
+export const addFriendSchema = z
+	.object({
+		targetUserId: z
+			.string()
+			.uuid()
+			.describe("Target user ID (UUID format)"),
+	})
+	.strict();
+
+// Schema for removing friends (removeFriend)
+// TODO: Check if better to reuse userIdParamSchema
+export const targetUserIdParamSchema = z
+	.object({
+		targetUserId: z.string().uuid().describe("User ID (UUID format)"),
+	})
+	.strict(); // Rejects unknown fields
+
+// // TODO: Maybe I can use userArrayResponseSchema instead?
+// // Schema for user friends
+// export const userFriendsResponseSchema = z.object({
+// 	friends: z.array(userResponseSchema),
+// });
 
 // Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
 export const emptyResponseSchema = z
@@ -348,10 +418,17 @@ export const emptyResponseSchema = z
 
 export const errorResponseSchema = z.object({
 	statusCode: z.number().describe("HTTP status code"),
-	error: z
-		.string()
-		.describe("Short title describing the error (e.g., 'Not Found')"),
+	code: z.string().describe("Error string code"),
 	message: z.string().describe("Detailed message about the error"),
+	// Don't send these. Already printed in the terminal.
+	// If I send them, I'm exposing internal code structure.
+	// service: z.string().describe("Service that threw the error"),
+	// type: z.string().describe("Error type/class"),
+	// handler: z
+	// 	.string()
+	// 	.describe("Function that caught the error (handler function)"),
+	// stack: z.string().describe("stack calls"),
+	// nestedCause: z.any().describe("Original error object or nested AppError"),
 });
 
 // TypeScript types inferred from schemas
@@ -361,3 +438,6 @@ export type updateUserPutInput = z.infer<typeof putUserSchema>;
 export type updateUserPatchInput = z.infer<typeof patchUserSchema>;
 export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
+// TODO: Check if I need these:
+export type addFriendInput = z.infer<typeof addFriendSchema>;
+// export type removeFriendParams = z.infer<typeof targetUserIdParamSchema>;

@@ -1,12 +1,24 @@
-# 🤖 AI Service
+# subject conform AI
 
-Containerized game + AI in one mini docker network
+## 1. endpoint for frontend: `https://localhost:8080/ai-api/game-mandatory`
 
-1. Start the game service container and the AI container in the directory ssg by running `docker-compose up`
-2. Open the [game](http://localhost:3010/pong-api/ping-pong) in your browser.
-3. Send a POST request from [Swagger docs](http://localhost:6969/documentation) or directly to `http://localhost:6969/game-mandatory`
-4. Creates a Bot instance with the provided parameters.
+Method: `POST`
 
-> [!NOTE]
->
-> The bot connects to the WebSocket at localhost:3010 to play the game
+Request body:
+
+```json
+{
+  "roomId": { type: "uuid" }, //room id where the human user is
+  "difficulty": { type: "string", enum: ["easy", "normal", "hard"] },
+}
+```
+
+only available to logged in users
+
+## 2. nginx will authenticate the request and forward it to backend bot `http://ai-bot:6969/ai-api/game-mandatory`
+
+## 3. this will open a websocket to backend pong
+
+ws is hidden completely from frontend
+
+## 4. see also [Swagger docs](http://localhost:6969/ai-api/documentation) while we are in development
