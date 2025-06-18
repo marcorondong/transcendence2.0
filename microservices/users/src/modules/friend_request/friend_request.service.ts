@@ -1,6 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { AppError, FRIEND_REQUEST_ERRORS } from "../../utils/errors";
-import { addFriend, areAlreadyFriends } from "../user/user.service";
+import {
+	getUserOrThrow,
+	addFriend,
+	areAlreadyFriends,
+} from "../user/user.service";
 import prisma from "../../utils/prisma";
 
 const AUTO_ACCEPT_REVERSE_REQUESTS = true;
@@ -14,6 +18,11 @@ async function resolveFriendRequest(
 	try {
 		await addFriend(fromId, toId); // Create friendship using addFriend from user module
 		await prisma.friendRequest.delete({ where: { id: requestId } }); // Delete friend request once friendship added
+		// Get and return the users objects involved in the friendship
+		return Promise.all([
+			getUserOrThrow({ id: fromId }),
+			getUserOrThrow({ id: toId }),
+		]);
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof AppError) throw err;
@@ -35,6 +44,11 @@ export async function createFriendRequest(
 				message: "Cannot create a friend request to yourself",
 			});
 		}
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: fromId }),
+			getUserOrThrow({ id: toId }),
+		]);
 		// Already friends?
 		if (await areAlreadyFriends(fromId, toId)) {
 			throw new AppError({
@@ -49,8 +63,14 @@ export async function createFriendRequest(
 		});
 		if (reverseRequest) {
 			if (AUTO_ACCEPT_REVERSE_REQUESTS) {
-				await resolveFriendRequest(fromId, toId, reverseRequest.id);
-				return { autoAccepted: true };
+				// await resolveFriendRequest(fromId, toId, reverseRequest.id);
+				// return { autoAccepted: true };
+				// Return the users objects involved in the friendship
+				return await resolveFriendRequest(
+					fromId,
+					toId,
+					reverseRequest.id,
+				);
 			} else {
 				throw new AppError({
 					statusCode: 409,
@@ -73,9 +93,17 @@ export async function createFriendRequest(
 				message: "Friend request already sent",
 			});
 		}
-		// All good – create the friend request
+		// Create the friend request
+		// return await prisma.friendRequest.create({
+		// 	data: { fromId, toId, message },
+		// });
+		// Create the friend request (include both user objects. Not just their ids)
 		return await prisma.friendRequest.create({
 			data: { fromId, toId, message },
+			include: {
+				from: true,
+				to: true,
+			},
 		});
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
@@ -87,7 +115,13 @@ export async function createFriendRequest(
 
 export async function getFriendRequests() {
 	try {
-		const friendRequests = await prisma.friendRequest.findMany();
+		// const friendRequests = await prisma.friendRequest.findMany();
+		const friendRequests = await prisma.friendRequest.findMany({
+			include: {
+				from: true,
+				to: true,
+			},
+		});
 		// This is not-standard, but it's easier to check by the status code
 		if (!friendRequests.length) {
 			throw new AppError({
@@ -124,7 +158,9 @@ export async function acceptFriendRequest(id: string) {
 				message: "Friend request not found",
 			});
 		}
-		await resolveFriendRequest(
+		// await resolveFriendRequest( // This doesn't return the users involved in the friendship
+		// Return the users objects involved in the friendship
+		return await resolveFriendRequest(
 			friendRequest.fromId,
 			friendRequest.toId,
 			id,
