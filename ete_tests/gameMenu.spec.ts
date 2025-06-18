@@ -46,4 +46,10 @@ test("Two users play against each other", async ({ browser }) => {
 	//Two browsers
 	const user1Context = await browser.newContext();
 	const user2Context = await browser.newContext();
+
+	const user1Page = await user1Context.newPage();
+	const user2Page = await user2Context.newPage();
+
+	await TestingUtils.logInStep(user1Page, registeredUsers.user1);
+	await TestingUtils.logInStep(user2Page, registeredUsers.user2);
 });
