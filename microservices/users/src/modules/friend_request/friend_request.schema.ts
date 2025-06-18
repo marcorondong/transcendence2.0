@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { userResponseSchema } from "../user/user.schema";
 
 // TODO: Add later the `.describe()`
 
@@ -23,7 +24,9 @@ export const friendRequestResponseSchema = z
 	.object({
 		id: z.string().uuid(),
 		fromId: z.string().uuid(),
+		from: userResponseSchema,
 		toId: z.string().uuid(),
+		to: userResponseSchema,
 		message: z.string(),
 		createdAt: z.date(),
 	})
@@ -58,7 +61,8 @@ export const errorResponseSchema = z.object({
 
 // Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
 export const emptyResponseSchema = z
-	.void()
+	// .void()
+	.null()
 	.describe("friend request deleted successfully");
 
 // TypeScript types inferred from schemas
