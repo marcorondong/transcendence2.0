@@ -42,9 +42,14 @@ export class TestingUtils {
 	}
 
 	static async gameRunningTest(page: Page) {
-		await page.waitForTimeout(2000);
+		// await page.waitForTimeout(5000);
 		await expect(page.locator("canvas")).toBeVisible();
 		// console.log(await page.locator("pong-component").innerText());
-		await page.screenshot({ path: "Random Game.png" });
+		await page.screenshot({
+			path: "ete_tests/screenshots/Random Game.png",
+		});
+		await expect(
+			page.getByText("Match Status: Game is running"),
+		).toBeVisible();
 	}
 }

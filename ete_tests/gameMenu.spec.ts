@@ -17,48 +17,56 @@ test("Login checkpoint", async ({ page }) => {
 	await page.getByRole("button", { name: "Sign in" }).click();
 });
 
-test("Login and game visibility", async ({ page }) => {
-	await TestingUtils.logInStep(page, registeredUsers.user1);
-	await expect(page.locator("#pong")).toBeVisible();
-	await page.locator("#pong").click();
-	await expect(
-		page.getByRole("button", { name: "Single Player Mode" }),
-	).toBeVisible();
-	await expect(
-		page.getByRole("button", { name: "Tournament Mode" }),
-	).toBeVisible();
-	await expect(
-		page.getByRole("button", { name: "Tournament Mode" }),
-	).toBeVisible();
-	await page.getByRole("button", { name: "Single Player Mode" }).click();
-	await expect(
-		page.getByRole("button", { name: "Play Random Opponent" }),
-	).toBeVisible();
-	await expect(
-		page.getByRole("button", { name: "Play Normal AI" }),
-	).toBeVisible();
-	await page.getByRole("button", { name: "Play Normal AI" }).click();
-	await expect(page.getByText("Knockout Name: single match")).toBeVisible();
-	await expect(page.getByText("Match Status: Game is running")).toBeVisible();
-});
+test.describe.serial("Game flow", () => {
+	test("Login and game against normal bot", async ({ page }) => {
+		await TestingUtils.logInStep(page, registeredUsers.user1);
+		await expect(page.locator("#pong")).toBeVisible();
+		await page.locator("#pong").click();
+		await expect(
+			page.getByRole("button", { name: "Single Player Mode" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Tournament Mode" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Tournament Mode" }),
+		).toBeVisible();
+		await page.getByRole("button", { name: "Single Player Mode" }).click();
+		await expect(
+			page.getByRole("button", { name: "Play Random Opponent" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Play Normal AI" }),
+		).toBeVisible();
+		await page.getByRole("button", { name: "Play Normal AI" }).click();
+		await expect(
+			page.getByText("Knockout Name: single match"),
+		).toBeVisible();
+		await expect(
+			page.getByText("Match Status: Game is running"),
+		).toBeVisible();
 
-test("Two users play against each other", async ({ browser }) => {
-	//Two browsers
-	const user1Context = await browser.newContext();
-	const user2Context = await browser.newContext();
+		await page.close();
+	});
 
-	const user1Page = await user1Context.newPage();
-	const user2Page = await user2Context.newPage();
+	test("Two users play against each other", async ({ browser }) => {
+		//Two browsers
+		const user1Context = await browser.newContext();
+		const user2Context = await browser.newContext();
 
-	await TestingUtils.logInStep(user1Page, registeredUsers.user1);
-	await TestingUtils.logInStep(user2Page, registeredUsers.user2);
+		const user1Page = await user1Context.newPage();
+		const user2Page = await user2Context.newPage();
 
-	await TestingUtils.randomGameStep(user1Page);
-	await TestingUtils.randomGameStep(user2Page);
+		await TestingUtils.logInStep(user1Page, registeredUsers.user1);
+		await TestingUtils.logInStep(user2Page, registeredUsers.user2);
 
-	await TestingUtils.gameRunningTest(user1Page);
-	await TestingUtils.gameRunningTest(user2Page);
+		await TestingUtils.randomGameStep(user1Page);
+		await TestingUtils.randomGameStep(user2Page);
 
-	// await expect(page.locator("canvas")).toBeVisible();
-	// await expect(page.getByText("Match Status: Game is running")).toBeVisible();
+		await TestingUtils.gameRunningTest(user1Page);
+		await TestingUtils.gameRunningTest(user2Page);
+
+		// await expect(page.locator("canvas")).toBeVisible();
+		// await expect(page.getByText("Match Status: Game is running")).toBeVisible();
+	});
 });
