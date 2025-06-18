@@ -1,6 +1,7 @@
 import type { FetchConfig } from "../types/Fetch";
 import { signInLinkEvent } from "./events";
 
+//TODO: manage baseUrl based on ENV variable
 // export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
 export const baseUrl = "/proxy";
 
@@ -8,7 +9,6 @@ export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
 	const { url, method, headers, body, form } = config;
 
 	const finalBody = body ? JSON.stringify(body) : form;
-	// const response = await fetch(baseUrl + url, {
 	const response = await fetch(baseUrl + url, {
 		method,
 		headers,

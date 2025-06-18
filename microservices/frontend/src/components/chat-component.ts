@@ -1,11 +1,11 @@
 import { IconComponent } from "./icon-component";
 import type { User, Chat, ChatUser, Message } from "../types/Chat";
-import { fetchChatDb } from "../services/fetch-chat";
 import {
 	notificationEvent,
 	onlineUserEvent,
 	pongLinkEvent,
 } from "../services/events.js";
+import { FetchChatDb } from "../services/fetch-chat.js";
 
 class ChatComponent extends HTMLElement {
 	// VARIABLES
@@ -336,10 +336,9 @@ class ChatComponent extends HTMLElement {
 		}
 		// check the block status of user
 		if (this.selectedUser.blockStatusChecked === false) {
-			const data = await fetchChatDb(
+			const data = await FetchChatDb.blockStatus(
 				this.me?.id,
 				this.selectedUser?.id,
-				"block-status",
 			);
 			this.selectedUser.blockStatusChecked = true;
 			this.selectedUser.blocked = data.blockStatus;
@@ -520,13 +519,17 @@ class ChatComponent extends HTMLElement {
 		if (button.id !== "block-button") {
 			return;
 		}
-		console.log("trying to block a user");
-		const data = await fetchChatDb(
+		console.log(
+			"trying to block a user, me:",
+			this.me?.id,
+			"selsected user:",
+			this.selectedUser?.id,
+		);
+		const data = await FetchChatDb.toggleBlock(
 			this.me?.id,
 			this.selectedUser?.id,
-			"toggle-block",
 		);
-		if (data.success === true && this.selectedUser) {
+		if (data?.success === true && this.selectedUser) {
 			this.selectedUser.blocked = !this.selectedUser.blocked;
 			this.updateBlockButton(this.selectedUser);
 		}
