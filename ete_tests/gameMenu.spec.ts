@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { homeUrl } from "./config";
-import { ElementTest } from "./elementsTest";
+import { homeUrl, registeredUsers } from "./config";
+import { TestingUtils } from "./elementsTest";
 
 test.use({
 	ignoreHTTPSErrors: true,
@@ -18,14 +18,7 @@ test("Login checkpoint", async ({ page }) => {
 });
 
 test("Login and game visibility", async ({ page }) => {
-	await page.goto(homeUrl);
-	await page.getByRole("textbox", { name: "Your Username" }).click();
-	await page.getByRole("textbox", { name: "Your Username" }).fill("fseles");
-	await page.getByRole("textbox", { name: "Your Username" }).press("Tab");
-	// await page.getByRole('button', { name: 'Sign in' }).click();
-	await page.getByRole("textbox", { name: "Your Password" }).click();
-	await page.getByRole("textbox", { name: "Your Password" }).fill("Pong123!");
-	await page.getByRole("button", { name: "Sign in" }).click();
+	await TestingUtils.logInStep(page, registeredUsers.user1);
 	await expect(page.locator("#pong")).toBeVisible();
 	await page.locator("#pong").click();
 	await expect(
@@ -47,4 +40,10 @@ test("Login and game visibility", async ({ page }) => {
 	await page.getByRole("button", { name: "Play Normal AI" }).click();
 	await expect(page.getByText("Knockout Name: single match")).toBeVisible();
 	await expect(page.getByText("Match Status: Game is running")).toBeVisible();
+});
+
+test("Two users play against each other", async ({ browser }) => {
+	//Two browsers
+	const user1Context = await browser.newContext();
+	const user2Context = await browser.newContext();
 });
