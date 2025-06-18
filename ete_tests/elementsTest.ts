@@ -27,4 +27,24 @@ export class TestingUtils {
 			.fill(user.password);
 		await page.getByRole("button", { name: "Sign in" }).click();
 	}
+
+	static async randomGameStep(homePage: Page) {
+		await homePage.locator("#pong").click();
+		await homePage
+			.getByRole("button", { name: "Single Player Mode" })
+			.click();
+		await homePage
+			.getByRole("button", { name: "Play Random Opponent" })
+			.click();
+		await expect(homePage.locator("pong-component")).toContainText(
+			"Room Id:",
+		);
+	}
+
+	static async gameRunningTest(page: Page) {
+		await page.waitForTimeout(2000);
+		await expect(page.locator("canvas")).toBeVisible();
+		// console.log(await page.locator("pong-component").innerText());
+		await page.screenshot({ path: "Random Game.png" });
+	}
 }

@@ -52,4 +52,13 @@ test("Two users play against each other", async ({ browser }) => {
 
 	await TestingUtils.logInStep(user1Page, registeredUsers.user1);
 	await TestingUtils.logInStep(user2Page, registeredUsers.user2);
+
+	await TestingUtils.randomGameStep(user1Page);
+	await TestingUtils.randomGameStep(user2Page);
+
+	await TestingUtils.gameRunningTest(user1Page);
+	await TestingUtils.gameRunningTest(user2Page);
+
+	// await expect(page.locator("canvas")).toBeVisible();
+	// await expect(page.getByText("Match Status: Game is running")).toBeVisible();
 });
