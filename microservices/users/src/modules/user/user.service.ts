@@ -87,14 +87,15 @@ export async function createUser(input: createUserInput) {
 }
 
 // Helper function to retrieve a user from the database
-async function getUserOrThrow(where: UniqueUserField) {
+export async function getUserOrThrow(where: UniqueUserField) {
 	const user = await prisma.user.findUnique({ where });
 
 	if (!user) {
 		throw new AppError({
 			statusCode: 404,
 			code: USER_ERRORS.NOT_FOUND,
-			message: "User not found",
+			// message: "User not found",
+			message: `User not found: ${JSON.stringify(where)}`,
 		});
 	}
 
