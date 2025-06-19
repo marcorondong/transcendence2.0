@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { homeUrl, registeredUsers } from "./config";
-import { TestingUtils } from "./elementsTest";
+import { TestingUtils } from "./TestingUtils";
 
 test.use({
 	ignoreHTTPSErrors: true,
