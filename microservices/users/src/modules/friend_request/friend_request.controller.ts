@@ -10,6 +10,7 @@ import {
 	friendRequestResponseSchema,
 	friendRequestArrayResponseSchema,
 } from "./friend_request.schema";
+import { userArrayResponseSchema } from "../user/user.schema";
 
 export async function createFriendRequestHandler(
 	request: FastifyRequest<{ Body: CreateFriendRequestInput }>,
@@ -18,14 +19,11 @@ export async function createFriendRequestHandler(
 	const { fromId, toId, message } = request.body;
 	const result = await createFriendRequest(fromId, toId, message);
 
-	// If it was auto-accepted, return a 201 with a flag
-	// if ("autoAccepted" in result) {
-	// 	return reply.code(201).send({ autoAccepted: true });
-	// }
 	// If it was auto-accepted,
 	if (Array.isArray(result)) {
-		// Reverse request was auto-accepted; return befriended users
-		return reply.code(200).send(result);
+		// Reverse request was auto-accepted; return befriended users (200 OK, instead of 201 friend request created)
+		const parsed = userArrayResponseSchema.parse(result);
+		return reply.code(200).send(parsed);
 	}
 	// Otherwise return the created friend request
 	const parsed = friendRequestResponseSchema.parse(result);
@@ -46,10 +44,9 @@ export async function acceptFriendRequestHandler(
 	reply: FastifyReply,
 ) {
 	const { id } = request.params;
-	// await acceptFriendRequest(id);
-	// return reply.code(200).send({}); // For following REST habit / convention
 	const users = await acceptFriendRequest(id);
-	return reply.code(200).send(users);
+	const parsed = userArrayResponseSchema.parse(users);
+	return reply.code(200).send(parsed);
 }
 
 export async function deleteFriendRequestHandler(
@@ -58,5 +55,5 @@ export async function deleteFriendRequestHandler(
 ) {
 	const { id } = request.params;
 	await deleteFriendRequest(id);
-	return reply.code(204).send(); // TODO Return `{}` too as acceptFriendRequestHandler?
+	return reply.code(204).send();
 }
