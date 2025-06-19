@@ -99,21 +99,21 @@ export function errorHandler<
 		try {
 			await fn(req, reply);
 			// Catch everything
-		} catch (error: unknown) {
+		} catch (err: unknown) {
 			const name = fn.name || "unknown_handler";
 			// If I caught an AppError
-			if (error instanceof AppError) {
-				error.handlerName ??= name;
-				throw error;
+			if (err instanceof AppError) {
+				err.handlerName ??= name;
+				throw err;
 			}
 			// If I caught an Error
-			if (error instanceof Error) {
+			if (err instanceof Error) {
 				throw new AppError({
 					statusCode: 500,
-					message: error.message || "Unexpected error",
+					message: err.message || "Unexpected error",
 					handlerName: name,
-					stack: error.stack,
-					nestedCause: error, // Capture original error
+					stack: err.stack,
+					nestedCause: err, // Capture original error
 				});
 			}
 			// If I caught something else (e.g: throw "simple string", 42, or { foo: "bar" })
@@ -121,11 +121,11 @@ export function errorHandler<
 				statusCode: 500,
 				message:
 					// So I don't discard / mutate the message
-					typeof error === "string"
-						? error
-						: JSON.stringify(error) || "Unknown error",
+					typeof err === "string"
+						? err
+						: JSON.stringify(err) || "Unknown error",
 				handlerName: name,
-				nestedCause: error, // Capture unknown value too
+				nestedCause: err, // Capture unknown value too
 			});
 		}
 	};
@@ -134,56 +134,56 @@ export function errorHandler<
 const ERROR_CAUSE_DEPTH = 3; // To limit how deep a nested error will be logged
 
 // Helper function for ft_fastifyErrorHandler to log nested causes (deep nested errors)
-function extractCauses(error: unknown, depth = ERROR_CAUSE_DEPTH): any {
-	if (!(error instanceof Error) || depth <= 0) return null;
+function extractCauses(err: unknown, depth = ERROR_CAUSE_DEPTH): any {
+	if (!(err instanceof Error) || depth <= 0) return null;
 	return {
 		// Add or comment-out fields
-		name: error.name,
-		message: error.message,
-		// stack: error.stack,
-		// nestedCause: extractCauses((error as any).nestedCause, depth - 1),
+		name: err.name,
+		message: err.message,
+		// stack: err.stack,
+		// nestedCause: extractCauses((err as any).nestedCause, depth - 1),
 	};
 }
 
 // Fastify server error handler function registered in app.ts
 export function ft_fastifyErrorHandler(
-	error: unknown,
+	err: unknown,
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
 	// Custom AppError (E.g., domain-specific errors like "Email exists")
-	if (error instanceof AppError) {
-		error.handlerName ??= "unknown_handler";
+	if (err instanceof AppError) {
+		err.handlerName ??= "unknown_handler";
 		// Log (terminal) part
 		// request.log.error({ // This line uses fastify default request.log
 		logger.from(request).error({
-			statusCode: error.statusCode,
-			code: error.code ?? "UNKNOWN_ERROR",
-			message: error.message,
-			service: error.service,
-			type: error.errorType,
-			handler: error.handlerName,
-			stack: error.stack,
+			statusCode: err.statusCode,
+			code: err.code ?? "UNKNOWN_ERROR",
+			message: err.message,
+			service: err.service,
+			type: err.errorType,
+			handler: err.handlerName,
+			stack: err.stack,
 		});
 		// Optional: Log nested error if cause is another Error
-		if (error.nestedCause instanceof Error) {
+		if (err.nestedCause instanceof Error) {
 			// request.log.error({
 			logger
 				.from(request)
-				.error({ nestedCause: extractCauses(error.nestedCause) });
+				.error({ nestedCause: extractCauses(err.nestedCause) });
 		}
 		// Reply (curl, Postman, Swagger) part
-		return reply.code(error.statusCode).send({
-			statusCode: error.statusCode,
-			code: error.code ?? "UNKNOWN_ERROR",
-			message: error.message,
+		return reply.code(err.statusCode).send({
+			statusCode: err.statusCode,
+			code: err.code ?? "UNKNOWN_ERROR",
+			message: err.message,
 			// Don't send these. Already printed in the terminal.
 			// If I send them, I'm exposing internal code structure.
-			// service: error.service,
-			// type: error.errorType,
-			// handler: error.handlerName,
-			// stack: error.stack,
-			// nestedCause: extractCauses(error.nestedCause, ERROR_CAUSE_DEPTH),
+			// service: err.service,
+			// type: err.errorType,
+			// handler: err.handlerName,
+			// stack: err.stack,
+			// nestedCause: extractCauses(err.nestedCause, ERROR_CAUSE_DEPTH),
 			// Note that these values are "filtered" by `errorResponseSchema`
 		});
 	}
@@ -194,25 +194,25 @@ export function ft_fastifyErrorHandler(
 		// And '?.' ensures that if error is not an object or has no .message or .stack, it won’t crash.
 		message:
 			// So I don't discard / mutate the message
-			typeof error === "string"
-				? error
-				: JSON.stringify(error) || "Unhandled exception",
-		stack: (error as any)?.stack,
+			typeof err === "string"
+				? err
+				: JSON.stringify(err) || "Unhandled exception",
+		stack: (err as any)?.stack,
 	});
-	// return reply.send(error);
+	// return reply.send(err);
 	const statusCode =
-		typeof (error as any)?.statusCode === "number" &&
-		(error as any).statusCode >= 400 &&
-		(error as any).statusCode < 600
-			? (error as any).statusCode
+		typeof (err as any)?.statusCode === "number" &&
+		(err as any).statusCode >= 400 &&
+		(err as any).statusCode < 600
+			? (err as any).statusCode
 			: 500;
 
 	return reply.code(statusCode).send({
 		statusCode,
-		code: (error as any)?.code ?? "UNHANDLED_ERROR",
+		code: (err as any)?.code ?? "UNHANDLED_ERROR",
 		message:
-			typeof error === "string"
-				? error
-				: (error as any)?.message || "Unhandled exception",
+			typeof err === "string"
+				? err
+				: (err as any)?.message || "Unhandled exception",
 	});
 }
