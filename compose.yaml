@@ -19,9 +19,9 @@ services:
       dockerfile: ./Dockerfile
     container_name: nginx
     volumes:
-      - nginx:/usr/share/nginx/html
-      - ./microservices/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - vite:/usr/share/nginx/html
       - user_pictures:/usr/share/nginx/html/uploads # Users pictures (Shared with Nginx)
+      - ./microservices/nginx/config/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "8080:443"
     restart: unless-stopped
@@ -50,14 +50,8 @@ include:
   #   env_file: ./.env
 
 volumes:
-  nginx:
-    name: nginx
-    driver: local
-    driver_opts:
-      type: none
-      device: ./microservices/nginx/html
-      o: bind
   user_pictures:
+  vite:
 
 networks:
   Transcendence2.0:

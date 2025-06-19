@@ -3,7 +3,9 @@ import { signInLinkEvent } from "./events";
 
 //TODO: manage baseUrl based on ENV variable
 // export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
-export const baseUrl = "/proxy";
+export const baseUrl = import.meta.env.PROD
+	? `https://${window.location.hostname}:${window.location.port}`
+	: "/proxy";
 
 export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
 	const { url, method, headers, body, form } = config;

@@ -74,7 +74,6 @@ export class Router {
 			event.currentTarget instanceof HTMLAnchorElement
 		) {
 			link = event.currentTarget.href;
-			console.log("link", link);
 		} else if (event instanceof CustomEvent) {
 			link = event.detail.source;
 		} else {
@@ -119,10 +118,10 @@ export class Router {
 		} else if (this.navComponents.indexOf(componentName) > -1) {
 			scriptName = componentName;
 		} else {
+			console.error("could not find:", componentName);
 			scriptName = "/error-view";
 			window.history.pushState({ path: baseUrl }, "", baseUrl);
 		}
-		console.log("script name: ", scriptName);
 		const path = `./views${scriptName}.ts`;
 		const loader = viewModules[path];
 		if (!loader) {

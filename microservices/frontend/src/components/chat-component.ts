@@ -65,14 +65,14 @@ class ChatComponent extends HTMLElement {
 			}
 
 			console.log("OPENING WS");
-			this.ws = new WebSocket(
-				`ws://${window.location.hostname}:${window.location.port}/chat-api`,
-			);
+			const url = import.meta.env.PROD
+				? `wss://${window.location.hostname}:${window.location.port}/chat-api`
+				: `ws://${window.location.hostname}:${window.location.port}/chat-api`;
+			this.ws = new WebSocket(url);
 			this.dispatchEvent(
 				notificationEvent("chat websocket opened", "success"),
 			);
 		} catch (e) {
-			console.log("ERROR");
 			console.log(e);
 			this.closeChat();
 			this.dispatchEvent(
@@ -91,7 +91,6 @@ class ChatComponent extends HTMLElement {
 
 		this.ws.onmessage = (event) => {
 			const chatServiceData: Chat = JSON.parse(event.data);
-			console.log("websocket data", chatServiceData);
 
 			// RECEIVING MESSAGE
 			if (chatServiceData.type === "message") {
@@ -111,10 +110,6 @@ class ChatComponent extends HTMLElement {
 					(user) => user.id === chatPartner.id,
 				);
 				if (relevantChat) {
-					console.log(
-						"this message belongs to chat with ",
-						relevantChat.id,
-					);
 					const newMessage: Message = {
 						type: chatServiceData.type,
 						sender: chatServiceData.sender,
@@ -213,8 +208,6 @@ class ChatComponent extends HTMLElement {
 	}
 
 	addTimestamp(newMessage: Message, chat: ChatUser) {
-		console.log("will add message to:", chat.id);
-
 		if (
 			chat.messages.length === 0 ||
 			(!chat.messages[chat.messages.length - 1].dateTime &&
@@ -247,9 +240,9 @@ class ChatComponent extends HTMLElement {
 		}
 
 		if (user.blocked) {
-			this.blockButton.classList.add("pong-button-wrong");
+			this.blockButton.classList.add("pong-button-block");
 		} else {
-			this.blockButton.classList.remove("pong-button-wrong");
+			this.blockButton.classList.remove("pong-button-block");
 		}
 	}
 
@@ -294,7 +287,6 @@ class ChatComponent extends HTMLElement {
 	}
 
 	chatBubble(message: Message) {
-		console.log(message);
 		const div = document.createElement("div");
 		div.innerText = message.message;
 		if (message.invitation) {
@@ -342,7 +334,6 @@ class ChatComponent extends HTMLElement {
 			);
 			this.selectedUser.blockStatusChecked = true;
 			this.selectedUser.blocked = data.blockStatus;
-			console.log("SETTING BLOCKED STATUS");
 		}
 	}
 
@@ -410,6 +401,7 @@ class ChatComponent extends HTMLElement {
 			return;
 		}
 
+		this.handleInviteLink(event);
 		// HANDLE ALL BUTTONS
 		const button = target.closest("button");
 		if (button) {
@@ -421,6 +413,25 @@ class ChatComponent extends HTMLElement {
 			this.signOutButton(button);
 		}
 	}
+
+	handleInviteLink(e: Event) {
+		const target = e.target as HTMLElement;
+		if (!target || target.id !== "invitationLink") {
+			return;
+		}
+		e.preventDefault();
+
+		this.minMaxButton.click();
+		this.dispatchEvent(
+			pongLinkEvent({
+				game: "pong",
+				mode: "singles",
+				room: this.roomId,
+			}),
+		);
+		this.roomId = undefined;
+	}
+
 	signOutButton(button: HTMLButtonElement) {
 		if (button.id !== "sign-out-button") {
 			return;
@@ -519,12 +530,6 @@ class ChatComponent extends HTMLElement {
 		if (button.id !== "block-button") {
 			return;
 		}
-		console.log(
-			"trying to block a user, me:",
-			this.me?.id,
-			"selsected user:",
-			this.selectedUser?.id,
-		);
 		const data = await FetchChatDb.toggleBlock(
 			this.me?.id,
 			this.selectedUser?.id,
@@ -539,8 +544,6 @@ class ChatComponent extends HTMLElement {
 		if (button.id !== "invite-button") {
 			return;
 		}
-		console.log("trying to invite a user");
-
 		this.roomId = "private";
 
 		const message: Message = {
@@ -564,21 +567,8 @@ class ChatComponent extends HTMLElement {
 	createInvitationLink() {
 		const link = document.createElement("a");
 		link.href = "#";
+		link.id = "invitationLink";
 		link.textContent = "Click to join game";
-		const roomId = this.roomId;
-		link.addEventListener("click", (e: MouseEvent) => {
-			e.preventDefault();
-			this.minMaxButton.click();
-			link.dispatchEvent(
-				pongLinkEvent({
-					game: "pong",
-					mode: "singles",
-					room: roomId,
-				}),
-			);
-		});
-		console.log("room id that invitation is pointing to:", this.roomId);
-		this.roomId = undefined;
 		return link;
 	}
 
@@ -596,18 +586,17 @@ class ChatComponent extends HTMLElement {
 	}
 
 	connectedCallback() {
-		console.log("Chat CONNECTED");
-		document.addEventListener("click", this);
-		document.addEventListener("keydown", this);
+		this.addEventListener("click", this);
+		this.addEventListener("keydown", this);
 		this.initChatElement();
 	}
 
 	disconnectedCallback() {
-		console.log("Chat DISCONNECTED");
+		this.removeEventListener("click", this);
+		this.removeEventListener("keydown", this);
 		this.ws?.close();
 	}
 	initChatElement() {
-		console.log("INIT CHAT");
 		this.nav.classList.add(
 			"col-span-full",
 			"flex",

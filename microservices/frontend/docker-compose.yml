@@ -1,14 +1,21 @@
 services:
   frontend:
+    image: frontend:V1.0.0
+    container_name: frontend
     build:
       context: .
       dockerfile: docker/Dockerfile
     ports:
-      - "5173:5173" # dev server port
+      - "5173:5173" # TODO: close this before handing in
     environment:
       - NODE_ENV=development # or production
+      # - NODE_ENV=production
     volumes:
-      - .:/app # mount source code for dev
+      - .:/app
+      - vite:/app/dist
     networks:
-      - Transcendence2.0
+      - ${NETWORK_NAME}
     restart: unless-stopped
+
+volumes:
+  vite:

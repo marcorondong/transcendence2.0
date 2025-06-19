@@ -3,6 +3,11 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
 	plugins: [tailwindcss()],
+	build: {
+		watch: {
+			// https://rollupjs.org/configuration-options/#watch
+		},
+	},
 	server: {
 		host: true, // This sets host to '0.0.0.0' internally
 		port: 5173,

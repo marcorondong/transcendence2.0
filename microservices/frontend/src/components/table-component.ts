@@ -8,16 +8,12 @@ class TableComponent extends HTMLElement {
 	tbody = document.createElement("tbody");
 
 	connectedCallback() {
-		console.log("TABLE has been CONNECTED");
-
 		this.appendChild(this.table);
 		this.table.appendChild(this.thead);
 		this.table.appendChild(this.tbody);
 	}
 
-	disconnectedCallback() {
-		console.log("TABLE  has been DISCONNECTED");
-	}
+	disconnectedCallback() {}
 
 	setClass(classes: string) {
 		this.table.className = classes;
@@ -47,7 +43,6 @@ class TableComponent extends HTMLElement {
 	}
 }
 
-
 customElements.define("table-component", TableComponent);
 
-export{TableComponent};
+export { TableComponent };

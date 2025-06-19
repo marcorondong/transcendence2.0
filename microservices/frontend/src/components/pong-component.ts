@@ -36,8 +36,6 @@ export class PongComponent extends HTMLElement {
 	}
 
 	connectedCallback() {
-		console.log("Pong CONNECTED");
-
 		// CANVAS ELEMENT
 		this.classList.add("shrink-0", "w-fit");
 		const canvasContainer = document.createElement("div");
@@ -110,11 +108,11 @@ export class PongComponent extends HTMLElement {
 
 		this.wss.onmessage = (event) => {
 			this.gameState = JSON.parse(event.data);
-			// console.log("game data from pong", event.data);
 			if (this.chat.roomId) {
 				this.chat.roomId = undefined;
 				this.chat.sendInvitation();
 			}
+
 			if (this.pongQueryParams.room === "private") {
 				const link = document.getElementById(
 					"copy-link",
@@ -131,7 +129,6 @@ export class PongComponent extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("Pong DISCONNECTED");
 		this.wss?.close();
 		document.removeEventListener("keydown", this, false);
 		document.removeEventListener("keyup", this, false);
@@ -177,7 +174,9 @@ export class PongComponent extends HTMLElement {
 
 	websocketUrl(): string {
 		// let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
-		let url = `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
+		let url = import.meta.env.PROD
+			? `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`
+			: `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
 		if (this.pongQueryParams.mode) {
 			url += this.pongQueryParams.mode;
 		}
@@ -203,12 +202,8 @@ export class PongComponent extends HTMLElement {
 	}
 
 	createNewWebsocket() {
-		console.log("query PARAMS", this.pongQueryParams);
-
 		this.wss?.close();
-
 		const url = this.websocketUrl();
-		console.log("ws to: ", url);
 		this.wss = new WebSocket(url);
 	}
 
@@ -390,7 +385,6 @@ export class PongComponent extends HTMLElement {
 		const touch = event.touches[0];
 		const rect = this.canvas.getBoundingClientRect();
 		const y = touch.clientY - rect.top;
-		console.log("y:", y);
 		let halfPoint: number;
 		if (document.fullscreenElement) {
 			halfPoint = window.innerHeight / 2;
