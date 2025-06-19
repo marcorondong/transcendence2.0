@@ -91,7 +91,7 @@ export class AppError extends Error {
 	}
 }
 
-export function errorHandler<
+export function appErrorHandler<
 	RequestType extends FastifyRequest = FastifyRequest,
 	ReplyType extends FastifyReply = FastifyReply,
 >(fn: (req: RequestType, reply: ReplyType) => Promise<unknown>) {

@@ -14,7 +14,7 @@ import {
 	emptyResponseSchema,
 } from "./friend_request.schema";
 import { userArrayResponseSchema } from "../user/user.schema";
-import { errorHandler } from "../../utils/errors";
+import { appErrorHandler } from "../../utils/errors";
 
 async function friendRequestRoutes(server: FastifyInstance) {
 	// 1. Create a friend request (send a new friend request)
@@ -35,7 +35,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				},
 			},
 		},
-		errorHandler(createFriendRequestHandler),
+		appErrorHandler(createFriendRequestHandler),
 	);
 	// 2. Get all friend requests //TODO: filter/sort/paginate ?
 	server.get(
@@ -52,7 +52,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				},
 			},
 		},
-		errorHandler(getFriendRequestsHandler),
+		appErrorHandler(getFriendRequestsHandler),
 	);
 	// 3. Accept a friend request (create new friendship and delete friend request)
 	server.post(
@@ -70,7 +70,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				},
 			},
 		},
-		errorHandler(acceptFriendRequestHandler),
+		appErrorHandler(acceptFriendRequestHandler),
 	);
 	// 4. Reject a friend request (delete friend request)
 	server.delete(
@@ -88,7 +88,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				},
 			},
 		},
-		errorHandler(deleteFriendRequestHandler),
+		appErrorHandler(deleteFriendRequestHandler),
 	);
 }
 
