@@ -189,7 +189,6 @@ atlassian-ide-plugin.xml
 Thumbs.db
 
 # Playwright
-node_modules/
 /test-results/
 /playwright-report/
 /blob-report/

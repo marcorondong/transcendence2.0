@@ -28,7 +28,7 @@ test.describe.serial("Game flow", () => {
 		await expect(
 			page.getByRole("button", { name: "Tournament Mode" }),
 		).toBeVisible();
-// Removed redundant check for "Tournament Mode".
+		// Removed redundant check for "Tournament Mode".
 		await page.getByRole("button", { name: "Single Player Mode" }).click();
 		await expect(
 			page.getByRole("button", { name: "Play Random Opponent" }),
@@ -61,8 +61,8 @@ test.describe.serial("Game flow", () => {
 		await TestingUtils.randomGameStep(user1Page);
 		await TestingUtils.randomGameStep(user2Page);
 
-		await TestingUtils.gameRunningTest(user1Page);
-		await TestingUtils.gameRunningTest(user2Page);
+		await TestingUtils.gameRunningTest(user1Page, "User1RandomGame");
+		await TestingUtils.gameRunningTest(user2Page, "User2RandomGame");
 
 		// await expect(page.locator("canvas")).toBeVisible();
 		// await expect(page.getByText("Match Status: Game is running")).toBeVisible();
