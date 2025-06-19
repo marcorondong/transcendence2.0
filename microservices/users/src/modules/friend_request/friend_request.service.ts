@@ -53,7 +53,7 @@ export async function createFriendRequest(
 		if (await areAlreadyFriends(fromId, toId)) {
 			throw new AppError({
 				statusCode: 409,
-				code: FRIEND_REQUEST_ERRORS.ALREADY_FRIENDS,
+				code: FRIEND_REQUEST_ERRORS.ALREADY,
 				message: "Users are already friends",
 			});
 		}
@@ -63,8 +63,6 @@ export async function createFriendRequest(
 		});
 		if (reverseRequest) {
 			if (AUTO_ACCEPT_REVERSE_REQUESTS) {
-				// await resolveFriendRequest(fromId, toId, reverseRequest.id);
-				// return { autoAccepted: true };
 				// Return the users objects involved in the friendship
 				return await resolveFriendRequest(
 					fromId,
@@ -74,7 +72,7 @@ export async function createFriendRequest(
 			} else {
 				throw new AppError({
 					statusCode: 409,
-					code: "FRIEND_REQUEST_PENDING_INCOMING",
+					code: FRIEND_REQUEST_ERRORS.CREATE,
 					message:
 						"A friend request from this user is already pending. Accept it instead.",
 				});
@@ -82,21 +80,17 @@ export async function createFriendRequest(
 		}
 		// Duplicate same-direction request?
 		// Note that I'm already enforcing @@unique, but apparently this is best practice
-		// Avoids DB errors as flow control and feels like I'm  "avoiding failure" instead of "handling it"
+		// Avoids DB errors as flow control and I'm  "avoiding failure" instead of "handling it"
 		const existing = await prisma.friendRequest.findFirst({
 			where: { fromId, toId },
 		});
 		if (existing) {
 			throw new AppError({
 				statusCode: 409,
-				code: "FRIEND_REQUEST_DUPLICATE",
+				code: FRIEND_REQUEST_ERRORS.CREATE,
 				message: "Friend request already sent",
 			});
 		}
-		// Create the friend request
-		// return await prisma.friendRequest.create({
-		// 	data: { fromId, toId, message },
-		// });
 		// Create the friend request (include both user objects. Not just their ids)
 		return await prisma.friendRequest.create({
 			data: { fromId, toId, message },
@@ -115,7 +109,6 @@ export async function createFriendRequest(
 
 export async function getFriendRequests() {
 	try {
-		// const friendRequests = await prisma.friendRequest.findMany();
 		const friendRequests = await prisma.friendRequest.findMany({
 			include: {
 				from: true,
@@ -126,7 +119,7 @@ export async function getFriendRequests() {
 		if (!friendRequests.length) {
 			throw new AppError({
 				statusCode: 404,
-				code: "NO_FRIEND_REQUESTS",
+				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 				message: "No friend requests found",
 			});
 		}
@@ -136,7 +129,7 @@ export async function getFriendRequests() {
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
 				statusCode: 400,
-				code: "FRIEND_REQUESTS_INVALID_QUERY",
+				code: FRIEND_REQUEST_ERRORS.INVALID_QUERY,
 				message: "Could not retrieve friend requests",
 			});
 		}
@@ -154,11 +147,10 @@ export async function acceptFriendRequest(id: string) {
 		if (!friendRequest) {
 			throw new AppError({
 				statusCode: 404,
-				code: "FRIEND_REQUEST_NOT_FOUND",
+				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 				message: "Friend request not found",
 			});
 		}
-		// await resolveFriendRequest( // This doesn't return the users involved in the friendship
 		// Return the users objects involved in the friendship
 		return await resolveFriendRequest(
 			friendRequest.fromId,
@@ -184,7 +176,7 @@ export async function deleteFriendRequest(id: string): Promise<void> {
 		) {
 			throw new AppError({
 				statusCode: 404,
-				code: "FRIEND_REQUEST_NOT_FOUND",
+				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 				message: "Friend request not found",
 			});
 		}

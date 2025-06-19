@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { AppError, FRIEND_ERRORS, USER_ERRORS } from "../../utils/errors";
+import { AppError, FRIENDSHIP_ERRORS, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import {
@@ -51,7 +51,7 @@ export async function createUser(input: createUserInput) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_CREATE,
+			code: USER_ERRORS.CREATE,
 			message: (err as Error).message,
 		});
 	}
@@ -70,13 +70,13 @@ export async function createUser(input: createUserInput) {
 						(err.meta?.target as string[])?.[0] ?? "field";
 					throw new AppError({
 						statusCode: 409,
-						code: USER_ERRORS.USER_CREATE,
+						code: USER_ERRORS.CREATE,
 						message: `${capitalize(target)} already exists`,
 					});
 				case "P2003":
 					throw new AppError({
 						statusCode: 400,
-						code: USER_ERRORS.USER_CREATE,
+						code: USER_ERRORS.CREATE,
 						message: "Invalid foreign key",
 					});
 			}
@@ -288,7 +288,7 @@ export async function deleteUser(id: string): Promise<void> {
 		) {
 			throw new AppError({
 				statusCode: 404,
-				code: USER_ERRORS.USER_DELETE,
+				code: USER_ERRORS.DELETE,
 				message: "User not found",
 			});
 		}
@@ -313,7 +313,7 @@ export async function updateUser(id: string, data: UpdateUserData) {
 			} catch (err) {
 				throw new AppError({
 					statusCode: 400,
-					code: USER_ERRORS.USER_UPDATE,
+					code: USER_ERRORS.UPDATE,
 					message: (err as Error).message,
 				});
 			}
@@ -337,19 +337,19 @@ export async function updateUser(id: string, data: UpdateUserData) {
 						(err.meta?.target as string[])?.[0] ?? "Field";
 					throw new AppError({
 						statusCode: 409,
-						code: USER_ERRORS.USER_UPDATE,
+						code: USER_ERRORS.UPDATE,
 						message: `${capitalize(field)} already exists`,
 					});
 				case "P2003":
 					throw new AppError({
 						statusCode: 400,
-						code: USER_ERRORS.USER_UPDATE,
+						code: USER_ERRORS.UPDATE,
 						message: "Invalid foreign key",
 					});
 				case "P2025":
 					throw new AppError({
 						statusCode: 404,
-						code: USER_ERRORS.USER_UPDATE,
+						code: USER_ERRORS.UPDATE,
 						message: "User not found",
 					});
 			}
@@ -376,7 +376,7 @@ export async function updateUserPicture(id: string, picturePath: string) {
 				case "P2025":
 					throw new AppError({
 						statusCode: 404,
-						code: USER_ERRORS.USER_PICTURE,
+						code: USER_ERRORS.PICTURE,
 						message: "User not found",
 					});
 			}
@@ -404,7 +404,7 @@ export async function getUserFriends(id: string) {
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
 			throw new AppError({
 				statusCode: 400,
-				code: FRIEND_ERRORS.GET_FRIEND, // or define a new FRIENDSHIP_ERRORS.FETCH
+				code: FRIENDSHIP_ERRORS.GET,
 				message: "Failed to fetch friends",
 			});
 		}
@@ -436,7 +436,7 @@ export async function addFriend(userId: string, targetUserId: string) {
 	if (userId === targetUserId) {
 		throw new AppError({
 			statusCode: 400,
-			code: FRIEND_ERRORS.ADD_FRIEND,
+			code: FRIENDSHIP_ERRORS.SELF,
 			message: "Cannot add yourself as a friend",
 		});
 	}
@@ -457,7 +457,7 @@ export async function addFriend(userId: string, targetUserId: string) {
 		if (await areAlreadyFriends(userId, targetUserId)) {
 			throw new AppError({
 				statusCode: 409,
-				code: FRIEND_ERRORS.ADD_FRIEND,
+				code: FRIENDSHIP_ERRORS.ALREADY,
 				message: "Users are already friends",
 			});
 		}
@@ -471,7 +471,7 @@ export async function addFriend(userId: string, targetUserId: string) {
 			if (err.code === "P2002") {
 				throw new AppError({
 					statusCode: 409,
-					code: FRIEND_ERRORS.ADD_FRIEND,
+					code: FRIENDSHIP_ERRORS.ADD,
 					message: "Users are already friends",
 				});
 			}
@@ -486,7 +486,7 @@ export async function deleteFriend(userId: string, targetUserId: string) {
 	if (userId === targetUserId) {
 		throw new AppError({
 			statusCode: 400,
-			code: FRIEND_ERRORS.DELETE_FRIEND,
+			code: FRIENDSHIP_ERRORS.SELF,
 			message: "Cannot delete yourself as a friend",
 		});
 	}
@@ -509,7 +509,7 @@ export async function deleteFriend(userId: string, targetUserId: string) {
 		if (result.count === 0) {
 			throw new AppError({
 				statusCode: 404,
-				code: FRIEND_ERRORS.DELETE_FRIEND,
+				code: FRIENDSHIP_ERRORS.DELETE,
 				message: "Users were not friends",
 			});
 		}
