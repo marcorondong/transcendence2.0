@@ -72,7 +72,7 @@ export async function loginHandler(
 	} else {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_LOGIN,
+			code: USER_ERRORS.LOGIN,
 			message: "Login requires a valid email or username",
 		});
 	}
@@ -87,7 +87,7 @@ export async function loginHandler(
 		if (!valid) {
 			throw new AppError({
 				statusCode: 401,
-				code: USER_ERRORS.USER_LOGIN,
+				code: USER_ERRORS.LOGIN,
 				message: "Invalid credentials",
 			});
 		}
@@ -104,7 +104,7 @@ export async function loginHandler(
 			// Change 404 Not Found to 401 Invalid credentials (Hide sensitive info)
 			throw new AppError({
 				statusCode: 401,
-				code: USER_ERRORS.USER_LOGIN,
+				code: USER_ERRORS.LOGIN,
 				message: "Invalid credentials",
 			});
 		}
@@ -316,7 +316,7 @@ export async function pictureHandler(
 	if (!pictureFile) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "No picture file uploaded",
 		});
 	}
@@ -327,7 +327,7 @@ export async function pictureHandler(
 	if (!ext) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "Unsupported file type",
 		});
 	}
@@ -335,7 +335,7 @@ export async function pictureHandler(
 	if (pictureFile.file.truncated) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "File too large (max 1MB)",
 		});
 	}
