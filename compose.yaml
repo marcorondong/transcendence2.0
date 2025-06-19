@@ -27,9 +27,7 @@ include:
   - ./microservices/chat_api/docker-compose.yml
   - ./microservices/tictactoe_db/docker-compose.yml
   - ./microservices/tictactoe_api/docker-compose.yml
-
-  - path: ./microservices/ssg/ai/docker-compose.yml
-    project_directory: ./microservices/ssg
+  - ./microservices/ssg/ai/docker-compose.yml
 
   #PONG_API LONG INCLUDE
   - path: ./microservices/ssg/pong-api/compose.yaml #path to "small" compose file of microservice relative to this root compose.yaml

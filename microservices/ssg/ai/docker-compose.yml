@@ -2,7 +2,8 @@ services:
   ai-bot:
     image: ai-bot
     build:
-      dockerfile: ./docker/Dockerfile
+      context: ..
+      dockerfile: ./ai/docker/Dockerfile
     container_name: ai-bot
     volumes:
       - ./src:/app/src:ro
