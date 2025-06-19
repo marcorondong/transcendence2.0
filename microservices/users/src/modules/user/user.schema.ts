@@ -60,6 +60,22 @@ export type UserField = Partial<
 	Record<UserPublicField, string | number | Date>
 >;
 
+// Type definition for query options
+export type UserQueryOptions = {
+	where?: UserField; // To filter by UserField
+	filterIds?: string[]; // To filter by array of IDs
+	useFuzzy?: boolean; // To allow partial matches
+	useOr?: boolean; // To allow OR logic
+	dateTarget?: "createdAt" | "updatedAt" | "both";
+	before?: Date;
+	after?: Date;
+	between?: [Date, Date];
+	skip?: number; // To skip the first n entries
+	take?: number; // To limit the number of returned entries
+	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
+	order?: SortDirection; // to order asc/desc
+};
+
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
 const blankToUndefined = <T extends z.ZodTypeAny>(
 	schema: T,
@@ -217,11 +233,10 @@ export const userResponseSchema = z.object({
 });
 
 // Schema to get a user by ID
+// It doesn't use blankToUndefined because I need to enforce id presence
 export const userIdParamSchema = z
 	.object({
-		id: blankToUndefined(
-			z.string().uuid().describe("User ID (UUID format)"),
-		),
+		id: z.string().uuid().describe("User ID (UUID format)"),
 	})
 	.strict(); // Rejects unknown fields
 

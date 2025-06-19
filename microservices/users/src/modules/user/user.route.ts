@@ -266,8 +266,9 @@ async function userRoutes(server: FastifyInstance) {
 				tags: ["Friends"],
 				summary: "Get all friends of a user",
 				description:
-					"Returns the list of users who are friends with the given user ID.",
+					"Supports filtering, sorting, and pagination via query params.",
 				params: userIdParamSchema,
+				querystring: getUsersQuerySchema,
 				response: {
 					200: userArrayResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
@@ -290,7 +291,8 @@ async function userRoutes(server: FastifyInstance) {
 				params: userIdParamSchema,
 				body: addFriendSchema,
 				response: {
-					201: userArrayResponseSchema,
+					// 201: userArrayResponseSchema,
+					201: userResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
 					404: errorResponseSchema.describe("Not Found"),
 					409: errorResponseSchema.describe("Already friends"),
@@ -309,9 +311,10 @@ async function userRoutes(server: FastifyInstance) {
 				summary: "Delete a friend",
 				description:
 					"Removes the friendship link between the user and the target user.",
-				params: targetUserIdParamSchema.merge(userIdParamSchema),
+				params: userIdParamSchema.merge(targetUserIdParamSchema),
 				response: {
-					200: userArrayResponseSchema,
+					// 200: userArrayResponseSchema,
+					204: emptyResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
 					404: errorResponseSchema.describe("Not Found"),
 				},

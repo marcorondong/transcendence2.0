@@ -5,10 +5,11 @@ import prisma from "../../utils/prisma";
 import {
 	createUserInput,
 	UpdateUserData,
-	SortDirection,
+	SortDirection, // TODO: Remove the unused ones
 	UserPublicField,
 	UniqueUserField,
 	UserField,
+	UserQueryOptions,
 } from "./user.schema";
 
 // Helper function to capitalize conflicting Prisma field
@@ -130,22 +131,6 @@ export async function findUserByUnique(where: UniqueUserField) {
 		throw err;
 	}
 }
-
-// Type definition for query options
-type UserQueryOptions = {
-	where?: UserField; // To filter by UserField
-	filterIds?: string[]; // To filter by array of IDs
-	useFuzzy?: boolean; // To allow partial matches
-	useOr?: boolean; // To allow OR logic
-	dateTarget?: "createdAt" | "updatedAt" | "both";
-	before?: Date;
-	after?: Date;
-	between?: [Date, Date];
-	skip?: number; // To skip the first n entries
-	take?: number; // To limit the number of returned entries
-	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
-	order?: SortDirection; // to order asc/desc
-};
 
 // TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
@@ -401,28 +386,68 @@ export async function updateUserPicture(id: string, picturePath: string) {
 	}
 }
 
-export async function getUserFriends(id: string) {
+// export async function getUserFriends(id: string) {
+// 	try {
+// 		await getUserOrThrow({ id }); // Ensure users exist
+// 		const friendships = await prisma.friendship.findMany({
+// 			where: {
+// 				OR: [{ user1Id: id }, { user2Id: id }],
+// 			},
+// 			include: {
+// 				user1: true,
+// 				user2: true,
+// 			},
+// 		});
+// 		return friendships.map((f) => (f.user1Id === id ? f.user2 : f.user1));
+// 	} catch (err) {
+// 		// Known/Expected errors bubble up to controller as AppError (custom error)
+// 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+// 			throw new AppError({
+// 				statusCode: 400,
+// 				code: FRIENDSHIP_ERRORS.GET,
+// 				message: "Failed to fetch friends",
+// 			});
+// 		}
+// 		if (err instanceof AppError) throw err;
+// 		// Unknown errors bubble up to global error handler.
+// 		throw err;
+// 	}
+// }
+
+export async function getUserFriends(
+	id: string,
+	query: Omit<UserQueryOptions, "filterIds" | "where">,
+) {
 	try {
-		await getUserOrThrow({ id }); // Ensure users exist
+		await getUserOrThrow({ id }); // Ensure user exists
+
+		// Step 1: Get all friendship relations for the user
 		const friendships = await prisma.friendship.findMany({
 			where: {
 				OR: [{ user1Id: id }, { user2Id: id }],
 			},
-			include: {
-				user1: true,
-				user2: true,
+			select: {
+				user1Id: true,
+				user2Id: true,
 			},
 		});
-		return friendships.map((f) => (f.user1Id === id ? f.user2 : f.user1));
-	} catch (err) {
-		// Known/Expected errors bubble up to controller as AppError (custom error)
-		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+		const friendIds = friendships.map((f) =>
+			f.user1Id === id ? f.user2Id : f.user1Id,
+		);
+		if (!friendIds.length) {
 			throw new AppError({
-				statusCode: 400,
-				code: FRIENDSHIP_ERRORS.GET,
-				message: "Failed to fetch friends",
+				statusCode: 404,
+				code: FRIENDSHIP_ERRORS.NOT_FOUND,
+				message: "User has no friends",
 			});
 		}
+		// Step 2: Use existing logic from findUsers to apply query filters
+		return await findUsers({
+			...query,
+			filterIds: friendIds,
+		});
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof AppError) throw err;
 		// Unknown errors bubble up to global error handler.
 		throw err;
@@ -480,6 +505,9 @@ export async function addFriend(userId: string, targetUserId: string) {
 		await prisma.friendship.create({
 			data: { user1Id, user2Id },
 		});
+
+		// Return the newly added friend user
+		return getUserOrThrow({ id: targetUserId });
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
