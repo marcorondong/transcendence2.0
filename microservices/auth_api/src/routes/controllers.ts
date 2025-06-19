@@ -17,22 +17,38 @@ export async function signInHandler(
 	request: FastifyRequest<{ Body: unknown }>,
 	reply: FastifyReply,
 ) {
-	const payload = await signInRequest(request.body, reply);
-	if (!payload) return;
+	const response = await signInRequest(request.body);
+	const data = await response.json();
+	if (!response.ok) {
+		reply.log.warn(
+			{ Response: data, Body: request.body },
+			"signInRequest() response not ok",
+		);
+		return reply.status(data.statusCode || 500).send(data);
+	}
+	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send(payload);
+	reply.status(200).send(data);
 }
 
 export async function signUpHandler(
 	request: FastifyRequest<{ Body: unknown }>,
 	reply: FastifyReply,
 ) {
-	const payload = await signUpRequest(request.body, reply);
-	if (!payload) return;
+	const response = await signUpRequest(request.body);
+	const data = await response.json();
+	if (!response.ok) {
+		reply.log.warn(
+			{ Response: data, Body: request.body },
+			"signUpRequest() response not ok",
+		);
+		return reply.status(data.statusCode || 500).send(data);
+	}
+	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send(payload);
+	reply.status(200).send(data);
 }
 
 export async function signOutHandler(
@@ -83,38 +99,56 @@ export async function editProfileHandler(
 	request: FastifyRequest<{ Body: unknown; Params: IdInput }>,
 	reply: FastifyReply,
 ) {
-	const payload = await editProfileRequest(
-		request.body,
-		request.params,
-		reply,
-	);
-	if (!payload) return;
+	const response = await editProfileRequest(request.body, request.params.id);
+	const data = await response.json();
+	if (!response.ok) {
+		reply.log.warn(
+			{ Response: data, Body: request.body, Params: request.params },
+			"editProfileRequest() response not ok",
+		);
+		return reply.status(data.statusCode || 500).send(data);
+	}
+	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send();
+	reply.status(200).send(data);
 }
 
 export async function updateProfileHandler(
 	request: FastifyRequest<{ Body: unknown; Params: IdInput }>,
 	reply: FastifyReply,
 ) {
-	const payload = await updateProfileRequest(
+	const response = await updateProfileRequest(
 		request.body,
-		request.params,
-		reply,
+		request.params.id,
 	);
-	if (!payload) return;
+	const data = await response.json();
+	if (!response.ok) {
+		reply.log.warn(
+			{ Response: data, Body: request.body, Params: request.params },
+			"updateProfileRequest() response not ok",
+		);
+		return reply.status(data.statusCode || 500).send(data);
+	}
+	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send();
+	reply.status(200).send(data);
 }
 
 export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: IdInput }>,
 	reply: FastifyReply,
 ) {
-	const result = await deleteUserRequest(request.params, reply);
-	if (!result) return;
+	const response = await deleteUserRequest(request.params.id);
+	if (!response.ok) {
+		const data = await response.json();
+		reply.log.warn(
+			{ Response: data, Params: request.params },
+			"deleteUserRequest() response not ok",
+		);
+		return reply.status(data.statusCode || 500).send(data);
+	}
 	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
 	reply.status(200).send();
 }

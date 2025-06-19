@@ -1,8 +1,6 @@
-import type { FastifyReply } from "fastify";
 import { env } from "../utils/env";
-import { payloadZodSchema } from "./zodSchemas";
 
-export async function signInRequest(body: unknown, reply: FastifyReply) {
+export async function signInRequest(body: unknown) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
@@ -10,17 +8,10 @@ export async function signInRequest(body: unknown, reply: FastifyReply) {
 		},
 		body: JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		reply.status(raw.statusCode || 500).send(raw);
-		return false;
-	}
-	const data = await response.json();
-	const payload = payloadZodSchema.parse(data);
-	return payload;
+	return response;
 }
 
-export async function signUpRequest(body: unknown, reply: FastifyReply) {
+export async function signUpRequest(body: unknown) {
 	const response = await fetch(env.USERS_REGISTRATION_REQUEST_DOCKER, {
 		method: "POST",
 		headers: {
@@ -28,17 +19,10 @@ export async function signUpRequest(body: unknown, reply: FastifyReply) {
 		},
 		body: JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		reply.status(raw.statusCode || 500).send(raw);
-		return false;
-	}
-	const data = await response.json();
-	const payload = payloadZodSchema.parse(data);
-	return payload;
+	return response;
 }
 
-export async function editProfileRequest(body: unknown, userId: unknown, reply: FastifyReply) {
+export async function editProfileRequest(body: unknown, userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PATCH",
 		headers: {
@@ -46,17 +30,10 @@ export async function editProfileRequest(body: unknown, userId: unknown, reply: 
 		},
 		body: JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		reply.status(raw.statusCode || 500).send(raw);
-		return false;
-	}
-	const data = await response.json();
-	const payload = { id: data.id, nickname: data.nickname };
-	return payload;
+	return response;
 }
 
-export async function updateProfileRequest(body: unknown, userId: unknown, reply: FastifyReply) {
+export async function updateProfileRequest(body: unknown, userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PUT",
 		headers: {
@@ -64,24 +41,12 @@ export async function updateProfileRequest(body: unknown, userId: unknown, reply
 		},
 		body: JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		reply.status(raw.statusCode || 500).send(raw);
-		return false;
-	}
-	const data = await response.json();
-	const payload = { id: data.id, nickname: data.nickname };
-	return payload;
+	return response;
 }
 
-export async function deleteUserRequest(userId: unknown, reply: FastifyReply) {
+export async function deleteUserRequest(userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "DELETE",
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		reply.status(raw.statusCode || 500).send(raw);
-		return false;
-	}
-	return true;
+	return response;
 }

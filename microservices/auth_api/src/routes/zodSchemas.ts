@@ -14,9 +14,9 @@ export const signUpZodSchema = z.object({
 });
 
 export const profileZodSchema = z.object({
-	nickname: z.string(),
-	email: z.string(),
-	password: z.string(),
+	nickname: z.string().optional(),
+	email: z.string().optional(),
+	password: z.string().optional(),
 });
 
 export const idZodSchema = z

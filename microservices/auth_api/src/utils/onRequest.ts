@@ -17,5 +17,18 @@ export async function ft_onRequest(
 		request.raw.url?.startsWith("/.well-known/")
 	)
 		return;
-	await request.jwtVerify();
+	try {
+		await request.jwtVerify();
+	} catch (error) {
+		reply.log.warn(
+			{ Response: error, url: request.url },
+			"JWT verification failed",
+		);
+		reply.status(401).send({
+			statusCode: 401,
+			error: "Unauthorized",
+			message: "You are not authorized",
+		});
+		return;
+	}
 }

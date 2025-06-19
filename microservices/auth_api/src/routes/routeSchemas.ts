@@ -7,21 +7,18 @@ import {
 	idZodSchema,
 } from "./zodSchemas";
 
-// TODO delete body for signin, signup, edit, update
 export const signInSchema = {
 	summary: "Sign In",
 	description: "Sign in a user. This will create the token for the user.",
 	tags: ["Auth"],
-	body: signInZodSchema,
-	response: { 200: payloadZodSchema },
+	// body: signInZodSchema,
 };
 
 export const signUpSchema = {
 	summary: "Sign Up",
 	description: "Sign up a user. This will create the user and the token.",
 	tags: ["Auth"],
-	body: signUpZodSchema,
-	response: { 200: payloadZodSchema },
+	// body: signUpZodSchema,
 };
 
 export const signOutSchema = {
@@ -62,7 +59,7 @@ export const editProfileSchema = {
 	summary: "Edit Profile",
 	description: "Edit the profile of the user and update token.",
 	tags: ["Auth"],
-	body: profileZodSchema,
+	// body: profileZodSchema,
 	params: idZodSchema,
 };
 
@@ -70,7 +67,7 @@ export const updateProfileSchema = {
 	summary: "Update Profile",
 	description: "Update the whole profile of the user and update token.",
 	tags: ["Auth"],
-	body: profileZodSchema,
+	// body: profileZodSchema,
 	params: idZodSchema,
 };
 
