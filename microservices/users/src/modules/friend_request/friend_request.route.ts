@@ -7,7 +7,6 @@ import {
 } from "./friend_request.controller";
 import {
 	friendRequestIdParamSchema,
-	acceptFriendRequestBodySchema,
 	createFriendRequestSchema,
 	friendRequestResponseSchema,
 	errorResponseSchema,
@@ -57,7 +56,6 @@ async function friendRequestRoutes(server: FastifyInstance) {
 	);
 	// 3. Accept a friend request (create new friendship and delete friend request)
 	server.post(
-		// TODO: Remove the accept or reformat the logic to use url instead of body
 		"/:id/accept",
 		{
 			schema: {
@@ -65,9 +63,7 @@ async function friendRequestRoutes(server: FastifyInstance) {
 				summary: "Accepts a friend request",
 				description: "Accepts a friend request.",
 				params: friendRequestIdParamSchema,
-				body: acceptFriendRequestBodySchema,
 				response: {
-					// 201: friendRequestResponseSchema,
 					200: userArrayResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
 					404: errorResponseSchema.describe("Not Found"),

@@ -37,13 +37,6 @@ export const friendRequestArrayResponseSchema = z.array(
 	friendRequestResponseSchema,
 );
 
-// Schema to accept friend request (must explicitly say "accept")
-export const acceptFriendRequestBodySchema = z
-	.object({
-		accept: z.literal(true),
-	})
-	.strict();
-
 export const errorResponseSchema = z.object({
 	statusCode: z.number().describe("HTTP status code"),
 	code: z.string().describe("Error string code"),
@@ -68,7 +61,4 @@ export const emptyResponseSchema = z
 // TypeScript types inferred from schemas
 export type CreateFriendRequestInput = z.infer<
 	typeof createFriendRequestSchema
->;
-export type AcceptFriendRequestInput = z.infer<
-	typeof acceptFriendRequestBodySchema
 >;
