@@ -46,6 +46,7 @@ test("Sign in without account", async ({ page }) => {
 
 test("Sign up page first view. Not logged", async ({ page }) => {
 	await page.goto(`${homeUrl}/sign-in-view`);
+	await page.getByRole("link", { name: "Sign Up", exact: true }).click();
 	await expect(
 		page.getByRole("textbox", { name: "Your Username" }),
 	).toBeVisible();
