@@ -26,16 +26,31 @@ function checkPasswordConstraints(
 		userData.username &&
 		lowerPassword.includes(userData.username.toLowerCase())
 	) {
-		throw new Error("Password cannot contain the username");
+		// throw new Error("Password cannot contain the username");
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.CONSTRAINTS,
+			message: "Password cannot contain the username",
+		});
 	}
 	if (
 		userData.nickname &&
 		lowerPassword.includes(userData.nickname.toLowerCase())
 	) {
-		throw new Error("Password cannot contain the nickname");
+		// throw new Error("Password cannot contain the nickname");
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.CONSTRAINTS,
+			message: "Password cannot contain the nickname",
+		});
 	}
 	if (userData.email && lowerPassword === userData.email.toLowerCase()) {
-		throw new Error("Password cannot be same as the email");
+		// throw new Error("Password cannot be same as the email");
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.CONSTRAINTS,
+			message: "Password cannot be same as the email",
+		});
 	}
 }
 
