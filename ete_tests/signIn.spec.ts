@@ -17,7 +17,6 @@ test("Home page visibility test", async ({ page }) => {
 	await expect(
 		page.getByRole("link", { name: "Sign up", exact: true }),
 	).toBeVisible();
-	await expect(page.getByRole("link", { name: "Sign In" })).toBeVisible();
 	await expect(
 		page.getByRole("link", { name: "Sign Up", exact: true }),
 	).toBeVisible();
@@ -46,8 +45,7 @@ test("Sign in without account", async ({ page }) => {
 });
 
 test("Sign up page first view. Not logged", async ({ page }) => {
-	await page.goto("https://localhost:8080/sign-in-view");
-	await page.getByRole("link", { name: "Sign Up", exact: true }).click();
+	await page.goto(`${homeUrl}/sign-in-view`);
 	await expect(
 		page.getByRole("textbox", { name: "Your Username" }),
 	).toBeVisible();

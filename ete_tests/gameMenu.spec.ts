@@ -28,9 +28,7 @@ test.describe.serial("Game flow", () => {
 		await expect(
 			page.getByRole("button", { name: "Tournament Mode" }),
 		).toBeVisible();
-		await expect(
-			page.getByRole("button", { name: "Tournament Mode" }),
-		).toBeVisible();
+// Removed redundant check for "Tournament Mode".
 		await page.getByRole("button", { name: "Single Player Mode" }).click();
 		await expect(
 			page.getByRole("button", { name: "Play Random Opponent" }),
