@@ -12,13 +12,19 @@ export const serverConfig = {
 //TODO We need to register those user in order for game testing to work. Maybe even with testing case for registering
 export const registeredUsers = {
 	user1: {
+		email: "f@gmail.com",
+		nickname: "sekula",
 		username: "fseles",
 		password: "Pong123!",
 	},
 	user2: {
-		username: "jasa",
+		email: "j@gmail.com",
+		nickname: "jasa",
+		username: "selki",
 		password: "Pong123!",
 	},
 };
 
 export const homeUrl = `${serverConfig.protocol}://${serverConfig.ip}:${serverConfig.port}`;
+
+export const registerUrl = `${homeUrl}/auth-api/sign-up`;
