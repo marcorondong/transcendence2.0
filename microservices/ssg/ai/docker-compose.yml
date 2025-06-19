@@ -1,0 +1,14 @@
+services:
+  ai-bot:
+    image: ai-bot
+    build:
+      context: ..
+      dockerfile: ./ai/docker/Dockerfile
+    container_name: ai-bot
+    volumes:
+      - ./src:/app/src:ro
+    env_file:
+      - ./docker/.env
+    restart: unless-stopped
+    networks:
+      - Transcendence2.0

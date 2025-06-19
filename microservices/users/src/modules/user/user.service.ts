@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { AppError, USER_ERRORS } from "../../utils/errors";
+import { AppError, FRIEND_ERRORS, USER_ERRORS } from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import {
@@ -86,18 +86,26 @@ export async function createUser(input: createUserInput) {
 	}
 }
 
+// Helper function to retrieve a user from the database
+export async function getUserOrThrow(where: UniqueUserField) {
+	const user = await prisma.user.findUnique({ where });
+
+	if (!user) {
+		throw new AppError({
+			statusCode: 404,
+			code: USER_ERRORS.NOT_FOUND,
+			// message: "User not found",
+			message: `User not found: ${JSON.stringify(where)}`,
+		});
+	}
+
+	return user;
+}
+
 // This function returns all user fields (no filtering). It only accepts unique fields, so it returns ONLY ONE user
 export async function findUserByUnique(where: UniqueUserField) {
 	try {
-		const user = await prisma.user.findUnique({ where });
-		if (!user) {
-			throw new AppError({
-				statusCode: 404,
-				code: USER_ERRORS.NOT_FOUND,
-				message: "User not found",
-			});
-		}
-		return user;
+		return await getUserOrThrow(where);
 	} catch (err) {
 		if (err instanceof AppError) {
 			// Known/Expected errors bubble up to controller as AppError (custom error)
@@ -111,6 +119,7 @@ export async function findUserByUnique(where: UniqueUserField) {
 // Type definition for query options
 type UserQueryOptions = {
 	where?: UserField; // To filter by UserField
+	filterIds?: string[]; // To filter by array of IDs
 	useFuzzy?: boolean; // To allow partial matches
 	useOr?: boolean; // To allow OR logic
 	dateTarget?: "createdAt" | "updatedAt" | "both";
@@ -133,6 +142,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 
 	const {
 		where = {},
+		filterIds,
 		useFuzzy = false,
 		useOr = false,
 		dateTarget = "createdAt",
@@ -146,13 +156,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 	} = cleanedOptions;
 
 	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
-
 	try {
 		// Remove undefined fields from 'where'
 		const cleanedWhere = Object.fromEntries(
 			Object.entries(where).filter(([_, v]) => v !== undefined),
 		);
-
 		const transformed = Object.entries(cleanedWhere).reduce(
 			(acc, [key, value]) => {
 				// Enable fuzzy search (transform string fields to `contains` filters)
@@ -165,7 +173,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			},
 			{} as Record<string, any>,
 		);
-		// Apply date filters to 'createdAt'
+		// Helper function to apply date filters
 		const applyDateFilter = (field: "createdAt" | "updatedAt") => {
 			if (before) {
 				transformed[field] = {
@@ -190,6 +198,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			}
 		};
 
+		// Apply date filters
 		if (dateTarget === "both") {
 			applyDateFilter("createdAt");
 			applyDateFilter("updatedAt");
@@ -197,20 +206,35 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			//applyDateFilter(dateTarget ?? "createdAt");
 			applyDateFilter(dateTarget);
 		}
+		// Merge 'filterIds' and 'where.id' into a unified filter
+		const combinedIds = new Set<string>();
+		if (filterIds?.length) {
+			filterIds.forEach((id) => combinedIds.add(id));
+		}
+		if (where.id) {
+			combinedIds.add(where.id as string);
+		}
+
+		let query: Record<string, any>;
 
 		// console.log("✅ Step 2: Transformed 'where'", transformed);
 		// Enable OR queries (map provided fields to build individual queries)
-		const query = useOr
-			? { OR: Object.entries(transformed).map(([k, v]) => ({ [k]: v })) }
-			: // : transformed;
-				Object.fromEntries(
-					Object.entries(transformed).filter(
-						([_, v]) => v !== undefined,
-					),
-				);
+		if (useOr) {
+			const orConditions = Object.entries(transformed).map(([k, v]) => ({
+				[k]: v,
+			}));
+			if (combinedIds.size > 0) {
+				orConditions.push({ id: { in: Array.from(combinedIds) } });
+			}
+			query = orConditions.length > 0 ? { OR: orConditions } : {};
+		} else {
+			query = { ...transformed };
+			if (combinedIds.size > 0) {
+				query.id = { in: Array.from(combinedIds) };
+			}
+		}
 
 		// console.log("✅ Step 3: Final Query Shape", query);
-
 		const prismaSortBy = { [sortBy]: order };
 
 		// console.log("✅ Step 4: Final Prisma Query", {
@@ -219,16 +243,14 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		// 	skip,
 		// 	take,
 		// });
-
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
-
 		// console.log("✅ Step 5: Result", users);
-
+		// This is not-standard, but it's easier to check by the status code
 		if (!users.length) {
 			throw new AppError({
 				statusCode: 404,
@@ -236,7 +258,6 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: "No users found",
 			});
 		}
-
 		return users;
 	} catch (err) {
 		// console.log("❌ Step 6: Error Caught", err);
@@ -248,19 +269,17 @@ export async function findUsers(options: UserQueryOptions = {}) {
 				message: `Invalid sortBy field: ${sortBy}`,
 			});
 		}
-
 		if (err instanceof AppError) throw err;
-
 		// console.error("❌ Step 6.2: Unknown error", err);
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
 
-// export async function deleteUser(id: number): Promise<void> {
 export async function deleteUser(id: string): Promise<void> {
 	try {
 		await prisma.user.delete({ where: { id } });
+		// Service handles database operations; so other logic like file cleanup is handled in controller
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (
@@ -278,20 +297,12 @@ export async function deleteUser(id: string): Promise<void> {
 	}
 }
 
-// export async function updateUser(id: number, data: UpdateUserData) {
+// TODO: Check also when updating username, nickname and email to check password constraints
 export async function updateUser(id: string, data: UpdateUserData) {
 	try {
 		const updatePayload: Record<string, any> = { ...data };
+		let currentUser = await getUserOrThrow({ id }); // get user to ensure it exists and work with it
 		if (data.password) {
-			// Find user for password constrains check
-			const currentUser = await prisma.user.findUnique({ where: { id } });
-			if (!currentUser) {
-				throw new AppError({
-					statusCode: 404,
-					code: USER_ERRORS.USER_UPDATE,
-					message: "User not found",
-				});
-			}
 			// Check password constraints
 			try {
 				checkPasswordConstraints(data.password, {
@@ -312,11 +323,11 @@ export async function updateUser(id: string, data: UpdateUserData) {
 			updatePayload.salt = salt;
 			delete updatePayload.password; // remove plain password
 		}
-		const updatedUser = await prisma.user.update({
+		currentUser = await prisma.user.update({
 			where: { id },
 			data: updatePayload,
 		});
-		return updatedUser;
+		return currentUser;
 	} catch (err) {
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -351,22 +362,15 @@ export async function updateUser(id: string, data: UpdateUserData) {
 // Updates user picture path
 export async function updateUserPicture(id: string, picturePath: string) {
 	try {
-		// Ensure user exists
-		const currentUser = await prisma.user.findUnique({ where: { id } });
-		if (!currentUser) {
-			throw new AppError({
-				statusCode: 404,
-				code: USER_ERRORS.USER_PICTURE,
-				message: "User not found",
-			});
-		}
+		let currentUser = await getUserOrThrow({ id }); // get user to ensure it exists and work with it
 		// Update picture path
-		const updatedUser = await prisma.user.update({
+		currentUser = await prisma.user.update({
 			where: { id },
 			data: { picture: picturePath },
 		});
-		return updatedUser;
+		return currentUser;
 	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
 			switch (err.code) {
 				case "P2025":
@@ -377,6 +381,160 @@ export async function updateUserPicture(id: string, picturePath: string) {
 					});
 			}
 		}
+		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
 }
+
+export async function getUserFriends(id: string) {
+	try {
+		await getUserOrThrow({ id }); // Ensure users exist
+		const friendships = await prisma.friendship.findMany({
+			where: {
+				OR: [{ user1Id: id }, { user2Id: id }],
+			},
+			include: {
+				user1: true,
+				user2: true,
+			},
+		});
+		return friendships.map((f) => (f.user1Id === id ? f.user2 : f.user1));
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			throw new AppError({
+				statusCode: 400,
+				code: FRIEND_ERRORS.GET_FRIEND, // or define a new FRIENDSHIP_ERRORS.FETCH
+				message: "Failed to fetch friends",
+			});
+		}
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// Helper function for friendRequest module
+export async function areAlreadyFriends(
+	userId: string,
+	targetUserId: string,
+): Promise<boolean> {
+	if (userId === targetUserId) return false;
+
+	const [user1Id, user2Id] =
+		userId < targetUserId ? [userId, targetUserId] : [targetUserId, userId];
+
+	const friendship = await prisma.friendship.findFirst({
+		where: { user1Id, user2Id },
+		select: { id: true },
+	});
+
+	return !!friendship;
+}
+
+export async function addFriend(userId: string, targetUserId: string) {
+	if (userId === targetUserId) {
+		throw new AppError({
+			statusCode: 400,
+			code: FRIEND_ERRORS.ADD_FRIEND,
+			message: "Cannot add yourself as a friend",
+		});
+	}
+	try {
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: userId }),
+			getUserOrThrow({ id: targetUserId }),
+		]);
+		// Sort users so they are always user1Id < user2Id to avoid A-B and B-A are not stored twice
+		const [user1Id, user2Id] =
+			userId < targetUserId
+				? [userId, targetUserId]
+				: [targetUserId, userId];
+		// Check if users are already friends
+		// Note that I'm already enforcing @@unique, but apparently this is best practice
+		// Avoids DB errors as flow control and feels like I'm  "avoiding failure" instead of "handling it"
+		if (await areAlreadyFriends(userId, targetUserId)) {
+			throw new AppError({
+				statusCode: 409,
+				code: FRIEND_ERRORS.ADD_FRIEND,
+				message: "Users are already friends",
+			});
+		}
+
+		await prisma.friendship.create({
+			data: { user1Id, user2Id },
+		});
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			if (err.code === "P2002") {
+				throw new AppError({
+					statusCode: 409,
+					code: FRIEND_ERRORS.ADD_FRIEND,
+					message: "Users are already friends",
+				});
+			}
+		}
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+export async function deleteFriend(userId: string, targetUserId: string) {
+	if (userId === targetUserId) {
+		throw new AppError({
+			statusCode: 400,
+			code: FRIEND_ERRORS.DELETE_FRIEND,
+			message: "Cannot delete yourself as a friend",
+		});
+	}
+	try {
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: userId }),
+			getUserOrThrow({ id: targetUserId }),
+		]);
+		// Sort users so they are always user1Id < user2Id to avoid A-B and B-A are not stored twice
+		const [user1Id, user2Id] =
+			userId < targetUserId
+				? [userId, targetUserId]
+				: [targetUserId, userId];
+
+		const result = await prisma.friendship.deleteMany({
+			where: { user1Id, user2Id },
+		});
+		// deleteMany doesn't throw is anything is deleted. So I have to check how many rows where deleted
+		if (result.count === 0) {
+			throw new AppError({
+				statusCode: 404,
+				code: FRIEND_ERRORS.DELETE_FRIEND,
+				message: "Users were not friends",
+			});
+		}
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// Helper function for future-proof (modifying the Friendship table externally, etc)
+// export async function getFriendshipId(
+// 	userId: string,
+// 	targetUserId: string,
+// ): Promise<string | null> {
+// 	if (userId === targetUserId) return null;
+
+// 	const [user1Id, user2Id] =
+// 		userId < targetUserId ? [userId, targetUserId] : [targetUserId, userId];
+
+// 	const friendship = await prisma.friendship.findFirst({
+// 		where: { user1Id, user2Id },
+// 		select: { id: true },
+// 	});
+
+// 	return friendship?.id || null;
+// }

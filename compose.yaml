@@ -1,16 +1,4 @@
 services:
-  ai-bot:
-    image: ai-bot
-    build:
-      context: ./microservices/ssg
-      dockerfile: ./ai/Dockerfile
-    container_name: ai-bot
-    environment:
-      - NODE_ENV=production
-    ports:
-      - 6969:6969 #TODO keep now for swagger documentation, remove later
-    networks:
-      - Transcendence2.0
 
   frontend:
     image: frontend
@@ -39,6 +27,7 @@ include:
   - ./microservices/chat_api/docker-compose.yml
   - ./microservices/tictactoe_db/docker-compose.yml
   - ./microservices/tictactoe_api/docker-compose.yml
+  - ./microservices/ssg/ai/docker-compose.yml
 
   #PONG_API LONG INCLUDE
   - path: ./microservices/ssg/pong-api/compose.yaml #path to "small" compose file of microservice relative to this root compose.yaml

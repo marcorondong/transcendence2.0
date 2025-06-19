@@ -9,6 +9,7 @@ export class PongComponent extends HTMLElement {
 	canvas = document.createElement("canvas");
 	ctx = this.canvas.getContext("2d");
 	chat: ChatComponent;
+	botJoined: boolean | undefined = undefined;
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -237,6 +238,30 @@ export class PongComponent extends HTMLElement {
 		requestAnimationFrame(this.gameLoop);
 	};
 
+	async requestBot(roomId: string) {
+		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
+		const reqBody = JSON.stringify({
+			roomId: roomId,
+			difficulty: this.chat.gameSelection?.playSelection,
+		});
+
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: reqBody,
+			});
+			this.botJoined = response.ok;
+		} catch (error) {
+			console.error("Exception in requestBot:", error);
+			this.botJoined = false;
+		}
+
+		if (this.botJoined === false) {
+			console.error("Bot is offline. Try again later."); // will improve error msg, in a different branch
+		}
+	}
+
 	constructor(chat: ChatComponent) {
 		super();
 		this.adjustCanvasToWindow();
@@ -342,6 +367,32 @@ export class PongComponent extends HTMLElement {
 			}
 		};
 		this.gameLoop();
+		this.botWrapper();
+	}
+
+	botWrapper() {
+		if (this.isBotNeeded() === true) {
+			let intervalId = setInterval(() => {
+				if (
+					this.wss?.readyState === this.wss?.OPEN &&
+					this.gameState?.roomId
+				) {
+					console.log("got roomId:", this.gameState.roomId);
+					clearInterval(intervalId);
+					this.requestBot(this.gameState.roomId);
+				} else {
+					console.log("waiting for roomId...");
+				}
+			}, 1000);
+		}
+	}
+
+	isBotNeeded() {
+		return (
+			this.chat.gameSelection?.playSelection === "easy" ||
+			this.chat.gameSelection?.playSelection === "normal" ||
+			this.chat.gameSelection?.playSelection === "hard"
+		);
 	}
 
 	handleEvent(event: Event) {

@@ -8,7 +8,7 @@ import ssl
 import time
 import urllib3
 from cli_config import PONG_SINGLES_URL, LOGIN_URL, REGISTER_URL
-
+import websockets.exceptions
 
 ssl_context = (
     ssl._create_unverified_context()
@@ -105,10 +105,13 @@ def client(user_header: dict[str, str]):
                 if time.time() - last_key_time > key_timeout:
                     paddle_direction = 0
 
-            if paddle_direction != 0:
-                move = "up" if paddle_direction == -1 else "down"
-                sendMove(websocket, move)
-
+            try:
+                if paddle_direction != 0:
+                    move = "up" if paddle_direction == -1 else "down"
+                    sendMove(websocket, move)
+            except websockets.exceptions.ConnectionClosed:
+                running = False
+                myLogger.debug("Close connection")
             elapsed = time.time() - start_time
             sleep_time = max(0, (1 / 60) - elapsed)
             time.sleep(sleep_time)

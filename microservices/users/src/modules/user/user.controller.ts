@@ -12,6 +12,10 @@ import {
 	getUsersQuery,
 	updateUserPutInput,
 	updateUserPatchInput,
+	addFriendInput,
+	addFriendSchema, // TODO: Check if I use these
+	targetUserIdParamSchema,
+	userIdParamSchema,
 } from "./user.schema";
 import {
 	createUser,
@@ -20,10 +24,14 @@ import {
 	deleteUser,
 	updateUser,
 	updateUserPicture,
+	getUserFriends,
+	addFriend,
+	deleteFriend,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
-import { getConfig } from "../../utils/config";
+import getConfig from "../../utils/config";
+import { logger } from "../../utils/logger";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -32,6 +40,7 @@ export async function registerUserHandler(
 	request: FastifyRequest<{ Body: createUserInput }>,
 	reply: FastifyReply,
 ) {
+	logger.info("testing logger in registerUserHandler");
 	const user = await createUser(request.body);
 	// Serialize/validate/filter response via Zod schemas (userResponseSchema.parse)
 	const parsedUser = userResponseSchema.parse(user);
@@ -45,6 +54,7 @@ export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
+	logger.warn("testing logger in loginHandler");
 	const { email, username, password } = request.body;
 	// Determine allowed identifiers
 	const allowedIdentifiers = LOGIN_IDENTIFIER_MODE.split(",").map((s) =>
@@ -107,6 +117,7 @@ export async function getUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.error("testing logger in getUserHandler");
 	const user = await findUserByUnique({ id: request.params.id });
 	const parsedUser = userResponseSchema.parse(user);
 	return reply.code(200).send(parsedUser);
@@ -145,8 +156,8 @@ function applyPagination(params: {
 		typeof params.page === "number"
 			? (params.page - 1) * take
 			: typeof params.skip === "number"
-				? params.skip
-				: 0;
+			? params.skip
+			: 0;
 
 	return { skip, take };
 }
@@ -155,6 +166,7 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
+	logger.debug("testing logger in getUsersHandler");
 	// Log full query for debugging purposes
 	// console.log("[Request Query]", request.query);
 
@@ -172,6 +184,7 @@ export async function getUsersHandler(
 		between,
 		useFuzzy,
 		useOr,
+		filterIds,
 		skip: querySkip,
 		take: queryTake,
 		page,
@@ -204,6 +217,7 @@ export async function getUsersHandler(
 		},
 		useFuzzy,
 		useOr,
+		filterIds,
 		dateTarget,
 		before,
 		after,
@@ -222,11 +236,13 @@ export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.fatal("testing logger in deleteUserHandler");
 	const user = await findUserByUnique({ id: request.params.id });
 
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
 
+	// Remove user folder here in controller, since service (should basically) handles database operations;
 	if (fs.existsSync(userFolder)) {
 		await fs.promises.rm(userFolder, { recursive: true, force: true });
 	}
@@ -242,6 +258,7 @@ export async function putUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.log("testing logger in putUserHandler");
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -254,6 +271,7 @@ export async function patchUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.from(request).info("testing logger in patchUserHandler");
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -268,10 +286,10 @@ const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
 			type === "image/jpeg"
 				? "jpg"
 				: type === "image/png"
-					? "png"
-					: type === "image/gif"
-						? "gif"
-						: "";
+				? "png"
+				: type === "image/gif"
+				? "gif"
+				: "";
 		return acc;
 	},
 	{} as Record<string, string>,
@@ -281,7 +299,10 @@ export async function pictureHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	const user = await findUserByUnique({ id: request.params.id });
+	logger
+		.from(request)
+		.info({ "event.action": "pictureHandler" }, "Update user picture");
+	const user = await findUserByUnique({ id: request.params.id }); // TODO: Check if I can make it "let" and reuse it
 
 	const parts = request.parts();
 	let pictureFile;
@@ -343,5 +364,37 @@ export async function pictureHandler(
 	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
-	reply.code(200).send(updatedUser);
+	reply.code(200).send(updatedUser); // TODO: Should I parse here?
+}
+
+export async function getFriendsHandler(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply,
+) {
+	const friends = await getUserFriends(request.params.id);
+	return reply.code(200).send(friends); // TODO: Should I parse here?
+}
+
+export async function addFriendHandler(
+	request: FastifyRequest<{
+		Params: { id: string };
+		Body: addFriendInput;
+	}>,
+	reply: FastifyReply,
+) {
+	await addFriend(request.params.id, request.body.targetUserId);
+	const friends = await getUserFriends(request.params.id);
+	return reply.code(201).send(friends); // TODO: Should I parse here?
+}
+
+// TODO: Should I still return the updated friends array, or 204 instead?
+export async function deleteFriendHandler(
+	request: FastifyRequest<{
+		Params: { id: string; targetUserId: string };
+	}>,
+	reply: FastifyReply,
+) {
+	await deleteFriend(request.params.id, request.params.targetUserId);
+	const friends = await getUserFriends(request.params.id);
+	return reply.code(200).send(friends); // TODO: Should I parse here?
 }

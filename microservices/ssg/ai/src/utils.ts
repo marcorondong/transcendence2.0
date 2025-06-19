@@ -1,5 +1,12 @@
-import { networkInterfaces } from "os";
-import { Point } from "./Point";
+import { Point } from "../imports/Point";
+
+export function findGradient(p1: Point, p2: Point): number {
+	const m =
+		p1.getX() != p2.getX()
+			? (p2.getY() - p1.getY()) / (p2.getX() - p1.getX())
+			: 0;
+	return m;
+}
 
 export function findIntersectionWithVerticalLine(
 	p1: Point,
@@ -7,12 +14,10 @@ export function findIntersectionWithVerticalLine(
 	xVertical: number,
 	yResult = 0,
 ): number {
-	if (p1.getX() != p2.getX()) {
-		const m = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
-		const b = p1.getY() - m * p1.getX();
-		yResult = m * xVertical + b;
-	}
-	return roundTo(yResult, 2);
+	const m = findGradient(p1, p2);
+	const b = p1.getY() - m * p1.getX();
+	yResult = m * xVertical + b;
+	return yResult;
 }
 
 export function distanceBetweenPoints(p1: Point, p2: Point): number {
@@ -24,4 +29,8 @@ export function distanceBetweenPoints(p1: Point, p2: Point): number {
 export function roundTo(n: number, decimals: number): number {
 	const multiplier = Math.pow(10, decimals);
 	return Math.round(n * multiplier) / multiplier;
+}
+
+export function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
