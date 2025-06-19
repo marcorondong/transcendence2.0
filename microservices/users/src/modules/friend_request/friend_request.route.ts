@@ -4,6 +4,7 @@ import {
 	deleteFriendRequestHandler,
 	getFriendRequestsHandler,
 	createFriendRequestHandler,
+	getFriendRequestHandler,
 } from "./friend_request.controller";
 import {
 	friendRequestIdParamSchema,
@@ -12,6 +13,7 @@ import {
 	errorResponseSchema,
 	friendRequestArrayResponseSchema,
 	emptyResponseSchema,
+	getFriendRequestsQuerySchema,
 } from "./friend_request.schema";
 import { userArrayResponseSchema } from "../user/user.schema";
 import { appErrorHandler } from "../../utils/errors";
@@ -44,7 +46,9 @@ async function friendRequestRoutes(server: FastifyInstance) {
 			schema: {
 				tags: ["Friend Request"],
 				summary: "Get all friend requests",
-				description: "Gets all friend request.",
+				description:
+					"Supports filtering, sorting, and pagination via query params.",
+				querystring: getFriendRequestsQuerySchema,
 				response: {
 					200: friendRequestArrayResponseSchema,
 					400: errorResponseSchema.describe("Bad request"),
@@ -54,7 +58,26 @@ async function friendRequestRoutes(server: FastifyInstance) {
 		},
 		appErrorHandler(getFriendRequestsHandler),
 	);
-	// 3. Accept a friend request (create new friendship and delete friend request)
+	// 3. Get a single friend request by ID
+	server.get(
+		"/:id",
+		{
+			schema: {
+				tags: ["Friend Request"],
+				summary: "Get a friend request by ID",
+				description:
+					"Returns a single friend request matching the given UUID.",
+				params: friendRequestIdParamSchema,
+				response: {
+					200: friendRequestResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+			},
+		},
+		appErrorHandler(getFriendRequestHandler),
+	);
+	// 4. Accept a friend request (create new friendship and delete friend request)
 	server.post(
 		"/:id/accept",
 		{
