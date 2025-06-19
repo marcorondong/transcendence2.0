@@ -193,3 +193,4 @@ Thumbs.db
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/ete_tests/screenshots/
