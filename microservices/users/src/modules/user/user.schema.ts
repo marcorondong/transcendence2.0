@@ -398,7 +398,7 @@ export const addFriendSchema = z
 	.strict();
 
 // Schema for removing friends (removeFriend)
-// TODO: Check if better to reuse userIdParamSchema
+// It doesn't use blankToUndefined because I need to enforce id presence
 export const targetUserIdParamSchema = z
 	.object({
 		targetUserId: z.string().uuid().describe("User ID (UUID format)"),
@@ -438,6 +438,4 @@ export type updateUserPutInput = z.infer<typeof putUserSchema>;
 export type updateUserPatchInput = z.infer<typeof patchUserSchema>;
 export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
-// TODO: Check if I need these:
 export type addFriendInput = z.infer<typeof addFriendSchema>;
-// export type removeFriendParams = z.infer<typeof targetUserIdParamSchema>;

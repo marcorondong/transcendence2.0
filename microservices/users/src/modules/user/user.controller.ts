@@ -13,9 +13,6 @@ import {
 	updateUserPutInput,
 	updateUserPatchInput,
 	addFriendInput,
-	addFriendSchema, // TODO: Check if I use these
-	targetUserIdParamSchema,
-	userIdParamSchema,
 } from "./user.schema";
 import {
 	createUser,
