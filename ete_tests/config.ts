@@ -9,7 +9,6 @@ export const serverConfig = {
 	protocol: "https",
 };
 
-//TODO We need to register those user in order for game testing to work. Maybe even with testing case for registering
 export const registeredUsers = {
 	user1: {
 		email: "f@gmail.com",
