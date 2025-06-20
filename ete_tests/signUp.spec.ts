@@ -9,50 +9,26 @@ const email = username + "@example.com";
 const nickname = username + "_nick";
 
 test.describe.serial("sign up test", () => {
+	const fillSignUpForm = async (page, username, password, email, nickname) => {
+		await page.getByRole("link", { name: "Sign up", exact: true }).click();
+		await page.getByRole("textbox", { name: "Your Username" }).fill(username);
+		await page.getByRole("textbox", { name: "Your Password" }).fill(password);
+		await page.getByRole("textbox", { name: "Repeat Password" }).fill(password);
+		await page.getByRole("textbox", { name: "Your Email" }).fill(email);
+		await page.getByRole("textbox", { name: "Your Nickname" }).fill(nickname);
+		await page.getByRole("button", { name: "Register new account" }).click();
+	};
+
 	test("can sign up and sign in automatically", async ({ page }) => {
 		await page.goto(homeUrl);
-		await page.getByRole("link", { name: "Sign up", exact: true }).click();
-		await page
-			.getByRole("textbox", { name: "Your Username" })
-			.fill(username);
-		await page
-			.getByRole("textbox", { name: "Your Password" })
-			.fill(password);
-		await page
-			.getByRole("textbox", { name: "Repeat Password" })
-			.fill(password);
-		await page.getByRole("textbox", { name: "Your Email" }).fill(email);
-		await page
-			.getByRole("textbox", { name: "Your Nickname" })
-			.fill(nickname);
-		await page
-			.getByRole("button", { name: "Register new account" })
-			.click();
+		await fillSignUpForm(page, username, password, email, nickname);
 		await expect(page.getByText("You just signed up!")).toBeVisible();
 		await expect(page.getByText("chat websocket opened")).toBeVisible();
 	});
 
 	test("cant sign up twice with same username", async ({ page }) => {
 		await page.goto(homeUrl);
-		await page.getByRole("link", { name: "Sign up", exact: true }).click();
-		await page
-			.getByRole("textbox", { name: "Your Username" })
-			.fill(username);
-		await page
-			.getByRole("textbox", { name: "Your Password" })
-			.fill(password);
-		await page
-			.getByRole("textbox", { name: "Repeat Password" })
-			.fill(password);
-		await page
-			.getByRole("textbox", { name: "Your Email" })
-			.fill("asd" + email);
-		await page
-			.getByRole("textbox", { name: "Your Nickname" })
-			.fill("asd" + nickname);
-		await page
-			.getByRole("button", { name: "Register new account" })
-			.click();
+		await fillSignUpForm(page, username, password, "asd" + email, "asd" + nickname);
 		await expect(page.getByText("failed to sign up")).toBeVisible();
 	});
 
