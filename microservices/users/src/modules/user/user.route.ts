@@ -8,6 +8,9 @@ import {
 	patchUserHandler,
 	deleteUserHandler,
 	pictureHandler,
+	getFriendsHandler,
+	addFriendHandler,
+	deleteFriendHandler,
 } from "./user.controller";
 import {
 	createUserSchema,
@@ -19,10 +22,12 @@ import {
 	getUsersQuerySchema,
 	putUserSchema,
 	patchUserSchema,
+	addFriendSchema,
+	targetUserIdParamSchema,
 	emptyResponseSchema,
 	errorResponseSchema,
 } from "./user.schema";
-import { errorHandler } from "../../utils/errors";
+import { appErrorHandler } from "../../utils/errors";
 // import { z } from "zod";
 
 // Helper function for SWagger to define common errors messages and assign them to Swagger UI examples
@@ -70,8 +75,9 @@ async function userRoutes(server: FastifyInstance) {
 				// }),
 			},
 		},
-		errorHandler(registerUserHandler),
+		appErrorHandler(registerUserHandler),
 	);
+
 	// 2. Log in to get authorization token (to access private/authenticated routes)
 	server.post(
 		"/login",
@@ -92,32 +98,10 @@ async function userRoutes(server: FastifyInstance) {
 				// }),
 			},
 		},
-		errorHandler(loginHandler),
+		appErrorHandler(loginHandler),
 	);
 
-	// 3. Get a single user by ID
-	server.get(
-		"/:id",
-		{
-			schema: {
-				tags: ["Users"],
-				summary: "Get a user by ID",
-				description: "Returns a single user matching the given UUID.",
-				params: userIdParamSchema,
-				response: {
-					200: userResponseSchema,
-					400: errorResponseSchema.describe("Bad request"),
-					404: errorResponseSchema.describe("Not Found"),
-				},
-				// response: withCommonErrors({
-				// 	200: userResponseSchema,
-				// }),
-			},
-		},
-		errorHandler(getUserHandler),
-	);
-
-	// 4. Get all users (filter/sort/paginate)
+	// 3. Get all users (filter/sort/paginate)
 	server.get(
 		"/",
 		{
@@ -137,7 +121,29 @@ async function userRoutes(server: FastifyInstance) {
 				// }),
 			},
 		},
-		errorHandler(getUsersHandler),
+		appErrorHandler(getUsersHandler),
+	);
+
+	// 4. Get a single user by ID
+	server.get(
+		"/:id",
+		{
+			schema: {
+				tags: ["Users"],
+				summary: "Get a user by ID",
+				description: "Returns a single user matching the given UUID.",
+				params: userIdParamSchema,
+				response: {
+					200: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+				// response: withCommonErrors({
+				// 	200: userResponseSchema,
+				// }),
+			},
+		},
+		appErrorHandler(getUserHandler),
 	);
 
 	// 5. Update ALL user fields (PUT)
@@ -161,7 +167,7 @@ async function userRoutes(server: FastifyInstance) {
 				// }),
 			},
 		},
-		errorHandler(putUserHandler),
+		appErrorHandler(putUserHandler),
 	);
 
 	// 6. Update SOME user fields (PATCH)
@@ -185,7 +191,7 @@ async function userRoutes(server: FastifyInstance) {
 				// }),
 			},
 		},
-		errorHandler(patchUserHandler),
+		appErrorHandler(patchUserHandler),
 	);
 
 	// 7. Delete a user by ID
@@ -208,7 +214,7 @@ async function userRoutes(server: FastifyInstance) {
 				// }),
 			},
 		},
-		errorHandler(deleteUserHandler),
+		appErrorHandler(deleteUserHandler),
 	);
 
 	// 8. Update user picture by ID
@@ -249,7 +255,72 @@ async function userRoutes(server: FastifyInstance) {
 				consumes: ["multipart/form-data"], // Enable file upload support in Swagger UI (by default is 'application/json')
 			},
 		},
-		errorHandler(pictureHandler),
+		appErrorHandler(pictureHandler),
+	);
+
+	// 9. Get all user friends by ID
+	server.get(
+		"/:id/friends",
+		{
+			schema: {
+				tags: ["Friends"],
+				summary: "Get all friends of a user",
+				description:
+					"Supports filtering, sorting, and pagination via query params.",
+				params: userIdParamSchema,
+				querystring: getUsersQuerySchema,
+				response: {
+					200: userArrayResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+			},
+		},
+		appErrorHandler(getFriendsHandler),
+	);
+
+	// 10. Add a user friend by ID
+	server.post(
+		"/:id/friends",
+		{
+			schema: {
+				tags: ["Friends"],
+				summary: "Add a friend",
+				description:
+					"Creates a bidirectional friendship between the current user and the target user.",
+				params: userIdParamSchema,
+				body: addFriendSchema,
+				response: {
+					// 201: userArrayResponseSchema,
+					201: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+					409: errorResponseSchema.describe("Already friends"),
+				},
+			},
+		},
+		appErrorHandler(addFriendHandler),
+	);
+
+	// 11. Delete a user friend by ID and TargetID
+	server.delete(
+		"/:id/friends/:targetUserId",
+		{
+			schema: {
+				tags: ["Friends"],
+				summary: "Delete a friend",
+				description:
+					"Removes the friendship link between the user and the target user.",
+				params: userIdParamSchema.merge(targetUserIdParamSchema),
+				response: {
+					// 200: userArrayResponseSchema,
+					204: emptyResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+			},
+		},
+		appErrorHandler(deleteFriendHandler),
 	);
 }
 

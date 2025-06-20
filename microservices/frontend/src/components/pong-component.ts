@@ -12,6 +12,7 @@ export class PongComponent extends HTMLElement {
 	ctx = this.canvas.getContext("2d");
 	chat: ChatComponent;
 	pongQueryParams: PongQueryParams;
+	botJoined: boolean | undefined = undefined;
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -371,6 +372,163 @@ export class PongComponent extends HTMLElement {
 
 		requestAnimationFrame(this.gameLoop);
 	};
+
+	async requestBot(roomId: string) {
+		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
+		const reqBody = JSON.stringify({
+			roomId: roomId,
+			difficulty: this.chat.gameSelection?.playSelection,
+		});
+
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: reqBody,
+			});
+			this.botJoined = response.ok;
+		} catch (error) {
+			console.error("Exception in requestBot:", error);
+			this.botJoined = false;
+		}
+
+		if (this.botJoined === false) {
+			console.error("Bot is offline. Try again later."); // will improve error msg, in a different branch
+		}
+	}
+
+	constructor(chat: ChatComponent) {
+		super();
+		this.adjustCanvasToWindow();
+		this.chat = chat;
+	}
+
+	connectedCallback() {
+		console.log("Pong CONNECTED");
+		console.log("gamed State", this.chat.gameSelection);
+
+		this.classList.add("shrink-0", "w-fit");
+		const canvasContainer = document.createElement("div");
+		canvasContainer.classList.add(
+			"p-1",
+			"sm:p-3",
+			"xl:p-5",
+			"mb-10",
+			"sm:border-5",
+			"xl:border-6",
+			"border-3",
+			"sm:rounded-xl",
+			"rounded-lg",
+			"bg-indigo-950",
+			"border-cyan-300",
+			"glow",
+			"shrink-0",
+			"w-fit",
+			"relative",
+			"group",
+		);
+
+		this.canvas.classList.add("bg-black", "rounded-lg");
+		canvasContainer.appendChild(this.canvas);
+
+		this.append(canvasContainer);
+
+		document.addEventListener("keydown", this, false);
+		document.addEventListener("keyup", this, false);
+		document.addEventListener("game-data", this);
+		window.addEventListener("resize", this);
+		this.canvas.addEventListener("touchstart", this);
+		this.canvas.addEventListener("touchend", this);
+
+		const gameDataContainer = document.createElement("div");
+		gameDataContainer.classList.add(
+			"text-[5px]",
+			"sm:text-xs",
+			"md:text-sm",
+			"lg:text:md",
+		);
+		const matchStatus = document.createElement("div");
+		const roomId = document.createElement("div");
+		const knockoutName = document.createElement("div");
+		gameDataContainer.append(matchStatus, roomId, knockoutName);
+
+		this.fullscreenButton.addEventListener("click", () => {
+			this.goFullscreen();
+		});
+
+		this.fullscreenButton.id = "fullscreen-button";
+		this.fullscreenButton.classList.add(
+			"top-3",
+			"right-3",
+			"md:top-5",
+			"md:right-5",
+			"lg:top-8",
+			"lg:right-8",
+			"invisible",
+			"absolute",
+			"opacity-60",
+			"group-hover:visible",
+			"pong-button",
+			"pong-button-pale",
+			"touch-visible",
+		);
+		const fullscreenIcon = new IconComponent("fullscreen", 7);
+		fullscreenIcon.id = "fullscreen-icon";
+		this.fullscreenButton.appendChild(fullscreenIcon);
+		canvasContainer.appendChild(this.fullscreenButton);
+
+		this.append(gameDataContainer);
+
+		this.createNewWebsocket();
+
+		if (!this.wss) {
+			return;
+		}
+
+		this.wss.onmessage = (event) => {
+			this.gameState = JSON.parse(event.data);
+			// console.log("game data from pong", event.data);
+			if (this.chat.roomId) {
+				this.chat.roomId = undefined;
+				this.chat.sendInvitation();
+			}
+			if (this.gameState) {
+				matchStatus.innerText =
+					"Match Status: " + this.gameState?.matchStatus;
+				roomId.innerText = "Room Id: " + this.gameState?.roomId;
+				knockoutName.innerText =
+					"Knockout Name: " +
+					(this.gameState?.knockoutName ?? "no info");
+			}
+		};
+		this.gameLoop();
+		this.botWrapper();
+	}
+
+	botWrapper() {
+		if (this.isBotNeeded() === true) {
+			let intervalId = setInterval(() => {
+				if (
+					this.wss?.readyState === this.wss?.OPEN &&
+					this.gameState?.roomId
+				) {
+					console.log("got roomId:", this.gameState.roomId);
+					clearInterval(intervalId);
+					this.requestBot(this.gameState.roomId);
+				} else {
+					console.log("waiting for roomId...");
+				}
+			}, 1000);
+		}
+	}
+
+	isBotNeeded() {
+		return (
+			this.chat.gameSelection?.playSelection === "easy" ||
+			this.chat.gameSelection?.playSelection === "normal" ||
+			this.chat.gameSelection?.playSelection === "hard"
+		);
+	}
 
 	handleEvent(event: Event) {
 		const handlerName =

@@ -12,6 +12,7 @@ import {
 	getUsersQuery,
 	updateUserPutInput,
 	updateUserPatchInput,
+	addFriendInput,
 } from "./user.schema";
 import {
 	createUser,
@@ -20,10 +21,14 @@ import {
 	deleteUser,
 	updateUser,
 	updateUserPicture,
+	getUserFriends,
+	addFriend,
+	deleteFriend,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
-import { getConfig } from "../../utils/config";
+import getConfig from "../../utils/config";
+import { logger } from "../../utils/logger";
 
 // MR_NOTE:
 // With "parse" Zod will filter out fields not in the schema (e.g., salt, password).
@@ -32,6 +37,7 @@ export async function registerUserHandler(
 	request: FastifyRequest<{ Body: createUserInput }>,
 	reply: FastifyReply,
 ) {
+	logger.info("testing logger in registerUserHandler");
 	const user = await createUser(request.body);
 	// Serialize/validate/filter response via Zod schemas (userResponseSchema.parse)
 	const parsedUser = userResponseSchema.parse(user);
@@ -45,6 +51,7 @@ export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
+	logger.warn("testing logger in loginHandler");
 	const { email, username, password } = request.body;
 	// Determine allowed identifiers
 	const allowedIdentifiers = LOGIN_IDENTIFIER_MODE.split(",").map((s) =>
@@ -62,7 +69,7 @@ export async function loginHandler(
 	} else {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_LOGIN,
+			code: USER_ERRORS.LOGIN,
 			message: "Login requires a valid email or username",
 		});
 	}
@@ -77,7 +84,7 @@ export async function loginHandler(
 		if (!valid) {
 			throw new AppError({
 				statusCode: 401,
-				code: USER_ERRORS.USER_LOGIN,
+				code: USER_ERRORS.LOGIN,
 				message: "Invalid credentials",
 			});
 		}
@@ -94,7 +101,7 @@ export async function loginHandler(
 			// Change 404 Not Found to 401 Invalid credentials (Hide sensitive info)
 			throw new AppError({
 				statusCode: 401,
-				code: USER_ERRORS.USER_LOGIN,
+				code: USER_ERRORS.LOGIN,
 				message: "Invalid credentials",
 			});
 		}
@@ -107,6 +114,7 @@ export async function getUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.error("testing logger in getUserHandler");
 	const user = await findUserByUnique({ id: request.params.id });
 	const parsedUser = userResponseSchema.parse(user);
 	return reply.code(200).send(parsedUser);
@@ -136,8 +144,13 @@ function applyPagination(params: {
 
 	// Enforce that both `page` and `skip` are not allowed together
 	if (typeof params.page === "number" && typeof params.skip === "number") {
-		// TODO: Use AppError here
-		throw new Error("Cannot use both 'page' and 'skip' in the same query");
+		// throw new Error("Cannot use both 'page' and 'skip' in the same query");
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.INVALID_QUERY,
+			// handlerName: "applyPagination",
+			message: "Cannot use both 'page' and 'skip' in the same query",
+		});
 		// Comment out the line above to disable this validation
 	}
 
@@ -155,6 +168,7 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
+	logger.debug("testing logger in getUsersHandler");
 	// Log full query for debugging purposes
 	// console.log("[Request Query]", request.query);
 
@@ -172,6 +186,7 @@ export async function getUsersHandler(
 		between,
 		useFuzzy,
 		useOr,
+		filterIds,
 		skip: querySkip,
 		take: queryTake,
 		page,
@@ -204,6 +219,7 @@ export async function getUsersHandler(
 		},
 		useFuzzy,
 		useOr,
+		filterIds,
 		dateTarget,
 		before,
 		after,
@@ -222,11 +238,13 @@ export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.fatal("testing logger in deleteUserHandler");
 	const user = await findUserByUnique({ id: request.params.id });
 
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
 
+	// Remove user folder here in controller, since service (should basically) handles database operations;
 	if (fs.existsSync(userFolder)) {
 		await fs.promises.rm(userFolder, { recursive: true, force: true });
 	}
@@ -242,6 +260,7 @@ export async function putUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.log("testing logger in putUserHandler");
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -254,6 +273,7 @@ export async function patchUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.from(request).info("testing logger in patchUserHandler");
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -281,7 +301,10 @@ export async function pictureHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	const user = await findUserByUnique({ id: request.params.id });
+	logger
+		.from(request)
+		.info({ "event.action": "pictureHandler" }, "Update user picture");
+	const user = await findUserByUnique({ id: request.params.id }); // TODO: Check if I can make it "let" and reuse it
 
 	const parts = request.parts();
 	let pictureFile;
@@ -295,7 +318,7 @@ export async function pictureHandler(
 	if (!pictureFile) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "No picture file uploaded",
 		});
 	}
@@ -306,7 +329,7 @@ export async function pictureHandler(
 	if (!ext) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "Unsupported file type",
 		});
 	}
@@ -314,7 +337,7 @@ export async function pictureHandler(
 	if (pictureFile.file.truncated) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "File too large (max 1MB)",
 		});
 	}
@@ -343,5 +366,96 @@ export async function pictureHandler(
 	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
-	reply.code(200).send(updatedUser);
+	const parsed = userResponseSchema.parse(updatedUser);
+	return reply.code(200).send(parsed);
+}
+
+export async function getFriendsHandler(
+	request: FastifyRequest<{
+		Params: { id: string };
+		Querystring: getUsersQuery;
+	}>,
+	reply: FastifyReply,
+) {
+	// Destructure request query into respective fields
+	const {
+		id,
+		email,
+		username,
+		nickname,
+		createdAt,
+		updatedAt,
+		dateTarget,
+		before,
+		after,
+		between,
+		useFuzzy,
+		useOr,
+		filterIds,
+		skip: querySkip,
+		take: queryTake,
+		page,
+		all,
+		sortBy,
+		order,
+	} = request.query;
+
+	const { skip, take } = applyPagination({
+		all,
+		skip: querySkip,
+		take: queryTake,
+		page,
+	});
+
+	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
+	// since pagination is an abstraction for 'skip' and 'take'
+	const friends = await getUserFriends(request.params.id, {
+		where: {
+			id,
+			email,
+			username,
+			nickname,
+			createdAt,
+			updatedAt,
+		},
+		useFuzzy,
+		useOr,
+		filterIds,
+		dateTarget,
+		before,
+		after,
+		between,
+		skip,
+		take,
+		sortBy,
+		order,
+	});
+
+	const parsed = userArrayResponseSchema.parse(friends);
+	return reply.code(200).send(parsed);
+}
+
+export async function addFriendHandler(
+	request: FastifyRequest<{
+		Params: { id: string };
+		Body: addFriendInput;
+	}>,
+	reply: FastifyReply,
+) {
+	const { id } = request.params;
+	const { targetUserId } = request.body;
+
+	const newFriend = await addFriend(id, targetUserId);
+	const parsed = userResponseSchema.parse(newFriend);
+	return reply.code(201).send(parsed);
+}
+
+export async function deleteFriendHandler(
+	request: FastifyRequest<{
+		Params: { id: string; targetUserId: string };
+	}>,
+	reply: FastifyReply,
+) {
+	await deleteFriend(request.params.id, request.params.targetUserId);
+	return reply.code(204).send();
 }

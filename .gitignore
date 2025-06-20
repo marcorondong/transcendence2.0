@@ -187,3 +187,10 @@ atlassian-ide-plugin.xml
 ############################ Operating System Files ###########################
 .DS_Store
 Thumbs.db
+
+############################## Playwright #####################################
+**/playwright-report/
+**/test-results/
+**/blob-report/
+**/playwright/.cache/
+**/ete_tests/screenshots/

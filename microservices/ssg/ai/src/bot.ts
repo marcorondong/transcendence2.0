@@ -1,11 +1,15 @@
 import { WebSocket } from "ws";
-import { PongField } from "./PongField";
-import { Point } from "./Point";
+import { PongField } from "../imports/PongField";
+import { Point } from "../imports/Point";
 import {
 	distanceBetweenPoints,
 	findIntersectionWithVerticalLine,
 	roundTo,
-} from "./geometryUtils";
+	sleep,
+} from "./utils";
+import { paddleTwistSelector, GameState, Score } from "./config";
+
+const field = new PongField();
 
 export class Bot {
 	//game dimensions
@@ -13,13 +17,17 @@ export class Bot {
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
+	private readonly MANDATORY_SPEED = 1000 / this.FRAME_RATE;
+	private readonly BALL_RADIUS = 0.075;
+	private readonly AVG_BOUNCE_GAP = 0.03; // the average distance between the ball and the paddle when it bounces
 
 	//room info
-	private readonly difficulty: number;
-	private readonly roomId: string;
-	private readonly port: string;
-	private readonly host: string;
-	private readonly side: number;
+	private readonly difficulty: string;
+	private readonly botSpeed: number;
+	private readonly port = "3010";
+	private readonly host = "pong-api";
+	private side: number;
+	private roomId: string = "";
 	private ws: WebSocket | null;
 
 	//dynamic game state
@@ -28,44 +36,49 @@ export class Bot {
 	private target: Point;
 	private framesUntilTarget: number;
 	private framesAfterTarget: number;
-	private moveCommand = { move: ""};
+	private moveCommand = { move: "" };
 	private leftScore = 0;
 	private rightScore = 0;
 	private paddleY = 0;
 	private movePaddleTo = 0;
-	private paddleHeight = 0;
-	private countdown = this.FRAME_RATE;
+	private paddleHeight = 1;
+	private welcomeFrames = true;
+	private disconnectTimeout = 10000;
+	private handlingBlocked = false;
 
 	constructor(initializers: any) {
+		console.log(initializers);
 		//room info
-		this.difficulty = difficultySelector.get(initializers.difficulty) ?? 1000 / 60;
-		this.roomId = initializers.roomId;
-		this.port = initializers.port ?? "3010";
-		this.host = initializers.host ?? "pong-api";
-		this.side =
-			initializers.side === "left"
-				? field.LEFT_EDGE_X + this.PADDLE_GAP
-				: field.RIGHT_EDGE_X - this.PADDLE_GAP;
+		this.difficulty = initializers.difficulty ?? "normal";
+		this.botSpeed =
+			initializers.mode === "mandatory" ? this.MANDATORY_SPEED : 0;
+		this.roomId =
+			(initializers.roomId && initializers.roomId != "") ||
+			initializers.mode === "mandatory"
+				? initializers.roomId
+				: "public";
+		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP;
 		this.ws = null;
 
 		//dynamic game state
-		this.paddleTwist =
-			paddleTwistSelector.get(initializers.difficulty) ?? 0;
-		this.lastBall = new Point(0, 0);
-		this.target = new Point(field.LEFT_EDGE_X + this.PADDLE_GAP, 0);
-		this.framesUntilTarget = Math.round(
-			Math.abs(this.target.getX()) / this.BALL_SPEED,
-		);
-		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
+		this.paddleTwist = paddleTwistSelector[this.difficulty] ?? 0;
+		this.lastBall = new Point(-6, 0);
+		this.target = new Point(Math.abs(this.side), 0);
+		this.framesUntilTarget = this.FRAME_RATE;
+		this.framesAfterTarget = 0;
 	}
 
-	public playGame() {
-		this.ws = new WebSocket(`ws://${this.host}:${this.port}/pong-api/pong/singles`);
+	public playGame(cookie: string) {
+		this.ws = new WebSocket(
+			`ws://${this.host}:${this.port}/${this.host}/pong/singles?roomId=${this.roomId}`,
+			{ headers: { Cookie: cookie } },
+		);
 		try {
 			this.ws.on("open", () => {
 				console.log(
 					`Connected to Pong WebSocket at ${this.host}:${this.port} for room ${this.roomId}`,
 				);
+				this.checkTimeout();
 			});
 
 			this.ws.on("error", (event: any) => {
@@ -82,39 +95,60 @@ export class Bot {
 			});
 
 			this.ws.on("message", (event: any) => {
-				this.handleEvent(event);
+				if (this.welcomeFrames) {
+					this.readWelcomeFrames(event);
+				} else if (this.handlingBlocked === false) {
+					this.handlingBlocked = true;
+					this.handleEvent(event);
+					setTimeout(() => {
+						this.handlingBlocked = false;
+					}, 998);
+				}
 			});
 		} catch (error) {
-			console.error(`WebSocket at ${this.host}:${this.port}:`, error);
+			console.error(`WebSocket at ${this.host}:${this.port}: `, error);
+			throw error;
 		}
 	}
 
-	public handleEvent(event: object) {
-		if (--this.countdown) return;
+	/*************************************************************************** */
+	/*                          TIME + MESSAGE HANDLING                          */
+	/*************************************************************************** */
 
-		const gameState = JSON.parse(event.toString());
-		console.log(gameState);
-
-		const ballPosition = new Point(
-			roundTo(gameState.ball.x, 2),
-			roundTo(gameState.ball.y, 2),
-		);
-		this.paddleY =
-			this.side < 0
-				? roundTo(gameState.leftPaddle.y, 2)
-				: roundTo(gameState.rightPaddle.y, 2);
-		if (this.paddleTwist >= gameState.leftPaddle.height / 2)
-			this.paddleTwist *= gameState.leftPaddle.height;
-		this.countdown = this.FRAME_RATE;
-
-		this.handleScore(gameState.score);
-		this.calculateTarget(ballPosition);
-		this.logAIState();
-
-		if (this.paddleY != this.movePaddleTo) this.makeMove(this.difficulty);
-		else this.twistBall(this.paddleTwist);
+	private resetTimeout() {
+		this.disconnectTimeout = 10000; // reset the timeout to 10 seconds
 	}
 
+	//if no activity, close the connection
+	private async checkTimeout() {
+		if (!this.ws) return;
+		while (this.disconnectTimeout > 0) {
+			this.disconnectTimeout = 0;
+			await sleep(10000);
+		}
+		console.log("Game is inactive, terminating ", this.roomId);
+		console.timeEnd("time since welcome frame");
+		this.ws.terminate();
+	}
+
+	private readWelcomeFrames(event: object) {
+		console.time("time since welcome frame");
+		const roomInfo = JSON.parse(event.toString());
+		console.log("first frame: ", roomInfo);
+		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
+			this.roomId = roomInfo.roomId;
+		}
+		if (Object.getOwnPropertyNames(roomInfo).includes("matchStatus")) {
+			let status = roomInfo.matchStatus;
+			if (status.includes("Left") || status.includes("left"))
+				this.side =
+					field.LEFT_EDGE_X + this.PADDLE_GAP + this.AVG_BOUNCE_GAP;
+			if (status.includes("Game is running")) this.welcomeFrames = false;
+		}
+	}
+
+	// send the necessary amount of moves to ws to get to the calculated target
+	// taking into account the paddle twist and the user movement speed
 	private async makeMove(delay: number) {
 		if (!this.ws) return;
 		this.moveCommand.move =
@@ -138,6 +172,35 @@ export class Bot {
 		}
 	}
 
+	/*************************************************************************** */
+	/*                              ALGORITHM                                    */
+	/*************************************************************************** */
+
+	// check game state, calculate target based on the last known positions, and send moves
+	public async handleEvent(event: object) {
+		this.resetTimeout();
+
+		const gameState = JSON.parse(event.toString()) as GameState;
+
+		const ballPosition = new Point(gameState.ball.x, gameState.ball.y);
+		this.logGameState(gameState);
+		this.updatePaddle(gameState);
+		this.handleScore(gameState.score);
+		this.calculateTarget(ballPosition);
+		this.logAIState();
+
+		if (this.paddleY != this.movePaddleTo) this.makeMove(this.botSpeed);
+		else this.twistBall(this.paddleHeight / 2 - this.BALL_RADIUS);
+	}
+
+	private calculateTarget(ballPosition: Point) {
+		this.provisionalTarget(ballPosition);
+		this.calculateFrames(ballPosition);
+		this.updateLastBall(ballPosition);
+		this.finalTarget();
+		this.whereToMovePaddle();
+	}
+
 	//the point of this function is for the AI to leave the middle
 	private async twistBall(twist: number) {
 		if (!this.ws) return;
@@ -145,14 +208,30 @@ export class Bot {
 
 		do {
 			this.ws.send(JSON.stringify(this.moveCommand));
-			await sleep(this.difficulty);
+			await sleep(this.botSpeed);
 		} while ((twist -= this.STEP) > 0);
 	}
 
+	private updatePaddle(gameState: GameState) {
+		this.paddleY =
+			this.side < 0
+				? roundTo(gameState.leftPaddle.y, 2)
+				: roundTo(gameState.rightPaddle.y, 2);
+
+		this.paddleHeight =
+			this.side < 0
+				? gameState.leftPaddle.height
+				: gameState.rightPaddle.height;
+
+		if (this.paddleTwist >= this.paddleHeight / 2)
+			this.paddleTwist *= this.paddleHeight;
+	}
+
+	// if someone scored, the ball starts in the middle -> update the last ball position
 	private resetLastBallAfterGoal(x: number) {
 		let lastBallCorrection =
-			this.framesUntilTarget * this.BALL_SPEED + this.PADDLE_GAP;
-		if (x > 0) lastBallCorrection = -lastBallCorrection;
+			this.framesUntilTarget * this.BALL_SPEED + this.PADDLE_GAP * 2;
+		if (x > 0) lastBallCorrection *= -1;
 		this.lastBall.setX(lastBallCorrection);
 		this.lastBall.setY(0);
 	}
@@ -164,14 +243,18 @@ export class Bot {
 		this.calculateFrames(this.lastBall);
 	}
 
-	private handleScore(score: any) {
-		while (score.leftGoals !== this.leftScore) {
+	private handleScore(score: Score) {
+		while (score.leftTeam.goals !== this.leftScore) {
 			this.leftScore++;
-			this.resetAfterGoal(field.RIGHT_EDGE_X - this.PADDLE_GAP); //if left side scored, ball will go to the right
+			this.resetAfterGoal(
+				field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP,
+			); //if left side scored, ball will go to the right
 		}
-		while (score.rightGoals !== this.rightScore) {
+		while (score.rightTeam.goals !== this.rightScore) {
 			this.rightScore++;
-			this.resetAfterGoal(field.LEFT_EDGE_X + this.PADDLE_GAP);
+			this.resetAfterGoal(
+				field.LEFT_EDGE_X + this.PADDLE_GAP + this.AVG_BOUNCE_GAP,
+			); //if right side scored, ball will go to the left
 		}
 	}
 
@@ -191,11 +274,16 @@ export class Bot {
 		return new Point(this.lastBall.getX(), this.lastBall.getY());
 	}
 
+	// calculate the intersection of the ball vector and either paddle line
+	// based on the current ball position, the last known target and the last known ball position
+	// disregard the table top and bottom for now
 	private provisionalTarget(ballPosition: Point) {
 		const origin = this.ballVectorOrigin();
+
 		const distance = distanceBetweenPoints(origin, ballPosition);
-		if (this.ballBounced(distance))
+		if (this.ballBounced(distance)) {
 			ballPosition.setY(this.accountForBounce(ballPosition.getY()));
+		}
 		if (this.ballHitPaddle()) this.target.setX(-this.target.getX());
 		this.target.setY(
 			findIntersectionWithVerticalLine(
@@ -207,7 +295,7 @@ export class Bot {
 	}
 
 	private calculateFrames(ballPosition: Point) {
-		this.framesUntilTarget = Math.round(
+		this.framesUntilTarget = Math.floor(
 			distanceBetweenPoints(ballPosition, this.target) / this.BALL_SPEED,
 		);
 		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
@@ -218,58 +306,78 @@ export class Bot {
 		this.lastBall.setY(ballPosition.getY());
 	}
 
-	private calculateTarget(ballPosition: Point) {
-		this.provisionalTarget(ballPosition);
-		this.calculateFrames(ballPosition);
+	private finalTarget() {
 		while (
 			this.target.getY() > field.TOP_EDGE_Y ||
 			this.target.getY() < field.BOTTOM_EDGE_Y
 		)
 			this.target.setY(this.accountForBounce(this.target.getY()));
+	}
+
+	private whereToMovePaddle() {
 		this.movePaddleTo =
 			this.target.getX() === this.side ? this.target.getY() : 0;
-		this.updateLastBall(ballPosition);
+		if (this.canReachTarget() === false) this.movePaddleTo = 0;
+	}
+
+	private canReachTarget(): boolean {
+		if (this.target.getX() !== this.side) return true;
+
+		let reachable = true;
+		if (Math.abs(this.side) < Math.abs(this.lastBall.getX())) {
+			reachable = false;
+		} else if (
+			this.botSpeed !== 0 &&
+			this.framesUntilTarget <
+				(this.movePaddleTo -
+					this.paddleY -
+					this.paddleHeight / 2 -
+					this.BALL_RADIUS / 2) /
+					this.STEP // the number of frames to reach our target
+		) {
+			reachable = false;
+		}
+		return reachable;
 	}
 
 	private ballBounced(distance: number): boolean {
 		const expectedDistance = this.ballHitPaddle()
 			? this.framesAfterTarget
 			: this.FRAME_RATE;
-		console.log(Math.round(distance / this.BALL_SPEED));
-		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // magic number to account for one or two dropped frames
+		this.logBounce(distance, expectedDistance);
+		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // to account for bounce calculation on server side
 	}
+
+	/*************************************************************************** */
+	/*                              LOGGING                                      */
+	/*************************************************************************** */
 
 	private logAIState() {
 		let AIState = {
-			lastBall: { x: this.lastBall.getX(), y: this.lastBall.getY() },
-			target: { x: this.target.getX(), y: this.target.getY() },
+			target: {
+				x: roundTo(this.target.getX(), 2),
+				y: roundTo(this.target.getY(), 2),
+			},
 			framesUntilTarget: this.framesUntilTarget,
 			framesAfterTarget: this.framesAfterTarget,
 			ballHitPaddle: this.ballHitPaddle(),
-			paddleTwist: this.paddleHeight,
+			movePaddleTo: roundTo(this.movePaddleTo, 2),
 		};
-		console.log(AIState);
+		console.log("AIState: ", AIState);
+	}
+
+	private logBounce(distance: number, expectedDistance: number) {
+		console.log(
+			"expected distance: ",
+			expectedDistance,
+			" distance: ",
+			Math.round(distance / this.BALL_SPEED),
+		);
+	}
+
+	private logGameState(gameState: GameState) {
+		console.log("score: ", gameState.score);
+		console.log("ball at: ", gameState.ball);
+		console.timeLog("time since welcome frame");
 	}
 }
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-const field = new PongField();
-
-//difficulty number = delay between AI moves in ms
-const difficultySelector = new Map<string, number>([
-	["easy", 24],
-	["medium", 1000 / 60],
-	["hard", 8],
-	["insane", 0],
-]);
-
-//the AI will twist the ball. maximum twist = 0.5 a.k.a. half of paddle height
-const paddleTwistSelector = new Map<string, number>([
-	["easy", 0],
-	["medium", 0.1],
-	["hard", 0.25],
-	["insane", 0.45],
-]);

@@ -34,6 +34,9 @@ class HomeView extends HTMLElement {
 				play: [
 					{ value: "public", label: "Play Random Opponent" },
 					{ value: "private", label: "Play Friend" },
+					{ value: "easy", label: "Play Easy AI" },
+					{ value: "normal", label: "Play Normal AI" },
+					{ value: "hard", label: "Play Hard AI" },
 				],
 			},
 			{

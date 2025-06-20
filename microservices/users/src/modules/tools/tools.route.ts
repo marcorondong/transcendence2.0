@@ -3,7 +3,7 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
 import { SwaggerOptions } from "@fastify/swagger";
-import { getConfig } from "../../utils/config";
+import getConfig from "../../utils/config";
 
 export async function setupSwagger(server: FastifyInstance) {
 	const { APP_VERSION, APP_NAME, APP_DESCRIPTION, NODE_ENV } = getConfig();

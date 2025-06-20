@@ -60,6 +60,22 @@ export type UserField = Partial<
 	Record<UserPublicField, string | number | Date>
 >;
 
+// Type definition for query options
+export type UserQueryOptions = {
+	where?: UserField; // To filter by UserField
+	filterIds?: string[]; // To filter by array of IDs
+	useFuzzy?: boolean; // To allow partial matches
+	useOr?: boolean; // To allow OR logic
+	dateTarget?: "createdAt" | "updatedAt" | "both";
+	before?: Date;
+	after?: Date;
+	between?: [Date, Date];
+	skip?: number; // To skip the first n entries
+	take?: number; // To limit the number of returned entries
+	sortBy?: UserPublicField; // To sort by id, email, username, nickname, createdAt, updatedAt
+	order?: SortDirection; // to order asc/desc
+};
+
 // Helper function to convert empty strings to undefined (Protection against invalid queries)
 const blankToUndefined = <T extends z.ZodTypeAny>(
 	schema: T,
@@ -217,11 +233,10 @@ export const userResponseSchema = z.object({
 });
 
 // Schema to get a user by ID
+// It doesn't use blankToUndefined because I need to enforce id presence
 export const userIdParamSchema = z
 	.object({
-		id: blankToUndefined(
-			z.string().uuid().describe("User ID (UUID format)"),
-		),
+		id: z.string().uuid().describe("User ID (UUID format)"),
 	})
 	.strict(); // Rejects unknown fields
 
@@ -298,11 +313,25 @@ export const loginResponseSchema = tokenPayloadSchema.describe(
 // Schema for array of users (for list responses)
 export const userArrayResponseSchema = z.array(userResponseSchema);
 
+const ARRAY_STRICT_MODE = false; // For toggling reject/allow single items in filterIds (it's an array, so there should be more than 1 item)
+
 // Base schema for query parameters
 // Note that all fields will be marked with '.optional()' and "coerced"
 // by getUsersQuerySchema = sanitizeQuerySchema(baseGetUsersQuerySchema);
 const baseGetUsersQuerySchema = z.object({
 	id: z.string().describe("Find users by user ID (UUID)"),
+	filterIds: ARRAY_STRICT_MODE // REJECT/ALLOW single items in filterIds (array of user ids)
+		? z
+				.array(z.string().uuid())
+				.describe("Filter users by UUIDs (array format)")
+		: z
+				.preprocess(
+					(val) => (typeof val === "string" ? [val] : val),
+					z.array(z.string().uuid()),
+				)
+				.describe(
+					"Filter users by UUIDs (supports single or multiple values)",
+				),
 	email: z.string().describe("Find users by email"),
 	username: z.string().describe("Find users by username"),
 	nickname: z.string().describe("Find users by nickname"),
@@ -319,7 +348,7 @@ const baseGetUsersQuerySchema = z.object({
 	// TODO: Make this as a type, and same for before, after and between
 	dateTarget: z
 		.enum(["createdAt", "updatedAt", "both"])
-		.default("createdAt")
+		// .default("createdAt")
 		.describe("Choose which date field to apply filters to"),
 	before: z
 		.preprocess((val) => new Date(val as string), z.date())
@@ -364,14 +393,38 @@ const baseGetUsersQuerySchema = z.object({
 		.min(1)
 		.describe("Page number to use for pagination (starts at 1)"),
 	all: z.boolean().describe("If true, return all results without pagination"),
-	sortBy: userSortByEnum.default("createdAt"),
-	order: sortDirectionEnum.default("asc"),
+	sortBy: userSortByEnum, //.default("createdAt"),
+	order: sortDirectionEnum, //.default("asc"),
 });
 
 // Refined schema for query parameters to find users
 export const getUsersQuerySchema = sanitizeQuerySchema(
 	baseGetUsersQuerySchema,
 ).strict(); // Rejects unknown fields
+
+// Schema for adding friends (addFriend)
+export const addFriendSchema = z
+	.object({
+		targetUserId: z
+			.string()
+			.uuid()
+			.describe("Target user ID (UUID format)"),
+	})
+	.strict();
+
+// Schema for removing friends (removeFriend)
+// It doesn't use blankToUndefined because I need to enforce id presence
+export const targetUserIdParamSchema = z
+	.object({
+		targetUserId: z.string().uuid().describe("User ID (UUID format)"),
+	})
+	.strict(); // Rejects unknown fields
+
+// // TODO: Maybe I can use userArrayResponseSchema instead?
+// // Schema for user friends
+// export const userFriendsResponseSchema = z.object({
+// 	friends: z.array(userResponseSchema),
+// });
 
 // Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
 export const emptyResponseSchema = z
@@ -380,10 +433,17 @@ export const emptyResponseSchema = z
 
 export const errorResponseSchema = z.object({
 	statusCode: z.number().describe("HTTP status code"),
-	error: z
-		.string()
-		.describe("Short title describing the error (e.g., 'Not Found')"),
+	code: z.string().describe("Error string code"),
 	message: z.string().describe("Detailed message about the error"),
+	// Don't send these. Already printed in the terminal.
+	// If I send them, I'm exposing internal code structure.
+	// service: z.string().describe("Service that threw the error"),
+	// type: z.string().describe("Error type/class"),
+	// handler: z
+	// 	.string()
+	// 	.describe("Function that caught the error (handler function)"),
+	// stack: z.string().describe("stack calls"),
+	// nestedCause: z.any().describe("Original error object or nested AppError"),
 });
 
 // TypeScript types inferred from schemas
@@ -393,3 +453,4 @@ export type updateUserPutInput = z.infer<typeof putUserSchema>;
 export type updateUserPatchInput = z.infer<typeof patchUserSchema>;
 export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
+export type addFriendInput = z.infer<typeof addFriendSchema>;
