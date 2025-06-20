@@ -77,6 +77,7 @@ async function userRoutes(server: FastifyInstance) {
 		},
 		appErrorHandler(registerUserHandler),
 	);
+
 	// 2. Log in to get authorization token (to access private/authenticated routes)
 	server.post(
 		"/login",
@@ -257,7 +258,6 @@ async function userRoutes(server: FastifyInstance) {
 		appErrorHandler(pictureHandler),
 	);
 
-	// TODO: Add pagination to this
 	// 9. Get all user friends by ID
 	server.get(
 		"/:id/friends",

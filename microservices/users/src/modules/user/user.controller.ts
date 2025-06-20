@@ -4,7 +4,6 @@ import path from "path";
 import { pipeline } from "stream/promises";
 import {
 	UniqueUserField,
-	UserQueryOptions,
 	createUserInput,
 	userResponseSchema,
 	loginInput,
@@ -145,7 +144,6 @@ function applyPagination(params: {
 
 	// Enforce that both `page` and `skip` are not allowed together
 	if (typeof params.page === "number" && typeof params.skip === "number") {
-		// TODO: Use AppError here
 		// throw new Error("Cannot use both 'page' and 'skip' in the same query");
 		throw new AppError({
 			statusCode: 400,
@@ -372,29 +370,6 @@ export async function pictureHandler(
 	return reply.code(200).send(parsed);
 }
 
-// export async function getFriendsHandler(
-// 	request: FastifyRequest<{ Params: { id: string } }>,
-// 	reply: FastifyReply,
-// ) {
-// 	const friends = await getUserFriends(request.params.id);
-// 	const parsed = userArrayResponseSchema.parse(friends);
-// 	return reply.code(200).send(parsed);
-// }
-
-// TODO: Duplicated omit (here and in service)
-// TODO: THe query is not working
-// export async function getFriendsHandler(
-// 	request: FastifyRequest<{
-// 		Params: { id: string };
-// 		Querystring: Omit<UserQueryOptions, "filterIds" | "where">;
-// 	}>,
-// 	reply: FastifyReply,
-// ) {
-// 	const friends = await getUserFriends(request.params.id, request.query);
-// 	const parsed = userArrayResponseSchema.parse(friends);
-// 	return reply.code(200).send(parsed);
-// }
-
 export async function getFriendsHandler(
 	request: FastifyRequest<{
 		Params: { id: string };
@@ -460,19 +435,6 @@ export async function getFriendsHandler(
 	return reply.code(200).send(parsed);
 }
 
-// export async function addFriendHandler(
-// 	request: FastifyRequest<{
-// 		Params: { id: string };
-// 		Body: addFriendInput;
-// 	}>,
-// 	reply: FastifyReply,
-// ) {
-// 	await addFriend(request.params.id, request.body.targetUserId);
-// 	// const friends = await getUserFriends(request.params.id);
-// 	const friends = await getUserFriends(request.params.id, {}); // Send an empty query to return all user's friends (paginated by default)
-// 	const parsed = userArrayResponseSchema.parse(friends);
-// 	return reply.code(201).send(parsed);
-// }
 export async function addFriendHandler(
 	request: FastifyRequest<{
 		Params: { id: string };
@@ -488,7 +450,6 @@ export async function addFriendHandler(
 	return reply.code(201).send(parsed);
 }
 
-// TODO: Should I still return the updated friends array, or 204 instead?
 export async function deleteFriendHandler(
 	request: FastifyRequest<{
 		Params: { id: string; targetUserId: string };
@@ -496,9 +457,5 @@ export async function deleteFriendHandler(
 	reply: FastifyReply,
 ) {
 	await deleteFriend(request.params.id, request.params.targetUserId);
-	// // const friends = await getUserFriends(request.params.id);
-	// const friends = await getUserFriends(request.params.id, {}); // Send an empty query to return all user's friends (paginated by default)
-	// const parsed = userArrayResponseSchema.parse(friends);
-	// return reply.code(200).send(parsed);
 	return reply.code(204).send();
 }

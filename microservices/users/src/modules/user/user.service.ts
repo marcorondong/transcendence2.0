@@ -5,10 +5,7 @@ import prisma from "../../utils/prisma";
 import {
 	createUserInput,
 	UpdateUserData,
-	SortDirection, // TODO: Remove the unused ones
-	UserPublicField,
 	UniqueUserField,
-	UserField,
 	UserQueryOptions,
 } from "./user.schema";
 
@@ -132,7 +129,6 @@ export async function findUserByUnique(where: UniqueUserField) {
 	}
 }
 
-// TODO: MR: Check if I can avoid using keyword `any`
 // Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function findUsers(options: UserQueryOptions = {}) {
 	// Remove undefined fields from the full options object
@@ -386,135 +382,7 @@ export async function updateUserPicture(id: string, picturePath: string) {
 	}
 }
 
-// export async function getUserFriends(id: string) {
-// 	try {
-// 		await getUserOrThrow({ id }); // Ensure users exist
-// 		const friendships = await prisma.friendship.findMany({
-// 			where: {
-// 				OR: [{ user1Id: id }, { user2Id: id }],
-// 			},
-// 			include: {
-// 				user1: true,
-// 				user2: true,
-// 			},
-// 		});
-// 		return friendships.map((f) => (f.user1Id === id ? f.user2 : f.user1));
-// 	} catch (err) {
-// 		// Known/Expected errors bubble up to controller as AppError (custom error)
-// 		if (err instanceof Prisma.PrismaClientKnownRequestError) {
-// 			throw new AppError({
-// 				statusCode: 400,
-// 				code: FRIENDSHIP_ERRORS.GET,
-// 				message: "Failed to fetch friends",
-// 			});
-// 		}
-// 		if (err instanceof AppError) throw err;
-// 		// Unknown errors bubble up to global error handler.
-// 		throw err;
-// 	}
-// }
-
-// export async function getUserFriends(
-// 	id: string,
-// 	query: Omit<UserQueryOptions, "filterIds" | "where">,
-// ) {
-// export async function getUserFriends(id: string, query: UserQueryOptions) {
-// 	try {
-// 		await getUserOrThrow({ id }); // Ensure user exists
-
-// 		// Step 1: Get all friendship relations for the user
-// 		const friendships = await prisma.friendship.findMany({
-// 			where: {
-// 				OR: [{ user1Id: id }, { user2Id: id }],
-// 			},
-// 			select: {
-// 				user1Id: true,
-// 				user2Id: true,
-// 			},
-// 		});
-// 		const friendIds = friendships.map((f) =>
-// 			f.user1Id === id ? f.user2Id : f.user1Id,
-// 		);
-// 		if (!friendIds.length) {
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: FRIENDSHIP_ERRORS.NOT_FOUND,
-// 				message: "User has no friends",
-// 			});
-// 		}
-// 		// Step 2: Use existing logic from findUsers to apply query filters
-// 		return await findUsers({
-// 			...query,
-// 			filterIds: friendIds,
-// 		});
-// 	} catch (err) {
-// 		// Known/Expected errors bubble up to controller as AppError (custom error)
-// 		if (err instanceof AppError) throw err;
-// 		// Unknown errors bubble up to global error handler.
-// 		throw err;
-// 	}
-// }
-
-// export async function getUserFriends(id: string, query: UserQueryOptions) {
-// 	try {
-// 		await getUserOrThrow({ id }); // Ensure user exists
-
-// 		// Step 1: Get all friendship relations for the user
-// 		const friendships = await prisma.friendship.findMany({
-// 			where: {
-// 				OR: [{ user1Id: id }, { user2Id: id }],
-// 			},
-// 			select: {
-// 				user1Id: true,
-// 				user2Id: true,
-// 			},
-// 		});
-// 		const friendIds = friendships.map((f) =>
-// 			f.user1Id === id ? f.user2Id : f.user1Id,
-// 		);
-// 		if (!friendIds.length) {
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: FRIENDSHIP_ERRORS.NOT_FOUND,
-// 				message: "User has no friends",
-// 			});
-// 		}
-
-// 		// Step 2: Normalize incoming filters (id + filterIds)
-// 		const { where = {}, filterIds: queryFilterIds, ...restQuery } = query;
-
-// 		const requestedIds = new Set<string>();
-// 		if (where.id) requestedIds.add(where.id as string);
-// 		if (queryFilterIds?.length)
-// 			queryFilterIds.forEach((id) => requestedIds.add(id));
-
-// 		const finalIds =
-// 			requestedIds.size > 0
-// 				? Array.from(friendIds).filter((id) => requestedIds.has(id))
-// 				: friendIds;
-
-// 		if (!finalIds.length) {
-// 			throw new AppError({
-// 				statusCode: 404,
-// 				code: FRIENDSHIP_ERRORS.NOT_FOUND,
-// 				message: "No matching friends found",
-// 			});
-// 		}
-
-// 		// Step 3: Use existing logic from findUsers to apply query filters
-// 		return await findUsers({
-// 			...restQuery,
-// 			where,
-// 			filterIds: finalIds,
-// 		});
-// 	} catch (err) {
-// 		// Known/Expected errors bubble up to controller as AppError (custom error)
-// 		if (err instanceof AppError) throw err;
-// 		// Unknown errors bubble up to global error handler.
-// 		throw err;
-// 	}
-// }
-
+// Function for searching user's friends. It supports OR (`useOr`) and fuzzy search (`contains`)
 export async function getUserFriends(id: string, query: UserQueryOptions) {
 	try {
 		await getUserOrThrow({ id }); // Ensure user exists
@@ -689,21 +557,3 @@ export async function deleteFriend(userId: string, targetUserId: string) {
 		throw err;
 	}
 }
-
-// Helper function for future-proof (modifying the Friendship table externally, etc)
-// export async function getFriendshipId(
-// 	userId: string,
-// 	targetUserId: string,
-// ): Promise<string | null> {
-// 	if (userId === targetUserId) return null;
-
-// 	const [user1Id, user2Id] =
-// 		userId < targetUserId ? [userId, targetUserId] : [targetUserId, userId];
-
-// 	const friendship = await prisma.friendship.findFirst({
-// 		where: { user1Id, user2Id },
-// 		select: { id: true },
-// 	});
-
-// 	return friendship?.id || null;
-// }
