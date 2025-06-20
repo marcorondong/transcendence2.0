@@ -10,6 +10,7 @@ const envZodSchema = z.object({
 	AUTH_API_REFRESH_JWT_STATIC: z.string().nonempty(),
 	AUTH_API_VERIFY_CONNECTION_STATIC: z.string().nonempty(),
 	AUTH_API_BOT_JWT_STATIC: z.string().nonempty(),
+	AUTH_API_UPDATE_JWT_STATIC: z.string().nonempty(),
 	AUTH_API_USERS_STATIC: z.string().nonempty(),
 	AUTH_API_HEALTH_CHECK_STATIC: z.string().nonempty(),
 	AUTH_API_DOCUMENTATION_STATIC: z.string().nonempty(),

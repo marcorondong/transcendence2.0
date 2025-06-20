@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import {
 	signInRequest,
 	signUpRequest,
+	getUserRequest,
 	editProfileRequest,
 	updateProfileRequest,
 	deleteUserRequest,
@@ -11,7 +12,7 @@ import { env } from "../utils/env";
 import * as cookieSignature from "cookie-signature";
 import { cookieSecret } from "../utils/options";
 import { payloadZodSchema } from "./zodSchemas";
-import type { IdInput } from "./zodSchemas";
+import type { IdInput, PayloadInput } from "./zodSchemas";
 
 export async function signInHandler(
 	request: FastifyRequest<{ Body: unknown }>,
@@ -90,9 +91,38 @@ export async function botJWTHandler(
 	reply: FastifyReply,
 ) {
 	const payload = { id: env.BOT_UUID, nickname: env.BOT_NICKNAME };
-	const raw_access_token = await reply.jwtSign(payload, jwtSignOpt);
-	const access_token = cookieSignature.sign(raw_access_token, cookieSecret);
-	reply.status(200).send({ [env.JWT_TOKEN_NAME]: access_token });
+	const rawAccessToken = await reply.jwtSign(payload, jwtSignOpt);
+	const accessToken = cookieSignature.sign(rawAccessToken, cookieSecret);
+	reply.status(200).send({ [env.JWT_TOKEN_NAME]: accessToken });
+}
+
+export async function updateJWTHandler(
+	request: FastifyRequest,
+	reply: FastifyReply,
+) {
+	const response = await getUserRequest(request.user.id);
+	const data = await response.json();
+	if (!response.ok) {
+		reply.log.warn(
+			{ Response: data, User: request.user },
+			"getUserRequest() response not ok",
+		);
+		return reply.status(data.statusCode || 500).send(data);
+	}
+	const payload = payloadZodSchema.parse(data);
+	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
+	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
+	reply.status(200).send(data);
+}
+
+export async function updateJWTPatchHandler(
+	request: FastifyRequest<{ Body: PayloadInput }>,
+	reply: FastifyReply,
+) {
+	const payload = payloadZodSchema.parse(request.body);
+	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
+	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
+	reply.status(200).send(payload);
 }
 
 export async function editProfileHandler(

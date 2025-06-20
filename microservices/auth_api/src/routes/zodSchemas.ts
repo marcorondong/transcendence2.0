@@ -37,3 +37,4 @@ export const accessTokenZodSchema = z
 	.strict();
 
 export type IdInput = z.infer<typeof idZodSchema>;
+export type PayloadInput = z.infer<typeof payloadZodSchema>;

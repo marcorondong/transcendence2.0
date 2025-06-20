@@ -31,14 +31,12 @@ export const verifyJWTSchema = {
 	summary: "Verify",
 	description: "Verify a user. This will check if the token is valid.",
 	tags: ["Auth"],
-	response: { 200: payloadZodSchema },
 };
 
 export const refreshJWTSchema = {
 	summary: "Refresh",
 	description: "Refresh a user. This will refresh the token for the user.",
 	tags: ["Auth"],
-	response: { 200: payloadZodSchema },
 };
 
 export const verifyConnectionSchema = {
@@ -53,6 +51,19 @@ export const botJWTSchema = {
 	description: "Get the bot JWT. This will return the JWT for bot.",
 	tags: ["Auth"],
 	response: { 200: accessTokenZodSchema },
+};
+
+export const updateJWTSchema = {
+	summary: "Update JWT",
+	description: "Update the JWT for the user. This will update the token.",
+	tags: ["Auth"],
+};
+
+export const updateJWTPatchSchema = {
+	summary: "Update JWT with provided ID and Nickname",
+	description: "Update the JWT with the provided ID and Nickname.",
+	tags: ["Auth"],
+	body: payloadZodSchema,
 };
 
 export const editProfileSchema = {

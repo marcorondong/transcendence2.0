@@ -22,6 +22,13 @@ export async function signUpRequest(body: unknown) {
 	return response;
 }
 
+export async function getUserRequest(userId: unknown) {
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "GET",
+	});
+	return response;
+}
+
 export async function editProfileRequest(body: unknown, userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PATCH",

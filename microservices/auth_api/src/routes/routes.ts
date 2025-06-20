@@ -7,6 +7,8 @@ import {
 	refreshJWTOpt,
 	botJWTOpt,
 	verifyConnectionOpt,
+	updateJWTOpt,
+	updateJWTPatchOpt,
 	editProfileOpt,
 	updateProfileOpt,
 	deleteUserOpt,
@@ -22,8 +24,10 @@ export async function authRoutes(server: FastifyInstance) {
 	server.get(env.AUTH_API_REFRESH_JWT_STATIC, refreshJWTOpt);
 	server.get(env.AUTH_API_BOT_JWT_STATIC, botJWTOpt);
 	server.get(env.AUTH_API_VERIFY_CONNECTION_STATIC, verifyConnectionOpt);
-	server.patch(env.AUTH_API_USERS_STATIC, editProfileOpt);
-	server.put(env.AUTH_API_USERS_STATIC, updateProfileOpt);
-	server.delete(env.AUTH_API_USERS_STATIC, deleteUserOpt);
+	server.get(env.AUTH_API_UPDATE_JWT_STATIC, updateJWTOpt);
+	server.patch(env.AUTH_API_UPDATE_JWT_STATIC, updateJWTPatchOpt);
+	// server.patch(env.AUTH_API_USERS_STATIC, editProfileOpt);
+	// server.put(env.AUTH_API_USERS_STATIC, updateProfileOpt);
+	// server.delete(env.AUTH_API_USERS_STATIC, deleteUserOpt);
 	server.get(env.AUTH_API_HEALTH_CHECK_STATIC, healthCheckOpt);
 }

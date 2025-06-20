@@ -5,6 +5,8 @@ import {
 	verifyJWTSchema,
 	refreshJWTSchema,
 	verifyConnectionSchema,
+	updateJWTSchema,
+	updateJWTPatchSchema,
 	botJWTSchema,
 	editProfileSchema,
 	updateProfileSchema,
@@ -18,6 +20,8 @@ import {
 	verifyJWTHandler,
 	refreshJWTHandler,
 	verifyConnectionHandler,
+	updateJWTHandler,
+	updateJWTPatchHandler,
 	botJWTHandler,
 	editProfileHandler,
 	updateProfileHandler,
@@ -58,6 +62,16 @@ export const botJWTOpt = {
 export const verifyConnectionOpt = {
 	schema: verifyConnectionSchema,
 	handler: verifyConnectionHandler,
+};
+
+export const updateJWTOpt = {
+	schema: updateJWTSchema,
+	handler: updateJWTHandler,
+};
+
+export const updateJWTPatchOpt = {
+	schema: updateJWTPatchSchema,
+	handler: updateJWTPatchHandler,
 };
 
 export const editProfileOpt = {
