@@ -19,9 +19,9 @@ export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
 
 	if (!response.ok) {
 		// document.dispatchEvent(notificationEvent(response.statusText, "error"));
-		if (response.status === 401) {
-			document.dispatchEvent(signInLinkEvent);
-		}
+		// if (response.status === 401) {
+		// 	document.dispatchEvent(signInLinkEvent);
+		// }
 		throw new Error(`Response status: ${response.status}`);
 	}
 

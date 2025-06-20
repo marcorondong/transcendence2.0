@@ -12,26 +12,11 @@ services:
     networks:
       - Transcendence2.0
 
-  nginx:
-    image: nginx
-    build:
-      context: ./microservices/nginx/
-      dockerfile: ./Dockerfile
-    container_name: nginx
-    volumes:
-      - vite:/usr/share/nginx/html
-      - user_pictures:/usr/share/nginx/html/uploads # Users pictures (Shared with Nginx)
-      - ./microservices/nginx/config/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "8080:443"
-    restart: unless-stopped
-    networks:
-      - Transcendence2.0
-
 include:
   #TODO once all microservices will use LONG INCLUDE remove this short syntax
   - ./microservices/auth_api/docker-compose.yml
   - ./microservices/frontend/docker-compose.yml
+  - ./microservices/nginx/docker-compose.yml
   - ./monitoring/monitoring-docker-compose.yml
   - ./microservices/users/docker-compose.yml
   - ./microservices/pong_db/docker-compose.yml

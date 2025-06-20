@@ -140,7 +140,8 @@ export class UsersView extends HTMLElement {
 		if (pageFromQuery && pageFromQuery > 0 && pageFromQuery < 1000) {
 			this.page = pageFromQuery;
 		}
-		const urlBrowser = baseUrl + "/users-view?page=" + this.page;
+		// const urlBrowser = baseUrl + "/users-view?page=" + this.page;
+		const urlBrowser = "/users-view?page=" + this.page;
 		window.history.pushState({ path: urlBrowser }, "", urlBrowser);
 	}
 

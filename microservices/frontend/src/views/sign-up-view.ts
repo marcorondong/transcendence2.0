@@ -2,6 +2,7 @@ import { ChatComponent } from "../components/chat-component";
 import { Auth } from "../services/auth";
 import { homeLinkEvent, notificationEvent } from "../services/events";
 import { FetchAuth } from "../services/fetch-auth";
+import { validateSignUpForm } from "../services/validation";
 
 export class SignUpView extends HTMLElement {
 	chat: ChatComponent;
@@ -34,6 +35,66 @@ export class SignUpView extends HTMLElement {
 
 	connectedCallback() {
 		console.log("SIGNUP VIEW has been CONNECTED");
+		this.buildDomElements();
+		this.addEventListener("click", this);
+	}
+
+	disconnectedCallback() {
+		this.removeEventListener("click", this);
+		console.log("SIGNUP VIEW has been DISCONNECTED");
+	}
+
+	handleEvent(event: Event) {
+		const handlerName =
+			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
+		const handler = this[handlerName as keyof this];
+		if (typeof handler === "function") {
+			handler.call(this, event);
+		}
+	}
+
+	onClick(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target) {
+			return;
+		}
+
+		const button = target.closest("button");
+		if (button) {
+			this.handleSignUpButton(event, button);
+		}
+	}
+
+	async handleSignUpButton(e: MouseEvent, button: HTMLButtonElement) {
+		e.preventDefault();
+		if (button.id !== "signUpButton") {
+			return;
+		}
+
+		const data = {
+			email: this.inputEmail.value.trim(),
+			username: this.inputUsername.value.trim(),
+			nickname: this.inputNickname.value.trim(),
+			password: this.inputPassword.value.trim(),
+		};
+		try {
+			validateSignUpForm(data);
+			await FetchAuth.signUp(data);
+			Auth.toggleAuthClasses(true);
+			this.chat.openWebsocket();
+			document.dispatchEvent(
+				notificationEvent("You just signed up!", "success"),
+			);
+			document.dispatchEvent(homeLinkEvent);
+		} catch (e) {
+			console.log(e);
+			document.dispatchEvent(
+				notificationEvent("failed to sign up", "error"),
+			);
+		}
+	}
+
+	buildDomElements() {
 		this.classList.add("flex", "w-full", "items-center", "justify-center");
 		this.container.classList.add(
 			"flex",
@@ -97,6 +158,7 @@ export class SignUpView extends HTMLElement {
 		this.labelRePassword.append(this.inputRePassword);
 
 		this.signUpButton.innerText = "Register new account";
+		this.signUpButton.id = "signUpButton";
 		this.signUpButton.classList.add(
 			"pong-button",
 			"pong-button-info",
@@ -115,33 +177,6 @@ export class SignUpView extends HTMLElement {
 			this.signUpButton,
 		);
 		this.append(this.container);
-		this.signUpButton.addEventListener("click", async (e: MouseEvent) => {
-			e.preventDefault();
-			const data = {
-				email: this.inputEmail.value,
-				username: this.inputUsername.value,
-				nickname: this.inputNickname.value,
-				password: this.inputPassword.value,
-			};
-			try {
-				await FetchAuth.signUp(data);
-				Auth.toggleAuthClasses(true);
-				this.chat.openWebsocket();
-				document.dispatchEvent(
-					notificationEvent("You just signed up!", "success"),
-				);
-				document.dispatchEvent(homeLinkEvent);
-			} catch (e) {
-				console.log(e);
-				document.dispatchEvent(
-					notificationEvent("failed to sign up", "error"),
-				);
-			}
-		});
-	}
-
-	disconnectedCallback() {
-		console.log("SIGNUP VIEW has been DISCONNECTED");
 	}
 }
 customElements.define("sign-up-view", SignUpView);

@@ -1,6 +1,6 @@
 import { ChatComponent } from "./components/chat-component";
 import { Auth } from "./services/auth";
-import { notificationEvent } from "./services/events";
+import { notificationEvent, signInLinkEvent } from "./services/events";
 import { FetchAuth } from "./services/fetch-auth";
 import { baseUrl } from "./services/fetch";
 
@@ -38,7 +38,10 @@ export class Router {
 			Auth.toggleAuthClasses(true);
 			this.loadComponent();
 		} catch (e) {
+			this.chat.ws?.close();
+			this.chat.closeChat();
 			Auth.toggleAuthClasses(false);
+			document.dispatchEvent(signInLinkEvent);
 		}
 	}
 

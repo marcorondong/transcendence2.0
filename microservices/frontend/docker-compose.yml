@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: frontend:V1.0.0
+    image: frontend:1.0.0
     container_name: frontend
     build:
       context: .
@@ -12,10 +12,9 @@ services:
       # - NODE_ENV=production
     volumes:
       - .:/app
-      - vite:/app/dist
+      - vite_dist:/app/dist
     networks:
       - ${NETWORK_NAME}
     restart: unless-stopped
-
 volumes:
-  vite:
+  vite_dist:
