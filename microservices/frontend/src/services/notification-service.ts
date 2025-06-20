@@ -15,14 +15,21 @@ export class NotificationService {
 				notification.classList.add("pong-notification-success");
 				break;
 		}
-		this.notificationContainer?.appendChild(notification);
+		this.notificationContainer?.insertBefore(
+			notification,
+			this.notificationContainer.firstChild,
+		);
 		setTimeout(() => {
 			notification?.remove();
 		}, 4000);
 	}
 
 	listen() {
-		this.notificationContainer.classList.add("fixed", "top-10", "right-10");
+		this.notificationContainer.classList.add(
+			"fixed",
+			"bottom-10",
+			"left-10",
+		);
 		this.notificationContainer.id = "notification-container";
 		document.addEventListener("notification", (e) => {
 			if (e instanceof CustomEvent) {

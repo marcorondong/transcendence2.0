@@ -83,9 +83,6 @@ class ChatComponent extends HTMLElement {
 
 		// WEBSOCKET CONNECTION CLOSED
 		this.ws.onclose = () => {
-			document.dispatchEvent(
-				notificationEvent("chat websocket closed", "info"),
-			);
 			this.closeChat();
 		};
 

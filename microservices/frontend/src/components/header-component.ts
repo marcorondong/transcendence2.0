@@ -4,6 +4,7 @@ import { ThemeToggleComponent } from "./theme-toggle-component";
 
 export class HeaderComponent extends HTMLElement {
 	menuIcon = new IconComponent();
+	smallViewPort = window.matchMedia("(min-width: 640px)");
 
 	constructor() {
 		super();
@@ -14,6 +15,7 @@ export class HeaderComponent extends HTMLElement {
 
 		const logoAnchor = document.createElement("a");
 		logoAnchor.href = "/";
+		logoAnchor.id = "pongLogo";
 		const logo = document.createElement("img");
 		logo.classList.add("size-18", "rounded-lg");
 		logo.src = "/images/pong-logo.png";
@@ -37,7 +39,7 @@ export class HeaderComponent extends HTMLElement {
 
 		// CONTAINER FOR NAVIGATION
 		const navigation = document.createElement("nav");
-		navigation.classList.add("flex", "items-center", "gap-2", "sm:gap-4");
+		navigation.classList.add("flex", "items-center", "gap-4");
 		const menuButton = document.createElement("button");
 		menuButton.classList.add(
 			"pong-button",
@@ -114,7 +116,7 @@ export class HeaderComponent extends HTMLElement {
 		const listElement = document.createElement("li");
 		listElement.append(logoutButton);
 		listElement.classList.add("flex", "justify-center");
-		navigation.append(listElement);
+		menuList?.append(listElement);
 
 		// THEME TOGGLE
 		const themeToggle = new ThemeToggleComponent();
@@ -123,6 +125,7 @@ export class HeaderComponent extends HTMLElement {
 
 		// CLOSE BUTTON
 		const closeButton = document.createElement("button");
+		closeButton.id = "closeButton";
 		const closeIcon = new IconComponent("close", 6);
 		closeButton.append(closeIcon);
 		closeButton.classList.add(
@@ -157,6 +160,19 @@ export class HeaderComponent extends HTMLElement {
 				await FetchAuth.signOut();
 			} catch (e) {}
 		});
+
+		this.smallViewPort.addEventListener("change", (event) => {
+			if (event.matches) {
+				this.leavingSmallViewPort();
+			}
+		});
+	}
+
+	leavingSmallViewPort() {
+		const menuList = document.getElementById("menuList");
+		menuList?.classList.add("hidden");
+		const closeButton = document.getElementById("closeButton");
+		closeButton?.classList.add("hidden");
 	}
 
 	disconnectedCallback() {}

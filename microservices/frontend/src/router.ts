@@ -13,10 +13,9 @@ interface ViewModule {
 export class Router {
 	containerDiv = document.getElementById("content");
 	navLinks = document.querySelectorAll<HTMLAnchorElement>("#menuList a");
+	navLinkPongLogo = document.getElementById("pongLogo") as HTMLAnchorElement;
 	component: Node | null = null;
 	chat: ChatComponent;
-
-	navComponents: string[] = this.createComponentNames();
 
 	createComponentNames() {
 		const array: string[] = [];
@@ -25,9 +24,14 @@ export class Router {
 			const result = this.stringAfterSlash(str);
 			array.push(result);
 		}
+		if (this.navLinkPongLogo) {
+			array.push(this.navLinkPongLogo.href);
+		}
 
 		return array;
 	}
+
+	navComponents: string[] = this.createComponentNames();
 
 	async auth() {
 		this.clearContent();
@@ -90,6 +94,7 @@ export class Router {
 		for (const link of this.navLinks) {
 			link.addEventListener("click", this.handleRouterLink);
 		}
+		this.navLinkPongLogo.addEventListener("click", this.handleRouterLink);
 	}
 
 	clearContent() {
