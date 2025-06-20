@@ -8,6 +8,7 @@ import {
 	UniqueUserField,
 	UserQueryOptions,
 } from "./user.schema";
+import { logger } from "../../utils/logger";
 
 // Helper function to capitalize conflicting Prisma field
 function capitalize(str: string) {
@@ -248,11 +249,21 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		// console.log("✅ Step 5: Result", users);
 		// This is not-standard, but it's easier to check by the status code
 		if (!users.length) {
-			throw new AppError({
-				statusCode: 404,
-				code: USER_ERRORS.NOT_FOUND,
-				message: "No users found",
-			});
+			// throw new AppError({
+			// 	statusCode: 404,
+			// 	code: USER_ERRORS.NOT_FOUND,
+			// 	message: "No users found",
+			// });
+			logger.log(
+				{
+					"event.action": "findUsers",
+					"where": query,
+					"skip": skip,
+					"take": take,
+				},
+				"No users found that matches this criteria",
+			);
+			return users;
 		}
 		return users;
 	} catch (err) {
@@ -401,11 +412,19 @@ export async function getUserFriends(id: string, query: UserQueryOptions) {
 			f.user1Id === id ? f.user2Id : f.user1Id,
 		);
 		if (!friendIds.length) {
-			throw new AppError({
-				statusCode: 404,
-				code: FRIENDSHIP_ERRORS.NOT_FOUND,
-				message: "User has no friends",
-			});
+			// throw new AppError({
+			// 	statusCode: 404,
+			// 	code: FRIENDSHIP_ERRORS.NOT_FOUND,
+			// 	message: "User has no friends",
+			// });
+			logger.log(
+				{
+					"event.action": "getUserFriends",
+					"userId": id,
+				},
+				"User has no friends",
+			);
+			return [];
 		}
 
 		// Step 2: Extract filters from query
@@ -424,11 +443,20 @@ export async function getUserFriends(id: string, query: UserQueryOptions) {
 				: friendIds;
 
 		if (!finalIds.length) {
-			throw new AppError({
-				statusCode: 404,
-				code: FRIENDSHIP_ERRORS.NOT_FOUND,
-				message: "No matching friends found",
-			});
+			// throw new AppError({
+			// 	statusCode: 404,
+			// 	code: FRIENDSHIP_ERRORS.NOT_FOUND,
+			// 	message: "No matching friends found",
+			// });
+			logger.log(
+				{
+					"event.action": "getUserFriends",
+					"userId": id,
+					"where": query,
+				},
+				"User has no friends that matches this criteria",
+			);
+			return [];
 		}
 
 		// Step 4: Remove 'where.id' and pass only intersected filterIds

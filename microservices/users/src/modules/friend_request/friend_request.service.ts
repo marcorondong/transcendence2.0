@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { AppError, FRIEND_REQUEST_ERRORS } from "../../utils/errors";
+import { logger } from "../../utils/logger";
 import prisma from "../../utils/prisma";
 import {
 	getUserOrThrow,
@@ -287,11 +288,21 @@ export async function findFriendRequests(
 		// console.log("✅ Step 5: Result", users);
 		// This is not-standard, but it's easier to check by the status code
 		if (!friendRequests.length) {
-			throw new AppError({
-				statusCode: 404,
-				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
-				message: "No friend requests found",
-			});
+			// throw new AppError({
+			// 	statusCode: 404,
+			// 	code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
+			// 	message: "No friend requests found",
+			// });
+			logger.log(
+				{
+					"event.action": "findFriendRequests",
+					"where": query,
+					"skip": skip,
+					"take": take,
+				},
+				"No friend request found that matches this criteria",
+			);
+			return friendRequests;
 		}
 
 		return friendRequests;
