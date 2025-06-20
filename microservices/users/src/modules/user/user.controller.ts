@@ -13,9 +13,6 @@ import {
 	updateUserPutInput,
 	updateUserPatchInput,
 	addFriendInput,
-	addFriendSchema, // TODO: Check if I use these
-	targetUserIdParamSchema,
-	userIdParamSchema,
 } from "./user.schema";
 import {
 	createUser,
@@ -72,7 +69,7 @@ export async function loginHandler(
 	} else {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_LOGIN,
+			code: USER_ERRORS.LOGIN,
 			message: "Login requires a valid email or username",
 		});
 	}
@@ -87,7 +84,7 @@ export async function loginHandler(
 		if (!valid) {
 			throw new AppError({
 				statusCode: 401,
-				code: USER_ERRORS.USER_LOGIN,
+				code: USER_ERRORS.LOGIN,
 				message: "Invalid credentials",
 			});
 		}
@@ -104,7 +101,7 @@ export async function loginHandler(
 			// Change 404 Not Found to 401 Invalid credentials (Hide sensitive info)
 			throw new AppError({
 				statusCode: 401,
-				code: USER_ERRORS.USER_LOGIN,
+				code: USER_ERRORS.LOGIN,
 				message: "Invalid credentials",
 			});
 		}
@@ -147,8 +144,13 @@ function applyPagination(params: {
 
 	// Enforce that both `page` and `skip` are not allowed together
 	if (typeof params.page === "number" && typeof params.skip === "number") {
-		// TODO: Use AppError here
-		throw new Error("Cannot use both 'page' and 'skip' in the same query");
+		// throw new Error("Cannot use both 'page' and 'skip' in the same query");
+		throw new AppError({
+			statusCode: 400,
+			code: USER_ERRORS.INVALID_QUERY,
+			// handlerName: "applyPagination",
+			message: "Cannot use both 'page' and 'skip' in the same query",
+		});
 		// Comment out the line above to disable this validation
 	}
 
@@ -156,8 +158,8 @@ function applyPagination(params: {
 		typeof params.page === "number"
 			? (params.page - 1) * take
 			: typeof params.skip === "number"
-			? params.skip
-			: 0;
+				? params.skip
+				: 0;
 
 	return { skip, take };
 }
@@ -286,10 +288,10 @@ const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
 			type === "image/jpeg"
 				? "jpg"
 				: type === "image/png"
-				? "png"
-				: type === "image/gif"
-				? "gif"
-				: "";
+					? "png"
+					: type === "image/gif"
+						? "gif"
+						: "";
 		return acc;
 	},
 	{} as Record<string, string>,
@@ -316,7 +318,7 @@ export async function pictureHandler(
 	if (!pictureFile) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "No picture file uploaded",
 		});
 	}
@@ -327,7 +329,7 @@ export async function pictureHandler(
 	if (!ext) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "Unsupported file type",
 		});
 	}
@@ -335,7 +337,7 @@ export async function pictureHandler(
 	if (pictureFile.file.truncated) {
 		throw new AppError({
 			statusCode: 400,
-			code: USER_ERRORS.USER_PICTURE,
+			code: USER_ERRORS.PICTURE,
 			message: "File too large (max 1MB)",
 		});
 	}
@@ -364,15 +366,73 @@ export async function pictureHandler(
 	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
-	reply.code(200).send(updatedUser); // TODO: Should I parse here?
+	const parsed = userResponseSchema.parse(updatedUser);
+	return reply.code(200).send(parsed);
 }
 
 export async function getFriendsHandler(
-	request: FastifyRequest<{ Params: { id: string } }>,
+	request: FastifyRequest<{
+		Params: { id: string };
+		Querystring: getUsersQuery;
+	}>,
 	reply: FastifyReply,
 ) {
-	const friends = await getUserFriends(request.params.id);
-	return reply.code(200).send(friends); // TODO: Should I parse here?
+	// Destructure request query into respective fields
+	const {
+		id,
+		email,
+		username,
+		nickname,
+		createdAt,
+		updatedAt,
+		dateTarget,
+		before,
+		after,
+		between,
+		useFuzzy,
+		useOr,
+		filterIds,
+		skip: querySkip,
+		take: queryTake,
+		page,
+		all,
+		sortBy,
+		order,
+	} = request.query;
+
+	const { skip, take } = applyPagination({
+		all,
+		skip: querySkip,
+		take: queryTake,
+		page,
+	});
+
+	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
+	// since pagination is an abstraction for 'skip' and 'take'
+	const friends = await getUserFriends(request.params.id, {
+		where: {
+			id,
+			email,
+			username,
+			nickname,
+			createdAt,
+			updatedAt,
+		},
+		useFuzzy,
+		useOr,
+		filterIds,
+		dateTarget,
+		before,
+		after,
+		between,
+		skip,
+		take,
+		sortBy,
+		order,
+	});
+
+	const parsed = userArrayResponseSchema.parse(friends);
+	return reply.code(200).send(parsed);
 }
 
 export async function addFriendHandler(
@@ -382,12 +442,14 @@ export async function addFriendHandler(
 	}>,
 	reply: FastifyReply,
 ) {
-	await addFriend(request.params.id, request.body.targetUserId);
-	const friends = await getUserFriends(request.params.id);
-	return reply.code(201).send(friends); // TODO: Should I parse here?
+	const { id } = request.params;
+	const { targetUserId } = request.body;
+
+	const newFriend = await addFriend(id, targetUserId);
+	const parsed = userResponseSchema.parse(newFriend);
+	return reply.code(201).send(parsed);
 }
 
-// TODO: Should I still return the updated friends array, or 204 instead?
 export async function deleteFriendHandler(
 	request: FastifyRequest<{
 		Params: { id: string; targetUserId: string };
@@ -395,6 +457,5 @@ export async function deleteFriendHandler(
 	reply: FastifyReply,
 ) {
 	await deleteFriend(request.params.id, request.params.targetUserId);
-	const friends = await getUserFriends(request.params.id);
-	return reply.code(200).send(friends); // TODO: Should I parse here?
+	return reply.code(204).send();
 }

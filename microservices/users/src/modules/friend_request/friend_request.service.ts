@@ -1,11 +1,17 @@
 import { Prisma } from "@prisma/client";
 import { AppError, FRIEND_REQUEST_ERRORS } from "../../utils/errors";
+import prisma from "../../utils/prisma";
 import {
 	getUserOrThrow,
 	addFriend,
 	areAlreadyFriends,
 } from "../user/user.service";
-import prisma from "../../utils/prisma";
+import {
+	UniqueFriendRequestField,
+	FriendRequestQueryField,
+	FriendRequestField,
+	SortDirection,
+} from "./friend_request.schema";
 
 const AUTO_ACCEPT_REVERSE_REQUESTS = true;
 
@@ -53,7 +59,7 @@ export async function createFriendRequest(
 		if (await areAlreadyFriends(fromId, toId)) {
 			throw new AppError({
 				statusCode: 409,
-				code: FRIEND_REQUEST_ERRORS.ALREADY_FRIENDS,
+				code: FRIEND_REQUEST_ERRORS.ALREADY,
 				message: "Users are already friends",
 			});
 		}
@@ -63,8 +69,6 @@ export async function createFriendRequest(
 		});
 		if (reverseRequest) {
 			if (AUTO_ACCEPT_REVERSE_REQUESTS) {
-				// await resolveFriendRequest(fromId, toId, reverseRequest.id);
-				// return { autoAccepted: true };
 				// Return the users objects involved in the friendship
 				return await resolveFriendRequest(
 					fromId,
@@ -74,7 +78,7 @@ export async function createFriendRequest(
 			} else {
 				throw new AppError({
 					statusCode: 409,
-					code: "FRIEND_REQUEST_PENDING_INCOMING",
+					code: FRIEND_REQUEST_ERRORS.CREATE,
 					message:
 						"A friend request from this user is already pending. Accept it instead.",
 				});
@@ -82,21 +86,17 @@ export async function createFriendRequest(
 		}
 		// Duplicate same-direction request?
 		// Note that I'm already enforcing @@unique, but apparently this is best practice
-		// Avoids DB errors as flow control and feels like I'm  "avoiding failure" instead of "handling it"
+		// Avoids DB errors as flow control and I'm  "avoiding failure" instead of "handling it"
 		const existing = await prisma.friendRequest.findFirst({
 			where: { fromId, toId },
 		});
 		if (existing) {
 			throw new AppError({
 				statusCode: 409,
-				code: "FRIEND_REQUEST_DUPLICATE",
+				code: FRIEND_REQUEST_ERRORS.CREATE,
 				message: "Friend request already sent",
 			});
 		}
-		// Create the friend request
-		// return await prisma.friendRequest.create({
-		// 	data: { fromId, toId, message },
-		// });
 		// Create the friend request (include both user objects. Not just their ids)
 		return await prisma.friendRequest.create({
 			data: { fromId, toId, message },
@@ -113,34 +113,200 @@ export async function createFriendRequest(
 	}
 }
 
-export async function getFriendRequests() {
+// Helper function to retrieve a friend request from the database
+export async function getFriendRequestOrThrow(where: UniqueFriendRequestField) {
+	// const friendRequest = await prisma.friendRequest.findUnique({ where });
+	const friendRequest = await prisma.friendRequest.findUnique({
+		where,
+		include: {
+			from: true,
+			to: true,
+		},
+	});
+
+	if (!friendRequest) {
+		throw new AppError({
+			statusCode: 404,
+			code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
+			// message: "FriendRequest not found",
+			message: `FriendRequest not found: ${JSON.stringify(where)}`,
+		});
+	}
+
+	return friendRequest;
+}
+
+// This function returns all friend request fields (no filtering). It only accepts unique fields, so it returns ONLY ONE friend request
+export async function findFriendRequestByUnique(
+	where: UniqueFriendRequestField,
+) {
 	try {
-		// const friendRequests = await prisma.friendRequest.findMany();
+		return await getFriendRequestOrThrow(where);
+	} catch (err) {
+		if (err instanceof AppError) {
+			// Known/Expected errors bubble up to controller as AppError (custom error)
+			throw err;
+		}
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// Type definition for query options
+type FriendRequestQueryOptions = {
+	// where?: Partial<Record<FriendRequestField, string | Date>>; // To filter by FriendRequestQueryField
+	where?: FriendRequestQueryField;
+	filterIds?: string[]; // To filter by array of IDs
+	useFuzzy?: boolean; // To allow partial matches
+	useOr?: boolean; // To allow OR logic
+	before?: Date;
+	after?: Date;
+	between?: [Date, Date];
+	skip?: number; // To skip the first n entries
+	take?: number; // To limit the number of returned entries
+	sortBy?: FriendRequestField; // To sort by id
+	order?: SortDirection; // to order asc/desc
+};
+
+// TODO: MR: Check if I can avoid using keyword `any`
+// Function for searching users. It supports OR (`useOr`) and fuzzy search (`contains`)
+export async function findFriendRequests(
+	options: FriendRequestQueryOptions = {},
+) {
+	// Remove undefined fields from the full options object
+	const cleanedOptions = Object.fromEntries(
+		Object.entries(options).filter(([_, v]) => v !== undefined),
+	) as FriendRequestQueryOptions;
+
+	const {
+		where = {},
+		filterIds,
+		useFuzzy = false,
+		useOr = false,
+		before,
+		after,
+		between,
+		skip,
+		take,
+		sortBy = "createdAt",
+		order = "asc",
+	} = cleanedOptions;
+
+	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
+	try {
+		// Remove undefined fields from 'where'
+		const cleanedWhere = Object.fromEntries(
+			Object.entries(where).filter(([_, v]) => v !== undefined),
+		);
+		const transformed = Object.entries(cleanedWhere).reduce(
+			(acc, [key, value]) => {
+				// Enable fuzzy search (transform string fields to `contains` filters)
+				if (
+					typeof value === "string" &&
+					useFuzzy &&
+					key === "message"
+				) {
+					acc[key] = { contains: value };
+				} else {
+					acc[key] = value;
+				}
+				return acc;
+			},
+			{} as Record<string, any>,
+		);
+		// Helper function to apply date filters
+		const applyDateFilter = (field: "createdAt") => {
+			if (before) {
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					lt: before,
+				};
+			}
+			if (after) {
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					gte: after,
+				};
+			}
+			// if (Array.isArray(between) && between.length === 2) {
+			if (between) {
+				const [start, end] = between;
+				transformed[field] = {
+					...(transformed[field] ?? {}),
+					gte: start,
+					lte: end,
+				};
+			}
+		};
+
+		// Apply date filters
+		applyDateFilter("createdAt");
+		// Merge 'filterIds' and 'where.id' into a unified filter
+		const combinedIds = new Set<string>();
+		if (filterIds?.length) filterIds.forEach((id) => combinedIds.add(id));
+		if (where.id) combinedIds.add(where.id as string);
+
+		let query: Record<string, any>;
+
+		// console.log("✅ Step 2: Transformed 'where'", transformed);
+		// Enable OR queries (map provided fields to build individual queries)
+		if (useOr) {
+			const orConditions = Object.entries(transformed).map(([k, v]) => ({
+				[k]: v,
+			}));
+			if (combinedIds.size > 0) {
+				orConditions.push({ id: { in: Array.from(combinedIds) } });
+			}
+			query = orConditions.length > 0 ? { OR: orConditions } : {};
+		} else {
+			query = { ...transformed };
+			if (combinedIds.size > 0) {
+				query.id = { in: Array.from(combinedIds) };
+			}
+		}
+
+		// console.log("✅ Step 3: Final Query Shape", query);
+		const prismaSortBy = { [sortBy]: order };
+
+		// console.log("✅ Step 4: Final Prisma Query", {
+		// 	where: query,
+		// 	orderBy: prismaSortBy,
+		// 	skip,
+		// 	take,
+		// });
 		const friendRequests = await prisma.friendRequest.findMany({
+			where: query,
 			include: {
 				from: true,
 				to: true,
 			},
+			orderBy: prismaSortBy,
+			skip,
+			take,
 		});
+		// console.log("✅ Step 5: Result", users);
 		// This is not-standard, but it's easier to check by the status code
 		if (!friendRequests.length) {
 			throw new AppError({
 				statusCode: 404,
-				code: "NO_FRIEND_REQUESTS",
+				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 				message: "No friend requests found",
 			});
 		}
+
 		return friendRequests;
 	} catch (err) {
+		// console.log("❌ Step 6: Error Caught", err);
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
 				statusCode: 400,
-				code: "FRIEND_REQUESTS_INVALID_QUERY",
-				message: "Could not retrieve friend requests",
+				code: FRIEND_REQUEST_ERRORS.INVALID_SORT,
+				message: `Invalid sortBy field: ${sortBy}`,
 			});
 		}
 		if (err instanceof AppError) throw err;
+		// console.error("❌ Step 6.2: Unknown error", err);
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
@@ -154,11 +320,10 @@ export async function acceptFriendRequest(id: string) {
 		if (!friendRequest) {
 			throw new AppError({
 				statusCode: 404,
-				code: "FRIEND_REQUEST_NOT_FOUND",
+				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 				message: "Friend request not found",
 			});
 		}
-		// await resolveFriendRequest( // This doesn't return the users involved in the friendship
 		// Return the users objects involved in the friendship
 		return await resolveFriendRequest(
 			friendRequest.fromId,
@@ -184,7 +349,7 @@ export async function deleteFriendRequest(id: string): Promise<void> {
 		) {
 			throw new AppError({
 				statusCode: 404,
-				code: "FRIEND_REQUEST_NOT_FOUND",
+				code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 				message: "Friend request not found",
 			});
 		}
