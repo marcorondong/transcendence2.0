@@ -414,10 +414,11 @@ export async function updateUserPicture(id: string, picturePath: string) {
 // 	}
 // }
 
-export async function getUserFriends(
-	id: string,
-	query: Omit<UserQueryOptions, "filterIds" | "where">,
-) {
+// export async function getUserFriends(
+// 	id: string,
+// 	query: Omit<UserQueryOptions, "filterIds" | "where">,
+// ) {
+export async function getUserFriends(id: string, query: UserQueryOptions) {
 	try {
 		await getUserOrThrow({ id }); // Ensure user exists
 

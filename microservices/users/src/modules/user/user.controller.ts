@@ -160,8 +160,8 @@ function applyPagination(params: {
 		typeof params.page === "number"
 			? (params.page - 1) * take
 			: typeof params.skip === "number"
-			? params.skip
-			: 0;
+				? params.skip
+				: 0;
 
 	return { skip, take };
 }
@@ -290,10 +290,10 @@ const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
 			type === "image/jpeg"
 				? "jpg"
 				: type === "image/png"
-				? "png"
-				: type === "image/gif"
-				? "gif"
-				: "";
+					? "png"
+					: type === "image/gif"
+						? "gif"
+						: "";
 		return acc;
 	},
 	{} as Record<string, string>,
@@ -383,14 +383,77 @@ export async function pictureHandler(
 
 // TODO: Duplicated omit (here and in service)
 // TODO: THe query is not working
+// export async function getFriendsHandler(
+// 	request: FastifyRequest<{
+// 		Params: { id: string };
+// 		Querystring: Omit<UserQueryOptions, "filterIds" | "where">;
+// 	}>,
+// 	reply: FastifyReply,
+// ) {
+// 	const friends = await getUserFriends(request.params.id, request.query);
+// 	const parsed = userArrayResponseSchema.parse(friends);
+// 	return reply.code(200).send(parsed);
+// }
+
 export async function getFriendsHandler(
 	request: FastifyRequest<{
 		Params: { id: string };
-		Querystring: Omit<UserQueryOptions, "filterIds" | "where">;
+		Querystring: getUsersQuery;
 	}>,
 	reply: FastifyReply,
 ) {
-	const friends = await getUserFriends(request.params.id, request.query);
+	// Destructure request query into respective fields
+	const {
+		id,
+		email,
+		username,
+		nickname,
+		createdAt,
+		updatedAt,
+		dateTarget,
+		before,
+		after,
+		between,
+		useFuzzy,
+		useOr,
+		skip: querySkip,
+		take: queryTake,
+		page,
+		all,
+		sortBy,
+		order,
+	} = request.query;
+
+	const { skip, take } = applyPagination({
+		all,
+		skip: querySkip,
+		take: queryTake,
+		page,
+	});
+
+	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
+	// since pagination is an abstraction for 'skip' and 'take'
+	const friends = await getUserFriends(request.params.id, {
+		where: {
+			id,
+			email,
+			username,
+			nickname,
+			createdAt,
+			updatedAt,
+		},
+		useFuzzy,
+		useOr,
+		dateTarget,
+		before,
+		after,
+		between,
+		skip,
+		take,
+		sortBy,
+		order,
+	});
+
 	const parsed = userArrayResponseSchema.parse(friends);
 	return reply.code(200).send(parsed);
 }
