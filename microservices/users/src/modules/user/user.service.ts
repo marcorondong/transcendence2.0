@@ -454,7 +454,7 @@ export async function getUserFriends(id: string, query: UserQueryOptions) {
 					"userId": id,
 					"where": query,
 				},
-				"User has no friends that matches this criteria",
+				"User has no friends that match this criteria",
 			);
 			return [];
 		}
