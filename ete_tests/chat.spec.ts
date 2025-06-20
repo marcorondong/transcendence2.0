@@ -107,3 +107,44 @@ test("open chat and invite user2", async ({ browser }) => {
 		registeredUsers.user2.nickname + "_Accepted",
 	);
 });
+
+test("open chat and block user2", async ({ browser }) => {
+	//Two browsers
+	const user1Context = await browser.newContext();
+	const user2Context = await browser.newContext();
+
+	const user1Page = await user1Context.newPage();
+	const user2Page = await user2Context.newPage();
+
+	await TestingUtils.logInStep(user1Page, registeredUsers.user1);
+	await TestingUtils.logInStep(user2Page, registeredUsers.user2);
+
+	//open chat and block user2
+	await user1Page.locator("#min-max-button").click();
+	await user1Page
+		.getByRole("button", { name: registeredUsers.user2.nickname })
+		.click();
+	await user1Page.locator("#block-button").click();
+
+	//user1 should not see user2's messages
+	const from2To1 =
+		"hello " +
+		registeredUsers.user1.nickname +
+		"! a unique message for you: " +
+		randomString();
+	await user2Page.locator("#min-max-button").click();
+	await user2Page
+		.getByRole("textbox", { name: "enter your message" })
+		.fill(from2To1);
+	await user2Page
+		.getByRole("textbox", { name: "enter your message" })
+		.press("Enter");
+	await expect(user2Page.getByText(from2To1)).toBeVisible();
+	await user2Page.screenshot({
+		path: `ete_tests/screenshots/${registeredUsers.user2.nickname}_messaged_${registeredUsers.user1.nickname}.png`,
+	});
+	await expect(user1Page.getByText(from2To1)).not.toBeVisible();
+	await user1Page.screenshot({
+		path: `ete_tests/screenshots/${registeredUsers.user1.nickname}_blocked_${registeredUsers.user2.nickname}.png`,
+	});
+});
