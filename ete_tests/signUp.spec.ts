@@ -34,47 +34,13 @@ test.describe.serial("sign up test", () => {
 
 	test("cant sign up twice with same email", async ({ page }) => {
 		await page.goto(homeUrl);
-		await page.getByRole("link", { name: "Sign up", exact: true }).click();
-		await page
-			.getByRole("textbox", { name: "Your Username" })
-			.fill("asd" + username);
-		await page
-			.getByRole("textbox", { name: "Your Password" })
-			.fill(password);
-		await page
-			.getByRole("textbox", { name: "Repeat Password" })
-			.fill(password);
-		await page.getByRole("textbox", { name: "Your Email" }).fill(email);
-		await page
-			.getByRole("textbox", { name: "Your Nickname" })
-			.fill("asd" + nickname);
-		await page
-			.getByRole("button", { name: "Register new account" })
-			.click();
+		await fillSignUpForm(page, "asd" + username, password, email, "asd" + nickname);
 		await expect(page.getByText("failed to sign up")).toBeVisible();
 	});
 
 	test("cant sign up twice with same nickname", async ({ page }) => {
 		await page.goto(homeUrl);
-		await page.getByRole("link", { name: "Sign up", exact: true }).click();
-		await page
-			.getByRole("textbox", { name: "Your Username" })
-			.fill("asd" + username);
-		await page
-			.getByRole("textbox", { name: "Your Password" })
-			.fill(password);
-		await page
-			.getByRole("textbox", { name: "Repeat Password" })
-			.fill(password);
-		await page
-			.getByRole("textbox", { name: "Your Email" })
-			.fill("asd" + email);
-		await page
-			.getByRole("textbox", { name: "Your Nickname" })
-			.fill(nickname);
-		await page
-			.getByRole("button", { name: "Register new account" })
-			.click();
+		await fillSignUpForm(page, "asd" + username, password, "asd" + email, nickname);
 		await expect(page.getByText("failed to sign up")).toBeVisible();
 	});
 
