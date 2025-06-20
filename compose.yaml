@@ -1,5 +1,3 @@
-services:
-
 include:
   #TODO once all microservices will use LONG INCLUDE remove this short syntax
   - ./microservices/auth_api/docker-compose.yml

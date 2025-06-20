@@ -28,6 +28,7 @@ export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
 	// Check if response has a body
 	const contentLength = response.headers.get("Content-Length");
 	const contentType = response.headers.get("Content-Type");
+	console.log(response.headers);
 
 	const hasBody =
 		(contentLength && parseInt(contentLength) > 0) ||

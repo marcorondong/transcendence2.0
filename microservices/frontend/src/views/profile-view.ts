@@ -6,6 +6,7 @@ import { ProfileDetailComponent } from "../components/profile-detail-component";
 import { ProfileMatchHistoryComponent } from "../components/profile-match-history-component";
 import { HeadlineComponent } from "../components/shared/headline-component";
 import { ProfileFriendsComponent } from "../components/profile-friends-component";
+import { FetchAuth } from "../services/fetch-auth";
 
 export class ProfileView extends HTMLElement {
 	chat: ChatComponent;
@@ -50,7 +51,9 @@ export class ProfileView extends HTMLElement {
 		try {
 			//TODO: change the access from chat.me to a get request to USERS once
 			//API endpoint for GET Me exists
-			const id = this.userId ?? this.chat.me!.id;
+
+			const meData = await FetchAuth.verifyConnection();
+			const id = this.userId ?? meData?.id;
 			this.userData = await FetchUsers.user(id);
 			this.matchHistory = await FetchPongDb.matchHistory(id);
 			// add fetch for friends list here

@@ -53,4 +53,13 @@ export class FetchAuth {
 		};
 		await fetchPong(config);
 	}
+
+	static async verifyConnection() {
+		const config: FetchConfig = {
+			url: "/auth-api/verify-connection",
+			method: "GET",
+			headers: { accept: "application/json" },
+		};
+		return await fetchPong(config);
+	}
 }
