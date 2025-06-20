@@ -7,12 +7,14 @@ import { ProfileMatchHistoryComponent } from "../components/profile-match-histor
 import { HeadlineComponent } from "../components/shared/headline-component";
 import { ProfileFriendsComponent } from "../components/profile-friends-component";
 import { FetchAuth } from "../services/fetch-auth";
+import type { FriendRequestPending, Me } from "../types/Fetch";
 
 export class ProfileView extends HTMLElement {
 	chat: ChatComponent;
 	userData: User | null = null;
 	userId: string | null = null;
 	matchHistory: MatchHistory[] | null = null;
+	friendRequestList: FriendRequestPending | null = null;
 
 	friendsList = [
 		"Lagzilla",
@@ -49,11 +51,12 @@ export class ProfileView extends HTMLElement {
 
 	async fetchData() {
 		try {
-			//TODO: change the access from chat.me to a get request to USERS once
-			//API endpoint for GET Me exists
-
-			const meData = await FetchAuth.verifyConnection();
-			const id = this.userId ?? meData?.id;
+			const meData: Me = await FetchAuth.verifyConnection();
+			const id = this.userId ?? meData.id;
+			this.friendRequestList = await FetchUsers.friendRequestGet(
+				meData.id,
+			);
+			console.log("!!!!!!friend requests", this.friendRequestList);
 			this.userData = await FetchUsers.user(id);
 			this.matchHistory = await FetchPongDb.matchHistory(id);
 			// add fetch for friends list here

@@ -1,17 +1,24 @@
 import { ChatComponent } from "../components/chat-component";
 import type { User, UserAggregated } from "../types/User";
-import type { FetchConfig } from "../types/Fetch";
+import type { FetchConfig, FriendRequest, Me } from "../types/Fetch";
 import { FetchPongDb } from "../services/fetch-pong-db";
 import { UsersUserComponent } from "../components/users-user-component";
 import { UsersPaginationComponent } from "../components/users-pagination-component";
-import { errorLinkEvent, profileLinkEvent } from "../services/events";
+import {
+	errorLinkEvent,
+	notificationEvent,
+	profileLinkEvent,
+} from "../services/events";
 import { baseUrl, fetchPong } from "../services/fetch";
+import { FetchUsers } from "../services/fetch-users";
+import { FetchAuth } from "../services/fetch-auth";
 
 export class UsersView extends HTMLElement {
 	chat: ChatComponent;
 	usersAggregated: UserAggregated[] = [];
 	usersData: User[] = [];
 	page: number = 1;
+	meData: Me | null = null;
 	constructor(chat: ChatComponent) {
 		super();
 		this.chat = chat;
@@ -83,7 +90,27 @@ export class UsersView extends HTMLElement {
 		if (!button.classList.contains("button-friend")) {
 			return;
 		}
-		console.log("befriend:", button.id);
+		let toId = button.id;
+		toId = toId.replace(/^friend-/, "");
+		const data: FriendRequest = {
+			fromId: this.meData?.id ?? "",
+			toId,
+			message: "hello",
+		};
+		console.log("data obj:", data);
+
+		try {
+			await FetchUsers.friendRequestPost(data);
+			console.log("befriend:", button.id);
+			document.dispatchEvent(
+				notificationEvent("Sent Friend Request", "success"),
+			);
+		} catch (e) {
+			document.dispatchEvent(
+				notificationEvent("failed to send Friend Request", "error"),
+			);
+			console.error(e);
+		}
 	}
 
 	async handleButtonLeft(button: HTMLButtonElement) {
@@ -148,6 +175,7 @@ export class UsersView extends HTMLElement {
 	async fetchData() {
 		this.handleQueryParam();
 		try {
+			this.meData = await FetchAuth.verifyConnection();
 			this.usersData = await this.fetchUsers(this.page);
 			const userIds = this.usersData.map((u) => u.id);
 			const statsData = await FetchPongDb.stats(userIds);

@@ -1,4 +1,4 @@
-import type { FetchConfig } from "../types/Fetch";
+import type { FetchConfig, FriendRequest } from "../types/Fetch";
 import type { UserPut } from "../types/User";
 import { fetchPong } from "./fetch";
 
@@ -60,6 +60,32 @@ export class FetchUsers {
 			},
 			url: "/api/users/" + id,
 			body,
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendRequestPost(body: FriendRequest) {
+		const config: FetchConfig = {
+			method: "POST",
+			headers: {
+				"accept": "application/json",
+				"Content-Type": "application/json",
+			},
+			url: "/api/friend-requests/",
+			body,
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendRequestGet(id: string) {
+		const config: FetchConfig = {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+			},
+			url: "api/friend-requests/?fromId=" + id,
 		};
 
 		return await fetchPong(config);
