@@ -16,7 +16,7 @@ This module provides a custom error class `AppError` to provide more info when a
   - [🧩 Usage Examples](#-usage-examples)
     - [Throwing an AppError instance](#throwing-an-apperror-instance)
     - [Catching an AppError instance](#catching-an-apperror-instance)
-    - [Using errorHandler wrapper](#using-errorhandler-wrapper)
+    - [Using appErrorHandler wrapper](#using-apperrorhandler-wrapper)
     - [Registering ft\_fastifyErrorHandler](#registering-ft_fastifyerrorhandler)
   - [📦 ELK Compatibility](#-elk-compatibility)
   - [✅ Recommended usage of AppError](#-recommended-usage-of-apperror)
@@ -45,7 +45,7 @@ This module provides a custom error class `AppError` to provide more info when a
 
 - Production / Development:
   - `AppError` class: None 👍
-  - `errorHandler` function: `fastify`, but it can be refactored to **NOT** use it.
+  - `appErrorHandler` function: `fastify`, but it can be refactored to **NOT** use it.
   - `ft_fastifyErrorHandler` function: `fastify` and custom `logger` but easily changeable (_intended to be fastify's custom error handler_)
 
 ---
@@ -55,10 +55,10 @@ This module provides a custom error class `AppError` to provide more info when a
 1. Import `AppError` class where you need it:
   `import { AppError } from "../path/to/utils/errors";`
   Include custom error codes (`error.code`) like `USER_ERRORS` (_needed to be defined inside `error.ts`_)
-2. Import error handler (`errorHandler`)
-  `import { errorHandler } from "../path/to/utils/errors";`
+2. Import error handler (`appErrorHandler`)
+  `import { appErrorHandler } from "../path/to/utils/errors";`
   Wrap the functions (_Fastify request/reply functions_) with it.
-  E.g: in `.microservices/users/src/modules/user/user.route.ts`: `errorHandler(getUserHandler),`
+  E.g: in `.microservices/users/src/modules/user/user.route.ts`: `appErrorHandler(getUserHandler),`
 3. Import custom Fastify's error handler (`ft_fastifyErrorHandler`)
   `import { fastifyLoggerConfig } from "../path/to/utils/logger";`
   Register the error handler.
@@ -88,7 +88,7 @@ This module provides a custom error class `AppError` to provide more info when a
 >
 > For some of its features, fastify must be installed.
 > If you want to use it without fastify, you can;
-> but you'll have to ditch/modify `errorHandler` and `ft_fastifyErrorHandler`
+> but you'll have to ditch/modify `appErrorHandler` and `ft_fastifyErrorHandler`
 
 ---
 
@@ -189,12 +189,12 @@ try {
 }
 ```
 
-### Using errorHandler wrapper
+### Using appErrorHandler wrapper
 
 In Fastify request/reply functions (_usually in routes_), wrap them like this:
 
 ```ts
-errorHandler(registerUserHandler),
+appErrorHandler(registerUserHandler),
 ```
 
 ### Registering ft_fastifyErrorHandler
