@@ -208,10 +208,12 @@ However, you can customize the service using docker secrets, environmental varia
 | DELETE | `/api/users/:id`                        | Delete user                            |
 | PUT    | `/api/users/:id/picture`                | Update user picture                    |
 | GET    | `/api/users/:id/friends`                | Get user's friends (returned as array) |
+| GET    | `/api/users/:id/friends/?field=value`   | Query string for sorting and filtering |
 | POST   | `/api/users/:id/friends`                | Add a friend to user (send id in body) |
 | DELETE | `/api/users/:id/friends/:targetUserId`  | Delete a user's friend                 |
 | POST   | `/api/friend-requests/`                 | Create a friend request                |
 | GET    | `/api/friend-requests/`                 | List all friend requests               |
+| GET    | `/api/friend-requests/?field=value`     | Query string for sorting and filtering |
 | POST   | `/api/friend-requests/:id/accept`       | Accept `id` friend request             |
 | DELETE | `/api/friend-requests/:id`              | Delete `id` friend request             |
 
