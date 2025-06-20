@@ -26,6 +26,8 @@
 | 10 | GET    | `http://auth_api_container:2999/auth-api/verify-connection`  | Verify WS Conn. | Pong, Chat, Tic  |
 | 11 | GET    | `http://auth_api_container:2999/auth-api/health-check`       | Health check    | Monitoring       |
 | 12 | GET    | `http://localhost:2999/auth-api/documentation`               | Swagger         | Everyone         |
+| 13 | GET    | `https://localhost:8080/auth-api/update-jwt`                 | Update JWT      | Frontend         |
+| 14 | PATCH  | `https://localhost:8080/auth-api/update-jwt`                 | Update JWT      | Frontend         |
 
 1) Sign in a user. This will create the token for the user.
 2) Sign up a user. This will create the user and the token.
@@ -39,6 +41,8 @@
 10) Verify Cookies and JWT for internal services. Returns id and nickname
 11) Check the health of the service
 12) Swagger page for detailed information
+13) Update JWT. This will extract id from JWT and make request to users/:id to get nickname and will update JWT accordingly
+14) Update JWT Patch. This will update JWT based on provided id and nickname in body
 
 Detailed information about routes, shape of body, param, response is in swagger page.
 
