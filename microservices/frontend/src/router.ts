@@ -12,7 +12,7 @@ interface ViewModule {
 
 export class Router {
 	containerDiv = document.getElementById("content");
-	navLinks = document.querySelectorAll<HTMLAnchorElement>("#navigation a");
+	navLinks = document.querySelectorAll<HTMLAnchorElement>("#menuList a");
 	component: Node | null = null;
 	chat: ChatComponent;
 

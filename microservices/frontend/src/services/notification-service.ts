@@ -60,7 +60,7 @@ export class NotificationService {
 				);
 
 				// ADD NOTIFICATION TO CONTAINER
-				const container = document.getElementById("navigation");
+				const container = document.getElementById("menuList");
 				if (container && this.notificationContainer) {
 					container.append(this.notificationContainer);
 				}

@@ -11,6 +11,7 @@ export class HeaderComponent extends HTMLElement {
 
 	connectedCallback() {
 		// LOGO ON LEFT SIDE
+
 		const logoAnchor = document.createElement("a");
 		logoAnchor.href = "/";
 		const logo = document.createElement("img");
@@ -36,9 +37,13 @@ export class HeaderComponent extends HTMLElement {
 
 		// CONTAINER FOR NAVIGATION
 		const navigation = document.createElement("nav");
-		navigation.classList.add("flex", "items-center", "gap-4");
+		navigation.classList.add("flex", "items-center", "gap-2", "sm:gap-4");
 		const menuButton = document.createElement("button");
-		menuButton.classList.add("pong-button", "sm:hidden");
+		menuButton.classList.add(
+			"pong-button",
+			"pong-button-primary",
+			"sm:hidden",
+		);
 		this.menuIcon.setSize(6);
 		this.menuIcon.setIcon("menu");
 		menuButton.appendChild(this.menuIcon);
@@ -46,24 +51,10 @@ export class HeaderComponent extends HTMLElement {
 
 		this.appendChild(navigation);
 
-		// CLOSE BUTTON
-		const closeButton = document.createElement("button");
-		const closeIcon = new IconComponent("close", 6);
-		closeButton.append(closeIcon);
-		closeButton.classList.add(
-			"absolute",
-			"pong-button",
-			"z-43",
-			"right-6",
-			"top-6",
-			"hidden",
-		);
-		this.appendChild(closeButton);
-
 		// LIST OF NAVIGATION LINKS
-		const list = document.getElementById("navigation");
-		if (list) {
-			list.classList.add(
+		const menuList = document.getElementById("menuList");
+		if (menuList) {
+			menuList.classList.add(
 				"fixed",
 				"top-0",
 				"right-0",
@@ -93,11 +84,11 @@ export class HeaderComponent extends HTMLElement {
 				"z-42",
 				"sm:me-6",
 			);
-			navigation.appendChild(list);
+			navigation.appendChild(menuList);
 		}
 
 		// list elements in navigation
-		const listElements = list?.querySelectorAll("li");
+		const listElements = menuList?.querySelectorAll("li");
 		if (listElements) {
 			const listElementsArray = [...listElements];
 			listElementsArray.map((lE) =>
@@ -130,19 +121,35 @@ export class HeaderComponent extends HTMLElement {
 		themeToggle.setSize(6);
 		navigation.appendChild(themeToggle);
 
+		// CLOSE BUTTON
+		const closeButton = document.createElement("button");
+		const closeIcon = new IconComponent("close", 6);
+		closeButton.append(closeIcon);
+		closeButton.classList.add(
+			"absolute",
+			"pong-button",
+			"pong-button-primary",
+			"z-4003",
+			"right-6",
+			"top-6",
+			"hidden",
+		);
+		menuList?.append(closeButton);
+
 		// EVENT LISTENERS
 		menuButton.addEventListener("click", () => {
-			list?.classList.remove("hidden");
+			console.log("pressing menu Button");
+			menuList?.classList.remove("hidden");
 			closeButton.classList.remove("hidden");
 		});
 
 		closeButton.addEventListener("click", () => {
-			list?.classList.add("hidden");
+			menuList?.classList.add("hidden");
 			closeButton.classList.add("hidden");
 		});
 
-		list?.addEventListener("click", () => {
-			list?.classList.add("hidden");
+		menuList?.addEventListener("click", () => {
+			menuList?.classList.add("hidden");
 			closeButton.classList.add("hidden");
 		});
 		logoutButton.addEventListener("click", async () => {
