@@ -89,14 +89,14 @@ E.g:
 
 ## 🔗 Links to services' readme files
 
-- [AI-broken](/microservices/ai/README.md)
+- [AI](/microservices/ssg/ai/README.md)
 - [Auth](/microservices/auth_api/README.md)
 - [Blockchain-broken](/microservices/blockchain/README.md)
 - [Chat](/microservices/chat_api/README.md)
 - [Chat DB](/microservices/chat_db/README.md)
-- [CLI Client-broken](/microservices/cli_client/README.md)
+- [CLI Client](/microservices/cli-client/README.md)
 - [Front-end-broken](/microservices/frontend/README.md)
-- [Monitoring-broken](/microservices/monitoring/README.md)
+- [Monitoring](/monitoring/README.md)
 - [Pong-api](./microservices/ssg/pong-api/README.md)
 - [Pong DB](/microservices/pong_db/README.md)
 - [TicTacToe-broken](/microservices/tictactoe_api/README.md)
