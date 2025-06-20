@@ -70,3 +70,40 @@ test("open chat and send message", async ({ browser }) => {
 	await expect(user2Page.getByText(from2To1)).toBeVisible();
 	await expect(user1Page.getByText(from2To1)).toBeVisible();
 });
+
+test("open chat and invite user2", async ({ browser }) => {
+	//Two browsers
+	const user1Context = await browser.newContext();
+	const user2Context = await browser.newContext();
+
+	const user1Page = await user1Context.newPage();
+	const user2Page = await user2Context.newPage();
+
+	await TestingUtils.logInStep(user1Page, registeredUsers.user1);
+	await TestingUtils.logInStep(user2Page, registeredUsers.user2);
+
+	//open chat and invite user2
+	await user1Page.locator("#min-max-button").click();
+	await user1Page
+		.getByRole("button", { name: registeredUsers.user2.nickname })
+		.click();
+	await user1Page.locator("#invite-button").click();
+
+	//user2 should accept the invite
+	await user2Page.locator("#min-max-button").click();
+	await user2Page
+		.getByRole("button", { name: registeredUsers.user1.nickname })
+		.click();
+	await user2Page
+		.getByRole("link", { name: "Click to join game", exact: true })
+		.click();
+
+	await TestingUtils.gameRunningTest(
+		user1Page,
+		registeredUsers.user1.nickname + "_SentInvite",
+	);
+	await TestingUtils.gameRunningTest(
+		user2Page,
+		registeredUsers.user2.nickname + "_Accepted",
+	);
+});
