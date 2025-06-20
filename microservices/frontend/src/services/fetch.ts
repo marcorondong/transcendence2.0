@@ -1,5 +1,4 @@
 import type { FetchConfig } from "../types/Fetch";
-import { signInLinkEvent } from "./events";
 
 //TODO: manage baseUrl based on ENV variable
 // export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;

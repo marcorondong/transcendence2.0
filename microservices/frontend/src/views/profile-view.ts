@@ -14,7 +14,7 @@ export class ProfileView extends HTMLElement {
 	userData: User | null = null;
 	userId: string | null = null;
 	matchHistory: MatchHistory[] | null = null;
-	friendRequestList: FriendRequestPending | null = null;
+	friendRequestList: FriendRequestPending[] | null = null;
 
 	friendsList = [
 		"Lagzilla",
@@ -75,8 +75,24 @@ export class ProfileView extends HTMLElement {
 		}
 
 		if (this.friendsList) {
-			this.append(new HeadlineComponent("Friends List"));
-			this.append(new ProfileFriendsComponent(this.friendsList));
+			this.append(new HeadlineComponent("Friends"));
+			if (this.friendRequestList) {
+				this.append(
+					new ProfileFriendsComponent(this.friendRequestList),
+				);
+			}
+			this.append(new HeadlineComponent("Incoming Friend Requests"));
+			if (this.friendRequestList) {
+				this.append(
+					new ProfileFriendsComponent(this.friendRequestList),
+				);
+			}
+			this.append(new HeadlineComponent("Outgoing Friend Requests"));
+			if (this.friendRequestList) {
+				this.append(
+					new ProfileFriendsComponent(this.friendRequestList),
+				);
+			}
 		}
 
 		if (this.matchHistory && this.userData) {

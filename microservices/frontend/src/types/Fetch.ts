@@ -1,4 +1,5 @@
 import type { GameMode, GameRoom, TournamentSize } from "./Game";
+import type { User } from "./User";
 
 export type Method = "GET" | "POST" | "PUT" | "POST" | "DELETE" | "PATCH";
 
@@ -30,29 +31,9 @@ export interface Me {
 export interface FriendRequestPending {
 	id: string;
 	fromId: string;
-	from: From;
+	from: User;
 	toId: string;
-	to: To;
+	to: User;
 	message: string;
 	createdAt: string;
-}
-
-export interface From {
-	id: string;
-	createdAt: string;
-	updatedAt: string;
-	picture: string;
-	username: string;
-	email: string;
-	nickname: string;
-}
-
-export interface To {
-	id: string;
-	createdAt: string;
-	updatedAt: string;
-	picture: string;
-	username: string;
-	email: string;
-	nickname: string;
 }

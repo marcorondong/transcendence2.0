@@ -1,3 +1,4 @@
+import { baseUrl } from "../../services/fetch";
 import type { User } from "../../types/User";
 
 class AvatarComponent extends HTMLElement {
@@ -20,8 +21,7 @@ class AvatarComponent extends HTMLElement {
 			"object-cover",
 			"aspect-square",
 		);
-		//TODO: replace this with url from user data
-		this.avatar.src = "/images/avatar_placeholder.png";
+		this.avatar.src = baseUrl + this.userData.picture;
 		this.append(this.avatar);
 	}
 
