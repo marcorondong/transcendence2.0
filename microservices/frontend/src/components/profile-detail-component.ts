@@ -1,8 +1,14 @@
+import { notificationEvent } from "../services/events";
 import { baseUrl } from "../services/fetch";
-import { FetchAuth } from "../services/fetch-auth";
 import { FetchUsers } from "../services/fetch-users";
+import {
+	emailValidator,
+	nicknameValidator,
+	passwordValidator,
+} from "../services/validation";
 import type { User } from "../types/User";
 import { IconComponent } from "./icon-component";
+import * as v from "valibot";
 
 class ProfileDetailComponent extends HTMLElement {
 	userData: User;
@@ -94,22 +100,28 @@ class ProfileDetailComponent extends HTMLElement {
 				email:
 					this.emailInput.value === this.userData.email
 						? undefined
-						: this.emailInput.value,
+						: v.parse(emailValidator, this.emailInput.value.trim()),
 				password:
 					this.passwordInput.value === ""
 						? undefined
-						: this.passwordInput.value,
+						: v.parse(passwordValidator, this.passwordInput.value),
 				nickname:
 					this.userData.nickname === this.nicknameInput.value
 						? undefined
-						: this.nicknameInput.value,
+						: v.parse(
+								nicknameValidator,
+								this.nicknameInput.value.trim(),
+							),
 			});
 			if (returnedData) {
 				this.userData = { ...this.userData, ...returnedData };
 			}
 			this.applyUserData();
 			this.displayDetail();
-		} catch (e) {
+		} catch (e: any) {
+			document.dispatchEvent(
+				notificationEvent(String(e.message), "error"),
+			);
 			console.log(e);
 		}
 	}
@@ -138,7 +150,7 @@ class ProfileDetailComponent extends HTMLElement {
 		if (button) {
 			this.handleEditButton(button);
 			this.handleCancelButton(button);
-			this.handleDeleteButton(button);
+			// this.handleDeleteButton(button);
 		}
 	}
 
@@ -158,17 +170,17 @@ class ProfileDetailComponent extends HTMLElement {
 		this.displayDetail();
 	}
 
-	async handleDeleteButton(button: HTMLElement) {
-		if (button.id !== "deleteButton") {
-			return;
-		}
-		try {
-			await FetchUsers.userDelete(this.userData.id);
-			await FetchAuth.signOut();
-		} catch (e) {
-			console.log(e);
-		}
-	}
+	// async handleDeleteButton(button: HTMLElement) {
+	// 	if (button.id !== "deleteButton") {
+	// 		return;
+	// 	}
+	// 	try {
+	// 		await FetchUsers.userDelete(this.userData.id);
+	// 		await FetchAuth.signOut();
+	// 	} catch (e) {
+	// 		console.log(e);
+	// 	}
+	// }
 
 	applyUserData() {
 		this.username.innerText = this.userData.username;
@@ -231,25 +243,25 @@ class ProfileDetailComponent extends HTMLElement {
 			"flex-wrap",
 		);
 
-		const deleteButton = document.createElement("button");
-		deleteButton.id = "deleteButton";
-		deleteButton.classList.add(
-			"pomg-button",
-			"pong-button-error",
-			"px-3",
-			"py-1",
-			"rounded-xl",
-			"cursor-pointer",
-		);
-		deleteButton.innerText = "delete";
-		this.cancelSaveContainer.classList.add(
-			"flex",
-			"gap-3",
-			"mt-2",
-			"flex-wrap",
-		);
+		// const deleteButton = document.createElement("button");
+		// deleteButton.id = "deleteButton";
+		// deleteButton.classList.add(
+		// 	"pomg-button",
+		// 	"pong-button-error",
+		// 	"px-3",
+		// 	"py-1",
+		// 	"rounded-xl",
+		// 	"cursor-pointer",
+		// );
+		// deleteButton.innerText = "delete";
+		// this.cancelSaveContainer.classList.add(
+		// 	"flex",
+		// 	"gap-3",
+		// 	"mt-2",
+		// 	"flex-wrap",
+		// );
 
-		this.cancelSaveContainer.append(cancelButton, deleteButton, saveButton);
+		this.cancelSaveContainer.append(cancelButton, saveButton);
 
 		// AVATAR
 		this.avatarContainer.classList.add("relative");

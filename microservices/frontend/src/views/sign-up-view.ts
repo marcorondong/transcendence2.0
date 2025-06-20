@@ -14,7 +14,7 @@ export class SignUpView extends HTMLElement {
 	frame = document.createElement("div");
 	container = document.createElement("form");
 
-	// SIGN IN
+	//SIGN UP
 	heading = document.createElement("h1");
 	labelUsername = document.createElement("label");
 	inputUsername = document.createElement("input");
@@ -23,8 +23,6 @@ export class SignUpView extends HTMLElement {
 	signUpNote = document.createElement("div");
 	signUpLink = document.createElement("a");
 	signInButton = document.createElement("button");
-
-	//SIGN UP
 	labelEmail = document.createElement("label");
 	inputEmail = document.createElement("input");
 	labelNickname = document.createElement("label");
@@ -76,10 +74,18 @@ export class SignUpView extends HTMLElement {
 			username: this.inputUsername.value.trim(),
 			nickname: this.inputNickname.value.trim(),
 			password: this.inputPassword.value.trim(),
+			passwordRepeat: this.inputRePassword.value.trim(),
 		};
 		try {
-			validateSignUpForm(data);
-			await FetchAuth.signUp(data);
+			const validatedData = validateSignUpForm(data);
+			if (validatedData.password !== validatedData.passwordRepeat) {
+				document.dispatchEvent(
+					notificationEvent("passwords do not match", "error"),
+				);
+				throw new Error("mismatching passwords");
+			}
+			const { passwordRepeat, ...finalData } = validatedData;
+			await FetchAuth.signUp(finalData);
 			Auth.toggleAuthClasses(true);
 			this.chat.openWebsocket();
 			document.dispatchEvent(
@@ -87,7 +93,7 @@ export class SignUpView extends HTMLElement {
 			);
 			document.dispatchEvent(homeLinkEvent);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			document.dispatchEvent(
 				notificationEvent("failed to sign up", "error"),
 			);

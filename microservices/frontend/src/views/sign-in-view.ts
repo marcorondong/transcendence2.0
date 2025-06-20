@@ -6,6 +6,7 @@ import {
 	signUpLinkEvent,
 } from "../services/events";
 import { FetchAuth } from "../services/fetch-auth";
+import { validateSignInForm } from "../services/validation";
 import type { UserAuth } from "../types/User";
 
 export class SignInView extends HTMLElement {
@@ -31,6 +32,58 @@ export class SignInView extends HTMLElement {
 
 	connectedCallback() {
 		console.log("SIGN-IN VIEW has been CONNECTED");
+		this.createDomElements();
+		this.append(this.container);
+		this.addEventListener("click", this);
+	}
+	handleEvent(event: Event) {
+		const handlerName =
+			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
+		const handler = this[handlerName as keyof this];
+		if (typeof handler === "function") {
+			handler.call(this, event);
+		}
+	}
+
+	async onClick(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target) {
+			return;
+		}
+		if (target.id === "sign-up-link") {
+			event.preventDefault();
+			this.dispatchEvent(signUpLinkEvent);
+		}
+		if (target.id === "sign-in-button") {
+			event.preventDefault();
+			const user: UserAuth = {
+				username: this.inputUsername.value.trim(),
+				password: this.inputPassword.value.trim(),
+			};
+			try {
+				const validatedData = validateSignInForm(user);
+				await FetchAuth.signIn(validatedData);
+				document.dispatchEvent(
+					notificationEvent("You just signed in!", "success"),
+				);
+				Auth.toggleAuthClasses(true);
+				this.chat.openWebsocket();
+				this.dispatchEvent(homeLinkEvent);
+			} catch (e) {
+				console.error(e);
+				document.dispatchEvent(
+					notificationEvent("sign in failed", "error"),
+				);
+			}
+		}
+	}
+
+	disconnectedCallback() {
+		console.log("SIGN-IN VIEW has been DISCONNECTED");
+		this.removeEventListener("click", this);
+	}
+
+	createDomElements() {
 		this.classList.add("flex", "w-full", "items-center", "justify-center");
 		this.container.classList.add(
 			"flex",
@@ -78,53 +131,6 @@ export class SignInView extends HTMLElement {
 			this.signInButton,
 			this.signUpNote,
 		);
-		this.append(this.container);
-		this.addEventListener("click", this);
-	}
-	handleEvent(event: Event) {
-		const handlerName =
-			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
-		const handler = this[handlerName as keyof this];
-		if (typeof handler === "function") {
-			handler.call(this, event);
-		}
-	}
-
-	async onClick(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (!target) {
-			return;
-		}
-		if (target.id === "sign-up-link") {
-			event.preventDefault();
-			this.dispatchEvent(signUpLinkEvent);
-		}
-		if (target.id === "sign-in-button") {
-			event.preventDefault();
-			const user: UserAuth = {
-				username: this.inputUsername.value,
-				password: this.inputPassword.value,
-			};
-			try {
-				await FetchAuth.signIn(user);
-				document.dispatchEvent(
-					notificationEvent("You just signed in!", "success"),
-				);
-				Auth.toggleAuthClasses(true);
-				this.chat.openWebsocket();
-				this.dispatchEvent(homeLinkEvent);
-			} catch (e) {
-				console.log(e);
-				document.dispatchEvent(
-					notificationEvent("sign in failed", "error"),
-				);
-			}
-		}
-	}
-
-	disconnectedCallback() {
-		console.log("SIGN-IN VIEW has been DISCONNECTED");
-		this.removeEventListener("click", this);
 	}
 }
 
