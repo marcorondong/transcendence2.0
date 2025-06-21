@@ -85,6 +85,10 @@ then this module have two behaviors depending on the value of `AUTO_ACCEPT_REVER
 - If `false`:
   - USERS Service will throw an error indicating to accept the reverse request instead of creating a new one.
 
+It supports **block-list**
+So a block-list is a `User` array.
+This is _**unidirectional**_ (so UserA has userB in block-list, but UserB doesn't need to have UserA in his block-list)
+
 > [!NOTE]
 >
 > In next version, it'll handle also:
@@ -194,28 +198,32 @@ However, you can customize the service using docker secrets, environmental varia
 
 ## 🔀 API Endpoints
 
-| Method | Path                                    | Description                            |
-| ------ | --------------------------------------- | -------------------------------------- |
-| GET    | `/api/health-check/`                    | Health check                           |
-| GET    | `/api/documentation/`                   | Swagger (Good for testing all options) |
-| POST   | `/api/users/`                           | Create a new user                      |
-| GET    | `/api/users/`                           | List all users                         |
-| GET    | `/api/users/?field=value`               | Query string for sorting and filtering |
-| POST   | `/api/users/login`                      | Authenticate user                      |
-| GET    | `/api/users/:id`                        | Get specific user                      |
-| PUT    | `/api/users/:id`                        | Update user (all fields)               |
-| PATCH  | `/api/users/:id`                        | Update user (some fields)              |
-| DELETE | `/api/users/:id`                        | Delete user                            |
-| PUT    | `/api/users/:id/picture`                | Update user picture                    |
-| GET    | `/api/users/:id/friends`                | Get user's friends (returned as array) |
-| GET    | `/api/users/:id/friends/?field=value`   | Query string for sorting and filtering |
-| POST   | `/api/users/:id/friends`                | Add a friend to user (send id in body) |
-| DELETE | `/api/users/:id/friends/:targetUserId`  | Delete a user's friend                 |
-| POST   | `/api/friend-requests/`                 | Create a friend request                |
-| GET    | `/api/friend-requests/`                 | List all friend requests               |
-| GET    | `/api/friend-requests/?field=value`     | Query string for sorting and filtering |
-| POST   | `/api/friend-requests/:id/accept`       | Accept `id` friend request             |
-| DELETE | `/api/friend-requests/:id`              | Delete `id` friend request             |
+| Method | Path                                      | Description                                              |
+| ------ | ----------------------------------------- | --------------------------------------                   |
+| GET    | `/api/health-check/`                      | Health check                                             |
+| GET    | `/api/documentation/`                     | Swagger (Good for testing all options)                   |
+| POST   | `/api/users/`                             | Create a new user                                        |
+| GET    | `/api/users/`                             | List all users                                           |
+| GET    | `/api/users/?field=value`                 | Query string for sorting and filtering                   |
+| POST   | `/api/users/login`                        | Authenticate user                                        |
+| GET    | `/api/users/:id`                          | Get specific user                                        |
+| PUT    | `/api/users/:id`                          | Update user (all fields)                                 |
+| PATCH  | `/api/users/:id`                          | Update user (some fields)                                |
+| DELETE | `/api/users/:id`                          | Delete user                                              |
+| PUT    | `/api/users/:id/picture`                  | Update user picture                                      |
+| GET    | `/api/users/:id/friends`                  | Get user's friends (returned as array)                   |
+| GET    | `/api/users/:id/friends/?field=value`     | Query string for sorting and filtering                   |
+| POST   | `/api/users/:id/friends`                  | Add a friend to user (send id in body)                   |
+| DELETE | `/api/users/:id/friends/:targetUserId`    | Delete a user's friend                                   |
+| GET    | `/api/users/:id/block-list`               | Get user's blockList (returned as array)                 |
+| GET    | `/api/users/:id/block-list/?field=value`  | Query string for sorting and filtering                   |
+| POST   | `/api/users/:id/block-list`               | (Block) Add a user to user's blocklist (send id in body) |
+| DELETE | `/api/users/:id/block-list/:targetUserId` | (Unblock)Delete a user from user's blocklist             |
+| POST   | `/api/friend-requests/`                   | Create a friend request                                  |
+| GET    | `/api/friend-requests/`                   | List all friend requests                                 |
+| GET    | `/api/friend-requests/?field=value`       | Query string for sorting and filtering                   |
+| POST   | `/api/friend-requests/:id/accept`         | Accept `id` friend request                               |
+| DELETE | `/api/friend-requests/:id`                | Delete `id` friend request                               |
 
 > [!NOTE]
 >
