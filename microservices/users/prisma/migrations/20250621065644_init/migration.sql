@@ -33,6 +33,16 @@ CREATE TABLE "FriendRequest" (
 );
 
 -- CreateTable
+CREATE TABLE "BlockList" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "blockerId" TEXT NOT NULL,
+    "blockedId" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "BlockList_blockerId_fkey" FOREIGN KEY ("blockerId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "BlockList_blockedId_fkey" FOREIGN KEY ("blockedId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Product" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -73,3 +83,12 @@ CREATE INDEX "FriendRequest_toId_idx" ON "FriendRequest"("toId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "FriendRequest_fromId_toId_key" ON "FriendRequest"("fromId", "toId");
+
+-- CreateIndex
+CREATE INDEX "BlockList_blockerId_idx" ON "BlockList"("blockerId");
+
+-- CreateIndex
+CREATE INDEX "BlockList_blockedId_idx" ON "BlockList"("blockedId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BlockList_blockerId_blockedId_key" ON "BlockList"("blockerId", "blockedId");
