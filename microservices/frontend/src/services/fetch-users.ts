@@ -85,7 +85,19 @@ export class FetchUsers {
 			headers: {
 				accept: "application/json",
 			},
-			url: "api/friend-requests/?fromId=" + id,
+			url: "/api/friend-requests/?fromId=" + id,
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendRequestDelete(id: string) {
+		const config: FetchConfig = {
+			method: "DELETE",
+			headers: {
+				accept: "application/json",
+			},
+			url: "/api/friend-requests/" + id,
 		};
 
 		return await fetchPong(config);

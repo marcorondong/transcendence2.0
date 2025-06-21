@@ -19,6 +19,7 @@ export class ProfileView extends HTMLElement {
 	friendRequestsOut: FriendRequestPending[] | null = null;
 	friendRequestsIn: FriendRequestPending[] | null = null;
 	friends: FriendRequestPending[] | null = null;
+	myId: string | undefined;
 
 	constructor(chat: ChatComponent) {
 		super();
@@ -49,12 +50,12 @@ export class ProfileView extends HTMLElement {
 	async fetchData() {
 		try {
 			const meData: Me = await FetchAuth.verifyConnection();
-			const id = this.userId ?? meData.id;
+			this.myId = this.userId ?? meData.id;
 			this.friendRequestsOut = await FetchUsers.friendRequestGet(
 				meData.id,
 			);
-			this.userData = await FetchUsers.user(id);
-			this.matchHistory = await FetchPongDb.matchHistory(id);
+			this.userData = await FetchUsers.user(this.myId);
+			this.matchHistory = await FetchPongDb.matchHistory(this.myId);
 			// add fetch for friends list here
 		} catch (e) {
 			console.log(e);
@@ -62,38 +63,58 @@ export class ProfileView extends HTMLElement {
 	}
 
 	buildDomElements() {
-		this.classList.add("flex", "flex-col", "gap-3");
+		this.classList.add("flex", "flex-col", "gap-18");
 		if (this.userData) {
-			this.append(new HeadlineComponent("Profile"));
-			const detail = new ProfileDetailComponent(this.userData);
-			detail.classList.add("mb-12");
-			this.append(detail);
+			const container = document.createElement("div");
+			container.append(
+				new HeadlineComponent("Profile"),
+				new ProfileDetailComponent(this.userData),
+			);
+			this.append(container);
 		}
 
 		if (this.friends?.length) {
-			this.append(new HeadlineComponent("Friends"));
-			this.append(new ProfileFriendsComponent(this.friends));
+			const container = document.createElement("div");
+			container.append(
+				new HeadlineComponent("Friends"),
+				new ProfileFriendsComponent(this.friends),
+			);
+			this.append(container);
 		}
 
 		if (this.friendRequestsIn?.length) {
-			this.append(new HeadlineComponent("Incoming Friend Requests"));
-			this.append(new ProfileFriendsComponent(this.friendRequestsIn));
+			const container = document.createElement("div");
+			container.append(
+				new HeadlineComponent("Incoming Friend Requests"),
+				new ProfileFriendsComponent(this.friendRequestsIn),
+			);
+			this.append(container);
 		}
 
-		if (this.friendRequestsOut?.length) {
-			this.append(new HeadlineComponent("Outgoing Friend Requests"));
-			this.append(new ProfileFriendsOutComponent(this.friendRequestsOut));
+		if (this.friendRequestsOut?.length && this.myId) {
+			const container = document.createElement("div");
+			container.id = "friendRequestOutContainer";
+			container.append(
+				new HeadlineComponent("Outgoing Friend Requests"),
+				new ProfileFriendsOutComponent(
+					this.friendRequestsOut,
+					this.myId,
+				),
+			);
+			this.append(container);
 		}
 
 		if (this.matchHistory && this.userData) {
-			this.append(new HeadlineComponent("Match History"));
+			const container = document.createElement("div");
+			container.append(new HeadlineComponent("Match History"));
 			for (let match of this.matchHistory) {
 				const matchCard = new ProfileMatchHistoryComponent(
 					match,
 					this.userData,
 				);
-				this.append(matchCard);
+				container.append(matchCard);
 			}
+			this.append(container);
 		}
 	}
 }

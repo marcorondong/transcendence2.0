@@ -273,7 +273,7 @@ class ProfileDetailComponent extends HTMLElement {
 			"rounded-t-xl",
 			"sm:rounded-t-none",
 			"sm:rounded-l-xl",
-			"sm:w-100",
+			"w-full",
 		);
 		this.avatarContainer.append(this.avatar);
 
