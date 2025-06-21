@@ -79,13 +79,25 @@ export class FetchUsers {
 		return await fetchPong(config);
 	}
 
-	static async friendRequestGet(id: string) {
+	static async friendRequestGetFromMe(id: string) {
 		const config: FetchConfig = {
 			method: "GET",
 			headers: {
 				accept: "application/json",
 			},
 			url: "/api/friend-requests/?fromId=" + id,
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendRequestGetToMe(id: string) {
+		const config: FetchConfig = {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+			},
+			url: "/api/friend-requests/?toId=" + id,
 		};
 
 		return await fetchPong(config);
@@ -98,6 +110,42 @@ export class FetchUsers {
 				accept: "application/json",
 			},
 			url: "/api/friend-requests/" + id,
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendRequestAccept(id: string) {
+		const config: FetchConfig = {
+			method: "POST",
+			headers: {
+				accept: "application/json",
+			},
+			url: "/api/friend-requests/" + id + "/accept",
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendsGet(id: string) {
+		const config: FetchConfig = {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+			},
+			url: "/api/users/" + id + "/friends",
+		};
+
+		return await fetchPong(config);
+	}
+
+	static async friendsDelete(myId: string, friendId: string) {
+		const config: FetchConfig = {
+			method: "DELETE",
+			headers: {
+				accept: "application/json",
+			},
+			url: "/api/users/" + myId + "/friends/" + friendId,
 		};
 
 		return await fetchPong(config);
