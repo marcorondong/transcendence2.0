@@ -52,4 +52,8 @@ export class TestingUtils {
 			page.getByText("Match Status: Game is running"),
 		).toBeVisible();
 	}
+
+	static async messageSent(page: Page) {
+		
+	}
 }
