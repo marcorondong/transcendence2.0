@@ -8,6 +8,7 @@ const envZodSchema = z.object({
 	CHAT_DB_BLOCK_STATUS_REQUEST_DOCKER: z.string().nonempty(),
 	AUTH_API_VERIFY_CONNECTION_REQUEST_DOCKER: z.string().nonempty(),
 	PONG_API_PLAYER_ROOM_REQUEST_DOCKER: z.string().nonempty(),
+	USERS_REQUEST_DOCKER: z.string().nonempty(),
 	HOST: z.string().nonempty(),
 	NODE_ENV: z.enum(["development", "production"]),
 });

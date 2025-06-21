@@ -5,11 +5,12 @@ import {
 	errorResponseSchema,
 	onlineUsersResponseSchema,
 	newUserResponseSchema,
+	updateNicknameResponseSchema,
 } from "./zodSchemas";
 import type { MessageInput, InviteInput } from "./zodSchemas";
 import type { Client } from "../utils/Client";
 import { onlineClients } from "./webSocketConnection";
-import { getRequestRoomId } from "./httpRequests";
+import { getRequestRoomId, getRequestUser } from "./httpRequests";
 import { checkUser } from "./service";
 import { env } from "../utils/env";
 
@@ -72,6 +73,25 @@ export async function inviteHandler(data: InviteInput, client: Client) {
 	}
 }
 
+export async function updateNicknameHandler(client: Client) {
+	const id = client.getId();
+	const response = await getRequestUser(id);
+	const rawData = await response.json();
+	if (!response.ok)
+		throw new Error(`Update nickname request failed: ${rawData}`);
+	const updatedUser = { id: rawData.id, nickname: rawData.nickname };
+	if (updatedUser.id !== id)
+		throw new Error("Update nickname request failed: user ID mismatch");
+	client.setNickname(updatedUser.nickname);
+	const updateNicknameResponse = updateNicknameResponseSchema.parse({
+		type: "updateNickname",
+		user: updatedUser,
+	});
+	onlineClients.forEach((person) => {
+		person.send(JSON.stringify(updateNicknameResponse));
+	});
+}
+
 export function disconnectionHandler(client: Client, socket: WebSocket) {
 	client.removeSocket(socket);
 	if (client.hasActiveSockets()) return;
@@ -89,7 +109,7 @@ export function disconnectionHandler(client: Client, socket: WebSocket) {
 export function errorHandler(socket: WebSocket, error: any) {
 	let errorMessage = "Something went wrong. Please try again later.";
 	if (env.NODE_ENV === "development") {
-		// TODO create warning for better frontend information or no need 
+		// TODO create warning for better frontend information or no need
 		errorMessage = `${error}`;
 	}
 	const errorResponse = errorResponseSchema.parse({

@@ -77,3 +77,14 @@ export async function getRequestVerifyConnection(
 	const { id, nickname } = userZodSchema.parse(data);
 	return { id, nickname };
 }
+
+export async function getRequestUser(id: unknown)
+{
+	const response = await fetch(
+		`${env.USERS_REQUEST_DOCKER}${id}`,
+		{
+			method: "GET",
+		}
+	);
+	return response;
+}
