@@ -94,7 +94,7 @@ E.g:
 - [Blockchain-broken](/microservices/blockchain/README.md)
 - [Chat](/microservices/chat_api/README.md)
 - [Chat DB](/microservices/chat_db/README.md)
-- [CLI Client](/microservices/cli-client/README.md)
+- [CLI Client](/cli-client/README.md)
 - [Front-end-broken](/microservices/frontend/README.md)
 - [Monitoring](/monitoring/README.md)
 - [Pong-api](./microservices/ssg/pong-api/README.md)

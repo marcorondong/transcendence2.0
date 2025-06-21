@@ -67,6 +67,12 @@ test("open chat and send message", async ({ browser }) => {
 	await expect(
 		user2Page.getByRole("textbox", { name: "enter your message" }),
 	).toBeVisible();
+	await user1Page.screenshot({  
+        path: `ete_tests/screenshots/chatUser1.png`,  
+    });  
+    await user2Page.screenshot({  
+        path: `ete_tests/screenshots/chatUser2.png`,  
+    });  
 	await expect(user2Page.getByText(from2To1)).toBeVisible();
 	await expect(user1Page.getByText(from2To1)).toBeVisible();
 });
