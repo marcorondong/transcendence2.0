@@ -139,12 +139,12 @@ test("open chat and block user2", async ({ browser }) => {
 	await user2Page
 		.getByRole("textbox", { name: "enter your message" })
 		.press("Enter");
-	await expect(user2Page.getByText(from2To1)).toBeVisible();
 	await user2Page.screenshot({
 		path: `ete_tests/screenshots/${registeredUsers.user2.nickname}_messaged_${registeredUsers.user1.nickname}.png`,
 	});
-	await expect(user1Page.getByText(from2To1)).not.toBeVisible();
 	await user1Page.screenshot({
 		path: `ete_tests/screenshots/${registeredUsers.user1.nickname}_blocked_${registeredUsers.user2.nickname}.png`,
 	});
+	await expect(user2Page.getByText(from2To1)).toBeVisible();
+	await expect(user1Page.getByText(from2To1)).not.toBeVisible();
 });
