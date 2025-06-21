@@ -30,6 +30,9 @@ model User {
   friendRequestsSent     FriendRequest[] @relation("FriendRequestsSent")
   friendRequestsReceived FriendRequest[] @relation("FriendRequestsReceived")
 
+  blockedUsers BlockList[] @relation("Blocker")
+  blockedBy    BlockList[] @relation("Blocked")
+
   products     Product[] // TODO: Remove this legacy code
 
   @@index([createdAt])
@@ -61,6 +64,19 @@ model FriendRequest {
   @@unique([fromId, toId]) // prevents duplicate FriendRequest
   @@index([fromId])
   @@index([toId])
+}
+
+model BlockList {
+  id          String   @id @default(uuid())
+  blocker     User     @relation("Blocker", fields: [blockerId], references: [id])
+  blockerId   String
+  blocked     User     @relation("Blocked", fields: [blockedId], references: [id])
+  blockedId   String
+  createdAt   DateTime @default(now())
+
+  @@unique([blockerId, blockedId]) // prevent duplicates
+  @@index([blockerId])
+  @@index([blockedId])
 }
 
  // TODO: Remove this legacy code

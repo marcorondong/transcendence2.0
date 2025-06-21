@@ -1,5 +1,10 @@
 import { Prisma } from "@prisma/client";
-import { AppError, FRIENDSHIP_ERRORS, USER_ERRORS } from "../../utils/errors";
+import {
+	AppError,
+	BLOCK_LIST_ERRORS,
+	FRIENDSHIP_ERRORS,
+	USER_ERRORS,
+} from "../../utils/errors";
 import { hashPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import {
@@ -476,6 +481,7 @@ export async function getUserFriends(id: string, query: UserQueryOptions) {
 	}
 }
 
+// TODO: Rename it to `alreadyFriends`
 // Helper function for friendRequest module
 export async function areAlreadyFriends(
 	userId: string,
@@ -576,6 +582,186 @@ export async function deleteFriend(userId: string, targetUserId: string) {
 				statusCode: 404,
 				code: FRIENDSHIP_ERRORS.DELETE,
 				message: "Users were not friends",
+			});
+		}
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// Get all users blocked by a specific user
+export async function getUserBlocked(id: string, query: UserQueryOptions) {
+	try {
+		await getUserOrThrow({ id }); // Ensure user exists
+
+		// Step 1: Get friendships for the given user
+		const blocked = await prisma.blockList.findMany({
+			where: { blockerId: id },
+			select: { blockedId: true },
+		});
+		const blockedIds = blocked.map((entry) => entry.blockedId);
+
+		if (!blockedIds.length) {
+			// throw new AppError({
+			// 	statusCode: 404,
+			// 	code: BLOCK_LIST_ERRORS.NOT_FOUND,
+			// 	message: "User has no blocked users",
+			// });
+			logger.log(
+				{
+					"event.action": "getUserBlocked",
+					"userId": id,
+				},
+				"User has no blocked users",
+			);
+			return [];
+		}
+
+		// Step 2: Extract filters from query
+		const { where = {}, filterIds: queryFilterIds, ...restQuery } = query;
+
+		const requestedIds = new Set<string>();
+		if (typeof where.id === "string") requestedIds.add(where.id);
+		if (Array.isArray(queryFilterIds)) {
+			queryFilterIds.forEach((id) => requestedIds.add(id));
+		}
+
+		// Step 3: Intersect friendIds with requestedIds (if any filters were provided)
+		const finalIds =
+			requestedIds.size > 0
+				? blockedIds.filter((id) => requestedIds.has(id))
+				: blockedIds;
+
+		if (!finalIds.length) {
+			// throw new AppError({
+			// 	statusCode: 404,
+			// 	code: BLOCK_LIST_ERRORS.NOT_FOUND,
+			// 	message: "No matching blocked users found",
+			// });
+			logger.log(
+				{
+					"event.action": "getUserFriends",
+					"userId": id,
+					"where": query,
+				},
+				"User has no friends that match this criteria",
+			);
+			return [];
+		}
+
+		// Step 4: Remove 'where.id' and pass only intersected filterIds
+		const { id: _, ...filteredWhere } = where;
+
+		// Step 5: Use existing logic from findUsers to apply query filters
+		return await findUsers({
+			...restQuery,
+			where: filteredWhere,
+			filterIds: finalIds,
+		});
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// TODO: Check if I should use `userId` and `targetUserId` as in areAlreadyFriends
+// Check if a user is already blocked by another
+async function alreadyBlocked(
+	blockerId: string,
+	blockedId: string,
+): Promise<boolean> {
+	if (blockerId === blockedId) return false;
+
+	const exists = await prisma.blockList.findFirst({
+		where: { blockerId, blockedId },
+		select: { id: true },
+	});
+
+	return !!exists;
+}
+
+// Block a user (unidirectional)
+export async function blockUser(userId: string, targetUserId: string) {
+	if (userId === targetUserId) {
+		throw new AppError({
+			statusCode: 400,
+			code: BLOCK_LIST_ERRORS.SELF,
+			message: "Cannot block yourself",
+		});
+	}
+	try {
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: userId }),
+			getUserOrThrow({ id: targetUserId }),
+		]);
+		// Check if targetUser is already blocked
+		// Note that I'm already enforcing @@unique, but apparently this is best practice
+		// Avoids DB errors as flow control so I'm  "avoiding failure" instead of "handling it"
+		if (await alreadyBlocked(userId, targetUserId)) {
+			throw new AppError({
+				statusCode: 409,
+				code: BLOCK_LIST_ERRORS.ALREADY,
+				message: "User is already blocked",
+			});
+		}
+
+		await prisma.blockList.create({
+			data: {
+				blockerId: userId,
+				blockedId: targetUserId,
+			},
+		});
+
+		// Return the newly blocked user
+		return getUserOrThrow({ id: targetUserId });
+	} catch (err) {
+		// Known/Expected errors bubble up to controller as AppError (custom error)
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			if (err.code === "P2002") {
+				throw new AppError({
+					statusCode: 409,
+					code: BLOCK_LIST_ERRORS.ADD,
+					message: "User is already blocked",
+				});
+			}
+		}
+		if (err instanceof AppError) throw err;
+		// Unknown errors bubble up to global error handler.
+		throw err;
+	}
+}
+
+// Unblock a user
+export async function unblockUser(userId: string, targetUserId: string) {
+	if (userId === targetUserId) {
+		throw new AppError({
+			statusCode: 400,
+			code: BLOCK_LIST_ERRORS.SELF,
+			message: "Cannot unblock yourself",
+		});
+	}
+	try {
+		// Ensure users exist
+		await Promise.all([
+			getUserOrThrow({ id: userId }),
+			getUserOrThrow({ id: targetUserId }),
+		]);
+
+		const result = await prisma.blockList.deleteMany({
+			where: { blockerId: userId, blockedId: targetUserId },
+		});
+		// deleteMany doesn't throw is anything is deleted. So I have to check how many rows where deleted
+		if (result.count === 0) {
+			throw new AppError({
+				statusCode: 404,
+				code: BLOCK_LIST_ERRORS.DELETE,
+				message: "User was not blocked",
 			});
 		}
 	} catch (err) {
