@@ -11,7 +11,7 @@ services:
       - .:/app # Mount full project
       - users_node_modules:/app/node_modules # Keep node_modules container-managed
       - users_db:/app/prisma/database # Keep DB container-managed & ephemeral
-      - user_pictures:/app/uploads # Users pictures (Shared with Nginx)
+      # - user_pictures:/app/uploads # Users pictures (Shared with Nginx)
     ports:
       - "3000:3000" # Expose Fastify server to host
     # environment:
@@ -25,4 +25,4 @@ services:
 volumes:
   users_node_modules:
   users_db:
-  user_pictures:
+  # user_pictures:

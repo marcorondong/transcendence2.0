@@ -47,11 +47,15 @@
 }
 
 .pong-button-error {
-	@apply bg-indigo-300 border-1 border-red-400/40 hover:bg-red-600 dark:text-red-400 dark:bg-red-300/10 hover:dark:bg-red-500/20;
+	@apply border-1 border-red-400 text-red-300 hover:text-red-200 bg-red-700/30 hover:bg-red-500/30  backdrop-blur-lg;
+}
+
+.pong-button-error-solid {
+	@apply border-1 border-red-400/40 hover:bg-red-600 dark:text-red-400 bg-red-800/50 hover:dark:bg-red-500 hover:text-rose-300 backdrop-blur-lg;
 }
 
 .pong-button-block {
-	@apply bg-indigo-300  dark:text-red-700 hover:dark:text-red-500 bg-transparent;
+	@apply dark:text-red-700 hover:dark:text-red-500 bg-transparent;
 }
 
 .pong-button-round {
@@ -137,7 +141,7 @@ a {
 }
 
 .pong-notification-error {
-	@apply bg-rose-700/30 border-rose-600 text-rose-200/90;
+	@apply bg-rose-700/30 border-rose-600 text-rose-200/90 hover:text-rose-300;
 }
 
 .pong-notification-success {

@@ -7,7 +7,7 @@ services:
     container_name: nginx
     volumes:
       # - ./microservices/frontend/dist/:/usr/share/nginx/html
-      - user_pictures:/usr/share/nginx/html/uploads # Users pictures (Shared with Nginx)
+      # - user_pictures:/usr/share/nginx/html/uploads # Users pictures (Shared with Nginx)
       - vite_dist:/usr/share/nginx/html
       # - ./microservices/nginx/config/nginx.conf:/etc/nginx/nginx.conf
     ports:
@@ -17,5 +17,5 @@ services:
       - Transcendence2.0
 
 volumes:
-  user_pictures:
+  # user_pictures:
   vite_dist:

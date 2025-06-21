@@ -1,7 +1,5 @@
 import type { FetchConfig } from "../types/Fetch";
 
-//TODO: manage baseUrl based on ENV variable
-// export const baseUrl = `https://${window.location.hostname}:${window.location.port}`;
 export const baseUrl = import.meta.env.PROD
 	? `https://${window.location.hostname}:${window.location.port}`
 	: "/proxy";
@@ -27,7 +25,6 @@ export async function fetchPong<T = unknown>(config: FetchConfig<T>) {
 	// Check if response has a body
 	const contentLength = response.headers.get("Content-Length");
 	const contentType = response.headers.get("Content-Type");
-	console.log(response.headers);
 
 	const hasBody =
 		(contentLength && parseInt(contentLength) > 0) ||

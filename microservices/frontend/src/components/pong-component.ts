@@ -375,10 +375,13 @@ export class PongComponent extends HTMLElement {
 
 	async requestBot(roomId: string) {
 		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
-		const reqBody = JSON.stringify({
-			roomId: roomId,
-			difficulty: this.chat.gameSelection?.playSelection,
-		});
+		console.log(roomId);
+		// TODO: fix
+		const reqBody = null;
+		// const reqBody = JSON.stringify({
+		// 	roomId: roomId,
+		// 	difficulty: this.chat.gameSelection?.playSelection,
+		// });
 
 		try {
 			const response = await fetch(url, {
@@ -415,11 +418,13 @@ export class PongComponent extends HTMLElement {
 	}
 
 	isBotNeeded() {
-		return (
-			this.chat.gameSelection?.playSelection === "easy" ||
-			this.chat.gameSelection?.playSelection === "normal" ||
-			this.chat.gameSelection?.playSelection === "hard"
-		);
+		// TODO: fix
+		return true;
+		// return (
+		// 	this.chat.gameSelection?.playSelection === "easy" ||
+		// 	this.chat.gameSelection?.playSelection === "normal" ||
+		// 	this.chat.gameSelection?.playSelection === "hard"
+		// );
 	}
 
 	handleEvent(event: Event) {
