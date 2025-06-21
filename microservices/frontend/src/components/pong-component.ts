@@ -1,5 +1,7 @@
 import { baseUrl } from "../services/fetch";
 import type { PongQueryParams } from "../types/Fetch";
+import { BotModes } from "../types/Game";
+import type { BotMode } from "../types/Game";
 import type { Ball, Paddle, Pong } from "../types/Pong";
 import { ChatComponent } from "./chat-component";
 import { IconComponent } from "./icon-component";
@@ -183,7 +185,8 @@ export class PongComponent extends HTMLElement {
 		}
 		if (
 			!this.pongQueryParams.room ||
-			this.pongQueryParams.room === "public"
+			this.pongQueryParams.room === "public" ||
+			this.isBotNeeded()
 		) {
 			return url;
 		}
@@ -376,12 +379,10 @@ export class PongComponent extends HTMLElement {
 	async requestBot(roomId: string) {
 		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
 		console.log(roomId);
-		// TODO: fix
-		const reqBody = null;
-		// const reqBody = JSON.stringify({
-		// 	roomId: roomId,
-		// 	difficulty: this.chat.gameSelection?.playSelection,
-		// });
+		const reqBody = JSON.stringify({
+			roomId: roomId,
+			difficulty: this.pongQueryParams.room,
+		});
 
 		try {
 			const response = await fetch(url, {
@@ -418,13 +419,7 @@ export class PongComponent extends HTMLElement {
 	}
 
 	isBotNeeded() {
-		// TODO: fix
-		return true;
-		// return (
-		// 	this.chat.gameSelection?.playSelection === "easy" ||
-		// 	this.chat.gameSelection?.playSelection === "normal" ||
-		// 	this.chat.gameSelection?.playSelection === "hard"
-		// );
+		return BotModes.includes(this.pongQueryParams.room as BotMode);
 	}
 
 	handleEvent(event: Event) {
