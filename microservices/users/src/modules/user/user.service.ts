@@ -643,11 +643,11 @@ export async function getUserBlocked(id: string, query: UserQueryOptions) {
 			// });
 			logger.log(
 				{
-					"event.action": "getUserFriends",
+					"event.action": "getUserBlocked",
 					"userId": id,
 					"where": query,
 				},
-				"User has no friends that match this criteria",
+				"User has no blocked users that match this criteria",
 			);
 			return [];
 		}

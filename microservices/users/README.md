@@ -199,7 +199,7 @@ However, you can customize the service using docker secrets, environmental varia
 ## 🔀 API Endpoints
 
 | Method | Path                                      | Description                                              |
-| ------ | ----------------------------------------- | --------------------------------------                   |
+| ------ | ----------------------------------------- | -------------------------------------------------------- |
 | GET    | `/api/health-check/`                      | Health check                                             |
 | GET    | `/api/documentation/`                     | Swagger (Good for testing all options)                   |
 | POST   | `/api/users/`                             | Create a new user                                        |

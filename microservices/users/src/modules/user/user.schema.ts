@@ -412,7 +412,7 @@ export const addFriendSchema = z
 	})
 	.strict();
 
-// Schema for blocking an user (blockUser)
+// Schema for blocking a user (blockUser)
 export const blockUserSchema = z
 	.object({
 		targetUserId: z
