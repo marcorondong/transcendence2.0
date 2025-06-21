@@ -40,23 +40,23 @@ model User {
 
 model Friendship {
   id        String   @id @default(uuid())
-  user1     User     @relation("User1Friends", fields: [user1Id], references: [id])
+  user1     User     @relation("User1Friends", fields: [user1Id], references: [id], onDelete: Cascade)
   user1Id   String
-  user2     User     @relation("User2Friends", fields: [user2Id], references: [id])
+  user2     User     @relation("User2Friends", fields: [user2Id], references: [id], onDelete: Cascade)
   user2Id   String
   createdAt DateTime @default(now())
-  @@unique([user1Id, user2Id]) // prevents duplicate friendships
-  // We'll enforce user1Id < user2Id to avoid A-B and B-A are not stored twice
 
+  // We'll enforce user1Id < user2Id to avoid A-B and B-A are not stored twice
+  @@unique([user1Id, user2Id]) // prevents duplicate friendships
   @@index([user1Id])
   @@index([user2Id])
 }
 
 model FriendRequest {
   id        String   @id @default(uuid())
-  from      User     @relation("FriendRequestsSent", fields: [fromId], references: [id])
+  from      User     @relation("FriendRequestsSent", fields: [fromId], references: [id], onDelete: Cascade)
   fromId    String
-  to        User     @relation("FriendRequestsReceived", fields: [toId], references: [id])
+  to        User     @relation("FriendRequestsReceived", fields: [toId], references: [id], onDelete: Cascade)
   toId      String
   message   String
   createdAt DateTime @default(now())
@@ -68,9 +68,9 @@ model FriendRequest {
 
 model BlockList {
   id          String   @id @default(uuid())
-  blocker     User     @relation("Blocker", fields: [blockerId], references: [id])
+  blocker     User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
   blockerId   String
-  blocked     User     @relation("Blocked", fields: [blockedId], references: [id])
+  blocked     User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
   blockedId   String
   createdAt   DateTime @default(now())
 
