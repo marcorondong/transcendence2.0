@@ -144,7 +144,7 @@ Reply sent to everyone (including User1 and others)
 
 ``` json
 {
-    "type": "updateNickname"
+    "type": "updateNickname",
     "user": {
         "id": "id of User1",
         "nickname": "new nickname of User1"
