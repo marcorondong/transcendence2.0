@@ -43,7 +43,7 @@ export class FetchAuth {
 	static async signOut() {
 		const config: FetchConfig = {
 			url: "/auth-api/sign-out",
-			method: "DELETE",
+			method: "POST",
 			header: { accept: "application/json" },
 		};
 		try {
@@ -58,7 +58,7 @@ export class FetchAuth {
 	static async verifyJwt() {
 		const config: FetchConfig = {
 			url: "/auth-api/verify-jwt",
-			method: "GET",
+			method: "POST",
 			header: { accept: "application/json" },
 		};
 		await fetchPong(config);
