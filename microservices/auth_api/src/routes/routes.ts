@@ -22,7 +22,7 @@ export async function authRoutes(server: FastifyInstance) {
 	server.post(env.AUTH_API_SIGN_OUT_STATIC, signOutOpt);
 	server.get(env.AUTH_API_VERIFY_JWT_STATIC, verifyJWTOpt);
 	server.post(env.AUTH_API_REFRESH_JWT_STATIC, refreshJWTOpt);
-	server.get(env.AUTH_API_BOT_JWT_STATIC, botJWTOpt);
+	server.post(env.AUTH_API_BOT_JWT_STATIC, botJWTOpt);
 	server.get(env.AUTH_API_VERIFY_CONNECTION_STATIC, verifyConnectionOpt);
 	server.post(env.AUTH_API_UPDATE_JWT_STATIC, updateJWTOpt);
 	// server.patch(env.AUTH_API_UPDATE_JWT_STATIC, updateJWTPatchOpt);
