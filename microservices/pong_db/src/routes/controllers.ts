@@ -7,7 +7,6 @@ import {
 	getHeadToHeadStats,
 	healthCheck,
 } from "./service";
-import httpError from "http-errors";
 
 export async function createGameHandler(
 	request: FastifyRequest<{ Body: GameInput }>,
@@ -24,8 +23,14 @@ export async function gameHistoryHandler(
 ) {
 	const { userId } = request.params;
 	const gameHistory = await getGameHistory(userId);
-	if (!gameHistory || gameHistory.length === 0)
-		throw new httpError.NotFound("Game history not found");
+	if (!gameHistory || gameHistory.length === 0) {
+		console.error(`No game history found for userId: ${userId}`);
+		return reply.status(404).send({
+			statusCode: 404,
+			error: "NotFound",
+			message: "No game history found for this user.",
+		});
+	}
 	reply.status(200).send(gameHistory);
 }
 
@@ -35,7 +40,14 @@ export async function userStatsHandler(
 ) {
 	const { userId } = request.params;
 	const userStats = await getUserStats(userId);
-	if (!userStats) throw new httpError.NotFound("User stats not found");
+	if (!userStats) {
+		console.error(`User stats not found for userId: ${userId}`);
+		return reply.status(404).send({
+			statusCode: 404,
+			error: "NotFound",
+			message: "User stats not found",
+		});
+	}
 	reply.status(200).send(userStats);
 }
 
@@ -61,7 +73,16 @@ export async function headToHeadHandler(
 ) {
 	const { userId, opponentId } = request.params;
 	const stats = await getHeadToHeadStats(userId, opponentId);
-	if (!stats) throw new httpError.NotFound("Head-to-head stats not found");
+	if (!stats) {
+		console.error(
+			`Head-to-head stats not found for userId: ${userId}, opponentId: ${opponentId}`,
+		);
+		return reply.status(404).send({
+			statusCode: 404,
+			error: "NotFound",
+			message: "Head-to-head stats not found",
+		});
+	}
 	reply.status(200).send(stats);
 }
 
