@@ -128,6 +128,31 @@ Reply sent to all other users
 }
 ```
 
+## 👤 User changed his nickname
+
+User1 changed his nickname
+
+Request sent by User1
+
+``` json
+{
+    "type": "updateNickname"
+}
+```
+
+Reply sent to everyone (including User1 and others)
+
+``` json
+{
+    "type": "updateNickname"
+    "user": {
+        "id": "id of User1",
+        "nickname": "new nickname of User1"
+    }
+}
+```
+
+
 ## 🔌 Disconnection Event
 
 When a User disconnects, the backend sends a disconnection event.
