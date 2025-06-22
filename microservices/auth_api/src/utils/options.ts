@@ -39,26 +39,34 @@ export const swaggerOption = {
 		security: [{ bearerAuth: [] }],
 	},
 	transform: jsonSchemaTransform,
-
 };
 
 export const swaggerUiOption = {
 	routePrefix: env.AUTH_API_DOCUMENTATION_STATIC,
 };
 
-export const serverOption = {
-	logger: {
-		level: "warn",
-		transport: {
-			target: "pino-pretty",
-			options: {
-				colorize: true,
-				ignore: "INFO",
-				translateTime: "HH:MM:ss Z",
-			},
-		},
-	},
-};
+// const serverOption = {
+// 	logger: {
+// 		level: "warn",
+// 		transport: {
+// 			target: "pino-pretty",
+// 			options: {
+// 				colorize: true,
+// 				ignore: "INFO",
+// 				translateTime: "HH:MM:ss Z",
+// 			},
+// 		},
+// 	},
+// };
+
+// export function ft_serverOption() {
+// 	try {
+// 		require.resolve("pino-pretty");
+// 		return serverOption;
+// 	} catch {
+// 		return { logger: true }; // Fallback to default logger if pino-pretty is not available
+// 	}
+// }
 
 export const jwtOption = {
 	secret: jwtSecret,

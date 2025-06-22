@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import {
-	serverOption,
+	// ft_serverOption,
 	swaggerOption,
 	swaggerUiOption,
 	jwtOption,
@@ -20,7 +20,7 @@ import fastifyJWT from "@fastify/jwt";
 import { ft_onRequest } from "./utils/onRequest";
 import { env } from "./utils/env";
 
-const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
+const server = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 server.setErrorHandler(globalErrorHandler);

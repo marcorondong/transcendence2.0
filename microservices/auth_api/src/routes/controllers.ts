@@ -30,7 +30,7 @@ export async function signInHandler(
 	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send(data);
+	reply.status(200).send();
 }
 
 export async function signUpHandler(
@@ -49,7 +49,7 @@ export async function signUpHandler(
 	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send(data);
+	reply.status(200).send();
 }
 
 export async function signOutHandler(
@@ -64,8 +64,7 @@ export async function verifyJWTHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const payload = payloadZodSchema.parse(request.user);
-	reply.status(200).send(payload);
+	reply.status(200).send();
 }
 
 export async function refreshJWTHandler(
@@ -75,7 +74,7 @@ export async function refreshJWTHandler(
 	const payload = payloadZodSchema.parse(request.user);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send(payload);
+	reply.status(200).send();
 }
 
 export async function verifyConnectionHandler(
