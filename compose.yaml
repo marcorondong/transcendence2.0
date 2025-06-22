@@ -21,9 +21,9 @@ include:
   #   project_directory: ./microservices/auth_api
   #   env_file: ./.env
 
-volumes:
-  # user_pictures:
-  vite_dist:
+# volumes:
+# user_pictures:
+# vite_dist:
 
 networks:
   Transcendence2.0:
