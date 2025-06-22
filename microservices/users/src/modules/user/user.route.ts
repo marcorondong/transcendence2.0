@@ -11,6 +11,9 @@ import {
 	getFriendsHandler,
 	addFriendHandler,
 	deleteFriendHandler,
+	getBlockedUsersHandler,
+	blockUserHandler,
+	unblockUserHandler,
 } from "./user.controller";
 import {
 	createUserSchema,
@@ -26,6 +29,7 @@ import {
 	targetUserIdParamSchema,
 	emptyResponseSchema,
 	errorResponseSchema,
+	blockUserSchema,
 } from "./user.schema";
 import { appErrorHandler } from "../../utils/errors";
 // import { z } from "zod";
@@ -321,6 +325,71 @@ async function userRoutes(server: FastifyInstance) {
 			},
 		},
 		appErrorHandler(deleteFriendHandler),
+	);
+
+	// 12. Get all blocked users by ID
+	server.get(
+		"/:id/block-list",
+		{
+			schema: {
+				tags: ["Block List"],
+				summary: "Get all blocked users",
+				description:
+					"Returns the list of users blocked by this user. Supports filtering, sorting, and pagination via query params.",
+				params: userIdParamSchema,
+				querystring: getUsersQuerySchema,
+				response: {
+					200: userArrayResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+			},
+		},
+		appErrorHandler(getBlockedUsersHandler),
+	);
+
+	// 13. Block a user by ID
+	server.post(
+		"/:id/block-list",
+		{
+			schema: {
+				tags: ["Block List"],
+				summary: "Block a user",
+				description:
+					"Adds the target user to the caller's block list (unidirectional).",
+				params: userIdParamSchema,
+				body: blockUserSchema,
+				response: {
+					// 201: userArrayResponseSchema,
+					201: userResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+					409: errorResponseSchema.describe("Already blocked"),
+				},
+			},
+		},
+		appErrorHandler(blockUserHandler),
+	);
+
+	// 14. Unblock a user by ID
+	server.delete(
+		"/:id/block-list/:targetUserId",
+		{
+			schema: {
+				tags: ["Block List"],
+				summary: "Unblock a user",
+				description:
+					"Removes the target user from the caller's block list (unidirectional).",
+				params: userIdParamSchema.merge(targetUserIdParamSchema),
+				response: {
+					// 200: userArrayResponseSchema,
+					204: emptyResponseSchema,
+					400: errorResponseSchema.describe("Bad request"),
+					404: errorResponseSchema.describe("Not Found"),
+				},
+			},
+		},
+		appErrorHandler(unblockUserHandler),
 	);
 }
 
