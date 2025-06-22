@@ -86,9 +86,12 @@ export class PongComponent extends HTMLElement {
 		this.fullscreenButton.appendChild(fullscreenIcon);
 		canvasContainer.appendChild(this.fullscreenButton);
 
+		// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
+		this.appendCopyLink("roomId");
+
 		// COPY LINK BUTTON FOR PRIVATE ROOMS
 		if (this.pongQueryParams.room === "private") {
-			this.appendCopyLink();
+			this.appendCopyLink("link");
 		}
 
 		// EVENT LISTENER
@@ -127,6 +130,14 @@ export class PongComponent extends HTMLElement {
 						this.gameState.roomId;
 				}
 			}
+
+			// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
+			const roomIdDiv = document.getElementById(
+				"copy-roomId",
+			) as HTMLElement;
+			if (roomIdDiv && this.gameState) {
+				roomIdDiv.innerText = this.gameState.roomId;
+			}
 		};
 		this.gameLoop();
 		this.botWrapper();
@@ -149,10 +160,10 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 
-	appendCopyLink() {
+	appendCopyLink(inviteType: "link" | "roomId") {
 		const headline = document.createElement("h2");
 		headline.classList.add("pong-heading", "text-center", "mb-2");
-		headline.innerText = "Share this link to play";
+		headline.innerText = `Share this ${inviteType} to invite`;
 		const linkContainer = document.createElement("div");
 		linkContainer.classList.add(
 			"pong-card",
@@ -171,7 +182,7 @@ export class PongComponent extends HTMLElement {
 		copyButton.append(copyIcon);
 		const link = document.createElement("div");
 		link.classList.add("text-xs");
-		link.id = "copy-link";
+		link.id = `copy-${inviteType}`;
 		linkContainer.append(link, copyButton);
 		this.append(headline, linkContainer);
 	}
