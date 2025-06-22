@@ -6,4 +6,6 @@ if [ "$NODE_ENV" = "development" ]; then
 else
   # npm run build --watch
   npm run build
+  echo "✅ Build complete. Exiting normally."
+  exit 0
 fi
