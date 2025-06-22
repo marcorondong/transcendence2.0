@@ -129,6 +129,7 @@ export class PongComponent extends HTMLElement {
 			}
 		};
 		this.gameLoop();
+		this.botWrapper();
 	}
 
 	disconnectedCallback() {
@@ -419,7 +420,9 @@ export class PongComponent extends HTMLElement {
 	}
 
 	isBotNeeded() {
-		return BotModes.includes(this.pongQueryParams.room as BotMode);
+		const botMode = BotModes.includes(this.pongQueryParams.room as BotMode);
+		console.log("botMode:", botMode);
+		return botMode;
 	}
 
 	handleEvent(event: Event) {
