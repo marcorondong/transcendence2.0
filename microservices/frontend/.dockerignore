@@ -1,0 +1,19 @@
+# Ignore dependencies
+node_modules/
+
+# Ignore build output
+dist/
+
+# Ignore Vite cache (optional)
+.vite/
+
+# Ignore environment files
+.env
+.env.* 
+
+# Git & editor junk
+.git/
+.gitignore
+*.log
+.DS_Store
+*.swp
