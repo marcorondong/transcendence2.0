@@ -60,6 +60,7 @@ delete-secrets:
 %$(REBUILD_SERVICE):
 	@echo "rebuilding $(@:$(REBUILD_SERVICE)=)"
 	-docker container rm -f $(shell docker ps | awk '{print $$NF}' | grep $(@:$(REBUILD_SERVICE)=))
+# so we find versioned images with tags
 	docker image rm -f $(shell docker images | awk '{print $$1,$$2}' | grep $(@:$(REBUILD_SERVICE)=) | tr ' ' ':')
 	make
 

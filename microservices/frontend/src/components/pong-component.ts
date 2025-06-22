@@ -15,6 +15,7 @@ export class PongComponent extends HTMLElement {
 	chat: ChatComponent;
 	pongQueryParams: PongQueryParams;
 	botJoined: boolean | undefined = undefined;
+	lobbyMessage: string = "Waiting for Opponent...";
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -126,6 +127,9 @@ export class PongComponent extends HTMLElement {
 			if (this.gameState?.roomId || !this.gameState?.score) {
 				this.fillCopyContainers();
 			}
+		};
+		this.wss.onclose = () => {
+			this.lobbyMessage = "Disconnected. Try again later.";
 		};
 		this.gameLoop();
 		this.botWrapper();
@@ -385,7 +389,7 @@ export class PongComponent extends HTMLElement {
 		} else {
 			this.drawCenterLine();
 			printMessage(
-				"Waiting for Opponent...",
+				this.lobbyMessage,
 				this.ctx,
 				this.canvasWidth,
 				this.canvasHeight,
@@ -416,7 +420,7 @@ export class PongComponent extends HTMLElement {
 		}
 
 		if (this.botJoined === false) {
-			console.error("Bot is offline. Try again later."); // will improve error msg, in a different branch
+			this.lobbyMessage = "Bot is offline. Try again later.";
 		}
 	}
 
