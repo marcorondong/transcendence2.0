@@ -177,6 +177,7 @@ export class PongComponent extends HTMLElement {
 	}
 
 	websocketUrl(): string {
+		console.log("pongQueryParams:", this.pongQueryParams);
 		// let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
 		let url = import.meta.env.PROD
 			? `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`

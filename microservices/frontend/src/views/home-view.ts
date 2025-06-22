@@ -33,7 +33,8 @@ class HomeView extends HTMLElement {
 				label: "Single Player Mode",
 				play: [
 					{ value: "public", label: "Play Random Opponent" },
-					{ value: "private", label: "Play Friend" },
+					{ value: "private", label: "Create Private Room" },
+					{ value: "input", label: "Join Private Room" },
 					{ value: "easy", label: "Play Easy AI" },
 					{ value: "normal", label: "Play Normal AI" },
 					{ value: "hard", label: "Play Hard AI" },
@@ -204,9 +205,28 @@ class HomeView extends HTMLElement {
 		if (!button.classList.contains("play-button")) {
 			return;
 		}
-		this.gameData.selection.room = button.id;
+		if (button.id === "input") {
+			//get room id from user input and store it in gameData.selection.room
+			const roomId = this.getRoomId();
+			if (roomId) {
+				this.gameData.selection.room = roomId;
+			}
+			else {
+				return;
+			}
+		} else {
+			this.gameData.selection.room = button.id;
+		}
 
 		this.dispatchEvent(pongLinkEvent(this.gameData.selection));
+	}
+
+	getRoomId() {
+		const roomId = prompt("Enter room ID");
+		if (roomId) {
+			return roomId;
+		}
+		return undefined;
 	}
 
 	connectedCallback() {
