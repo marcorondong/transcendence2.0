@@ -16,7 +16,8 @@ services:
       - vite_dist:/app/dist
     networks:
       - ${NETWORK_NAME}
-    restart: unless-stopped
+    # Since in production this container stop working, don't restart it again (don't use restart: unless-stopped, or use a conditional one)
+    # restart: unless-stopped # "${FRONTEND_RESTART_POLICY:-unless-stopped}"
 volumes:
   frontend_node_modules:
   vite_dist:
