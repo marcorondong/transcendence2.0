@@ -13,6 +13,7 @@ import {
 	updateUserPutInput,
 	updateUserPatchInput,
 	addFriendInput,
+	blockUserInput,
 } from "./user.schema";
 import {
 	createUser,
@@ -24,6 +25,9 @@ import {
 	getUserFriends,
 	addFriend,
 	deleteFriend,
+	getUserBlocked,
+	blockUser,
+	unblockUser,
 } from "./user.service";
 import { AppError, USER_ERRORS } from "../../utils/errors";
 import { verifyPassword } from "../../utils/hash";
@@ -457,5 +461,95 @@ export async function deleteFriendHandler(
 	reply: FastifyReply,
 ) {
 	await deleteFriend(request.params.id, request.params.targetUserId);
+	return reply.code(204).send();
+}
+
+export async function getBlockedUsersHandler(
+	request: FastifyRequest<{
+		Params: { id: string };
+		Querystring: getUsersQuery;
+	}>,
+	reply: FastifyReply,
+) {
+	// Destructure request query into respective fields
+	const {
+		id,
+		email,
+		username,
+		nickname,
+		createdAt,
+		updatedAt,
+		dateTarget,
+		before,
+		after,
+		between,
+		useFuzzy,
+		useOr,
+		filterIds,
+		skip: querySkip,
+		take: queryTake,
+		page,
+		all,
+		sortBy,
+		order,
+	} = request.query;
+
+	const { skip, take } = applyPagination({
+		all,
+		skip: querySkip,
+		take: queryTake,
+		page,
+	});
+
+	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
+	// since pagination is an abstraction for 'skip' and 'take'
+	const blockedUsers = await getUserBlocked(request.params.id, {
+		where: {
+			id,
+			email,
+			username,
+			nickname,
+			createdAt,
+			updatedAt,
+		},
+		useFuzzy,
+		useOr,
+		filterIds,
+		dateTarget,
+		before,
+		after,
+		between,
+		skip,
+		take,
+		sortBy,
+		order,
+	});
+
+	const parsed = userArrayResponseSchema.parse(blockedUsers);
+	return reply.code(200).send(parsed);
+}
+
+export async function blockUserHandler(
+	request: FastifyRequest<{
+		Params: { id: string };
+		Body: blockUserInput;
+	}>,
+	reply: FastifyReply,
+) {
+	const { id } = request.params;
+	const { targetUserId } = request.body;
+
+	const blocked = await blockUser(id, targetUserId);
+	const parsed = userResponseSchema.parse(blocked);
+	return reply.code(201).send(parsed);
+}
+
+export async function unblockUserHandler(
+	request: FastifyRequest<{
+		Params: { id: string; targetUserId: string };
+	}>,
+	reply: FastifyReply,
+) {
+	await unblockUser(request.params.id, request.params.targetUserId);
 	return reply.code(204).send();
 }

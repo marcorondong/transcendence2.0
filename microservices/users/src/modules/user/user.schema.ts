@@ -412,7 +412,17 @@ export const addFriendSchema = z
 	})
 	.strict();
 
-// Schema for removing friends (removeFriend)
+// Schema for blocking a user (blockUser)
+export const blockUserSchema = z
+	.object({
+		targetUserId: z
+			.string()
+			.uuid()
+			.describe("Target user ID (UUID format)"),
+	})
+	.strict();
+
+// Schema for removing friends (removeFriend) or removing from blockList (unblockUser)
 // It doesn't use blankToUndefined because I need to enforce id presence
 export const targetUserIdParamSchema = z
 	.object({
@@ -454,3 +464,4 @@ export type updateUserPatchInput = z.infer<typeof patchUserSchema>;
 export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
 export type addFriendInput = z.infer<typeof addFriendSchema>;
+export type blockUserInput = z.infer<typeof blockUserSchema>;
