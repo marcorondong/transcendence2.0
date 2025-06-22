@@ -251,7 +251,7 @@ class HomeView extends HTMLElement {
 		const cleanup = () => {
 			inputContainer.remove();
 			originalButton.classList.remove("hidden");
-			document.removeEventListener("keydown", handleKeydown);
+			textInput.removeEventListener("keydown", handleKeydown);
 		};
 
 		const submit = () => {
@@ -274,7 +274,7 @@ class HomeView extends HTMLElement {
 
 		sendButton.onclick = submit;
 		cancelButton.onclick = cleanup;
-		document.addEventListener("keydown", handleKeydown);
+		textInput.addEventListener("keydown", handleKeydown);
 
 		inputContainer.append(textInput, sendButton, cancelButton);
 		originalButton.after(inputContainer);
