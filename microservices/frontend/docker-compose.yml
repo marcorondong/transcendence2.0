@@ -8,13 +8,13 @@ services:
     ports:
       - "5173:5173" # TODO: close this before handing in
     environment:
-      # - NODE_ENV=development # or production
-      - NODE_ENV=production
+      - NODE_ENV=development # or production
+      # - NODE_ENV=production
     volumes:
       - .:/app
       - vite_dist:/app/dist
     networks:
       - ${NETWORK_NAME}
-    # restart: unless-stopped
+    restart: unless-stopped
 volumes:
   vite_dist:
