@@ -1,39 +1,20 @@
 services:
-  tailwind:
-    container_name: tailwind
-    image: tailwind-img
+  frontend:
+    image: frontend:1.0.0
+    container_name: frontend
     build:
-      context: ./
-      dockerfile: docker/tailwind/Dockerfile-Tailwind
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "5173:5173" # TODO: close this before handing in
+    environment:
+      - NODE_ENV=development # or production
+      # - NODE_ENV=production
     volumes:
-      - tailwind:/app/volume
+      - .:/app
+      - vite_dist:/app/dist
     networks:
       - ${NETWORK_NAME}
     restart: unless-stopped
-  typescript:
-    container_name: typescript
-    image: typescript-img
-    build:
-      context: ./
-      dockerfile: docker/typescript/Dockerfile-Typescript
-    volumes:
-      - typescript:/app/volume
-    networks:
-      - ${NETWORK_NAME}
-    restart: unless-stopped
-
 volumes:
-  tailwind:
-    name: tailwind
-    driver: local
-    driver_opts:
-      type: none
-      device: ./volume
-      o: bind
-  typescript:
-    name: typescript
-    driver: local
-    driver_opts:
-      type: none
-      device: ./volume
-      o: bind
+  vite_dist:
