@@ -24,9 +24,6 @@ export const registeredUsers = {
 	},
 };
 
-// export const homeUrl = `${serverConfig.protocol}://${serverConfig.ip}:${serverConfig.port}`;
+export const homeUrl = `${serverConfig.protocol}://${serverConfig.ip}:${serverConfig.port}`;
 
-// dev environment
-export const homeUrl = "http://localhost:5173";
-
-export const registerUrl = `${serverConfig.protocol}://${serverConfig.ip}:${serverConfig.port}/auth-api/sign-up`;
+export const registerUrl = `${homeUrl}/auth-api/sign-up`;
