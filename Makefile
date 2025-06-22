@@ -59,8 +59,9 @@ delete-secrets:
 # e.g. "make users-re" to rebuild users image and container
 %$(REBUILD_SERVICE):
 	@echo "rebuilding $(@:$(REBUILD_SERVICE)=)"
-	docker container rm -f $(shell docker ps | awk '{print $$NF}' | grep $(@:$(REBUILD_SERVICE)=))
-	docker image rm -f $(shell docker images | awk '{print $$1}' | grep $(@:$(REBUILD_SERVICE)=))
+	-docker container rm -f $(shell docker ps | awk '{print $$NF}' | grep $(@:$(REBUILD_SERVICE)=))
+# so we find versioned images with tags
+	docker image rm -f $(shell docker images | awk '{print $$1,$$2}' | grep $(@:$(REBUILD_SERVICE)=) | tr ' ' ':')
 	make
 
 $(SECRET_DIRECTORIES):

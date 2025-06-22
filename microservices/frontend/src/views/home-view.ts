@@ -33,7 +33,8 @@ class HomeView extends HTMLElement {
 				label: "Single Player Mode",
 				play: [
 					{ value: "public", label: "Play Random Opponent" },
-					{ value: "private", label: "Play Friend" },
+					{ value: "private", label: "Create Private Room" },
+					{ value: "input", label: "Join Private Room" },
 					{ value: "easy", label: "Play Easy AI" },
 					{ value: "normal", label: "Play Normal AI" },
 					{ value: "hard", label: "Play Hard AI" },
@@ -204,9 +205,75 @@ class HomeView extends HTMLElement {
 		if (!button.classList.contains("play-button")) {
 			return;
 		}
-		this.gameData.selection.room = button.id;
+		if (button.id === "input") {
+			//get room id from user input and store it in gameData.selection.room
+			this.showRoomInput(button);
+			return;
+		} else {
+			this.gameData.selection.room = button.id;
+		}
 
 		this.dispatchEvent(pongLinkEvent(this.gameData.selection));
+	}
+
+	showRoomInput(originalButton: HTMLButtonElement) {
+		originalButton.classList.add("hidden");
+
+		const inputContainer = document.createElement("div");
+		inputContainer.classList.add("flex", "gap-2", "items-center", "w-full");
+
+		const textInput = document.createElement("input");
+		textInput.type = "text";
+		textInput.placeholder = "enter room id";
+		textInput.style.resize = "none";
+		textInput.classList.add(
+			"grow-1",
+			"field-sizing-content",
+			"max-h-60",
+			"p-2",
+			"rounded-xl",
+			"bg-indigo-950",
+		);
+		textInput.focus();
+
+		const sendButton = document.createElement("button");
+		sendButton.textContent = "Join";
+		sendButton.classList.add("pong-button");
+
+		const cancelButton = document.createElement("button");
+		cancelButton.textContent = "Cancel";
+		cancelButton.classList.add("pong-button");
+
+		const cleanup = () => {
+			inputContainer.remove();
+			originalButton.classList.remove("hidden");
+			textInput.removeEventListener("keydown", handleKeydown);
+		};
+
+		const submit = () => {
+			const roomId = textInput.value.trim();
+			if (roomId) {
+				this.gameData.selection.room = roomId;
+				this.dispatchEvent(pongLinkEvent(this.gameData.selection));
+			}
+			cleanup();
+		};
+
+		const handleKeydown = (event: KeyboardEvent) => {
+			if (event.key === "Enter") {
+				event.preventDefault();
+				submit();
+			} else if (event.key === "Escape") {
+				cleanup();
+			}
+		};
+
+		sendButton.onclick = submit;
+		cancelButton.onclick = cleanup;
+		textInput.addEventListener("keydown", handleKeydown);
+
+		inputContainer.append(textInput, sendButton, cancelButton);
+		originalButton.after(inputContainer);
 	}
 
 	connectedCallback() {

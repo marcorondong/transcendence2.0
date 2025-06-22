@@ -1,5 +1,7 @@
 import { baseUrl } from "../services/fetch";
 import type { PongQueryParams } from "../types/Fetch";
+import { BotModes } from "../types/Game";
+import type { BotMode } from "../types/Game";
 import type { Ball, Paddle, Pong } from "../types/Pong";
 import { ChatComponent } from "./chat-component";
 import { IconComponent } from "./icon-component";
@@ -13,6 +15,7 @@ export class PongComponent extends HTMLElement {
 	chat: ChatComponent;
 	pongQueryParams: PongQueryParams;
 	botJoined: boolean | undefined = undefined;
+	lobbyMessage: string = "Waiting for Opponent...";
 
 	// VARS
 	aspectRatio = 16 / 9;
@@ -84,9 +87,17 @@ export class PongComponent extends HTMLElement {
 		this.fullscreenButton.appendChild(fullscreenIcon);
 		canvasContainer.appendChild(this.fullscreenButton);
 
+		// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
+		if (
+			this.pongQueryParams.room === "private" ||
+			this.pongQueryParams.room === "spectate"
+		) {
+			this.appendCopyLink("roomId");
+		}
+
 		// COPY LINK BUTTON FOR PRIVATE ROOMS
 		if (this.pongQueryParams.room === "private") {
-			this.appendCopyLink();
+			this.appendCopyLink("link");
 		}
 
 		// EVENT LISTENER
@@ -113,20 +124,33 @@ export class PongComponent extends HTMLElement {
 				this.chat.roomId = undefined;
 				this.chat.sendInvitation();
 			}
-
-			if (this.pongQueryParams.room === "private") {
-				const link = document.getElementById(
-					"copy-link",
-				) as HTMLElement;
-				if (link && this.gameState) {
-					link.innerText =
-						baseUrl +
-						"/pong-view?mode=singles&room=" +
-						this.gameState.roomId;
-				}
+			if (this.gameState?.roomId || !this.gameState?.score) {
+				this.fillCopyContainers();
 			}
 		};
+		this.wss.onclose = () => {
+			this.lobbyMessage = "Disconnected. Try again later.";
+		};
 		this.gameLoop();
+		this.botWrapper();
+	}
+
+	fillCopyContainers() {
+		if (this.pongQueryParams.room === "private") {
+			const link = document.getElementById("copy-link") as HTMLElement;
+			if (link && this.gameState) {
+				link.innerText =
+					baseUrl +
+					"/pong-view?mode=singles&room=" +
+					this.gameState.roomId;
+			}
+		}
+
+		// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
+		const roomIdDiv = document.getElementById("copy-roomId") as HTMLElement;
+		if (roomIdDiv && this.gameState) {
+			roomIdDiv.innerText = this.gameState.roomId;
+		}
 	}
 
 	disconnectedCallback() {
@@ -136,9 +160,9 @@ export class PongComponent extends HTMLElement {
 		document.removeEventListener("click", this, false);
 	}
 
-	copyToClipboard() {
+	copyToClipboard(id: string) {
 		// Get the text field
-		var copyText = document.getElementById("copy-link");
+		var copyText = document.getElementById(id);
 
 		// Copy the text inside the text field
 		if (copyText) {
@@ -146,10 +170,10 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 
-	appendCopyLink() {
+	appendCopyLink(inviteType: "link" | "roomId") {
 		const headline = document.createElement("h2");
 		headline.classList.add("pong-heading", "text-center", "mb-2");
-		headline.innerText = "Share this link to play";
+		headline.innerText = `Share this ${inviteType} to invite`;
 		const linkContainer = document.createElement("div");
 		linkContainer.classList.add(
 			"pong-card",
@@ -164,16 +188,17 @@ export class PongComponent extends HTMLElement {
 		const copyIcon = new IconComponent("copy", 4);
 		const copyButton = document.createElement("button");
 		copyButton.classList.add("pong-button", "pong-button-primary");
-		copyButton.id = "copy-button";
+		copyButton.id = `copy-${inviteType}-button`;
 		copyButton.append(copyIcon);
 		const link = document.createElement("div");
 		link.classList.add("text-xs");
-		link.id = "copy-link";
+		link.id = `copy-${inviteType}`;
 		linkContainer.append(link, copyButton);
 		this.append(headline, linkContainer);
 	}
 
 	websocketUrl(): string {
+		console.log("pongQueryParams:", this.pongQueryParams);
 		// let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
 		let url = import.meta.env.PROD
 			? `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`
@@ -183,7 +208,8 @@ export class PongComponent extends HTMLElement {
 		}
 		if (
 			!this.pongQueryParams.room ||
-			this.pongQueryParams.room === "public"
+			this.pongQueryParams.room === "public" ||
+			this.isBotNeeded()
 		) {
 			return url;
 		}
@@ -363,7 +389,7 @@ export class PongComponent extends HTMLElement {
 		} else {
 			this.drawCenterLine();
 			printMessage(
-				"Waiting for Opponent...",
+				this.lobbyMessage,
 				this.ctx,
 				this.canvasWidth,
 				this.canvasHeight,
@@ -374,14 +400,12 @@ export class PongComponent extends HTMLElement {
 	};
 
 	async requestBot(roomId: string) {
-		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
+		const url = `${baseUrl}/ai-api/game-mandatory`;
 		console.log(roomId);
-		// TODO: fix
-		const reqBody = null;
-		// const reqBody = JSON.stringify({
-		// 	roomId: roomId,
-		// 	difficulty: this.chat.gameSelection?.playSelection,
-		// });
+		const reqBody = JSON.stringify({
+			roomId: roomId,
+			difficulty: this.pongQueryParams.room,
+		});
 
 		try {
 			const response = await fetch(url, {
@@ -396,7 +420,7 @@ export class PongComponent extends HTMLElement {
 		}
 
 		if (this.botJoined === false) {
-			console.error("Bot is offline. Try again later."); // will improve error msg, in a different branch
+			this.lobbyMessage = "Bot is offline. Try again later.";
 		}
 	}
 
@@ -418,13 +442,9 @@ export class PongComponent extends HTMLElement {
 	}
 
 	isBotNeeded() {
-		// TODO: fix
-		return true;
-		// return (
-		// 	this.chat.gameSelection?.playSelection === "easy" ||
-		// 	this.chat.gameSelection?.playSelection === "normal" ||
-		// 	this.chat.gameSelection?.playSelection === "hard"
-		// );
+		const botMode = BotModes.includes(this.pongQueryParams.room as BotMode);
+		console.log("botMode:", botMode);
+		return botMode;
 	}
 
 	handleEvent(event: Event) {
@@ -484,10 +504,10 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 	handleCopyButton(button: HTMLButtonElement) {
-		if (button.id !== "copy-button") {
+		if (!button.id.startsWith("copy-") || !button.id.endsWith("-button")) {
 			return;
 		}
-		this.copyToClipboard();
+		this.copyToClipboard(button.id.replace("-button", ""));
 	}
 
 	onResize() {
