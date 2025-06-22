@@ -220,14 +220,10 @@ class HomeView extends HTMLElement {
 		originalButton.classList.add("hidden");
 
 		const inputContainer = document.createElement("div");
-		inputContainer.classList.add(
-			"flex",
-			"gap-2",
-			"items-center",
-			"w-full",
-		);
+		inputContainer.classList.add("flex", "gap-2", "items-center", "w-full");
 
-		const textInput = document.createElement("textarea");
+		const textInput = document.createElement("input");
+		textInput.type = "text";
 		textInput.placeholder = "enter room id";
 		textInput.style.resize = "none";
 		textInput.classList.add(

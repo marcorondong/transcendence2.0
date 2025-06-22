@@ -400,7 +400,7 @@ export class PongComponent extends HTMLElement {
 	};
 
 	async requestBot(roomId: string) {
-		const url = `https://${window.location.hostname}:${window.location.port}/ai-api/game-mandatory`;
+		const url = `${baseUrl}/ai-api/game-mandatory`;
 		console.log(roomId);
 		const reqBody = JSON.stringify({
 			roomId: roomId,
