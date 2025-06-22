@@ -87,7 +87,12 @@ export class PongComponent extends HTMLElement {
 		canvasContainer.appendChild(this.fullscreenButton);
 
 		// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
-		this.appendCopyLink("roomId");
+		if (
+			this.pongQueryParams.room === "private" ||
+			this.pongQueryParams.room === "spectate"
+		) {
+			this.appendCopyLink("roomId");
+		}
 
 		// COPY LINK BUTTON FOR PRIVATE ROOMS
 		if (this.pongQueryParams.room === "private") {
@@ -118,29 +123,30 @@ export class PongComponent extends HTMLElement {
 				this.chat.roomId = undefined;
 				this.chat.sendInvitation();
 			}
-
-			if (this.pongQueryParams.room === "private") {
-				const link = document.getElementById(
-					"copy-link",
-				) as HTMLElement;
-				if (link && this.gameState) {
-					link.innerText =
-						baseUrl +
-						"/pong-view?mode=singles&room=" +
-						this.gameState.roomId;
-				}
-			}
-
-			// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
-			const roomIdDiv = document.getElementById(
-				"copy-roomId",
-			) as HTMLElement;
-			if (roomIdDiv && this.gameState) {
-				roomIdDiv.innerText = this.gameState.roomId;
+			if (this.gameState?.roomId || !this.gameState?.score) {
+				this.fillCopyContainers();
 			}
 		};
 		this.gameLoop();
 		this.botWrapper();
+	}
+
+	fillCopyContainers() {
+		if (this.pongQueryParams.room === "private") {
+			const link = document.getElementById("copy-link") as HTMLElement;
+			if (link && this.gameState) {
+				link.innerText =
+					baseUrl +
+					"/pong-view?mode=singles&room=" +
+					this.gameState.roomId;
+			}
+		}
+
+		// COPY ROOM ID BUTTON - MAKES MORE SENSE FOR PRIVATE + SPECTATE MODE
+		const roomIdDiv = document.getElementById("copy-roomId") as HTMLElement;
+		if (roomIdDiv && this.gameState) {
+			roomIdDiv.innerText = this.gameState.roomId;
+		}
 	}
 
 	disconnectedCallback() {
@@ -150,9 +156,9 @@ export class PongComponent extends HTMLElement {
 		document.removeEventListener("click", this, false);
 	}
 
-	copyToClipboard() {
+	copyToClipboard(id: string) {
 		// Get the text field
-		var copyText = document.getElementById("copy-link");
+		var copyText = document.getElementById(id);
 
 		// Copy the text inside the text field
 		if (copyText) {
@@ -178,7 +184,7 @@ export class PongComponent extends HTMLElement {
 		const copyIcon = new IconComponent("copy", 4);
 		const copyButton = document.createElement("button");
 		copyButton.classList.add("pong-button", "pong-button-primary");
-		copyButton.id = "copy-button";
+		copyButton.id = `copy-${inviteType}-button`;
 		copyButton.append(copyIcon);
 		const link = document.createElement("div");
 		link.classList.add("text-xs");
@@ -494,10 +500,10 @@ export class PongComponent extends HTMLElement {
 		}
 	}
 	handleCopyButton(button: HTMLButtonElement) {
-		if (button.id !== "copy-button") {
+		if (!button.id.startsWith("copy-") || !button.id.endsWith("-button")) {
 			return;
 		}
-		this.copyToClipboard();
+		this.copyToClipboard(button.id.replace("-button", ""));
 	}
 
 	onResize() {
