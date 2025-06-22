@@ -6,5 +6,4 @@ if [ "$NODE_ENV" = "development" ]; then
 else
   # npm run build --watch
   npm run build
-  npm run preview
 fi

@@ -15,6 +15,6 @@ services:
       - vite_dist:/app/dist
     networks:
       - ${NETWORK_NAME}
-    restart: unless-stopped
+    # restart: unless-stopped
 volumes:
   vite_dist:
