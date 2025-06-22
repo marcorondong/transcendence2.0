@@ -10,14 +10,23 @@ class ProfileFriendsOutComponent extends HTMLElement {
 	}
 
 	connectedCallback() {
+		this.buildDomElements();
+	}
+	disconnectedCallback() {}
+
+	buildDomElements() {
 		this.classList.add(
 			"pong-card",
 			"p-8",
-			"grid",
-			"justify-items-center",
-			"[grid-template-columns:repeat(auto-fit,minmax(60px,1fr))]",
+			"flex",
+			"flex-wrap",
+			"justify-start",
 			"gap-6",
 		);
+		this.buildFriends();
+	}
+
+	buildFriends() {
 		for (let friend of this.friends) {
 			const container = document.createElement("div");
 			container.classList.add(
@@ -28,13 +37,15 @@ class ProfileFriendsOutComponent extends HTMLElement {
 				"relative",
 				"w-20",
 			);
+			container.id = "containerFriendOut-" + friend.id;
 			const avatar = new AvatarComponent(friend.to);
 			avatar.styleComponent("border-indigo-800");
 
-			const xIcon = new IconComponent("close", 2);
-			const xButton = document.createElement("button");
-			xButton.append(xIcon);
-			xButton.classList.add(
+			const deleteIcon = new IconComponent("close", 3);
+			const deleteButton = document.createElement("button");
+			deleteButton.id = "delete-out-button-" + friend.id;
+			deleteButton.append(deleteIcon);
+			deleteButton.classList.add(
 				"pong-button",
 				"pong-button-round",
 				"pong-button-error",
@@ -52,13 +63,10 @@ class ProfileFriendsOutComponent extends HTMLElement {
 				"overflow-hidden",
 				"text-ellipsis",
 			);
-			container.append(avatar, name, xButton);
+			container.append(avatar, name, deleteButton);
 			this.append(container);
 		}
 	}
-	disconnectedCallback() {}
-
-	buildDomElements() {}
 }
 
 customElements.define(

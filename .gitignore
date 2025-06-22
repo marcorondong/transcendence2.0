@@ -15,6 +15,7 @@
 *.p7c
 ft_crypt.sh
 secrets/
+.vite/
 
 ############################ Binary and Blob Files ############################
 *.pdf

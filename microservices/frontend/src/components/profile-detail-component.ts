@@ -13,6 +13,7 @@ import * as v from "valibot";
 class ProfileDetailComponent extends HTMLElement {
 	userData: User;
 	article = document.createElement("article");
+	editableProfile: boolean;
 
 	usernameContainer = document.createElement("div");
 	username = document.createElement("div");
@@ -38,9 +39,10 @@ class ProfileDetailComponent extends HTMLElement {
 	avatarContainer = document.createElement("div");
 	avatar = document.createElement("img");
 
-	constructor(userData: User) {
+	constructor(userData: User, editableProfile: boolean) {
 		super();
 		this.userData = userData;
+		this.editableProfile = editableProfile;
 		this.buildDomElements();
 	}
 
@@ -68,8 +70,10 @@ class ProfileDetailComponent extends HTMLElement {
 			this.usernameContainer,
 			this.nicknameContainer,
 			this.emailContainer,
-			this.editButton,
 		);
+		if (this.editableProfile) {
+			this.article.append(this.editButton);
+		}
 	}
 
 	displayDetailInput() {
@@ -122,7 +126,7 @@ class ProfileDetailComponent extends HTMLElement {
 			document.dispatchEvent(
 				notificationEvent(String(e.message), "error"),
 			);
-			console.log(e);
+			console.error(e);
 		}
 	}
 
@@ -178,7 +182,7 @@ class ProfileDetailComponent extends HTMLElement {
 	// 		await FetchUsers.userDelete(this.userData.id);
 	// 		await FetchAuth.signOut();
 	// 	} catch (e) {
-	// 		console.log(e);
+	// 		console.error(e);
 	// 	}
 	// }
 
@@ -273,7 +277,7 @@ class ProfileDetailComponent extends HTMLElement {
 			"rounded-t-xl",
 			"sm:rounded-t-none",
 			"sm:rounded-l-xl",
-			"sm:w-100",
+			"w-full",
 		);
 		this.avatarContainer.append(this.avatar);
 
@@ -348,7 +352,11 @@ class ProfileDetailComponent extends HTMLElement {
 			this.emailContainer,
 		);
 		this.applyUserData();
-		this.article.append(this.editButton, details, this.cancelSaveContainer);
+
+		if (this.editableProfile) {
+			this.article.append(this.editButton);
+		}
+		this.article.append(details, this.cancelSaveContainer);
 
 		form.append(this.avatarContainer, this.article);
 		this.append(form);
