@@ -207,13 +207,8 @@ class HomeView extends HTMLElement {
 		}
 		if (button.id === "input") {
 			//get room id from user input and store it in gameData.selection.room
-			const roomId = this.getRoomId();
-			if (roomId) {
-				this.gameData.selection.room = roomId;
-			}
-			else {
-				return;
-			}
+			this.showRoomInput(button);
+			return;
 		} else {
 			this.gameData.selection.room = button.id;
 		}
@@ -221,12 +216,68 @@ class HomeView extends HTMLElement {
 		this.dispatchEvent(pongLinkEvent(this.gameData.selection));
 	}
 
-	getRoomId() {
-		const roomId = prompt("Enter room ID");
-		if (roomId) {
-			return roomId;
-		}
-		return undefined;
+	showRoomInput(originalButton: HTMLButtonElement) {
+		originalButton.classList.add("hidden");
+
+		const inputContainer = document.createElement("div");
+		inputContainer.classList.add(
+			"flex",
+			"gap-2",
+			"items-center",
+			"w-full",
+		);
+
+		const textInput = document.createElement("textarea");
+		textInput.placeholder = "enter room id";
+		textInput.style.resize = "none";
+		textInput.classList.add(
+			"grow-1",
+			"field-sizing-content",
+			"max-h-60",
+			"p-2",
+			"rounded-xl",
+			"bg-indigo-950",
+		);
+		textInput.focus();
+
+		const sendButton = document.createElement("button");
+		sendButton.textContent = "Join";
+		sendButton.classList.add("pong-button");
+
+		const cancelButton = document.createElement("button");
+		cancelButton.textContent = "Cancel";
+		cancelButton.classList.add("pong-button");
+
+		const cleanup = () => {
+			inputContainer.remove();
+			originalButton.classList.remove("hidden");
+			document.removeEventListener("keydown", handleKeydown);
+		};
+
+		const submit = () => {
+			const roomId = textInput.value.trim();
+			if (roomId) {
+				this.gameData.selection.room = roomId;
+				this.dispatchEvent(pongLinkEvent(this.gameData.selection));
+			}
+			cleanup();
+		};
+
+		const handleKeydown = (event: KeyboardEvent) => {
+			if (event.key === "Enter") {
+				event.preventDefault();
+				submit();
+			} else if (event.key === "Escape") {
+				cleanup();
+			}
+		};
+
+		sendButton.onclick = submit;
+		cancelButton.onclick = cleanup;
+		document.addEventListener("keydown", handleKeydown);
+
+		inputContainer.append(textInput, sendButton, cancelButton);
+		originalButton.after(inputContainer);
 	}
 
 	connectedCallback() {
