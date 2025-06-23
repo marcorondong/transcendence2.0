@@ -32,6 +32,7 @@ import {
 	blockUserSchema,
 } from "./user.schema";
 import { appErrorHandler } from "../../utils/errors";
+import { onlySelf } from "../../utils/authGuard";
 // import { z } from "zod";
 
 // Helper function for SWagger to define common errors messages and assign them to Swagger UI examples
@@ -78,6 +79,7 @@ async function userRoutes(server: FastifyInstance) {
 				// 	201: userResponseSchema,
 				// }),
 			},
+			config: { authRequired: false }, // Remove authentication (this route is public/exposed)
 		},
 		appErrorHandler(registerUserHandler),
 	);
@@ -101,6 +103,7 @@ async function userRoutes(server: FastifyInstance) {
 				// 	200: loginResponseSchema,
 				// }),
 			},
+			config: { authRequired: false }, // Remove authentication (this route is public/exposed)
 		},
 		appErrorHandler(loginHandler),
 	);
@@ -132,6 +135,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.get(
 		"/:id",
 		{
+			// preHandler: onlySelf, // TODO Should this one be private user route?
 			schema: {
 				tags: ["Users"],
 				summary: "Get a user by ID",
@@ -154,6 +158,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.put(
 		"/:id",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Users"],
 				summary: "Update all user fields",
@@ -178,6 +183,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.patch(
 		"/:id",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Users"],
 				summary: "Update partial user fields",
@@ -202,6 +208,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.delete(
 		"/:id",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Users"],
 				summary: "Delete a user by ID",
@@ -225,6 +232,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.put(
 		"/:id/picture",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Users"],
 				summary: " Update user picture by ID",
@@ -266,6 +274,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.get(
 		"/:id/friends",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Friends"],
 				summary: "Get all friends of a user",
@@ -287,6 +296,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.post(
 		"/:id/friends",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Friends"],
 				summary: "Add a friend",
@@ -310,6 +320,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.delete(
 		"/:id/friends/:targetUserId",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Friends"],
 				summary: "Delete a friend",
@@ -331,6 +342,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.get(
 		"/:id/block-list",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Block List"],
 				summary: "Get all blocked users",
@@ -352,6 +364,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.post(
 		"/:id/block-list",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Block List"],
 				summary: "Block a user",
@@ -375,6 +388,7 @@ async function userRoutes(server: FastifyInstance) {
 	server.delete(
 		"/:id/block-list/:targetUserId",
 		{
+			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
 			schema: {
 				tags: ["Block List"],
 				summary: "Unblock a user",
