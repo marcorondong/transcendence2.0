@@ -48,7 +48,7 @@ export class FetchAuth {
 	static async verifyJwt() {
 		const config: FetchConfig = {
 			url: "/auth-api/verify-jwt",
-			method: "POST",
+			method: "GET",
 			headers: { accept: "application/json" },
 		};
 		await fetchPong(config);
