@@ -3,7 +3,7 @@ import { homeUrl } from "./config";
 
 // random username generator
 const randomString = () => Math.random().toString(36).substring(2, 15);
-const username = "tester_" + randomString();
+const username = "tester" + randomString().replaceAll(/[0-9]/g, "");
 const password = randomString() + "A1!"; // to comply with our password policy
 const email = username + "@example.com";
 const nickname = username + "_nick";
