@@ -4,7 +4,7 @@ services:
     container_name: ${TICTACTOE_DB_CONTAINER_NAME}
     build: ${TICTACTOE_DB_BUILD_FOLDER}
     env_file:
-      - ${TICTACTOE_DB_ENV_FILE_PATH}
+      - ../service.config
     volumes:
       - ${TICTACTOE_DB_SRC_FOLDER_LOCAL}:${TICTACTOE_DB_SRC_FOLDER_CONTAINER} #TODO remove in production
       - ${TICTACTOE_DB_PRISMA_FOLDER_LOCAL}:/${TICTACTOE_DB_PRISMA_FOLDER_CONTAINER} #TODO remove in production

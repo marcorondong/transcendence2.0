@@ -4,7 +4,7 @@ services:
     container_name: ${PONG_DB_CONTAINER_NAME}
     build: ${PONG_DB_BUILD_FOLDER}
     env_file:
-      - ${PONG_DB_ENV_FILE_PATH}
+      - ../service.config
     volumes:
       - ${PONG_DB_SRC_FOLDER_LOCAL}:${PONG_DB_SRC_FOLDER_CONTAINER} #TODO remove in production
       - ${PONG_DB_PRISMA_FOLDER_LOCAL}:/${PONG_DB_PRISMA_FOLDER_CONTAINER} #TODO remove in production

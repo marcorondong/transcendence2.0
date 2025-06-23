@@ -4,7 +4,7 @@ services:
     container_name: ${CHAT_API_CONTAINER_NAME}
     build: ${CHAT_API_BUILD_FOLDER}
     env_file:
-      - ${CHAT_API_ENV_FILE_PATH}
+      - ../service.config
     volumes:
       - ${CHAT_API_SRC_FOLDER_LOCAL}:${CHAT_API_SRC_FOLDER_CONTAINER} #TODO remove in production
     ports:

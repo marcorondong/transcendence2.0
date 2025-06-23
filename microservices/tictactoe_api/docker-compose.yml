@@ -4,7 +4,7 @@ services:
     container_name: ${TICTACTOE_API_CONTAINER_NAME}
     build: ${TICTACTOE_API_BUILD_FOLDER}
     env_file:
-      - ${TICTACTOE_API_ENV_FILE_PATH}
+      - ../service.config
     volumes:
       - ${TICTACTOE_API_SRC_FOLDER_LOCAL}:${TICTACTOE_API_SRC_FOLDER_CONTAINER} # TODO remove this in production
       - ./public/:/tictactoe_api/public/ # TODO remove this when there is real frontend

@@ -4,7 +4,7 @@ services:
     container_name: ${AUTH_API_CONTAINER_NAME}
     build: ${AUTH_API_BUILD_FOLDER}
     env_file:
-      - ${AUTH_API_ENV_FILE_PATH}
+      - ../service.config
     secrets:
       - jwtSecret.key
       - cookieSecret.key
