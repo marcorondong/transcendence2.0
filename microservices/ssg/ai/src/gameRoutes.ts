@@ -4,7 +4,9 @@ import { Bot } from "./bot";
 import { tokenRoute } from "./config";
 
 async function cookieSubRequest(gameRequestReply: any): Promise<string> {
-	const res = await fetch(tokenRoute);
+	const res = await fetch(tokenRoute, {
+		method: "POST",
+	});
 
 	if (!res.ok) {
 		gameRequestReply.code(401).send({ error: "bot is unauthorized" });

@@ -5,10 +5,12 @@ import {
 	verifyJWTSchema,
 	refreshJWTSchema,
 	verifyConnectionSchema,
+	updateJWTSchema,
+	updateJWTPatchSchema,
 	botJWTSchema,
-	// editProfileSchema, // AUTH will only handle cookies/jwt management it should intercept calls
-	// updateProfileSchema, // AUTH will only handle cookies/jwt management it should intercept calls
-	// deleteUserSchema, // AUTH will only handle cookies/jwt management it should intercept calls
+	editProfileSchema,
+	updateProfileSchema,
+	deleteUserSchema,
 	healthCheckSchema,
 } from "./routeSchemas";
 import {
@@ -18,10 +20,12 @@ import {
 	verifyJWTHandler,
 	refreshJWTHandler,
 	verifyConnectionHandler,
+	updateJWTHandler,
+	updateJWTPatchHandler,
 	botJWTHandler,
-	// editProfileHandler, // AUTH will only handle cookies/jwt management it should intercept calls
-	// updateProfileHandler, // AUTH will only handle cookies/jwt management it should intercept calls
-	// deleteUserHandler, // AUTH will only handle cookies/jwt management it should intercept calls
+	editProfileHandler,
+	updateProfileHandler,
+	deleteUserHandler,
 	healthCheckHandler,
 } from "./controllers";
 
@@ -60,21 +64,30 @@ export const verifyConnectionOpt = {
 	handler: verifyConnectionHandler,
 };
 
-// TODO: This won't be handled by AUTH. And will have major refactoring to limit scope (only handling cookies/jwt)
-// export const editProfileOpt = {
-// 	schema: editProfileSchema,
-// 	handler: editProfileHandler,
-// };
+export const updateJWTOpt = {
+	schema: updateJWTSchema,
+	handler: updateJWTHandler,
+};
 
-// export const updateProfileOpt = {
-// 	schema: updateProfileSchema,
-// 	handler: updateProfileHandler,
-// };
+export const updateJWTPatchOpt = {
+	schema: updateJWTPatchSchema,
+	handler: updateJWTPatchHandler,
+};
 
-// export const deleteUserOpt = {
-// 	schema: deleteUserSchema,
-// 	handler: deleteUserHandler,
-// };
+export const editProfileOpt = {
+	schema: editProfileSchema,
+	handler: editProfileHandler,
+};
+
+export const updateProfileOpt = {
+	schema: updateProfileSchema,
+	handler: updateProfileHandler,
+};
+
+export const deleteUserOpt = {
+	schema: deleteUserSchema,
+	handler: deleteUserHandler,
+};
 
 export const healthCheckOpt = {
 	schema: healthCheckSchema,
