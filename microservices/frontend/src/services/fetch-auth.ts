@@ -33,7 +33,7 @@ export class FetchAuth {
 	static async signOut() {
 		const config: FetchConfig = {
 			url: "/auth-api/sign-out",
-			method: "DELETE",
+			method: "POST",
 			headers: { accept: "application/json" },
 		};
 		try {

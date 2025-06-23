@@ -1,7 +1,6 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { env } from "./env";
 
-// TODO: Later; is very probable that none of USERS requests will be handled by AUTH.
 export async function ft_onRequest(
 	request: FastifyRequest,
 	reply: FastifyReply,
@@ -14,5 +13,18 @@ export async function ft_onRequest(
 	)
 		return;
 	if (request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC)) return;
-	await request.jwtVerify();
+	try {
+		await request.jwtVerify();
+	} catch (error) {
+		reply.log.warn(
+			{ Response: error, url: request.url },
+			"JWT verification failed",
+		);
+		reply.status(401).send({
+			statusCode: 401,
+			error: "Unauthorized",
+			message: "You are not authorized",
+		});
+		return;
+	}
 }

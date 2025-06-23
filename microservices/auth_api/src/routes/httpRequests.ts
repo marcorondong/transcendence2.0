@@ -1,4 +1,3 @@
-import httpError from "http-errors";
 import { env } from "../utils/env";
 
 export async function signInRequest(body: unknown) {
@@ -9,17 +8,7 @@ export async function signInRequest(body: unknown) {
 		},
 		body: JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while signing in",
-			{ name: raw.error || "SignIn Error" },
-		);
-	}
-	const data = await response.json();
-	const payload = { id: data.id, nickname: data.nickname };
-	return payload;
+	return response;
 }
 
 export async function signUpRequest(body: unknown) {
@@ -30,78 +19,41 @@ export async function signUpRequest(body: unknown) {
 		},
 		body: JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const raw = await response.json();
-		throw httpError(
-			raw.statusCode || 500,
-			raw.message || "An error occurred while signing up",
-			{ name: raw.error || "SignUp Error" },
-		);
-	}
-	const data = await response.json();
-	const payload = { id: data.id, nickname: data.nickname };
-	return payload;
+	return response;
 }
 
-// TODO: This won't be handled by AUTH. And will have major refactoring to limit scope (only handling cookies/jwt)
-// export async function editProfileRequest(body: unknown, userId: unknown) {
-// 	const response = await fetch(
-// 		`${env.USERS_REQUEST_DOCKER}${userId}`,
-// 		{
-// 			method: "PATCH",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 			},
-// 			body: JSON.stringify(body),
-// 		},
-// 	);
-// 	if (!response.ok) {
-// 		const raw = await response.json();
-// 		throw httpError(
-// 			raw.statusCode || 500,
-// 			raw.message || "An error occurred while editing profile",
-// 			{ name: raw.error || "EditProfile Error" },
-// 		);
-// 	}
-// 	const data = await response.json();
-// 	const payload = { id: data.id, nickname: data.nickname };
-// 	return payload;
-// }
+export async function getUserRequest(userId: unknown) {
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "GET",
+	});
+	return response;
+}
 
-// export async function updateProfileRequest(body: unknown, userId: unknown) {
-// 	const response = await fetch(
-// 		`${env.USERS_REQUEST_DOCKER}${userId}`,
-// 		{
-// 			method: "PUT",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 			},
-// 			body: JSON.stringify(body),
-// 		},
-// 	);
-// 	if (!response.ok) {
-// 		const raw = await response.json();
-// 		throw httpError(
-// 			raw.statusCode || 500,
-// 			raw.message || "An error occurred while updating profile",
-// 			{ name: raw.error || "UpdateProfile Error" },
-// 		);
-// 	}
-// 	const data = await response.json();
-// 	const payload = { id: data.id, nickname: data.nickname };
-// 	return payload;
-// }
+export async function editProfileRequest(body: unknown, userId: unknown) {
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+	return response;
+}
 
-// export async function deleteUserRequest(userId: unknown) {
-// 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
-// 		method: "DELETE",
-// 	});
-// 	if (!response.ok) {
-// 		const raw = await response.json();
-// 		throw httpError(
-// 			raw.statusCode || 500,
-// 			raw.message || "An error occurred while deleting user",
-// 			{ name: raw.error || "DeleteUser Error" },
-// 		);
-// 	}
-// }
+export async function updateProfileRequest(body: unknown, userId: unknown) {
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "PUT",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
+	});
+	return response;
+}
+
+export async function deleteUserRequest(userId: unknown) {
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
+		method: "DELETE",
+	});
+	return response;
+}
