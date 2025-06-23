@@ -81,11 +81,11 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		request.authUser = validated; // for type-safe logic
 	} catch (err) {
 		// logger.error(err, "[AUTH ERROR]");
-		logger.log({
-			"event.action": "authGuard",
-			"error": err,
-			"message": "[AUTH ERROR]",
-		});
+		// logger.log({
+		// 	"event.action": "authGuard",
+		// 	"error": err,
+		// 	"message": "[AUTH ERROR]",
+		// });
 		throw new AppError({
 			statusCode: 500,
 			code: AUTH_GUARD_ERRORS.UNREACHABLE_AUTH,
@@ -125,18 +125,20 @@ export async function onlySelf(
 		throw new AppError({
 			statusCode: 403,
 			code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_RESOURCE,
-			message: "Forbidden: not your resource",
+			// TODO: Later remove the ids part
+			message: `Forbidden: not your resource. You have id: ${user.id} | You requested: ${request.params.id}`,
 			handlerName: "onlySelf",
 		});
 	}
 	logger.log({
 		"event.action": "onlySelf",
+		"match": "params.id",
 		"authUser": request.authUser,
+		"userId": user.id,
 		"message": "onlySelf check succeeded",
 	});
 }
 
-// Guard that allows access if the authenticated user is: The route param `:id`, or Present in one of the accepted query params (`fromId`, `toId`, etc.)
 // Guard that allows access if the authenticated user is: The route param `:id`, or Present in one of the accepted query params (`fromId`, `toId`, etc.)
 export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 	queryKeys: string[],
@@ -162,7 +164,15 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 			});
 		}
 		// Check if :id param matches
-		if ((request.params as any)?.id === user.id) return; // Authorized
+		if ((request.params as any)?.id === user.id) {
+			logger.log({
+				"event.action": "onlyIfInQuery",
+				"match": "params.id",
+				"userId": user.id,
+				"message": "Authorized by param match",
+			});
+			return; // Authorized
+		}
 		// Check query, body, or both for  user's ID
 		for (const key of queryKeys) {
 			const queryMatch =
@@ -171,7 +181,15 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 			const bodyMatch =
 				(request.body as Record<string, string | undefined>)?.[key] ===
 				user.id;
-			if (queryMatch || bodyMatch) return; // Authorized
+			if (queryMatch || bodyMatch) {
+				logger.log({
+					"event.action": "onlyIfInQuery",
+					"match": queryMatch ? `query.${key}` : `body.${key}`,
+					"userId": user.id,
+					"message": "Authorized by query/body match",
+				});
+				return; // Authorized
+			}
 		}
 		// Else
 		// return reply.code(403).send({
@@ -182,9 +200,10 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 		throw new AppError({
 			statusCode: 403,
 			code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_QUERY,
-			message: `Forbidden: user does not match any of [params.id, ${queryKeys.join(
-				", ",
-			)}]`,
+			// TODO: Later remove the ids part
+			message: `Forbidden: User with id ${
+				user.id
+			} does not match any of [params.id, ${queryKeys.join(", ")}]`,
 			handlerName: "onlyIfInQuery",
 		});
 	};
