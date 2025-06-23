@@ -11,6 +11,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { chatRoutes } from "./routes/routes";
 import { env } from "./utils/env";
 
+// use "serverOption" instead of "{ logger: true }" to activate pino-pretty
 const server = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
