@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { TokenPayload, loginResponseSchema } from "../modules/user/user.schema";
 import { AppError, AUTH_GUARD_ERRORS, AUTH_PRE_HANDLER_ERRORS } from "./errors";
 import { logger } from "./logger";
+import prisma from "./prisma";
 
 const ENABLE_AUTH_GUARD = true;
 const IS_DEV_MODE = true;
@@ -39,7 +40,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 			nickname: "dev-user",
 		};
 		request.authUser = {
-			id: "7d7348af-b918-4f3e-aca7-09722c922fc1",
+			id: "8e2f7a60-1697-44b1-b777-a52562fe5990",
 			nickname: "dev-user",
 		};
 		logger.log({
@@ -209,92 +210,62 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 	};
 }
 
-//=========OLD VER02: DIDN'T ONLY CHECK IN QUERY PARAMS (NOT BODY)============//
-// export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
-// 	queryKeys: string[],
-// ) {
-// 	logger.log({
-// 		"event.action": "onlyIfInQuery",
-// 		"queryKeys": queryKeys,
-// 		"message": "Attempting onlyIfInQuery check",
-// 	});
-// 	return async function (request: T, _reply: FastifyReply) {
-// 		const user = (request as FastifyRequest).authUser;
-
-// 		// If NO user inside the Cookie
-// 		if (!user) {
-// 			// return reply
-// 			// 	.code(401)
-// 			// 	.send({ message: "Unauthorized: no user info" });
-// 			throw new AppError({
-// 				statusCode: 401,
-// 				code: "AUTH_NO_USER",
-// 				message: "Unauthorized: no user info",
-// 			});
-// 		}
-// 		// Check if :id param matches
-// 		if ((request.params as any)?.id === user.id) return; // Authorized
-// 		// Check if query string contains user's ID in accepted keys
-// 		for (const key of queryKeys) {
-// 			if ((request.query as Record<string, string>)[key] === user.id) {
-// 				return; // Authorized
-// 			}
-// 		}
-// 		// Else
-// 		// return reply.code(403).send({
-// 		// 	message: `Forbidden: user does not match any of [params.id, ${queryKeys.join(
-// 		// 		", ",
-// 		// 	)}]`,
-// 		// });
-// 		throw new AppError({
-// 			statusCode: 403,
-// 			code: "AUTH_FORBIDDEN_QUERY",
-// 			message: `Forbidden: user does not match any of [params.id, ${queryKeys.join(
-// 				", ",
-// 			)}]`,
-// 		});
-// 	};
-// }
-
-//=======================OLD VER01: DIDN'T USE TEMPLATE=======================//
-// export function onlyIfInQuery(queryKeys: string[]) {
-// 	return async function (
-// 		request: FastifyRequest<{ Params: { id?: string } }>,
-// 		_reply: FastifyReply,
-// 		// reply: FastifyReply,
-// 	) {
-// 		const user = request.authUser;
-// 		// If NO user inside the Cookie
-// 		if (!user) {
-// 			// return reply
-// 			// 	.code(401)
-// 			// 	.send({ message: "Unauthorized: no user info" });
-// 			throw new AppError({
-// 				statusCode: 401,
-// 				code: "AUTH_NO_USER",
-// 				message: "Unauthorized: no user info",
-// 			});
-// 		}
-// 		// Check if :id param matches
-// 		if (request.params?.id === user.id) return; // Authorized
-// 		// Check if query string contains user's ID in accepted keys
-// 		for (const key of queryKeys) {
-// 			if ((request.query as Record<string, string>)[key] === user.id) {
-// 				return; // Authorized
-// 			}
-// 		}
-// 		// Else
-// 		// return reply.code(403).send({
-// 		// 	message: `Forbidden: user does not match any of [params.id, ${queryKeys.join(
-// 		// 		", ",
-// 		// 	)}]`,
-// 		// });
-// 		throw new AppError({
-// 			statusCode: 403,
-// 			code: "AUTH_FORBIDDEN_QUERY",
-// 			message: `Forbidden: user does not match any of [params.id, ${queryKeys.join(
-// 				", ",
-// 			)}]`,
-// 		});
-// 	};
-// }
+// Guard that restricts access to participants of a specific FriendRequest
+export function onlyFriendRequestParticipant(restrictToReceiver = false) {
+	return async function (
+		request: FastifyRequest<{ Params: { id: string } }>,
+		_reply: FastifyReply,
+	) {
+		logger.log({
+			"event.action": "onlyFriendRequestParticipant",
+			"params.id": request.params.id,
+			"restrictToReceiver": restrictToReceiver,
+			"authUser": request.authUser,
+			"message": "Attempting onlyFriendRequestParticipant check",
+		});
+		const user = request.authUser;
+		const friendReqId = request.params.id;
+		// If NO user inside the Cookie
+		if (!user) {
+			throw new AppError({
+				statusCode: 401,
+				code: AUTH_PRE_HANDLER_ERRORS.USER_INFO_NOT_FOUND,
+				message: "Unauthorized: no user info",
+				handlerName: "onlyFriendRequestParticipant",
+			});
+		}
+		// Get friend request by ID
+		const friendRq = await prisma.friendRequest.findUnique({
+			where: { id: friendReqId },
+			select: { fromId: true, toId: true },
+		});
+		// This is handled in friend_request.service.ts; but i need to check here too to restrict access
+		if (!friendRq) {
+			throw new AppError({
+				statusCode: 404,
+				code: AUTH_PRE_HANDLER_ERRORS.RESOURCE_NOT_FOUND,
+				message: "Friend request not found",
+				handlerName: "onlyFriendRequestParticipant",
+			});
+		}
+		// Check if user id is part of the friend request
+		const isParticipant =
+			friendRq.fromId === user.id || friendRq.toId === user.id;
+		if (
+			!isParticipant ||
+			(restrictToReceiver && user.id !== friendRq.toId)
+		) {
+			throw new AppError({
+				statusCode: 403,
+				code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_RESOURCE,
+				message: "Forbidden: Not authorized for this friend request",
+				handlerName: "onlyFriendRequestParticipant",
+			});
+		}
+		logger.log({
+			"event.action": "onlyFriendRequestParticipant",
+			"authUser": request.authUser,
+			"message": "Friend request access granted",
+		});
+	};
+}
