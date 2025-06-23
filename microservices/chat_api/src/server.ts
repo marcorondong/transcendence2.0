@@ -10,7 +10,7 @@ import { webSocketConnection } from "./webSocketConnection/webSocketConnection";
 import fCookie from "@fastify/cookie";
 import { env } from "./utils/env";
 
-const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
+const server = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 server.register(fastifyWebsocket);
