@@ -24,7 +24,14 @@ export async function gameHistoryHandler(
 	const { userId } = request.params;
 	const gameHistory = await getGameHistory(userId);
 	if (!gameHistory || gameHistory.length === 0) {
-		reply.log.warn(`No game history found for userId: ${userId}`);
+		reply.log.warn(
+			{
+				error: "NotFound",
+				statusCode: 404,
+				message: `No game history found for userId: ${userId}`,
+			},
+			"NotFound",
+		);
 		return reply.status(404).send({
 			statusCode: 404,
 			error: "NotFound",
@@ -41,7 +48,14 @@ export async function userStatsHandler(
 	const { userId } = request.params;
 	const userStats = await getUserStats(userId);
 	if (!userStats) {
-		reply.log.warn(`User stats not found for userId: ${userId}`);
+		reply.log.warn(
+			{
+				error: "NotFound",
+				statusCode: 404,
+				message: `User stats not found for user: ${userId}`,
+			},
+			"NotFound",
+		);
 		return reply.status(404).send({
 			statusCode: 404,
 			error: "NotFound",
@@ -75,7 +89,12 @@ export async function headToHeadHandler(
 	const stats = await getHeadToHeadStats(userId, opponentId);
 	if (!stats) {
 		reply.log.warn(
-			`Head-to-head stats not found for userId: ${userId} and opponentId: ${opponentId}`,
+			{
+				error: "NotFound",
+				statusCode: 404,
+				message: `Head-to-head stats not found for user: ${userId} and opponent: ${opponentId}`,
+			},
+			"NotFound",
 		);
 		return reply.status(404).send({
 			statusCode: 404,
