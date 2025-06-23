@@ -16,29 +16,25 @@
 | -- | ------ | ------------------------------------------------------------ | --------------- |----------------- |
 | 1  | POST   | `https://localhost:8080/auth-api/sign-in`                    | Login user      | Frontend         |
 | 2  | POST   | `https://localhost:8080/auth-api/sign-up`                    | Register user   | Frontend         |
-| 3  | DELETE | `https://localhost:8080/auth-api/sign-out`                   | Logout user     | Frontend         |
+| 3  | POST   | `https://localhost:8080/auth-api/sign-out`                   | Logout user     | Frontend         |
 | 4  | GET    | `https://localhost:8080/auth-api/verify-jwt`                 | Verify JWT      | Frontend         |
-| 5  | GET    | `https://localhost:8080/auth-api/refresh-jwt`                | Refresh JWT     | Frontend         |
-| 6  | PATCH  | `https://localhost:8080/auth-api/users/:id`                  | Edit Profile    | Frontend         |
-| 7  | PUT    | `https://localhost:8080/auth-api/users/:id`                  | Update Profile  | Frontend         |
-| 8  | DELETE | `https://localhost:8080/auth-api/users/:id`                  | Delete User     | Frontend         |
-| 9  | GET    | `http://auth_api_container:2999/auth-api/bot-jwt`            | Token for Bot   | Ai-Bot           |
-| 10 | GET    | `http://auth_api_container:2999/auth-api/verify-connection`  | Verify WS Conn. | Pong, Chat, Tic  |
-| 11 | GET    | `http://auth_api_container:2999/auth-api/health-check`       | Health check    | Monitoring       |
-| 12 | GET    | `http://localhost:2999/auth-api/documentation`               | Swagger         | Everyone         |
+| 5  | POST   | `https://localhost:8080/auth-api/refresh-jwt`                | Refresh JWT     | Frontend         |
+| 6  | GET    | `http://auth_api_container:2999/auth-api/bot-jwt`            | Token for Bot   | Ai-Bot, Frontend |
+| 7  | POST   | `http://auth_api_container:2999/auth-api/verify-connection`  | Verify WS Conn. | Pong,Chat,Tic,Fr |
+| 8  | GET    | `http://auth_api_container:2999/auth-api/health-check`       | Health check    | Monitoring       |
+| 9  | GET    | `http://localhost:2999/auth-api/documentation`               | Swagger         | Everyone         |
+| 10 | POST   | `https://localhost:8080/auth-api/update-jwt`                 | Update JWT      | Frontend         |
 
-1) Sign in a user. This will create the token for the user.
-2) Sign up a user. This will create the user and the token.
+1) Sign in a user. This will contact with users service and create the token for the user in browser in case of success.
+2) Sign up a user. This will contact with users service and create the token for the user in browser in case of success.
 3) Sign out a user. This will delete the token for the user.
 4) Verify a user. This will check if the token is valid.
 5) Refresh a user. This will refresh the token for the user.
-6) Edit the profile of the user and update token.
-7) Update the whole profile of the user and update token.
-8) Delete a user. This will delete the user and the token.
-9) Get the bot JWT. This will return the JWT for bot.
-10) Verify Cookies and JWT for internal services. Returns id and nickname
-11) Check the health of the service
-12) Swagger page for detailed information
+6) Get the bot JWT. This will return the JWT for bot.
+7) Verify Cookies and JWT. Returns Payload (id and nickname)
+8) Check the health of the service
+9) Swagger page for detailed information
+10) Update JWT. This will extract id from JWT and make request to users/:id to get nickname and will update JWT accordingly
 
 Detailed information about routes, shape of body, param, response is in swagger page.
 
