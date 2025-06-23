@@ -34,7 +34,7 @@ export class FetchAuth {
 		const config: FetchConfig = {
 			url: "/auth-api/sign-out",
 			method: "POST",
-			header: { accept: "application/json" },
+			headers: { accept: "application/json" },
 		};
 		try {
 			await fetchPong(config);
@@ -49,7 +49,7 @@ export class FetchAuth {
 		const config: FetchConfig = {
 			url: "/auth-api/verify-jwt",
 			method: "POST",
-			header: { accept: "application/json" },
+			headers: { accept: "application/json" },
 		};
 		await fetchPong(config);
 	}
