@@ -96,6 +96,29 @@ class ProfileMatchHistoryComponent extends HTMLElement {
 			opponentScoreDiv,
 		);
 
+		const date = new Date(this.history.createdAt);
+		const formattedDate = date
+			.toLocaleString("en-GB", {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: false,
+			})
+			.replace(",", " at"); // "23/06/2024 at 14:05"
+
+		const dateDiv = document.createElement("div");
+		dateDiv.classList.add(
+			"text-sm",
+			"dark:text-slate-300",
+			"text-indigo-900",
+			"col-span-full",
+			"justify-self-center",
+			"font-bold",
+		);
+		dateDiv.innerText = "Played on " + formattedDate;
+
 		// ADD ALL ELEMENTS TO COMPONENT
 		this.append(
 			currentAvatar,
@@ -103,6 +126,7 @@ class ProfileMatchHistoryComponent extends HTMLElement {
 			scoreContainer,
 			opponentNickname,
 			opponentAvatar,
+			dateDiv,
 		);
 	}
 }
