@@ -30,6 +30,13 @@ import {
 	emptyResponseSchema,
 	errorResponseSchema,
 	blockUserSchema,
+	updateUserPutInput,
+	updateUserPatchInput,
+	getUsersQuery,
+	addFriendInput,
+	blockUserInput,
+	createUserInput,
+	loginInput,
 } from "./user.schema";
 import { appErrorHandler } from "../../utils/errors";
 import { onlySelf } from "../../utils/authGuard";
@@ -61,7 +68,9 @@ import { onlySelf } from "../../utils/authGuard";
 
 async function userRoutes(server: FastifyInstance) {
 	// 1. Create a new user
-	server.post(
+	server.post<{
+		Body: createUserInput;
+	}>(
 		"/",
 		{
 			schema: {
@@ -85,7 +94,9 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 2. Log in to get authorization token (to access private/authenticated routes)
-	server.post(
+	server.post<{
+		Body: loginInput;
+	}>(
 		"/login",
 		{
 			schema: {
@@ -109,7 +120,9 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 3. Get all users (filter/sort/paginate)
-	server.get(
+	server.get<{
+		Querystring: getUsersQuery;
+	}>(
 		"/",
 		{
 			schema: {
@@ -132,7 +145,7 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 4. Get a single user by ID
-	server.get(
+	server.get<{ Params: { id: string } }>(
 		"/:id",
 		{
 			// preHandler: onlySelf, // TODO Should this one be private user route?
@@ -155,7 +168,10 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 5. Update ALL user fields (PUT)
-	server.put(
+	server.put<{
+		Params: { id: string };
+		Body: updateUserPutInput;
+	}>(
 		"/:id",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -180,7 +196,10 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 6. Update SOME user fields (PATCH)
-	server.patch(
+	server.patch<{
+		Params: { id: string };
+		Body: updateUserPatchInput;
+	}>(
 		"/:id",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -205,7 +224,7 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 7. Delete a user by ID
-	server.delete(
+	server.delete<{ Params: { id: string } }>(
 		"/:id",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -229,7 +248,7 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 8. Update user picture by ID
-	server.put(
+	server.put<{ Params: { id: string } }>(
 		"/:id/picture",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -271,7 +290,10 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 9. Get all user friends by ID
-	server.get(
+	server.get<{
+		Params: { id: string };
+		Querystring: getUsersQuery;
+	}>(
 		"/:id/friends",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -293,7 +315,10 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 10. Add a user friend by ID
-	server.post(
+	server.post<{
+		Params: { id: string };
+		Body: addFriendInput;
+	}>(
 		"/:id/friends",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -317,7 +342,7 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 11. Delete a user friend by ID and TargetID
-	server.delete(
+	server.delete<{ Params: { id: string; targetUserId: string } }>(
 		"/:id/friends/:targetUserId",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -339,7 +364,10 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 12. Get all blocked users by ID
-	server.get(
+	server.get<{
+		Params: { id: string };
+		Querystring: getUsersQuery;
+	}>(
 		"/:id/block-list",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -361,7 +389,10 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 13. Block a user by ID
-	server.post(
+	server.post<{
+		Params: { id: string };
+		Body: blockUserInput;
+	}>(
 		"/:id/block-list",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
@@ -385,7 +416,7 @@ async function userRoutes(server: FastifyInstance) {
 	);
 
 	// 14. Unblock a user by ID
-	server.delete(
+	server.delete<{ Params: { id: string; targetUserId: string } }>(
 		"/:id/block-list/:targetUserId",
 		{
 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
