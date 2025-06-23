@@ -9,7 +9,7 @@ COPY ./package.json ./
 COPY ./package-lock.json ./
 COPY ./tsconfig.json ./
 COPY ./prisma ./prisma/
-COPY ./src ./
+COPY ./src ./src
 RUN npm clean-install
 
 # TODO uncomment below line in production
