@@ -329,6 +329,9 @@ class ChatComponent extends HTMLElement {
 				this.me?.id,
 				this.selectedUser?.id,
 			);
+			if (!data) {
+				return;
+			}
 			this.selectedUser.blockStatusChecked = true;
 			this.selectedUser.blocked = data.blockStatus;
 		}
