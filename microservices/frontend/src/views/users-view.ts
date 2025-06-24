@@ -102,7 +102,6 @@ export class UsersView extends HTMLElement {
 			toId,
 			message: "hello",
 		};
-		console.log("data obj:", data);
 
 		try {
 			await FetchUsers.friendRequestPost(data);

@@ -580,8 +580,12 @@ class ChatComponent extends HTMLElement {
 			type: "invite",
 			id: this.selectedUser?.id,
 		};
-		if (this.ws) {
-			this.ws.send(JSON.stringify(chat));
+		try {
+			if (this.ws) {
+				this.ws.send(JSON.stringify(chat));
+			}
+		} catch (e) {
+			console.error(e);
 		}
 	}
 
