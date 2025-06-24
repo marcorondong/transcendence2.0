@@ -62,4 +62,13 @@ export class FetchAuth {
 		};
 		return await fetchPong(config);
 	}
+
+	static async updateJwt() {
+		const config: FetchConfig = {
+			url: "/auth-api/update-jwt",
+			method: "POST",
+			headers: { accept: "application/json" },
+		};
+		return await fetchPong(config);
+	}
 }
