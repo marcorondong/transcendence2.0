@@ -254,13 +254,14 @@ export class ProfileView extends HTMLElement {
 			const meData: Me = await FetchAuth.verifyConnection();
 			this.meId = meData.id;
 			this.userId = this.paramsId ?? this.meId;
-			this.friendRequestsOut = await FetchUsers.friendRequestGetFromMe(
-				meData.id,
-			);
-			this.friendRequestsIn = await FetchUsers.friendRequestGetToMe(
-				meData.id,
-			);
-			this.friends = await FetchUsers.friendsGet(this.userId);
+			if (this.userId === this.meId) {
+				this.friendRequestsOut =
+					await FetchUsers.friendRequestGetFromMe(meData.id);
+				this.friendRequestsIn = await FetchUsers.friendRequestGetToMe(
+					meData.id,
+				);
+				this.friends = await FetchUsers.friendsGet(this.userId);
+			}
 			this.userData = await FetchUsers.user(this.userId);
 			this.matchHistory = await FetchPongDb.matchHistory(this.userId);
 			// add fetch for friends list here
