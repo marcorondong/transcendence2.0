@@ -171,9 +171,6 @@ export class HeaderComponent extends HTMLElement {
 				);
 				Auth.toggleAuthClasses(false);
 				document.dispatchEvent(signInLinkEvent);
-				if (this.chat?.ws) {
-					this.chat.ws.close();
-				}
 			} catch (e) {
 				console.error(e);
 			}

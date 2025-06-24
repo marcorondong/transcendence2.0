@@ -13,12 +13,6 @@ const router = new Router(chat);
 const notificationService = new NotificationService();
 notificationService.listen();
 
-// ADDING CHAT INSTANCE TO HEADER COMPONENT
-const header = document.getElementsByTagName("header-component");
-if (header && header[0] && header[0] instanceof HeaderComponent) {
-	header[0].setChat(chat);
-}
-
 // PUTTING CHAT INTO DOM TREE
 const container = document.getElementById("container");
 container?.appendChild(chat);
