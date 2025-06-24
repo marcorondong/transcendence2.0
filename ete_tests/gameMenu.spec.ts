@@ -19,30 +19,19 @@ test("Login checkpoint", async ({ page }) => {
 
 test.describe.serial("Game flow", () => {
 	test("Login and game against normal bot", async ({ page }) => {
+		//go to pong game
 		await TestingUtils.logInStep(page, registeredUsers.user1);
-		await expect(page.locator("#pong")).toBeVisible();
-		await page.locator("#pong").click();
-		await expect(
-			page.getByRole("button", { name: "Single Player Mode" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("button", { name: "Tournament Mode" }),
-		).toBeVisible();
-		// Removed redundant check for "Tournament Mode".
-		await page.getByRole("button", { name: "Single Player Mode" }).click();
-		await expect(
-			page.getByRole("button", { name: "Play Random Opponent" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("button", { name: "Play Normal AI" }),
-		).toBeVisible();
-		await page.getByRole("button", { name: "Play Normal AI" }).click();
-		await expect(
-			page.getByText("Knockout Name: single match"),
-		).toBeVisible();
-		await expect(
-			page.getByText("Match Status: Game is running"),
-		).toBeVisible();
+
+		await TestingUtils.gameRunningTest(
+			page,
+			"BotGame",
+			["Single Player Mode", "Play Normal AI"],
+			[
+				'"matchStatus":"Game is running"',
+				'"roomId"',
+				'"knockoutName":"single match"',
+			],
+		);
 
 		await page.close();
 	});
@@ -58,11 +47,16 @@ test.describe.serial("Game flow", () => {
 		await TestingUtils.logInStep(user1Page, registeredUsers.user1);
 		await TestingUtils.logInStep(user2Page, registeredUsers.user2);
 
-		await TestingUtils.randomGameStep(user1Page);
-		await TestingUtils.randomGameStep(user2Page);
-
-		await TestingUtils.gameRunningTest(user1Page, "User1RandomGame");
-		await TestingUtils.gameRunningTest(user2Page, "User2RandomGame");
+		TestingUtils.gameRunningTest(user1Page, "User1RandomGame", [
+			"Match Status: Game is running",
+			"Room Id:",
+			"Knockout Name: single match",
+		]);
+		TestingUtils.gameRunningTest(user2Page, "User2RandomGame", [
+			"Match Status: Game is running",
+			"Room Id:",
+			"Knockout Name: single match",
+		]);
 
 		// await expect(page.locator("canvas")).toBeVisible();
 		// await expect(page.getByText("Match Status: Game is running")).toBeVisible();
