@@ -26,6 +26,7 @@ interface AuthenticatedRequest<
 
 // Authentication hook
 export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
+	console.dir(request, { depth: 2 });
 	if (!AUTH_GUARD_ENABLED) return;
 
 	logger.warn({
@@ -220,6 +221,7 @@ export function onlyIfInQuery<
 	});
 	// This is a Factory: It returns a preHandler depending on the arguments (e.g: preHandler: onlyIfInQuery(["fromId", "toId"]))
 	return async function (request: T, _reply: FastifyReply) {
+		console.dir(request, { depth: 2 });
 		// const user = (request as FastifyRequest).authUser;
 		const user = request.authUser;
 		logger.info({
