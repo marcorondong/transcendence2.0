@@ -309,7 +309,11 @@ export class ProfileView extends HTMLElement {
 
 		if (this.matchHistory && this.userData) {
 			const container = document.createElement("div");
-			container.append(new HeadlineComponent("Match History"));
+			const headlineText =
+				this.userId === this.meId
+					? "My 1v1 Match History"
+					: "1v1 Match History of " + this.userData.nickname;
+			container.append(new HeadlineComponent(headlineText));
 			for (let match of this.matchHistory) {
 				const matchCard = new ProfileMatchHistoryComponent(
 					match,
