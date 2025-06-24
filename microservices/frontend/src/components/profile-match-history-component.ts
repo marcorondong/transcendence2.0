@@ -31,7 +31,7 @@ class ProfileMatchHistoryComponent extends HTMLElement {
 			"px-4",
 			"pb-10",
 			"pt-8",
-			"sm:py-2",
+			"sm:py-4",
 			"flex",
 			"flex-col",
 			"sm:grid",
@@ -42,6 +42,7 @@ class ProfileMatchHistoryComponent extends HTMLElement {
 			"gap-x-8",
 			"gap-y-3",
 			"sm:gap-2",
+			"relative",
 		);
 
 		// AVATAR PICTURE
@@ -97,25 +98,27 @@ class ProfileMatchHistoryComponent extends HTMLElement {
 		);
 
 		const date = new Date(this.history.createdAt);
-		const formattedDate = date
-			.toLocaleString("en-GB", {
-				day: "2-digit",
-				month: "2-digit",
-				year: "numeric",
-				hour: "2-digit",
-				minute: "2-digit",
-				hour12: false,
-			})
-			.replace(",", " at"); // "23/06/2024 at 14:05"
+		const formattedDate = date.toLocaleString("en-GB", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: false,
+		});
 
 		const dateDiv = document.createElement("div");
 		dateDiv.classList.add(
-			"text-sm",
-			"dark:text-slate-300",
+			"text-[0.7rem]",
+			"text-xs",
+			"dark:text-slate-500",
 			"text-indigo-900",
 			"col-span-full",
 			"justify-self-center",
-			"font-bold",
+			"absolute",
+			"sm:bottom-1",
+			"bottom-2",
+			// "font-bold",
 		);
 		dateDiv.innerText = "Played on " + formattedDate;
 
