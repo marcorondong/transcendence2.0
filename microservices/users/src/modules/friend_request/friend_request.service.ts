@@ -193,7 +193,11 @@ export async function findFriendRequests(
 		order = "asc",
 	} = cleanedOptions;
 
-	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
+	logger.debug({
+		"event.action": "findFriendRequests",
+		"cleanedOptions": cleanedOptions,
+		"message": "✅ Step 1: Received Cleaned Options",
+	});
 	try {
 		// Remove undefined fields from 'where'
 		const cleanedWhere = Object.fromEntries(
@@ -249,7 +253,11 @@ export async function findFriendRequests(
 
 		let query: Record<string, any>;
 
-		// console.log("✅ Step 2: Transformed 'where'", transformed);
+		logger.debug({
+			"event.action": "getFriendRequests",
+			"transformed": transformed,
+			"message": "✅ Step 2: Transformed 'where'",
+		});
 		// Enable OR queries (map provided fields to build individual queries)
 		if (useOr) {
 			const orConditions = Object.entries(transformed).map(([k, v]) => ({
@@ -266,15 +274,21 @@ export async function findFriendRequests(
 			}
 		}
 
-		// console.log("✅ Step 3: Final Query Shape", query);
+		logger.debug({
+			"event.action": "findFriendRequests",
+			"query": query,
+			"message": "✅ Step 3: Final Query Shape",
+		});
 		const prismaSortBy = { [sortBy]: order };
 
-		// console.log("✅ Step 4: Final Prisma Query", {
-		// 	where: query,
-		// 	orderBy: prismaSortBy,
-		// 	skip,
-		// 	take,
-		// });
+		logger.debug({
+			"event.action": "findFriendRequests",
+			"where": query,
+			"orderBy": prismaSortBy,
+			"skip": skip,
+			"take": take,
+			"message": "✅ Step 4: Final Prisma Query",
+		});
 		const friendRequests = await prisma.friendRequest.findMany({
 			where: query,
 			include: {
@@ -285,7 +299,11 @@ export async function findFriendRequests(
 			skip,
 			take,
 		});
-		// console.log("✅ Step 5: Result", users);
+		logger.debug({
+			"event.action": "findFriendRequests",
+			"users": friendRequests,
+			"message": "✅ Step 5: Result",
+		});
 		// This is not-standard, but it's easier to check by the status code
 		if (!friendRequests.length) {
 			// throw new AppError({
@@ -293,7 +311,7 @@ export async function findFriendRequests(
 			// 	code: FRIEND_REQUEST_ERRORS.NOT_FOUND,
 			// 	message: "No friend requests found",
 			// });
-			logger.log(
+			logger.debug(
 				{
 					"event.action": "findFriendRequests",
 					"where": query,
@@ -307,7 +325,11 @@ export async function findFriendRequests(
 
 		return friendRequests;
 	} catch (err) {
-		// console.log("❌ Step 6: Error Caught", err);
+		logger.error({
+			"event.action": "findFriendRequests",
+			"error": err,
+			"message": "❌ Step 6: Error Caught",
+		});
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
@@ -317,7 +339,11 @@ export async function findFriendRequests(
 			});
 		}
 		if (err instanceof AppError) throw err;
-		// console.error("❌ Step 6.2: Unknown error", err);
+		logger.error({
+			"event.action": "findFriendRequests",
+			"error": err,
+			"message": "❌ Step 6.2: Unknown error",
+		});
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
