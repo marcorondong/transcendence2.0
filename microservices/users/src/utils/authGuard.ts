@@ -36,16 +36,22 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		"message": "Starting authGuard()",
 	});
 	// Public paths that never require auth (centralized)
-	const publicPaths: string[] = [
+	const exactPaths = [
 		"/api/tools/health-check",
-		"/api/tools/swagger",
-		"/api/users",
 		"/api/users/login",
+		"/api/users",
 	];
+	// Public paths that never require auth (centralized)
+	const prefixPaths = ["/api/tools/swagger", "/api/documentation"];
 
-	const isPublicPath = publicPaths.some((path) =>
+	const isExactPublicPath = exactPaths.includes(
+		(request as any).routerPath ?? "",
+	);
+	const isPrefixPublicPath = prefixPaths.some((path) =>
 		request.raw.url?.startsWith(path),
 	);
+
+	const isPublicPath = isExactPublicPath || isPrefixPublicPath;
 
 	const isRouteExempt = request.routeOptions?.config?.authRequired === false;
 
@@ -152,6 +158,7 @@ export async function onlySelf<
 		id: string;
 	}>,
 >(request: T, _reply: FastifyReply) {
+	console.dir(request, { depth: 2 });
 	if (!AUTH_GUARD_ENABLED) return;
 	logger.info({
 		"event.action": "onlySelf",
