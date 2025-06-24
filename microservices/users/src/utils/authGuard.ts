@@ -101,6 +101,7 @@ export async function onlySelf(
 	_reply: FastifyReply,
 	// reply: FastifyReply,
 ) {
+	if (!ENABLE_AUTH_GUARD) return;
 	logger.info({
 		"event.action": "onlySelf",
 		"id params": request.id,
@@ -143,6 +144,7 @@ export async function onlySelf(
 export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 	queryKeys: string[],
 ) {
+	if (!ENABLE_AUTH_GUARD) return;
 	logger.info({
 		"event.action": "onlyIfInQuery",
 		"queryKeys": queryKeys,
@@ -211,6 +213,7 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 
 // Guard that restricts access to participants of a specific FriendRequest
 export function onlyFriendRequestParticipant(restrictToReceiver = false) {
+	if (!ENABLE_AUTH_GUARD) return;
 	return async function (
 		request: FastifyRequest<{ Params: { id: string } }>,
 		_reply: FastifyReply,
