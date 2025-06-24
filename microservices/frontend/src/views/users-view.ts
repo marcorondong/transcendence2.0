@@ -1,6 +1,11 @@
 import { ChatComponent } from "../components/chat-component";
 import type { User, UserAggregated } from "../types/User";
-import type { FetchConfig, FriendRequest, Me } from "../types/Fetch";
+import type {
+	FetchConfig,
+	FriendRequest,
+	FriendRequestPending,
+	Me,
+} from "../types/Fetch";
 import { FetchPongDb } from "../services/fetch-pong-db";
 import { UsersUserComponent } from "../components/users-user-component";
 import { UsersPaginationComponent } from "../components/users-pagination-component";
@@ -101,7 +106,7 @@ export class UsersView extends HTMLElement {
 
 		try {
 			await FetchUsers.friendRequestPost(data);
-			console.log("befriend:", button.id);
+			button.disabled = true;
 			document.dispatchEvent(
 				notificationEvent("Sent Friend Request", "success"),
 			);
@@ -176,9 +181,15 @@ export class UsersView extends HTMLElement {
 		this.handleQueryParam();
 		try {
 			this.meData = await FetchAuth.verifyConnection();
+			if (!this.meData) {
+				return;
+			}
 			this.usersData = await this.fetchUsers(this.page);
 			const userIds = this.usersData.map((u) => u.id);
 			const statsData = await FetchPongDb.stats(userIds);
+			const friends: User[] = await FetchUsers.friendsGet(this.meData.id);
+			const friendRequests: FriendRequestPending[] =
+				await FetchUsers.friendRequestGetFromMe(this.meData.id);
 			this.usersAggregated = this.usersData.map((user) => {
 				const stats = statsData.find((s) => s.userId === user.id);
 				const data = {
@@ -186,11 +197,17 @@ export class UsersView extends HTMLElement {
 					wins: stats?.wins ?? 0,
 					losses: stats?.losses ?? 0,
 					online: false,
+					friend:
+						!!friends.find((friend) => friend.id === user.id) ||
+						user.id === this.meData?.id ||
+						!!friendRequests.find(
+							(friend) => friend.toId === user.id,
+						),
 				};
 				return data;
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			this.dispatchEvent(errorLinkEvent);
 			return;
 		}

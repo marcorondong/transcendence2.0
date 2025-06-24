@@ -309,6 +309,7 @@ export class ProfileView extends HTMLElement {
 
 		if (this.matchHistory && this.userData) {
 			const container = document.createElement("div");
+			container.classList.add("flex", "flex-col", "gap-4");
 			const headlineText =
 				this.userId === this.meId
 					? "My 1v1 Match History"
