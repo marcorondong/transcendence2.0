@@ -56,6 +56,19 @@ export const newUserResponseSchema = z
 	})
 	.strict();
 
+export const updateNicknameSchema = z
+	.object({
+		type: z.literal("updateNickname"),
+	})
+	.strict()
+
+export const updateNicknameResponseSchema = z
+	.object({
+		type: z.literal("updateNickname"),
+		user: userZodSchema,
+	})
+	.strict();
+
 export const disconnectedResponseSchema = z
 	.object({
 		type: z.literal("disconnected"),
@@ -85,6 +98,7 @@ export const roomIdSchema = z
 export const DataSchema = z.discriminatedUnion("type", [
 	messageSchema,
 	inviteSchema,
+	updateNicknameSchema,
 ]);
 
 export type DataInput = z.infer<typeof DataSchema>;

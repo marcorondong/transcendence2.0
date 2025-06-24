@@ -19,8 +19,6 @@
   "homepage": "https://github.com/marcorondong/transcendence2.0#readme",
   "description": "",
   "devDependencies": {
-    "@fastify/swagger": "^9.4.2",
-    "@fastify/swagger-ui": "^5.2.2",
     "@types/node": "^22.14.1",
     "nodemon": "^3.1.9",
     "pino-pretty": "^13.0.0",
@@ -31,8 +29,6 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/websocket": "^11.0.2",
     "fastify": "^5.3.0",
-    "fastify-type-provider-zod": "^4.0.2",
-    "zod": "^3.24.3",
-    "zod-to-json-schema": "^3.24.5"
+    "zod": "^3.24.3"
   }
 }

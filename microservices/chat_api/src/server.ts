@@ -1,10 +1,5 @@
 import Fastify from "fastify";
 import { serverOption } from "./utils/options";
-import {
-	ZodTypeProvider,
-	validatorCompiler,
-	serializerCompiler,
-} from "fastify-type-provider-zod";
 import fastifyWebsocket from "@fastify/websocket";
 import { webSocketConnection } from "./webSocketConnection/webSocketConnection";
 import fCookie from "@fastify/cookie";
