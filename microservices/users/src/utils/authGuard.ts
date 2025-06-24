@@ -43,7 +43,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 			id: "8e2f7a60-1697-44b1-b777-a52562fe5990",
 			nickname: "dev-user",
 		};
-		logger.log({
+		logger.info({
 			"event.action": "authGuard",
 			"authUser": request.authUser,
 			"message": "[DEV AUTH] Injected mock user:",
@@ -81,8 +81,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
 	} catch (err) {
-		// logger.error(err, "[AUTH ERROR]");
-		// logger.log({
+		// logger.error({
 		// 	"event.action": "authGuard",
 		// 	"error": err,
 		// 	"message": "[AUTH ERROR]",
@@ -102,7 +101,7 @@ export async function onlySelf(
 	_reply: FastifyReply,
 	// reply: FastifyReply,
 ) {
-	logger.log({
+	logger.info({
 		"event.action": "onlySelf",
 		"id params": request.id,
 		"message": "Attempting onlySelf check",
@@ -131,7 +130,7 @@ export async function onlySelf(
 			handlerName: "onlySelf",
 		});
 	}
-	logger.log({
+	logger.info({
 		"event.action": "onlySelf",
 		"match": "params.id",
 		"authUser": request.authUser,
@@ -144,7 +143,7 @@ export async function onlySelf(
 export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 	queryKeys: string[],
 ) {
-	logger.log({
+	logger.info({
 		"event.action": "onlyIfInQuery",
 		"queryKeys": queryKeys,
 		"message": "Attempting onlyIfInQuery check",
@@ -166,7 +165,7 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 		}
 		// Check if :id param matches
 		if ((request.params as any)?.id === user.id) {
-			logger.log({
+			logger.info({
 				"event.action": "onlyIfInQuery",
 				"match": "params.id",
 				"userId": user.id,
@@ -183,7 +182,7 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 				(request.body as Record<string, string | undefined>)?.[key] ===
 				user.id;
 			if (queryMatch || bodyMatch) {
-				logger.log({
+				logger.info({
 					"event.action": "onlyIfInQuery",
 					"match": queryMatch ? `query.${key}` : `body.${key}`,
 					"userId": user.id,
@@ -216,7 +215,7 @@ export function onlyFriendRequestParticipant(restrictToReceiver = false) {
 		request: FastifyRequest<{ Params: { id: string } }>,
 		_reply: FastifyReply,
 	) {
-		logger.log({
+		logger.info({
 			"event.action": "onlyFriendRequestParticipant",
 			"params.id": request.params.id,
 			"restrictToReceiver": restrictToReceiver,
@@ -262,7 +261,7 @@ export function onlyFriendRequestParticipant(restrictToReceiver = false) {
 				handlerName: "onlyFriendRequestParticipant",
 			});
 		}
-		logger.log({
+		logger.info({
 			"event.action": "onlyFriendRequestParticipant",
 			"authUser": request.authUser,
 			"message": "Friend request access granted",
