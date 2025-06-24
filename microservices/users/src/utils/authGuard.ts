@@ -9,6 +9,7 @@ const DEV_AUTH_ENABLED = false;
 const AUTH_VERIFY_URL =
 	"http://auth_api_container:2999/auth-api/verify-connection"; // Adjust according to Docker
 
+// TODO: Check if extend FastifyRequest here or in app.ts as i'm currently doing
 // // Extend FastifyRequest with a `authUser` field
 // declare module "fastify" {
 // 	interface FastifyRequest {
@@ -26,23 +27,24 @@ interface AuthenticatedRequest<
 
 // Authentication hook
 export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
-	console.dir(request, { depth: 2 });
+	// console.dir(request, { depth: 2 });
 	if (!AUTH_GUARD_ENABLED) return;
 
-	logger.warn({
-		"event.action": "authGuard entry",
+	logger.debug({
+		"event.action": "authGuard hit",
 		"url": request.raw.url,
 		"method": request.method,
 		"cookie": request.headers.cookie,
 		"message": "Starting authGuard()",
 	});
-	// Public paths that never require auth (centralized)
+	// Public paths that never require auth (Exact match: no more extra path nor less)
 	const exactPaths = [
 		"/api/tools/health-check",
 		"/api/users/login",
 		"/api/users",
 	];
-	// Public paths that never require auth (centralized)
+	// Public paths that never require auth (IMPORTANT! startWith match: will match the path + anything extra)
+	// E.g: api/documentation/static/swagger-ui.css"
 	const prefixPaths = ["/api/tools/swagger", "/api/documentation"];
 
 	const isExactPublicPath = exactPaths.includes(
@@ -56,7 +58,6 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 
 	const isRouteExempt = request.routeOptions?.config?.authRequired === false;
 
-	// if (DEV_AUTH_ENABLED || isPublicPath || isRouteExempt) {
 	if (DEV_AUTH_ENABLED) {
 		// Attach info. Make the request pass WITH faked auth info
 		request.user = {
@@ -89,13 +90,13 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 	}
 	try {
-		logger.info({
+		logger.debug({
 			"event.action": "authGuard to verify with AUTH",
 			"cookie": cookie,
 			"message":
 				"Received cookie in real mode; will be verified with AUTH",
 		});
-		logger.warn(`Attempting AUTH contact at: ${AUTH_VERIFY_URL}`);
+		logger.debug(`Attempting AUTH contact at: ${AUTH_VERIFY_URL}`);
 		const response = await fetch(AUTH_VERIFY_URL, {
 			method: "GET",
 			headers: {
@@ -105,7 +106,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 		if (!response.ok) {
 			// logger.warn(`Failed AUTH contact at: ${AUTH_VERIFY_URL}`);
-			// const errorText = await response.text(); // safe even if not JSON // TODO: You can only read the body once — don’t try .json() after .text()
+			// const errorText = await response.text(); // safe even if not JSON // TODO: I can only read the body once. cannot try .json() after .text()
 			logger.warn({
 				"event.action": "authGuard",
 				"url": AUTH_VERIFY_URL,
@@ -121,10 +122,10 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 				handlerName: "authGuard",
 			});
 		}
-		logger.warn(`Successful AUTH contact at: ${AUTH_VERIFY_URL}`);
+		logger.debug(`Successful AUTH contact at: ${AUTH_VERIFY_URL}`);
 		const data = await response.json();
 		const validated = loginResponseSchema.parse(data); // I should use tokenPayloadSchema but it's not exported and this one is the same
-		logger.info({
+		logger.debug({
 			"event.action": "authGuard verified with AUTH",
 			"status": response.status,
 			"statusText": response.statusText,
@@ -133,17 +134,12 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
-		logger.info({
+		logger.debug({
 			"event.action": "authGuard",
 			"authUser": request.authUser,
 			"message": "Final authUser attached to request",
 		});
 	} catch (err) {
-		// logger.error({
-		// 	"event.action": "authGuard",
-		// 	"error": err,
-		// 	"message": "[AUTH ERROR]",
-		// });
 		throw new AppError({
 			statusCode: 500,
 			code: AUTH_GUARD_ERRORS.UNREACHABLE_AUTH,
@@ -159,26 +155,21 @@ export async function onlySelf<
 		id: string;
 	}>,
 >(request: T, _reply: FastifyReply) {
-	console.dir(request, { depth: 2 });
+	// console.dir(request, { depth: 2 });
 	if (!AUTH_GUARD_ENABLED) return;
-	logger.info({
-		"event.action": "onlySelf",
+	logger.debug({
+		"event.action": "onlySelf hit",
+		"url": request.raw.url,
+		"method": request.method,
+		"cookie": request.headers.cookie,
 		"authUser": request.authUser,
 		"params": request.params,
 		// "id params": request.id,
 		"message": "Attempting onlySelf check",
 	});
-	logger.warn({
-		"event.action": "onlySelf",
-		"url": request.raw.url,
-		"cookie": request.headers.cookie,
-		"authUser": request.authUser,
-		"message": "Verifying user in onlySelf() if authUser is still present",
-	});
 	const user = request.authUser;
 	// If NO user inside the Cookie
 	if (!user) {
-		// return reply.code(401).send({ message: "Unauthorized: no user info" });
 		throw new AppError({
 			statusCode: 401,
 			code: AUTH_PRE_HANDLER_ERRORS.USER_INFO_NOT_FOUND,
@@ -188,9 +179,6 @@ export async function onlySelf<
 	}
 	// If user id doesn't match the owner of the resource he tries to access
 	if (user.id !== request.params.id) {
-		// return reply
-		// 	.code(403)
-		// 	.send({ message: "Forbidden: not your resource" });
 		throw new AppError({
 			statusCode: 403,
 			code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_RESOURCE,
@@ -199,43 +187,42 @@ export async function onlySelf<
 			handlerName: "onlySelf",
 		});
 	}
-	logger.info({
+	logger.debug({
 		"event.action": "onlySelf",
-		"match": "params.id",
-		"authUser": request.authUser,
+		"idMatch": "params.id",
 		"userId": user.id,
+		"authUser": request.authUser,
 		"message": "onlySelf check succeeded",
 	});
 }
 
-// <T extends AuthenticatedRequest<any, any, { fromId?: string; toId?: string }> = ...>
+// <T extends AuthenticatedRequest<any, any, { fromId?: string; toId?: string }> = ...> // Example of how to introduce types in Fastify generics
 // Guard that allows access if the authenticated user is: The route param `:id`, or Present in one of the accepted query params (`fromId`, `toId`, etc.)
 export function onlyIfInQuery<
 	T extends AuthenticatedRequest = AuthenticatedRequest,
 >(queryKeys: string[]) {
 	if (!AUTH_GUARD_ENABLED) return;
-	logger.info({
-		"event.action": "onlyIfInQuery",
+	logger.debug({
+		"event.action": "onlyIfInQuery hit",
 		"queryKeys": queryKeys,
 		"message": "Attempting onlyIfInQuery check",
 	});
 	// This is a Factory: It returns a preHandler depending on the arguments (e.g: preHandler: onlyIfInQuery(["fromId", "toId"]))
 	return async function (request: T, _reply: FastifyReply) {
-		console.dir(request, { depth: 2 });
-		// const user = (request as FastifyRequest).authUser;
+		// console.dir(request, { depth: 2 });
 		const user = request.authUser;
-		logger.info({
-			"event.action": "onlyIfInQuery",
+		logger.debug({
+			"event.action": "onlyIfInQuery factory function hit",
+			"url": request.raw.url,
+			"method": request.method,
+			"cookie": request.headers.cookie,
 			"authUser": user,
 			"queryKeys": queryKeys,
 			// "id params": request.id,
-			"message": "Dumping onlyIfInQuery data",
+			"message": "Attempting onlyIfInQuery factory function check",
 		});
 		// If NO user inside the Cookie
 		if (!user) {
-			// return reply
-			// 	.code(401)
-			// 	.send({ message: "Unauthorized: no user info" });
 			throw new AppError({
 				statusCode: 401,
 				code: AUTH_PRE_HANDLER_ERRORS.USER_INFO_NOT_FOUND,
@@ -245,10 +232,11 @@ export function onlyIfInQuery<
 		}
 		// Check if :id param matches
 		if ((request.params as any)?.id === user.id) {
-			logger.info({
+			logger.debug({
 				"event.action": "onlyIfInQuery",
-				"match": "params.id",
+				"idMatch": "params.id",
 				"userId": user.id,
+				"authUser": request.authUser,
 				"message": "Authorized by param match",
 			});
 			return; // Authorized
@@ -262,21 +250,17 @@ export function onlyIfInQuery<
 				(request.body as Record<string, string | undefined>)?.[key] ===
 				user.id;
 			if (queryMatch || bodyMatch) {
-				logger.info({
+				logger.debug({
 					"event.action": "onlyIfInQuery",
-					"match": queryMatch ? `query.${key}` : `body.${key}`,
+					"queryMatch": queryMatch ? `query.${key}` : `body.${key}`,
 					"userId": user.id,
+					"authUser": request.authUser,
 					"message": "Authorized by query/body match",
 				});
 				return; // Authorized
 			}
 		}
 		// Else
-		// return reply.code(403).send({
-		// 	message: `Forbidden: user does not match any of [params.id, ${queryKeys.join(
-		// 		", ",
-		// 	)}]`,
-		// });
 		throw new AppError({
 			statusCode: 403,
 			code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_QUERY,
@@ -297,11 +281,16 @@ export function onlyFriendRequestParticipant(restrictToReceiver = false) {
 			id: string;
 		}>,
 	>(request: T, _reply: FastifyReply) {
-		logger.info({
-			"event.action": "onlyFriendRequestParticipant",
-			"params.id": request.params.id,
-			"restrictToReceiver": restrictToReceiver,
+		// console.dir(request, { depth: 2 });
+		logger.debug({
+			"event.action": "onlyFriendRequestParticipant hit",
+			"url": request.raw.url,
+			"method": request.method,
+			"cookie": request.headers.cookie,
 			"authUser": request.authUser,
+			"params": request.params,
+			// "params.id": request.params.id,
+			"restrictToReceiver": restrictToReceiver,
 			"message": "Attempting onlyFriendRequestParticipant check",
 		});
 		const user = request.authUser;
@@ -320,7 +309,7 @@ export function onlyFriendRequestParticipant(restrictToReceiver = false) {
 			where: { id: friendReqId },
 			select: { fromId: true, toId: true },
 		});
-		// This is handled in friend_request.service.ts; but i need to check here too to restrict access
+		// This is handled in friend_request.service.ts; but I need to check here too to restrict resource access
 		if (!friendRq) {
 			throw new AppError({
 				statusCode: 404,
@@ -343,8 +332,10 @@ export function onlyFriendRequestParticipant(restrictToReceiver = false) {
 				handlerName: "onlyFriendRequestParticipant",
 			});
 		}
-		logger.info({
+		logger.debug({
 			"event.action": "onlyFriendRequestParticipant",
+			"idMatch": "params.id",
+			"userId": user.id,
 			"authUser": request.authUser,
 			"message": "Friend request access granted",
 		});
