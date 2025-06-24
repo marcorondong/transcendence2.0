@@ -52,9 +52,11 @@ export async function blockUserHandler(
 			handleError(reply, "Conflict", 409, `User already blocked`);
 			return;
 		}
-	} catch (error) {
-		handleError(reply, "NotFound", 404, `User ${friendId} does not exist`);
-		return;
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
 	}
 	await connectUser(userId, friendId);
 	reply.status(200).send({ success: true });
@@ -71,9 +73,11 @@ export async function unblockUserHandler(
 			handleError(reply, "Conflict", 409, `User not blocked`);
 			return;
 		}
-	} catch (error) {
-		handleError(reply, "NotFound", 404, `User ${friendId} does not exist`);
-		return;
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
 	}
 	await disconnectUser(userId, friendId);
 	reply.status(200).send({ success: true });
@@ -87,9 +91,11 @@ export async function toggleBlockHandler(
 	let isUserInBlockList;
 	try {
 		isUserInBlockList = await getBlockStatus(userId, friendId);
-	} catch (error) {
-		handleError(reply, "NotFound", 404, `User ${friendId} does not exist`);
-		return;
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId}not found`);
+			return;
+		} else throw error;
 	}
 	if (isUserInBlockList) await disconnectUser(userId, friendId);
 	else await connectUser(userId, friendId);
@@ -104,9 +110,11 @@ export async function blockStatusHandler(
 	let blockStatus;
 	try {
 		blockStatus = await getBlockStatus(userId, friendId);
-	} catch (error) {
-		handleError(reply, "NotFound", 404, `User ${friendId} does not exist`);
-		return;
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
 	}
 	reply.status(200).send({ blockStatus });
 }
@@ -119,9 +127,11 @@ export async function blockListHandler(
 	let blockList;
 	try {
 		blockList = await ft_blockList(userId);
-	} catch (error) {
-		handleError(reply, "NotFound", 404, `User ${userId} does not exist`);
-		return;
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${userId} not found`);
+			return;
+		} else throw error;
 	}
 	reply.status(200).send({ blockList });
 }
