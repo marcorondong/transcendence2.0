@@ -4,22 +4,37 @@ import { AppError, AUTH_GUARD_ERRORS, AUTH_PRE_HANDLER_ERRORS } from "./errors";
 import { logger } from "./logger";
 import prisma from "./prisma";
 
-const ENABLE_AUTH_GUARD = true;
-const IS_DEV_MODE = true;
+const AUTH_GUARD_ENABLED = true;
+const DEV_AUTH_ENABLED = false;
 const AUTH_VERIFY_URL =
 	"http://auth_api_container:2999/auth-api/verify-connection"; // Adjust according to Docker
 
-// Extend FastifyRequest with a `authUser` field
-declare module "fastify" {
-	interface FastifyRequest {
-		authUser?: TokenPayload;
-	}
+// // Extend FastifyRequest with a `authUser` field
+// declare module "fastify" {
+// 	interface FastifyRequest {
+// 		authUser?: TokenPayload;
+// 	}
+// }
+
+interface AuthenticatedRequest<
+	Params = FastifyRequest["params"],
+	Body = FastifyRequest["body"],
+	Query = FastifyRequest["query"],
+> extends FastifyRequest<{ Params: Params; Body: Body; Query: Query }> {
+	authUser?: TokenPayload; // Optional, since I'll check for it inside the preHandlers
 }
 
 // Authentication hook
 export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
-	if (!ENABLE_AUTH_GUARD) return;
+	if (!AUTH_GUARD_ENABLED) return;
 
+	logger.warn({
+		"event.action": "authGuard entry",
+		"url": request.raw.url,
+		"method": request.method,
+		"cookie": request.headers.cookie,
+		"message": "Starting authGuard()",
+	});
 	// Public paths that never require auth (centralized)
 	const publicPaths: string[] = [
 		"/api/tools/health-check",
@@ -34,7 +49,9 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 
 	const isRouteExempt = request.routeOptions?.config?.authRequired === false;
 
-	if (IS_DEV_MODE || isPublicPath || isRouteExempt) {
+	// if (DEV_AUTH_ENABLED || isPublicPath || isRouteExempt) {
+	if (DEV_AUTH_ENABLED) {
+		// Attach info. Make the request pass WITH faked auth info
 		request.user = {
 			id: "00000000-0000-0000-0000-000000000001",
 			nickname: "dev-user",
@@ -50,6 +67,10 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 		return;
 	}
+	if (isPublicPath || isRouteExempt) {
+		// Don't attach anything. Let the request pass WITHOUT auth info (they're public no no auth is checked)
+		return;
+	}
 
 	const cookie = request.headers.cookie;
 	if (!cookie) {
@@ -61,6 +82,13 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 	}
 	try {
+		logger.info({
+			"event.action": "authGuard to verify with AUTH",
+			"cookie": cookie,
+			"message":
+				"Received cookie in real mode; will be verified with AUTH",
+		});
+		logger.warn(`Attempting AUTH contact at: ${AUTH_VERIFY_URL}`);
 		const response = await fetch(AUTH_VERIFY_URL, {
 			method: "GET",
 			headers: {
@@ -69,6 +97,16 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 			},
 		});
 		if (!response.ok) {
+			// logger.warn(`Failed AUTH contact at: ${AUTH_VERIFY_URL}`);
+			// const errorText = await response.text(); // safe even if not JSON // TODO: You can only read the body once — don’t try .json() after .text()
+			logger.warn({
+				"event.action": "authGuard",
+				"url": AUTH_VERIFY_URL,
+				"status": response.status,
+				"statusText": response.statusText,
+				// "body": errorText,
+				"message": "AUTH service responded with failure",
+			});
 			throw new AppError({
 				statusCode: 401,
 				code: AUTH_GUARD_ERRORS.INVALID_TOKEN,
@@ -76,10 +114,23 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 				handlerName: "authGuard",
 			});
 		}
+		logger.warn(`Successful AUTH contact at: ${AUTH_VERIFY_URL}`);
 		const data = await response.json();
 		const validated = loginResponseSchema.parse(data); // I should use tokenPayloadSchema but it's not exported and this one is the same
+		logger.info({
+			"event.action": "authGuard verified with AUTH",
+			"status": response.status,
+			"statusText": response.statusText,
+			"validated": validated,
+			"message": "Parsed token data from AUTH",
+		});
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
+		logger.info({
+			"event.action": "authGuard",
+			"authUser": request.authUser,
+			"message": "Final authUser attached to request",
+		});
 	} catch (err) {
 		// logger.error({
 		// 	"event.action": "authGuard",
@@ -96,16 +147,25 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 }
 
 // Guard that allows only the user to access/modify their own resource.
-export async function onlySelf(
-	request: FastifyRequest<{ Params: { id: string } }>,
-	_reply: FastifyReply,
-	// reply: FastifyReply,
-) {
-	if (!ENABLE_AUTH_GUARD) return;
+export async function onlySelf<
+	T extends AuthenticatedRequest<{ id: string }> = AuthenticatedRequest<{
+		id: string;
+	}>,
+>(request: T, _reply: FastifyReply) {
+	if (!AUTH_GUARD_ENABLED) return;
 	logger.info({
 		"event.action": "onlySelf",
-		"id params": request.id,
+		"authUser": request.authUser,
+		"params": request.params,
+		// "id params": request.id,
 		"message": "Attempting onlySelf check",
+	});
+	logger.warn({
+		"event.action": "onlySelf",
+		"url": request.raw.url,
+		"cookie": request.headers.cookie,
+		"authUser": request.authUser,
+		"message": "Verifying user in onlySelf() if authUser is still present",
 	});
 	const user = request.authUser;
 	// If NO user inside the Cookie
@@ -140,19 +200,28 @@ export async function onlySelf(
 	});
 }
 
+// <T extends AuthenticatedRequest<any, any, { fromId?: string; toId?: string }> = ...>
 // Guard that allows access if the authenticated user is: The route param `:id`, or Present in one of the accepted query params (`fromId`, `toId`, etc.)
-export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
-	queryKeys: string[],
-) {
-	if (!ENABLE_AUTH_GUARD) return;
+export function onlyIfInQuery<
+	T extends AuthenticatedRequest = AuthenticatedRequest,
+>(queryKeys: string[]) {
+	if (!AUTH_GUARD_ENABLED) return;
 	logger.info({
 		"event.action": "onlyIfInQuery",
 		"queryKeys": queryKeys,
 		"message": "Attempting onlyIfInQuery check",
 	});
+	// This is a Factory: It returns a preHandler depending on the arguments (e.g: preHandler: onlyIfInQuery(["fromId", "toId"]))
 	return async function (request: T, _reply: FastifyReply) {
-		const user = (request as FastifyRequest).authUser;
-
+		// const user = (request as FastifyRequest).authUser;
+		const user = request.authUser;
+		logger.info({
+			"event.action": "onlyIfInQuery",
+			"authUser": user,
+			"queryKeys": queryKeys,
+			// "id params": request.id,
+			"message": "Dumping onlyIfInQuery data",
+		});
 		// If NO user inside the Cookie
 		if (!user) {
 			// return reply
@@ -213,11 +282,12 @@ export function onlyIfInQuery<T extends FastifyRequest = FastifyRequest>(
 
 // Guard that restricts access to participants of a specific FriendRequest
 export function onlyFriendRequestParticipant(restrictToReceiver = false) {
-	if (!ENABLE_AUTH_GUARD) return;
-	return async function (
-		request: FastifyRequest<{ Params: { id: string } }>,
-		_reply: FastifyReply,
-	) {
+	if (!AUTH_GUARD_ENABLED) return;
+	return async function <
+		T extends AuthenticatedRequest<{ id: string }> = AuthenticatedRequest<{
+			id: string;
+		}>,
+	>(request: T, _reply: FastifyReply) {
 		logger.info({
 			"event.action": "onlyFriendRequestParticipant",
 			"params.id": request.params.id,
