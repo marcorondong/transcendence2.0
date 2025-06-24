@@ -78,13 +78,23 @@ export async function getRequestVerifyConnection(
 	return { id, nickname };
 }
 
-export async function getRequestUser(id: unknown)
-{
-	const response = await fetch(
-		`${env.USERS_REQUEST_DOCKER}${id}`,
-		{
-			method: "GET",
-		}
-	);
+export async function getRequestUser(id: unknown) {
+	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${id}`, {
+		method: "GET",
+	});
 	return response;
+}
+
+export async function getRequestFriends(id: string) {
+	const response = await fetch(`http://users:3000/api/users/${id}/friends`, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(`Friends Request failed with status ${errorMessage}`);
+	}
+	return response.json();
 }
