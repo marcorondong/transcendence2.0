@@ -1,21 +1,15 @@
 import { Auth } from "../services/auth";
 import { notificationEvent, signInLinkEvent } from "../services/events";
 import { FetchAuth } from "../services/fetch-auth";
-import type { ChatComponent } from "./chat-component";
 import { IconComponent } from "./icon-component";
 import { ThemeToggleComponent } from "./theme-toggle-component";
 
 export class HeaderComponent extends HTMLElement {
 	menuIcon = new IconComponent();
 	smallViewPort = window.matchMedia("(min-width: 640px)");
-	chat: ChatComponent | undefined;
 
 	constructor() {
 		super();
-	}
-
-	setChat(chat: ChatComponent) {
-		this.chat = chat;
 	}
 
 	connectedCallback() {
