@@ -126,7 +126,7 @@ export class Router {
 		} else if (this.navComponents.indexOf(componentName) > -1) {
 			scriptName = componentName;
 		} else {
-			console.error("could not find:", componentName);
+			// console.error("could not find:", componentName);
 			scriptName = "/error-view";
 			window.history.pushState({ path: baseUrl }, "", baseUrl);
 		}

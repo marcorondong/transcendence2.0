@@ -1,6 +1,4 @@
-import { Auth } from "./auth";
 import type { UserAuth } from "../types/User";
-import { notificationEvent, signInLinkEvent } from "./events";
 import type { FetchConfig } from "../types/Fetch";
 import { fetchPong } from "./fetch";
 
@@ -36,14 +34,7 @@ export class FetchAuth {
 			method: "POST",
 			headers: { accept: "application/json" },
 		};
-		try {
-			await fetchPong(config);
-			document.dispatchEvent(
-				notificationEvent("You logged out!", "success"),
-			);
-			Auth.toggleAuthClasses(false);
-			document.dispatchEvent(signInLinkEvent);
-		} catch (e) {}
+		await fetchPong(config);
 	}
 	static async verifyJwt() {
 		const config: FetchConfig = {

@@ -117,13 +117,16 @@ export class ProfileView extends HTMLElement {
 			return;
 		}
 
-		console.log("ACCEPT");
 		let id = button.id;
 		id = id.replace(/^accept-in-button-/, "");
 		try {
 			// ACCEPTING FRIEND REQUEST
 			await FetchUsers.friendRequestAccept(id);
-
+			if (this.chat?.ws) {
+				this.chat.ws.send(
+					JSON.stringify({ type: "refreshFriendList", id: id }),
+				);
+			}
 			const friendContainer = document.getElementById(
 				"containerFriendIn-" + id,
 			);
@@ -205,6 +208,11 @@ export class ProfileView extends HTMLElement {
 		try {
 			// DELETING FRIEND
 			FetchUsers.friendsDelete(this.userId, id);
+			if (this.chat?.ws) {
+				this.chat.ws.send(
+					JSON.stringify({ type: "refreshFriendList", id: id }),
+				);
+			}
 
 			const friendContainer = document.getElementById(
 				"containerFriend-" + id,
@@ -246,13 +254,14 @@ export class ProfileView extends HTMLElement {
 			const meData: Me = await FetchAuth.verifyConnection();
 			this.meId = meData.id;
 			this.userId = this.paramsId ?? this.meId;
-			this.friendRequestsOut = await FetchUsers.friendRequestGetFromMe(
-				meData.id,
-			);
-			this.friendRequestsIn = await FetchUsers.friendRequestGetToMe(
-				meData.id,
-			);
-			this.friends = await FetchUsers.friendsGet(this.userId);
+			if (this.userId === this.meId) {
+				this.friendRequestsOut =
+					await FetchUsers.friendRequestGetFromMe(meData.id);
+				this.friendRequestsIn = await FetchUsers.friendRequestGetToMe(
+					meData.id,
+				);
+				this.friends = await FetchUsers.friendsGet(this.userId);
+			}
 			this.userData = await FetchUsers.user(this.userId);
 			this.matchHistory = await FetchPongDb.matchHistory(this.userId);
 			// add fetch for friends list here
@@ -309,6 +318,7 @@ export class ProfileView extends HTMLElement {
 
 		if (this.matchHistory && this.userData) {
 			const container = document.createElement("div");
+			container.classList.add("flex", "flex-col", "gap-4");
 			const headlineText =
 				this.userId === this.meId
 					? "My 1v1 Match History"
