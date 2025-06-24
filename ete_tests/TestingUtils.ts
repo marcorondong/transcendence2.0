@@ -69,7 +69,11 @@ export class TestingUtils {
 			console.log(`🔌 WEBSOCKET: ${ws.url()}`);
 			ws.on("framereceived", (data) => {
 				const message = data.payload.toString();
+				console.log(message);
 				webSocketMessages.push(message);
+			});
+			ws.on("socketerror", (e) => {
+				console.error(e);
 			});
 		});
 
@@ -87,6 +91,8 @@ export class TestingUtils {
 				expectedWebsocketMessages,
 			),
 		).toBe(true);
+
+		await page.close();
 	}
 
 	static async messageSent(page: Page) {}
