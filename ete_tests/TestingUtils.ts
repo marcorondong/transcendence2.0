@@ -61,8 +61,9 @@ export class TestingUtils {
 		timeout: number = 1000,
 		roomId: string = "",
 	) {
-		await page.locator("#pong").click();
-
+		await page.locator('#pongLogo').click();
+		await page.locator('#pong').click();
+		
 		//setup websocket message collection
 		let webSocketMessages: string[] = [];
 		page.on("websocket", (ws) => {
@@ -91,8 +92,6 @@ export class TestingUtils {
 				expectedWebsocketMessages,
 			),
 		).toBe(true);
-
-		await page.close();
 	}
 
 	static async messageSent(page: Page) {}

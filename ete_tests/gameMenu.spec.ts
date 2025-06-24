@@ -18,6 +18,24 @@ test("Login checkpoint", async ({ page }) => {
 });
 
 test.describe.serial("Game flow", () => {
+
+	test("play against bot", async ({page}) => {
+		await TestingUtils.logInStep(page, registeredUsers.user1);
+
+		//bot game
+		await TestingUtils.gameRunningTest(
+			page,
+			"BotGame",
+			["Single Player Mode", "Play Normal AI"],
+			[
+				'"matchStatus":"Game is running"',
+				'"roomId"',
+				'"knockoutName":"single match"',
+			],
+		);
+
+		await page.close();
+	});
 	
 	test("Two users play against each other", async ({ browser }) => {
 		//Two browsers
@@ -30,7 +48,8 @@ test.describe.serial("Game flow", () => {
 		await TestingUtils.logInStep(user1Page, registeredUsers.user1);
 		await TestingUtils.logInStep(user2Page, registeredUsers.user2);
 
-		TestingUtils.gameRunningTest(
+		//1v1 game
+		await TestingUtils.gameRunningTest(
 			user1Page,
 			"User1RandomGame",
 			["Single Player Mode", "Play Random Opponent"],
@@ -40,7 +59,7 @@ test.describe.serial("Game flow", () => {
 				"Knockout Name: single match",
 			],
 		);
-		TestingUtils.gameRunningTest(
+		await TestingUtils.gameRunningTest(
 			user2Page,
 			"User2RandomGame",
 			["Single Player Mode", "Play Random Opponent"],
@@ -50,22 +69,5 @@ test.describe.serial("Game flow", () => {
 				"Knockout Name: single match",
 			],
 		);
-	});
-	
-	test("Login and game against normal bot", async ({ page }) => {
-		//go to pong game
-		await TestingUtils.logInStep(page, registeredUsers.user1);
-
-		await TestingUtils.gameRunningTest(
-			page,
-			"BotGame",
-			["Single Player Mode", "Play Normal AI"],
-			[
-				'"matchStatus":"Game is running"',
-				'"roomId"',
-				'"knockoutName":"single match"',
-			],
-		);
-
 	});
 });
