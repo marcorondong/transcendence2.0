@@ -41,7 +41,7 @@ export class TestingUtils {
 
 	static async clickMenuButtons(page: Page, buttonNames: string[]) {
 		for (const buttonName of buttonNames) {
-			await page.getByRole("button", { name: buttonName }).click();
+			await TestingUtils.buttonTest(page, buttonName);
 		}
 	}
 
