@@ -4,6 +4,10 @@ import { IPongFrameDoubles, PongGameDoubles } from "./PongGameDoubles";
 import { EPlayerRoleFiltered, EPlayerRole } from "../../PongPlayer";
 import { GameEvents } from "../../../customEvents";
 
+function shortenString(str: string): string {
+	return str.length > 9 ? str.slice(0, 9) + "." : str;
+}
+
 export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 	private leftPlayerOne?: PongPlayer;
 	private leftPlayerTwo?: PongPlayer;
@@ -195,6 +199,8 @@ export class PongRoomDoubles extends APongRoom<PongGameDoubles> {
 		firstNickname: string,
 		secondNickname: string,
 	): string {
-		return firstNickname + " " + secondNickname + " TEAM";
+		return (
+			shortenString(firstNickname) + " & " + shortenString(secondNickname)
+		);
 	}
 }
