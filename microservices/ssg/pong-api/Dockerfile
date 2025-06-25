@@ -1,12 +1,16 @@
 FROM node:22.14.0-bullseye-slim
 
+WORKDIR /pong/pong-api/
+# COPY ./nodemon.json /pong/pong-api/ #For nodemon
+COPY ./package.json ./
+COPY ./tsconfig.json ./
+COPY ./.env ./
+
+RUN npm install
+
+COPY ./src ./src
+
+RUN npm run build
 
 
-COPY ./nodemon.json /pong/pong-api/
-COPY ./package.json /pong/pong-api/
-COPY ./tsconfig.json /pong/pong-api/
-COPY ./.env /pong/pong-api/
-
-RUN npm --prefix /pong/pong-api/ install
-
-
+# RUN npm --prefix /pong/pong-api/ install

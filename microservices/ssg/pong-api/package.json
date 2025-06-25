@@ -18,7 +18,7 @@
   "scripts": {
     "pong-api": "nodemon --watch src src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "start": "node dist/index.js"
   },
   "author": "",
   "license": "ISC",

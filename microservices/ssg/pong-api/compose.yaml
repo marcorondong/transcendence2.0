@@ -7,21 +7,21 @@ services:
     build:
       context: ./ #No point to put in env
       dockerfile: Dockerfile #No need in env
-    volumes:
-      - pong-api:/pong/pong-api/src/ #FIXME No volumes at final version
-    ports:
-      - ${PONG_PORT:-3010}:${PONG_PORT:-3010} #TODO remove it will not be exposed at final version, Port make sense to put in env
+    # volumes:
+    #   - pong-api:/pong/pong-api/src/ # No volumes at final version
+    # ports:
+    #   - ${PONG_PORT:-3010}:${PONG_PORT:-3010} #remove it will not be exposed at final version, Port make sense to put in env
     environment:
       - NODE_ENV=production
-    command: ["npm", "--prefix", "/pong/pong-api/", "run", "pong-api"] #No need in env
+    command: ["npm", "start"] #No need in env
     networks:
       - ${DOCKER_NETWORK:-Transcendence2.0} #Nice to have in env
 
-volumes:
-  pong-api:
-    name: pong-api
-    driver: local
-    driver_opts:
-      type: none
-      device: ./src/
-      o: bind
+# volumes:
+#   pong-api:
+#     name: pong-api
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: ./src/
+#       o: bind
