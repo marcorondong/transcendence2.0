@@ -17,8 +17,9 @@ export async function ft_onRequest(
 	if (request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC)) return;
 	try {
 		await request.jwtVerify();
+		let response;
 		try {
-			const response = await getUserRequest(request.user.id, request);
+			response = await getUserRequest(request.user.id, request);
 		} catch (error) {
 			// this catch is for getUserRequest specifically. It can be merged with the next catch, but it is kept separate for clarity.
 			reply.log.warn(
