@@ -7,6 +7,8 @@ import { NotificationService } from "./services/notification-service";
 
 const chat = new ChatComponent();
 const router = new Router(chat);
+
+// starting notification service
 const notificationService = new NotificationService();
 notificationService.listen();
 
