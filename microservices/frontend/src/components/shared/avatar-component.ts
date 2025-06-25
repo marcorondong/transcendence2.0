@@ -17,7 +17,6 @@ class AvatarComponent extends HTMLElement {
 			"rounded-full",
 			"lg:border-6",
 			"border-4",
-			"sm:w-auto",
 			"object-cover",
 			"aspect-square",
 		);

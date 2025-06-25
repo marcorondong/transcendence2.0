@@ -31,4 +31,5 @@ export interface UserAggregated extends User {
 	wins: number;
 	losses: number;
 	online: boolean;
+	friend: boolean;
 }

@@ -157,7 +157,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		order = "asc",
 	} = cleanedOptions;
 
-	// console.log("✅ Step 1: Received Cleaned Options", cleanedOptions);
+	logger.debug({
+		"event.action": "findUsers",
+		"cleanedOptions": cleanedOptions,
+		"message": "✅ Step 1: Received Cleaned Options",
+	});
 	try {
 		// Remove undefined fields from 'where'
 		const cleanedWhere = Object.fromEntries(
@@ -219,7 +223,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 
 		let query: Record<string, any>;
 
-		// console.log("✅ Step 2: Transformed 'where'", transformed);
+		logger.debug({
+			"event.action": "findUsers",
+			"transformed": transformed,
+			"message": "✅ Step 2: Transformed 'where'",
+		});
 		// Enable OR queries (map provided fields to build individual queries)
 		if (useOr) {
 			const orConditions = Object.entries(transformed).map(([k, v]) => ({
@@ -236,22 +244,32 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			}
 		}
 
-		// console.log("✅ Step 3: Final Query Shape", query);
+		logger.debug({
+			"event.action": "findUsers",
+			"query": query,
+			"message": "✅ Step 3: Final Query Shape",
+		});
 		const prismaSortBy = { [sortBy]: order };
 
-		// console.log("✅ Step 4: Final Prisma Query", {
-		// 	where: query,
-		// 	orderBy: prismaSortBy,
-		// 	skip,
-		// 	take,
-		// });
+		logger.debug({
+			"event.action": "findUsers",
+			"where": query,
+			"orderBy": prismaSortBy,
+			"skip": skip,
+			"take": take,
+			"message": "✅ Step 4: Final Prisma Query",
+		});
 		const users = await prisma.user.findMany({
 			where: query,
 			orderBy: prismaSortBy,
 			skip,
 			take,
 		});
-		// console.log("✅ Step 5: Result", users);
+		logger.debug({
+			"event.action": "findUsers",
+			"users": users,
+			"message": "✅ Step 5: Result",
+		});
 		// This is not-standard, but it's easier to check by the status code
 		if (!users.length) {
 			// throw new AppError({
@@ -259,7 +277,7 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			// 	code: USER_ERRORS.NOT_FOUND,
 			// 	message: "No users found",
 			// });
-			logger.log(
+			logger.debug(
 				{
 					"event.action": "findUsers",
 					"where": query,
@@ -272,7 +290,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 		}
 		return users;
 	} catch (err) {
-		// console.log("❌ Step 6: Error Caught", err);
+		logger.error({
+			"event.action": "findUsers",
+			"error": err,
+			"message": "❌ Step 6: Error Caught",
+		});
 		// Known/Expected errors bubble up to controller as AppError (custom error)
 		if (err instanceof Prisma.PrismaClientValidationError) {
 			throw new AppError({
@@ -282,7 +304,11 @@ export async function findUsers(options: UserQueryOptions = {}) {
 			});
 		}
 		if (err instanceof AppError) throw err;
-		// console.error("❌ Step 6.2: Unknown error", err);
+		logger.error({
+			"event.action": "findUsers",
+			"error": err,
+			"message": "❌ Step 6.2: Unknown error",
+		});
 		// Unknown errors bubble up to global error handler.
 		throw err;
 	}
@@ -422,7 +448,7 @@ export async function getUserFriends(id: string, query: UserQueryOptions) {
 			// 	code: FRIENDSHIP_ERRORS.NOT_FOUND,
 			// 	message: "User has no friends",
 			// });
-			logger.log(
+			logger.debug(
 				{
 					"event.action": "getUserFriends",
 					"userId": id,
@@ -453,7 +479,7 @@ export async function getUserFriends(id: string, query: UserQueryOptions) {
 			// 	code: FRIENDSHIP_ERRORS.NOT_FOUND,
 			// 	message: "No matching friends found",
 			// });
-			logger.log(
+			logger.debug(
 				{
 					"event.action": "getUserFriends",
 					"userId": id,
@@ -610,7 +636,7 @@ export async function getUserBlocked(id: string, query: UserQueryOptions) {
 			// 	code: BLOCK_LIST_ERRORS.NOT_FOUND,
 			// 	message: "User has no blocked users",
 			// });
-			logger.log(
+			logger.debug(
 				{
 					"event.action": "getUserBlocked",
 					"userId": id,
@@ -641,7 +667,7 @@ export async function getUserBlocked(id: string, query: UserQueryOptions) {
 			// 	code: BLOCK_LIST_ERRORS.NOT_FOUND,
 			// 	message: "No matching blocked users found",
 			// });
-			logger.log(
+			logger.debug(
 				{
 					"event.action": "getUserBlocked",
 					"userId": id,
