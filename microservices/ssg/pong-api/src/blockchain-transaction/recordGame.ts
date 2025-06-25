@@ -1,33 +1,22 @@
 import { ethers } from "ethers";
-import * as dotenv from "dotenv";
 import abi from "./TournamentScores.json"; // adjust path as needed
-import path from "path";
 import { blockchainConfig } from "../config";
-
-if (!process.env.WALLET_PRIVATE_KEY) {
-	const env = dotenv.config({
-		path: path.resolve(__dirname, "../../.env"),
-	});
-
-	if (env.error) {
-		console.warn(
-			"❌ Failed to load .env file with data for contract transaction. Check if env file is placed in microservice root as ./.env",
-			env.error,
-		);
-	} else {
-		console.log(
-			"✅ Environment file for setting up wallet and blockchain loaded",
-		);
-	}
-} else {
-	console.log(
-		"✅ Environment variables already injected (probably by Docker)",
-	);
-}
+import fs from "fs";
 
 const CONTRACT_ADDRESS = blockchainConfig.contract_address;
 const FUJI_RPC_URL = blockchainConfig.fuji_rpc_url;
-const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY!;
+
+let WALLET_PRIVATE_KEY: string;
+
+try {
+	WALLET_PRIVATE_KEY = fs
+		.readFileSync("/run/secrets/wallet_private_key", "utf8")
+		.trim();
+	console.log("Private wallet key loaded ✅ ");
+} catch (err) {
+	console.warn("⚠️ Private key secret not found:", err);
+	WALLET_PRIVATE_KEY = "unknown";
+}
 
 export async function recordGameOnBlockchain(
 	gameId: string,

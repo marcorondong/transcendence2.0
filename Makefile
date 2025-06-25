@@ -3,6 +3,7 @@ MONITORING_SECRETS = ./monitoring/secrets
 GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
 PONG_ENV = ./microservices/ssg/pong-api/.env
+PRIVATE_WALLET_KEY = ./microservices/ssg/pong-api/wallet_private.key
 BOT_ENV = ./microservices/ssg/ai-bot/docker/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
@@ -13,7 +14,7 @@ SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
 SECRET_FILES = $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) \
 	$(GLOBAL_ENV) $(AUTH_API_COOKIE_SECRET) $(AUTH_API_JWT_SECRET) \
-	$(BOT_ENV)
+	$(BOT_ENV) $(PRIVATE_WALLET_KEY)
 
 all: $(SECRET_FILES)
 	docker compose up -d
@@ -73,6 +74,9 @@ $(GRAFANA_PW): $(SECRET_DIRECTORIES)
 $(PONG_ENV):
 	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
 
+$(PRIVATE_WALLET_KEY):
+	ft_crypt.sh --decrypt="$(PRIVATE_WALLET_KEY).enc" --force
+
 $(BOT_ENV):
 	ft_crypt.sh --decrypt="$(BOT_ENV).enc" --force
 
@@ -90,4 +94,4 @@ $(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
 
-.PHONY: all re clean remove dev cli nuke delete-secrets reset %$(REBUILD_SERVICE) 
+.PHONY: all re clean remove dev cli nuke delete-secrets reset %$(REBUILD_SERVICE)

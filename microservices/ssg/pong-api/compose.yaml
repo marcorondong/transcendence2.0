@@ -15,10 +15,15 @@ services:
       - NODE_ENV=production
     env_file:
       - ./.env
+    secrets:
+      - wallet_private_key
     command: ["npm", "start"] #No need in env
     networks:
       - ${DOCKER_NETWORK:-Transcendence2.0} #Nice to have in env
 
+secrets:
+  wallet_private_key:
+    file: ./wallet_private.key
 # volumes:
 #   pong-api:
 #     name: pong-api
