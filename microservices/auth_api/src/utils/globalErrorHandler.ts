@@ -1,17 +1,17 @@
-import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
 import { env } from "./env";
 import { clearCookieOpt } from "../routes/configs";
 
 export function globalErrorHandler(
-	error: FastifyError,
+	error: unknown,
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
 	reply.log.error(error);
 	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
-	
-	if (error instanceof TypeError && error.message.includes("fetch failed")) {
+
+	if (error instanceof Error && error.message.includes("fetch failed")) {
 		return reply.status(502).send({
 			statusCode: 502,
 			error: "Bad Gateway",
@@ -19,7 +19,7 @@ export function globalErrorHandler(
 		});
 	}
 
-	if (error.validation || error instanceof ZodError) {
+	if ((error as any)?.validation || error instanceof ZodError) {
 		return reply.status(400).send({
 			statusCode: 400,
 			error: "Bad Request",
