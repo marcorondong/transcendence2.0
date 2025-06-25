@@ -1,16 +1,16 @@
 services:
   chat_db:
-    image: ${CHAT_DB_IMAGE_NAME}
-    container_name: ${CHAT_DB_CONTAINER_NAME}
-    build: ${CHAT_DB_BUILD_FOLDER}
+    image: chat_db_image
+    container_name: chat_db_container
+    build: ./
     env_file:
-      - ${CHAT_DB_ENV_FILE_PATH}
+      - ../../setting.conf
     volumes:
-      - ${CHAT_DB_SRC_FOLDER_LOCAL}:${CHAT_DB_SRC_FOLDER_CONTAINER} #TODO remove in production
-      - ${CHAT_DB_PRISMA_FOLDER_LOCAL}:/${CHAT_DB_PRISMA_FOLDER_CONTAINER} #TODO remove in production
-      #- ${CHAT_DB_DATABASE_FOLDER_LOCAL}:${CHAT_DB_DATABASE_FOLDER_CONTAINER} #TODO define path to db and uncomment this line when using the local DB
+      - ./src/:/chat_db/src/ #TODO remove in production
+      - ./prisma/:/chat_db/prisma/ #TODO remove in production
+      #- /home/iguliyev/DBs/chat/:/chat_db/DB/ #TODO define path to db and uncomment this line when using the local DB
     ports:
-      - ${CHAT_DB_PORT}:${CHAT_DB_PORT}
+      - 3004:3004 # TODO remove this in production
     networks:
-      - ${NETWORK_NAME}
-    restart: ${RESTART_POLICY}
+      - Transcendence2.0
+    restart: unless-stopped

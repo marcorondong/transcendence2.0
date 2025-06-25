@@ -1,23 +1,23 @@
 services:
   auth_api:
-    image: ${AUTH_API_IMAGE_NAME}
-    container_name: ${AUTH_API_CONTAINER_NAME}
-    build: ${AUTH_API_BUILD_FOLDER}
+    image: auth_api_image
+    container_name: auth_api_container
+    build: ./
     env_file:
-      - ${AUTH_API_ENV_FILE_PATH}
+      - ../../setting.conf
     secrets:
       - jwtSecret.key
       - cookieSecret.key
     volumes:
-      - ${AUTH_API_SRC_FOLDER_LOCAL}:${AUTH_API_SRC_FOLDER_CONTAINER} #TODO remove in production
+      - ./src/:/auth_api/src/ #TODO remove in production
     ports:
-      - ${AUTH_API_PORT}:${AUTH_API_PORT}
+      - 2999:2999 # TODO remove this in production
     networks:
-      - ${NETWORK_NAME}
-    restart: ${RESTART_POLICY}
+      - Transcendence2.0
+    restart: unless-stopped
 
 secrets:
   jwtSecret.key:
-    file: ${AUTH_API_JWT_SECRET_FILE_LOCATION_LOCAL}
+    file: ./secret_keys/jwtSecret.key
   cookieSecret.key:
-    file: ${AUTH_API_COOKIE_SECRET_FILE_LOCATION_LOCAL}
+    file: ./secret_keys/cookieSecret.key
