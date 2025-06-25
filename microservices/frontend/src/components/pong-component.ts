@@ -343,23 +343,37 @@ export class PongComponent extends HTMLElement {
 			);
 		}
 	}
+
 	displayScore(state: Pong) {
 		if (!this.ctx) {
 			return;
 		}
-		const fontSize = Math.trunc(this.canvasHeight / 8);
+		const fontSize = Math.trunc(this.canvasHeight / 20);
 		this.ctx.font = `${fontSize}px sans-serif`;
 		this.ctx.textAlign = "center";
-		const space = this.canvas.width / 10;
+		const space = this.canvas.width / 4;
+		const leftPlayer = state.score?.leftTeam.teamNickname ?? "Left";
+		const rightPlayer = state.score?.rightTeam.teamNickname ?? "Right";
+		const leftGoals = state.score?.leftTeam.goals ?? 0;
+		const rightGoals = state.score?.rightTeam.goals ?? 0;
+		const gameTime = state.score?.time ?? 0;
+
+		const topMargin = fontSize; // more space from top
+
 		this.ctx.fillText(
-			String(state.score?.leftTeam.goals ?? 0),
+			`${leftPlayer}: ${leftGoals}`,
 			this.canvasWidthHalf - space,
-			fontSize * 1.2,
+			topMargin,
 		);
 		this.ctx.fillText(
-			String(state.score?.rightTeam.goals ?? 0),
+			`${rightPlayer}: ${rightGoals}`,
 			this.canvasWidthHalf + space,
-			fontSize * 1.2,
+			topMargin,
+		);
+		this.ctx.fillText(
+			`⏱️ ${gameTime}`, // optional emoji or just use `${timeLeft}`
+			this.canvasWidthHalf,
+			topMargin,
 		);
 	}
 
