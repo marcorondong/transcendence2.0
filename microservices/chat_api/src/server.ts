@@ -5,7 +5,8 @@ import { webSocketConnection } from "./webSocketConnection/webSocketConnection";
 import fCookie from "@fastify/cookie";
 import { env } from "./utils/env";
 
-const server = Fastify(serverOption);
+// use "serverOption" instead of "{ logger: true }" to activate pino-pretty
+const server = Fastify({ logger: true });
 server.register(fastifyWebsocket);
 server.register(webSocketConnection);
 server.register(fCookie);
