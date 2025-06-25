@@ -64,7 +64,7 @@ export async function verifyJWTHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const response = await getUserRequest(request.user.id);
+	const response = await getUserRequest(request.user.id, request);
 	if (!response.ok) {
 		const data = await response.json();
 		reply.log.warn(
@@ -109,7 +109,7 @@ export async function updateJWTHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const response = await getUserRequest(request.user.id);
+	const response = await getUserRequest(request.user.id, request);
 	const data = await response.json();
 	if (!response.ok) {
 		reply.log.warn(

@@ -1,4 +1,5 @@
 import { env } from "../utils/env";
+import type { FastifyRequest } from "fastify";
 
 export async function signInRequest(body: unknown) {
 	const response = await fetch(env.USERS_LOGIN_REQUEST_DOCKER, {
@@ -22,9 +23,13 @@ export async function signUpRequest(body: unknown) {
 	return response;
 }
 
-export async function getUserRequest(userId: unknown) {
+export async function getUserRequest(userId: unknown, request: FastifyRequest) {
+	const cookie = request.headers.cookie || "invalid_cookie";
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "GET",
+		headers: {
+			Cookie: cookie,
+		},
 	});
 	return response;
 }
