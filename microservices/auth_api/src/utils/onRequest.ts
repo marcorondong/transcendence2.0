@@ -17,7 +17,22 @@ export async function ft_onRequest(
 	if (request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC)) return;
 	try {
 		await request.jwtVerify();
-		const response = await getUserRequest(request.user.id, request);
+		try {
+			const response = await getUserRequest(request.user.id, request);
+		} catch (error) {
+			// this catch is for getUserRequest specifically. It can be merged with the next catch, but it is kept separate for clarity.
+			reply.log.warn(
+				{ Response: error, url: request.url },
+				"getUserRequest() failed",
+			);
+			reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
+			return reply.status(502).send({
+				statusCode: 502,
+				error: "Bad Gateway",
+				message:
+					"Couldn't reach upstream service. Please try again later.",
+			});
+		}
 		if (!response.ok) {
 			const data = await response.json();
 			reply.log.warn(
@@ -28,6 +43,7 @@ export async function ft_onRequest(
 			return reply.status(data.statusCode || 500).send(data);
 		}
 	} catch (error) {
+		// this catch is for jwtVerify specifically
 		reply.log.warn(
 			{ Response: error, url: request.url },
 			"JWT verification failed",
