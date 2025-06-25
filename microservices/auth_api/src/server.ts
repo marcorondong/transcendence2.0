@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import {
-	// ft_serverOption,
+	ft_serverOption,
 	swaggerOption,
 	swaggerUiOption,
 	jwtOption,

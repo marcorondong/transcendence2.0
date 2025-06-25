@@ -64,6 +64,16 @@ export async function verifyJWTHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
+	const response = await getUserRequest(request.user.id);
+	if (!response.ok) {
+		const data = await response.json();
+		reply.log.warn(
+			{ Response: data, User: request.user },
+			"getUserRequest() response not ok",
+		);
+		reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
+		return reply.status(data.statusCode || 500).send(data);
+	}
 	reply.status(200).send();
 }
 
