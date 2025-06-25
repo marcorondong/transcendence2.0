@@ -131,7 +131,7 @@ export class PongComponent extends HTMLElement {
 		};
 		this.wss.onclose = () => {
 			this.lobbyMessage = "Disconnected. Try again later.";
-			this.dispatchEvent(homeLinkEvent);
+			setTimeout(() => this.dispatchEvent(homeLinkEvent), 10000);
 		};
 		this.gameLoop();
 		this.botWrapper();
@@ -265,7 +265,7 @@ export class PongComponent extends HTMLElement {
 		this.canvasHeight = this.canvasWidth / this.aspectRatio;
 		this.canvasWidthHalf = this.canvasWidth / 2;
 		this.canvasHeightHalf = this.canvasHeight / 2;
-		this.scaleX = this.canvasWidthHalf / 4;
+		this.scaleX = this.canvasWidthHalf / 4.5;
 		this.scaleY = this.canvasHeightHalf / 2.46;
 		this.paddleWidth = this.canvasWidth / 100;
 	}
@@ -276,6 +276,11 @@ export class PongComponent extends HTMLElement {
 			state.ball.y *= this.scaleY;
 			state.ball.radius *= this.scaleX;
 		}
+		if (state?.leftSecondPaddle) {
+			state.leftSecondPaddle.x *= this.scaleX;
+			state.leftSecondPaddle.y *= this.scaleY;
+			state.leftSecondPaddle.height *= this.scaleY;
+		}
 		if (state?.leftPaddle) {
 			state.leftPaddle.x *= this.scaleX;
 			state.leftPaddle.y *= this.scaleY;
@@ -285,6 +290,11 @@ export class PongComponent extends HTMLElement {
 			state.rightPaddle.x *= this.scaleX;
 			state.rightPaddle.y *= this.scaleY;
 			state.rightPaddle.height *= this.scaleY;
+		}
+		if (state?.rightSecondPaddle) {
+			state.rightSecondPaddle.x *= this.scaleX;
+			state.rightSecondPaddle.y *= this.scaleY;
+			state.rightSecondPaddle.height *= this.scaleY;
 		}
 	}
 
@@ -345,23 +355,37 @@ export class PongComponent extends HTMLElement {
 			);
 		}
 	}
+
 	displayScore(state: Pong) {
 		if (!this.ctx) {
 			return;
 		}
-		const fontSize = Math.trunc(this.canvasHeight / 8);
+		const fontSize = Math.trunc(this.canvasHeight / 20);
 		this.ctx.font = `${fontSize}px sans-serif`;
 		this.ctx.textAlign = "center";
-		const space = this.canvas.width / 10;
+		const space = this.canvas.width / 4;
+		const leftPlayer = state.score?.leftTeam.teamNickname ?? "Left";
+		const rightPlayer = state.score?.rightTeam.teamNickname ?? "Right";
+		const leftGoals = state.score?.leftTeam.goals ?? 0;
+		const rightGoals = state.score?.rightTeam.goals ?? 0;
+		const gameTime = state.score?.time ?? 0;
+
+		const topMargin = fontSize * 1.4; // more space from top
+
 		this.ctx.fillText(
-			String(state.score?.leftTeam.goals ?? 0),
+			`${leftPlayer}: ${leftGoals}`,
 			this.canvasWidthHalf - space,
-			fontSize * 1.2,
+			topMargin,
 		);
 		this.ctx.fillText(
-			String(state.score?.rightTeam.goals ?? 0),
+			`${rightPlayer}: ${rightGoals}`,
 			this.canvasWidthHalf + space,
-			fontSize * 1.2,
+			topMargin,
+		);
+		this.ctx.fillText(
+			`⏱️ ${gameTime}`, // optional emoji or just use `${timeLeft}`
+			this.canvasWidthHalf,
+			topMargin,
 		);
 	}
 
@@ -375,6 +399,8 @@ export class PongComponent extends HTMLElement {
 			this.scaleGameState(state);
 			this.drawCenterLine();
 			this.drawPaddle(state.leftPaddle);
+			this.drawPaddle(state.leftSecondPaddle);
+			this.drawPaddle(state.rightSecondPaddle);
 			this.drawPaddle(state.rightPaddle);
 			this.drawBall(state.ball);
 			this.displayScore(state);
@@ -450,6 +476,9 @@ export class PongComponent extends HTMLElement {
 	}
 
 	handleEvent(event: Event) {
+		if (!this.wss || this.wss.readyState === WebSocket.CLOSED) {
+			return;
+		}
 		const handlerName =
 			"on" + event.type.charAt(0).toUpperCase() + event.type.slice(1);
 		const handler = this[handlerName as keyof this];

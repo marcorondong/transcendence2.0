@@ -3,7 +3,9 @@ export interface Pong {
 	matchStatus: string;
 	ball?: Ball;
 	leftPaddle?: Paddle;
+	leftSecondPaddle?: Paddle;
 	rightPaddle?: Paddle;
+	rightSecondPaddle?: Paddle;
 	roomId: string;
 	knockoutName?: string;
 }
