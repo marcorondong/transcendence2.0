@@ -6,7 +6,6 @@ import {
 	updateNicknameHandler,
 	refreshFriendListHandler,
 } from "./controllers";
-import { connectionHandler } from "./controllers";
 
 export async function requests(message: string, client: Client) {
 	const raw = JSON.parse(message.toString());

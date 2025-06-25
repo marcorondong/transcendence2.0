@@ -52,8 +52,8 @@ export async function connectionHandler(
 				person.send(JSON.stringify(newUserResponse));
 		});
 		onlineClients.set(me.id, client);
-		console.log(`Client ${me.nickname} connected`);
-	} else console.log(`Client ${me.nickname} reconnected`);
+		console.log(`Client ${me.nickname} ${me.id} connected`);
+	} else console.log(`Client ${me.nickname} ${me.id} reconnected`);
 }
 
 export async function messageHandler(data: MessageInput, client: Client) {
@@ -161,6 +161,10 @@ export async function refreshFriendListHandler(
 
 	const friendId = data.id;
 	const friendClient = onlineClients.get(friendId);
+	console.log("all online clients ->", onlineClients);
+	console.log("my id ->", client.getNickname(), id);
+	console.log("friendId ->", friendClient?.getNickname(), friendId);
+	console.log("friendClient ->", friendClient?.getId());
 	if (friendClient) {
 		const friendsFriendRaw = await getRequestFriends(friendId);
 		const friendsFriend = friendsFriendRaw.map((friend: any) => friend.id);

@@ -50,7 +50,6 @@ export async function getRequestRoomId(userId: string) {
 		throw new Error(`RoomId Request failed with status ${errorMessage}`);
 	}
 	const data = await response.json();
-	console.log("data ->", data);
 	const { roomId } = roomIdSchema.parse(data);
 	return roomId;
 }
@@ -88,9 +87,6 @@ export async function getRequestUser(id: unknown) {
 export async function getRequestFriends(id: string) {
 	const response = await fetch(`http://users:3000/api/users/${id}/friends`, {
 		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-		},
 	});
 	if (!response.ok) {
 		const errorMessage = await response.text();

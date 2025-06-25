@@ -3,7 +3,7 @@ import type { Client } from "../utils/Client";
 import { onlineClients } from "./webSocketConnection";
 import { getRequestBlockStatus } from "./httpRequests";
 
-export function checkCookie(request: FastifyRequest, socket: WebSocket) {
+export function checkCookie(request: FastifyRequest) {
 	const cookie = request.headers.cookie;
 	const token = request.cookies.access_token;
 	if (!cookie || !token) {
