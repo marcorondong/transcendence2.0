@@ -5,6 +5,8 @@ services:
     build: ${CHAT_API_BUILD_FOLDER}
     env_file:
       - ${CHAT_API_ENV_FILE_PATH}
+    secrets:
+      - apiKey.key
     volumes:
       - ${CHAT_API_SRC_FOLDER_LOCAL}:${CHAT_API_SRC_FOLDER_CONTAINER} #TODO remove in production
     ports:
@@ -15,3 +17,6 @@ services:
       - ${CHAT_DB_MICRO_SERVICE_NAME}
     restart: ${RESTART_POLICY}
 
+secrets:
+  apiKey.key:
+    file: api_key/apiKey.key
