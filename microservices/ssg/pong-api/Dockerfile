@@ -4,7 +4,7 @@ WORKDIR /pong/pong-api/
 # COPY ./nodemon.json /pong/pong-api/ #For nodemon
 COPY ./package.json ./
 COPY ./tsconfig.json ./
-COPY ./.env ./
+
 
 RUN npm install
 

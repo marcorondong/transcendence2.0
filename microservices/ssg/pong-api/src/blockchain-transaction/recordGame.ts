@@ -4,18 +4,24 @@ import abi from "./TournamentScores.json"; // adjust path as needed
 import path from "path";
 import { blockchainConfig } from "../config";
 
-const env = dotenv.config({
-	path: path.resolve(__dirname, "../../.env"),
-});
+if (!process.env.WALLET_PRIVATE_KEY) {
+	const env = dotenv.config({
+		path: path.resolve(__dirname, "../../.env"),
+	});
 
-if (env.error) {
-	console.warn(
-		"❌ Failed to load .env file with data for contract transaction. Check if env file is placed in microservice root as ./.env",
-		env.error,
-	);
+	if (env.error) {
+		console.warn(
+			"❌ Failed to load .env file with data for contract transaction. Check if env file is placed in microservice root as ./.env",
+			env.error,
+		);
+	} else {
+		console.log(
+			"✅ Environment file for setting up wallet and blockchain loaded",
+		);
+	}
 } else {
 	console.log(
-		"✅ Environment file for setting up wallet and blockchain loaded",
+		"✅ Environment variables already injected (probably by Docker)",
 	);
 }
 

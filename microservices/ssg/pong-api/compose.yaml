@@ -13,6 +13,8 @@ services:
     #   - ${PONG_PORT:-3010}:${PONG_PORT:-3010} #remove it will not be exposed at final version, Port make sense to put in env
     environment:
       - NODE_ENV=production
+    env_file:
+      - ./.env
     command: ["npm", "start"] #No need in env
     networks:
       - ${DOCKER_NETWORK:-Transcendence2.0} #Nice to have in env
