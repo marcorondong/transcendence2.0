@@ -2,10 +2,10 @@ FROM node:22.14.0-bullseye-slim as build-stage
 
 WORKDIR /pong/pong-api/
 # COPY ./nodemon.json /pong/pong-api/ #For nodemon
-COPY ./package.json ./
+COPY ./package*.json ./
 COPY ./tsconfig.json ./
 COPY ./src ./src
-RUN npm install --production=false
+RUN npm clean-install
 RUN npm run build
 
 #Production
