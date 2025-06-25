@@ -8,7 +8,7 @@ WORKDIR /tictactoe_api
 COPY ./package.json ./
 COPY ./package-lock.json ./
 COPY ./tsconfig.json ./
-COPY ./src ./
+COPY ./src ./src
 # TODO remove below line in production
 COPY ./public ./
 RUN npm clean-install
