@@ -1,5 +1,7 @@
-import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
+import { env } from "./env";
+import { clearCookieOpt } from "../routes/configs";
 
 export function globalErrorHandler(
 	error: unknown,
@@ -7,6 +9,7 @@ export function globalErrorHandler(
 	reply: FastifyReply,
 ) {
 	reply.log.error(error);
+	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
 
 	if (error instanceof Error && error.message.includes("fetch failed")) {
 		return reply.status(502).send({
