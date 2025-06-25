@@ -1,5 +1,5 @@
 import { gameLog, interpretGame } from "./blockchain-transaction/recordGame";
-import { HeadToHeadQuery, TournamentSizeQuery } from "./utils/zodSchema";
+import { HeadToHeadQuery } from "./utils/zodSchema";
 import { MatchMaking } from "./match-making/MatchMaking";
 import { Parsing } from "./utils/Parsing";
 import { PongPlayer } from "./game/PongPlayer";
@@ -7,10 +7,7 @@ import { PongSwagger } from "./utils/swagger";
 import { serverConfig } from "./config";
 import dotenv from "dotenv";
 import Fastify, { FastifyRequest } from "fastify";
-import fastifyStatic from "@fastify/static";
 import fCookie from "@fastify/cookie";
-import fs from "fs";
-import path from "path";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import websocket, { WebSocket } from "@fastify/websocket";
@@ -39,27 +36,27 @@ function processPlayerJoin(
 }
 
 const fastify = Fastify({
-	logger:
-		process.env.NODE_ENV === "development"
-			? {
-					transport: {
-						target: "pino-pretty",
-						options: {
-							colorize: true, //enables colors
-							translateTime: "HH:MM:ss Z", //formatting timestamp
-							ignore: "pid,hostname", //Hide fields
-						},
-					},
-			  }
-			: true,
+	logger: true,
+	// process.env.NODE_ENV === "development"
+	// 	? {
+	// 			transport: {
+	// 				target: "pino-pretty",
+	// 				options: {
+	// 					colorize: true, //enables colors
+	// 					translateTime: "HH:MM:ss Z", //formatting timestamp
+	// 					ignore: "pid,hostname", //Hide fields
+	// 				},
+	// 			},
+	// 	  }
+	// 	: true,
 });
 
 const manager: MatchMaking = new MatchMaking();
 
-fastify.register(fastifyStatic, {
-	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
-	prefix: "/", // Optional: Sets the URL prefix
-});
+// fastify.register(fastifyStatic, {
+// 	root: path.join(process.cwd(), "src/public"), // Ensure this path is correct
+// 	prefix: "/", // Optional: Sets the URL prefix
+// });
 
 fastify.register(swagger, PongSwagger.getSwaggerOptions());
 
@@ -153,15 +150,15 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	//TODO: remove this on final version
-	fastify.get("/pong-api/ping-pong", async (request, reply) => {
-		const filePath = path.join(process.cwd(), "src/public/pong.html");
-		if (fs.existsSync(filePath)) {
-			return reply.sendFile("pong.html"); // Serve public/index.html
-		} else {
-			reply.status(404).send({ error: "File not found" });
-		}
-	});
+	//Testing HTML PONG
+	// fastify.get("/pong-api/ping-pong", async (request, reply) => {
+	// 	const filePath = path.join(process.cwd(), "src/public/pong.html");
+	// 	if (fs.existsSync(filePath)) {
+	// 		return reply.sendFile("pong.html"); // Serve public/index.html
+	// 	} else {
+	// 		reply.status(404).send({ error: "File not found" });
+	// 	}
+	// });
 });
 
 const startServer = async () => {

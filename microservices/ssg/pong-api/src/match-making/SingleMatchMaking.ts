@@ -28,7 +28,7 @@ export class HeadToHeadMatchMaking {
 		roomId: string,
 		mode: "singles" | "doubles",
 	) {
-		if (roomId === "private") //TODO: read from config
+		if (roomId === "private") 
 			return this.createHostPrivateRoom(player, mode);
 
 		let privateRoom: APongRoom<APongGame> | undefined =

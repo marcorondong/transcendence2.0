@@ -66,7 +66,6 @@ export abstract class APongRoom<T extends APongGame> extends SessionRoom {
 		};
 	}
 
-	//TODO check if this approach is better. Be careful with crashing /-> it was mistake of recursive call before i changed it to this more simpler version
 	// async getWinnerCaptain(): Promise<PongPlayer> {
 	// await this.getGame().waitForFinalWhistle();
 	getWinnerCaptain(): PongPlayer {
