@@ -4,7 +4,7 @@ import { AppError, AUTH_GUARD_ERRORS, AUTH_PRE_HANDLER_ERRORS } from "./errors";
 import { logger } from "./logger";
 import prisma from "./prisma";
 
-const AUTH_GUARD_ENABLED = true;
+const AUTH_GUARD_ENABLED = false;
 const DEV_AUTH_ENABLED = false;
 const AUTH_VERIFY_URL =
 	"http://auth_api_container:2999/auth-api/verify-connection"; // Adjust according to Docker
