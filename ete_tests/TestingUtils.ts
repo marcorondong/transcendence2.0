@@ -1,5 +1,5 @@
 import { Page, expect } from "@playwright/test";
-import { homeUrl, ILogIn } from "./config";
+import { homeUrl, ILogIn, IUserInfo } from "./config";
 
 export class TestingUtils {
 	static async labelTest(page: Page, labelName: string): Promise<void> {
@@ -53,7 +53,16 @@ export class TestingUtils {
 		).toBeVisible();
 	}
 
-	static async messageSent(page: Page) {
-		
+	static async resetUser(page: Page, user: IUserInfo) {
+		await page.getByRole("link", { name: "profile" }).click();
+		await page.locator("#editButton").click();
+		await page.getByRole("textbox").first().dblclick();
+		await page.getByRole("textbox").first().fill(user.username); //SEkula
+		await page.locator('input[type="email"]').click();
+		await page.locator('input[type="email"]').fill(user.email);
+		await page.getByRole("button", { name: "save" }).click();
+		await page.getByRole("link", { name: "profile" }).click();
 	}
+
+	static async messageSent(page: Page) {}
 }
