@@ -93,7 +93,7 @@ export async function toggleBlockHandler(
 		isUserInBlockList = await getBlockStatus(userId, friendId);
 	} catch (error: any) {
 		if (error.message.includes("User not found")) {
-			handleError(reply, "NotFound", 404, `User ${friendId}not found`);
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
 			return;
 		} else throw error;
 	}
