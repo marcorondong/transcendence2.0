@@ -42,6 +42,7 @@ class ProfileFriendsInComponent extends HTMLElement {
 			avatar.styleComponent("border-indigo-800");
 
 			const deleteIcon = new IconComponent("close", 3);
+			deleteIcon.id = friend.fromId;
 			const deleteButton = document.createElement("button");
 			deleteButton.id = "delete-in-button-" + friend.id;
 			deleteButton.append(deleteIcon);
@@ -55,9 +56,11 @@ class ProfileFriendsInComponent extends HTMLElement {
 			);
 
 			const acceptIcon = new IconComponent("check", 3);
+			acceptIcon.id = friend.fromId;
 			const acceptButton = document.createElement("button");
 			acceptButton.id = "accept-in-button-" + friend.id;
 			acceptButton.append(acceptIcon);
+
 			acceptButton.classList.add(
 				"pong-button",
 				"pong-button-round",
