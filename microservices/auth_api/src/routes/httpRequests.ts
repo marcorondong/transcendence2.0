@@ -34,6 +34,7 @@ export async function getUserRequest(userId: unknown, request: FastifyRequest) {
 	return response;
 }
 
+// This function is not in use and commented out in routes.ts
 export async function editProfileRequest(body: unknown, userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PATCH",
@@ -45,6 +46,7 @@ export async function editProfileRequest(body: unknown, userId: unknown) {
 	return response;
 }
 
+// This function is not in use and commented out in routes.ts
 export async function updateProfileRequest(body: unknown, userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "PUT",
@@ -56,6 +58,7 @@ export async function updateProfileRequest(body: unknown, userId: unknown) {
 	return response;
 }
 
+// This function is not in use and commented out in routes.ts
 export async function deleteUserRequest(userId: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${userId}`, {
 		method: "DELETE",
