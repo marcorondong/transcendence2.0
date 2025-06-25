@@ -1,16 +1,16 @@
 services:
   tictactoe_db:
-    image: ${TICTACTOE_DB_IMAGE_NAME}
-    container_name: ${TICTACTOE_DB_CONTAINER_NAME}
-    build: ${TICTACTOE_DB_BUILD_FOLDER}
+    image: tictactoe_db_image
+    container_name: tictactoe_db_container
+    build: ./
     env_file:
-      - ${TICTACTOE_DB_ENV_FILE_PATH}
+      - ../../setting.conf
     volumes:
-      - ${TICTACTOE_DB_SRC_FOLDER_LOCAL}:${TICTACTOE_DB_SRC_FOLDER_CONTAINER} #TODO remove in production
-      - ${TICTACTOE_DB_PRISMA_FOLDER_LOCAL}:/${TICTACTOE_DB_PRISMA_FOLDER_CONTAINER} #TODO remove in production
-      #- ${TICTACTOE_DB_DATABASE_FOLDER_LOCAL}:${TICTACTOE_DB_DATABASE_FOLDER_CONTAINER} #TODO define path to db and uncomment this line when using the local DB
+      - ./src/:/tictactoe_db/src/ #TODO remove in production
+      - ./prisma/:/tictactoe_db/prisma/ #TODO remove in production
+      #- /home/iguliyev/DBs/tictactoe/:/tictactoe_db/DB/ #TODO define path to db and uncomment this line when using the local DB
     ports:
-      - ${TICTACTOE_DB_PORT}:${TICTACTOE_DB_PORT}
+      - 3003:3003 # TODO remove this in production
     networks:
-      - ${NETWORK_NAME}
-    restart: ${RESTART_POLICY}
+      - Transcendence2.0
+    restart: unless-stopped
