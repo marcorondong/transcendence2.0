@@ -70,7 +70,6 @@ export class TestingUtils {
 			console.log(`🔌 WEBSOCKET: ${ws.url()}`);
 			ws.on("framereceived", (data) => {
 				const message = data.payload.toString();
-				console.log(message);
 				webSocketMessages.push(message);
 			});
 			ws.on("socketerror", (e) => {
