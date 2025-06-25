@@ -99,11 +99,15 @@ export async function getRequestUser(id: unknown) {
 }
 
 export async function getRequestFriends(id: string) {
+	console.log("api key", apiKey);
+	const cookie_fake = "Watafac";
 	const response = await fetch(`http://users:3000/api/users/${id}/friends`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
 			"Authorization": `Bearer ${apiKey}`,
+			"MarcoHi": "IsmayilHi",
+			"Cookie": apiKey,
 		},
 	});
 	if (!response.ok) {
