@@ -33,6 +33,9 @@ export class SignUpView extends HTMLElement {
 
 	connectedCallback() {
 		console.log("SIGNUP VIEW has been CONNECTED");
+		if (this.chat.ws) {
+			this.chat.ws.close();
+		}
 		this.buildDomElements();
 		this.addEventListener("click", this);
 	}
