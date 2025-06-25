@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import httpError from "http-errors";
 
 const prisma = new PrismaClient();
 
@@ -17,14 +16,14 @@ export async function ft_blockList(userId: string) {
 		where: { userId },
 		select: { blockList: true },
 	});
-	if (!user) throw new httpError.NotFound("User not found");
+	if (!user) throw new Error("User not found");
 	return user.blockList;
 }
 
 export async function getBlockStatus(userId: string, friendId: string) {
 	const userBlockList = await ft_blockList(userId);
 	const isFiendExist = await isUserExists(friendId);
-	if (!isFiendExist) throw new httpError.NotFound("Friend not found");
+	if (!isFiendExist) throw new Error("User not found");
 	for (const friend of userBlockList)
 		if (friend.userId === friendId) return true;
 	return false;
