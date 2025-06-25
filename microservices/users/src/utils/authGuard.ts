@@ -111,7 +111,8 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 			});
 		}
 
-		const decoded = request.jwt.decode<TokenPayload>(token);
+		// const decoded = request.jwt.decode<TokenPayload>(token);
+		const decoded = request.jwt.decode(token) as TokenPayload;
 		if (!decoded || typeof decoded !== "object") {
 			throw new AppError({
 				statusCode: 401,
