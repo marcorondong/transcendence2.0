@@ -6,12 +6,14 @@ import {
 	validatorCompiler,
 	serializerCompiler,
 } from "fastify-type-provider-zod";
+import { TokenPayload } from "./modules/user/user.schema";
 import userRoutes from "./modules/user/user.route";
 import friendRequestRoutes from "./modules/friend_request/friend_request.route";
 import productRoutes from "./modules/product/product.route";
 import { setupSwagger, toolsRoutes } from "./modules/tools/tools.route";
 import { ft_fastifyErrorHandler } from "./utils/errors";
 import { fastifyLoggerConfig } from "./utils/logger";
+import { authGuard } from "./utils/authGuard";
 
 // Creating server with global Zod type inference and logger config
 export const server = Fastify({
@@ -21,6 +23,24 @@ export const server = Fastify({
 // Set Zod as the validator and serializer compiler
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
+
+// Extend FastifyRequest with a `authUser` field
+declare module "fastify" {
+	interface FastifyRequest {
+		authUser?: TokenPayload;
+	}
+}
+
+// Extend TypeScript Fastify's types to add "authRequired" custom field. (augmenting)(augmenting Fastify's type system)
+// This is for using authGuard() to allow/deny requests
+declare module "fastify" {
+	interface FastifyContextConfig {
+		authRequired?: boolean;
+	}
+}
+
+// Register global authGuard hook (as onRequest, to contact AUTH Service on each request)
+server.addHook("onRequest", authGuard);
 
 // Register multipart (for picture uploads) and set limits
 // TODO: Later move these constraints to Nginx (separation of concerns, unique source of truth)

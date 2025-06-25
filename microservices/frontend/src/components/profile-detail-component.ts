@@ -1,6 +1,7 @@
 import { notificationEvent } from "../services/events";
 import { baseUrl } from "../services/fetch";
 import { FetchUsers } from "../services/fetch-users";
+import { FetchAuth } from "../services/fetch-auth";
 import {
 	emailValidator,
 	nicknameValidator,
@@ -120,6 +121,7 @@ class ProfileDetailComponent extends HTMLElement {
 			if (returnedData) {
 				this.userData = { ...this.userData, ...returnedData };
 			}
+			await FetchAuth.updateJwt();
 			this.applyUserData();
 			this.displayDetail();
 		} catch (e: any) {
@@ -278,6 +280,7 @@ class ProfileDetailComponent extends HTMLElement {
 			"sm:rounded-t-none",
 			"sm:rounded-l-xl",
 			"w-full",
+			"sm:max-w-150",
 		);
 		this.avatarContainer.append(this.avatar);
 

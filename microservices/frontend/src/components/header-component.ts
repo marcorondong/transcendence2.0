@@ -1,3 +1,5 @@
+import { Auth } from "../services/auth";
+import { notificationEvent, signInLinkEvent } from "../services/events";
 import { FetchAuth } from "../services/fetch-auth";
 import { IconComponent } from "./icon-component";
 import { ThemeToggleComponent } from "./theme-toggle-component";
@@ -158,7 +160,14 @@ export class HeaderComponent extends HTMLElement {
 		logoutButton.addEventListener("click", async () => {
 			try {
 				await FetchAuth.signOut();
-			} catch (e) {}
+				document.dispatchEvent(
+					notificationEvent("You logged out!", "success"),
+				);
+				Auth.toggleAuthClasses(false);
+				document.dispatchEvent(signInLinkEvent);
+			} catch (e) {
+				console.error(e);
+			}
 		});
 
 		this.smallViewPort.addEventListener("change", (event) => {

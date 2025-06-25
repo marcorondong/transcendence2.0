@@ -41,7 +41,10 @@ export async function registerUserHandler(
 	request: FastifyRequest<{ Body: createUserInput }>,
 	reply: FastifyReply,
 ) {
-	logger.info("testing logger in registerUserHandler");
+	logger.debug({
+		"event.action": "Register User",
+		"message": "registerUserHandler hit",
+	});
 	const user = await createUser(request.body);
 	// Serialize/validate/filter response via Zod schemas (userResponseSchema.parse)
 	const parsedUser = userResponseSchema.parse(user);
@@ -55,7 +58,10 @@ export async function loginHandler(
 	request: FastifyRequest<{ Body: loginInput }>,
 	reply: FastifyReply,
 ) {
-	logger.warn("testing logger in loginHandler");
+	logger.debug({
+		"event.action": "Login",
+		"message": "loginHandler hit",
+	});
 	const { email, username, password } = request.body;
 	// Determine allowed identifiers
 	const allowedIdentifiers = LOGIN_IDENTIFIER_MODE.split(",").map((s) =>
@@ -118,7 +124,10 @@ export async function getUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	logger.error("testing logger in getUserHandler");
+	logger.debug({
+		"event.action": "Get single User",
+		"message": "getUserHandler hit",
+	});
 	const user = await findUserByUnique({ id: request.params.id });
 	const parsedUser = userResponseSchema.parse(user);
 	return reply.code(200).send(parsedUser);
@@ -131,7 +140,11 @@ function applyPagination(params: {
 	take?: number;
 	page?: number;
 }) {
-	// console.log("[applyPagination] Raw params:", params);
+	// logger.debug({
+	// 	"event.action": "applyPagination",
+	// 	"params": params,
+	// 	"message": "[applyPagination] Raw params",
+	// });
 
 	// Get config from utils function getConfig() (utils/config.ts)
 	const config = getConfig();
@@ -162,8 +175,8 @@ function applyPagination(params: {
 		typeof params.page === "number"
 			? (params.page - 1) * take
 			: typeof params.skip === "number"
-				? params.skip
-				: 0;
+			? params.skip
+			: 0;
 
 	return { skip, take };
 }
@@ -172,10 +185,12 @@ export async function getUsersHandler(
 	request: FastifyRequest<{ Querystring: getUsersQuery }>,
 	reply: FastifyReply,
 ) {
-	logger.debug("testing logger in getUsersHandler");
 	// Log full query for debugging purposes
-	// console.log("[Request Query]", request.query);
-
+	logger.debug({
+		"event.action": "Get Users - query params",
+		"query": request.query,
+		"message": "getUsersHandler hit",
+	});
 	// Destructure request query into respective fields
 	const {
 		id,
@@ -206,9 +221,14 @@ export async function getUsersHandler(
 		page,
 	});
 	// Log pagination results for debugging purposes
-	// console.log(
-	// 	`[Pagination] page: ${page}, skip: ${skip}, take: ${take}, all: ${all}`,
-	// );
+	// logger.debug({
+	// 	"event.action": "applyPagination",
+	// 	"page": page,
+	// 	"skip": skip,
+	// 	"take": take,
+	// 	"all": all,
+	// 	"message": "[Pagination]",
+	// });
 
 	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
 	// since pagination is an abstraction for 'skip' and 'take'
@@ -242,13 +262,20 @@ export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	logger.fatal("testing logger in deleteUserHandler");
+	logger.debug({
+		"event.action": "Delete User",
+		"message": "deleteUserHandler hit",
+	});
 	const user = await findUserByUnique({ id: request.params.id });
 
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
 
 	// Remove user folder here in controller, since service (should basically) handles database operations;
+	logger.debug({
+		"event.action": "deleteUserHandler",
+		"message": "Deleting user picture if any",
+	});
 	if (fs.existsSync(userFolder)) {
 		await fs.promises.rm(userFolder, { recursive: true, force: true });
 	}
@@ -264,7 +291,10 @@ export async function putUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
-	logger.log("testing logger in putUserHandler");
+	logger.debug({
+		"event.action": "Update ALL User fields",
+		"message": "putUserHandler hit",
+	});
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -277,7 +307,10 @@ export async function patchUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
-	logger.from(request).info("testing logger in patchUserHandler");
+	logger.debug({
+		"event.action": "Update SOME User fields",
+		"message": "patchUserHandler hit",
+	});
 	const updatedUser = await updateUser(request.params.id, request.body);
 	const parsed = userResponseSchema.parse(updatedUser);
 	return reply.code(200).send(parsed);
@@ -292,10 +325,10 @@ const ALLOWED_IMAGE_TYPES = ALLOWED_IMAGE_MODES.split(",").reduce(
 			type === "image/jpeg"
 				? "jpg"
 				: type === "image/png"
-					? "png"
-					: type === "image/gif"
-						? "gif"
-						: "";
+				? "png"
+				: type === "image/gif"
+				? "gif"
+				: "";
 		return acc;
 	},
 	{} as Record<string, string>,
@@ -305,9 +338,10 @@ export async function pictureHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
-	logger
-		.from(request)
-		.info({ "event.action": "pictureHandler" }, "Update user picture");
+	logger.debug({
+		"event.action": "Update User Picture",
+		"message": "pictureHandler hit",
+	});
 	const user = await findUserByUnique({ id: request.params.id }); // TODO: Check if I can make it "let" and reuse it
 
 	const parts = request.parts();
@@ -349,9 +383,9 @@ export async function pictureHandler(
 	// Ensure destination folder exists
 	const uploadsBase = path.resolve("uploads/users");
 	const userFolder = path.join(uploadsBase, user.username);
-	console.log("Saving picture to:", userFolder); // TODO: Remove this later
+	logger.debug("Saving picture to:", userFolder);
 	await fs.promises.mkdir(userFolder, { recursive: true });
-	// console.log(`Would run: mkdir(${userFolder}, { recursive: true })`);
+	// logger.debug(`Would run: mkdir(${userFolder}, { recursive: true })`);
 
 	// Delete all files in the user's folder (remove old pictures)
 	const oldFiles = await fs.promises.readdir(userFolder);
@@ -362,12 +396,18 @@ export async function pictureHandler(
 	// Save new picture
 	const filePath = path.join(userFolder, `picture.${ext}`);
 	await pipeline(pictureFile.file, fs.createWriteStream(filePath));
-	// console.log(
+	// logger.debug(
 	// 	`Would run: pipeline(<picture stream>, createWriteStream(${filePath}))`,
 	// );
 
 	// Store relative path in DB
 	const publicPath = `/uploads/users/${user.username}/picture.${ext}`;
+	logger.debug({
+		"event.action": "Saving Picture",
+		"username": user.username,
+		"path": publicPath,
+		"message": `Saving ${user.username} picture in ${publicPath}`,
+	});
 	const updatedUser = await updateUserPicture(user.id, publicPath);
 
 	const parsed = userResponseSchema.parse(updatedUser);
@@ -381,6 +421,12 @@ export async function getFriendsHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	// Log full query for debugging purposes
+	logger.debug({
+		"event.action": "Get Users Friends - query params",
+		"query": request.query,
+		"message": "getFriendsHandler hit",
+	});
 	// Destructure request query into respective fields
 	const {
 		id,
@@ -410,6 +456,15 @@ export async function getFriendsHandler(
 		take: queryTake,
 		page,
 	});
+	// Log pagination results for debugging purposes
+	// logger.debug({
+	// 	"event.action": "applyPagination",
+	// 	"page": page,
+	// 	"skip": skip,
+	// 	"take": take,
+	// 	"all": all,
+	// 	"message": "[Pagination]",
+	// });
 
 	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
 	// since pagination is an abstraction for 'skip' and 'take'
@@ -446,6 +501,12 @@ export async function addFriendHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Add Friend",
+		"id": request.params,
+		"targetUserId": request.body,
+		"message": "addFriendHandler hit",
+	});
 	const { id } = request.params;
 	const { targetUserId } = request.body;
 
@@ -460,6 +521,12 @@ export async function deleteFriendHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Delete Friend",
+		"id": request.params,
+		"targetUserId": request.body,
+		"message": "deleteFriendHandler hit",
+	});
 	await deleteFriend(request.params.id, request.params.targetUserId);
 	return reply.code(204).send();
 }
@@ -471,6 +538,12 @@ export async function getBlockedUsersHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	// Log full query for debugging purposes
+	logger.debug({
+		"event.action": "Get User blockList - query params",
+		"query": request.query,
+		"message": "getBlockedUsersHandler hit",
+	});
 	// Destructure request query into respective fields
 	const {
 		id,
@@ -500,6 +573,15 @@ export async function getBlockedUsersHandler(
 		take: queryTake,
 		page,
 	});
+	// Log pagination results for debugging purposes
+	// logger.debug({
+	// 	"event.action": "applyPagination",
+	// 	"page": page,
+	// 	"skip": skip,
+	// 	"take": take,
+	// 	"all": all,
+	// 	"message": "[Pagination]",
+	// });
 
 	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
 	// since pagination is an abstraction for 'skip' and 'take'
@@ -536,6 +618,12 @@ export async function blockUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Block User",
+		"id": request.params,
+		"targetUserId": request.body,
+		"message": "blockUserHandler hit",
+	});
 	const { id } = request.params;
 	const { targetUserId } = request.body;
 
@@ -550,6 +638,12 @@ export async function unblockUserHandler(
 	}>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Unblock User",
+		"id": request.params,
+		"targetUserId": request.body,
+		"message": "unblockUserHandler hit",
+	});
 	await unblockUser(request.params.id, request.params.targetUserId);
 	return reply.code(204).send();
 }
