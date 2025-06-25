@@ -13,4 +13,4 @@ services:
       - Transcendence2.0
     depends_on:
       - tictactoe_db
-    restart: always
+    restart: unless-stopped

@@ -14,7 +14,7 @@ services:
       - 2999:2999 # TODO remove this in production
     networks:
       - Transcendence2.0
-    restart: always
+    restart: unless-stopped
 
 secrets:
   jwtSecret.key:
