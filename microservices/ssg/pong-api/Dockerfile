@@ -9,6 +9,4 @@ COPY ./.env /pong/pong-api/
 
 RUN npm --prefix /pong/pong-api/ install
 
-#TODO remove this
-#ENTRYPOINT [ "npm run dev" ]
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
+

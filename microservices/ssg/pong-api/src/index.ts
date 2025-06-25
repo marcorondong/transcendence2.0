@@ -153,15 +153,15 @@ fastify.register(async function (fastify) {
 		},
 	);
 
-	//TODO: remove this on final version
-	fastify.get("/pong-api/ping-pong", async (request, reply) => {
-		const filePath = path.join(process.cwd(), "src/public/pong.html");
-		if (fs.existsSync(filePath)) {
-			return reply.sendFile("pong.html"); // Serve public/index.html
-		} else {
-			reply.status(404).send({ error: "File not found" });
-		}
-	});
+	//Testing HTML PONG
+	// fastify.get("/pong-api/ping-pong", async (request, reply) => {
+	// 	const filePath = path.join(process.cwd(), "src/public/pong.html");
+	// 	if (fs.existsSync(filePath)) {
+	// 		return reply.sendFile("pong.html"); // Serve public/index.html
+	// 	} else {
+	// 		reply.status(404).send({ error: "File not found" });
+	// 	}
+	// });
 });
 
 const startServer = async () => {
