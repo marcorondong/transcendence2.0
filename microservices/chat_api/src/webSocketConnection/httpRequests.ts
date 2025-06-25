@@ -1,5 +1,15 @@
 import { blockStatusSchema, roomIdSchema, userZodSchema } from "./zodSchemas";
 import { env } from "../utils/env";
+import fs from "fs";
+
+let apiKey: string;
+
+try {
+	apiKey = fs.readFileSync("/run/secrets/apiKey.key", "utf-8");
+} catch (error) {
+	console.error("Failed to read API key:", error);
+	process.exit(1);
+}
 
 export async function postRequestCreateUser(userId: string) {
 	const response = await fetch(env.CHAT_DB_CREATE_USER_REQUEST_DOCKER, {
@@ -80,6 +90,10 @@ export async function getRequestVerifyConnection(
 export async function getRequestUser(id: unknown) {
 	const response = await fetch(`${env.USERS_REQUEST_DOCKER}${id}`, {
 		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"Authorization": `Bearer ${apiKey}`,
+		},
 	});
 	return response;
 }
@@ -87,6 +101,10 @@ export async function getRequestUser(id: unknown) {
 export async function getRequestFriends(id: string) {
 	const response = await fetch(`http://users:3000/api/users/${id}/friends`, {
 		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			"Authorization": `Bearer ${apiKey}`,
+		},
 	});
 	if (!response.ok) {
 		const errorMessage = await response.text();
