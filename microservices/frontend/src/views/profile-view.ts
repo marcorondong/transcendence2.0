@@ -122,9 +122,13 @@ export class ProfileView extends HTMLElement {
 		try {
 			// ACCEPTING FRIEND REQUEST
 			await FetchUsers.friendRequestAccept(id);
-			if (this.chat?.ws) {
+			const iconComponent = button.firstElementChild;
+			if (this.chat?.ws && iconComponent?.id) {
 				this.chat.ws.send(
-					JSON.stringify({ type: "refreshFriendList", id: id }),
+					JSON.stringify({
+						type: "refreshFriendList",
+						id: iconComponent.id,
+					}),
 				);
 			}
 			const friendContainer = document.getElementById(
@@ -266,7 +270,7 @@ export class ProfileView extends HTMLElement {
 			this.matchHistory = await FetchPongDb.matchHistory(this.userId);
 			// add fetch for friends list here
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 
