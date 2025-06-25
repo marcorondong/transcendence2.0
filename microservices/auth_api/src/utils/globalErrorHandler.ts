@@ -9,7 +9,8 @@ export function globalErrorHandler(
 	reply: FastifyReply,
 ) {
 	reply.log.error(error);
-
+	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
+	
 	if (error instanceof TypeError && error.message.includes("fetch failed")) {
 		return reply.status(502).send({
 			statusCode: 502,
@@ -26,7 +27,6 @@ export function globalErrorHandler(
 		});
 	}
 
-	reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
 	return reply.status(500).send({
 		statusCode: 500,
 		error: "Internal Server Error",
