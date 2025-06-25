@@ -1,3 +1,4 @@
+import { homeLinkEvent } from "../services/events";
 import { baseUrl } from "../services/fetch";
 import type { PongQueryParams } from "../types/Fetch";
 import { BotModes } from "../types/Game";
@@ -130,6 +131,7 @@ export class PongComponent extends HTMLElement {
 		};
 		this.wss.onclose = () => {
 			this.lobbyMessage = "Disconnected. Try again later.";
+			this.dispatchEvent(homeLinkEvent);
 		};
 		this.gameLoop();
 		this.botWrapper();
@@ -384,7 +386,7 @@ export class PongComponent extends HTMLElement {
 					this.canvasWidth,
 					this.canvasHeight,
 				);
-				return;
+				// return;
 			}
 		} else {
 			this.drawCenterLine();
