@@ -1,0 +1,2245 @@
+{
+	"info": {
+		"_postman_id": "4506a613-4558-493c-b61a-8a207bad0d40",
+		"name": "HTTP_REQUESTS_TEST",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42441731",
+		"_collection_link": "https://aaaaaa-6698.postman.co/workspace/Team-Workspace~0d346918-cc69-48d6-89b8-9c7df73bc377/collection/42441731-4506a613-4558-493c-b61a-8a207bad0d40?action=share&source=collection_link&creator=42441731"
+	},
+	"item": [
+		{
+			"name": "tictactoe-db-create-game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const playerXId = uuidv4();",
+							"const playerOId = uuidv4();",
+							"pm.variables.set(\"playerXId\", playerXId);",
+							"pm.variables.set(\"playerOId\", playerOId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"playerXId\": \"{{playerXId}}\",\n  \"playerOId\": \"{{playerOId}}\",\n  \"result\": \"X\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3003/tictactoe-db/create-game",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3003",
+					"path": [
+						"tictactoe-db",
+						"create-game"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tictactoe-db-health-check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3003/tictactoe-db/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3003",
+					"path": [
+						"tictactoe-db",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tictactoe-db-game-history",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const playerXId = uuidv4();",
+							"const playerOId = uuidv4();",
+							"const userId = playerXId;",
+							"pm.variables.set(\"playerXId\", playerXId);",
+							"pm.variables.set(\"playerOId\", playerOId);",
+							"pm.variables.set(\"userId\", userId);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3003/tictactoe-db/create-game\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"        {",
+							"        \"playerXId\": playerXId,",
+							"        \"playerOId\": playerOId,",
+							"        \"result\": \"X\"",
+							"        })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response has correct shape and types\", function () {",
+							"    let jsonData;",
+							"    try {",
+							"        jsonData = pm.response.json();",
+							"    } catch (e) {",
+							"        pm.expect.fail(\"Response is not valid JSON\");",
+							"    }",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;",
+							"    jsonData.forEach((item, index) => {",
+							"        pm.expect(item).to.be.an('object');",
+							"",
+							"        // Check required keys exist",
+							"        pm.expect(item).to.have.property('playerXId');",
+							"        pm.expect(item).to.have.property('playerOId');",
+							"",
+							"        // Validate UUID strings",
+							"        pm.expect(item.playerXId).to.match(uuidV4Regex, `playerXId at index ${index} is not a valid UUID v4`);",
+							"        pm.expect(item.playerOId).to.match(uuidV4Regex, `playerOId at index ${index} is not a valid UUID v4`);",
+							"    });",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3003/tictactoe-db/game-history/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3003",
+					"path": [
+						"tictactoe-db",
+						"game-history",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tictactoe-db-total-stats",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const playerXId = uuidv4();",
+							"const playerOId = uuidv4();",
+							"const userId = playerXId;",
+							"pm.variables.set(\"playerXId\", playerXId);",
+							"pm.variables.set(\"playerOId\", playerOId);",
+							"pm.variables.set(\"userId\", userId);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3003/tictactoe-db/create-game\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"        {",
+							"        \"playerXId\": playerXId,",
+							"        \"playerOId\": playerOId,",
+							"        \"result\": \"X\"",
+							"        })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response has correct shape and types\", function () {",
+							"    let jsonData;",
+							"    try {",
+							"        jsonData = pm.response.json();",
+							"    } catch (e) {",
+							"        pm.expect.fail(\"Response is not valid JSON\");",
+							"    }",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"",
+							"    // Check required keys exist",
+							"    pm.expect(jsonData).to.have.property('total');",
+							"    pm.expect(jsonData).to.have.property('wins');",
+							"    pm.expect(jsonData).to.have.property('losses');",
+							"",
+							"    // Validate non-negative numbers",
+							"    pm.expect(jsonData.total).to.be.a('number');",
+							"    pm.expect(jsonData.total).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.wins).to.be.a('number');",
+							"    pm.expect(jsonData.wins).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.losses).to.be.a('number');",
+							"    pm.expect(jsonData.losses).to.be.at.least(0);",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3003/tictactoe-db/total-stats/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3003",
+					"path": [
+						"tictactoe-db",
+						"total-stats",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tictactoe-db-head-to-head",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const playerXId = uuidv4();",
+							"const playerOId = uuidv4();",
+							"const userId = playerXId;",
+							"const friendId = playerOId;",
+							"pm.variables.set(\"playerXId\", playerXId);",
+							"pm.variables.set(\"playerOId\", playerOId);",
+							"pm.variables.set(\"userId\", userId);",
+							"pm.variables.set(\"friendId\", friendId);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3003/tictactoe-db/create-game\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"        {",
+							"        \"playerXId\": playerXId,",
+							"        \"playerOId\": playerOId,",
+							"        \"result\": \"X\"",
+							"        })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response has correct shape and types\", function () {",
+							"    let jsonData;",
+							"    try {",
+							"        jsonData = pm.response.json();",
+							"    } catch (e) {",
+							"        pm.expect.fail(\"Response is not valid JSON\");",
+							"    }",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"",
+							"    // Check required keys exist",
+							"    pm.expect(jsonData).to.have.property('total');",
+							"    pm.expect(jsonData).to.have.property('wins');",
+							"    pm.expect(jsonData).to.have.property('losses');",
+							"",
+							"    // Validate non-negative numbers",
+							"    pm.expect(jsonData.total).to.be.a('number');",
+							"    pm.expect(jsonData.total).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.wins).to.be.a('number');",
+							"    pm.expect(jsonData.wins).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.losses).to.be.a('number');",
+							"    pm.expect(jsonData.losses).to.be.at.least(0);",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3003/tictactoe-db/head-to-head/{{userId}}/{{friendId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3003",
+					"path": [
+						"tictactoe-db",
+						"head-to-head",
+						"{{userId}}",
+						"{{friendId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chat-db-health-check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3004/chat-db/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3004",
+					"path": [
+						"chat-db",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chat-db-create-user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const uuid = uuidv4();",
+							"pm.variables.set(\"uuid\", uuid);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"{{uuid}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3004/chat-db/create-user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3004",
+					"path": [
+						"chat-db",
+						"create-user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chat-db-block-user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const uuid1 = uuidv4();",
+							"const uuid2 = uuidv4();",
+							"pm.variables.set(\"uuid1\", uuid1);",
+							"pm.variables.set(\"uuid2\", uuid2);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid1 })",
+							"    }",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid2 })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const uuid1 = pm.variables.get(\"uuid1\");",
+							"const uuid2 = pm.variables.get(\"uuid2\");",
+							"",
+							"pm.test(\"1. Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2. Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"3. Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"4. Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"5. Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/block-user\",",
+							"    method: \"PATCH\",",
+							"    header: {\"Content-Type\": \"application/json\"},",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({\"userId\": uuid1, friendId: uuid2})",
+							"    }, ",
+							"}, function (err, res) {",
+							"    pm.test(\"6. Second block attempt returns 409 (Already Blocked)\", function () {",
+							"        pm.expect(res).to.have.property(\"code\", 409);",
+							"    });",
+							"    const responseJson = res.json();",
+							"    pm.test(\"7. Error message is meaningful\", function () {",
+							"        pm.expect(responseJson.message).to.eql(\"User already blocked\");",
+							"    });",
+							"    pm.test(\"8. Error type is meaningful\", function () {",
+							"        pm.expect(responseJson.error).to.eql(\"ConflictError\");",
+							"    });",
+							"}); ",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"{{uuid1}}\",\n  \"friendId\": \"{{uuid2}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3004/chat-db/block-user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3004",
+					"path": [
+						"chat-db",
+						"block-user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chat-db-unblock-user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const uuid1 = uuidv4();",
+							"const uuid2 = uuidv4();",
+							"pm.variables.set(\"uuid1\", uuid1);",
+							"pm.variables.set(\"uuid2\", uuid2);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: { \"Content-Type\": \"application/json\" },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid1 })",
+							"    }",
+							"}, function (err, res) {",
+							"    pm.sendRequest({",
+							"        url: \"http://localhost:3004/chat-db/create-user\",",
+							"        method: \"POST\",",
+							"        header: { \"Content-Type\": \"application/json\" },",
+							"        body: {",
+							"            mode: \"raw\",",
+							"            raw: JSON.stringify({ userId: uuid2 })",
+							"        }",
+							"    }, function (err2, res2) {",
+							"        pm.sendRequest({",
+							"            url: \"http://localhost:3004/chat-db/block-user\",",
+							"            method: \"PATCH\",",
+							"            header: { \"Content-Type\": \"application/json\" },",
+							"            body: {",
+							"                mode: \"raw\",",
+							"                raw: JSON.stringify({ userId: uuid1, friendId: uuid2 })",
+							"            }",
+							"        });",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const uuid1 = pm.variables.get(\"uuid1\");",
+							"const uuid2 = pm.variables.get(\"uuid2\");",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/unblock-user\",",
+							"    method: \"PATCH\",",
+							"    header: {\"Content-Type\": \"application/json\"},",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({\"userId\": uuid1, friendId: uuid2})",
+							"    }, ",
+							"}, function(err, res) {",
+							"    pm.test(\" Second unblock attepmt returns 409 (Already Unblocked)\", function () {",
+							"        pm.expect(res).to.have.property(\"code\", 409);",
+							"    });",
+							"    const responseJson = res.json();",
+							"    pm.test(\"7. Error message is meaningful\", function () {",
+							"        pm.expect(responseJson.message).to.eql(\"User not blocked\");",
+							"    });",
+							"    pm.test(\"8. Error type is meaningful\", function () {",
+							"        pm.expect(responseJson.error).to.eql(\"ConflictError\");",
+							"    });",
+							"} ",
+							");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"{{uuid1}}\",\n  \"friendId\": \"{{uuid2}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3004/chat-db/unblock-user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3004",
+					"path": [
+						"chat-db",
+						"unblock-user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chat-db-toggle-block",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const uuid1 = uuidv4();",
+							"const uuid2 = uuidv4();",
+							"pm.variables.set(\"uuid1\", uuid1);",
+							"pm.variables.set(\"uuid2\", uuid2);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid1 })",
+							"    }",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid2 })",
+							"    }",
+							"});",
+							"",
+							"//eval(pm.globals.get(\"createUser\"));",
+							"//createUser(uuid1);",
+							"//createUser(uuid2);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const uuid1 = pm.variables.get(\"uuid1\");",
+							"const uuid2 = pm.variables.get(\"uuid2\");",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: `http://localhost:3004/chat-db/block-status/${uuid1}/${uuid2}`,",
+							"    method: \"GET\",",
+							"    header: { \"Content-Type\": \"application/json\" }",
+							"}, function (err2, res2) {",
+							"    if (err2) {",
+							"        console.error(err2);",
+							"        pm.test(\"GET block status request failed\", () => { throw new Error(err2); });",
+							"        return;",
+							"    }",
+							"    pm.test(\"Block status check\", function () {",
+							"        let checkJson = res2.json();",
+							"        pm.expect(checkJson.blockStatus).to.eql(true);",
+							"    });",
+							"",
+							"    pm.sendRequest({",
+							"        url: 'http://localhost:3004/chat-db/toggle-block',",
+							"        method: \"PATCH\",",
+							"        header: { \"Content-Type\": \"application/json\" },",
+							"        body: {",
+							"            mode: \"raw\",",
+							"            raw: JSON.stringify({ userId: uuid1, friendId: uuid2 })",
+							"        }",
+							"    }, function (err, res) {",
+							"        if (err) {",
+							"            console.log(err);",
+							"            pm.test(\"Toggle block request failed\", function () {",
+							"                throw new Error(\"Toggle block request failed\");",
+							"            });",
+							"            return",
+							"        }",
+							"        pm.test(\"2nd status code is 200\", function () {",
+							"            pm.expect(res).to.have.property(\"code\", 200);",
+							"        });",
+							"        const data = res.json();",
+							"        pm.test(\"2nd response is correct\", function () {",
+							"            pm.expect(data.success).to.eql(true);",
+							"        });",
+							"",
+							"        pm.sendRequest({",
+							"            url: `http://localhost:3004/chat-db/block-status/${uuid1}/${uuid2}`,",
+							"            method: \"GET\",",
+							"            header: { \"Content-Type\": \"application/json\" }",
+							"        }, function (err2, res2) {",
+							"            if (err2) {",
+							"                console.error(err2);",
+							"                pm.test(\"GET block status request failed\", () => { throw new Error(err2); });",
+							"                return;",
+							"            }",
+							"            pm.test(\"Block status check\", function () {",
+							"                let checkJson = res2.json();",
+							"                pm.expect(checkJson.blockStatus).to.eql(false);",
+							"            });",
+							"        });",
+							"    });",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": \"{{uuid1}}\",\n  \"friendId\": \"{{uuid2}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3004/chat-db/toggle-block",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3004",
+					"path": [
+						"chat-db",
+						"toggle-block"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "chat-db-block-status",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const uuid1 = uuidv4();",
+							"const uuid2 = uuidv4();",
+							"pm.variables.set(\"uuid1\", uuid1);",
+							"pm.variables.set(\"uuid2\", uuid2);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid1 })",
+							"    }",
+							"}, function (err, res) {",
+							"    console.log(res.json());",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/create-user\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid2 })",
+							"    }",
+							"}, function (err, res) {",
+							"    console.log(res.json());",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const uuid1 = pm.variables.get(\"uuid1\");",
+							"const uuid2 = pm.variables.get(\"uuid2\");",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.blockStatus).to.eql(false);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"blockStatus\":false}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3004/chat-db/block-user\",",
+							"    method: \"PATCH\",",
+							"    header: { \"Content-Type\": \"application/json\" },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify({ userId: uuid1, friendId: uuid2 })",
+							"    }",
+							"}, function (err, res) {",
+							"    if (err) {",
+							"        console.error(res);",
+							"        pm.test(\"PATCH request failed\", () => { throw new Error(err); });",
+							"        return;",
+							"    }",
+							"    pm.test(\"PATCH status code is 200\", function () {",
+							"        pm.expect(res).to.have.property(\"code\", 200);",
+							"    });",
+							"    pm.sendRequest({",
+							"        url: `http://localhost:3004/chat-db/block-status/${uuid1}/${uuid2}`,",
+							"        method: \"GET\",",
+							"        header: { \"Content-Type\": \"application/json\" }",
+							"    }, function (err2, res2) {",
+							"        if (err2) {",
+							"            console.error(err2);",
+							"            pm.test(\"GET block status request failed\", () => { throw new Error(err2); });",
+							"            return;",
+							"        }",
+							"        pm.test(\"Final block status check\", function () {",
+							"            let checkJson = res2.json();",
+							"            pm.expect(checkJson.blockStatus).to.eql(true);",
+							"        });",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3004/chat-db/block-status/{{uuid1}}/{{uuid2}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3004",
+					"path": [
+						"chat-db",
+						"block-status",
+						"{{uuid1}}",
+						"{{uuid2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-db-create-game",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const winnerId = uuidv4();",
+							"const loserId = uuidv4();",
+							"const gameId = uuidv4();",
+							"pm.variables.set(\"winnerId\", winnerId);",
+							"pm.variables.set(\"loserId\", loserId);",
+							"pm.variables.set(\"gameId\", gameId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"winnerId\": \"{{winnerId}}\",\n  \"loserId\": \"{{loserId}}\",\n  \"winnerScore\": 6,\n  \"loserScore\": 0,\n  \"gameId\": \"{{gameId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3011/pong-db/create-game",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3011",
+					"path": [
+						"pong-db",
+						"create-game"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-db-health-check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"});",
+							"pm.test(\"Body is correct\", function () {",
+							"    pm.response.to.have.body('{\"success\":true}');",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3011/pong-db/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3011",
+					"path": [
+						"pong-db",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-db-game-history",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const winnerId = uuidv4();",
+							"const loserId = uuidv4();",
+							"const gameId = uuidv4();",
+							"const userId = winnerId;",
+							"pm.variables.set(\"winnerId\", winnerId);",
+							"pm.variables.set(\"loserId\", loserId);",
+							"pm.variables.set(\"gameId\", gameId);",
+							"pm.variables.set(\"userId\", userId);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3011/pong-db/create-game\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"            {",
+							"                \"winnerId\": winnerId,",
+							"                \"loserId\": loserId,",
+							"                \"winnerScore\": 6,",
+							"                \"loserScore\": 0,",
+							"                \"gameId\": gameId",
+							"            })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response has correct shape and types\", function () {",
+							"    let jsonData;",
+							"    try {",
+							"        jsonData = pm.response.json();",
+							"    } catch (e) {",
+							"        pm.expect.fail(\"Response is not valid JSON\");",
+							"    }",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;",
+							"    jsonData.forEach((item, index) => {",
+							"        pm.expect(item).to.be.an('object');",
+							"",
+							"        // Check required keys exist",
+							"        pm.expect(item).to.have.property('winnerId');",
+							"        pm.expect(item).to.have.property('loserId');",
+							"        pm.expect(item).to.have.property('winnerScore');",
+							"        pm.expect(item).to.have.property('loserScore');",
+							"        pm.expect(item).to.have.property('createdAt');",
+							"",
+							"        // Validate UUID strings",
+							"        pm.expect(item.winnerId).to.match(uuidV4Regex, `winnerId at index ${index} is not a valid UUID v4`);",
+							"        pm.expect(item.loserId).to.match(uuidV4Regex, `loserId at index ${index} is not a valid UUID v4`);",
+							"",
+							"        // Validate non-negative numbers",
+							"        pm.expect(item.winnerScore).to.be.a('number');",
+							"        pm.expect(item.winnerScore).to.be.at.least(0);",
+							"",
+							"        pm.expect(item.loserScore).to.be.a('number');",
+							"        pm.expect(item.loserScore).to.be.at.least(0);",
+							"",
+							"        // Validate createdAt is a valid date string",
+							"        const date = new Date(item.createdAt);",
+							"        pm.expect(date.toString()).to.not.equal('Invalid Date');",
+							"    });",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3011/pong-db/game-history/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3011",
+					"path": [
+						"pong-db",
+						"game-history",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-db-total-stats",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const winnerId = uuidv4();",
+							"const loserId = uuidv4();",
+							"const gameId = uuidv4();",
+							"const userId = winnerId;",
+							"pm.variables.set(\"winnerId\", winnerId);",
+							"pm.variables.set(\"loserId\", loserId);",
+							"pm.variables.set(\"gameId\", gameId);",
+							"pm.variables.set(\"userId\", userId);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3011/pong-db/create-game\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"            {",
+							"                \"winnerId\": winnerId,",
+							"                \"loserId\": loserId,",
+							"                \"winnerScore\": 6,",
+							"                \"loserScore\": 0,",
+							"                \"gameId\": gameId",
+							"            })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response has correct shape and types\", function () {",
+							"    let jsonData;",
+							"    try {",
+							"        jsonData = pm.response.json();",
+							"    } catch (e) {",
+							"        pm.expect.fail(\"Response is not valid JSON\");",
+							"    }",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"",
+							"    // Check required keys exist",
+							"    pm.expect(jsonData).to.have.property('total');",
+							"    pm.expect(jsonData).to.have.property('wins');",
+							"    pm.expect(jsonData).to.have.property('losses');",
+							"",
+							"    // Validate non-negative numbers",
+							"    pm.expect(jsonData.total).to.be.a('number');",
+							"    pm.expect(jsonData.total).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.wins).to.be.a('number');",
+							"    pm.expect(jsonData.wins).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.losses).to.be.a('number');",
+							"    pm.expect(jsonData.losses).to.be.at.least(0);",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3011/pong-db/user-stats/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3011",
+					"path": [
+						"pong-db",
+						"user-stats",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-db-head-to-head",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const { v4: uuidv4 } = require('uuid');",
+							"const winnerId = uuidv4();",
+							"const loserId = uuidv4();",
+							"const gameId = uuidv4();",
+							"const userId = winnerId;",
+							"const friendId = loserId;",
+							"pm.variables.set(\"winnerId\", winnerId);",
+							"pm.variables.set(\"loserId\", loserId);",
+							"pm.variables.set(\"gameId\", gameId);",
+							"pm.variables.set(\"userId\", userId);",
+							"pm.variables.set(\"friendId\", friendId);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:3011/pong-db/create-game\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"            {",
+							"                \"winnerId\": winnerId,",
+							"                \"loserId\": loserId,",
+							"                \"winnerScore\": 6,",
+							"                \"loserScore\": 0,",
+							"                \"gameId\": gameId",
+							"            })",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response has correct shape and types\", function () {",
+							"    let jsonData;",
+							"    try {",
+							"        jsonData = pm.response.json();",
+							"    } catch (e) {",
+							"        pm.expect.fail(\"Response is not valid JSON\");",
+							"    }",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"",
+							"    // Check required keys exist",
+							"    pm.expect(jsonData).to.have.property('total');",
+							"    pm.expect(jsonData).to.have.property('wins');",
+							"    pm.expect(jsonData).to.have.property('losses');",
+							"",
+							"    // Validate non-negative numbers",
+							"    pm.expect(jsonData.total).to.be.a('number');",
+							"    pm.expect(jsonData.total).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.wins).to.be.a('number');",
+							"    pm.expect(jsonData.wins).to.be.at.least(0);",
+							"",
+							"    pm.expect(jsonData.losses).to.be.a('number');",
+							"    pm.expect(jsonData.losses).to.be.at.least(0);",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3011/pong-db/head-to-head/{{userId}}/{{friendId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3011",
+					"path": [
+						"pong-db",
+						"head-to-head",
+						"{{userId}}",
+						"{{friendId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-sign-in",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function generateUsername(length = 10) {",
+							"    const chars = \"abcdefghijklmnopqrstuvwxyz0123456789-_\";",
+							"    let username = \"\";",
+							"    for (let i = 0; i < length; i++) {",
+							"        username += chars.charAt(Math.floor(Math.random() * chars.length));",
+							"    }",
+							"    return username;",
+							"}",
+							"",
+							"const username = generateUsername();",
+							"const nickname = pm.variables.replaceIn(\"{{$randomUserName}}\");",
+							"const email = pm.variables.replaceIn(\"{{$randomEmail}}\").toLowerCase();",
+							"const password = pm.variables.replaceIn(\"{{$randomPassword}}\") + \"A!1aaa\";",
+							"pm.variables.set(\"username\", username);",
+							"pm.variables.set(\"password\", password);",
+							"",
+							"pm.sendRequest({",
+							"    url: \"http://localhost:2999/auth-api/sign-up\",",
+							"    method: \"POST\",",
+							"    header: {",
+							"        \"Content-Type\": \"application/json\"",
+							"    },",
+							"    body: {",
+							"        mode: \"raw\",",
+							"        raw: JSON.stringify(",
+							"        {",
+							"        \"email\": email,",
+							"        \"password\": password,",
+							"        \"username\": username,",
+							"        \"nickname\": nickname,",
+							"        })",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2999/auth-api/sign-in",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-verify-jwt",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkN2NlNTNlLTJiN2QtNDI5Yy1hNjA5LTI3MzBkYTAzOGE5ZCIsIm5pY2tuYW1lIjoic2V2ZXJpbmEiLCJpYXQiOjE3NDc1OTgzMTgsImV4cCI6MTc1NTM3NDMxOH0.z3O6k8GVK_R-gWA4Ew6ZRXUFSk2TEFvm3MEAi7JlX3Q.j7wzrkuf7%2F%2BrJDJvPB3s6FWWKrbcTRyr%2B5sX%2Fnvg3wk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/verify-jwt",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"verify-jwt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-verify-connection",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"pm.test(\"Response body contains id and nickname\", function () {",
+							"    pm.expect(pm.response.json()).to.have.property(\"id\");",
+							"    pm.expect(pm.response.json()).to.have.property(\"nickname\");",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkN2NlNTNlLTJiN2QtNDI5Yy1hNjA5LTI3MzBkYTAzOGE5ZCIsIm5pY2tuYW1lIjoic2V2ZXJpbmEiLCJpYXQiOjE3NDc1OTgzMTgsImV4cCI6MTc1NTM3NDMxOH0.z3O6k8GVK_R-gWA4Ew6ZRXUFSk2TEFvm3MEAi7JlX3Q.j7wzrkuf7%2F%2BrJDJvPB3s6FWWKrbcTRyr%2B5sX%2Fnvg3wk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/verify-connection",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"verify-connection"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-health-check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-refresh-jwt",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkN2NlNTNlLTJiN2QtNDI5Yy1hNjA5LTI3MzBkYTAzOGE5ZCIsIm5pY2tuYW1lIjoic2V2ZXJpbmEiLCJpYXQiOjE3NDc1OTgzMTgsImV4cCI6MTc1NTM3NDMxOH0.z3O6k8GVK_R-gWA4Ew6ZRXUFSk2TEFvm3MEAi7JlX3Q.j7wzrkuf7%2F%2BrJDJvPB3s6FWWKrbcTRyr%2B5sX%2Fnvg3wk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/refresh-jwt",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"refresh-jwt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-bot-jwt",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Response body contains access_token\", function () {",
+							"    pm.response.to.have.jsonBody('access_token');",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/bot-jwt",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"bot-jwt"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-sign-out",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkN2NlNTNlLTJiN2QtNDI5Yy1hNjA5LTI3MzBkYTAzOGE5ZCIsIm5pY2tuYW1lIjoic2V2ZXJpbmEiLCJpYXQiOjE3NDc1OTgzMTgsImV4cCI6MTc1NTM3NDMxOH0.z3O6k8GVK_R-gWA4Ew6ZRXUFSk2TEFvm3MEAi7JlX3Q.j7wzrkuf7%2F%2BrJDJvPB3s6FWWKrbcTRyr%2B5sX%2Fnvg3wk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/sign-out",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"sign-out"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth-api-sign-up",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function generateUsername(length = 10) {",
+							"    const chars = \"abcdefghijklmnopqrstuvwxyz0123456789-_\";",
+							"    let username = \"\";",
+							"    for (let i = 0; i < length; i++) {",
+							"        username += chars.charAt(Math.floor(Math.random() * chars.length));",
+							"    }",
+							"    return username;",
+							"}",
+							"",
+							"const username = generateUsername();",
+							"const nickname = pm.variables.replaceIn(\"{{$randomUserName}}\");",
+							"const email = pm.variables.replaceIn(\"{{$randomEmail}}\").toLowerCase();",
+							"const password = pm.variables.replaceIn(\"{{$randomPassword}}\") + \"A!1aaa\";",
+							"pm.variables.set(\"username\", username);",
+							"pm.variables.set(\"password\", password);",
+							"pm.variables.set(\"nickname\", nickname);",
+							"pm.variables.set(\"email\", email);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"email\": \"{{email}}\",\n  \"nickname\": \"{{nickname}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2999/auth-api/sign-up",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"sign-up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "users-health-check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-api-health-check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3010/pong-api/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"pong-api",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pong-api-health-check Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"}); "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:2999/auth-api/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2999",
+					"path": [
+						"auth-api",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
