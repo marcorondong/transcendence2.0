@@ -56,7 +56,6 @@ export class PongGameSingles extends APongGame {
 		winnerCaptainId: string,
 		loserCaptainId: string,
 	): IPongSinglesDatabase {
-		//TODO implement proper IDs of winner and loser not just side
 		return {
 			gameId: this.getGameId(),
 			winnerId: winnerCaptainId,

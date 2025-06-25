@@ -55,7 +55,7 @@ export class PongGameDoubles extends APongGame {
 		return game;
 	}
 
-	//TODO implement version of double mode to database
+	//implement version of double mode to database
 	async storeResultInDatabase(): Promise<void> {
 		return;
 	}
