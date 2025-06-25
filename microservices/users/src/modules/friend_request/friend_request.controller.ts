@@ -15,11 +15,19 @@ import {
 import { userArrayResponseSchema } from "../user/user.schema";
 import { AppError, FRIEND_REQUEST_ERRORS } from "../../utils/errors";
 import getConfig from "../../utils/config";
+import { logger } from "../../utils/logger";
 
 export async function createFriendRequestHandler(
 	request: FastifyRequest<{ Body: CreateFriendRequestInput }>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Create Friend User",
+		"fromId": request.body.fromId,
+		"toId": request.body.toId,
+		"msg": request.body.message,
+		"message": "createFriendRequestHandler hit",
+	});
 	const { fromId, toId, message } = request.body;
 	const result = await createFriendRequest(fromId, toId, message);
 
@@ -38,6 +46,10 @@ export async function getFriendRequestHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Get sigle Friend Request",
+		"message": "getFriendRequestHandler hit",
+	});
 	const friendRequest = await findFriendRequestByUnique({
 		id: request.params.id,
 	});
@@ -52,7 +64,11 @@ function applyPagination(params: {
 	take?: number;
 	page?: number;
 }) {
-	// console.log("[applyPagination] Raw params:", params);
+	// logger.debug({
+	// 	"event.action": "applyPagination",
+	// 	"params": params,
+	// 	"message": "[applyPagination] Raw params",
+	// });
 
 	// Get config from utils function getConfig() (utils/config.ts)
 	const config = getConfig();
@@ -94,6 +110,13 @@ export async function getFriendRequestsHandler(
 	request: FastifyRequest<{ Querystring: getFriendRequestsQuery }>,
 	reply: FastifyReply,
 ) {
+	// Log full query for debugging purposes
+	logger.debug({
+		"event.action": "Get Friend Request - query params",
+		"query": request.query,
+		"message": "getFriendRequestsHandler hit",
+	});
+	// Destructure request query into respective fields
 	const {
 		id,
 		fromId,
@@ -120,6 +143,15 @@ export async function getFriendRequestsHandler(
 		take: queryTake,
 		page,
 	});
+	// Log pagination results for debugging purposes
+	// logger.debug({
+	// 	"event.action": "applyPagination",
+	// 	"page": page,
+	// 	"skip": skip,
+	// 	"take": take,
+	// 	"all": all,
+	// 	"message": "[Pagination]",
+	// });
 
 	// MR_NOTE: 'page' nor 'all' field aren't handled by service `findUsers()`;
 	// since pagination is an abstraction for 'skip' and 'take'
@@ -151,6 +183,10 @@ export async function acceptFriendRequestHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Accept Friend Request",
+		"message": "acceptFriendRequestHandler hit",
+	});
 	const { id } = request.params;
 	const users = await acceptFriendRequest(id);
 	const parsed = userArrayResponseSchema.parse(users);
@@ -161,6 +197,10 @@ export async function deleteFriendRequestHandler(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply,
 ) {
+	logger.debug({
+		"event.action": "Reject Friend Request",
+		"message": "deleteFriendRequestHandler hit",
+	});
 	const { id } = request.params;
 	await deleteFriendRequest(id);
 	return reply.code(204).send();
