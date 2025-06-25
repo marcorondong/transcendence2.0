@@ -9,7 +9,27 @@ import {
 	disconnectUser,
 	healthCheck,
 } from "./service";
-import httpError from "http-errors";
+
+function handleError(
+	reply: FastifyReply,
+	error: string,
+	statusCode: number,
+	message: string,
+) {
+	reply.log.warn(
+		{
+			error,
+			statusCode,
+			message,
+		},
+		"Error",
+	);
+	reply.status(statusCode).send({
+		statusCode,
+		error,
+		message,
+	});
+}
 
 export async function createUserHandler(
 	request: FastifyRequest<{ Body: IdInput }>,
@@ -26,8 +46,18 @@ export async function blockUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	const isUserInList = await getBlockStatus(userId, friendId);
-	if (isUserInList) throw new httpError.Conflict("User already blocked");
+	try {
+		const isUserInList = await getBlockStatus(userId, friendId);
+		if (isUserInList) {
+			handleError(reply, "Conflict", 409, `User already blocked`);
+			return;
+		}
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
+	}
 	await connectUser(userId, friendId);
 	reply.status(200).send({ success: true });
 }
@@ -37,8 +67,18 @@ export async function unblockUserHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	const isUserInBlockList = await getBlockStatus(userId, friendId);
-	if (!isUserInBlockList) throw new httpError.Conflict("User not blocked");
+	try {
+		const isUserInBlockList = await getBlockStatus(userId, friendId);
+		if (!isUserInBlockList) {
+			handleError(reply, "Conflict", 409, `User not blocked`);
+			return;
+		}
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
+	}
 	await disconnectUser(userId, friendId);
 	reply.status(200).send({ success: true });
 }
@@ -48,7 +88,15 @@ export async function toggleBlockHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.body;
-	const isUserInBlockList = await getBlockStatus(userId, friendId);
+	let isUserInBlockList;
+	try {
+		isUserInBlockList = await getBlockStatus(userId, friendId);
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
+	}
 	if (isUserInBlockList) await disconnectUser(userId, friendId);
 	else await connectUser(userId, friendId);
 	reply.status(200).send({ success: true });
@@ -59,7 +107,15 @@ export async function blockStatusHandler(
 	reply: FastifyReply,
 ) {
 	const { userId, friendId } = request.params;
-	const blockStatus = await getBlockStatus(userId, friendId);
+	let blockStatus;
+	try {
+		blockStatus = await getBlockStatus(userId, friendId);
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${friendId} not found`);
+			return;
+		} else throw error;
+	}
 	reply.status(200).send({ blockStatus });
 }
 
@@ -68,7 +124,15 @@ export async function blockListHandler(
 	reply: FastifyReply,
 ) {
 	const { userId } = request.params;
-	const blockList = await ft_blockList(userId);
+	let blockList;
+	try {
+		blockList = await ft_blockList(userId);
+	} catch (error: any) {
+		if (error.message.includes("User not found")) {
+			handleError(reply, "NotFound", 404, `User ${userId} not found`);
+			return;
+		} else throw error;
+	}
 	reply.status(200).send({ blockList });
 }
 
