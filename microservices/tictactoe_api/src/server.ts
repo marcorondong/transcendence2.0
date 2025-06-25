@@ -12,7 +12,8 @@ import path from "path"; // TODO remove this after frontend is built
 import fCookie from "@fastify/cookie";
 import { env } from "./utils/env";
 
-const server = Fastify(serverOption).withTypeProvider<ZodTypeProvider>();
+// use "serverOption" instead of "{ logger: true }" to activate pino-pretty
+const server = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 
 // TODO remove this after frontend is built
 server.register(fastifyStatic, {
