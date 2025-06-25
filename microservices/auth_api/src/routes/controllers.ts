@@ -64,16 +64,6 @@ export async function verifyJWTHandler(
 	request: FastifyRequest,
 	reply: FastifyReply,
 ) {
-	const response = await getUserRequest(request.user.id, request);
-	if (!response.ok) {
-		const data = await response.json();
-		reply.log.warn(
-			{ Response: data, User: request.user },
-			"getUserRequest() response not ok",
-		);
-		reply.clearCookie(env.JWT_TOKEN_NAME, clearCookieOpt);
-		return reply.status(data.statusCode || 500).send(data);
-	}
 	reply.status(200).send();
 }
 
@@ -121,9 +111,10 @@ export async function updateJWTHandler(
 	const payload = payloadZodSchema.parse(data);
 	const accessToken = await reply.jwtSign(payload, jwtSignOpt);
 	reply.setCookie(env.JWT_TOKEN_NAME, accessToken, setCookieOpt);
-	reply.status(200).send(data);
+	reply.status(200).send();
 }
 
+// This handler is not in use, but kept for future reference
 export async function updateJWTPatchHandler(
 	request: FastifyRequest<{ Body: PayloadInput }>,
 	reply: FastifyReply,
@@ -134,6 +125,7 @@ export async function updateJWTPatchHandler(
 	reply.status(200).send(payload);
 }
 
+// This handler is not in use, but kept for future reference
 export async function editProfileHandler(
 	request: FastifyRequest<{ Body: unknown; Params: IdInput }>,
 	reply: FastifyReply,
@@ -153,6 +145,7 @@ export async function editProfileHandler(
 	reply.status(200).send(data);
 }
 
+// This handler is not in use, but kept for future reference
 export async function updateProfileHandler(
 	request: FastifyRequest<{ Body: unknown; Params: IdInput }>,
 	reply: FastifyReply,
@@ -175,6 +168,7 @@ export async function updateProfileHandler(
 	reply.status(200).send(data);
 }
 
+// This handler is not in use, but kept for future reference
 export async function deleteUserHandler(
 	request: FastifyRequest<{ Params: IdInput }>,
 	reply: FastifyReply,
