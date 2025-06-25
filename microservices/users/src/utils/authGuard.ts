@@ -80,8 +80,8 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		return;
 	}
 
-	const cookie = request.headers.cookie;
-	if (!cookie) {
+	const cookieHeader = request.headers.cookie;
+	if (!cookieHeader) {
 		throw new AppError({
 			statusCode: 401,
 			code: AUTH_GUARD_ERRORS.COOKIE_NOT_FOUND,
@@ -92,50 +92,39 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 	try {
 		logger.debug({
 			"event.action": "authGuard to verify with AUTH",
-			"cookie": cookie,
+			"cookie": cookieHeader,
 			"message":
 				"Received cookie in real mode; will be verified with AUTH",
 		});
-		logger.debug(`Attempting AUTH contact at: ${AUTH_VERIFY_URL}`);
-		const response = await fetch(AUTH_VERIFY_URL, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-				"Cookie": cookie,
-			},
-		});
-		if (!response.ok) {
-			// logger.warn(`Failed AUTH contact at: ${AUTH_VERIFY_URL}`);
-			// const errorText = await response.text(); // safe even if not JSON // TODO: I can only read the body once. cannot try .json() after .text()
-			logger.warn({
-				"event.action": "authGuard",
-				"url": AUTH_VERIFY_URL,
-				"status": response.status,
-				"statusText": response.statusText,
-				// "body": errorText,
-				"message": "AUTH service responded with failure",
-			});
+
+		const cookies = Object.fromEntries(
+			cookieHeader.split(";").map((c) => c.trim().split("=")),
+		);
+		const token = cookies["access_token"]; // Or your actual cookie name
+
+		if (!token) {
 			throw new AppError({
 				statusCode: 401,
 				code: AUTH_GUARD_ERRORS.INVALID_TOKEN,
-				message: "Unauthorized: invalid token",
+				message: "Unauthorized: missing token in cookie",
 				handlerName: "authGuard",
 			});
 		}
-		logger.debug(`Successful AUTH contact at: ${AUTH_VERIFY_URL}`);
-		const data = await response.json();
-		const validated = loginResponseSchema.parse(data); // I should use tokenPayloadSchema but it's not exported and this one is the same
-		logger.debug({
-			"event.action": "authGuard verified with AUTH",
-			"status": response.status,
-			"statusText": response.statusText,
-			"validated": validated,
-			"message": "Parsed token data from AUTH",
-		});
+
+		const decoded = request.jwt.decode<TokenPayload>(token);
+		if (!decoded || typeof decoded !== "object") {
+			throw new AppError({
+				statusCode: 401,
+				code: AUTH_GUARD_ERRORS.INVALID_TOKEN,
+				message: "Unauthorized: malformed token payload",
+				handlerName: "authGuard",
+			});
+		}
+		const validated = loginResponseSchema.parse(decoded);
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
 		logger.debug({
-			"event.action": "authGuard",
+			"event.action": "authGuard decoded cookie",
 			"authUser": request.authUser,
 			"message": "Final authUser attached to request",
 		});
@@ -143,11 +132,135 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		throw new AppError({
 			statusCode: 500,
 			code: AUTH_GUARD_ERRORS.UNREACHABLE_AUTH,
-			message: "Auth service unreachable",
+			message: "Failed to decode token",
 			handlerName: "authGuard",
 		});
 	}
 }
+
+//============ OLD authGuard that checked cookie with AUTH =====================
+// export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
+// 	// console.dir(request, { depth: 2 });
+// 	if (!AUTH_GUARD_ENABLED) return;
+
+// 	logger.debug({
+// 		"event.action": "authGuard hit",
+// 		"url": request.raw.url,
+// 		"method": request.method,
+// 		"cookie": request.headers.cookie,
+// 		"message": "Starting authGuard()",
+// 	});
+// 	// Public paths that never require auth (Exact match: no more extra path nor less)
+// 	const exactPaths = [
+// 		"/api/tools/health-check",
+// 		"/api/users/login",
+// 		"/api/users",
+// 	];
+// 	// Public paths that never require auth (IMPORTANT! startWith match: will match the path + anything extra)
+// 	// E.g: api/documentation/static/swagger-ui.css"
+// 	const prefixPaths = ["/api/tools/swagger", "/api/documentation"];
+
+// 	const isExactPublicPath = exactPaths.includes(
+// 		(request as any).routerPath ?? "",
+// 	);
+// 	const isPrefixPublicPath = prefixPaths.some((path) =>
+// 		request.raw.url?.startsWith(path),
+// 	);
+
+// 	const isPublicPath = isExactPublicPath || isPrefixPublicPath;
+
+// 	const isRouteExempt = request.routeOptions?.config?.authRequired === false;
+
+// 	if (DEV_AUTH_ENABLED) {
+// 		// Attach info. Make the request pass WITH faked auth info
+// 		request.user = {
+// 			id: "00000000-0000-0000-0000-000000000001",
+// 			nickname: "dev-user",
+// 		};
+// 		request.authUser = {
+// 			id: "8e2f7a60-1697-44b1-b777-a52562fe5990",
+// 			nickname: "dev-user",
+// 		};
+// 		logger.info({
+// 			"event.action": "authGuard",
+// 			"authUser": request.authUser,
+// 			"message": "[DEV AUTH] Injected mock user:",
+// 		});
+// 		return;
+// 	}
+// 	if (isPublicPath || isRouteExempt) {
+// 		// Don't attach anything. Let the request pass WITHOUT auth info (they're public no no auth is checked)
+// 		return;
+// 	}
+
+// 	const cookie = request.headers.cookie;
+// 	if (!cookie) {
+// 		throw new AppError({
+// 			statusCode: 401,
+// 			code: AUTH_GUARD_ERRORS.COOKIE_NOT_FOUND,
+// 			message: "Unauthorized: missing cookie",
+// 			handlerName: "authGuard",
+// 		});
+// 	}
+// 	try {
+// 		logger.debug({
+// 			"event.action": "authGuard to verify with AUTH",
+// 			"cookie": cookie,
+// 			"message":
+// 				"Received cookie in real mode; will be verified with AUTH",
+// 		});
+// 		logger.debug(`Attempting AUTH contact at: ${AUTH_VERIFY_URL}`);
+// 		const response = await fetch(AUTH_VERIFY_URL, {
+// 			method: "GET",
+// 			headers: {
+// 				"Content-Type": "application/json",
+// 				"Cookie": cookie,
+// 			},
+// 		});
+// 		if (!response.ok) {
+// 			// logger.warn(`Failed AUTH contact at: ${AUTH_VERIFY_URL}`);
+// 			// const errorText = await response.text(); // safe even if not JSON // TODO: I can only read the body once. cannot try .json() after .text()
+// 			logger.warn({
+// 				"event.action": "authGuard",
+// 				"url": AUTH_VERIFY_URL,
+// 				"status": response.status,
+// 				"statusText": response.statusText,
+// 				// "body": errorText,
+// 				"message": "AUTH service responded with failure",
+// 			});
+// 			throw new AppError({
+// 				statusCode: 401,
+// 				code: AUTH_GUARD_ERRORS.INVALID_TOKEN,
+// 				message: "Unauthorized: invalid token",
+// 				handlerName: "authGuard",
+// 			});
+// 		}
+// 		logger.debug(`Successful AUTH contact at: ${AUTH_VERIFY_URL}`);
+// 		const data = await response.json();
+// 		const validated = loginResponseSchema.parse(data); // I should use tokenPayloadSchema but it's not exported and this one is the same
+// 		logger.debug({
+// 			"event.action": "authGuard verified with AUTH",
+// 			"status": response.status,
+// 			"statusText": response.statusText,
+// 			"validated": validated,
+// 			"message": "Parsed token data from AUTH",
+// 		});
+// 		request.user = validated; // for logging via pino
+// 		request.authUser = validated; // for type-safe logic
+// 		logger.debug({
+// 			"event.action": "authGuard",
+// 			"authUser": request.authUser,
+// 			"message": "Final authUser attached to request",
+// 		});
+// 	} catch (err) {
+// 		throw new AppError({
+// 			statusCode: 500,
+// 			code: AUTH_GUARD_ERRORS.UNREACHABLE_AUTH,
+// 			message: "Auth service unreachable",
+// 			handlerName: "authGuard",
+// 		});
+// 	}
+// }
 
 // Guard that allows only the user to access/modify their own resource.
 export async function onlySelf<
