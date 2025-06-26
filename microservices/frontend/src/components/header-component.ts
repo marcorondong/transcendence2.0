@@ -164,7 +164,6 @@ export class HeaderComponent extends HTMLElement {
 					notificationEvent("You logged out!", "success"),
 				);
 				Auth.toggleAuthClasses(false);
-				document.dispatchEvent(signInLinkEvent);
 			} catch (e) {
 				console.error(e);
 			} finally {
