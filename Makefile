@@ -71,27 +71,27 @@ $(SECRET_DIRECTORIES):
 $(GRAFANA_PW): $(SECRET_DIRECTORIES)
 	./monitoring/grafana/create_password.sh
 
-$(PONG_ENV):
-	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
+# $(PONG_ENV):
+# 	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
 
-$(PRIVATE_WALLET_KEY):
-	ft_crypt.sh --decrypt="$(PRIVATE_WALLET_KEY).enc" --force
+# $(PRIVATE_WALLET_KEY):
+# 	ft_crypt.sh --decrypt="$(PRIVATE_WALLET_KEY).enc" --force
 
-$(BOT_ENV):
-	ft_crypt.sh --decrypt="$(BOT_ENV).enc" --force
+# $(BOT_ENV):
+# 	ft_crypt.sh --decrypt="$(BOT_ENV).enc" --force
 
-$(AUTH_API_COOKIE_SECRET):
-	ft_crypt.sh --decrypt="$(AUTH_API_COOKIE_SECRET).enc" --force
+# $(AUTH_API_COOKIE_SECRET):
+# 	ft_crypt.sh --decrypt="$(AUTH_API_COOKIE_SECRET).enc" --force
 
-$(AUTH_API_JWT_SECRET):
-	ft_crypt.sh --decrypt="$(AUTH_API_JWT_SECRET).enc" --force
+# $(AUTH_API_JWT_SECRET):
+# 	ft_crypt.sh --decrypt="$(AUTH_API_JWT_SECRET).enc" --force
 
-$(GLOBAL_ENV):
-	ft_crypt.sh --decrypt="$(GLOBAL_ENV).enc" --force
+# $(GLOBAL_ENV):
+# 	ft_crypt.sh --decrypt="$(GLOBAL_ENV).enc" --force
 
-$(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
-	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
-	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
+# $(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
+# 	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
+# 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
 
 .PHONY: all re clean remove dev cli nuke delete-secrets reset %$(REBUILD_SERVICE)
