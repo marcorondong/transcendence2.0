@@ -2,11 +2,14 @@ import { test, expect } from "@playwright/test";
 import { homeUrl, registeredUsers } from "./config";
 import { TestingUtils } from "./TestingUtils";
 
+//don't run tests in parallel, for joining games
+test.describe.configure({ mode: "serial" });
+
 test.use({
 	ignoreHTTPSErrors: true,
 });
 
-test("play against bot", async ({page}) => {
+test("play against bot", async ({ page }) => {
 	await TestingUtils.logInStep(page, registeredUsers.user1);
 
 	//bot game
