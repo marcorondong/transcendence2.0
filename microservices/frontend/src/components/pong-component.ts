@@ -1,4 +1,4 @@
-import { homeLinkEvent } from "../services/events";
+import { homeLinkEvent, notificationEvent } from "../services/events";
 import { baseUrl } from "../services/fetch";
 import type { PongQueryParams } from "../types/Fetch";
 import { BotModes } from "../types/Game";
@@ -33,6 +33,11 @@ export class PongComponent extends HTMLElement {
 	// Buttons
 	fullscreenButton = document.createElement("button");
 
+	// ELEMENTS
+	gameInfoContainer = document.createElement("div");
+	matchStatusValue = document.createElement("div");
+	knockoutValue = document.createElement("div");
+
 	constructor(chat: ChatComponent, pongQueryParams: PongQueryParams) {
 		super();
 		this.adjustCanvasToWindow();
@@ -64,7 +69,28 @@ export class PongComponent extends HTMLElement {
 		);
 		this.canvas.classList.add("bg-black", "rounded-lg");
 		canvasContainer.appendChild(this.canvas);
-		this.append(canvasContainer);
+
+		this.gameInfoContainer.classList.add(
+			"pong-card",
+			"pong-card-dark",
+			"flex",
+			"gap-8",
+			"px-4",
+			"py-2",
+			"items-center",
+			"justify-between",
+			"mb-8",
+		);
+		const knockoutLabel = document.createElement("div");
+		knockoutLabel.innerText = "Game Mode:";
+		const knockoutContainer = document.createElement("div");
+		knockoutContainer.append(knockoutLabel, this.knockoutValue);
+		const matchStatusLabel = document.createElement("div");
+		matchStatusLabel.innerText = "Match Status:";
+		const matchStatusContainer = document.createElement("div");
+		matchStatusContainer.append(matchStatusLabel, this.matchStatusValue);
+		this.gameInfoContainer.append(knockoutContainer, matchStatusContainer);
+		this.append(this.gameInfoContainer, canvasContainer);
 
 		// FULLSCREEN BUTTON
 		this.fullscreenButton.id = "fullscreen-button";
@@ -96,10 +122,10 @@ export class PongComponent extends HTMLElement {
 			this.appendCopyLink("roomId");
 		}
 
-		// COPY LINK BUTTON FOR PRIVATE ROOMS
-		if (this.pongQueryParams.room === "private") {
-			this.appendCopyLink("link");
-		}
+		// // COPY LINK BUTTON FOR PRIVATE ROOMS
+		// if (this.pongQueryParams.room === "private") {
+		// 	this.appendCopyLink("link");
+		// }
 
 		// EVENT LISTENER
 		document.addEventListener("keydown", this, false);
@@ -128,12 +154,15 @@ export class PongComponent extends HTMLElement {
 			if (this.gameState?.roomId || !this.gameState?.score) {
 				this.fillCopyContainers();
 			}
+			this.matchStatusValue.innerText = this.gameState?.matchStatus ?? "";
+			this.knockoutValue.innerText = this.gameState?.knockoutName ?? "";
+			this.gameLoop();
 		};
 		this.wss.onclose = () => {
 			this.lobbyMessage = "Disconnected. Try again later.";
 			setTimeout(() => this.dispatchEvent(homeLinkEvent), 10000);
 		};
-		this.gameLoop();
+		// this.gameLoop();
 		this.botWrapper();
 	}
 
@@ -395,7 +424,8 @@ export class PongComponent extends HTMLElement {
 		// CLEAR THE CANVAS
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		if (this.gameState && this.gameState.ball) {
-			const state = structuredClone(this.gameState);
+			// const state = structuredClone(this.gameState);
+			const state = this.gameState;
 			this.scaleGameState(state);
 			this.drawCenterLine();
 			this.drawPaddle(state.leftPaddle);
@@ -412,7 +442,6 @@ export class PongComponent extends HTMLElement {
 					this.canvasWidth,
 					this.canvasHeight,
 				);
-				// return;
 			}
 		} else {
 			this.drawCenterLine();
@@ -424,7 +453,7 @@ export class PongComponent extends HTMLElement {
 			);
 		}
 
-		requestAnimationFrame(this.gameLoop);
+		// requestAnimationFrame(this.gameLoop);
 	};
 
 	async requestBot(roomId: string) {
@@ -456,14 +485,21 @@ export class PongComponent extends HTMLElement {
 		if (this.isBotNeeded() === true) {
 			let intervalId = setInterval(() => {
 				if (
-					this.wss?.readyState === this.wss?.OPEN &&
+					this.wss?.readyState === WebSocket.OPEN &&
 					this.gameState?.roomId
 				) {
-					console.log("got roomId:", this.gameState.roomId);
+					this.dispatchEvent(
+						notificationEvent(
+							`got roomId:", ${this.gameState.roomId}`,
+							"success",
+						),
+					);
 					clearInterval(intervalId);
 					this.requestBot(this.gameState.roomId);
 				} else {
-					console.log("waiting for roomId...");
+					this.dispatchEvent(
+						notificationEvent("waiting for roomId...", "info"),
+					);
 				}
 			}, 1000);
 		}
@@ -543,6 +579,7 @@ export class PongComponent extends HTMLElement {
 
 	onResize() {
 		this.adjustCanvasToWindow();
+		this.gameLoop();
 	}
 }
 

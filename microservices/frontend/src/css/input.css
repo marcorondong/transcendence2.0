@@ -30,6 +30,10 @@
 .pong-button {
 	@apply cursor-pointer rounded-lg text-center  text-base  font-medium px-2 py-2 text-indigo-900 transition-colors duration-300 hover:text-cyan-400  disabled:cursor-default  disabled:hover:bg-slate-300/10 disabled:bg-slate-300/10 disabled:border-slate-100/0 disabled:opacity-30 disabled:text-slate-400 hover:disabled:text-slate-400 dark:text-amber-50 hover:dark:text-cyan-400   no-underline whitespace-nowrap z-0;
 }
+
+.pong-button-tight {
+	@apply p-1 sm:p-2;
+}
 .pong-button-primary {
 	@apply border-1 hover:dark:text-blue-300 border-blue-600/60 dark:text-blue-400 dark:bg-indigo-900/20 hover:dark:bg-indigo-700/20;
 }
