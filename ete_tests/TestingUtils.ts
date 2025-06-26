@@ -64,5 +64,40 @@ export class TestingUtils {
 		await page.getByRole("link", { name: "profile" }).click();
 	}
 
+	static async tournamentStep(page: Page, playerNumber: number = 4) {
+		await page.locator("#pong").click();
+		await page.getByRole("button", { name: "Tournament Mode" }).click();
+		await page
+			.getByRole("button", { name: `${playerNumber} Player Tournament` })
+			.click();
+	}
+
+	static async takeScreenshotsEvery10Seconds(
+		pages: Page[],
+		baseName: string,
+		durationSeconds = 60,
+		intervalSeconds = 10,
+	) {
+		const totalShots = Math.floor(durationSeconds / intervalSeconds);
+
+		for (let i = 0; i < totalShots; i++) {
+			await Promise.all(
+				pages.map((page, index) =>
+					page.screenshot({
+						path: `ete_tests/screenshots/${baseName}_user${
+							index + 1
+						}_t${i * intervalSeconds}.png`,
+					}),
+				),
+			);
+
+			if (i < totalShots - 1) {
+				await new Promise((res) =>
+					setTimeout(res, intervalSeconds * 1000),
+				);
+			}
+		}
+	}
+
 	static async messageSent(page: Page) {}
 }

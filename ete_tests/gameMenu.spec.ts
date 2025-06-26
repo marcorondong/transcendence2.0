@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Browser, Page, BrowserContext } from "@playwright/test";
 import { homeUrl, registeredUsers } from "./config";
 import { TestingUtils } from "./TestingUtils";
 
@@ -67,4 +67,47 @@ test.describe.serial("Game flow", () => {
 		// await expect(page.locator("canvas")).toBeVisible();
 		// await expect(page.getByText("Match Status: Game is running")).toBeVisible();
 	});
+});
+
+test("4 Player Tournament test", async ({ browser }) => {
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = 0; i < 4; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.tournamentStep(page);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"Tournament4",
+		30 * 3,
+		20,
+	);
+});
+
+test("8 Player Tournament test", async ({ browser }) => {
+	test.setTimeout(30 * 4 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = 0; i < 8; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.tournamentStep(page, 8);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"Tournament8",
+		30 * 4,
+		20,
+	);
 });
