@@ -35,6 +35,7 @@ build/
 # Secrets
 # apiKey.key
 *.key
+*.txt
 
 # Git files
 .git

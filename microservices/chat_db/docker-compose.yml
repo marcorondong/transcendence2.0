@@ -9,8 +9,8 @@ services:
       - ./src/:/chat_db/src/ #TODO remove in production
       - ./prisma/:/chat_db/prisma/ #TODO remove in production
       #- /home/iguliyev/DBs/chat/:/chat_db/DB/ #TODO define path to db and uncomment this line when using the local DB
-    ports:
-      - 3004:3004 # TODO remove this in production
+    # ports:
+    #   - 3004:3004 # TODO remove this in production
     networks:
       - Transcendence2.0
     restart: unless-stopped

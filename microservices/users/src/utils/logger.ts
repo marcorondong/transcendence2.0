@@ -6,7 +6,7 @@ import util from "util"; // For handling %s, %d, %j, etc as console.log()
 // Logger format section
 let PINO_LOGGER = true; // Change to true to enable full Pino logging
 const FASTIFY_LOGGER = true; // Change to false to disable Fastify logger
-const LOG_LEVEL = process.env.LOG_LEVEL || "info";
+const LOG_LEVEL = process.env.LOG_LEVEL || "warn"; // "trace" | "debug" | "info" | "warn" | "error" | "fatal"
 const NODE_ENV = process.env.NODE_ENV || "development";
 // Tracing section
 const SHOW_CALL_SITE = true; // Enable call_site (function, file, line) in debug and trace logs
@@ -16,7 +16,7 @@ const SERVICE_NAME = "users"; // Optional: leave empty string to skip including 
 // ELK format section
 const USE_ELK_FORMAT = true; // Toggle ELK-style arg order: (data, message)
 const DEFAULT_LOG_MESSAGE = "<no message>"; // Default fallback if no msg
-const ELK_WARN_ENABLED = true; // Set to false to suppress non-ELK format warnings
+const ELK_WARN_ENABLED = false; // Set to false to suppress non-ELK format warnings
 type InternalLogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal"; // Helper type to set level of non-ELK warning message
 const ELK_WARN_LEVEL: InternalLogLevel = "warn"; // Can be trace, debug, fatal, etc.
 

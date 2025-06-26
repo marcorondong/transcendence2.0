@@ -25,6 +25,8 @@ export class ProfileView extends HTMLElement {
 	friendsOutContainer = document.createElement("div");
 	friendsInContainer = document.createElement("div");
 	friendsContainer = document.createElement("div");
+	friendsComponent : ProfileFriendsComponent | undefined = undefined;
+	friendsHeadlineComponent: HeadlineComponent | undefined = undefined;
 
 	constructor(chat: ChatComponent) {
 		super();
@@ -33,7 +35,9 @@ export class ProfileView extends HTMLElement {
 
 	async connectedCallback() {
 		console.log("PROFILE VIEW has been CONNECTED");
+		this.friendsContainer.id = 'friendsContainer';
 
+		
 		this.userIdFromQueryParam();
 		await this.fetchData();
 		if (!this.userData) {
@@ -152,7 +156,7 @@ export class ProfileView extends HTMLElement {
 
 			if (this.userId) {
 				this.friends = await FetchUsers.friendsGet(this.userId);
-				this.buildFriends();
+				this.friendsComponent?.updateFriends(this.friends ?? []);;
 			}
 		} catch (e) {
 			document.dispatchEvent(
@@ -275,16 +279,15 @@ export class ProfileView extends HTMLElement {
 	}
 
 	buildFriends() {
-		if (this.friends?.length) {
-			this.friendsContainer.append(
-				new HeadlineComponent("Friends"),
-				new ProfileFriendsComponent(
-					this.friends,
-					this.userId === this.meId,
-				),
-			);
+			if(this.friends?.length === 0 ){
+				this.friendsContainer.classList.add('hidden');
+			}
+			this.friendsComponent = new ProfileFriendsComponent(this.friends ?? [], this.userId === this.meId,);
+			this.friendsComponent.id = 'friendsComponent';
+			this.friendsHeadlineComponent = new HeadlineComponent("Friends");
+			this.friendsContainer.append(this.friendsHeadlineComponent, this.friendsComponent);
 			this.insertBefore(this.friendsContainer, this.children[1] || null);
-		}
+		
 	}
 
 	buildDomElements() {

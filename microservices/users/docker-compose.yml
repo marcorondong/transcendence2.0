@@ -10,12 +10,12 @@ services:
     secrets:
       - apikey
     volumes:
-      - .:/app # Mount full project
-      - users_node_modules:/app/node_modules # Keep node_modules container-managed
-      - users_db:/app/prisma/database # Keep DB container-managed & ephemeral
-      - user_pictures:/app/uploads # Users pictures (Shared with Nginx)
-    ports:
-      - "3000:3000" # Expose Fastify server to host
+      # - .:/app # Mount full project
+      # - users_node_modules:/app/node_modules # Keep node_modules container-managed
+      - users_db:/users/prisma/database # Keep DB container-managed & ephemeral
+      - user_pictures:/users/uploads # Users pictures (Shared with Nginx)
+    # ports:
+      # - "3000:3000" # Expose Fastify server to host
     # environment:
     #   - DATABASE_URL=file:./prisma/database/dev.db
     networks:
@@ -29,6 +29,6 @@ secrets:
     file: docker/apikey.txt
 
 volumes:
-  users_node_modules:
+  # users_node_modules:
   users_db:
   user_pictures:

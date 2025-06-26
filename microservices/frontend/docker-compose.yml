@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    ports:
-      - "5173:5173" # TODO: close this before handing in
+    # ports:
+    #   - "5173:5173" # TODO: close this before handing in
     environment:
       # - NODE_ENV=development # or production
       - NODE_ENV=production

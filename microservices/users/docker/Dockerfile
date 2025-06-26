@@ -2,16 +2,23 @@
 FROM node:23-bullseye-slim
 
 # Set working directory
-WORKDIR /app
+# WORKDIR /app
+WORKDIR /users
 
 # Copy package.json and package-lock.json (from context `users/`)
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+# RUN npm install
 
 # Copy the rest of the app code (from context `users/`)
-COPY . .
+# COPY . .
+# COPY ./node_modules .
+COPY ./prisma ./prisma/
+COPY ./src ./src/
+COPY ./tsconfig.json ./
+
+RUN npm ci
 
 # Generate Prisma client (after schema and node_modules are present)
 RUN npx prisma generate

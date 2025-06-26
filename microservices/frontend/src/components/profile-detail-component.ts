@@ -109,7 +109,7 @@ class ProfileDetailComponent extends HTMLElement {
 			const returnedData = await FetchUsers.userPatch(this.userData.id, {
 				email:
 					this.emailInput.value === this.userData.email
-						? undefined
+						? this.userData.email
 						: v.parse(emailValidator, this.emailInput.value.trim()),
 				password:
 					this.passwordInput.value === ""
@@ -117,7 +117,7 @@ class ProfileDetailComponent extends HTMLElement {
 						: v.parse(passwordValidator, this.passwordInput.value),
 				nickname:
 					this.userData.nickname === this.nicknameInput.value
-						? undefined
+						? this.userData.nickname
 						: v.parse(
 								nicknameValidator,
 								this.nicknameInput.value.trim(),
