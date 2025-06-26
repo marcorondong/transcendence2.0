@@ -17,8 +17,12 @@ class ProfileMatchHistoryComponent extends HTMLElement {
 			this.history.loserId === this.currentUser.id
 				? this.history.winnerId
 				: this.history.loserId;
-		const opponentUser = await FetchUsers.user(opponentUserId);
-		this.buildDomElements(this.currentUser, opponentUser);
+		try {
+			const opponentUser = await FetchUsers.user(opponentUserId);
+			this.buildDomElements(this.currentUser, opponentUser);
+		} catch (e) {
+			console.log(e);
+		}
 	}
 	disconnectedCallback() {}
 
