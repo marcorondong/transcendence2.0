@@ -10,8 +10,8 @@ services:
     secrets:
       - apikey
     volumes:
-      - .:/app # Mount full project
-      - users_node_modules:/app/node_modules # Keep node_modules container-managed
+      # - .:/app # Mount full project
+      # - users_node_modules:/app/node_modules # Keep node_modules container-managed
       - users_db:/app/prisma/database # Keep DB container-managed & ephemeral
       - user_pictures:/app/uploads # Users pictures (Shared with Nginx)
     ports:
@@ -29,6 +29,6 @@ secrets:
     file: docker/apikey.txt
 
 volumes:
-  users_node_modules:
+  # users_node_modules:
   users_db:
   user_pictures:
