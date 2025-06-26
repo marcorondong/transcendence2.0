@@ -95,7 +95,7 @@ export class AppError extends Error {
 	constructor({
 		statusCode = 500,
 		code = "APP_ERROR_DEFAULT",
-		message = "Unknown error",
+		message = "Error caught", // "Unknown error"
 		service = SERVICE_NAME || undefined,
 		handlerName,
 		stack,
@@ -139,7 +139,7 @@ export function appErrorHandler<
 			if (err instanceof Error) {
 				throw new AppError({
 					statusCode: 500,
-					message: err.message || "Unexpected error",
+					message: err.message || "Some error msg here", // "Unexpected error"
 					handlerName: name,
 					stack: err.stack,
 					nestedCause: err, // Capture original error
@@ -152,7 +152,7 @@ export function appErrorHandler<
 					// So I don't discard / mutate the message
 					typeof err === "string"
 						? err
-						: JSON.stringify(err) || "Unknown error",
+						: JSON.stringify(err) || "Error caught", // "Unknown error"
 				handlerName: name,
 				nestedCause: err, // Capture unknown value too
 			});
@@ -187,7 +187,7 @@ export function ft_fastifyErrorHandler(
 		// request.log.error({ // This line uses fastify default request.log
 		logger.from(request).error({
 			statusCode: err.statusCode,
-			code: err.code ?? "UNKNOWN_ERROR",
+			code: err.code ?? "VERY_WELL_KNOWN_ERROR", // UNKNOWN_ERROR"
 			message: err.message,
 			service: err.service,
 			type: err.errorType,
@@ -204,7 +204,7 @@ export function ft_fastifyErrorHandler(
 		// Reply (curl, Postman, Swagger) part
 		return reply.code(err.statusCode).send({
 			statusCode: err.statusCode,
-			code: err.code ?? "UNKNOWN_ERROR",
+			code: err.code ?? "VERY_WELL_KNOWN_ERROR", // UNKNOWN_ERROR"
 			message: err.message,
 			// Don't send these. Already printed in the terminal.
 			// If I send them, I'm exposing internal code structure.
@@ -225,7 +225,7 @@ export function ft_fastifyErrorHandler(
 			// So I don't discard / mutate the message
 			typeof err === "string"
 				? err
-				: JSON.stringify(err) || "Unhandled exception",
+				: JSON.stringify(err) || "Handled exception",
 		stack: (err as any)?.stack,
 	});
 	// return reply.send(err);
@@ -238,10 +238,10 @@ export function ft_fastifyErrorHandler(
 
 	return reply.code(statusCode).send({
 		statusCode,
-		code: (err as any)?.code ?? "UNHANDLED_ERROR",
+		code: (err as any)?.code ?? "VERY_WELL_HANDLED_ERROR",
 		message:
 			typeof err === "string"
 				? err
-				: (err as any)?.message || "Unhandled exception",
+				: (err as any)?.message || "Very well handled exception",
 	});
 }
