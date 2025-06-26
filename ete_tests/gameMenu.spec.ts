@@ -1,7 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Browser, Page, BrowserContext } from "@playwright/test";
 import { homeUrl, registeredUsers } from "./config";
 import { TestingUtils } from "./TestingUtils";
 
+const HUMAN_PLAYERS = 0;
 //don't run tests in parallel, for joining games
 test.describe.configure({ mode: "serial" });
 
@@ -61,5 +62,93 @@ test("Two users play against each other", async ({ browser }) => {
 			'"knockoutName":"single match"',
 		],
 		3000,
+	);
+});
+
+test("4 Player Tournament test", async ({ browser }) => {
+	test.setTimeout(30 * 2 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = HUMAN_PLAYERS; i < 4; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.tournamentStep(page);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"Tournament4",
+		30 * 3,
+		20,
+	);
+});
+
+test("8 Player Tournament test", async ({ browser }) => {
+	test.setTimeout(30 * 4 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = HUMAN_PLAYERS; i < 8; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.tournamentStep(page, 8);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"Tournament8",
+		30 * 4,
+		20,
+	);
+});
+
+test("16 Player Tournament test", async ({ browser }) => {
+	test.setTimeout(30 * 5 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = HUMAN_PLAYERS; i < 16; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.tournamentStep(page, 16);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"Tournament16",
+		30 * 4,
+		20,
+	);
+});
+
+test("2 vs 2 doubles test", async ({ browser }) => {
+	test.setTimeout(30 * 2 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = HUMAN_PLAYERS; i < 4; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.doublesStep(page);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"doubles",
+		30 * 3,
+		20,
 	);
 });
