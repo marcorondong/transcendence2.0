@@ -73,24 +73,36 @@ export class PongComponent extends HTMLElement {
 		this.gameInfoContainer.classList.add(
 			"pong-card",
 			"pong-card-dark",
-			"flex",
-			"gap-8",
+			"grid",
+			"grid-cols-1",
+			"grid-rows-2",
 			"px-4",
 			"py-2",
+			"gap-2",
 			"items-center",
 			"justify-between",
 			"mb-8",
+			"text-sm",
+			"text-slate-400",
+			"truncate",
+			"min-h-12",
 		);
 		const knockoutLabel = document.createElement("div");
 		knockoutLabel.innerText = "Game Mode:";
+		knockoutLabel.classList.add("text-nowrap", "font-semibold");
+		this.knockoutValue.classList.add("text-wrap", "text-normal");
 		const knockoutContainer = document.createElement("div");
+		knockoutContainer.classList.add("flex", "items-start", "gap-2");
 		knockoutContainer.append(knockoutLabel, this.knockoutValue);
 		const matchStatusLabel = document.createElement("div");
 		matchStatusLabel.innerText = "Match Status:";
+		matchStatusLabel.classList.add("text-nowrap", "font-semibold");
+		this.matchStatusValue.classList.add("text-wrap", "text-normal");
 		const matchStatusContainer = document.createElement("div");
 		matchStatusContainer.append(matchStatusLabel, this.matchStatusValue);
+		matchStatusContainer.classList.add("flex", "items-start", "gap-2");
 		this.gameInfoContainer.append(knockoutContainer, matchStatusContainer);
-		this.append(this.gameInfoContainer, canvasContainer);
+		this.append(canvasContainer, this.gameInfoContainer);
 
 		// FULLSCREEN BUTTON
 		this.fullscreenButton.id = "fullscreen-button";
@@ -154,7 +166,11 @@ export class PongComponent extends HTMLElement {
 			if (this.gameState?.roomId || !this.gameState?.score) {
 				this.fillCopyContainers();
 			}
-			this.matchStatusValue.innerText = this.gameState?.matchStatus ?? "";
+			const welcomeMessage =
+				this.gameState?.matchStatus.includes("Welcome");
+			this.matchStatusValue.innerText = welcomeMessage
+				? "waiting for opponent..."
+				: (this.gameState?.matchStatus ?? "");
 			this.knockoutValue.innerText = this.gameState?.knockoutName ?? "";
 			this.gameLoop();
 		};

@@ -91,6 +91,7 @@ export class Bot {
 					`WebSocket closed at ${this.host}:${this.port} in room ${this.roomId}: `,
 					event,
 				);
+				console.timeEnd("time since welcome frame");
 				return;
 			});
 

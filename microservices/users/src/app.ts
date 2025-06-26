@@ -1,5 +1,6 @@
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
-import fastifyJwt from "@fastify/jwt";
+// import fastifyJwt from "@fastify/jwt";
+import type { FastifyJWT } from "@fastify/jwt";
 import multipart from "@fastify/multipart";
 import {
 	ZodTypeProvider,
@@ -39,11 +40,27 @@ declare module "fastify" {
 	}
 }
 
+declare module "@fastify/jwt" {
+	interface FastifyJWT {
+		payload: TokenPayload; // Optional: decode()'s return value
+	}
+}
+
+// Add this below your other `declare module "fastify"` block
+// declare module "fastify" {
+// 	interface FastifyRequest {
+// 		jwt: {
+// 			decode: (token: string) => TokenPayload | null;
+// 		};
+// 	}
+// }
+
 // Register global authGuard hook (as onRequest, to contact AUTH Service on each request)
 server.addHook("onRequest", authGuard);
 
 // Register multipart (for picture uploads) and set limits
 // TODO: Later move these constraints to Nginx (separation of concerns, unique source of truth)
+// TODO: Maybe move this one inside main() to wait for it async/promise
 server.register(multipart, {
 	limits: { fileSize: 1_048_576 }, // 1MB in bytes
 });
