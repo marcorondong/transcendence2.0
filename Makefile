@@ -4,9 +4,12 @@ GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
 PONG_ENV = ./microservices/ssg/pong-api/.env
 PRIVATE_WALLET_KEY = ./microservices/ssg/pong-api/wallet_private.key
-BOT_ENV = ./microservices/ssg/ai-bot/docker/.env
+BOT_ENV = ./microservices/ssg/ai/docker/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
+API_KEY = ./microservices/users/docker/apikey.txt
+CAHT_API_KEY = ./microservices/chat_api/api_key/apiKey.key
+SETTINGS_CONF = setting.conf
 GLOBAL_ENV = .env
 REBUILD_SERVICE = -re
 
@@ -14,7 +17,7 @@ SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
 SECRET_FILES = $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) \
 	$(GLOBAL_ENV) $(AUTH_API_COOKIE_SECRET) $(AUTH_API_JWT_SECRET) \
-	$(BOT_ENV) $(PRIVATE_WALLET_KEY)
+	$(BOT_ENV) $(PRIVATE_WALLET_KEY) $(SETTINGS_CONF) $(API_KEY) $(CAHT_API_KEY)
 
 all: $(SECRET_FILES)
 	docker compose up -d
@@ -28,7 +31,7 @@ clean:
 remove:
 	docker compose down --volumes
 	docker system prune -a -f --volumes
-	$(MAKE) delete-secrets
+##$(MAKE) delete-secrets
 	$(MAKE) -C cli-client clean
 
 reset:
@@ -71,27 +74,27 @@ $(SECRET_DIRECTORIES):
 $(GRAFANA_PW): $(SECRET_DIRECTORIES)
 	./monitoring/grafana/create_password.sh
 
-$(PONG_ENV):
-	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
+# $(PONG_ENV):
+# 	ft_crypt.sh --decrypt="$(PONG_ENV).enc" --force
 
-$(PRIVATE_WALLET_KEY):
-	ft_crypt.sh --decrypt="$(PRIVATE_WALLET_KEY).enc" --force
+# $(PRIVATE_WALLET_KEY):
+# 	ft_crypt.sh --decrypt="$(PRIVATE_WALLET_KEY).enc" --force
 
-$(BOT_ENV):
-	ft_crypt.sh --decrypt="$(BOT_ENV).enc" --force
+# $(BOT_ENV):
+# 	ft_crypt.sh --decrypt="$(BOT_ENV).enc" --force
 
-$(AUTH_API_COOKIE_SECRET):
-	ft_crypt.sh --decrypt="$(AUTH_API_COOKIE_SECRET).enc" --force
+# $(AUTH_API_COOKIE_SECRET):
+# 	ft_crypt.sh --decrypt="$(AUTH_API_COOKIE_SECRET).enc" --force
 
-$(AUTH_API_JWT_SECRET):
-	ft_crypt.sh --decrypt="$(AUTH_API_JWT_SECRET).enc" --force
+# $(AUTH_API_JWT_SECRET):
+# 	ft_crypt.sh --decrypt="$(AUTH_API_JWT_SECRET).enc" --force
 
-$(GLOBAL_ENV):
-	ft_crypt.sh --decrypt="$(GLOBAL_ENV).enc" --force
+# $(GLOBAL_ENV):
+# 	ft_crypt.sh --decrypt="$(GLOBAL_ENV).enc" --force
 
-$(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
-	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
-	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
+# $(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
+# 	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
+# 	mv ./monitoring/alertmanager/slack_webhook.txt $(SLACK_WEBHOOK)
 
 
 .PHONY: all re clean remove dev cli nuke delete-secrets reset %$(REBUILD_SERVICE)

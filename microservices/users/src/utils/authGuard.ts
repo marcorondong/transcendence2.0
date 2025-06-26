@@ -34,8 +34,8 @@ export function isInternalApiRequest(
 		authHeader === `Bearer ${INTERNAL_API_KEY}`;
 
 	if (isMatch && callerLabel) {
-		console.log(`[isInternalApiRequest] Bypassed auth in "${callerLabel}"`);
-		logger.warn({
+		// console.log(`[isInternalApiRequest] Bypassed auth in "${callerLabel}"`);
+		logger.debug({
 			"event.action": "isInternalApiRequest hit",
 			"url": request.raw.url,
 			"method": request.method,
@@ -71,7 +71,7 @@ export function isInternalApiRequest(
 // Helper function to decode token payload (No need the "secret" for that)
 export function decodeJwtPayload(token: string): TokenPayload | null {
 	try {
-		console.log("this is the token received by decodeJwtPayload", token);
+		// console.log("this is the token received by decodeJwtPayload", token);
 		const parts = token.split(".");
 		if (parts.length < 3) {
 			console.log("Failing in Step01");
@@ -125,7 +125,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 	// console.log("###################################################");
 	if (!AUTH_GUARD_ENABLED) return;
 
-	logger.warn({
+	logger.debug({
 		"event.action": "authGuard hit",
 		"url": request.raw.url,
 		"method": request.method,
@@ -175,7 +175,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		return;
 	}
 
-	logger.warn("Entering new cookie logic");
+	logger.debug("Entering new cookie logic");
 	const cookieHeader = request.headers.cookie;
 	if (!cookieHeader) {
 		throw new AppError({
@@ -186,7 +186,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 	}
 	try {
-		logger.warn({
+		logger.debug({
 			"event.action": "authGuard to verify with AUTH",
 			"cookie": cookieHeader,
 			"message":
@@ -196,13 +196,13 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		const cookies = Object.fromEntries(
 			cookieHeader.split(";").map((c) => c.trim().split("=")),
 		);
-		logger.warn({
+		logger.debug({
 			"event.action": "authGuard new cookie/jwt logic",
 			"cookies": cookies,
 			"message": "This is the cookies content",
 		});
 		const token = cookies["access_token"]; // Or your actual cookie name
-		logger.warn({
+		logger.debug({
 			"event.action": "authGuard new cookie/jwt logic",
 			"token": token,
 			"message": "This is the token content",
@@ -215,7 +215,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 				handlerName: "authGuard",
 			});
 		}
-		logger.warn("Trying to decode token with new logic");
+		logger.debug("Trying to decode token with new logic");
 		const decoded = decodeJwtPayload(token);
 		if (!decoded) {
 			throw new AppError({
@@ -225,20 +225,20 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 				handlerName: "authGuard",
 			});
 		}
-		logger.warn({
+		logger.debug({
 			"event.action": "authGuard new cookie/jwt logic",
 			"decoded": decoded,
 			"message": "This is the decoded token content",
 		});
 		const validated = validatedTokenSchema.parse(decoded);
-		logger.warn({
+		logger.debug({
 			"event.action": "authGuard new cookie/jwt logic",
 			"validated": validated,
 			"message": "This is the validated (parsed) decoded content",
 		});
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
-		logger.warn({
+		logger.debug({
 			"event.action": "authGuard decoded cookie",
 			"authUser": request.authUser,
 			"message": "Final authUser attached to request",
@@ -290,7 +290,8 @@ export async function onlySelf<
 			statusCode: 403,
 			code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_RESOURCE,
 			// TODO: Later remove the ids part
-			message: `Forbidden: not your resource. You have id: ${user.id} | You requested: ${request.params.id}`,
+			// message: `Forbidden: not your resource. You have id: ${user.id} | You requested: ${request.params.id}`,
+			message: "Forbidden: not your resource",
 			handlerName: "onlySelf",
 		});
 	}
@@ -373,9 +374,10 @@ export function onlyIfInQuery<
 			statusCode: 403,
 			code: AUTH_PRE_HANDLER_ERRORS.FORBIDDEN_QUERY,
 			// TODO: Later remove the ids part
-			message: `Forbidden: User with id ${
-				user.id
-			} does not match any of [params.id, ${queryKeys.join(", ")}]`,
+			// message: `Forbidden: User with id ${
+			// 	user.id
+			// } does not match any of [params.id, ${queryKeys.join(", ")}]`,
+			message: "Forbidden: not your resource",
 			handlerName: "onlyIfInQuery",
 		});
 	};

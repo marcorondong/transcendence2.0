@@ -25,11 +25,21 @@ class ProfileFriendsComponent extends HTMLElement {
 			"justify-start",
 			"gap-6",
 		);
-		this.buildFriends();
+		this.buildFriends(this.friends);
+	}
+	updateFriends(friends: User[]){
+		this.replaceChildren();
+		const friendsContainer = document.getElementById('friendsContainer');
+		if (friendsContainer && friends.length > 0){
+			friendsContainer.classList.remove('hidden');
+		} else {
+			friendsContainer?.classList.add('hidden');
+		}
+		this.buildFriends(friends);
 	}
 
-	buildFriends() {
-		for (let friend of this.friends) {
+	buildFriends(friends: User[]) {
+		for (let friend of friends) {
 			const container = document.createElement("div");
 			container.classList.add(
 				"flex",

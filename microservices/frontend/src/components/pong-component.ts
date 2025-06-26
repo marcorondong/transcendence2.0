@@ -151,35 +151,40 @@ export class PongComponent extends HTMLElement {
 			this.goFullscreen();
 		});
 
-		this.createNewWebsocket();
+		try {
+			this.createNewWebsocket();
 
-		if (!this.wss) {
-			return;
+			if (!this.wss) {
+				return;
+			}
+
+			this.wss.onmessage = (event) => {
+				this.gameState = JSON.parse(event.data);
+				if (this.chat.roomId) {
+					this.chat.roomId = undefined;
+					this.chat.sendInvitation();
+				}
+				if (this.gameState?.roomId || !this.gameState?.score) {
+					this.fillCopyContainers();
+				}
+				const welcomeMessage =
+					this.gameState?.matchStatus?.includes("Welcome");
+				this.matchStatusValue.innerText = welcomeMessage
+					? "waiting for opponent..."
+					: (this.gameState?.matchStatus ?? "");
+				this.knockoutValue.innerText = this.gameState?.knockoutName ?? "";
+				this.gameLoop();
+			};
+			this.wss.onclose = () => {
+				this.lobbyMessage = "Disconnected. Try again later.";
+				setTimeout(() => this.dispatchEvent(homeLinkEvent), 10000);
+			};
+			
+			// this.gameLoop();
+			this.botWrapper();
+		} catch (error) {
+			console.error(error)
 		}
-
-		this.wss.onmessage = (event) => {
-			this.gameState = JSON.parse(event.data);
-			if (this.chat.roomId) {
-				this.chat.roomId = undefined;
-				this.chat.sendInvitation();
-			}
-			if (this.gameState?.roomId || !this.gameState?.score) {
-				this.fillCopyContainers();
-			}
-			const welcomeMessage =
-				this.gameState?.matchStatus.includes("Welcome");
-			this.matchStatusValue.innerText = welcomeMessage
-				? "waiting for opponent..."
-				: (this.gameState?.matchStatus ?? "");
-			this.knockoutValue.innerText = this.gameState?.knockoutName ?? "";
-			this.gameLoop();
-		};
-		this.wss.onclose = () => {
-			this.lobbyMessage = "Disconnected. Try again later.";
-			setTimeout(() => this.dispatchEvent(homeLinkEvent), 10000);
-		};
-		// this.gameLoop();
-		this.botWrapper();
 	}
 
 	fillCopyContainers() {

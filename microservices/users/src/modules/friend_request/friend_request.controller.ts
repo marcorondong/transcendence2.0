@@ -85,7 +85,6 @@ function applyPagination(params: {
 
 	// Enforce that both `page` and `skip` are not allowed together
 	if (typeof params.page === "number" && typeof params.skip === "number") {
-		// TODO: Use AppError here
 		// throw new Error("Cannot use both 'page' and 'skip' in the same query");
 		throw new AppError({
 			statusCode: 400,
