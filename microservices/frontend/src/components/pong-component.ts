@@ -74,12 +74,11 @@ export class PongComponent extends HTMLElement {
 			"pong-card",
 			"pong-card-dark",
 			"grid",
-			"sm:grid-cols-2",
 			"grid-cols-1",
 			"grid-rows-2",
-			"sm:grid-rows-1",
 			"px-4",
 			"py-2",
+			"gap-2",
 			"items-center",
 			"justify-between",
 			"mb-8",
@@ -91,22 +90,14 @@ export class PongComponent extends HTMLElement {
 		const knockoutLabel = document.createElement("div");
 		knockoutLabel.innerText = "Game Mode:";
 		knockoutLabel.classList.add("text-nowrap", "font-semibold");
-		this.knockoutValue.classList.add(
-			"text-nowrap",
-			"text-normal",
-			"truncate",
-		);
+		this.knockoutValue.classList.add("text-wrap", "text-normal");
 		const knockoutContainer = document.createElement("div");
 		knockoutContainer.classList.add("flex", "items-start", "gap-2");
 		knockoutContainer.append(knockoutLabel, this.knockoutValue);
 		const matchStatusLabel = document.createElement("div");
 		matchStatusLabel.innerText = "Match Status:";
 		matchStatusLabel.classList.add("text-nowrap", "font-semibold");
-		this.matchStatusValue.classList.add(
-			"text-nowrap",
-			"text-normal",
-			"truncate",
-		);
+		this.matchStatusValue.classList.add("text-wrap", "text-normal");
 		const matchStatusContainer = document.createElement("div");
 		matchStatusContainer.append(matchStatusLabel, this.matchStatusValue);
 		matchStatusContainer.classList.add("flex", "items-start", "gap-2");
