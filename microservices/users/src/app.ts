@@ -1,6 +1,6 @@
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 // import fastifyJwt from "@fastify/jwt";
-// import type { FastifyJWT } from "@fastify/jwt";
+import type { FastifyJWT } from "@fastify/jwt";
 import multipart from "@fastify/multipart";
 import {
 	ZodTypeProvider,
@@ -40,11 +40,11 @@ declare module "fastify" {
 	}
 }
 
-// declare module "@fastify/jwt" {
-// 	interface FastifyJWT {
-// 		payload: TokenPayload; // Optional: decode()'s return value
-// 	}
-// }
+declare module "@fastify/jwt" {
+	interface FastifyJWT {
+		payload: TokenPayload; // Optional: decode()'s return value
+	}
+}
 
 // Add this below your other `declare module "fastify"` block
 // declare module "fastify" {

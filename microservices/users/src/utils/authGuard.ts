@@ -1,5 +1,9 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { TokenPayload, loginResponseSchema } from "../modules/user/user.schema";
+import {
+	TokenPayload,
+	// loginResponseSchema, // TODO: Remove this one since validatedTokenSchema replaces it
+	validatedTokenSchema,
+} from "../modules/user/user.schema";
 import { AppError, AUTH_GUARD_ERRORS, AUTH_PRE_HANDLER_ERRORS } from "./errors";
 import { logger } from "./logger";
 import prisma from "./prisma";
@@ -80,7 +84,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 	// console.dir(request, { depth: 2 });
 	if (!AUTH_GUARD_ENABLED) return;
 
-	logger.debug({
+	logger.warn({
 		"event.action": "authGuard hit",
 		"url": request.raw.url,
 		"method": request.method,
@@ -195,7 +199,8 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 			"decoded": decoded,
 			"message": "This is the decoded token content",
 		});
-		const validated = loginResponseSchema.parse(decoded);
+		// const validated = loginResponseSchema.parse(decoded);
+		const validated = validatedTokenSchema.parse(decoded);
 		logger.warn({
 			"event.action": "authGuard new cookie/jwt logic",
 			"validated": validated,
@@ -203,13 +208,14 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
-		logger.debug({
+		logger.warn({
 			"event.action": "authGuard decoded cookie",
 			"authUser": request.authUser,
 			"message": "Final authUser attached to request",
 		});
 		// TODO: Maybe this one doesn't need to be here
 	} catch (err) {
+		// console.log(err);
 		throw new AppError({
 			statusCode: 500,
 			code: AUTH_GUARD_ERRORS.UNREACHABLE_AUTH,
