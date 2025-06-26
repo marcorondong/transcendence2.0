@@ -72,6 +72,12 @@ export class TestingUtils {
 			.click();
 	}
 
+	static async doublesStep(page: Page) {
+		await page.locator("#pong").click();
+		await page.getByRole("button", { name: "Doubles Mode" }).click();
+		await page.locator("#public").click();
+	}
+
 	static async takeScreenshotsEvery10Seconds(
 		pages: Page[],
 		baseName: string,

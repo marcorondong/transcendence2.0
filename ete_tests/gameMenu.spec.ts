@@ -6,6 +6,8 @@ test.use({
 	ignoreHTTPSErrors: true,
 });
 
+const HUMAN_PLAYERS = 0;
+
 test("Login checkpoint", async ({ page }) => {
 	await page.goto(homeUrl);
 	await page.getByRole("textbox", { name: "Your Username" }).click();
@@ -74,7 +76,7 @@ test("4 Player Tournament test", async ({ browser }) => {
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
 
-	for (let i = 0; i < 4; i++) {
+	for (let i = HUMAN_PLAYERS; i < 4; i++) {
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		contexts.push(context);
@@ -96,7 +98,7 @@ test("8 Player Tournament test", async ({ browser }) => {
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
 
-	for (let i = 0; i < 8; i++) {
+	for (let i = HUMAN_PLAYERS; i < 8; i++) {
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		contexts.push(context);
@@ -108,6 +110,50 @@ test("8 Player Tournament test", async ({ browser }) => {
 		pages,
 		"Tournament8",
 		30 * 4,
+		20,
+	);
+});
+
+test("16 Player Tournament test", async ({ browser }) => {
+	test.setTimeout(30 * 5 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = HUMAN_PLAYERS; i < 16; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.tournamentStep(page, 16);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"Tournament16",
+		30 * 4,
+		20,
+	);
+});
+
+test("2 vs 2 doubles test", async ({ browser }) => {
+	test.setTimeout(30 * 2 * 1000);
+	const contexts: BrowserContext[] = [];
+	const pages: Page[] = [];
+	const usersArray = Object.values(registeredUsers);
+
+	for (let i = HUMAN_PLAYERS; i < 4; i++) {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		contexts.push(context);
+		pages.push(page);
+		await TestingUtils.logInStep(page, usersArray[i]);
+		await TestingUtils.doublesStep(page);
+	}
+	await TestingUtils.takeScreenshotsEvery10Seconds(
+		pages,
+		"doubles",
+		30 * 3,
 		20,
 	);
 });
