@@ -1,7 +1,7 @@
 import type { FastifyRequest } from "fastify";
 import type { Client } from "../utils/Client";
 import { onlineClients } from "./webSocketConnection";
-import { getRequestBlockStatus } from "./httpRequests";
+import { getRequestBlockStatus, getRequestFriends } from "./httpRequests";
 
 export function checkCookie(request: FastifyRequest) {
 	const cookie = request.headers.cookie;
@@ -20,6 +20,9 @@ export async function checkUser(id: string, client: Client) {
 	if (!friendClient) throw new Error("Server: friend UUID not found");
 	const blockStatus = await getRequestBlockStatus(currentId, id);
 	if (blockStatus) throw new Error("Server: user is blocked");
+	const friendsRaw = await getRequestFriends(currentId);
+	const friends = friendsRaw.map((friend: any) => friend.id);
+	if (!friends.includes(id)) throw new Error("Server: You are not friends");
 	const friendBlockStatus = await getRequestBlockStatus(id, currentId);
 	return { friendClient, friendBlockStatus };
 }
