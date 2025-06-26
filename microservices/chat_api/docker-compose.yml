@@ -7,8 +7,8 @@ services:
       - ../../setting.conf
     volumes:
       - ./src/:/chat_api/src/ #TODO remove in production
-    ports:
-      - 3002:3002 # TODO remove this in production
+    # ports:
+    #   - 3002:3002 # TODO remove this in production
     networks:
       - Transcendence2.0
     depends_on:

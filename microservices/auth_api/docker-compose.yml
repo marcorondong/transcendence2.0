@@ -10,8 +10,8 @@ services:
       - cookieSecret.key
     volumes:
       - ./src/:/auth_api/src/ #TODO remove in production
-    ports:
-      - 2999:2999 # TODO remove this in production
+    # ports:
+    #   - 2999:2999 # TODO remove this in production
     networks:
       - Transcendence2.0
     restart: unless-stopped
