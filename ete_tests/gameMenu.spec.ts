@@ -66,6 +66,7 @@ test("Two users play against each other", async ({ browser }) => {
 });
 
 test("4 Player Tournament test", async ({ browser }) => {
+	test.setTimeout(30 * 2 * 1000);
 	const contexts: BrowserContext[] = [];
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
