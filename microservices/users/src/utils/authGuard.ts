@@ -9,6 +9,7 @@ import prisma from "./prisma";
 
 const AUTH_GUARD_ENABLED = true;
 const DEV_AUTH_ENABLED = false;
+const INTERNAL_API_KEY = "954d4d7d7cd1e53de1c6e398aad2540b"; // TODO: load this from docker secrets
 
 interface AuthenticatedRequest<
 	Params = FastifyRequest["params"],
@@ -18,6 +19,52 @@ interface AuthenticatedRequest<
 	authUser?: TokenPayload; // Optional, since I'll check for it inside the preHandlers
 }
 
+// Helper function to check internal requests (with API Key) and bypass restrictions
+export function isInternalApiRequest(
+	request: FastifyRequest,
+	callerLabel?: string,
+): boolean {
+	const authHeader = request.headers["authorization"];
+	const isMatch =
+		typeof authHeader === "string" &&
+		authHeader === `Bearer ${INTERNAL_API_KEY}`;
+
+	if (isMatch && callerLabel) {
+		console.log(`[isInternalApiRequest] Bypassed auth in "${callerLabel}"`);
+		logger.warn({
+			"event.action": "isInternalApiRequest hit",
+			"url": request.raw.url,
+			"method": request.method,
+			"headers": request.headers,
+			// "cookie": request.headers.cookie,
+			"authHeader": authHeader,
+			"message": `Bypassed auth in "${callerLabel}`,
+		});
+	}
+
+	return isMatch;
+}
+
+// Helper function to check internal requests (with API Key)
+// function isInternalApiRequest(request: FastifyRequest): boolean {
+// 	const authHeader = request.headers["authorization"];
+// 	logger.warn({
+// 		"event.action": "authGuard - preHandler hit",
+// 		"url": request.raw.url,
+// 		"method": request.method,
+// 		"headers": request.headers,
+// 		// "cookie": request.headers.cookie,
+// 		"authHeader": authHeader,
+// 		"message": "authGuard - preHandler detected API Key",
+// 	});
+// 	// Bypass auth for valid internal API key
+// 	return (
+// 		typeof authHeader === "string" &&
+// 		authHeader === `Bearer ${INTERNAL_API_KEY}`
+// 	);
+// }
+
+// Helper function to decode token payload (No need the "secret" for that)
 export function decodeJwtPayload(token: string): TokenPayload | null {
 	try {
 		console.log("this is the token received by decodeJwtPayload", token);
@@ -67,6 +114,11 @@ export function decodeJwtPayload(token: string): TokenPayload | null {
 // Authentication hook
 export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 	// console.dir(request, { depth: 2 });
+	// const authHeader = request.headers["authorization"];
+	if (isInternalApiRequest(request, "authGuard")) return; // Bypass auth for valid internal API key
+	// console.log("###################################################");
+	// console.log("authHeader", authHeader);
+	// console.log("###################################################");
 	if (!AUTH_GUARD_ENABLED) return;
 
 	logger.warn({
@@ -206,6 +258,7 @@ export async function onlySelf<
 	}>,
 >(request: T, _reply: FastifyReply) {
 	// console.dir(request, { depth: 2 });
+	if (isInternalApiRequest(request, "onlySelf")) return; // Bypass auth for valid internal API key
 	if (!AUTH_GUARD_ENABLED) return;
 	logger.debug({
 		"event.action": "onlySelf hit",
@@ -260,6 +313,7 @@ export function onlyIfInQuery<
 	// This is a Factory: It returns a preHandler depending on the arguments (e.g: preHandler: onlyIfInQuery(["fromId", "toId"]))
 	return async function (request: T, _reply: FastifyReply) {
 		// console.dir(request, { depth: 2 });
+		if (isInternalApiRequest(request, "onlyIfInQuery")) return; // Bypass auth for valid internal API key
 		const user = request.authUser;
 		logger.debug({
 			"event.action": "onlyIfInQuery factory function hit",
@@ -332,6 +386,7 @@ export function onlyFriendRequestParticipant(restrictToReceiver = false) {
 		}>,
 	>(request: T, _reply: FastifyReply) {
 		// console.dir(request, { depth: 2 });
+		// if (isInternalApiRequest(request, "onlyFriendRequestParticipant")) return; // Bypass auth for valid internal API key
 		logger.debug({
 			"event.action": "onlyFriendRequestParticipant hit",
 			"url": request.raw.url,
