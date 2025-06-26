@@ -69,6 +69,13 @@ export const updateNicknameResponseSchema = z
 	})
 	.strict();
 
+export const refreshFriendListSchema = z
+	.object({
+		type: z.literal("refreshFriendList"),
+		id: z.string().uuid(),
+	})
+	.strict();
+
 export const disconnectedResponseSchema = z
 	.object({
 		type: z.literal("disconnected"),
@@ -99,8 +106,10 @@ export const DataSchema = z.discriminatedUnion("type", [
 	messageSchema,
 	inviteSchema,
 	updateNicknameSchema,
+	refreshFriendListSchema,
 ]);
 
 export type DataInput = z.infer<typeof DataSchema>;
 export type MessageInput = z.infer<typeof messageSchema>;
 export type InviteInput = z.infer<typeof inviteSchema>;
+export type refreshFriendListInput = z.infer<typeof refreshFriendListSchema>;
