@@ -32,6 +32,10 @@ build/
 .env
 .env.*
 
+# Secrets
+# apiKey.key
+*.key
+
 # Git files
 .git
 .gitignore

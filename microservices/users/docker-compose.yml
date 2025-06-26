@@ -7,6 +7,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+    secrets:
+      - apikey
     volumes:
       - .:/app # Mount full project
       - users_node_modules:/app/node_modules # Keep node_modules container-managed
@@ -21,6 +23,10 @@ services:
     command: >
       sh -c "npx prisma migrate reset --force --skip-seed &&
              RUNNING_ENV=container npm run dev"
+
+secrets:
+  apikey:
+    file: docker/apikey.txt
 
 volumes:
   users_node_modules:
