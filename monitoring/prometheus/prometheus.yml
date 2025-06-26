@@ -45,23 +45,23 @@ scrape_configs:
     static_configs:
       - targets: ["blackbox-exporter:9115"]
 
-#monitor backend endpoints in docker network
-  - job_name: 'blackbox-http'
+  #monitor backend endpoints in docker network
+  - job_name: "blackbox-http"
     scrape_interval: 10m
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
       - targets:
-        - http://ai-bot:6969/health-check
-        - http://pong-api:3010/pong-api/health-check
-        - http://pong_db_container:3011/pong-db/health-check
-        - http://tictactoe_api_container:3001/tictactoe-api/health-check
-        - http://tictactoe_db_container:3003/tictactoe-db/health-check
-        - http://chat_api_container:3002/chat-api/health-check
-        - http://chat_db_container:3004/chat-db/health-check
-        - http://auth_api_container:2999/auth-api/health-check
-        - http://users:3000/api/health-check
+          - http://ai-bot:6969/health-check
+          - http://pong-api:3010/pong-api/health-check
+          - http://pong_db_container:3011/pong-db/health-check
+          - http://tictactoe_api_container:3001/tictactoe-api/health-check
+          - http://tictactoe_db_container:3003/tictactoe-db/health-check
+          - http://chat_api_container:3002/chat-api/health-check
+          - http://chat_db_container:3004/chat-db/health-check
+          - http://auth_api_container:2999/auth-api/health-check
+          - http://users:3000/api/health-check
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -70,7 +70,7 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter:9115
 
-#monitor user endpoints but in docker network
+  #monitor user endpoints but in docker network
   - job_name: "blackbox-https"
     scrape_interval: 10m
     metrics_path: /probe
@@ -78,11 +78,10 @@ scrape_configs:
       module: [https_no_verify]
     static_configs:
       - targets:
-          - https://frontend:443
-          - https://frontend:443/users
-          - https://frontend:443/profile
-          - https://frontend:443/highscore
-        #frontend:443 is mounted to localhost:8080
+          - https://nginx:443
+          - https://nginx:443/sign-in-view
+          - https://nginx:443/sign-up-view
+        #nginx:443 is mounted to localhost:8080
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
