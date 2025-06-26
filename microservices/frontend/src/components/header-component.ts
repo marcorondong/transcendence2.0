@@ -167,6 +167,8 @@ export class HeaderComponent extends HTMLElement {
 				document.dispatchEvent(signInLinkEvent);
 			} catch (e) {
 				console.error(e);
+			} finally {
+				document.dispatchEvent(signInLinkEvent);
 			}
 		});
 
