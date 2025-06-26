@@ -436,6 +436,14 @@ export const targetUserIdParamSchema = z
 // 	friends: z.array(userResponseSchema),
 // });
 
+// TODO: Use .pick or another method, because this is ugly for juts bypassing token validation
+export const validatedTokenSchema = z.object({
+	id: z.string().uuid().describe("User ID included in the token payload"),
+	nickname: z
+		.string()
+		.describe("User nickname included in the token payload"),
+});
+
 // Schema for empty response (when requesting DELETE so I return 204 No content (No content returned))
 export const emptyResponseSchema = z
 	.void()
