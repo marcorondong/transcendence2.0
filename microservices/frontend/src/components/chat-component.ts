@@ -188,9 +188,8 @@ class ChatComponent extends HTMLElement {
 					return;
 				}
 				affectedUser.nickname = newNickname;
-				if (this.me?.id === userId) {
-					this.navMe.innerText =
-						chatServiceData.me?.nickname ?? "unknown";
+				if (this.me && this.me.id === userId) {
+					this.navMe.innerText = this.me.nickname ?? "unknown";
 				}
 				this.displayCurrentChat();
 				this.updateUsers();
