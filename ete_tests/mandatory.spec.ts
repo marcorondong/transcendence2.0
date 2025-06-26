@@ -11,8 +11,8 @@ test("Back and fort button", async ({ page }) => {
 	await expect(page.locator("#pong")).toBeVisible();
 	await page.getByRole("link", { name: "profile" }).click();
 	await expect(page.getByRole("heading", { name: "Profile" })).toBeVisible();
-	await page.goto("https://localhost:8080/");
+	await page.goto(homeUrl);
 	await expect(page.locator("#pong")).toBeVisible();
-	await page.goto("https://localhost:8080/profile-view");
+	await page.goto(homeUrl);
 	await expect(page.getByRole("heading", { name: "Profile" })).toBeVisible();
 });
