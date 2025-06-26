@@ -28,6 +28,10 @@ interface AuthenticatedRequest<
 // Authentication hook
 export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 	// console.dir(request, { depth: 2 });
+	const authHeader = request.headers['authorization'];
+	console.log("###################################################");
+	console.log("authHeader", authHeader);
+	console.log("###################################################");
 	if (!AUTH_GUARD_ENABLED) return;
 
 	logger.debug({

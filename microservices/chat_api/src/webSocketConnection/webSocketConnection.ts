@@ -51,7 +51,6 @@ export async function webSocketConnection(server: FastifyInstance) {
 				socket.on("message", async (message: string) => {
 					try {
 						await requests(message, client);
-						console.log(`Received message from ${client.getNickname()} ${client.getId()}: ${message}`);
 					} catch (error) {
 						errorHandler(socket, error);
 					}

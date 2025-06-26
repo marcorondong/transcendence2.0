@@ -67,7 +67,6 @@ export async function messageHandler(data: MessageInput, client: Client) {
 	});
 	client.send(JSON.stringify(messageResponse));
 	if (!friendBlockStatus) friendClient.send(JSON.stringify(messageResponse));
-	console.log(messageResponse);
 }
 
 export async function inviteHandler(data: InviteInput, client: Client) {
@@ -93,13 +92,20 @@ export async function updateNicknameHandler(client: Client) {
 	const updatedUser = { id: rawData.id, nickname: rawData.nickname };
 	if (updatedUser.id !== id)
 		throw new Error("Update nickname request failed: user ID mismatch");
+
+	const friendsRaw = await getRequestFriends(id);
+	const friends = friendsRaw.map((friend: any) => friend.id);
+
 	client.setNickname(updatedUser.nickname);
 	const updateNicknameResponse = updateNicknameResponseSchema.parse({
 		type: "updateNickname",
 		user: updatedUser,
 	});
+	client.send(JSON.stringify(updateNicknameResponse));
 	onlineClients.forEach((person) => {
-		person.send(JSON.stringify(updateNicknameResponse));
+		if (friends.includes(person.getId())) {
+			person.send(JSON.stringify(updateNicknameResponse));
+		}
 	});
 }
 
@@ -161,10 +167,6 @@ export async function refreshFriendListHandler(
 
 	const friendId = data.id;
 	const friendClient = onlineClients.get(friendId);
-	console.log("all online clients ->", onlineClients);
-	console.log("my id ->", client.getNickname(), id);
-	console.log("friendId ->", friendClient?.getNickname(), friendId);
-	console.log("friendClient ->", friendClient?.getId());
 	if (friendClient) {
 		const friendsFriendRaw = await getRequestFriends(friendId);
 		const friendsFriend = friendsFriendRaw.map((friend: any) => friend.id);
