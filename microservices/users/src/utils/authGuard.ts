@@ -6,10 +6,14 @@ import {
 import { AppError, AUTH_GUARD_ERRORS, AUTH_PRE_HANDLER_ERRORS } from "./errors";
 import { logger } from "./logger";
 import prisma from "./prisma";
+import getConfig from "./config";
 
 const AUTH_GUARD_ENABLED = true;
 const DEV_AUTH_ENABLED = false;
-const INTERNAL_API_KEY = "954d4d7d7cd1e53de1c6e398aad2540b"; // TODO: load this from docker secrets
+const config = getConfig();
+const INTERNAL_API_KEY = config.api_key;
+
+// logger.fatal(`Value if ApiKey from secret: ${INTERNAL_API_KEY}`);
 
 interface AuthenticatedRequest<
 	Params = FastifyRequest["params"],
