@@ -145,7 +145,7 @@ const nicknameField = z
 		invalid_type_error: "Nickname must be a string",
 	})
 	.min(3, "Nickname must be at least 3 characters long")
-	.max(70, "Nickname cannot be longer than 70 characters")
+	.max(15, "Nickname cannot be longer than 70 characters")
 	.regex(/\S/, "Nickname cannot be empty or whitespace only")
 	.regex(/[a-zA-Z]/, "Nickname must contain at least one letter")
 	.regex(/^[\x00-\x7F]+$/, "Nickname must contain only ASCII characters")
