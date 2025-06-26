@@ -465,3 +465,4 @@ export type UpdateUserData = updateUserPutInput | updateUserPatchInput;
 export type getUsersQuery = z.infer<typeof getUsersQuerySchema>;
 export type addFriendInput = z.infer<typeof addFriendSchema>;
 export type blockUserInput = z.infer<typeof blockUserSchema>;
+export type TokenPayload = z.infer<typeof loginResponseSchema>; // I cannot use tokenPayloadSchema because it's not exported

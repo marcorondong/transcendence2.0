@@ -3,6 +3,11 @@ export interface ILogIn {
 	password: string;
 }
 
+export interface IUserInfo extends ILogIn {
+	nickname: string;
+	email: string;
+}
+
 export const serverConfig = {
 	port: 8080,
 	ip: "localhost", // but can be 10.12.6.1 or whatever is remote host

@@ -20,6 +20,7 @@ import fastifyJWT from "@fastify/jwt";
 import { ft_onRequest } from "./utils/onRequest";
 import { env } from "./utils/env";
 
+// use "ft_serverOption" instead of "{ logger: true }" to activate pino-pretty
 const server = Fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);

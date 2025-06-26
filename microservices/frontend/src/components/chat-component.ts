@@ -73,7 +73,7 @@ class ChatComponent extends HTMLElement {
 				notificationEvent("chat websocket opened", "success"),
 			);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			this.closeChat();
 			this.dispatchEvent(
 				notificationEvent("chat websocket failed", "error"),
@@ -329,6 +329,9 @@ class ChatComponent extends HTMLElement {
 				this.me?.id,
 				this.selectedUser?.id,
 			);
+			if (!data) {
+				return;
+			}
 			this.selectedUser.blockStatusChecked = true;
 			this.selectedUser.blocked = data.blockStatus;
 		}
@@ -413,7 +416,7 @@ class ChatComponent extends HTMLElement {
 
 	handleInviteLink(e: Event) {
 		const target = e.target as HTMLElement;
-		if (!target || target.id !== "invitationLink") {
+		if (!target || target.dataset.link !== "invitationLink") {
 			return;
 		}
 		e.preventDefault();
@@ -426,6 +429,9 @@ class ChatComponent extends HTMLElement {
 				room: this.roomId,
 			}),
 		);
+		const span = document.createElement("span");
+		span.innerText = target.innerText;
+		target.replaceWith(span);
 		this.roomId = undefined;
 	}
 
@@ -564,7 +570,7 @@ class ChatComponent extends HTMLElement {
 	createInvitationLink() {
 		const link = document.createElement("a");
 		link.href = "#";
-		link.id = "invitationLink";
+		link.dataset.link = "invitationLink";
 		link.textContent = "Click to join game";
 		return link;
 	}
@@ -577,8 +583,12 @@ class ChatComponent extends HTMLElement {
 			type: "invite",
 			id: this.selectedUser?.id,
 		};
-		if (this.ws) {
-			this.ws.send(JSON.stringify(chat));
+		try {
+			if (this.ws) {
+				this.ws.send(JSON.stringify(chat));
+			}
+		} catch (e) {
+			console.error(e);
 		}
 	}
 

@@ -60,9 +60,18 @@ try {
 		],
 		debug: true,
 	});
-	logger.log(`${process.env.SERVICE_ENV} and ${process.env.ROOT_ENV}`);
+	logger.info({
+		"event.action": "dotenv",
+		"service folder .env": `${process.env.SERVICE_ENV}`,
+		"root folder .env": `${process.env.ROOT_ENV}`,
+		"message": "Loading .env files",
+	});
 } catch (err) {
-	logger.error("[dotenv] Threw error:", err);
+	logger.error({
+		"event.action": "dotenv",
+		"error": err,
+		"message": "[dotenv] Threw error",
+	});
 }
 
 // Function Return type definition (for type safety)
@@ -85,7 +94,10 @@ let cachedConfig: AppConfig | null = null;
 export default function getConfig(): AppConfig {
 	if (cachedConfig) return cachedConfig;
 
-	logger.log("[config] Loading config...");
+	logger.info({
+		"event.action": "getConfig",
+		"message": "[config] Loading config...",
+	});
 
 	// Define hardcoded values here
 	const hardcodedDefaults = {
@@ -106,7 +118,11 @@ export default function getConfig(): AppConfig {
 			const pkgPath = getPath(path.join(JSON_PATH, "package.json"));
 			return JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 		} catch (err) {
-			logger.warn("[config] Could not load package.json:", err);
+			logger.warn({
+				"event.action": "json_load",
+				"error": err,
+				"message": "[config] Could not load package.json",
+			});
 			// Optional: throw an error?
 			// throw new AppError({
 			// 	statusCode: 500,
@@ -120,7 +136,11 @@ export default function getConfig(): AppConfig {
 
 	// Load values from Docker-style secrets
 	const loadSecret = (key: string | undefined): string | undefined => {
-		logger.log("[config] loadSecret() called for key:", key);
+		logger.debug({
+			"event.action": "loadSecret",
+			"key": key,
+			"message": `[config] loadSecret() called for key ${key}`,
+		});
 		if (!key) return undefined;
 		const candidates = [
 			getPath(path.join(SECRETS_PATH, key.toLowerCase() + ".txt")), // local
@@ -132,10 +152,12 @@ export default function getConfig(): AppConfig {
 					return fs.readFileSync(filePath, "utf-8").trim();
 				}
 			} catch (err) {
-				logger.warn(
-					`[config] Failed to read secret ${key} at ${filePath}:`,
-					err,
-				);
+				logger.warn({
+					"event.action": "loadSecret",
+					"error": err,
+					"path": filePath,
+					"message": `[config] Failed to read secret ${key} at ${filePath}`,
+				});
 				// Optional: throw an error?
 				// throw new AppError({
 				// 	statusCode: 500,
@@ -155,13 +177,21 @@ export default function getConfig(): AppConfig {
 		for (const [sourceName, value] of sources) {
 			// If value DO exist (it's not undefined, null)
 			if (value != null) {
-				logger.log(
-					`[config] ${key} = ${value} Loaded from ${sourceName}`,
-				);
+				logger.debug({
+					"event.action": "resolveConfigValue",
+					"key": key,
+					"value": value,
+					"source": sourceName,
+					"message": `[config] ${key} = ${value} Loaded from ${sourceName}`,
+				});
 				return value;
 			}
 		}
-		logger.warn(`[config] ${key} is missing in all sources`);
+		logger.warn({
+			"event.action": "resolveConfigValue",
+			"key": key,
+			"message": `[config] ${key} is missing in all sources`,
+		});
 		// Optional: throw an error?
 		throw new AppError({
 			statusCode: 500,
@@ -228,7 +258,11 @@ export default function getConfig(): AppConfig {
 		]),
 	};
 
-	logger.log("[config] Final config object:", config);
+	logger.info({
+		"event.action": "getConf",
+		"configuration": config,
+		"message": "[config] Final config object",
+	});
 
 	cachedConfig = config; // Cache the config
 	return config;

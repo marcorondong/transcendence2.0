@@ -3,6 +3,7 @@ import type { Client } from "../utils/Client";
 import {
 	messageHandler,
 	inviteHandler,
+	updateNicknameHandler,
 } from "./controllers";
 
 export async function requests(message: string, client: Client) {
@@ -13,6 +14,8 @@ export async function requests(message: string, client: Client) {
 		await messageHandler(data, client);
 	else if (data.type === "invite")
 		await inviteHandler(data, client);
+	else if (data.type === "updateNickname")
+		await updateNicknameHandler(client);
 	else
 		throw new Error("Server: invalid request type");
 }

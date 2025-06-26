@@ -80,7 +80,7 @@ export class PongSwagger {
 
 	static getWebsocketSchema() {
 		return {
-			//hide: true, //TODO add this line later to hide if from swagger
+			hide: true, //remove this line later to show if from swagger
 			description: "Websockets are not supported by Swagger",
 			tags: ["Websockets"],
 		};
