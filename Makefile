@@ -4,9 +4,10 @@ GRAFANA_PW = $(MONITORING_SECRETS)/grafana_admin_password.txt
 SLACK_WEBHOOK = $(MONITORING_SECRETS)/slack_webhook.txt
 PONG_ENV = ./microservices/ssg/pong-api/.env
 PRIVATE_WALLET_KEY = ./microservices/ssg/pong-api/wallet_private.key
-BOT_ENV = ./microservices/ssg/ai-bot/docker/.env
+BOT_ENV = ./microservices/ssg/ai/docker/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
+SETTINGS_CONF = setting.conf
 GLOBAL_ENV = .env
 REBUILD_SERVICE = -re
 
@@ -14,7 +15,7 @@ SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
 SECRET_FILES = $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) \
 	$(GLOBAL_ENV) $(AUTH_API_COOKIE_SECRET) $(AUTH_API_JWT_SECRET) \
-	$(BOT_ENV) $(PRIVATE_WALLET_KEY)
+	$(BOT_ENV) $(PRIVATE_WALLET_KEY) $(SETTINGS_CONF)
 
 all: $(SECRET_FILES)
 	docker compose up -d
@@ -28,7 +29,7 @@ clean:
 remove:
 	docker compose down --volumes
 	docker system prune -a -f --volumes
-	$(MAKE) delete-secrets
+##$(MAKE) delete-secrets
 	$(MAKE) -C cli-client clean
 
 reset:

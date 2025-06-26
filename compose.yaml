@@ -8,8 +8,6 @@ include:
   - ./microservices/pong_db/docker-compose.yml
   - ./microservices/chat_db/docker-compose.yml
   - ./microservices/chat_api/docker-compose.yml
-  - ./microservices/tictactoe_db/docker-compose.yml
-  - ./microservices/tictactoe_api/docker-compose.yml
   - ./microservices/ssg/ai/docker-compose.yml
 
   #PONG_API LONG INCLUDE
