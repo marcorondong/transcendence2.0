@@ -126,22 +126,25 @@ class ProfileDetailComponent extends HTMLElement {
 			if (returnedData) {
 				this.userData = { ...this.userData, ...returnedData };
 			}
-			try {
-				await FetchAuth.updateJwt();
-				const updateNickname: Chat = {
-					type: "updateNickname",
-				};
-				if (this.chat.ws) {
-					this.chat.ws.send(JSON.stringify(updateNickname));
+			// REFRESHING JWT AND NOTIFYING CHAT ONLY WHEN NICKNAME HAS CHANGED
+			if (returnedData.nickname) {
+				try {
+					await FetchAuth.updateJwt();
+					const updateNickname: Chat = {
+						type: "updateNickname",
+					};
+					if (this.chat.ws) {
+						this.chat.ws.send(JSON.stringify(updateNickname));
+					}
+				} catch (e) {
+					console.error(e);
+					document.dispatchEvent(
+						notificationEvent(
+							"Error updating Nickname, please sign out and sign back in",
+							"error",
+						),
+					);
 				}
-			} catch (e) {
-				console.error(e);
-				document.dispatchEvent(
-					notificationEvent(
-						"Error updating Nickname, please sign out and sign back in",
-						"error",
-					),
-				);
 			}
 			this.applyUserData();
 			this.displayDetail();

@@ -172,6 +172,30 @@ class ChatComponent extends HTMLElement {
 				this.dispatchEvent(onlineUserEvent);
 			}
 
+			// A USER CHANGED HIS HER NICKNAME
+			if (
+				chatServiceData.type === "updateNickname" &&
+				chatServiceData.user
+			) {
+				const newNickname = chatServiceData.user.nickname;
+				const userId = chatServiceData.user.id;
+
+				const affectedUser =
+					this.onlineUsers.find(
+						(onlineUser) => onlineUser.id === userId,
+					) || (this.me?.id === userId ? this.me : undefined);
+				if (!affectedUser) {
+					return;
+				}
+				affectedUser.nickname = newNickname;
+				if (this.me?.id === userId) {
+					this.navMe.innerText =
+						chatServiceData.me?.nickname ?? "unknown";
+				}
+				this.displayCurrentChat();
+				this.updateUsers();
+			}
+
 			// WHEN USER LOGS IN, SETTING UP PEOPLE THAT ARE ONLINE
 			if (
 				chatServiceData.type === "onlineUsers" &&
