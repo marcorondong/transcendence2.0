@@ -4,11 +4,11 @@ export const setCookieOpt = {
 	secure: true,
 	signed: true,
 	sameSite: "strict" as const,
-	maxAge: 60 * 60,
+	maxAge: 5 * 60 * 60,
 };
 
 export const jwtSignOpt = {
-	expiresIn: "1h",
+	expiresIn: "5h",
 };
 
 export const clearCookieOpt = {

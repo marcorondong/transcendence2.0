@@ -75,7 +75,7 @@ export const jwtOption = {
 		signed: true,
 	},
 	sign: {
-		expiresIn: "1h",
+		expiresIn: "5h",
 	},
 };
 
@@ -87,6 +87,6 @@ export const cookieOption = {
 		secure: true,
 		signed: true,
 		sameSite: "strict" as const,
-		maxAge: 60 * 60,
+		maxAge: 5 * 60 * 60,
 	},
 };
