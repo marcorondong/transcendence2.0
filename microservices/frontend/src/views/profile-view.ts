@@ -297,6 +297,7 @@ export class ProfileView extends HTMLElement {
 				new ProfileDetailComponent(
 					this.userData,
 					this.userId === this.meId,
+					this.chat,
 				),
 			);
 			this.append(container);
