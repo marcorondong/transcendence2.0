@@ -36,28 +36,68 @@ export class TestingUtils {
 		await homePage
 			.getByRole("button", { name: "Play Random Opponent" })
 			.click();
-		await expect(homePage.locator("pong-component")).toContainText(
-			"Room Id:",
-		);
+		await expect(homePage.locator("canvas")).toBeVisible();
 	}
 
-	static async gameRunningTest(page: Page, screenshotName: string) {
-		// await page.waitForTimeout(5000);
-		await expect(page.locator("canvas")).toBeVisible();
-		// console.log(await page.locator("pong-component").innerText());
+	static async clickMenuButtons(page: Page, buttonNames: string[]) {
+		for (const buttonName of buttonNames) {
+			await TestingUtils.buttonTest(page, buttonName);
+		}
+	}
+
+	/**
+	 * @param page - The page object
+	 * @param screenshotName - The name of the screenshot to save
+	 * @param gameSelection - PLaywright will click these buttons in the game menu
+	 * @param expectedWebsocketMessages - The expected websocket messages
+	 * @param timeout - optional, the timeout to wait for the game to start
+	 * @param roomId - optional, the room id for spectate or join private game
+	 */
+	static async gameRunningTest(
+		page: Page,
+		screenshotName: string,
+		gameSelection: string[],
+		expectedWebsocketMessages: string[],
+		timeout: number = 1000,
+		roomId: string = "",
+	) {
+		await page.locator("#pongLogo").click();
+		await page.locator("#pong").click();
+
+		//setup websocket message collection
+		let webSocketMessages: string[] = [];
+		page.on("websocket", (ws) => {
+			console.log(`🔌 WEBSOCKET: ${ws.url()}`);
+			ws.on("framereceived", (data) => {
+				const message = data.payload.toString();
+				webSocketMessages.push(message);
+			});
+			ws.on("socketerror", (e) => {
+				console.error(e);
+			});
+		});
+
+		//start game
+		await TestingUtils.clickMenuButtons(page, gameSelection);
+		await page.waitForTimeout(timeout);
 		await page.screenshot({
 			path: `ete_tests/screenshots/${screenshotName}.png`,
 		});
-		await expect(
-			page.getByText("Match Status: Game is running"),
-		).toBeVisible();
+
+		//check if game is running
+		expect(
+			TestingUtils.findSubstrings(
+				webSocketMessages,
+				expectedWebsocketMessages,
+			),
+		).toBe(true);
 	}
 
 	static async resetUser(page: Page, user: IUserInfo) {
 		await page.getByRole("link", { name: "profile" }).click();
 		await page.locator("#editButton").click();
 		await page.getByRole("textbox").first().dblclick();
-		await page.getByRole("textbox").first().fill(user.username); //SEkula
+		await page.getByRole("textbox").first().fill(user.nickname); //SEkula
 		await page.locator('input[type="email"]').click();
 		await page.locator('input[type="email"]').fill(user.email);
 		await page.getByRole("button", { name: "save" }).click();
@@ -106,4 +146,9 @@ export class TestingUtils {
 	}
 
 	static async messageSent(page: Page) {}
+	static findSubstrings(array: string[], substrings: string[]): boolean {
+		return substrings.every((substring) =>
+			array.some((str) => str.includes(substring)),
+		);
+	}
 }

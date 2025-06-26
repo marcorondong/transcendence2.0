@@ -104,13 +104,27 @@ test("open chat and invite user2", async ({ browser }) => {
 		.getByRole("link", { name: "Click to join game", exact: true })
 		.click();
 
-	await TestingUtils.gameRunningTest(
+	TestingUtils.gameRunningTest(
 		user1Page,
-		registeredUsers.user1.nickname + "_SentInvite",
+		"InviteGame",
+		[],
+		[
+			'"matchStatus":"Game is running"',
+			'"roomId"',
+			'"knockoutName":"single match"',
+		],
+		3000,
 	);
 	await TestingUtils.gameRunningTest(
 		user2Page,
-		registeredUsers.user2.nickname + "_Accepted",
+		"InviteGame",
+		[],
+		[
+			'"matchStatus":"Game is running"',
+			'"roomId"',
+			'"knockoutName":"single match"',
+		],
+		3000,
 	);
 });
 
@@ -139,6 +153,9 @@ test("open chat and block user2", async ({ browser }) => {
 		"! a unique message for you: " +
 		randomString();
 	await user2Page.locator("#min-max-button").click();
+	await user2Page
+		.getByRole("button", { name: registeredUsers.user1.nickname })
+		.click();
 	await user2Page
 		.getByRole("textbox", { name: "enter your message" })
 		.fill(from2To1);
