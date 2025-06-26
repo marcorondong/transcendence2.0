@@ -25,6 +25,56 @@ interface AuthenticatedRequest<
 	authUser?: TokenPayload; // Optional, since I'll check for it inside the preHandlers
 }
 
+// TODO: I could change the split 3 part and base64Payload with this:
+// const base64Payload = token.split(".").slice(0, 3)[1];``
+
+export function decodeJwtPayload(token: string): TokenPayload | null {
+	try {
+		console.log("this is the token received by decodeJwtPayload", token);
+		const parts = token.split(".");
+		// if (parts.length !== 3) {
+		if (parts.length < 3) {
+			console.log("Failing in Step01");
+			return null;
+		}
+
+		const base64Payload = parts[1];
+		let jsonPayload: string;
+
+		try {
+			jsonPayload = Buffer.from(base64Payload, "base64url").toString(
+				"utf8",
+			);
+		} catch {
+			try {
+				jsonPayload = Buffer.from(base64Payload, "base64").toString(
+					"utf8",
+				);
+			} catch {
+				console.log("Failing in Step02");
+				return null;
+			}
+		}
+
+		const parsed = JSON.parse(jsonPayload);
+		if (typeof parsed !== "object" || parsed === null) {
+			console.log("Failing in Step03");
+			return null;
+		}
+
+		// Optional: validate expected fields exist
+		if (!parsed.id || !parsed.nickname) {
+			console.log("Failing in Step04");
+			return null;
+		}
+
+		return parsed as TokenPayload;
+	} catch {
+		console.log("Error caught at end of decodeJwtPayload");
+		return null;
+	}
+}
+
 // Authentication hook
 export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 	// console.dir(request, { depth: 2 });
@@ -80,6 +130,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		return;
 	}
 
+	logger.warn("Entering new cookie logic");
 	const cookieHeader = request.headers.cookie;
 	if (!cookieHeader) {
 		throw new AppError({
@@ -90,7 +141,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		});
 	}
 	try {
-		logger.debug({
+		logger.warn({
 			"event.action": "authGuard to verify with AUTH",
 			"cookie": cookieHeader,
 			"message":
@@ -100,8 +151,17 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 		const cookies = Object.fromEntries(
 			cookieHeader.split(";").map((c) => c.trim().split("=")),
 		);
+		logger.warn({
+			"event.action": "authGuard new cookie/jwt logic",
+			"cookies": cookies,
+			"message": "This is the cookies content",
+		});
 		const token = cookies["access_token"]; // Or your actual cookie name
-
+		logger.warn({
+			"event.action": "authGuard new cookie/jwt logic",
+			"token": token,
+			"message": "This is the token content",
+		});
 		if (!token) {
 			throw new AppError({
 				statusCode: 401,
@@ -110,10 +170,19 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 				handlerName: "authGuard",
 			});
 		}
-
-		// const decoded = request.jwt.decode<TokenPayload>(token);
-		const decoded = request.jwt.decode(token) as TokenPayload;
-		if (!decoded || typeof decoded !== "object") {
+		logger.warn("Trying to decode token with new logic");
+		// // const decoded = request.jwt.decode<TokenPayload>(token);
+		// const decoded = request.jwt.decode(token) as TokenPayload;
+		// if (!decoded || typeof decoded !== "object") {
+		// 	throw new AppError({
+		// 		statusCode: 401,
+		// 		code: AUTH_GUARD_ERRORS.INVALID_TOKEN,
+		// 		message: "Unauthorized: malformed token payload",
+		// 		handlerName: "authGuard",
+		// 	});
+		// }
+		const decoded = decodeJwtPayload(token);
+		if (!decoded) {
 			throw new AppError({
 				statusCode: 401,
 				code: AUTH_GUARD_ERRORS.INVALID_TOKEN,
@@ -121,7 +190,17 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 				handlerName: "authGuard",
 			});
 		}
+		logger.warn({
+			"event.action": "authGuard new cookie/jwt logic",
+			"decoded": decoded,
+			"message": "This is the decoded token content",
+		});
 		const validated = loginResponseSchema.parse(decoded);
+		logger.warn({
+			"event.action": "authGuard new cookie/jwt logic",
+			"validated": validated,
+			"message": "This is the validated (parsed) decoded content",
+		});
 		request.user = validated; // for logging via pino
 		request.authUser = validated; // for type-safe logic
 		logger.debug({
@@ -129,6 +208,7 @@ export async function authGuard(request: FastifyRequest, reply: FastifyReply) {
 			"authUser": request.authUser,
 			"message": "Final authUser attached to request",
 		});
+		// TODO: Maybe this one doesn't need to be here
 	} catch (err) {
 		throw new AppError({
 			statusCode: 500,
