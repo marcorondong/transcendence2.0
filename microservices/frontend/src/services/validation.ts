@@ -35,7 +35,7 @@ export const usernameValidator = v.pipe(
 export const nicknameValidator = v.pipe(
 	v.string("Your nickname must be a string."),
 	v.nonEmpty("Please enter your nickname."),
-	v.maxLength(100, "Your nickname can't have more than 100 characters"),
+	v.maxLength(15, "Your nickname can't have more than 15 characters"),
 	v.minLength(3, "Your nickname must be at least 3 characters long"),
 );
 
