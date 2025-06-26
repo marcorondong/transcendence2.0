@@ -17,6 +17,7 @@ export async function ft_onRequest(
 	if (request.url.startsWith(env.AUTH_API_DOCUMENTATION_STATIC)) return;
 	try {
 		await request.jwtVerify();
+		if (request.user.id === env.BOT_UUID) return;
 		let response;
 		try {
 			response = await getUserRequest(request.user.id, request);
