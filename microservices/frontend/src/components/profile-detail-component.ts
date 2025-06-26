@@ -10,6 +10,8 @@ import {
 import type { User } from "../types/User";
 import { IconComponent } from "./icon-component";
 import * as v from "valibot";
+import type { ChatComponent } from "./chat-component";
+import type { Chat } from "../types/Chat";
 
 class ProfileDetailComponent extends HTMLElement {
 	userData: User;
@@ -40,8 +42,11 @@ class ProfileDetailComponent extends HTMLElement {
 	avatarContainer = document.createElement("div");
 	avatar = document.createElement("img");
 
-	constructor(userData: User, editableProfile: boolean) {
+	chat: ChatComponent;
+
+	constructor(userData: User, editableProfile: boolean, chat: ChatComponent) {
 		super();
+		this.chat = chat;
 		this.userData = userData;
 		this.editableProfile = editableProfile;
 		this.buildDomElements();
@@ -121,7 +126,23 @@ class ProfileDetailComponent extends HTMLElement {
 			if (returnedData) {
 				this.userData = { ...this.userData, ...returnedData };
 			}
-			await FetchAuth.updateJwt();
+			try {
+				await FetchAuth.updateJwt();
+				const updateNickname: Chat = {
+					type: "updateNickname",
+				};
+				if (this.chat.ws) {
+					this.chat.ws.send(JSON.stringify(updateNickname));
+				}
+			} catch (e) {
+				console.error(e);
+				document.dispatchEvent(
+					notificationEvent(
+						"Error updating Nickname, please sign out and sign back in",
+						"error",
+					),
+				);
+			}
 			this.applyUserData();
 			this.displayDetail();
 		} catch (e: any) {
