@@ -49,7 +49,8 @@ class GameSelectionComponent extends HTMLElement {
 		ttt.append(tttImage);
 		tttContainer.append(ttt);
 
-		this.append(pongContainer, tttContainer);
+		// this.append(pongContainer, tttContainer);
+		this.append(pongContainer);
 	}
 
 	disconnectedCallback() {}

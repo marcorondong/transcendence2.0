@@ -6,17 +6,30 @@ class ThemeToggleComponent extends HTMLElement {
 		this.initSystemMode();
 	}
 
+	// initSystemMode() {
+	// 	if (
+	// 		window.matchMedia &&
+	// 		window.matchMedia("(prefers-color-scheme: dark)").matches
+	// 	) {
+	// 		document.documentElement.setAttribute("data-theme", "dark");
+	// 		this.systemModeLight = false;
+	// 	} else {
+	// 		document.documentElement.setAttribute("data-theme", "light");
+	// 		this.systemModeLight = true;
+	// 	}
+	// }
+
 	initSystemMode() {
-		if (
-			window.matchMedia &&
-			window.matchMedia("(prefers-color-scheme: dark)").matches
-		) {
-			document.documentElement.setAttribute("data-theme", "dark");
-			this.systemModeLight = false;
-		} else {
-			document.documentElement.setAttribute("data-theme", "light");
-			this.systemModeLight = true;
-		}
+		// if (
+		// 	window.matchMedia &&
+		// 	window.matchMedia("(prefers-color-scheme: dark)").matches
+		// ) {
+		document.documentElement.setAttribute("data-theme", "dark");
+		this.systemModeLight = false;
+		// } else {
+		// 	document.documentElement.setAttribute("data-theme", "light");
+		// 	this.systemModeLight = true;
+		// }
 	}
 
 	applySystemMode(icon: IconComponent) {

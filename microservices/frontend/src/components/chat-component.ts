@@ -4,6 +4,7 @@ import {
 	notificationEvent,
 	onlineUserEvent,
 	pongLinkEvent,
+	profileLinkEvent,
 } from "../services/events.js";
 import { FetchChatDb } from "../services/fetch-chat.js";
 
@@ -25,6 +26,7 @@ class ChatComponent extends HTMLElement {
 	sendButton = document.createElement("button");
 	blockButton = document.createElement("button");
 	inviteButton = document.createElement("button");
+	profileButton = document.createElement("button");
 
 	// ELEMENTS
 	nav = document.createElement("nav");
@@ -270,6 +272,7 @@ class ChatComponent extends HTMLElement {
 				"pong-button-special",
 				"selectUser-group",
 				"grow-1",
+				"truncate",
 			);
 			userButton.id = user.id;
 			userButton.innerText = user.nickname;
@@ -314,11 +317,13 @@ class ChatComponent extends HTMLElement {
 			this.sendButton.disabled = true;
 			this.blockButton.disabled = true;
 			this.inviteButton.disabled = true;
+			this.profileButton.disabled = true;
 		} else {
 			this.chatInput.disabled = false;
 			this.sendButton.disabled = false;
 			this.blockButton.disabled = false;
 			this.inviteButton.disabled = false;
+			this.profileButton.disabled = false;
 		}
 		if (!this.selectedUser) {
 			return;
@@ -410,6 +415,7 @@ class ChatComponent extends HTMLElement {
 			this.handleSendButton(button);
 			this.handleBlockButton(button);
 			this.handleInviteButton(button);
+			this.handleProfileButton(button);
 			this.signOutButton(button);
 		}
 	}
@@ -527,6 +533,13 @@ class ChatComponent extends HTMLElement {
 			this.ws.send(JSON.stringify(chat));
 		}
 		this.chatInput.value = "";
+	}
+
+	handleProfileButton(button: HTMLButtonElement) {
+		if (button.id !== "profile-button" || !this.selectedUser) {
+			return;
+		}
+		this.dispatchEvent(profileLinkEvent(this.selectedUser.id));
 	}
 
 	async handleBlockButton(button: HTMLButtonElement) {
@@ -675,7 +688,8 @@ class ChatComponent extends HTMLElement {
 			"w-full",
 			"h-full",
 			"flex",
-			"gap-2",
+			"gap-0",
+			"sm:gap-1",
 			"items-center",
 		);
 		this.append(this.chatContainer);
@@ -693,21 +707,31 @@ class ChatComponent extends HTMLElement {
 			"flex",
 			"justify-center",
 			"items-center",
+			"pong-button-tight",
 		);
 		this.sendButton.id = "send-button";
+
 		this.blockButton.id = "block-button";
-		this.blockButton.classList.add("pong-button");
+		this.blockButton.classList.add("pong-button", "pong-button-tight");
 		const blockIcon = new IconComponent("block", 5);
 		this.blockButton.append(blockIcon);
-		this.inviteButton.classList.add("pong-button");
+
+		this.inviteButton.classList.add("pong-button", "pong-button-tight");
 		this.inviteButton.id = "invite-button";
 		const inviteIcon = new IconComponent("game", 5);
 		this.inviteButton.append(inviteIcon);
+
+		this.profileButton.classList.add("pong-button", "pong-button-tight");
+		this.profileButton.id = "profile-button";
+		const profileIcon = new IconComponent("user", 5);
+		this.profileButton.append(profileIcon);
+
 		this.chatContainer.append(
 			this.chatInput,
 			this.sendButton,
 			this.inviteButton,
 			this.blockButton,
+			this.profileButton,
 		);
 	}
 }
