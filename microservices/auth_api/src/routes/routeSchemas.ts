@@ -59,6 +59,7 @@ export const updateJWTSchema = {
 	tags: ["Auth"],
 };
 
+// Not used in the current implementation, but kept for future use
 export const updateJWTPatchSchema = {
 	summary: "Update JWT with provided ID and Nickname",
 	description: "Update the JWT with the provided ID and Nickname.",
@@ -66,6 +67,7 @@ export const updateJWTPatchSchema = {
 	body: payloadZodSchema,
 };
 
+// Not used in the current implementation, but kept for future use
 export const editProfileSchema = {
 	summary: "Edit Profile",
 	description: "Edit the profile of the user and update token.",
@@ -74,6 +76,7 @@ export const editProfileSchema = {
 	params: idZodSchema,
 };
 
+// Not used in the current implementation, but kept for future use
 export const updateProfileSchema = {
 	summary: "Update Profile",
 	description: "Update the whole profile of the user and update token.",
@@ -82,6 +85,7 @@ export const updateProfileSchema = {
 	params: idZodSchema,
 };
 
+// Not used in the current implementation, but kept for future use
 export const deleteUserSchema = {
 	summary: "Delete User",
 	description: "Delete a user. This will delete the user and the token.",
