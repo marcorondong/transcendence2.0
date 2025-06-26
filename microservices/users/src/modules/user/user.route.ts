@@ -314,32 +314,33 @@ async function userRoutes(server: FastifyInstance) {
 		appErrorHandler(getFriendsHandler),
 	);
 
+	// TODO: Commented out because we're using friend_request instead
 	// 10. Add a user friend by ID
-	server.post<{
-		Params: { id: string };
-		Body: addFriendInput;
-	}>(
-		"/:id/friends",
-		{
-			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
-			schema: {
-				tags: ["Friends"],
-				summary: "Add a friend",
-				description:
-					"Creates a bidirectional friendship between the current user and the target user.",
-				params: userIdParamSchema,
-				body: addFriendSchema,
-				response: {
-					// 201: userArrayResponseSchema,
-					201: userResponseSchema,
-					400: errorResponseSchema.describe("Bad request"),
-					404: errorResponseSchema.describe("Not Found"),
-					409: errorResponseSchema.describe("Already friends"),
-				},
-			},
-		},
-		appErrorHandler(addFriendHandler),
-	);
+	// server.post<{
+	// 	Params: { id: string };
+	// 	Body: addFriendInput;
+	// }>(
+	// 	"/:id/friends",
+	// 	{
+	// 		preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
+	// 		schema: {
+	// 			tags: ["Friends"],
+	// 			summary: "Add a friend",
+	// 			description:
+	// 				"Creates a bidirectional friendship between the current user and the target user.",
+	// 			params: userIdParamSchema,
+	// 			body: addFriendSchema,
+	// 			response: {
+	// 				// 201: userArrayResponseSchema,
+	// 				201: userResponseSchema,
+	// 				400: errorResponseSchema.describe("Bad request"),
+	// 				404: errorResponseSchema.describe("Not Found"),
+	// 				409: errorResponseSchema.describe("Already friends"),
+	// 			},
+	// 		},
+	// 	},
+	// 	appErrorHandler(addFriendHandler),
+	// );
 
 	// 11. Delete a user friend by ID and TargetID
 	server.delete<{ Params: { id: string; targetUserId: string } }>(
@@ -363,79 +364,80 @@ async function userRoutes(server: FastifyInstance) {
 		appErrorHandler(deleteFriendHandler),
 	);
 
-	// 12. Get all blocked users by ID
-	server.get<{
-		Params: { id: string };
-		Querystring: getUsersQuery;
-	}>(
-		"/:id/block-list",
-		{
-			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
-			schema: {
-				tags: ["Block List"],
-				summary: "Get all blocked users",
-				description:
-					"Returns the list of users blocked by this user. Supports filtering, sorting, and pagination via query params.",
-				params: userIdParamSchema,
-				querystring: getUsersQuerySchema,
-				response: {
-					200: userArrayResponseSchema,
-					400: errorResponseSchema.describe("Bad request"),
-					404: errorResponseSchema.describe("Not Found"),
-				},
-			},
-		},
-		appErrorHandler(getBlockedUsersHandler),
-	);
+	// TODO: Commented out because we're not using these blockFriend
+	// 	// 12. Get all blocked users by ID
+	// 	server.get<{
+	// 		Params: { id: string };
+	// 		Querystring: getUsersQuery;
+	// 	}>(
+	// 		"/:id/block-list",
+	// 		{
+	// 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
+	// 			schema: {
+	// 				tags: ["Block List"],
+	// 				summary: "Get all blocked users",
+	// 				description:
+	// 					"Returns the list of users blocked by this user. Supports filtering, sorting, and pagination via query params.",
+	// 				params: userIdParamSchema,
+	// 				querystring: getUsersQuerySchema,
+	// 				response: {
+	// 					200: userArrayResponseSchema,
+	// 					400: errorResponseSchema.describe("Bad request"),
+	// 					404: errorResponseSchema.describe("Not Found"),
+	// 				},
+	// 			},
+	// 		},
+	// 		appErrorHandler(getBlockedUsersHandler),
+	// 	);
 
-	// 13. Block a user by ID
-	server.post<{
-		Params: { id: string };
-		Body: blockUserInput;
-	}>(
-		"/:id/block-list",
-		{
-			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
-			schema: {
-				tags: ["Block List"],
-				summary: "Block a user",
-				description:
-					"Adds the target user to the caller's block list (unidirectional).",
-				params: userIdParamSchema,
-				body: blockUserSchema,
-				response: {
-					// 201: userArrayResponseSchema,
-					201: userResponseSchema,
-					400: errorResponseSchema.describe("Bad request"),
-					404: errorResponseSchema.describe("Not Found"),
-					409: errorResponseSchema.describe("Already blocked"),
-				},
-			},
-		},
-		appErrorHandler(blockUserHandler),
-	);
+	// 	// 13. Block a user by ID
+	// 	server.post<{
+	// 		Params: { id: string };
+	// 		Body: blockUserInput;
+	// 	}>(
+	// 		"/:id/block-list",
+	// 		{
+	// 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
+	// 			schema: {
+	// 				tags: ["Block List"],
+	// 				summary: "Block a user",
+	// 				description:
+	// 					"Adds the target user to the caller's block list (unidirectional).",
+	// 				params: userIdParamSchema,
+	// 				body: blockUserSchema,
+	// 				response: {
+	// 					// 201: userArrayResponseSchema,
+	// 					201: userResponseSchema,
+	// 					400: errorResponseSchema.describe("Bad request"),
+	// 					404: errorResponseSchema.describe("Not Found"),
+	// 					409: errorResponseSchema.describe("Already blocked"),
+	// 				},
+	// 			},
+	// 		},
+	// 		appErrorHandler(blockUserHandler),
+	// 	);
 
-	// 14. Unblock a user by ID
-	server.delete<{ Params: { id: string; targetUserId: string } }>(
-		"/:id/block-list/:targetUserId",
-		{
-			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
-			schema: {
-				tags: ["Block List"],
-				summary: "Unblock a user",
-				description:
-					"Removes the target user from the caller's block list (unidirectional).",
-				params: userIdParamSchema.merge(targetUserIdParamSchema),
-				response: {
-					// 200: userArrayResponseSchema,
-					204: emptyResponseSchema,
-					400: errorResponseSchema.describe("Bad request"),
-					404: errorResponseSchema.describe("Not Found"),
-				},
-			},
-		},
-		appErrorHandler(unblockUserHandler),
-	);
+	// 	// 14. Unblock a user by ID
+	// 	server.delete<{ Params: { id: string; targetUserId: string } }>(
+	// 		"/:id/block-list/:targetUserId",
+	// 		{
+	// 			preHandler: onlySelf, //* Private user route. Only user with ID match (cookieJWT <-> database) can access it
+	// 			schema: {
+	// 				tags: ["Block List"],
+	// 				summary: "Unblock a user",
+	// 				description:
+	// 					"Removes the target user from the caller's block list (unidirectional).",
+	// 				params: userIdParamSchema.merge(targetUserIdParamSchema),
+	// 				response: {
+	// 					// 200: userArrayResponseSchema,
+	// 					204: emptyResponseSchema,
+	// 					400: errorResponseSchema.describe("Bad request"),
+	// 					404: errorResponseSchema.describe("Not Found"),
+	// 				},
+	// 			},
+	// 		},
+	// 		appErrorHandler(unblockUserHandler),
+	// 	);
 }
 
 export default userRoutes;
