@@ -81,7 +81,7 @@ export class ProfileView extends HTMLElement {
 		id = id.replace(/^delete-out-button-/, "");
 		try {
 			// DELETING FRIEND REQUEST
-			FetchUsers.friendRequestDelete(id);
+			await FetchUsers.friendRequestDelete(id);
 
 			const friendContainer = document.getElementById(
 				"containerFriendOut-" + id,
@@ -174,7 +174,7 @@ export class ProfileView extends HTMLElement {
 		id = id.replace(/^delete-in-button-/, "");
 		try {
 			// DELETING FRIEND REQUEST
-			FetchUsers.friendRequestDelete(id);
+			await FetchUsers.friendRequestDelete(id);
 
 			const friendContainer = document.getElementById(
 				"containerFriendIn-" + id,
@@ -211,7 +211,7 @@ export class ProfileView extends HTMLElement {
 		id = id.replace(/^delete-friend-button-/, "");
 		try {
 			// DELETING FRIEND
-			FetchUsers.friendsDelete(this.userId, id);
+			await FetchUsers.friendsDelete(this.userId, id);
 			if (this.chat?.ws) {
 				this.chat.ws.send(
 					JSON.stringify({ type: "refreshFriendList", id: id }),
