@@ -5,6 +5,8 @@ services:
     build: ./
     env_file:
       - ../../setting.conf
+    secrets:
+      - apiKey.key
     volumes:
       - ./src/:/chat_api/src/ #TODO remove in production
     ports:
@@ -14,3 +16,6 @@ services:
     depends_on:
       - chat_db
     restart: unless-stopped
+secrets:
+  apiKey.key:
+    file: api_key/apiKey.key

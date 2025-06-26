@@ -172,6 +172,29 @@ class ChatComponent extends HTMLElement {
 				this.dispatchEvent(onlineUserEvent);
 			}
 
+			// A USER CHANGED HIS HER NICKNAME
+			if (
+				chatServiceData.type === "updateNickname" &&
+				chatServiceData.user
+			) {
+				const newNickname = chatServiceData.user.nickname;
+				const userId = chatServiceData.user.id;
+
+				const affectedUser =
+					this.onlineUsers.find(
+						(onlineUser) => onlineUser.id === userId,
+					) || (this.me?.id === userId ? this.me : undefined);
+				if (!affectedUser) {
+					return;
+				}
+				affectedUser.nickname = newNickname;
+				if (this.me && this.me.id === userId) {
+					this.navMe.innerText = this.me.nickname ?? "unknown";
+				}
+				this.displayCurrentChat();
+				this.updateUsers();
+			}
+
 			// WHEN USER LOGS IN, SETTING UP PEOPLE THAT ARE ONLINE
 			if (
 				chatServiceData.type === "onlineUsers" &&
@@ -195,9 +218,24 @@ class ChatComponent extends HTMLElement {
 							blockStatusChecked: false,
 						};
 						this.onlineUsers.push(newUser);
-						this.updateUsers();
+						// this.updateUsers();
 					}
 				});
+				this.onlineUsers = this.onlineUsers.reduce(
+					(aggr: ChatUser[], oldUser) => {
+						if (
+							chatServiceData.users &&
+							chatServiceData.users.some(
+								(newUser) => newUser.id === oldUser.id,
+							)
+						) {
+							aggr.push(oldUser);
+						}
+						return aggr;
+					},
+					[],
+				);
+				this.updateUsers();
 			}
 		};
 	}

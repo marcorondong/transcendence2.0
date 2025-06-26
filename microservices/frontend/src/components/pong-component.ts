@@ -245,8 +245,6 @@ export class PongComponent extends HTMLElement {
 	}
 
 	websocketUrl(): string {
-		console.log("pongQueryParams:", this.pongQueryParams);
-		// let url = `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
 		let url = import.meta.env.PROD
 			? `wss://${window.location.hostname}:${window.location.port}/pong-api/pong/`
 			: `ws://${window.location.hostname}:${window.location.port}/pong-api/pong/`;
@@ -440,8 +438,8 @@ export class PongComponent extends HTMLElement {
 		// CLEAR THE CANVAS
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		if (this.gameState && this.gameState.ball) {
-			// const state = structuredClone(this.gameState);
-			const state = this.gameState;
+			const state = structuredClone(this.gameState);
+			// const state = this.gameState;
 			this.scaleGameState(state);
 			this.drawCenterLine();
 			this.drawPaddle(state.leftPaddle);
@@ -474,7 +472,6 @@ export class PongComponent extends HTMLElement {
 
 	async requestBot(roomId: string) {
 		const url = `${baseUrl}/ai-api/game-mandatory`;
-		console.log(roomId);
 		const reqBody = JSON.stringify({
 			roomId: roomId,
 			difficulty: this.pongQueryParams.room,
@@ -523,7 +520,6 @@ export class PongComponent extends HTMLElement {
 
 	isBotNeeded() {
 		const botMode = BotModes.includes(this.pongQueryParams.room as BotMode);
-		console.log("botMode:", botMode);
 		return botMode;
 	}
 
