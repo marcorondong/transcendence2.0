@@ -2,15 +2,15 @@
 * [] Framework module 
 * [] Database module 
 * [] Frontend module
-* [] Single page application
-* [] work on Mozilla Firefox 
+* [] Single page application -> pw
+* [] work on Mozilla Firefox  -> pw
 * [] Must use Docker to run website
 * [] Everything must be lunched with a single command line to run an autonomous container 
 * [] YOUR RUNTIME NEED TO BE LOCATED IN /goinfre or /sgoinfre
 * [] You are not able to use “bind-mount volumes” between the host
 and the container if non-root UIDs are used in the container.
-* [] Live pong game against another player directly on website
-* [] Remote players
+* [] Live pong game against another player directly on website ->pw
+* [] Remote players -> pw
 * [] Tournament. Who is playing against who and the order of the play 
 * [] Registration system. Standard User Management.  With the module: aliases are linked to registered
 accounts, allowing persistent stats and friend lists
@@ -53,10 +53,10 @@ We need 7 points for 100, 9.5 for 125
   * [] Solidity smart contract is responsible for recording, managing and retrieving tournament scores
 ### User management
 #### [] Standard User management, authentication and users across tournaments  (1 Point )
-  * [] Users can securely subscribe to the website
-  * [] Registered users can securely log in
+  * [] Users can securely subscribe to the website -> pw
+  * [] Registered users can securely log in -> pw
   * [] User can select a unique display name to participate in tournaments 
-  * [] User can update their information 
+  * [] User can update their information -> pw
   * [] Users can upload an avatar, with default option if none is provided 
   * [] Users can add others as friends and view their online status.
   * [] User profiles display stats such as wins and losses.
