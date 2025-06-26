@@ -60,7 +60,7 @@ export type TournamentSizeQuery = z.infer<typeof TournamentSizeQuerySchema>;
 const RoomIdSchema = z.union([
 	z.string().uuid(),
 	z.literal("private"),
-	z.literal("public"), //TODO: read from config
+	z.literal("public"), //read from config to make it better later
 ]);
 export type RoomIdType = z.infer<typeof RoomIdSchema>;
 

@@ -325,7 +325,7 @@ export abstract class APongGame extends EventEmitter {
 		}
 	}
 
-	//TODO it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
+	//it is maybe possible to gain some performance if return  false check is made if paddle is too far from ball
 	/**
 	 *
 	 * @param paddle
