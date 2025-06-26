@@ -218,9 +218,24 @@ class ChatComponent extends HTMLElement {
 							blockStatusChecked: false,
 						};
 						this.onlineUsers.push(newUser);
-						this.updateUsers();
+						// this.updateUsers();
 					}
 				});
+				this.onlineUsers = this.onlineUsers.reduce(
+					(aggr: ChatUser[], oldUser) => {
+						if (
+							chatServiceData.users &&
+							chatServiceData.users.some(
+								(newUser) => newUser.id === oldUser.id,
+							)
+						) {
+							aggr.push(oldUser);
+						}
+						return aggr;
+					},
+					[],
+				);
+				this.updateUsers();
 			}
 		};
 	}
