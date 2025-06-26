@@ -20,7 +20,7 @@ services:
     container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
     networks:
       - Transcendence2.0
@@ -39,8 +39,8 @@ services:
     container_name: alertmanager
     restart: unless-stopped
     volumes:
-      - ./alertmanager:/etc/alertmanager:ro # = mount our config for alertmanager
-      - alertmanager_data:/alertmanager # = name the docker volume that alertmanager image must create for persistence
+      - ./alertmanager:/etc/alertmanager:ro
+      - alertmanager_data:/alertmanager
     networks:
       - Transcendence2.0
     depends_on:
@@ -60,7 +60,7 @@ services:
       - prometheus
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana:/etc/grafana
+      - ./grafana:/etc/grafana:ro
     secrets:
       - grafana_admin_password
     entrypoint:
