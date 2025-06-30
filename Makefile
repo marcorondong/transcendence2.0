@@ -7,6 +7,7 @@ PRIVATE_WALLET_KEY = ./microservices/ssg/pong-api/wallet_private.key
 BOT_ENV = ./microservices/ssg/ai-bot/docker/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
+API_KEY_USERS = ./microservices/users/docker/apikey.txt
 GLOBAL_ENV = .env
 REBUILD_SERVICE = -re
 
@@ -14,7 +15,7 @@ SECRET_DIRECTORIES = $(MONITORING_SECRETS)
 
 SECRET_FILES = $(GRAFANA_PW) $(SLACK_WEBHOOK) $(PONG_ENV) \
 	$(GLOBAL_ENV) $(AUTH_API_COOKIE_SECRET) $(AUTH_API_JWT_SECRET) \
-	$(BOT_ENV) $(PRIVATE_WALLET_KEY)
+	$(BOT_ENV) $(PRIVATE_WALLET_KEY) $(API_KEY_USERS)
 
 all: $(SECRET_FILES)
 	docker compose up -d
@@ -85,6 +86,9 @@ $(AUTH_API_COOKIE_SECRET):
 
 $(AUTH_API_JWT_SECRET):
 	ft_crypt.sh --decrypt="$(AUTH_API_JWT_SECRET).enc" --force
+
+$(API_KEY_USERS):
+	ft_crypt.sh --decrypt="$(API_KEY_USERS).enc" --force
 
 $(GLOBAL_ENV):
 	ft_crypt.sh --decrypt="$(GLOBAL_ENV).enc" --force
