@@ -9,7 +9,7 @@ export interface IUserInfo extends ILogIn {
 }
 
 export const serverConfig = {
-	port: 8080,
+	port: 443,
 	ip: "localhost", // but can be 10.12.6.1 or whatever is remote host
 	protocol: "https",
 };

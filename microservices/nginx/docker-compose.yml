@@ -12,7 +12,7 @@ services:
       - vite_dist:/usr/share/nginx/html:ro # Compiled code by fronted service (Shared with Nginx, as read-only because nginx doesn't need to write into them)
       # - ./microservices/nginx/config/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "8080:443"
+      - "443:443"
     restart: unless-stopped
     networks:
       - Transcendence2.0

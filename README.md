@@ -57,7 +57,7 @@ make cli       # build & start all services AND use cli makefile to run it
 
 | Service             | URL                                                                                        |
 | ------------------- | ------------------------------------------------------------------------------------------ |
-| Frontend SPA        | [https://localhost:8080](http://localhost:8080/)                                           |
+| Frontend SPA        | [https://localhost:443](http://localhost:443/)                                           |
 | User API            | [http://localhost:3000/api](http://localhost:3000/api/users/)                              |
 | Game Service        | ws://localhost:5000/ws                                                                     |
 | Swagger USERS (dev) | [http://localhost:3000/api/documentation](http://localhost:3000/api/tools/swagger)         |

@@ -2,7 +2,7 @@
 PROTOCOL = "https"
 WS_PROTOCOL = "wss"
 HOST = "localhost"  # TODO read this from proper file like 10.12.5.7
-PORT = "8080"
+PORT = "443"
 
 # pong-api config
 PONG_SINGLES_ROUTE = "/pong-api/pong/singles"

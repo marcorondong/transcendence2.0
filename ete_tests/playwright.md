@@ -1,4 +1,4 @@
-`npx playwright codegen --ignore-https-errors https://localhost:8080` command that lets you record test and provide code for you. 
+`npx playwright codegen --ignore-https-errors https://localhost:443` command that lets you record test and provide code for you. 
 
 
 `npx playwright test --ui` fancy ui testing

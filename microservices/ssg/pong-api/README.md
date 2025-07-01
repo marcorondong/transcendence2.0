@@ -13,7 +13,7 @@ Pong-api is microservice that:
 
 ### Connect as spectator 🕶️
 
-`wss://localhost:8080/pong-api/pong/spectate/{{ROOM_ID}}`
+`wss://localhost:443/pong-api/pong/spectate/{{ROOM_ID}}`
 
 VALID JWT is not required for spectating. Spectator receives all same frames as player but anything spectator send to websocket is completely ignored by server
 
@@ -23,7 +23,7 @@ If Pong-api is behind nginx, websocket protocol is secure  `wss` otherwise it is
 
 * WEBSOCKET_PROTOCOL -> `wss | ws`
 * IP -> ip address of nginx or pong api (example: `localhost`, `10.12.6.1`, etc )
-* PORT -> port of pong-api or frontend (example: `8080`, `3010`)
+* PORT -> port of pong-api or frontend (example: `443`, `3010`)
 * MATCH_TYPE -> `singles | doubles | tournament`
 
 Note: You need to have valid JWT from our auth-api in order to play
@@ -50,13 +50,13 @@ If noting is specified it is same as sending `?tournamentSize=4`
 
 ### Valid examples
 
-* `wss://localhost:8080/pong-api/pong/singles` -> most basic
-* `wss://localhost:8080/pong-api/pong/singles?roomId=private` -> SINGLE PRIVATE HOST
-* `wss://localhost:8080/pong-api/pong/singles?roomId=0f2217d6-a378-484e-98a2-4c07a377f5c5` -> SINGLE PRIVATE GUEST
-* `wss://localhost:8080/pong-api/pong/tournament` -> TOURNAMENT with size 4
-* `wss://localhost:8080/pong-api/pong/tournament?tournamentSize=8` -> TOURNAMENT with size 8
-* `wss://localhost:8080/pong-api/pong/doubles` -> DOUBLES basic
-* `wss://localhost:8080/pong-api/pong/spectate/0f2217d6-a378-484e-98a2-4c07a377f5c5` -> spectate room
+* `wss://localhost:443/pong-api/pong/singles` -> most basic
+* `wss://localhost:443/pong-api/pong/singles?roomId=private` -> SINGLE PRIVATE HOST
+* `wss://localhost:443/pong-api/pong/singles?roomId=0f2217d6-a378-484e-98a2-4c07a377f5c5` -> SINGLE PRIVATE GUEST
+* `wss://localhost:443/pong-api/pong/tournament` -> TOURNAMENT with size 4
+* `wss://localhost:443/pong-api/pong/tournament?tournamentSize=8` -> TOURNAMENT with size 8
+* `wss://localhost:443/pong-api/pong/doubles` -> DOUBLES basic
+* `wss://localhost:443/pong-api/pong/spectate/0f2217d6-a378-484e-98a2-4c07a377f5c5` -> spectate room
 
 ### Other routes
 

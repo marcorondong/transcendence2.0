@@ -11,8 +11,8 @@ They automatically generate the /frontend/volume/css/output.css and the /fronten
 
 ## 🌎 use
 
-By running the docker-compose file at the root of the repo the nginx container hosts the frontend which is reachable at `https://localhost:8080`
-Check it out in our [ft_transcendence page](https://localhost:8080)
+By running the docker-compose file at the root of the repo the nginx container hosts the frontend which is reachable at `https://localhost:443`
+Check it out in our [ft_transcendence page](https://localhost:443)
 
 ## 💻 development
 

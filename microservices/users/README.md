@@ -164,7 +164,7 @@ This is _**unidirectional**_ (so UserA has userB in block-list, but UserB doesn'
       ```
 
    2. If you're running "locally" (`npm run dev`); check the pictures at `./microservices/users/uploads/`
-   3. If you're running with Docker; check the pictures in the Browser at: `https://localhost:8080/uploads/users/<your-username>/picture.jpg`
+   3. If you're running with Docker; check the pictures in the Browser at: `https://localhost:443/uploads/users/<your-username>/picture.jpg`
 
 > [!WARNING]
 >
@@ -294,7 +294,7 @@ For testing with `curl` and USERS Service functionality going through AUTH Servi
 
     ```bash
     curl -v -k -X 'POST' \
-      'https://localhost:8080/auth-api/sign-up' \
+      'https://localhost:443/auth-api/sign-up' \
       -H 'accept: application/json' \
       -H 'Content-Type: application/json' \
       -d '{
@@ -316,7 +316,7 @@ For testing with `curl` and USERS Service functionality going through AUTH Servi
 4. GET ALL THE USERS TO GET YOUR ID:
 
     ```bash
-    curl -v -k https://localhost:8080/api/users/ \
+    curl -v -k https://localhost:443/api/users/ \
       -H 'Cookie: access_token=eyJhbG...'
     ```
 
@@ -326,7 +326,7 @@ For testing with `curl` and USERS Service functionality going through AUTH Servi
 
     ```bash
     curl -v -k -X 'POST' \
-      'https://localhost:8080/auth-api/sign-in' \
+      'https://localhost:443/auth-api/sign-in' \
       -H 'accept: application/json' \
       -H 'Content-Type: application/json' \
       -d '{
@@ -341,7 +341,7 @@ For testing with `curl` and USERS Service functionality going through AUTH Servi
 
     ```bash
     curl -v -k -X 'PATCH' \
-      'https://localhost:8080/api/users/<user-id>' \
+      'https://localhost:443/api/users/<user-id>' \
       -H 'accept: application/json' \
       -H 'Content-Type: application/json' \
       -H 'Cookie: access_token=eyJhbG...' \
@@ -353,7 +353,7 @@ For testing with `curl` and USERS Service functionality going through AUTH Servi
 7. UPDATE THE USER PICTURE
 
     ```bash
-    curl -v -k -X PUT https://localhost:8080/api/users/<user-id>/picture \
+    curl -v -k -X PUT https://localhost:443/api/users/<user-id>/picture \
       -H "Content-Type: multipart/form-data" \
       -H 'Cookie: access_token=eyJhbG...' \
       -F "picture=@/path/to/your/picture.jpg"
@@ -362,5 +362,5 @@ For testing with `curl` and USERS Service functionality going through AUTH Servi
 8. TO CHECK IF THE PICTURE WAS CHANGED:
 
   You can request your user details, or even better! use the Browser:
-  Copy this URL: `https://localhost:8080/uploads/users/<your-username>/picture.jpg`
+  Copy this URL: `https://localhost:443/uploads/users/<your-username>/picture.jpg`
   Update the placeholder <your-username> with the correct value

@@ -8,7 +8,7 @@ If slack_webhook is missing, copy from our channel.
 
 ## Access
 
-Link to [Grafana](https://localhost:8080/grafana)
+Link to [Grafana](https://localhost:443/grafana)
 
 admin
 pass: see secrets directory

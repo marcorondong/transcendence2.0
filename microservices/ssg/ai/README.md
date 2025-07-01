@@ -1,6 +1,6 @@
 # subject conform AI
 
-## 1. endpoint for frontend: `https://localhost:8080/ai-api/game-mandatory`
+## 1. endpoint for frontend: `https://localhost:443/ai-api/game-mandatory`
 
 Method: `POST`
 

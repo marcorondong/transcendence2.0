@@ -21,7 +21,7 @@ async function globalSetup() {
 	}
 
 	await requestContext.dispose();
-	// await requestContext.post("https://localhost:8080/register", {
+	// await requestContext.post("https://localhost:443/register", {
 	// 	data: {
 	// 		username: "user1",
 	// 		password: "pass123",
@@ -29,7 +29,7 @@ async function globalSetup() {
 	// });
 
 	// // Example registration for user2
-	// await requestContext.post("https://localhost:8080/register", {
+	// await requestContext.post("https://localhost:443/register", {
 	// 	data: {
 	// 		username: "user2",
 	// 		password: "pass456",

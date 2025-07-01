@@ -81,7 +81,7 @@ scrape_configs:
           - https://nginx:443
           - https://nginx:443/sign-in-view
           - https://nginx:443/sign-up-view
-        #nginx:443 is mounted to localhost:8080
+        #nginx:443 is mounted to localhost:443
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

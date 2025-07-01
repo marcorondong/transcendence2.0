@@ -1,682 +1,606 @@
 {
-	"info": {
-		"_postman_id": "fbae6932-dcdf-4552-b099-7979fb9dbef3",
-		"name": "Transcendence2.0",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "42760590"
-	},
-	"item": [
-		{
-			"name": "bot",
-			"item": [
-				{
-					"name": "launch_extra_backend",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Cache-Control",
-								"value": "no-cache",
-								"name": "cache-control",
-								"type": "text"
-							},
-							{
-								"key": "Postman-Token",
-								"value": "<calculated when request is sent>",
-								"name": "postman-token",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"name": "content-type",
-								"type": "text"
-							},
-							{
-								"key": "Content-Length",
-								"value": "<calculated when request is sent>",
-								"name": "content-length",
-								"type": "text"
-							},
-							{
-								"key": "Host",
-								"value": "<calculated when request is sent>",
-								"name": "host",
-								"type": "text"
-							},
-							{
-								"key": "User-Agent",
-								"value": "PostmanRuntime/7.39.1",
-								"name": "user-agent",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "*/*",
-								"name": "accept",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Encoding",
-								"value": "gzip, deflate, br",
-								"name": "accept-encoding",
-								"type": "text"
-							},
-							{
-								"key": "Connection",
-								"value": "keep-alive",
-								"name": "connection",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"difficulty\": \"hard\",\n  \"roomId\": \"\",\n  \"mode\": \"debug\"\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://127.0.0.1:6969/game-debug",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "6969",
-							"path": [
-								"game-debug"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "launch_mandatory_frontend",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"difficulty\": \"normal\",\n    \"mode\": \"mandatory\",\n    \"roomId\": \"\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "https://localhost:8080/ai-api/game-mandatory",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"ai-api",
-								"game-mandatory"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "bot JWT",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:2999/auth-api/bot-jwt",
-							"host": [
-								"localhost"
-							],
-							"port": "2999",
-							"path": [
-								"auth-api",
-								"bot-jwt"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "sign-in-up",
-			"item": [
-				{
-					"name": "register",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@b.com\",\n    \"username\": \"yoo\",\n    \"nickname\": \"yoo\",\n    \"password\": \"123QWEasd<yxc\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:3000/api/users/",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "auth login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@b.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:2999/auth-api/sign-in",
-							"host": [
-								"localhost"
-							],
-							"port": "2999",
-							"path": [
-								"auth-api",
-								"sign-in"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "auth logout",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@b.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:2999/auth-api/sign-out",
-							"host": [
-								"localhost"
-							],
-							"port": "2999",
-							"path": [
-								"auth-api",
-								"sign-out"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "register frontend",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@c.com\",\n    \"username\": \"haha\",\n    \"nickname\": \"haha\",\n    \"password\": \"123QWEasd<yxc\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "https://localhost:8080/auth-api/sign-up",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"auth-api",
-								"sign-up"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "frontend login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@c.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "https://localhost:8080/auth-api/sign-in",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"auth-api",
-								"sign-in"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "login user",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@b.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:3000/api/users/login",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"login"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "cookies",
-			"item": [
-				{
-					"name": "validate JWT cookie",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"",
-									"const cookies = pm.cookies.toObject()",
-									"console.log(cookies)"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"",
-									"const cookies = pm.cookies.toObject()",
-									"console.log(cookies)"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Cookie",
-								"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
-								"name": "cookie",
-								"type": "text"
-							},
-							{
-								"key": "Cache-Control",
-								"value": "no-cache",
-								"name": "cache-control",
-								"type": "text"
-							},
-							{
-								"key": "Postman-Token",
-								"value": "<calculated when request is sent>",
-								"name": "postman-token",
-								"type": "text"
-							},
-							{
-								"key": "Host",
-								"value": "<calculated when request is sent>",
-								"name": "host",
-								"type": "text"
-							},
-							{
-								"key": "User-Agent",
-								"value": "PostmanRuntime/7.39.1",
-								"name": "user-agent",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "*/*",
-								"name": "accept",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Encoding",
-								"value": "gzip, deflate, br",
-								"name": "accept-encoding",
-								"type": "text"
-							},
-							{
-								"key": "Connection",
-								"value": "keep-alive",
-								"name": "connection",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "localhost:2999/auth-api/verify-jwt",
-							"host": [
-								"localhost"
-							],
-							"port": "2999",
-							"path": [
-								"auth-api",
-								"verify-jwt"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "refreshJWT",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Cookie",
-								"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
-								"type": "text"
-							},
-							{
-								"key": "Cache-Control",
-								"value": "no-cache",
-								"type": "text"
-							},
-							{
-								"key": "Postman-Token",
-								"value": "<calculated when request is sent>",
-								"type": "text"
-							},
-							{
-								"key": "Host",
-								"value": "<calculated when request is sent>",
-								"type": "text"
-							},
-							{
-								"key": "User-Agent",
-								"value": "PostmanRuntime/7.39.1",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "*/*",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Encoding",
-								"value": "gzip, deflate, br",
-								"type": "text"
-							},
-							{
-								"key": "Connection",
-								"value": "keep-alive",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "localhost:2999/auth-api/update-jwt",
-							"host": [
-								"localhost"
-							],
-							"port": "2999",
-							"path": [
-								"auth-api",
-								"update-jwt"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "updateJWT",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Cookie",
-								"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
-								"name": "cookie",
-								"type": "text"
-							},
-							{
-								"key": "Cache-Control",
-								"value": "no-cache",
-								"name": "cache-control",
-								"type": "text"
-							},
-							{
-								"key": "Postman-Token",
-								"value": "<calculated when request is sent>",
-								"name": "postman-token",
-								"type": "text"
-							},
-							{
-								"key": "Host",
-								"value": "<calculated when request is sent>",
-								"name": "host",
-								"type": "text"
-							},
-							{
-								"key": "User-Agent",
-								"value": "PostmanRuntime/7.39.1",
-								"name": "user-agent",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "*/*",
-								"name": "accept",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Encoding",
-								"value": "gzip, deflate, br",
-								"name": "accept-encoding",
-								"type": "text"
-							},
-							{
-								"key": "Connection",
-								"value": "keep-alive",
-								"name": "connection",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"c9030dee-155c-471c-9437-b7ebc0b855cb\",\n    \"nickname\": \"sekula\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:2999/auth-api/update-jwt",
-							"host": [
-								"localhost"
-							],
-							"port": "2999",
-							"path": [
-								"auth-api",
-								"update-jwt"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "userInfo",
-			"item": [
-				{
-					"name": "database",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "https://localhost:8080/api/users/",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"users",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "changeUserInfo",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Cookie",
-								"value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
-								"name": "cookie",
-								"type": "text"
-							},
-							{
-								"key": "Cache-Control",
-								"value": "no-cache",
-								"name": "cache-control",
-								"type": "text"
-							},
-							{
-								"key": "Postman-Token",
-								"value": "<calculated when request is sent>",
-								"name": "postman-token",
-								"type": "text"
-							},
-							{
-								"key": "Host",
-								"value": "<calculated when request is sent>",
-								"name": "host",
-								"type": "text"
-							},
-							{
-								"key": "User-Agent",
-								"value": "PostmanRuntime/7.39.1",
-								"name": "user-agent",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "*/*",
-								"name": "accept",
-								"type": "text"
-							},
-							{
-								"key": "Accept-Encoding",
-								"value": "gzip, deflate, br",
-								"name": "accept-encoding",
-								"type": "text"
-							},
-							{
-								"key": "Connection",
-								"value": "keep-alive",
-								"name": "connection",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"a@c.com\",\n    \"nickname\": \"trallallero_trallalla\",\n    \"password\": \"123QWE<yx\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:3000/api/users/{{userId}}",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"users",
-								"{{userId}}"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "singles",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": ""
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "fbae6932-dcdf-4552-b099-7979fb9dbef3",
+    "name": "Transcendence2.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42760590"
+  },
+  "item": [
+    {
+      "name": "bot",
+      "item": [
+        {
+          "name": "launch_extra_backend",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "name": "cache-control",
+                "type": "text"
+              },
+              {
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "name": "postman-token",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "name": "content-type",
+                "type": "text"
+              },
+              {
+                "key": "Content-Length",
+                "value": "<calculated when request is sent>",
+                "name": "content-length",
+                "type": "text"
+              },
+              {
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "name": "host",
+                "type": "text"
+              },
+              {
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "name": "user-agent",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "name": "accept",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "name": "accept-encoding",
+                "type": "text"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive",
+                "name": "connection",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"difficulty\": \"hard\",\n  \"roomId\": \"\",\n  \"mode\": \"debug\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:6969/game-debug",
+              "protocol": "http",
+              "host": ["127", "0", "0", "1"],
+              "port": "6969",
+              "path": ["game-debug"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "launch_mandatory_frontend",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"difficulty\": \"normal\",\n    \"mode\": \"mandatory\",\n    \"roomId\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:443/ai-api/game-mandatory",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "443",
+              "path": ["ai-api", "game-mandatory"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "bot JWT",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:2999/auth-api/bot-jwt",
+              "host": ["localhost"],
+              "port": "2999",
+              "path": ["auth-api", "bot-jwt"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "sign-in-up",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@b.com\",\n    \"username\": \"yoo\",\n    \"nickname\": \"yoo\",\n    \"password\": \"123QWEasd<yxc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:3000/api/users/",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "auth login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@b.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:2999/auth-api/sign-in",
+              "host": ["localhost"],
+              "port": "2999",
+              "path": ["auth-api", "sign-in"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "auth logout",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@b.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:2999/auth-api/sign-out",
+              "host": ["localhost"],
+              "port": "2999",
+              "path": ["auth-api", "sign-out"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register frontend",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@c.com\",\n    \"username\": \"haha\",\n    \"nickname\": \"haha\",\n    \"password\": \"123QWEasd<yxc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:443/auth-api/sign-up",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "443",
+              "path": ["auth-api", "sign-up"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "frontend login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@c.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:443/auth-api/sign-in",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "443",
+              "path": ["auth-api", "sign-in"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@b.com\",\n    \"password\": \"123QWEasd<yxc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:3000/api/users/login",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cookies",
+      "item": [
+        {
+          "name": "validate JWT cookie",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "",
+                  "const cookies = pm.cookies.toObject()",
+                  "console.log(cookies)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "",
+                  "const cookies = pm.cookies.toObject()",
+                  "console.log(cookies)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
+                "name": "cookie",
+                "type": "text"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "name": "cache-control",
+                "type": "text"
+              },
+              {
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "name": "postman-token",
+                "type": "text"
+              },
+              {
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "name": "host",
+                "type": "text"
+              },
+              {
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "name": "user-agent",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "name": "accept",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "name": "accept-encoding",
+                "type": "text"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive",
+                "name": "connection",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "localhost:2999/auth-api/verify-jwt",
+              "host": ["localhost"],
+              "port": "2999",
+              "path": ["auth-api", "verify-jwt"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "refreshJWT",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
+                "type": "text"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "type": "text"
+              },
+              {
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "type": "text"
+              },
+              {
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "type": "text"
+              },
+              {
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "type": "text"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "localhost:2999/auth-api/update-jwt",
+              "host": ["localhost"],
+              "port": "2999",
+              "path": ["auth-api", "update-jwt"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateJWT",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
+                "name": "cookie",
+                "type": "text"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "name": "cache-control",
+                "type": "text"
+              },
+              {
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "name": "postman-token",
+                "type": "text"
+              },
+              {
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "name": "host",
+                "type": "text"
+              },
+              {
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "name": "user-agent",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "name": "accept",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "name": "accept-encoding",
+                "type": "text"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive",
+                "name": "connection",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"id\": \"c9030dee-155c-471c-9437-b7ebc0b855cb\",\n    \"nickname\": \"sekula\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:2999/auth-api/update-jwt",
+              "host": ["localhost"],
+              "port": "2999",
+              "path": ["auth-api", "update-jwt"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "userInfo",
+      "item": [
+        {
+          "name": "database",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users/",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "443",
+              "path": ["api", "users", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "changeUserInfo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6eyJ1c2VybmFtZSI6InlvbyJ9LCJpYXQiOjE3NDY0MzkyMDksImV4cCI6MTc0NjQ0MjgwOX0.622tWmv2zIfboF7J_b64QDTEuTCACyK3gfdmIMC9xIg; Cookie_2=value",
+                "name": "cookie",
+                "type": "text"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache",
+                "name": "cache-control",
+                "type": "text"
+              },
+              {
+                "key": "Postman-Token",
+                "value": "<calculated when request is sent>",
+                "name": "postman-token",
+                "type": "text"
+              },
+              {
+                "key": "Host",
+                "value": "<calculated when request is sent>",
+                "name": "host",
+                "type": "text"
+              },
+              {
+                "key": "User-Agent",
+                "value": "PostmanRuntime/7.39.1",
+                "name": "user-agent",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "name": "accept",
+                "type": "text"
+              },
+              {
+                "key": "Accept-Encoding",
+                "value": "gzip, deflate, br",
+                "name": "accept-encoding",
+                "type": "text"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive",
+                "name": "connection",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"a@c.com\",\n    \"nickname\": \"trallallero_trallalla\",\n    \"password\": \"123QWE<yx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:3000/api/users/{{userId}}",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "singles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
+    }
+  ]
 }

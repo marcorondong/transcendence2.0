@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npx playwright test",
     "uiTest": "npx playwright test --ui",
-    "codgen": "npx playwright codegen --ignore-https-errors https://localhost:8080"
+    "codgen": "npx playwright codegen --ignore-https-errors https://localhost:443"
   },
   "repository": {
     "type": "git",
