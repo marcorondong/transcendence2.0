@@ -85,7 +85,6 @@ type AppConfig = {
 	ROOT_ENV: string;
 	SERVICE_ENV: string;
 	docker_secret: string;
-	api_key: string;
 };
 
 // To cache the result of reading files/envs. (initialized once, optimizes performance)
@@ -256,11 +255,6 @@ export default function getConfig(): AppConfig {
 		docker_secret: resolveConfigValue("docker_secret", [
 			["secret", loadSecret("docker_secret")],
 			["default", hardcodedDefaults.ROOT_ENV],
-		]),
-		// API Key
-		api_key: resolveConfigValue("apiKey", [
-			["secret", loadSecret("apiKey")],
-			// ["default", hardcodedDefaults.ROOT_ENV],
 		]),
 	};
 

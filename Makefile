@@ -7,6 +7,7 @@ PRIVATE_WALLET_KEY = ./microservices/ssg/pong-api/wallet_private.key
 BOT_ENV = ./microservices/ssg/ai-bot/docker/.env
 AUTH_API_COOKIE_SECRET = ./microservices/auth_api/secret_keys/cookieSecret.key
 AUTH_API_JWT_SECRET = ./microservices/auth_api/secret_keys/jwtSecret.key
+API_KEY=./microservices/chat_api/api_key/apiKey.key
 GLOBAL_ENV = .env
 REBUILD_SERVICE = -re
 
@@ -88,6 +89,9 @@ $(AUTH_API_JWT_SECRET):
 
 $(GLOBAL_ENV):
 	ft_crypt.sh --decrypt="$(GLOBAL_ENV).enc" --force
+
+$(API_KEY):
+	ft_crypt.sh --decrypt="$(API_KEY).enc" --force
 
 $(SLACK_WEBHOOK): $(SECRET_DIRECTORIES)
 	ft_crypt.sh --decrypt="./monitoring/alertmanager/slack_webhook.txt.enc" --force
