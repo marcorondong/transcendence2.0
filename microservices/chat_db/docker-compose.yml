@@ -6,15 +6,11 @@ services:
     env_file:
       - ../../setting.conf
     volumes:
-      - ./src/:/chat_db/src/ #TODO remove in production
-      - ./prisma/:/chat_db/prisma/ #TODO remove in production
-      - chat_db:/chat_db/DB/
-    ports:
-      - 3004:3004 # TODO remove this in production
+      # - ./src/:/chat_db/src/ #TODO remove in production
+      # - ./prisma/:/chat_db/prisma/ #TODO remove in production
+      - ./database:/chat_db/DB/
+    # ports:
+    #   - 3004:3004 # TODO remove this in production
     networks:
       - Transcendence2.0
     restart: unless-stopped
-
-volumes:
-  chat_db:
-    driver: local

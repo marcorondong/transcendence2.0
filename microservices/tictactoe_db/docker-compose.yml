@@ -6,9 +6,9 @@ services:
     env_file:
       - ../../setting.conf
     volumes:
-      - ./src/:/tictactoe_db/src/ #TODO remove in production
-      - ./prisma/:/tictactoe_db/prisma/ #TODO remove in production
-      #- /home/iguliyev/DBs/tictactoe/:/tictactoe_db/DB/ #TODO define path to db and uncomment this line when using the local DB
+      # - ./src/:/tictactoe_db/src/ #TODO remove in production
+      # - ./prisma/:/tictactoe_db/prisma/ #TODO remove in production
+      - ./database:/tictactoe_db/DB/ #TODO define path to db and uncomment this line when using the local DB
     ports:
       - 3003:3003 # TODO remove this in production
     networks:

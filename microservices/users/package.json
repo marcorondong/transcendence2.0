@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --exit-child src/app.ts",
+    "start": "ts-node src/app.ts",
     "rebuild": "npm run -s delete-db && npm run -s apply-schema && npm run -s prisma-client",
     "migrate": "npm run -s delete-migrations && npm run -s delete-db && npm run -s migrate-schema && npm run -s prisma-client",
     "delete-db": "echo '🧹 Deleting database...' && rm -rf prisma/database",
