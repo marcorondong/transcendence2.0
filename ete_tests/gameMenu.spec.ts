@@ -1,8 +1,10 @@
 import { test, expect, Browser, Page, BrowserContext } from "@playwright/test";
 import { homeUrl, registeredUsers } from "./config";
 import { TestingUtils } from "./TestingUtils";
+import {scoreBoardConfig} from "../microservices/ssg/pong-api/src/config"
 
 const HUMAN_PLAYERS = 0;
+const LONGEST_MATCH_TIME = scoreBoardConfig.match_length + 15
 //don't run tests in parallel, for joining games
 test.describe.configure({ mode: "serial" });
 
@@ -66,7 +68,7 @@ test("Two users play against each other", async ({ browser }) => {
 });
 
 test("4 Player Tournament test", async ({ browser }) => {
-	test.setTimeout(30 * 2 * 1000);
+	test.setTimeout(LONGEST_MATCH_TIME * 2 * 1000);
 	const contexts: BrowserContext[] = [];
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
@@ -88,7 +90,7 @@ test("4 Player Tournament test", async ({ browser }) => {
 });
 
 test("8 Player Tournament test", async ({ browser }) => {
-	test.setTimeout(30 * 4 * 1000);
+	test.setTimeout(LONGEST_MATCH_TIME * 4 * 1000);
 	const contexts: BrowserContext[] = [];
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
@@ -110,7 +112,7 @@ test("8 Player Tournament test", async ({ browser }) => {
 });
 
 test("16 Player Tournament test", async ({ browser }) => {
-	test.setTimeout(30 * 5 * 1000);
+	test.setTimeout(LONGEST_MATCH_TIME * 5 * 1000);
 	const contexts: BrowserContext[] = [];
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
@@ -132,7 +134,7 @@ test("16 Player Tournament test", async ({ browser }) => {
 });
 
 test("2 vs 2 doubles test", async ({ browser }) => {
-	test.setTimeout(30 * 2 * 1000);
+	test.setTimeout(LONGEST_MATCH_TIME * 2 * 1000);
 	const contexts: BrowserContext[] = [];
 	const pages: Page[] = [];
 	const usersArray = Object.values(registeredUsers);
