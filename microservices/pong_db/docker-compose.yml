@@ -8,9 +8,12 @@ services:
     volumes:
       # - ./src/:/pong_db/src/ #TODO remove in production
       # - ./prisma/:/pong_db/prisma/ #TODO remove in production
-      - ./database:/pong_db/DB/
+      - pong_db:/pong_db/DB/
     # ports:
     #   - 3011:3011 # TODO remove this in production
     networks:
       - Transcendence2.0
     restart: unless-stopped
+
+volumes:
+  pong_db:
