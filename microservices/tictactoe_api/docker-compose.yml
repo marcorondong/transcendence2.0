@@ -5,10 +5,10 @@ services:
     build: ./
     env_file:
       - ../../setting.conf
-    volumes:
-      - ./src/:/tictactoe_api/src/ # TODO remove this in production
-    ports:
-      - 3001:3001 # TODO remove this in production
+    # volumes:
+    #   - ./src/:/tictactoe_api/src/ # TODO remove this in production
+    # ports:
+    #   - 3001:3001 # TODO remove this in production
     networks:
       - Transcendence2.0
     depends_on:

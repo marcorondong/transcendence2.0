@@ -12,6 +12,6 @@ COPY ./src ./src
 RUN npm clean-install
 
 # TODO uncomment below line in production
-# CMD ["npm run start"]
+CMD ["npm", "run", "start"]
 # TODO remove below line in production
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
