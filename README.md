@@ -1,6 +1,7 @@
 # 🏓 ft_transcendence
 
-A full-stack SPA project that replicates the classic Pong game using a microservice architecture.
+A full-stack SPA project that replicates the classic Pong game using a microservice architecture.  
+Check it out here: https://transcendence.at/sign-in-view
 
 ---
 
