@@ -30,4 +30,5 @@ RUN npx prisma generate
 
 # Run dev with auto-reset DB on container start
 # CMD npx prisma migrate reset --force --skip-seed && RUNNING_ENV="container" npm run dev
-CMD sh -c 'npx prisma migrate reset --force --skip-seed && RUNNING_ENV=container npm run dev'
+# CMD sh -c 'npx prisma migrate reset --force --skip-seed && RUNNING_ENV=container npm run dev'
+CMD sh -c 'npx prisma migrate deploy && RUNNING_ENV=container npm run start'
