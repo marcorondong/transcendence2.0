@@ -63,8 +63,6 @@ services:
       - ./grafana:/etc/grafana:ro
     secrets:
       - grafana_admin_password
-    entrypoint:
-      - /etc/grafana/entrypoint.sh
 
 volumes:
   grafana-data:
