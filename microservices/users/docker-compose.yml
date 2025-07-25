@@ -8,9 +8,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     volumes:
-      - .:/app # Mount full project
+      # - .:/app # Mount full project
       - users_node_modules:/app/node_modules # Keep node_modules container-managed
-      - users_db:/app/prisma/database # Keep DB container-managed & ephemeral
+      - users_db:/app/prisma/database # Keep DB container-managed
       - user_pictures:/app/uploads # Users pictures (Shared with Nginx)
     ports:
       - "3000:3000" # Expose Fastify server to host
@@ -18,9 +18,9 @@ services:
     #   - DATABASE_URL=file:./prisma/database/dev.db
     networks:
       - Transcendence2.0
-    command: >
-      sh -c "npx prisma migrate reset --force --skip-seed &&
-             RUNNING_ENV=container npm run dev"
+    # command: >
+    #   sh -c "npx prisma migrate reset --force --skip-seed &&
+    #          RUNNING_ENV=container npm run dev"
 
 volumes:
   users_node_modules:
