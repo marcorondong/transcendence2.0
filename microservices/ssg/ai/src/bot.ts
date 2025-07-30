@@ -13,19 +13,18 @@ const field = new PongField();
 
 export class Bot {
 	//game dimensions
-	private readonly FRAME_RATE = 60;
 	private readonly STEP = 0.05;
 	private readonly BALL_SPEED = 0.1;
 	private readonly PADDLE_GAP = 0.5;
-	private readonly MANDATORY_SPEED = 1000 / this.FRAME_RATE;
 	private readonly BALL_RADIUS = 0.075;
 	private readonly AVG_BOUNCE_GAP = 0.03; // the average distance between the ball and the paddle when it bounces
 
 	//room info
 	private readonly difficulty: string;
-	private readonly botSpeed: number;
+	private readonly moveSpeed = 1000 / 60;
 	private readonly port = "3010";
 	private readonly host = "pong-api";
+	private frameRate: number;
 	private side: number;
 	private roomId: string = "";
 	private ws: WebSocket | null;
@@ -36,6 +35,8 @@ export class Bot {
 	private target: Point;
 	private framesUntilTarget: number;
 	private framesAfterTarget: number;
+	private timeout: number;
+
 	private moveCommand = { move: "" };
 	private leftScore = 0;
 	private rightScore = 0;
@@ -50,8 +51,6 @@ export class Bot {
 		console.log(initializers);
 		//room info
 		this.difficulty = initializers.difficulty ?? "normal";
-		this.botSpeed =
-			initializers.mode === "mandatory" ? this.MANDATORY_SPEED : 0;
 		this.roomId =
 			(initializers.roomId && initializers.roomId != "") ||
 			initializers.mode === "mandatory"
@@ -59,12 +58,23 @@ export class Bot {
 				: "public";
 		this.side = field.RIGHT_EDGE_X - this.PADDLE_GAP - this.AVG_BOUNCE_GAP;
 		this.ws = null;
+		if (this.difficulty === "easy") {
+			this.timeout = 1000;
+			this.frameRate = 60;
+		} else if (this.difficulty === "normal") {
+			this.timeout = 1000 / 2;
+			this.frameRate = 60 / 2;
+		} else {
+			this.timeout = 1000 / 6 + 3;
+			this.frameRate = 60 / 6;
+		}
+		this.timeout -= 3;
 
 		//dynamic game state
 		this.paddleTwist = paddleTwistSelector[this.difficulty] ?? 0;
 		this.lastBall = new Point(-6, 0);
 		this.target = new Point(Math.abs(this.side), 0);
-		this.framesUntilTarget = this.FRAME_RATE;
+		this.framesUntilTarget = this.frameRate;
 		this.framesAfterTarget = 0;
 	}
 
@@ -103,7 +113,7 @@ export class Bot {
 					this.handleEvent(event);
 					setTimeout(() => {
 						this.handlingBlocked = false;
-					}, 998);
+					}, this.timeout);
 				}
 			});
 		} catch (error) {
@@ -136,9 +146,8 @@ export class Bot {
 		console.time("time since welcome frame");
 		const roomInfo = JSON.parse(event.toString());
 		console.log("first frame: ", roomInfo);
-		if (Object.getOwnPropertyNames(roomInfo).includes("roomId")) {
+		if (Object.getOwnPropertyNames(roomInfo).includes("roomId"))
 			this.roomId = roomInfo.roomId;
-		}
 		if (Object.getOwnPropertyNames(roomInfo).includes("matchStatus")) {
 			let status = roomInfo.matchStatus;
 			if (status.includes("Left") || status.includes("left"))
@@ -190,8 +199,8 @@ export class Bot {
 		this.calculateTarget(ballPosition);
 		this.logAIState();
 
-		if (this.paddleY != this.movePaddleTo) this.makeMove(this.botSpeed);
-		else this.twistBall(this.paddleHeight / 2 - this.BALL_RADIUS);
+		if (this.paddleY != this.movePaddleTo) this.makeMove(this.moveSpeed);
+		// else this.twistBall(this.paddleHeight / 2 - this.BALL_RADIUS);
 	}
 
 	private calculateTarget(ballPosition: Point) {
@@ -209,7 +218,7 @@ export class Bot {
 
 		do {
 			this.ws.send(JSON.stringify(this.moveCommand));
-			await sleep(this.botSpeed);
+			await sleep(this.moveSpeed);
 		} while ((twist -= this.STEP) > 0);
 	}
 
@@ -266,7 +275,7 @@ export class Bot {
 	}
 
 	private ballHitPaddle(): boolean {
-		return this.framesUntilTarget < this.FRAME_RATE;
+		return this.framesUntilTarget < this.frameRate;
 	}
 
 	private ballVectorOrigin(): Point {
@@ -299,7 +308,7 @@ export class Bot {
 		this.framesUntilTarget = Math.floor(
 			distanceBetweenPoints(ballPosition, this.target) / this.BALL_SPEED,
 		);
-		this.framesAfterTarget = this.FRAME_RATE - this.framesUntilTarget;
+		this.framesAfterTarget = this.frameRate - this.framesUntilTarget;
 	}
 
 	private updateLastBall(ballPosition: Point) {
@@ -322,19 +331,19 @@ export class Bot {
 	}
 
 	private canReachTarget(): boolean {
-		if (this.target.getX() !== this.side) return true;
+		if (this.target.getX() !== this.side || this.difficulty === "easy")
+			return true;
 
 		let reachable = true;
 		if (Math.abs(this.side) < Math.abs(this.lastBall.getX())) {
 			reachable = false;
 		} else if (
-			this.botSpeed !== 0 &&
 			this.framesUntilTarget <
-				(this.movePaddleTo -
-					this.paddleY -
-					this.paddleHeight / 2 -
-					this.BALL_RADIUS / 2) /
-					this.STEP // the number of frames to reach our target
+			(this.movePaddleTo -
+				this.paddleY -
+				this.paddleHeight / 2 -
+				this.BALL_RADIUS / 2) /
+				this.STEP // the number of frames to reach our target
 		) {
 			reachable = false;
 		}
@@ -344,7 +353,7 @@ export class Bot {
 	private ballBounced(distance: number): boolean {
 		const expectedDistance = this.ballHitPaddle()
 			? this.framesAfterTarget
-			: this.FRAME_RATE;
+			: this.frameRate;
 		this.logBounce(distance, expectedDistance);
 		return Math.round(distance / this.BALL_SPEED) < expectedDistance - 2; // to account for bounce calculation on server side
 	}
