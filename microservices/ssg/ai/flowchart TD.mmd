@@ -1,0 +1,21 @@
+flowchart TD
+    A([Frontend sends game request]) --> B[Fastify validates request with JSON schema]
+    B --> C[GET valid JWT from auth-api]
+    C --> D{JWT valid?}
+    D -- No --> E([Reject request])
+    D -- Yes --> F[Create game session]
+    F --> G[Open WebSocket to pong-api with JWT]
+    G --> H[Register event handler]
+    H --> I[[Throttled interval: check game state]]
+    I --> J[Parse game state]
+    J --> K[Calculate bot move]
+    K --> L[Send move via WebSocket]
+    L --> I
+    G --> M{Game over / error / inactivity?}
+    M -- Yes --> N[Close WebSocket]
+    N --> O[Delete game object]
+
+    %% Async multi-game handling
+    P([Async request handler]) --> Q{{Spawn/track game task}}
+    Q --> F
+    P --> R([Handle other games simultaneously])

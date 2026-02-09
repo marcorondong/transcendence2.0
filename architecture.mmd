@@ -1,0 +1,24 @@
+---
+id: 5d11ac81-1ee4-49dd-88e9-45402bd6d993
+---
+architecture-beta
+    service end_users(internet)[Host port 443]
+
+    group docker(cloud)[Docker Network]
+    service nginx(server)[NGINX] in docker
+
+    service rest_services_note(server)[REST API Microservices AuthWithJWT Users Chat Pong Bot] in docker
+	service frontend(engine)[Typescript compiled with Vite]
+    service db_services(database)[Prisma ORM for SQLite] in docker
+    service db_services_note(database)[Chat GameResults UserProfiles] in docker
+    service monitoring_services(server)[Grafana] in docker
+    service monitoring_services_note(server)[Prometheus Alertmanager Node_Exporter Blackbox_Exporter] in docker
+
+    end_users:R <--> L:nginx
+
+    nginx:B <--> T:rest_services_note
+    rest_services_note:R --> L:db_services
+    nginx:R <--> L:monitoring_services
+    db_services:R --> L:db_services_note
+    monitoring_services:R <-- L:monitoring_services_note
+	frontend:B --> T:nginx
